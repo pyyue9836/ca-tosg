@@ -12,6 +12,9 @@ __pycache__/
 *.npy
 *.ckpt
 
+# Figure previews (regenerable; only the .pdf ships)
+*_preview.png
+
 # LaTeX build artifacts
 *.aux
 *.log
