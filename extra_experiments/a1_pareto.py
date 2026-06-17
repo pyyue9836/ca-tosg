@@ -11,7 +11,7 @@ For each split we plot, on the payload--F1 plane:
 Outputs: paper/figures/fig_pareto_{validate,test}.pdf  +  runs CSV of frontier points.
 All numbers come from cached per-frame effective F1 / payload -- no inference re-run.
 """
-import os, pickle
+import os, sys, pickle
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -22,6 +22,8 @@ from sklearn.ensemble import RandomForestClassifier
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 ROOT = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg')
+sys.path.insert(0, ROOT)
+import paper_style as PS; PS.apply()
 VAL_CSV = os.path.join(ROOT, 'runs/v2/dataset.csv')
 TEST_CSV = os.path.join(ROOT, 'test_split_pipeline/runs/test_dataset.csv')
 RF_PKL = os.path.join(ROOT, 'runs/v2/rf_full.pkl')
@@ -110,14 +112,14 @@ def run_split(name, df, train_df=None, rf=None):
 
 def plot(name, pts, front, rfl):
     fig, ax = plt.subplots(figsize=(5.8, 3.4))
-    ax.plot(front[:, 0], front[:, 1], '-', color='0.5', lw=1.5, zorder=1,
+    ax.plot(front[:, 0], front[:, 1], '-', color=PS.C_REF, lw=1.3, zorder=1,
             label='Lagrangian oracle frontier')
     if rfl is not None:
-        ax.plot(rfl[:, 1], rfl[:, 2], 'o--', color='#9467bd', ms=4, lw=1.2,
+        ax.plot(rfl[:, 1], rfl[:, 2], 'o--', color=PS.C_OURS, ms=4, lw=1.1,
                 zorder=2, label=r'CA-TOSG (RF) $\lambda$-sweep')
-    markers = {'Fixed L': ('s', '#1f77b4'), 'Fixed C16': ('^', '#d62728'),
-               'Fixed C256': ('v', '#ff7f0e'), 'Oracle': ('*', '#2ca02c'),
-               'CA-TOSG (RF, deployed)': ('D', '#9467bd')}
+    markers = {'Fixed L': ('s', PS.C_L), 'Fixed C16': ('^', PS.C_C16),
+               'Fixed C256': ('v', PS.C_C256), 'Oracle': ('*', PS.C_ORACLE),
+               'CA-TOSG (RF, deployed)': ('D', PS.C_OURS)}
     for k, (x, y) in pts.items():
         m, c = markers.get(k, ('o', 'k'))
         ax.scatter([x], [y], marker=m, c=c, s=90 if m == '*' else 55, zorder=4,

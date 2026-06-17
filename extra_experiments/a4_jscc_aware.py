@@ -38,11 +38,11 @@ def load(name):
 
 def main():
     series = {
-        'ImportanceMapJSCC feature': ('awgn_jscc_summary.csv', '#2ca02c', '-'),
-        'LDPC + 16-QAM feature': ('awgn_ldpc16_summary.csv', '#1f77b4', '-'),
-        'LDPC + 256-QAM feature': ('awgn_ldpc256_summary.csv', '#d62728', '-'),
-        'Perfect-channel upper bound': ('awgn_upper_summary.csv', '0.4', '--'),
-        'Ego-only floor': ('ego_only_summary.csv', '0.6', ':'),
+        'ImportanceMapJSCC feature': ('awgn_jscc_summary.csv', C.PS.C_ORACLE, '-'),
+        'LDPC + 16-QAM feature': ('awgn_ldpc16_summary.csv', C.PS.C_C16, '-'),
+        'LDPC + 256-QAM feature': ('awgn_ldpc256_summary.csv', C.PS.C_C256, '-'),
+        'Perfect-channel upper bound': ('awgn_upper_summary.csv', C.PS.C_REF, '--'),
+        'Ego-only floor': ('ego_only_summary.csv', '0.65', ':'),
     }
     fig, ax = plt.subplots(figsize=(4.8, 3.3))
     for label, (fn, col, ls) in series.items():
@@ -50,7 +50,7 @@ def main():
         if d is None:
             print('  missing', fn); continue
         ax.plot(d['snr_db'], d['ap_05'], ls, color=col, lw=1.8, label=label)
-    ax.axhline(FIXED_L_AP05, color='k', lw=1.5, ls='-.',
+    ax.axhline(FIXED_L_AP05, color=C.PS.C_L, lw=1.4, ls='-.',
                label='Fixed $L$ (channel-invariant)')
     ax.set_xlabel('SNR (dB, AWGN)'); ax.set_ylabel('AP@0.5')
     ax.set_title('Feature-branch coding: JSCC (graceful) vs LDPC (cliff)', fontsize=8.5)

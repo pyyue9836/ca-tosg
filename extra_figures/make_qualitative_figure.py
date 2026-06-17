@@ -8,7 +8,7 @@ feature-level communication recovers objects that the compact object-level
 message misses (this frame: late F1 0.67 -> compressed F1 0.95).
 Output: paper/figures/fig_qualitative_bev.pdf
 """
-import os
+import os, sys
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -18,6 +18,8 @@ from scipy.spatial import ConvexHull
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import paper_style as PS; PS.apply()
 PRE = os.path.join(REPO, 'peiyi_work/05_pretrained_models')
 LATE = os.path.join(PRE, 'pointpillar_late_fusion_test_eval', 'npy')
 COMP = os.path.join(PRE, 'pointpillar_attentive_fusion',
@@ -44,14 +46,14 @@ def draw(ax, pcd, gt, pred, pred_color, pred_label, title):
         ax.scatter(pcd[:, 0], pcd[:, 1], s=0.15, c='0.7', linewidths=0, zorder=1,
                    rasterized=True)
     for p in boxes_bev(gt):
-        ax.add_patch(Polygon(p, closed=True, facecolor='#2ca02c', alpha=0.45,
-                             edgecolor='#1a701a', lw=1.2, zorder=2))
+        ax.add_patch(Polygon(p, closed=True, facecolor=PS.C_ORACLE, alpha=0.40,
+                             edgecolor=PS.C_ORACLE, lw=1.0, zorder=2))
     for p in boxes_bev(pred):
         ax.add_patch(Polygon(p, closed=True, fill=False, edgecolor=pred_color,
                              lw=1.6, ls='-', zorder=4))
     # legend proxies
-    ax.add_patch(Polygon([[0, 0]], facecolor='#2ca02c', alpha=0.30,
-                         edgecolor='#2ca02c', label='Ground truth'))
+    ax.add_patch(Polygon([[0, 0]], facecolor=PS.C_ORACLE, alpha=0.40,
+                         edgecolor=PS.C_ORACLE, label='Ground truth'))
     ax.plot([], [], color=pred_color, lw=1.6, label=pred_label)
     ax.set_title(title, fontsize=9)
     ax.set_xlabel('x (m)', fontsize=8)
@@ -73,10 +75,10 @@ def main():
     xmin, ymin = allxy.min(0) - 6
     xmax, ymax = allxy.max(0) + 6
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2), sharey=True)
-    draw(axes[0], pcd, gt, late_pred, '#1f77b4',
+    fig, axes = plt.subplots(1, 2, figsize=(PS.DCOL, 3.1), sharey=True)
+    draw(axes[0], pcd, gt, late_pred, PS.C_L,
          'Object-level $L$', r'Object-level $L$ (F1 = 0.67)')
-    draw(axes[1], pcd, gt, comp_pred, '#d62728',
+    draw(axes[1], pcd, gt, comp_pred, PS.C_C16,
          'Feature-level $C_{16}$', r'Feature-level $C_{16}$ (F1 = 0.95)')
     for ax in axes:
         ax.set_xlim(xmin, xmax); ax.set_ylim(ymin, ymax)

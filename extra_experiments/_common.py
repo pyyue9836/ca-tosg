@@ -3,6 +3,7 @@
 (mirrors train_rf_v2.py 'full' mode), effective-F1 bookkeeping, and policy
 realisation. All experiments read the cached per-frame CSVs -- no inference."""
 import os
+import sys
 import pickle
 import numpy as np
 import pandas as pd
@@ -10,6 +11,14 @@ import pandas as pd
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 ROOT = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg')
+
+# apply the shared IEEE figure style for every experiment that imports _common
+sys.path.insert(0, ROOT)
+try:
+    import paper_style as PS
+    PS.apply()
+except Exception:
+    PS = None
 VAL_CSV = os.path.join(ROOT, 'runs/v2/dataset.csv')
 TEST_CSV = os.path.join(ROOT, 'test_split_pipeline/runs/test_dataset.csv')
 RF_PKL = os.path.join(ROOT, 'runs/v2/rf_full.pkl')

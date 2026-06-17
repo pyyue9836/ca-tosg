@@ -37,6 +37,9 @@ import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import paper_style as _ps; _ps.apply()
 import numpy as np
 import pandas as pd
 
@@ -95,10 +98,10 @@ def main():
 
             # ---- Left panel: AP vs SNR with all baselines + RF + oracle ----
             for scheme, st in [
-                ('upper',   dict(color='black',     ls='--', marker='s', label='Upper bound (perfect)')),
-                ('jscc',    dict(color='tab:red',   ls='-',  marker='o', label='ImportanceMapJSCC')),
-                ('ldpc16',  dict(color='tab:blue',  ls=':',  marker='^', label='LDPC + 16-QAM')),
-                ('ldpc256', dict(color='tab:orange',ls=':',  marker='v', label='LDPC + 256-QAM')),
+                ('upper',   dict(color=_ps.C_REF,   ls='--', marker='s', label='Upper bound (perfect)')),
+                ('jscc',    dict(color='#56B4E9',   ls='-',  marker='o', label='ImportanceMapJSCC')),
+                ('ldpc16',  dict(color=_ps.C_C16,   ls=':',  marker='^', label='LDPC + 16-QAM')),
+                ('ldpc256', dict(color=_ps.C_C256,  ls=':',  marker='v', label='LDPC + 256-QAM')),
             ]:
                 df = load_csv(channel, scheme)
                 if df is None: continue
@@ -109,11 +112,11 @@ def main():
                     ax1.plot(df['snr_db'], df[ap_col], **{k: v for k, v in st.items() if k != 'label'},
                              linewidth=2, label=st['label'])
 
-            ax1.axhline(L_AP, color='tab:green', ls='-.', linewidth=1.6,
+            ax1.axhline(L_AP, color=_ps.C_L, ls='-.', linewidth=1.6,
                         label='Fixed L (channel-invariant)')
-            ax1.plot(snr_grid, oracle_AP, color='magenta', ls='--',
+            ax1.plot(snr_grid, oracle_AP, color=_ps.C_ORACLE, ls='--',
                      marker='D', linewidth=2, label='Oracle (L vs JSCC)')
-            ax1.plot(snr_grid, rf_AP, color='black', marker='*',
+            ax1.plot(snr_grid, rf_AP, color=_ps.C_OURS, marker='*',
                      linewidth=2.4, markersize=9,
                      label='CSI-aware RF policy (proposed)')
 
@@ -125,11 +128,11 @@ def main():
             ax1.legend(fontsize=7.5, loc='lower right', ncol=1)
 
             # ---- Right panel: payload vs SNR for RF / oracle / fixed ----
-            ax2.plot(snr_grid, rf_payload, color='black', marker='*',
+            ax2.plot(snr_grid, rf_payload, color=_ps.C_OURS, marker='*',
                      linewidth=2.4, markersize=9, label='RF policy')
-            ax2.axhline(PAYLOAD['L'], color='tab:green', ls='-.',
+            ax2.axhline(PAYLOAD['L'], color=_ps.C_L, ls='-.',
                         label='Fixed L = %.3f' % PAYLOAD['L'])
-            ax2.axhline(PAYLOAD['JSCC'], color='tab:red', ls='-',
+            ax2.axhline(PAYLOAD['JSCC'], color=_ps.C_C16, ls='-',
                         label='Fixed C / JSCC = %.2f' % PAYLOAD['JSCC'])
             ax2.set_yscale('log')
             ax2.set_xlabel('SNR (dB)')

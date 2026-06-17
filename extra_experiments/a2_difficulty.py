@@ -49,13 +49,13 @@ def analyse(name, csv, rf):
 def _panel(ax, rs, title):
     strata = [r['stratum'] for r in rs]
     x = np.arange(len(strata)); w = 0.26
-    ax.bar(x - w, [r['fixedL_f1'] for r in rs], w, label='Fixed $L$', color='#1f77b4')
-    ax.bar(x, [r['catosg_f1'] for r in rs], w, label='CA-TOSG', color='#9467bd')
-    ax.bar(x + w, [r['oracle_f1'] for r in rs], w, label='Oracle', color='#2ca02c')
+    ax.bar(x - w, [r['fixedL_f1'] for r in rs], w, label='Fixed $L$', color=C.PS.C_L)
+    ax.bar(x, [r['catosg_f1'] for r in rs], w, label='CA-TOSG', color=C.PS.C_OURS)
+    ax.bar(x + w, [r['oracle_f1'] for r in rs], w, label='Oracle', color=C.PS.C_ORACLE)
     for i, r in enumerate(rs):
         g = r['gain_catosg_minus_L']
         ax.text(i, max(r['catosg_f1'], r['fixedL_f1']) + 0.015,
-                f'{g:+.3f}', ha='center', fontsize=7, color='#5b2a86')
+                f'{g:+.3f}', ha='center', fontsize=6.5, color=C.PS.C_OURS)
     ax.set_xticks(x); ax.set_xticklabels(strata, fontsize=8)
     ax.set_title(title, fontsize=9)
     ax.set_ylim(0, 1.05); ax.grid(True, axis='y', alpha=0.3)

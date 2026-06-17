@@ -8,7 +8,7 @@ far to the right of 16-QAM (the dominance argument), (iii) Rayleigh degrading so
 badly that feature-level transmission is never worthwhile -> selector stays at L.
 Output: paper/figures/fig_channel_bler.pdf
 """
-import os
+import os, sys
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import paper_style as PS; PS.apply()
 BLER_CSV = os.path.join(REPO,
     'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv')
 OUT = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/paper/figures/fig_channel_bler.pdf')
@@ -48,14 +50,14 @@ def main():
     df = pd.read_csv(BLER_CSV)
     snr = np.linspace(0, 20, 201)
 
-    fig, ax = plt.subplots(figsize=(4.2, 3.0))
-    ax.plot(snr, bler_awgn(snr, df, 16),  '-',  color='#1f77b4', lw=2,
+    fig, ax = plt.subplots(figsize=(PS.COL, 2.7))
+    ax.plot(snr, bler_awgn(snr, df, 16),  '-',  color=PS.C_C16, lw=1.6,
             label='16-QAM, AWGN')
-    ax.plot(snr, bler_awgn(snr, df, 256), '-',  color='#d62728', lw=2,
+    ax.plot(snr, bler_awgn(snr, df, 256), '-',  color=PS.C_C256, lw=1.6,
             label='256-QAM, AWGN')
-    ax.plot(snr, bler_rayleigh(snr, df, 16),  '--', color='#1f77b4', lw=2,
+    ax.plot(snr, bler_rayleigh(snr, df, 16),  '--', color=PS.C_C16, lw=1.6,
             label='16-QAM, Rayleigh')
-    ax.plot(snr, bler_rayleigh(snr, df, 256), '--', color='#d62728', lw=2,
+    ax.plot(snr, bler_rayleigh(snr, df, 256), '--', color=PS.C_C256, lw=1.6,
             label='256-QAM, Rayleigh')
 
     # mark the AWGN 16-QAM knee region the selector tracks (~12-14 dB)
