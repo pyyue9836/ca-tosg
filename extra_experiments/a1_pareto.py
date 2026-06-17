@@ -75,8 +75,7 @@ def fixed_point(df, a):
     return PAYLOAD[a], eff.mean()
 
 
-def run_split(name, csv, train_df=None, rf=None):
-    df = pd.read_csv(csv)
+def run_split(name, df, train_df=None, rf=None):
     pts = {}
     for a in ACTIONS:
         pts[f'Fixed {a}'] = fixed_point(df, a)
@@ -106,7 +105,7 @@ def run_split(name, csv, train_df=None, rf=None):
             m.fit(train_df[common], y)
             p = m.predict(df[common])
             rfl.append((lam, *realised(df, p)))
-    return df, pts, lams, front, np.array(rfl) if rfl else None
+    return pts, lams, front, np.array(rfl) if rfl else None
 
 
 def plot(name, pts, front, rfl):
@@ -143,13 +142,25 @@ def plot(name, pts, front, rfl):
 
 
 def main():
+    from sklearn.model_selection import train_test_split
+    from sklearn.ensemble import RandomForestClassifier as _RF
     with open(RF_PKL, 'rb') as f:
         rf = pickle.load(f)
-    val_df = pd.read_csv(VAL_CSV)
+    val_full = pd.read_csv(VAL_CSV)
+    test_df = pd.read_csv(TEST_CSV)
+
+    # validate: held-out 30% split (matches the paper's tab:headline protocol),
+    # RF retrained on the 70% train partition -> deployed point ~ 0.076/0.865.
+    v_tr, v_te = train_test_split(val_full, test_size=0.30, random_state=SEED,
+                                  stratify=val_full['oracle_3way'])
+    cols_v = feat_cols(v_tr)
+    rf_v = _RF(n_estimators=400, max_depth=10, min_samples_leaf=4,
+               random_state=SEED, n_jobs=-1).fit(v_tr[cols_v], v_tr['oracle_3way'])
 
     rows = []
-    for name, csv in [('validate', VAL_CSV), ('test', TEST_CSV)]:
-        df, pts, lams, front, rfl = run_split(name, csv, train_df=val_df, rf=rf)
+    for name, df, tdf, model in [('validate', v_te, v_tr, rf_v),
+                                 ('test', test_df, val_full, rf)]:
+        pts, lams, front, rfl = run_split(name, df, train_df=tdf, rf=model)
         plot(name, pts, front, rfl)
         for k, (x, y) in pts.items():
             rows.append(dict(split=name, policy=k, payload=round(x, 4), f1=round(y, 4)))
