@@ -1,0 +1,58 @@
+[
+  {
+    "name": "oracle_3way",
+    "mode": "oracle",
+    "n_features": 0,
+    "accuracy": 1.0,
+    "mean_payload": 0.07395454545454545,
+    "mean_f1": 0.8678999663411158
+  },
+  {
+    "name": "fixed_L",
+    "mode": "fixed",
+    "n_features": 0,
+    "accuracy": 0.8939393939393939,
+    "mean_payload": 0.023999999999999997,
+    "mean_f1": 0.8621376727600639
+  },
+  {
+    "name": "fixed_C16",
+    "mode": "fixed",
+    "n_features": 0,
+    "accuracy": 0.10606060606060606,
+    "mean_payload": 0.49499999999999994,
+    "mean_f1": 0.3845163668322871
+  },
+  {
+    "name": "fixed_C256",
+    "mode": "fixed",
+    "n_features": 0,
+    "accuracy": 0.0,
+    "mean_payload": 0.24749999999999997,
+    "mean_f1": 0.10114274890899648
+  },
+  {
+    "name": "rf_base",
+    "mode": "base",
+    "n_features": 21,
+    "accuracy": 0.8636363636363636,
+    "mean_payload": 0.047787878787878796,
+    "mean_f1": 0.8386943948171817
+  },
+  {
+    "name": "rf_csi",
+    "mode": "csi",
+    "n_features": 22,
+    "accuracy": 0.8602693602693603,
+    "mean_payload": 0.08902020202020203,
+    "mean_f1": 0.8511517880646092
+  },
+  {
+    "name": "rf_full",
+    "mode": "full",
+    "n_features": 23,
+    "accuracy": 0.9326599326599326,
+    "mean_payload": 0.07554040404040405,
+    "mean_f1": 0.8645952571662472
+  }
+]

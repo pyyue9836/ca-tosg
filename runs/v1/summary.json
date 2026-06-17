@@ -1,0 +1,42 @@
+[
+  {
+    "name": "channel_oracle",
+    "accuracy": 1.0,
+    "mean_payload_Mbit": 0.4125656565656566,
+    "mean_f1": 0.8787875888182548,
+    "n_features": 0,
+    "include_csi": true
+  },
+  {
+    "name": "fixed_late",
+    "accuracy": 0.8013468013468014,
+    "mean_payload_Mbit": 0.023999999999999997,
+    "mean_f1": 0.8689685944930708,
+    "n_features": 0,
+    "include_csi": false
+  },
+  {
+    "name": "fixed_compressed",
+    "accuracy": 0.19865319865319866,
+    "mean_payload_Mbit": 1.9799999999999998,
+    "mean_f1": 0.4804602413393781,
+    "n_features": 0,
+    "include_csi": false
+  },
+  {
+    "name": "rf_baseline",
+    "include_csi": false,
+    "n_features": 21,
+    "accuracy": 0.6885521885521886,
+    "mean_payload_Mbit": 0.5014747474747474,
+    "mean_f1": 0.7671133791131609
+  },
+  {
+    "name": "rf_csi",
+    "include_csi": true,
+    "n_features": 22,
+    "accuracy": 0.835016835016835,
+    "mean_payload_Mbit": 0.5706262626262626,
+    "mean_f1": 0.8722601254458432
+  }
+]
