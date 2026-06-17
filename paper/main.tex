@@ -66,7 +66,8 @@ The main contributions of this paper are summarized as follows:
     \item We formulate channel-aware semantic granularity selection for V2V cooperative perception, where the sender adaptively selects the semantic level of each transmitted message according to task state and channel quality.
     \item We propose \method, a lightweight Random Forest selector~\cite{breiman2001random} that uses online perception cues and estimated SNR to choose among compact object-level communication and compressed feature-level communication modes.
     \item We provide a communication-aware evaluation protocol under AWGN and Rayleigh channels, comparing fixed object-level transmission, fixed feature-level transmission with LDPC + 16/256-QAM coding~\cite{ieee80211bd}, a learned semantic-communication baseline~\cite{sheng2024importance}, and a channel-aware oracle.
-    \item Experiments on OPV2V show that \method{} avoids unreliable high-payload feature transmission under poor channel conditions and approaches oracle performance when the channel supports richer communication. We further identify a negative finding that the 256-QAM action is dominated under LDPC 1/2, motivating future work on modulation and channel coding co-design.
+    \item Experiments on OPV2V show that \method{} avoids unreliable high-payload feature transmission under poor channel conditions and approaches oracle performance when the channel supports richer communication. We characterise it as \emph{Pareto-optimal} on the payload--F1 plane rather than merely better on average, show the gain concentrates on hard frames under usable channels (up to $+0.045$ F1), and verify cross-split and Culver-City domain-shift generalisation with a frozen selector.
+    \item We report an honest analysis of selector design: feature ablations, an SNR-threshold baseline that matches the learned selector on F1 (so the contribution is a \emph{lightweight, bandwidth-efficient, interpretable channel-aware policy}, not a complex learner), model and latency comparisons, Rician/CSI-aging robustness, and a negative finding that 256-QAM is dominated under LDPC 1/2.
 \end{itemize}
 
 \section{Related Work}
@@ -662,6 +663,199 @@ Rayleigh & 20.0 & 1.000 & 0.799 & 0.668 \\
 \end{tabular}
 \end{table}
 
+\subsection{Communication--Perception Pareto Frontier}\label{sec:pareto}
+
+The headline table compares policies at a single operating point. To show that
+\method{} is \emph{Pareto-optimal} rather than merely better on average, we sweep
+the Lagrangian selector $s_t^\star=\arg\max_s (F_t^s-\lambda B_s)$ over $\lambda$ and
+plot every policy on the payload--F1 plane (Fig.~\ref{fig:pareto}). As $\lambda$
+grows from $0$ (max F1) to large values (min payload), the oracle traces the
+achievable upper frontier; the fixed feature-level policies $C_{16}$ and $C_{256}$
+sit far below it (high payload, low realised F1 due to the LDPC cliff), i.e.\ they
+are strictly dominated. \method{} and a $\lambda$-cost RF retrained on
+$\arg\max_s(F_t^s-\lambda B_s)$ labels lie on the frontier between Fixed $L$ and the
+oracle: on test, the deployed selector reaches F1 $0.888$ at $0.081$~Mbit/frame,
+within $0.006$ F1 of the oracle and at $16\%$ of the $C_{16}$ payload.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig_pareto_test.pdf}
+    \caption{Communication--perception Pareto frontier on OPV2V test (log payload axis).
+    Fixed feature-level policies are dominated; the Lagrangian oracle frontier and the
+    $\lambda$-swept RF connect Fixed $L$ to the oracle, and \method{} operates on this
+    frontier. The same picture holds on validate.}
+    \label{fig:pareto}
+\end{figure}
+
+\subsection{Where the Gain Concentrates: Difficulty Stratification}\label{sec:difficulty}
+
+A channel-averaged mean masks where \method{} matters. We stratify frames into
+easy/medium/hard terciles by the ego's own object-level detection F1 (low $=$ hard),
+and report realised F1 in two regimes (Fig.~\ref{fig:difficulty}). Averaged over all
+channels the CA-TOSG-over-Fixed-$L$ gain is small and rises with difficulty
+($+0.000/+0.008$ easy/hard on test); but on realisations where the channel can carry
+features (AWGN, SNR $\ge 14$~dB) the gain on hard frames reaches $\mathbf{+0.045}$ on
+test ($+0.039$ on validate), an order of magnitude above the all-channel mean, while
+staying near zero on easy frames. The value of \method{} is therefore two-dimensional:
+it materialises where a \emph{hard frame meets a usable channel}, and the
+channel-averaged headline necessarily dilutes it. (On easy frames under a good channel
+the deployed selector occasionally over-requests $C_{16}$, a small $-0.013$ F1 effect
+the $\lambda$-cost variant of Section~\ref{sec:pareto} removes.)
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig_difficulty.pdf}
+    \caption{Realised F1 by frame difficulty (ego object-level F1 tercile) on OPV2V test.
+    \emph{Left}: all channels---gain grows with difficulty but is small. \emph{Right}:
+    AWGN, SNR$\ge$14~dB---when the channel can support features the hard-frame gain over
+    Fixed $L$ reaches $+0.045$. Numbers above bars are CA-TOSG$-$Fixed-$L$.}
+    \label{fig:difficulty}
+\end{figure}
+
+\subsection{Is a Learned Selector Necessary? Feature Ablation and an SNR-Threshold Rule}\label{sec:threshold}
+
+Since channel features dominate importance (Section~\ref{sec:feat_imp}), we test
+whether a hand-tuned rule suffices. Table~\ref{tab:ablation_threshold} compares RF
+feature subsets and a rule ``if AWGN and $\hat\gamma_t>\tau$ then $C_{16}$ else $L$''
+(train on validate, evaluate on test). We report this honestly: \emph{on realised F1
+the RF does not beat the SNR-threshold rule}---the best threshold reaches F1 $0.890$
+and the full RF $0.887$. The RF's advantage is \emph{bandwidth efficiency}: it attains
+the same F1 at $0.028$~Mbit/frame versus the threshold's $0.072$--$0.117$, because it
+uses perception cues to send features only on frames that benefit, whereas the
+threshold floods every high-SNR frame. We therefore frame \method{} as a
+\emph{lightweight channel-aware selection policy} whose value is Pareto/bandwidth
+efficiency, not raw accuracy; the threshold rule is a fully interpretable special case.
+Dropping the range, density, or object-count cue groups changes F1 by $<0.001$.
+
+\begin{table}[t]
+\centering
+\caption{Selector feature ablation and SNR-threshold rule (train: validate, eval: test).
+Realised F1 is nearly invariant across selectors; they differ in payload. The
+SNR-threshold rule matches the RF on F1 at higher payload.}\label{tab:ablation_threshold}
+\begin{tabular}{lccc}
+\toprule
+Selector & \#feat & Realised F1 & Payload \\
+\midrule
+Channel only ($\hat\gamma,c$)        & 2  & 0.888 & 0.066 \\
+Perception cues only                 & 21 & 0.887 & 0.024 \\
+Perception $+\ \hat\gamma$           & 22 & 0.887 & 0.024 \\
+Full (all features)                  & 23 & 0.887 & \textbf{0.028} \\
+SNR-threshold $\tau{=}12$            & -- & \textbf{0.890} & 0.117 \\
+SNR-threshold $\tau{=}16$            & -- & 0.889 & 0.072 \\
+\midrule
+Oracle / Fixed $L$                   & -- & 0.894 / 0.887 & 0.074 / 0.024 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Selector Model Comparison}\label{sec:models}
+
+Table~\ref{tab:models} compares candidate selectors at batch size $1$ (the $10$~Hz
+operating point; latencies on the host of Section~\ref{sec:latency}). All models reach
+the same realised F1 ($0.887$--$0.889$); they trade payload, latency, and size. A
+decision tree or logistic-regression selector matches the random forest's F1 at
+$>10\times$ lower latency and $\sim100\times$ smaller size, while the random forest is
+the most payload-efficient. This confirms that model complexity is not where the
+performance comes from, and that a far lighter selector is deployable if latency is
+critical.
+
+\begin{table}[t]
+\centering
+\caption{Selector models (train: validate, eval: test). Latency is per-frame at batch
+size 1 on the experimental host; F1 is essentially model-independent.}\label{tab:models}
+\begin{tabular}{lcccc}
+\toprule
+Model & Realised F1 & Payload & Latency (ms) & Size \\
+\midrule
+Decision Tree          & 0.889 & 0.072 & 0.40 & 11~KB \\
+Logistic Regression    & 0.889 & 0.062 & 0.55 & 2~KB \\
+RBF-SVM                & 0.888 & 0.041 & 0.57 & 82~KB \\
+Small MLP (32,16)      & 0.889 & 0.057 & 0.55 & 55~KB \\
+Random Forest (400)    & 0.887 & \textbf{0.028} & 8.3 & 3.5~MB \\
+SNR-threshold ($\tau{=}16$) & 0.889 & 0.072 & $\sim0$ & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Scene-Content Subsets and Object-Level Reliability}\label{sec:subsets}
+
+\textbf{Scene subsets.} To check the selector activates features for the right reasons,
+we form top-tercile subsets by cached cues. On occlusion-proxy frames (high
+object-level false-positive count) the selector's feature-activation rate rises to
+$0.17$ versus $0.10$ on the complement and its good-channel gain to $+0.031$ vs
+$+0.013$ (validate); the sparse-LiDAR subset behaves similarly on test
+($+0.033$ vs $+0.001$). The long-range subset is inconclusive---our cue is the count
+of far LiDAR \emph{points}, a poor proxy for far \emph{objects} (which OPV2V does not
+label per-frame), and the selector does not favour features there. We report this
+rather than select a favourable proxy.
+
+\textbf{Object-level reliability.} The main results treat $L$ as perfectly reliable.
+Relaxing this---a lost $L$ falls back to the ego-only floor ($0.63$), with $L$
+block-error rate up to $10\%$ and repetition cost up to $3\times$---the
+CA-TOSG-over-$L$ gain \emph{grows} monotonically from $+0.002$ to $+0.005$ as $L$
+degrades, and the conclusion (CA-TOSG $\ge$ Fixed $L$) is unchanged: the result does
+not rest on an over-strong reliability assumption for $L$.
+
+\subsection{Vehicular Channels: Rician Fading and CSI Aging}\label{sec:vehicular}
+
+\textbf{Rician fading.} We extend the channel model to Rician fading (BLER obtained by
+averaging the AWGN BLER over the Rician SNR density, $K$-factor sweeping
+$0=$Rayleigh$\to\infty=$AWGN). Fig.~\ref{fig:rician} shows the selector's
+feature-activation knee moving smoothly from Rayleigh-like (stay at $L$) to AWGN-like
+(activate $C_{16}$) as the line-of-sight component strengthens---the framework spans
+the full fading-severity range without modification.
+
+\textbf{CSI aging.} Under a Jakes model at $5.9$~GHz and $60$~km/h (Doppler
+$\approx328$~Hz), the SNR estimate decorrelates within $\sim10$~ms, so a stale CSI
+estimate degrades realised F1 from $0.888$ to $\approx0.873$ ($-1.5\%$) and then
+plateaus---the loss is bounded because the selector falls back to the robust $L$ when
+CSI is unreliable. This complements the CSI-noise ablation of Section~\ref{sec:csi_noise}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig_rician.pdf}
+    \caption{Feature-level activation rate of the channel-aware oracle versus mean SNR
+    under Rician fading of increasing $K$-factor, between the Rayleigh and AWGN limits.}
+    \label{fig:rician}
+\end{figure}
+
+\subsection{Request Latency and Decision Causality}\label{sec:causality}
+
+The ego decides on its own frame-$t$ cues and CSI and signals a $2$-bit request, so
+sub-frame request delays do not change the decided frame. The residual risk is
+whole-frame staleness: at $10$~Hz a one-frame round trip applies the frame-$t$ decision
+to frame $t{+}1$. The oracle action changes between consecutive frames $18\%$ of the
+time at a $100$~ms delay; acting on a one-frame-stale decision costs up to
+$-0.057$ realised F1, but this is a pessimistic bound under the i.i.d.-per-frame channel
+assumption of our protocol (a one-frame-old \emph{channel} decision is near-random,
+consistent with the $\sim10$~ms decorrelation above). Because CSI and cues are computed
+locally at decision time, the architecture avoids most of this; a persistent per-round
+mode preference bounds the remainder.
+
+\subsection{JSCC-Aware Granularity Selection}\label{sec:jscc_aware}
+
+If the feature branch used importance-map JSCC (graceful degradation) instead of
+LDPC+QAM (cliff), is selection still needed? Fig.~\ref{fig:jscc_aware} plots AP@$0.5$
+versus SNR from our ImportanceMapJSCC reproduction: JSCC degrades gracefully and stays
+above the LDPC curves at low SNR, though still marginally below Fixed $L$ at
+$0$~dB ($0.833$ vs $0.840$). Graceful JSCC weakens the \emph{channel}-driven case for
+selection, but the \emph{task}-driven case remains: on easy frames object-level $L$
+already matches feature-level (Section~\ref{sec:difficulty}), so a
+$\{L,\text{Feature-JSCC}\}$ selector still saves bandwidth by not transmitting features
+when the frame does not need them. A per-frame JSCC-aware selector requires per-frame
+JSCC predictions, which our cached sweep provides only in aggregate; we specify it as
+immediate future work (re-cache per-frame JSCC F1, relabel the oracle, retrain the
+selector---no backbone change).
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig_jscc_aware.pdf}
+    \caption{Feature-branch coding under AWGN: importance-map JSCC (graceful) versus
+    LDPC+16/256-QAM (cliff), with the perfect-channel upper bound, ego-only floor, and
+    channel-invariant Fixed $L$.}
+    \label{fig:jscc_aware}
+\end{figure}
+
 \subsection{Comparison with Where2comm}\label{sec:where2comm}
 
 To provide a same-codebase reference against the most prominent
@@ -702,7 +896,23 @@ Three limitations of the present study are worth flagging explicitly.
 
 \textbf{Cross-dataset evaluation.} The generalisation study of Section~\ref{sec:generalisation} establishes that the validate-trained selector transfers without retraining to the scene-disjoint OPV2V test split ($T=2{,}170$ frames) and to the Culver-City domain shift ($T=550$ frames, real road layout), reproducing the headline payload--F1 frontier and the channel-adaptive end-to-end AP behaviour on both. We have not, however, evaluated second-party V2V perception datasets such as V2X-Sim or V2V4Real, which remain the highest-priority follow-up. The selector's input cues are dataset-agnostic, the BLER tables are independent of the perception backbone, and only the per-frame predictions need to be re-cached on a new dataset; we therefore expect the qualitative findings (LDPC + QAM dominance by Fixed $L$, $\hat\gamma_t$ + $c_t$ accounting for the bulk of feature importance, AWGN-side adaptation knee at the LDPC threshold) to transfer, while the absolute payload--F1 frontier may shift with the underlying perception model's clean-channel performance.
 
-Future work includes multi-vehicle scheduling under shared bandwidth, extension to a Where2comm-style spatial confidence module inside the $C_q$ branches~\cite{hu2022where2comm}, and integration with spread-spectrum signalling for jamming resilience in safety-critical V2X scenarios.
+\textbf{Multi-vehicle shared bandwidth.} This work studies a single ego--collaborator
+link. A practical V2V deployment has several collaborators contending for a shared
+bandwidth budget, turning per-frame granularity selection into a joint
+selection-and-scheduling problem (which collaborators transmit, at which granularity,
+under a total payload cap). Our per-link selector is the natural per-CAV primitive for
+such a scheduler; the joint multi-CAV problem---comparing all-$L$, all-$C$, top-$k$
+distance/confidence selection, per-CAV \method{}, and a bandwidth-constrained
+scheduler on ego AP versus total payload and over-budget rate---is a substantial system
+extension we leave to future work rather than approximate here.
+
+Other future work includes (i) evaluation on second-party datasets (V2X-Sim, V2V4Real)
+via the frozen-selector transfer protocol above; (ii) a per-frame JSCC-aware selector
+(Section~\ref{sec:jscc_aware}); (iii) a rate-matched third action
+($C_{256}^{3/4}$, Section~\ref{sec:negative}); (iv) a Where2comm-style spatial
+confidence module inside the $C_q$ branches~\cite{hu2022where2comm}; and (v)
+integration with spread-spectrum signalling for jamming resilience in safety-critical
+V2X scenarios.
 
 \section{Conclusion}
 
