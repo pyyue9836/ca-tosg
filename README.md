@@ -10,6 +10,7 @@
 | 文件夹 / folder | 内容 / what | 状态 / status |
 |---|---|---|
 | **`paper1_ca_tosg/`** | **CA-TOSG** —— 信道感知任务导向语义粒度选择(IEEE TVT)的全部代码、实验、论文源码 / the complete CA-TOSG paper | ✅ 完成 / complete |
+| `shared_infra/` | 共享基础设施:OpenCOOD 源码改动(13 个 `#self+` 文件)+ BLER 表/JSCC 基线 + SComCP 复现代码 / shared infra: OpenCOOD mods + channel BLER table + JSCC/SComCP baseline code | ✅ 备份 / backed up |
 | `paper2_TBD/` | 第二篇论文,占位,待开始 / reserved for the second paper, not started yet | 🚧 待定 / TBD |
 
 每个文件夹内都有自己的 `README.md`(中英双语)详细说明。**先看 [`paper1_ca_tosg/README.md`](paper1_ca_tosg/README.md)。**
