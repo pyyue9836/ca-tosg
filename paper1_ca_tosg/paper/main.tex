@@ -31,7 +31,7 @@ Peiyi Yue%
 \maketitle
 
 \begin{abstract}
-Connected and automated vehicles can improve perception reliability by exchanging information through vehicle-to-vehicle (V2V) links. However, cooperative perception must operate under limited bandwidth and time-varying vehicular channels. Existing communication-efficient perception methods mainly reduce redundancy within a fixed semantic representation, such as object-level detections or feature-level messages. This paper shows that fixed semantic granularity is suboptimal: feature-level messages are potentially more informative but can become unreliable or wasteful under poor channel quality, while object-level messages are compact and stable but less expressive. We propose \emph{Channel-Aware Task-Oriented Semantic Granularity Selection} (\method), a receiver-driven framework in which the ego vehicle selects the communication granularity for each frame from its own perception cues and estimated channel state, and signals the choice to the collaborator via a $2$-bit request piggy-backed on periodic V2X awareness messages, such as CAM/BSM, over 802.11bd or NR sidelink. \method{} chooses one message type from object-level communication and compressed feature-level communication modes before any high-payload transmission. We derive the selector as the Lagrangian-relaxed solution of a constrained perception-communication problem and instantiate it with a $400$-tree Random Forest. Experiments on $1{,}980$ frames of the OPV2V dataset under AWGN and Rayleigh channels show that \method{} approaches the channel-aware oracle within $0.003$ realized frame F1 while using $84.6\%$ lower average payload than fixed $C_{16}$ feature-level transmission under LDPC + 16-QAM coding. The estimated SNR and channel-type features jointly account for $65\%$ of the selector's feature importance, dominating $21$ ego-side cues. The deployed selector incurs $52.8$~ms per frame on a single CPU core, fitting the $100$~ms budget of a 10~Hz LiDAR cycle. These results demonstrate that channel-aware semantic granularity adaptation is an effective strategy for bandwidth-constrained V2V cooperative perception.
+Connected and automated vehicles can improve perception reliability by exchanging information through vehicle-to-vehicle (V2V) links. However, cooperative perception must operate under limited bandwidth and time-varying vehicular channels. Existing communication-efficient perception methods mainly reduce redundancy within a fixed semantic representation, such as object-level detections or feature-level messages. This paper shows that fixed semantic granularity is suboptimal: feature-level messages are potentially more informative but can become unreliable or wasteful under poor channel quality, while object-level messages are compact and stable but less expressive. We propose \emph{Channel-Aware Task-Oriented Semantic Granularity Selection} (\method), a receiver-driven framework in which the ego vehicle selects the communication granularity for each frame from its own perception cues and estimated channel state, and signals the choice to the collaborator via a $2$-bit request piggy-backed on periodic V2X awareness messages, such as CAM/BSM, over 802.11bd or NR sidelink. \method{} chooses one message type from object-level communication and compressed feature-level communication modes before any high-payload transmission. We derive the selector as the Lagrangian-relaxed solution of a constrained perception-communication problem and instantiate it with a $400$-tree Random Forest. Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channels show that, when the channel can carry feature-level messages, \method{} lifts true end-to-end AP@0.5 by up to $+0.05$ over object-level communication, while---averaged over all channel states---using $\le 17\%$ of the bandwidth of fixed $C_{16}$ feature-level transmission under LDPC + 16-QAM coding; under fading it safely falls back to the robust object-level message. The estimated SNR and channel-type features jointly account for $65\%$ of the selector's feature importance, dominating $21$ ego-side cues. Crucially, we show that whether the task-oriented perception cues are needed at all is determined by the feature codec's channel response: under an LDPC + QAM cliff the estimated SNR is a near-sufficient statistic and a one-line threshold matches the learned selector, whereas under graceful importance-map JSCC the SNR becomes uninformative and the cue-based selector beats the best SNR threshold by $+0.017$ realised F1 ($95\%$ CI $[+0.012,+0.022]$). The deployed selector incurs $52.8$~ms per frame on a single CPU core, fitting the $100$~ms budget of a 10~Hz LiDAR cycle. These results demonstrate that channel-aware semantic granularity adaptation is an effective strategy for bandwidth-constrained V2V cooperative perception.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -67,7 +67,7 @@ The main contributions of this paper are summarized as follows:
     \item We propose \method, a lightweight Random Forest selector~\cite{breiman2001random} that uses online perception cues and estimated SNR to choose among compact object-level communication and compressed feature-level communication modes.
     \item We provide a communication-aware evaluation protocol under AWGN and Rayleigh channels, comparing fixed object-level transmission, fixed feature-level transmission with LDPC + 16/256-QAM coding~\cite{ieee80211bd}, a learned semantic-communication baseline~\cite{sheng2024importance}, and a channel-aware oracle.
     \item Experiments on OPV2V show that \method{} avoids unreliable high-payload feature transmission under poor channel conditions and approaches oracle performance when the channel supports richer communication. We characterise it as \emph{Pareto-optimal} on the payload--F1 plane rather than merely better on average, show the gain concentrates on hard frames under usable channels (up to $+0.045$ F1), and verify cross-split and Culver-City domain-shift generalisation with a frozen selector.
-    \item We report an honest analysis of selector design: feature ablations, an SNR-threshold baseline that matches the learned selector on F1 (so the contribution is a \emph{lightweight, bandwidth-efficient, interpretable channel-aware policy}, not a complex learner), model and latency comparisons, Rician/CSI-aging robustness, and a negative finding that 256-QAM is dominated under LDPC 1/2.
+    \item Our central finding is that whether task-oriented perception cues are needed for granularity selection is \emph{determined by the feature codec's channel response}. Under an LDPC + QAM cliff the estimated SNR is a near-sufficient statistic and a one-line threshold matches the learned selector (the cues add $<0.001$ aggregate F1); under graceful importance-map JSCC the SNR becomes uninformative, the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ F1 ($95\%$ CI $[+0.012,+0.022]$, AWGN; $+0.015$ under Rayleigh). We report this honestly alongside supporting selector-design analyses (feature ablations, model/latency comparisons, Rician/CSI-aging robustness) and a negative finding that 256-QAM is dominated under LDPC 1/2.
 \end{itemize}
 
 \section{Related Work}
@@ -348,29 +348,52 @@ We report AP@0.5 and AP@0.7 for end-to-end detection performance, mean realised 
 
 \subsection{Headline Results}\label{sec:headline}
 
-Table~\ref{tab:headline} summarises the mean realised F1 and average payload for the proposed selector against fixed strategies and the channel-aware oracle, averaged across SNRs $0$--$20$~dB and over an equal mix of AWGN and Rayleigh channel realisations.
+Because the value of feature-level cooperation is realised only when the channel can deliver it, a single channel-averaged number understates the effect: under Rayleigh fading and low-SNR AWGN the selector deliberately holds the object-level message $L$, so averaging over all channel states dilutes the gain. We therefore report the \emph{true end-to-end} detection AP in the two regimes that define the policy: the fallback regime (fading or low-SNR AWGN), where \method{} holds $L$ at $0.024$~Mbit/frame, and the feature-active regime (AWGN $\hat\gamma_t \ge 14$~dB), where the selector requests $C_{16}$. AP is computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth (full protocol in Section~\ref{sec:true_e2e}); the per-SNR breakdown and the Rayleigh curves are in Tables~\ref{tab:true_e2e}--\ref{tab:gen_true_e2e_culver}.
 
 \begin{table}[t]
 \centering
-\caption{Headline results on OPV2V validate ($T=1{,}980$ frames), mean over SNR $\in[0,20]$~dB with $50/50$ AWGN/Rayleigh mix. The proposed selector recovers $99.7\%$ of the oracle's F1 with less than $16\%$ of the bandwidth of Fixed $C_{16}$.}
+\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge14$~dB feature-active regime (selector requests $C_{16}$). When the channel can carry features, \method{} lifts AP toward the feature-level ceiling; when it cannot, it safely retains the $L$ operating point. Payload is channel-use-equivalent Mbit/frame; channel-\emph{averaged} \method{} payload is $\le0.085$~Mbit/frame, i.e.\ $\le17\%$ of Fixed $C_{16}$ ($0.495$).}
 \label{tab:headline}
-\begin{tabular}{lcc}
+\begin{tabular}{llccc}
 \toprule
-Policy & Payload (Mbit/frame) & Mean F1 \\
+Split & Regime & AP@0.5 & AP@0.7 & Payload \\
 \midrule
-Channel-aware oracle           & 0.074 & \textbf{0.868} \\
-Fixed $L$ (PointPillar\_Late)   & 0.024 & 0.862 \\
-Fixed $C_{16}$ (LDPC + 16-QAM)  & 0.495 & 0.385 \\
-Fixed $C_{256}$ (LDPC + 256-QAM)& 0.248 & 0.101 \\
+\multirow{2}{*}{Validate ($1{,}980$)}
+  & Fallback ($L$)  & 0.838 & 0.757 & 0.024 \\
+  & AWGN $\ge14$~dB & \textbf{0.863} & \textbf{0.791} & 0.339 \\
 \midrule
-\method{} (ours, RF + CSI + ch) & \textbf{0.076} & \textbf{0.865} \\
+\multirow{2}{*}{Test ($2{,}170$)}
+  & Fallback ($L$)  & 0.859 & 0.781 & 0.024 \\
+  & AWGN $\ge14$~dB & \textbf{0.881} & \textbf{0.795} & 0.340 \\
+\midrule
+\multirow{2}{*}{Culver-City ($550$)}
+  & Fallback ($L$)  & 0.799 & 0.668 & 0.024 \\
+  & AWGN $\ge14$~dB & \textbf{0.852} & \textbf{0.729} & 0.402 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Three observations are immediate. (i) Both fixed feature-level policies are \emph{strictly dominated by Fixed $L$}: they use $10\text{--}21\times$ more bandwidth and produce lower realised F1 because of the LDPC cliff at low SNR. (ii) The channel-aware oracle achieves only marginally higher F1 than Fixed $L$ ($0.868$ vs.\ $0.862$), confirming that the value of feature-level transmission is realised only on a small subset of frames under realistic channels. (iii) \method{} attains $99.7\%$ of the oracle's F1 ($0.865$ vs.\ $0.868$) with $0.076$~Mbit/frame, i.e., $84.6\%$ less bandwidth than Fixed $C_{16}$.
+Three observations follow. (i) When the channel can carry features, the selector captures the cooperative AP gain: AP@0.5 rises by $+0.025$ (validate), $+0.022$ (test), and $+0.053$ (Culver-City) over the object-level baseline, and AP@0.7 by $+0.034$, $+0.014$, and $+0.061$, respectively---the gain is largest on the harder Culver-City domain. On validate and test this sits within $0.007$ and $0.018$~AP@0.5 of the perfect-channel feature-level ceiling ($0.870$ and $0.899$). (ii) Under fading or low SNR the selector holds $L$ and incurs no AP loss relative to object-level communication, so feature-level transmission is never activated where it would be wasteful; the fixed feature-level policies $C_{16}$ and $C_{256}$, by contrast, are \emph{strictly dominated}---they cost $10\text{--}21\times$ more bandwidth yet fall below Fixed $L$ in realised AP because of the LDPC cliff (Fig.~\ref{fig:ap_snr}). (iii) Averaged over all channel states the selector's payload is $\le0.085$~Mbit/frame, i.e.\ $\le17\%$ of Fixed $C_{16}$, because the expensive feature-active regime occupies only the high-SNR AWGN tail.
 
-\method{} is not designed to maximise average F1 beyond Fixed $L$ on every frame: on many frames object-level communication is already sufficient. Its value is to select feature-level communication \emph{only} when the expected task gain justifies the payload and channel risk. The appropriate figure of merit is therefore the payload--F1 frontier (Section~\ref{sec:pareto}) rather than raw mean F1 alone, and the per-frame gain is concentrated where it matters (Section~\ref{sec:difficulty}).
+\method{} is not designed to raise channel-\emph{averaged} AP above Fixed $L$ on every frame: on many frames object-level communication is already sufficient, and a channel-averaged mean necessarily dilutes the gain. Its value is to activate feature-level communication \emph{only} when the expected task gain justifies the payload and channel risk. The complementary channel-averaged payload--F1 frontier (Section~\ref{sec:pareto}), the difficulty stratification that localises the gain (Section~\ref{sec:difficulty}), and the SNR-threshold comparison (Section~\ref{sec:threshold}) further characterise where and why the policy helps.
+
+Because a one-line SNR-threshold rule is the natural challenger to any learned selector, we place it in the headline rather than an appendix. Table~\ref{tab:headline_agg} reports the channel-averaged frame F1 and payload of Fixed $L$, an SNR-threshold rule, the learned selector, and the oracle over $200$ random SNR/channel draws on the frozen test split. The honest reading is that, \emph{averaged over all channel states, the learned selector and the threshold rule lie on the same payload--F1 frontier}---at equal F1 the threshold is in fact marginally cheaper ($0.889$ at payload $0.071$ versus the RF's $0.078$). On an LDPC + QAM channel the estimated SNR is therefore a near-sufficient statistic for the granularity decision, and the $21$ ego-side perception cues add no aggregate bandwidth advantage over channel state alone. We report this rather than hide it: it is the central diagnostic finding of the paper. The learned selector's residual value is (i) frame-selective---the granularity policy's gain over Fixed~$L$ reaches $+0.045$ F1 (bootstrap $95\%$ CI $[+0.033,+0.059]$) on hard frames under a usable channel (Section~\ref{sec:difficulty})---and (ii) decisive on channels without a sharp SNR cliff, such as JSCC: when SNR ceases to be a sufficient statistic the cue-based selector beats the best SNR threshold by $+0.017$ F1 (Section~\ref{sec:jscc_aware}).
+
+\begin{table}[t]
+\centering
+\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames). Mean realised frame F1 and channel-use-equivalent payload over $200$ random draws of per-frame SNR ($\mathcal{U}[0,20]$~dB) and channel type ($50/50$ AWGN/Rayleigh); payload $95\%$ CI in brackets, F1 CI half-widths $<0.0011$ for the learned policies. The SNR-threshold rule lies on the same payload--F1 frontier as the learned selector.}
+\label{tab:headline_agg}
+\begin{tabular}{lcc}
+\toprule
+Policy & Mean F1 & Payload (Mbit/frame) \\
+\midrule
+Fixed $L$                    & 0.887 & 0.024 \\
+SNR-threshold ($\tau{=}16$)  & 0.889 & 0.071\,[0.066,\,0.077] \\
+\method{} (RF, frozen)       & 0.889 & 0.078\,[0.072,\,0.084] \\
+Channel-aware oracle         & \textbf{0.894} & 0.074 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Fig.~\ref{fig:qualitative} gives a qualitative view of the subset of frames on which feature-level communication is worthwhile. On this frame, the object-level branch over-produces boxes---including several false positives away from any ground-truth vehicle (bottom-left cluster)---yielding a frame F1 of $0.67$, whereas the compressed feature-level message, when the channel can support it, returns a clean detection set that aligns with the ground truth (F1 $0.95$). The selector's job is precisely to identify such frames and request $C_{16}$ only when the channel permits.
 
@@ -725,35 +748,41 @@ random SNR/channel draws the RF attains mean F1 $0.8886$ ($95\%$ CI $[0.8878,0.8
 mean payload $0.078$, and a tuned threshold reaches the same F1 at essentially the same
 payload---the learned selector gives \emph{no channel-averaged Pareto advantage} over the
 threshold. This is the key honest message: \emph{channel awareness is the dominant decision
-factor}, and a simple, fully interpretable SNR threshold already captures it. The value the
-ego-side perception cues add is \emph{frame-selective}, not aggregate: on hard frames under a
-usable channel (Section~\ref{sec:difficulty}) the RF's gain over Fixed~$L$ is
-$+0.045$ F1 with bootstrap $95\%$ CI $[+0.033,+0.059]$ (significant), because it sends
-features to the frames that benefit rather than to every high-SNR frame. We therefore frame
-\method{} as a \emph{lightweight, interpretable channel-aware selection policy} whose
-aggregate operating point matches a threshold and whose learned refinement helps
-significantly on the hard-frame subset. Dropping the range, density, or object-count cue
-groups changes F1 by $<0.001$. (The single-realisation payloads in
-Table~\ref{tab:ablation_threshold} are one such draw; the channel-averaged RF payload is
-$0.078$, CI $[0.072,0.084]$.)
+factor}, and a simple, fully interpretable SNR threshold already captures it. The $21$
+ego-side perception cues add $<0.001$ aggregate F1 over channel state alone on this
+LDPC + QAM channel; we attribute this to the sharp SNR cliff, which makes the estimated
+SNR a near-sufficient statistic for the decision. What the granularity \emph{policy}
+adds over object-level communication is nonetheless frame-selective, not aggregate: on
+hard frames under a usable channel (Section~\ref{sec:difficulty}) the policy's gain over
+Fixed~$L$ is $+0.045$ F1 with bootstrap $95\%$ CI $[+0.033,+0.059]$ (significant). We
+therefore frame \method{} as a \emph{lightweight, interpretable channel-aware selection
+policy} whose aggregate operating point matches a threshold on this cliff codec; the
+perception cues become decisive on graceful-degradation channels, where SNR is no longer
+a sufficient statistic and the cue-based selector beats the best SNR threshold by
+$+0.017$ F1 (Section~\ref{sec:jscc_aware}). Dropping the range, density, or object-count cue
+groups changes F1 by $<0.001$; the channel-averaged payloads, with $95\%$ CIs over
+$200$ seeds, are in Table~\ref{tab:headline_agg} (RF $0.078$ versus the $\tau{=}16$
+threshold's $0.071$).
 
 \begin{table}[t]
 \centering
-\caption{Selector feature ablation and SNR-threshold rule (train: validate, eval: test).
-Realised F1 is nearly invariant across selectors; they differ in payload. The
-SNR-threshold rule matches the RF on F1 at higher payload.}\label{tab:ablation_threshold}
-\begin{tabular}{lccc}
+\caption{Selector feature ablation (train: validate, eval: test; frozen selector,
+$T=2{,}170$ frames). Realised frame F1 is nearly invariant across feature subsets and
+across a hand-tuned SNR threshold: channel state alone (2 features) already reaches
+F1 $0.888$, and adding the $21$ ego-side perception cues changes F1 by $<0.001$. The
+rigorous channel-averaged payload comparison ($200$ seeds, with CIs) is in
+Table~\ref{tab:headline_agg}.}\label{tab:ablation_threshold}
+\begin{tabular}{lcc}
 \toprule
-Selector & \#feat & Realised F1 & Payload \\
+Selector & \#feat & Realised F1 \\
 \midrule
-Channel only ($\hat\gamma,c$)        & 2  & 0.888 & 0.066 \\
-Perception cues only                 & 21 & 0.887 & 0.024 \\
-Perception $+\ \hat\gamma$           & 22 & 0.887 & 0.024 \\
-Full (all features)                  & 23 & 0.887 & \textbf{0.028} \\
-SNR-threshold $\tau{=}12$            & -- & \textbf{0.890} & 0.117 \\
-SNR-threshold $\tau{=}16$            & -- & 0.889 & 0.072 \\
+Channel only ($\hat\gamma,c$)        & 2  & 0.888 \\
+Perception cues only                 & 21 & 0.887 \\
+Perception $+\ \hat\gamma$           & 22 & 0.887 \\
+Full (all features)                  & 23 & 0.887 \\
+SNR-threshold $\tau{=}16$            & -- & 0.889 \\
 \midrule
-Oracle / Fixed $L$                   & -- & 0.894 / 0.887 & 0.074 / 0.024 \\
+Oracle / Fixed $L$                   & -- & 0.894 / 0.887 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -772,17 +801,19 @@ critical.
 \begin{table}[t]
 \centering
 \caption{Selector models (train: validate, eval: test). Latency is per-frame at batch
-size 1 on the experimental host; F1 is essentially model-independent.}\label{tab:models}
-\begin{tabular}{lcccc}
+size 1 on the experimental host; realised F1 is essentially model-independent, so the
+models trade only latency and size. The rigorous channel-averaged payload comparison
+($200$ seeds, with CIs) is in Table~\ref{tab:headline_agg}.}\label{tab:models}
+\begin{tabular}{lccc}
 \toprule
-Model & Realised F1 & Payload & Latency (ms) & Size \\
+Model & Realised F1 & Latency (ms) & Size \\
 \midrule
-Decision Tree          & 0.889 & 0.072 & 0.40 & 11~KB \\
-Logistic Regression    & 0.889 & 0.062 & 0.55 & 2~KB \\
-RBF-SVM                & 0.888 & 0.041 & 0.57 & 82~KB \\
-Small MLP (32,16)      & 0.889 & 0.057 & 0.55 & 55~KB \\
-Random Forest (400)    & 0.887 & \textbf{0.028} & 8.3 & 3.5~MB \\
-SNR-threshold ($\tau{=}16$) & 0.889 & 0.072 & $\sim0$ & -- \\
+Decision Tree          & 0.889 & 0.40 & 11~KB \\
+Logistic Regression    & 0.889 & 0.55 & 2~KB \\
+RBF-SVM                & 0.888 & 0.57 & 82~KB \\
+Small MLP (32,16)      & 0.889 & 0.55 & 55~KB \\
+Random Forest (400)    & 0.887 & 8.3 & 3.5~MB \\
+SNR-threshold ($\tau{=}16$) & 0.889 & $\sim0$ & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -842,29 +873,79 @@ consistent with the $\sim10$~ms decorrelation above). Because CSI and cues are c
 locally at decision time, the architecture avoids most of this; a persistent per-round
 mode preference bounds the remainder.
 
-\subsection{JSCC-Aware Granularity Selection}\label{sec:jscc_aware}
+\subsection{When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation}\label{sec:jscc_aware}
 
-If the feature branch used importance-map JSCC (graceful degradation) instead of
-LDPC+QAM (cliff), is selection still needed? Fig.~\ref{fig:jscc_aware} plots AP@$0.5$
-versus SNR from our ImportanceMapJSCC reproduction: JSCC degrades gracefully and stays
-above the LDPC curves at low SNR, though still marginally below Fixed $L$ at
-$0$~dB ($0.833$ vs $0.840$). Graceful JSCC weakens the \emph{channel}-driven case for
-selection, but the \emph{task}-driven case remains: on easy frames object-level $L$
-already matches feature-level (Section~\ref{sec:difficulty}), so a
-$\{L,\text{Feature-JSCC}\}$ selector still saves bandwidth by not transmitting features
-when the frame does not need them. A per-frame JSCC-aware selector requires per-frame
-JSCC predictions, which our cached sweep provides only in aggregate; we specify it as
-immediate future work (re-cache per-frame JSCC F1, relabel the oracle, retrain the
-selector---no backbone change).
+Section~\ref{sec:threshold} established that under LDPC + QAM the estimated SNR is a
+near-sufficient statistic, so a one-line threshold matches the learned selector. This
+raises the sharper question that decides whether \emph{task}-oriented cues are needed at
+all: does that equivalence survive a feature codec \emph{without} a sharp SNR cliff? We
+answer it directly by replacing the LDPC + QAM feature branch with importance-map
+JSCC~\cite{sheng2024importance} and re-running the per-frame pipeline end-to-end: we
+re-cache per-frame JSCC F1 at each SNR from the trained JSCC model ($1{,}000$ frames per
+SNR, AWGN and Rayleigh), relabel the $\{L,\text{Feature-JSCC}\}$ oracle, and retrain the
+selector---no perception-backbone change.
+
+The mechanism is shown in Fig.~\ref{fig:two_regime}(a). The LDPC + QAM feature F1 has a
+sharp cliff at the $12$~dB decoding threshold, so SNR is highly informative. The learned
+JSCC feature F1, by contrast, is \emph{essentially flat} at $\approx 0.86$ across the
+entire $0$--$20$~dB range (real per-frame data): the codec is trained to degrade
+gracefully and in this operating range the channel barely degrades it at all, so the
+estimated SNR carries almost no information about whether a feature message will help on
+a given frame.
+
+This flips the selector comparison (Fig.~\ref{fig:two_regime}(b), Table~\ref{tab:two_regime}).
+We evaluate both codecs on the \emph{same} $1{,}000$ validate frames under the identical
+$200$-seed protocol, and report the \emph{edge} of the learned selector over the best
+SNR-threshold rule---where the threshold is even granted an oracle-tuned $\tau$ on the
+evaluation frames. Under LDPC + QAM the edge is $+0.002$ F1 ($95\%$ CI $[-0.001,+0.006]$),
+\emph{not} significant: the threshold suffices, reproducing Section~\ref{sec:threshold}.
+Under JSCC the best SNR threshold collapses to the Fixed-$L$ operating point---it cannot
+gate on an uninformative SNR---and only the cue-based selector extracts the content-driven
+gain: the edge is $+0.017$ F1 ($[+0.012,+0.022]$) under AWGN, $+0.015$
+($[+0.011,+0.020]$) under Rayleigh, and $+0.015$ ($[+0.011,+0.019]$) under OFDM, all
+significant.
+
+The interpretation is the central message of this paper: \emph{whether task-oriented
+perception cues are needed for granularity selection is determined by the feature codec's
+channel response.} Under a cliff codec the decision is channel-bound and SNR is sufficient;
+under a graceful codec the decision becomes content-bound, the channel is no longer the
+bottleneck, and the ego-side perception cues---which predict whether a frame's object-level
+detection is already adequate---become the operative signal. A deployment that pairs an
+object-level fallback with a JSCC feature branch therefore genuinely requires the
+task-oriented selector this paper proposes.
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{fig_jscc_aware.pdf}
-    \caption{Feature-branch coding under AWGN: importance-map JSCC (graceful) versus
-    LDPC+16/256-QAM (cliff), with the perfect-channel upper bound, ego-only floor, and
-    channel-invariant Fixed $L$.}
-    \label{fig:jscc_aware}
+    \includegraphics[width=\linewidth]{fig_two_regime.pdf}
+    \caption{When do task-oriented cues matter? \emph{(a)} Mean feature F1 versus SNR
+    (AWGN): the LDPC + QAM feature has a cliff at $\approx 12$~dB (SNR informative),
+    whereas the learned JSCC feature is flat at $\approx 0.86$ (SNR uninformative).
+    \emph{(b)} Realised F1 of Fixed $L$, the best SNR-threshold rule, the learned selector
+    (\method), and the oracle, on the same $1{,}000$ validate frames under each feature
+    codec. Under LDPC the threshold matches \method; under JSCC the threshold collapses to
+    Fixed $L$ and only \method{} captures the content-driven gain. Error bars are $95\%$
+    CIs over $200$ seeds.}
+    \label{fig:two_regime}
 \end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Learned-selector edge over the best (oracle-tuned) SNR-threshold rule on the
+same $1{,}000$ validate frames, $200$-seed protocol. The edge is insignificant under the
+LDPC cliff (SNR is a sufficient statistic) but significant under graceful JSCC (the
+perception cues become necessary).}
+\label{tab:two_regime}
+\begin{tabular}{llc}
+\toprule
+Feature codec & Channel & Edge (RF $-$ threshold) F1 \\
+\midrule
+LDPC + QAM (cliff)      & AWGN     & $+0.002$~$[-0.001,+0.006]$ \\
+Importance-map JSCC     & AWGN     & $\mathbf{+0.017}$~$[+0.012,+0.022]$ \\
+Importance-map JSCC     & Rayleigh & $\mathbf{+0.015}$~$[+0.011,+0.020]$ \\
+Importance-map JSCC     & OFDM     & $\mathbf{+0.015}$~$[+0.011,+0.019]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Comparison with Where2comm}\label{sec:where2comm}
 
@@ -928,7 +1009,7 @@ V2X scenarios.
 
 We presented \method{}, a channel-aware task-oriented semantic granularity selector for V2V cooperative perception. The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs one of three communication modes: a compact object-level message $L$, or a compressed feature-level message under 16- or 256-QAM coding. The selector is implemented as a lightweight Random Forest that adds no learnable parameters to the perception pipeline; the contribution is not the Random Forest itself but the channel-aware granularity policy, of which the forest is one interpretable implementation (a hand-tuned SNR-threshold rule captures much of the same effect, Section~\ref{sec:threshold}). It runs in $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms) per frame on a single CPU core, within the $100$~ms budget of a $10$~Hz LiDAR cycle, and a decision tree or logistic-regression selector reaches the same F1 at $>10\times$ lower latency (Section~\ref{sec:models}).
 
-The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection recovers near-oracle payload--F1 trade-offs by activating feature-level communication only when the channel and task state justify it; on OPV2V validate it reaches $84.6\%$ lower average payload than fixed $C_{16}$ at near-oracle F1, and this trade-off transfers to the scene-disjoint test split and the Culver-City domain shift with a frozen selector. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule already matches the learned selector on the channel-averaged payload--F1 frontier, while the ego-side perception cues add a statistically significant refinement specifically on hard frames under a usable channel ($+0.045$ F1, $95\%$ CI $[+0.033,+0.059]$).
+The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection recovers the feature-level detection gain only when the channel and task state justify it: when the channel can carry features it lifts true end-to-end AP@0.5 by up to $+0.05$ over object-level communication, while averaged over all channel states it spends $\le17\%$ of the bandwidth of fixed $C_{16}$, and this trade-off transfers to the scene-disjoint test split and the Culver-City domain shift with a frozen selector. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule already matches the learned selector on the channel-averaged payload--F1 frontier, and the $21$ ego-side perception cues add $<0.001$ aggregate F1 over channel state alone. The granularity policy's gain over object-level communication is itself frame-selective, reaching $+0.045$ F1 ($95\%$ CI $[+0.033,+0.059]$) on hard frames under a usable channel; we attribute the limited marginal value of the perception cues to the sharp LDPC + QAM SNR cliff, which makes the estimated SNR a near-sufficient statistic. When the feature branch instead uses graceful importance-map JSCC, the estimated SNR becomes uninformative and the picture reverses: the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ F1 ($95\%$ CI $[+0.012,+0.022]$) under AWGN and $+0.015$ under Rayleigh (Section~\ref{sec:jscc_aware}). Whether task-oriented perception cues are needed is thus determined by the feature codec's channel response: superfluous under a cliff codec, necessary under a graceful one.
 
 Future work will evaluate second-party datasets (V2X-Sim, V2V4Real), per-frame JSCC-aware selectors, and multi-CAV shared-bandwidth scheduling.
 

@@ -87,6 +87,13 @@ def main():
     for k in ['f1_rf', 'pay_rf', 'f1_or', 'f1_L', 'gain']:
         m, lo, hi = ci(R[k]); rows.append(dict(metric=k, mean=round(m, 4),
                     ci_lo=round(lo, 4), ci_hi=round(hi, 4)))
+    # SNR-threshold rule at fixed tau, same 200-seed protocol as the RF, so it
+    # carries a matched CI (no RF-with-CI vs threshold-single-point asymmetry).
+    for tau_fixed in (12, 16):
+        ti = int(np.where(taus == tau_fixed)[0][0])
+        for lbl, col in (('f1_thr%d' % tau_fixed, 1), ('pay_thr%d' % tau_fixed, 0)):
+            m, lo, hi = ci(T[:, ti, col]); rows.append(dict(metric=lbl,
+                        mean=round(m, 4), ci_lo=round(lo, 4), ci_hi=round(hi, 4)))
     out = pd.DataFrame(rows)
 
     # (2) bandwidth efficiency at matched F1

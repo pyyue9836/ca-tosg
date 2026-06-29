@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# Large binaries that do not belong in a code/paper review repo
+*.pth
+*.npy
+*.ckpt
+
+# Figure previews (regenerable; only the .pdf ships)
+*_preview.png
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.toc
