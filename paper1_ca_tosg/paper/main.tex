@@ -148,7 +148,7 @@ Two representative channel models are considered. The first is the additive whit
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{fig_channel_bler.pdf}
-    \caption{Block-error rate of the feature-level message under LDPC $1/2$ with 16-QAM and 256-QAM, over AWGN (solid) and Rayleigh (dashed) channels. The 16-QAM AWGN cliff at $\approx 12$~dB defines the selector knee (shaded); the 256-QAM cliff sits far to its right, so by the time 256-QAM is reliable the 16-QAM block is already error-free---this is the basis of the 256-QAM dominance discussed in Section~\ref{sec:negative}. Under Rayleigh fading both curves degrade so slowly that feature-level transmission never becomes reliable in $0$--$20$~dB, explaining the selector's conservative $L$-only behaviour.}
+    \caption{Block-error rate of the feature-level message under LDPC $1/2$ with 16-QAM and 256-QAM, over AWGN (solid) and Rayleigh (dashed) channels. The 16-QAM AWGN cliff at $\approx 12$~dB defines the selector knee (shaded); the 256-QAM cliff sits far to its right, so by the time 256-QAM is reliable the 16-QAM block is already error-free---this is the basis of the 256-QAM dominance discussed in Appendix~\ref{sec:negative}. Under Rayleigh fading both curves degrade so slowly that feature-level transmission never becomes reliable in $0$--$20$~dB, explaining the selector's conservative $L$-only behaviour.}
     \label{fig:bler}
 \end{figure}
 
@@ -205,7 +205,7 @@ whose pointwise optimum is
 s_t^\star(\lambda) = \arg\max_{s \in \mathcal{S}}\; \bigl(F_t^s - \lambda B_s\bigr).
 \label{eq:lagrangian_oracle}
 \end{equation}
-Equation~\eqref{eq:oracle} corresponds to the regime $\lambda \to 0^+$, which is the relevant operating point of this paper because (i) the $L$ payload $B_L = 0.024$~Mbit/frame is already small enough that the bandwidth constraint becomes non-binding whenever $L$ is selected, and (ii) the $L$ option provides a safe ``no-op'' that limits the worst-case bandwidth spend. For non-trivial $\lambda$, the relaxed solution biases the policy toward smaller-payload actions, which we use in Section~\ref{sec:negative} to analyse the dominance of $C_{16}$ over $C_{256}$.
+Equation~\eqref{eq:oracle} corresponds to the regime $\lambda \to 0^+$, which is the relevant operating point of this paper because (i) the $L$ payload $B_L = 0.024$~Mbit/frame is already small enough that the bandwidth constraint becomes non-binding whenever $L$ is selected, and (ii) the $L$ option provides a safe ``no-op'' that limits the worst-case bandwidth spend. For non-trivial $\lambda$, the relaxed solution biases the policy toward smaller-payload actions, which we use in Appendix~\ref{sec:negative} to analyse the dominance of $C_{16}$ over $C_{256}$.
 
 From a rate-distortion perspective, the effective F1 model of Eq.~\eqref{eq:eff_C} is a channel-induced distortion that scales with $\mathrm{BLER}_q(\gamma)$. The compressed-feature mode $C_q$ delivers ``rate'' $R_{C_q} = 1.98 / \log_2 M_q$ in channel-use-equivalent megabits, modulated by a channel-induced packet survival probability $1 - \mathrm{BLER}_q(\gamma)$, while the object-level mode $L$ delivers a much lower rate but with effectively unit survival probability under the protected low-rate transmission assumed in this paper. The selector therefore implicitly trades off rate against rate-conditional distortion as a function of the channel state, a structure familiar from joint source-channel coding theory but here expressed at the granularity-action level rather than at the symbol level.
 
@@ -281,7 +281,7 @@ The feature-level branches transmit compressed BEV representations $m_t^{C_q} = 
 
 \subsection{Channel-Aware Semantic Granularity Selector}
 
-The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier with $N_T=400$ trees, depth bound $D_{\max}=10$, minimum samples per leaf of $4$, and balanced class weighting to compensate for the heavy class imbalance in the channel-aware oracle labels. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms), measured over $2{,}000$ trials in Section~\ref{sec:latency}; this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Section~\ref{sec:models} shows lighter models (decision tree, logistic regression) and even a hand-tuned SNR-threshold rule reach the same realised F1.
+The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier with $N_T=400$ trees, depth bound $D_{\max}=10$, minimum samples per leaf of $4$, and balanced class weighting to compensate for the heavy class imbalance in the channel-aware oracle labels. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms), measured over $2{,}000$ trials in Appendix~\ref{sec:latency}; this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Appendix~\ref{sec:models} shows lighter models (decision tree, logistic regression) and even a hand-tuned SNR-threshold rule reach the same realised F1.
 
 The selector is trained to imitate the channel-aware oracle defined in Eq.~\eqref{eq:oracle}. The oracle uses ground-truth detection outputs and is therefore not deployable; it is used only to generate training labels and as an upper-bound reference. At deployment, the selector uses only the online cues $z_t$ and the channel state $(\hat\gamma_t,c_t)$:
 \begin{equation}
@@ -420,18 +420,6 @@ Fig.~\ref{fig:ap_snr} reports AP@0.5 and AP@0.7 under AWGN and Rayleigh, compari
 
 Under AWGN, \method{} sits on the Fixed $L$ line for SNR $\le 10$~dB and rises to approximately $0.86$ AP@0.5 for SNR $\ge 14$~dB, tracking ImportanceMapJSCC and the channel-aware oracle within $0.01$~AP. The bandwidth panel (Section~\ref{sec:payload_snr}) reflects this transition with a step-shaped payload increase at the LDPC decoding threshold. Under Rayleigh, \method{} remains near Fixed $L$ across the entire SNR range; we attribute this to the residual deep-fade risk that keeps the channel-aware oracle from confidently selecting $C_{16}$ even at $20$~dB mean SNR. This is consistent with the empirical observation that fixed LDPC baselines never recover above the ego-only AP floor of $\approx 0.63$ under Rayleigh.
 
-\subsection{Frame-Level F1 versus SNR}
-
-Fig.~\ref{fig:f1_snr} shows the mean realised frame F1 under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, which underpins the oracle and the selector's training label. Fixed feature-level communication collapses to near-zero F1 below $10$~dB (AWGN) and across the entire range (Rayleigh) because of the BLER cliff; \method{} stays at or above Fixed $L$ throughout.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.48\textwidth]{fig_snr_vs_f1.pdf}\hfill
-    \includegraphics[width=0.48\textwidth]{fig_f1_rayleigh.pdf}
-    \caption{Mean realised frame F1 versus SNR under AWGN (left, v1 results) and Rayleigh (right, v2 results). \method{} remains close to the channel-aware oracle and avoids the cliff of fixed feature-level communication at low SNR.}
-    \label{fig:f1_snr}
-\end{figure*}
-
 \subsection{Payload versus SNR}\label{sec:payload_snr}
 
 Fig.~\ref{fig:payload_snr} reports the average payload of each policy as a function of SNR. \method{} uses the $L$-payload of $0.024$~Mbit/frame across all SNRs under Rayleigh, and switches from $L$-payload to a near-$C_{16}$-payload at SNR $\approx 12$~dB under AWGN, matching the channel-aware oracle behaviour. The fixed-mode baselines are flat at their constant payload, providing the worst-case bandwidth reference.
@@ -470,7 +458,7 @@ Fig.~\ref{fig:feat_imp} and Table~\ref{tab:feat_imp} report the top Gini feature
 
 \begin{table}[t]
 \centering
-\caption{Top-7 features by Gini importance for the deployed \method{} selector. The two channel-side features account for $65\%$ of total importance.}
+\caption{Top-7 features by Gini importance for the deployed \method{} selector (trained on OPV2V validate, $T=1{,}980$ frames). The two channel-side features account for $65\%$ of total importance.}
 \label{tab:feat_imp}
 \begin{tabular}{lc}
 \toprule
@@ -510,35 +498,6 @@ Variant & Features & Acc.\ vs.\ oracle & Payload & Mean F1 \\
 
 Two findings stand out. First, $\hat\gamma_t$ alone improves F1 from $0.839$ to $0.851$ but actually \emph{increases} payload, because the selector tends to over-select $C_{16}$ when it cannot distinguish AWGN from Rayleigh and treats the average SNR as informative on both. Second, adding $c_t$ corrects this by enabling a channel-conditional policy: under Rayleigh the selector becomes $L$-dominant, lowering payload from $0.089$ to $0.076$, while under AWGN it activates $C_{16}$ above the LDPC threshold. The full selector reaches $93.3\%$ accuracy versus the oracle.
 
-\subsection{CSI Estimation Noise Robustness}\label{sec:csi_noise}
-
-In any deployed V2X stack the SNR estimate $\hat\gamma_t$ is itself noisy. To
-quantify the selector's robustness to this noise we keep the true channel SNR
-fixed at $\gamma=10$~dB but corrupt the selector's input $\hat\gamma_t$ with
-zero-mean Gaussian noise of standard deviation $\sigma \in
-\{0,0.5,1,2,3,5\}$~dB and average each operating point over $10$ noise draws.
-Results are reported in Fig.~\ref{fig:csi_noise}.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{fig_csi_noise.pdf}
-    \caption{Mean realised frame F1 versus SNR-estimation noise $\sigma$ at fixed true SNR $\gamma=10$~dB, averaged over $10$ noise realisations per point. The deployed selector is stable for $\sigma \le 1$~dB under AWGN and remains stable across the entire range under Rayleigh, because the Rayleigh policy is already saturated at $L$.}
-    \label{fig:csi_noise}
-\end{figure}
-
-Under AWGN, the selector tolerates SNR-estimation noise up to
-$\sigma\approx 1$~dB with $\le 0.003$~F1 degradation; F1 degrades by
-$0.025$ at $\sigma=2$~dB and by $0.070$ at $\sigma=5$~dB as the selector
-begins to mis-classify low-SNR frames as feature-level-eligible and pays
-a payload penalty without a corresponding F1 gain. Under Rayleigh, the
-deployed policy is saturated at $L$ across the entire SNR range
-(Section~\ref{sec:decision_ratio}), so the F1 is insensitive to the SNR
-estimate. This asymmetry has a clean operational interpretation: the
-selector needs a precise SNR estimate \emph{only} in the regime where
-feature-level communication is a viable option; in regimes where the
-oracle would refuse feature-level transmission regardless, CSI accuracy
-is irrelevant.
-
 \subsection{End-to-end Deployment Verification}\label{sec:e2e}
 
 Throughout Sections~\ref{sec:headline}--\ref{sec:ablation} the realised
@@ -559,7 +518,7 @@ The Bernoulli realisations are averaged over $50$ runs per operating point.
 
 \begin{table}[t]
 \centering
-\caption{End-to-end deployment-mode verification at single operating points.  The deployment-mode F1 with empirical ego-only floor is equal to or higher than the analytical lower bound used during selector training, confirming that the analytical numbers in Section~\ref{sec:headline}--\ref{sec:ablation} are conservative.}
+\caption{End-to-end deployment-mode verification at single operating points (OPV2V validate, $T=1{,}980$ frames; deployed selector). The deployment-mode F1 with empirical ego-only floor is equal to or higher than the analytical lower bound used during selector training, confirming that the analytical numbers in Section~\ref{sec:headline}--\ref{sec:ablation} are conservative.}
 \label{tab:e2e}
 \begin{tabular}{lccccc}
 \toprule
@@ -595,7 +554,7 @@ Table~\ref{tab:e2e} reports the deployment-mode \emph{frame-level F1} aggregated
 
 \begin{table}[t]
 \centering
-\caption{True end-to-end AP under the deployed selector, computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth at $5$ stochastic channel realisations per operating point. The AP@$0.5$ knee at AWGN $\ge 12$~dB matches the policy transition observed in Fig.~\ref{fig:decision_ratio}; under Rayleigh the selector stays at the Fixed-$L$ point across the full $0$--$20$~dB range, consistent with the deep-fade regime.}\label{tab:true_e2e}
+\caption{True end-to-end AP under the deployed selector on OPV2V validate ($T=1{,}980$ frames), computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth at $5$ stochastic channel realisations per operating point. The AP@$0.5$ knee at AWGN $\ge 12$~dB matches the policy transition observed in Fig.~\ref{fig:decision_ratio}; under Rayleigh the selector stays at the Fixed-$L$ point across the full $0$--$20$~dB range, consistent with the deep-fade regime.}\label{tab:true_e2e}
 \begin{tabular}{lcccc}
 \toprule
 Channel & SNR (dB) & $\rho_L$ & AP@0.5 & AP@0.7 \\
@@ -787,92 +746,6 @@ Oracle / Fixed $L$                   & -- & 0.894 / 0.887 \\
 \end{tabular}
 \end{table}
 
-\subsection{Selector Model Comparison}\label{sec:models}
-
-Table~\ref{tab:models} compares candidate selectors at batch size $1$ (the $10$~Hz
-operating point; latencies on the host of Section~\ref{sec:latency}). All models reach
-the same realised F1 ($0.887$--$0.889$); they trade payload, latency, and size. A
-decision tree or logistic-regression selector matches the random forest's F1 at
-$>10\times$ lower latency and $\sim100\times$ smaller size, while the random forest is
-the most payload-efficient. This confirms that model complexity is not where the
-performance comes from, and that a far lighter selector is deployable if latency is
-critical.
-
-\begin{table}[t]
-\centering
-\caption{Selector models (train: validate, eval: test). Latency is per-frame at batch
-size 1 on the experimental host; realised F1 is essentially model-independent, so the
-models trade only latency and size. The rigorous channel-averaged payload comparison
-($200$ seeds, with CIs) is in Table~\ref{tab:headline_agg}.}\label{tab:models}
-\begin{tabular}{lccc}
-\toprule
-Model & Realised F1 & Latency (ms) & Size \\
-\midrule
-Decision Tree          & 0.889 & 0.40 & 11~KB \\
-Logistic Regression    & 0.889 & 0.55 & 2~KB \\
-RBF-SVM                & 0.888 & 0.57 & 82~KB \\
-Small MLP (32,16)      & 0.889 & 0.55 & 55~KB \\
-Random Forest (400)    & 0.887 & 8.3 & 3.5~MB \\
-SNR-threshold ($\tau{=}16$) & 0.889 & $\sim0$ & -- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Scene-Content Subsets and Object-Level Reliability}\label{sec:subsets}
-
-\textbf{Scene subsets.} To check the selector activates features for the right reasons,
-we form top-tercile subsets by cached cues. On occlusion-proxy frames (high
-object-level false-positive count) the selector's feature-activation rate rises to
-$0.17$ versus $0.10$ on the complement and its good-channel gain to $+0.031$ vs
-$+0.013$ (validate); the sparse-LiDAR subset behaves similarly on test
-($+0.033$ vs $+0.001$). The long-range subset is inconclusive---our cue is the count
-of far LiDAR \emph{points}, a poor proxy for far \emph{objects} (which OPV2V does not
-label per-frame), and the selector does not favour features there. We report this
-rather than select a favourable proxy.
-
-\textbf{Object-level reliability.} The main results treat $L$ as perfectly reliable.
-Relaxing this---a lost $L$ falls back to the ego-only floor ($0.63$), with $L$
-block-error rate up to $10\%$ and repetition cost up to $3\times$---the
-CA-TOSG-over-$L$ gain \emph{grows} monotonically from $+0.002$ to $+0.005$ as $L$
-degrades, and the conclusion (CA-TOSG $\ge$ Fixed $L$) is unchanged: the result does
-not rest on an over-strong reliability assumption for $L$.
-
-\subsection{Vehicular Channels: Rician Fading and CSI Aging}\label{sec:vehicular}
-
-\textbf{Rician fading.} We extend the channel model to Rician fading (BLER obtained by
-averaging the AWGN BLER over the Rician SNR density, $K$-factor sweeping
-$0=$Rayleigh$\to\infty=$AWGN). Fig.~\ref{fig:rician} shows the selector's
-feature-activation knee moving smoothly from Rayleigh-like (stay at $L$) to AWGN-like
-(activate $C_{16}$) as the line-of-sight component strengthens---the framework spans
-the full fading-severity range without modification.
-
-\textbf{CSI aging.} Under a Jakes model at $5.9$~GHz and $60$~km/h (Doppler
-$\approx328$~Hz), the SNR estimate decorrelates within $\sim10$~ms, so a stale CSI
-estimate degrades realised F1 from $0.888$ to $\approx0.873$ ($-1.5\%$) and then
-plateaus---the loss is bounded because the selector falls back to the robust $L$ when
-CSI is unreliable. This complements the CSI-noise ablation of Section~\ref{sec:csi_noise}.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{fig_rician.pdf}
-    \caption{Feature-level activation rate of the channel-aware oracle versus mean SNR
-    under Rician fading of increasing $K$-factor, between the Rayleigh and AWGN limits.}
-    \label{fig:rician}
-\end{figure}
-
-\subsection{Request Latency and Decision Causality}\label{sec:causality}
-
-The ego decides on its own frame-$t$ cues and CSI and signals a $2$-bit request, so
-sub-frame request delays do not change the decided frame. The residual risk is
-whole-frame staleness: at $10$~Hz a one-frame round trip applies the frame-$t$ decision
-to frame $t{+}1$. The oracle action changes between consecutive frames $18\%$ of the
-time at a $100$~ms delay; acting on a one-frame-stale decision costs up to
-$-0.057$ realised F1, but this is a pessimistic bound under the i.i.d.-per-frame channel
-assumption of our protocol (a one-frame-old \emph{channel} decision is near-random,
-consistent with the $\sim10$~ms decorrelation above). Because CSI and cues are computed
-locally at decision time, the architecture avoids most of this; a persistent per-round
-mode preference bounds the remainder.
-
 \subsection{When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation}\label{sec:jscc_aware}
 
 Section~\ref{sec:threshold} established that under LDPC + QAM the estimated SNR is a
@@ -952,30 +825,26 @@ Importance-map JSCC     & OFDM     & $\mathbf{+0.015}$~$[+0.011,+0.019]$ \\
 To provide a same-codebase reference against the most prominent
 spatial-selection cooperative perception method, we evaluate
 Where2comm~\cite{hu2022where2comm} on the same OPV2V validate split
-using a checkpoint trained for $37$ epochs in our reproduction.
-Under perfect channel (lossless feature-level transmission), Where2comm
-achieves AP@0.5 = $0.809$ and AP@0.7 = $0.672$. These numbers sit below
-the ImportanceMapJSCC perfect-channel reference of $0.866 / 0.728$ and
-below the channel-invariant Fixed $L$ value of $0.840 / 0.760$. We
-attribute this gap to the under-training of our Where2comm
-reproduction; the original work~\cite{hu2022where2comm} requires
-considerably longer training schedules than were available in our
-single-GPU setting. Importantly, the qualitative finding is unaffected:
-Where2comm is a spatial-mask method that operates inside a single
-semantic granularity, and is therefore complementary rather than
-competing with \method{}; a future extension can deploy Where2comm
-inside the $C_q$ branches of \method{} while letting the granularity
-selector decide when feature-level communication is activated.
-
-\subsection{Inference Latency}\label{sec:latency}
-
-To validate deployability we measure the per-frame inference latency of the deployed selector on a single CPU core (Intel i7 host of the experimental setup). Random Forest \texttt{predict()} is called on per-frame feature vectors with the cache warmed by $100$ priming calls and then measured over $2{,}000$ trials. At batch size $1$, the operating point relevant for a $10$~Hz online deployment, the mean per-frame latency is $\boldsymbol{52.8 \pm 5.7}$~ms with median $54.7$~ms, $95$th-percentile $59.1$~ms, and $99$th-percentile $69.5$~ms. The full $\mathrm{P99}$ latency therefore sits at $69$~ms, leaving a $31$~ms margin within the $100$~ms cycle of a $10$~Hz LiDAR sensor. At batch size $100$ (an offline batch-evaluation operating point), per-sample latency drops to $0.47 \pm 0.03$~ms, indicating that the bulk of the per-call cost at batch $1$ is in tree-traversal dispatch rather than per-feature computation; ahead-of-time compilation of the tree ensemble (e.g., via ONNX) would close this gap if a stricter latency budget were required, but is not necessary at $10$~Hz.
-
-\subsection{Design Ablation: Action-Space Cliff Matching}\label{sec:negative}
-
-An empirical finding from the $3$-way action set $\mathcal{S}=\{L,C_{16},C_{256}\}$ is that the channel-aware oracle never selects the $C_{256}$ action: $\rho_{C_{256}}^\star = 0.0\%$ across both channels and all SNRs in the evaluated range. We interpret this as an intentional ablation of the action-space design: $C_{16}$ and $C_{256}$ as defined here share the \emph{same} LDPC rate $1/2$ but trade modulation order against BLER, and the resulting cliffs are not rate-matched. Under LDPC 1/2 with AWGN, $\mathrm{BLER}_{256}(\gamma) > 0.5$ for all $\gamma \le 16$~dB, whereas $\mathrm{BLER}_{16}(\gamma) < 0.05$ already at $\gamma = 12$~dB (Fig.~\ref{fig:bler}); by the time 256-QAM is reliable, 16-QAM is already saturated, and Eq.~\eqref{eq:lagrangian_oracle} prefers the latter at every SNR.
-
-The methodological implication is constructive. A truly useful third action would have to fall between $C_{16}$ and $L$ on \emph{both} the rate and the cliff-SNR axes simultaneously, which the LDPC 1/2 + 256-QAM pair fails to satisfy. A natural rate-matched extension that we leave to follow-up work is a $C_{256}^{3/4}$ branch combining 256-QAM with a higher LDPC rate (e.g., $3/4$ or $5/6$); the rate increase compensates for the modulation order's higher cliff, and the resulting branch should be non-dominated above approximately $18$~dB AWGN. Our framework accommodates this extension without retraining the perception backbone: only the BLER table and the action set need updating, and the selector retrains in under one minute on the existing $1{,}980$-frame dataset.
+($1{,}980$ frames) using our $50$-epoch reproduction. Under perfect
+channel (lossless feature-level transmission), Where2comm achieves
+AP@0.5 = $0.885$ and AP@0.7 = $0.811$, the strongest perfect-channel
+feature-level result in our study---above the ImportanceMapJSCC
+reference of $0.866 / 0.728$, the attentive-compression branch used by
+\method{} ($0.870$ AP@0.5), and the channel-invariant Fixed $L$ value of
+$0.840 / 0.760$. This is expected: Where2comm is a well-engineered
+intermediate-fusion method, and its strength under a clean channel
+confirms that our evaluation pipeline does not handicap feature-level
+baselines. The key point is that this strength is \emph{orthogonal} to
+\method: Where2comm is a spatial-mask method that decides \emph{which
+feature regions} to send \emph{within} a fixed feature-level granularity,
+whereas \method{} decides \emph{whether} to send feature-level
+information at all and at \emph{what} granularity, given the channel.
+The two compose: Where2comm can be deployed inside the $C_q$ branches of
+\method{} as a stronger feature codec, while the granularity selector
+decides when feature-level communication is worth its payload and channel
+risk. Under a bandwidth-constrained, time-varying link, even a
+perfect-channel AP of $0.885$ is realised only when the channel can
+deliver the feature message---precisely the regime \method{} arbitrates.
 
 \subsection{Discussion and Limitations}\label{sec:discussion}
 
@@ -1000,18 +869,188 @@ extension we leave to future work rather than approximate here.
 Other future work includes (i) evaluation on second-party datasets (V2X-Sim, V2V4Real)
 via the frozen-selector transfer protocol above; (ii) a per-frame JSCC-aware selector
 (Section~\ref{sec:jscc_aware}); (iii) a rate-matched third action
-($C_{256}^{3/4}$, Section~\ref{sec:negative}); (iv) a Where2comm-style spatial
+($C_{256}^{3/4}$, Appendix~\ref{sec:negative}); (iv) a Where2comm-style spatial
 confidence module inside the $C_q$ branches~\cite{hu2022where2comm}; and (v)
 integration with spread-spectrum signalling for jamming resilience in safety-critical
 V2X scenarios.
 
 \section{Conclusion}
 
-We presented \method{}, a channel-aware task-oriented semantic granularity selector for V2V cooperative perception. The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs one of three communication modes: a compact object-level message $L$, or a compressed feature-level message under 16- or 256-QAM coding. The selector is implemented as a lightweight Random Forest that adds no learnable parameters to the perception pipeline; the contribution is not the Random Forest itself but the channel-aware granularity policy, of which the forest is one interpretable implementation (a hand-tuned SNR-threshold rule captures much of the same effect, Section~\ref{sec:threshold}). It runs in $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms) per frame on a single CPU core, within the $100$~ms budget of a $10$~Hz LiDAR cycle, and a decision tree or logistic-regression selector reaches the same F1 at $>10\times$ lower latency (Section~\ref{sec:models}).
+We presented \method{}, a channel-aware task-oriented semantic granularity selector for V2V cooperative perception. The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs one of three communication modes: a compact object-level message $L$, or a compressed feature-level message under 16- or 256-QAM coding. The selector is implemented as a lightweight Random Forest that adds no learnable parameters to the perception pipeline; the contribution is not the Random Forest itself but the channel-aware granularity policy, of which the forest is one interpretable implementation (a hand-tuned SNR-threshold rule captures much of the same effect, Section~\ref{sec:threshold}). It runs in $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms) per frame on a single CPU core, within the $100$~ms budget of a $10$~Hz LiDAR cycle, and a decision tree or logistic-regression selector reaches the same F1 at $>10\times$ lower latency (Appendix~\ref{sec:models}).
 
 The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection recovers the feature-level detection gain only when the channel and task state justify it: when the channel can carry features it lifts true end-to-end AP@0.5 by up to $+0.05$ over object-level communication, while averaged over all channel states it spends $\le17\%$ of the bandwidth of fixed $C_{16}$, and this trade-off transfers to the scene-disjoint test split and the Culver-City domain shift with a frozen selector. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule already matches the learned selector on the channel-averaged payload--F1 frontier, and the $21$ ego-side perception cues add $<0.001$ aggregate F1 over channel state alone. The granularity policy's gain over object-level communication is itself frame-selective, reaching $+0.045$ F1 ($95\%$ CI $[+0.033,+0.059]$) on hard frames under a usable channel; we attribute the limited marginal value of the perception cues to the sharp LDPC + QAM SNR cliff, which makes the estimated SNR a near-sufficient statistic. When the feature branch instead uses graceful importance-map JSCC, the estimated SNR becomes uninformative and the picture reverses: the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ F1 ($95\%$ CI $[+0.012,+0.022]$) under AWGN and $+0.015$ under Rayleigh (Section~\ref{sec:jscc_aware}). Whether task-oriented perception cues are needed is thus determined by the feature codec's channel response: superfluous under a cliff codec, necessary under a graceful one.
 
 Future work will evaluate second-party datasets (V2X-Sim, V2V4Real), per-frame JSCC-aware selectors, and multi-CAV shared-bandwidth scheduling.
+
+
+\appendices
+\section{Frame-Level F1 versus SNR}
+
+Fig.~\ref{fig:f1_snr} shows the mean realised frame F1 under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, which underpins the oracle and the selector's training label. Fixed feature-level communication collapses to near-zero F1 below $10$~dB (AWGN) and across the entire range (Rayleigh) because of the BLER cliff; \method{} stays at or above Fixed $L$ throughout.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.48\textwidth]{fig_snr_vs_f1.pdf}\hfill
+    \includegraphics[width=0.48\textwidth]{fig_f1_rayleigh.pdf}
+    \caption{Mean realised frame F1 versus SNR under AWGN (left, v1 results) and Rayleigh (right, v2 results). \method{} remains close to the channel-aware oracle and avoids the cliff of fixed feature-level communication at low SNR.}
+    \label{fig:f1_snr}
+\end{figure*}
+
+\section{Robustness to CSI Imperfection and Request Delay}\label{sec:csi_noise}
+
+Table~\ref{tab:robustness} consolidates the selector's sensitivity to the three
+practical imperfections of a deployed V2X link---a noisy SNR estimate, channel-state
+aging under mobility, and a stale (delayed) request---each detailed below and in
+Appendices~\ref{sec:vehicular} and~\ref{sec:causality}. In all three cases the realised
+F1 degrades gracefully and the loss is bounded, because whenever the channel state is
+uncertain the selector falls back to the robust object-level message $L$.
+
+\begin{table}[t]
+\centering
+\caption{Robustness summary (OPV2V validate; realised frame F1). Each row perturbs one
+deployment imperfection while holding the others ideal. Losses are bounded because an
+uncertain channel state defaults to the robust $L$ message.}
+\label{tab:robustness}
+\begin{tabular}{lll}
+\toprule
+Imperfection & Operating point & $\Delta$F1 \\
+\midrule
+\multirow{3}{*}{SNR-estimation noise $\sigma$}
+   & $\le 1$~dB              & $\ge -0.003$ \\
+   & $2$~dB                  & $-0.025$ \\
+   & $5$~dB                  & $-0.070$ \\
+\midrule
+CSI aging (Jakes, $60$~km/h) & stale by ${\sim}10$~ms & $-0.015$ (then plateaus) \\
+\midrule
+Request delay & $1$-frame-stale decision & $\ge -0.057$ (pessimistic i.i.d.\ bound) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+In any deployed V2X stack the SNR estimate $\hat\gamma_t$ is itself noisy. To
+quantify the selector's robustness to this noise we keep the true channel SNR
+fixed at $\gamma=10$~dB but corrupt the selector's input $\hat\gamma_t$ with
+zero-mean Gaussian noise of standard deviation $\sigma \in
+\{0,0.5,1,2,3,5\}$~dB and average each operating point over $10$ noise draws.
+Results are reported in Fig.~\ref{fig:csi_noise}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig_csi_noise.pdf}
+    \caption{Mean realised frame F1 versus SNR-estimation noise $\sigma$ at fixed true SNR $\gamma=10$~dB, averaged over $10$ noise realisations per point. The deployed selector is stable for $\sigma \le 1$~dB under AWGN and remains stable across the entire range under Rayleigh, because the Rayleigh policy is already saturated at $L$.}
+    \label{fig:csi_noise}
+\end{figure}
+
+Under AWGN, the selector tolerates SNR-estimation noise up to
+$\sigma\approx 1$~dB with $\le 0.003$~F1 degradation; F1 degrades by
+$0.025$ at $\sigma=2$~dB and by $0.070$ at $\sigma=5$~dB as the selector
+begins to mis-classify low-SNR frames as feature-level-eligible and pays
+a payload penalty without a corresponding F1 gain. Under Rayleigh, the
+deployed policy is saturated at $L$ across the entire SNR range
+(Section~\ref{sec:decision_ratio}), so the F1 is insensitive to the SNR
+estimate. This asymmetry has a clean operational interpretation: the
+selector needs a precise SNR estimate \emph{only} in the regime where
+feature-level communication is a viable option; in regimes where the
+oracle would refuse feature-level transmission regardless, CSI accuracy
+is irrelevant.
+
+\section{Selector Model Comparison}\label{sec:models}
+
+Table~\ref{tab:models} compares candidate selectors at batch size $1$ (the $10$~Hz
+operating point; latencies on the host of Appendix~\ref{sec:latency}). All models reach
+the same realised F1 ($0.887$--$0.889$); they trade payload, latency, and size. A
+decision tree or logistic-regression selector matches the random forest's F1 at
+$>10\times$ lower latency and $\sim100\times$ smaller size, while the random forest is
+the most payload-efficient. This confirms that model complexity is not where the
+performance comes from, and that a far lighter selector is deployable if latency is
+critical.
+
+\begin{table}[t]
+\centering
+\caption{Selector models (train: validate, eval: test). Latency is per-frame at batch
+size 1 on the experimental host; realised F1 is essentially model-independent, so the
+models trade only latency and size. The rigorous channel-averaged payload comparison
+($200$ seeds, with CIs) is in Table~\ref{tab:headline_agg}.}\label{tab:models}
+\begin{tabular}{lccc}
+\toprule
+Model & Realised F1 & Latency (ms) & Size \\
+\midrule
+Decision Tree          & 0.889 & 0.40 & 11~KB \\
+Logistic Regression    & 0.889 & 0.55 & 2~KB \\
+RBF-SVM                & 0.888 & 0.57 & 82~KB \\
+Small MLP (32,16)      & 0.889 & 0.55 & 55~KB \\
+Random Forest (400)    & 0.887 & 8.3 & 3.5~MB \\
+SNR-threshold ($\tau{=}16$) & 0.889 & $\sim0$ & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Scene-Content Subsets and Object-Level Reliability}\label{sec:subsets}
+
+\textbf{Scene subsets.} To check the selector activates features for the right reasons,
+we form top-tercile subsets by cached cues. On occlusion-proxy frames (high
+object-level false-positive count) the selector's feature-activation rate rises to
+$0.17$ versus $0.10$ on the complement and its good-channel gain to $+0.031$ vs
+$+0.013$ (validate); the sparse-LiDAR subset behaves similarly on test
+($+0.033$ vs $+0.001$). The long-range subset is inconclusive---our cue is the count
+of far LiDAR \emph{points}, a poor proxy for far \emph{objects} (which OPV2V does not
+label per-frame), and the selector does not favour features there. We report this
+rather than select a favourable proxy.
+
+\textbf{Object-level reliability.} The main results treat $L$ as perfectly reliable.
+Relaxing this---a lost $L$ falls back to the ego-only floor ($0.63$), with $L$
+block-error rate up to $10\%$ and repetition cost up to $3\times$---the
+CA-TOSG-over-$L$ gain \emph{grows} monotonically from $+0.002$ to $+0.005$ as $L$
+degrades, and the conclusion (CA-TOSG $\ge$ Fixed $L$) is unchanged: the result does
+not rest on an over-strong reliability assumption for $L$.
+
+\section{Vehicular Channels: Rician Fading and CSI Aging}\label{sec:vehicular}
+
+\textbf{Rician fading.} We extend the channel model to Rician fading (BLER obtained by
+averaging the AWGN BLER over the Rician SNR density, $K$-factor sweeping
+$0=$Rayleigh$\to\infty=$AWGN). Fig.~\ref{fig:rician} shows the selector's
+feature-activation knee moving smoothly from Rayleigh-like (stay at $L$) to AWGN-like
+(activate $C_{16}$) as the line-of-sight component strengthens---the framework spans
+the full fading-severity range without modification.
+
+\textbf{CSI aging.} Under a Jakes model at $5.9$~GHz and $60$~km/h (Doppler
+$\approx328$~Hz), the SNR estimate decorrelates within $\sim10$~ms, so a stale CSI
+estimate degrades realised F1 from $0.888$ to $\approx0.873$ ($-1.5\%$) and then
+plateaus---the loss is bounded because the selector falls back to the robust $L$ when
+CSI is unreliable. This complements the CSI-noise ablation of Appendix~\ref{sec:csi_noise}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{fig_rician.pdf}
+    \caption{Feature-level activation rate of the channel-aware oracle versus mean SNR
+    under Rician fading of increasing $K$-factor, between the Rayleigh and AWGN limits.}
+    \label{fig:rician}
+\end{figure}
+
+\section{Request Latency and Decision Causality}\label{sec:causality}
+
+The ego decides on its own frame-$t$ cues and CSI and signals a $2$-bit request, so
+sub-frame request delays do not change the decided frame. The residual risk is
+whole-frame staleness: at $10$~Hz a one-frame round trip applies the frame-$t$ decision
+to frame $t{+}1$. The oracle action changes between consecutive frames $18\%$ of the
+time at a $100$~ms delay; acting on a one-frame-stale decision costs up to
+$-0.057$ realised F1, but this is a pessimistic bound under the i.i.d.-per-frame channel
+assumption of our protocol (a one-frame-old \emph{channel} decision is near-random,
+consistent with the $\sim10$~ms decorrelation above). Because CSI and cues are computed
+locally at decision time, the architecture avoids most of this; a persistent per-round
+mode preference bounds the remainder.
+
+\section{Inference Latency}\label{sec:latency}
+
+To validate deployability we measure the per-frame inference latency of the deployed selector on a single CPU core (Intel i7 host of the experimental setup). Random Forest \texttt{predict()} is called on per-frame feature vectors with the cache warmed by $100$ priming calls and then measured over $2{,}000$ trials. At batch size $1$, the operating point relevant for a $10$~Hz online deployment, the mean per-frame latency is $\boldsymbol{52.8 \pm 5.7}$~ms with median $54.7$~ms, $95$th-percentile $59.1$~ms, and $99$th-percentile $69.5$~ms. The full $\mathrm{P99}$ latency therefore sits at $69$~ms, leaving a $31$~ms margin within the $100$~ms cycle of a $10$~Hz LiDAR sensor. At batch size $100$ (an offline batch-evaluation operating point), per-sample latency drops to $0.47 \pm 0.03$~ms, indicating that the bulk of the per-call cost at batch $1$ is in tree-traversal dispatch rather than per-feature computation; ahead-of-time compilation of the tree ensemble (e.g., via ONNX) would close this gap if a stricter latency budget were required, but is not necessary at $10$~Hz.
+
+\section{Design Ablation: Action-Space Cliff Matching}\label{sec:negative}
+
+An empirical finding from the $3$-way action set $\mathcal{S}=\{L,C_{16},C_{256}\}$ is that the channel-aware oracle never selects the $C_{256}$ action: $\rho_{C_{256}}^\star = 0.0\%$ across both channels and all SNRs in the evaluated range. We interpret this as an intentional ablation of the action-space design: $C_{16}$ and $C_{256}$ as defined here share the \emph{same} LDPC rate $1/2$ but trade modulation order against BLER, and the resulting cliffs are not rate-matched. Under LDPC 1/2 with AWGN, $\mathrm{BLER}_{256}(\gamma) > 0.5$ for all $\gamma \le 16$~dB, whereas $\mathrm{BLER}_{16}(\gamma) < 0.05$ already at $\gamma = 12$~dB (Fig.~\ref{fig:bler}); by the time 256-QAM is reliable, 16-QAM is already saturated, and Eq.~\eqref{eq:lagrangian_oracle} prefers the latter at every SNR.
+
+The methodological implication is constructive. A truly useful third action would have to fall between $C_{16}$ and $L$ on \emph{both} the rate and the cliff-SNR axes simultaneously, which the LDPC 1/2 + 256-QAM pair fails to satisfy. A natural rate-matched extension that we leave to follow-up work is a $C_{256}^{3/4}$ branch combining 256-QAM with a higher LDPC rate (e.g., $3/4$ or $5/6$); the rate increase compensates for the modulation order's higher cliff, and the resulting branch should be non-dominated above approximately $18$~dB AWGN. Our framework accommodates this extension without retraining the perception backbone: only the BLER table and the action set need updating, and the selector retrains in under one minute on the existing $1{,}980$-frame dataset.
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
