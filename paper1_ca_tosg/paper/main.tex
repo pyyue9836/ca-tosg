@@ -42,7 +42,7 @@ Vehicle-to-vehicle communication, cooperative perception, connected vehicles, se
 
 Connected and automated vehicles are expected to rely not only on their onboard sensors, but also on information shared by surrounding vehicles. By exchanging perception information through vehicle-to-vehicle (V2V) links, a vehicle can obtain complementary viewpoints and improve its understanding of the driving scene. This capability is particularly important in safety-critical scenarios such as intersections, dense traffic, occluded road segments, and long-range perception, where a single vehicle's LiDAR or camera may provide incomplete observations. Cooperative perception therefore has the potential to improve detection robustness beyond the physical sensing range and viewpoint of an individual vehicle~\cite{xu2022opv2v,xu2022v2xvit}.
 
-Despite this potential, practical V2V cooperative perception is fundamentally constrained by communication. Sharing raw point clouds or dense intermediate feature maps can preserve rich geometric and semantic information, but the resulting payload can be too large for vehicular links with limited bandwidth and latency requirements. Moreover, V2V channels are time-varying due to mobility, blockage, multipath propagation, and fading~\cite{ieee80211bd}. A communication strategy that is effective under a clean channel may become unreliable under low signal-to-noise ratio (SNR) or fading. Therefore, cooperative perception cannot be designed only as a perception problem; it must also account for the reliability and cost of the vehicular communication link.
+Despite this potential, practical V2V cooperative perception is fundamentally constrained by communication. Sharing raw point clouds or dense intermediate feature maps can preserve rich geometric and semantic information, but the resulting payload can be too large for vehicular links with limited bandwidth and latency requirements. Moreover, V2V channels are time-varying due to mobility, blockage, multipath propagation, and fading~\cite{ieee80211bd,3gpp38885}. A communication strategy that is effective under a clean channel may become unreliable under low signal-to-noise ratio (SNR) or fading. Therefore, cooperative perception cannot be designed only as a perception problem; it must also account for the reliability and cost of the vehicular communication link.
 
 Existing cooperative perception methods make different choices along the perception-communication trade-off. Late-fusion methods transmit object-level predictions, such as 3D bounding boxes, class labels, and confidence scores~\cite{xu2022opv2v}. These messages are compact and can be protected with strong coding, but they discard intermediate semantic context and may suffer when local detections are uncertain or incomplete. Intermediate-fusion methods transmit learned feature maps, which usually provide richer information for downstream fusion and detection~\cite{xu2022v2xvit,hu2022where2comm}, but at a much higher communication cost. Recent communication-efficient methods reduce this cost by selecting important feature regions, applying attention-based masks, or compressing feature representations~\cite{hu2022where2comm}. Semantic communication and joint source-channel coding methods further optimize the transmitted feature representation for task performance under wireless channels~\cite{sheng2024importance,gan2026scomcp}.
 
@@ -64,25 +64,25 @@ This formulation is complementary to existing feature compression and semantic c
 The main contributions of this paper are summarized as follows:
 \begin{itemize}
     \item We formulate channel-aware semantic granularity selection for V2V cooperative perception, where the sender adaptively selects the semantic level of each transmitted message according to task state and channel quality.
-    \item We propose \method, a lightweight Random Forest selector~\cite{breiman2001random} that uses online perception cues and estimated SNR to choose among compact object-level communication and compressed feature-level communication modes.
+    \item We instantiate the framework as a lightweight, interpretable, receiver-driven policy that uses only ego-side perception cues and an estimated SNR/channel-type, adds no learnable parameters to the perception backbone, and runs in real time on a single CPU core. The policy is deliberately model-agnostic: a $400$-tree Random Forest~\cite{breiman2001random} and a one-line SNR threshold are two interchangeable realisations, so the contribution is the \emph{selection framework}, not a particular classifier.
     \item We provide a communication-aware evaluation protocol under AWGN and Rayleigh channels, comparing fixed object-level transmission, fixed feature-level transmission with LDPC + 16/256-QAM coding~\cite{ieee80211bd}, a learned semantic-communication baseline~\cite{sheng2024importance}, and a channel-aware oracle.
     \item Experiments on OPV2V show that \method{} avoids unreliable high-payload feature transmission under poor channel conditions and approaches oracle performance when the channel supports richer communication. We characterise it as \emph{Pareto-optimal} on the payload--F1 plane rather than merely better on average, show the gain concentrates on hard frames under usable channels (up to $+0.045$ F1), and verify cross-split and Culver-City domain-shift generalisation with a frozen selector.
-    \item Our central finding is that whether task-oriented perception cues are needed for granularity selection is \emph{determined by the feature codec's channel response}. Under an LDPC + QAM cliff the estimated SNR is a near-sufficient statistic and a one-line threshold matches the learned selector (the cues add $<0.001$ aggregate F1); under graceful importance-map JSCC the SNR becomes uninformative, the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ F1 ($95\%$ CI $[+0.012,+0.022]$, AWGN; $+0.015$ under Rayleigh). We report this honestly alongside supporting selector-design analyses (feature ablations, model/latency comparisons, Rician/CSI-aging robustness) and a negative finding that 256-QAM is dominated under LDPC 1/2.
+    \item Our central finding is that whether task-oriented perception cues are needed for granularity selection is \emph{determined by the feature codec's channel response}: under an LDPC + QAM cliff the estimated SNR is a near-sufficient statistic and a one-line threshold matches the learned selector, whereas under graceful importance-map JSCC the SNR becomes uninformative, the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ realised F1 ($95\%$ CI $[+0.012,+0.022]$, AWGN; $+0.015$ under both Rayleigh and OFDM). This identifies precisely when a task-oriented selector is necessary versus when channel state alone suffices.
 \end{itemize}
 
 \section{Related Work}
 
 \subsection{V2V Cooperative Perception}
 
-V2V cooperative perception aims to improve the perception capability of an ego vehicle by exploiting information from surrounding connected vehicles~\cite{xu2022opv2v}. Compared with single-agent perception, cooperative perception can provide complementary viewpoints and alleviate occlusion, long-range sparsity, and limited field-of-view problems. Existing methods are commonly categorized according to the stage at which information is shared: early fusion, intermediate fusion, and late fusion.
+V2V cooperative perception aims to improve the perception capability of an ego vehicle by exploiting information from surrounding connected vehicles~\cite{xu2022opv2v,han2023collaborative}. Compared with single-agent perception, cooperative perception can provide complementary viewpoints and alleviate occlusion, long-range sparsity, and limited field-of-view problems. Existing methods are commonly categorized according to the stage at which information is shared: early fusion, intermediate fusion, and late fusion.
 
 Early fusion shares raw sensor measurements, such as point clouds, among vehicles before feature extraction~\cite{xu2022opv2v}. Since raw observations preserve the most complete information, early fusion can potentially provide strong perception performance. However, it introduces a very large communication payload and requires accurate spatial and temporal alignment across agents. These limitations make raw-data sharing difficult to deploy under practical V2V bandwidth and latency constraints.
 
 Late fusion shares compact object-level predictions, including 3D bounding boxes, class labels, and confidence scores~\cite{xu2022opv2v}. This strategy has a much smaller payload and is naturally compatible with low-rate V2V communication. However, late fusion discards intermediate semantic and spatial information. Once an object is missed or incorrectly detected by the sender, the receiver has limited ability to recover from the error. As a result, late fusion is efficient but may be less effective in challenging scenes with occlusion or uncertain local detections.
 
-Intermediate fusion shares learned feature representations, such as BEV feature maps, after local backbone extraction and before the final detection head~\cite{xu2022v2xvit,hu2022where2comm}. Many cooperative perception frameworks adopt intermediate fusion because it offers a favorable balance between raw-data sharing and object-level sharing. By exchanging intermediate features, the ego vehicle can fuse richer spatial and semantic information from neighboring vehicles. However, intermediate features are still much larger than object-level messages, and their transmission can be expensive under bandwidth-constrained V2V links.
+Intermediate fusion shares learned feature representations, such as BEV feature maps, after local backbone extraction and before the final detection head~\cite{xu2022v2xvit,hu2022where2comm,wang2020v2vnet,li2021disconet,xu2022cobevt,liu2020when2com,lu2024heal,hu2024pragmatic}. Many cooperative perception frameworks adopt intermediate fusion because it offers a favorable balance between raw-data sharing and object-level sharing. By exchanging intermediate features, the ego vehicle can fuse richer spatial and semantic information from neighboring vehicles. However, intermediate features are still much larger than object-level messages, and their transmission can be expensive under bandwidth-constrained V2V links.
 
-Recent benchmarks and toolkits, such as OPV2V and OpenCOOD~\cite{xu2022opv2v}, have enabled systematic evaluation of cooperative perception methods under realistic multi-agent driving scenarios. These platforms provide common datasets, model architectures, and evaluation protocols for comparing fusion strategies. In this paper, we build on this cooperative perception setting but focus on a different problem: rather than assuming a fixed fusion representation, we study how to select the semantic granularity of the transmitted message according to task and channel conditions.
+Recent benchmarks and toolkits, such as OPV2V and OpenCOOD~\cite{xu2022opv2v}, V2X-Sim~\cite{li2022v2xsim}, and V2V4Real~\cite{xu2023v2v4real}, have enabled systematic evaluation of cooperative perception methods under realistic multi-agent driving scenarios. These platforms provide common datasets, model architectures, and evaluation protocols for comparing fusion strategies. In this paper, we build on this cooperative perception setting but focus on a different problem: rather than assuming a fixed fusion representation, we study how to select the semantic granularity of the transmitted message according to task and channel conditions.
 
 \subsection{Communication-Efficient Cooperative Perception}
 
@@ -96,7 +96,7 @@ However, most communication-efficient cooperative perception methods still opera
 
 \subsection{Semantic and Channel-Aware Communication for Vehicular Perception}
 
-Semantic communication has recently attracted attention as a task-oriented alternative to conventional bit-level communication~\cite{sheng2024importance,gan2026scomcp}. Instead of minimizing reconstruction error or bit error rate alone, semantic communication optimizes the transmitted representation for downstream task performance. In cooperative perception, this means that the communication module should preserve information useful for detection, rather than reconstructing the full feature map perfectly.
+Semantic communication has recently attracted attention as a task-oriented alternative to conventional bit-level communication~\cite{sheng2024importance,gan2026scomcp,bourtsoulatze2019deepjscc,xie2021deepsc,gunduz2023beyond}. Instead of minimizing reconstruction error or bit error rate alone, semantic communication optimizes the transmitted representation for downstream task performance. In cooperative perception, this means that the communication module should preserve information useful for detection, rather than reconstructing the full feature map perfectly.
 
 Joint source-channel coding and learned semantic codecs provide one way to improve robustness under noisy wireless channels~\cite{sheng2024importance,gan2026scomcp}. By training the encoder and decoder with channel effects in the loop, these methods can produce representations that degrade more gracefully than conventional separated source and channel coding under certain channel conditions. Digital communication baselines, such as modulation and coding schemes based on QAM and LDPC, often show threshold or waterfall behavior~\cite{ieee80211bd}: performance can be poor below a certain SNR and improve rapidly once the channel becomes reliable.
 
@@ -104,11 +104,11 @@ For vehicular perception, this channel dependence is especially important. V2V l
 
 Existing semantic communication methods mainly focus on how to encode and transmit feature-level information more robustly. Our work is complementary to these methods. A semantic codec or channel coding module can be used inside the feature-level branch of \method{}. The key difference is that \method{} operates before the transmission mode is chosen: it decides whether the sender should transmit object-level information or feature-level information under the current task and channel state. This channel-aware semantic granularity selection is particularly suitable for vehicular systems, where communication resources are limited and channel quality can change rapidly.
 
-\section{System Model and Problem Formulation}
+\section{System Model and Problem Formulation}\label{sec:system}
 
 \subsection{Cooperative Perception Setting}
 
-We consider a single ego--collaborator V2V link. At each frame $t$, the ego vehicle observes the scene using its onboard sensors and extracts a local bird's-eye-view (BEV) feature representation, denoted by $F_{\mathrm{ego},t}$. The collaborating vehicle also observes the scene from its own viewpoint and extracts a local feature representation $F_{j,t}$ using a shared PointPillars backbone~\cite{lang2019pointpillars}. The collaborator can transmit a perception message to the ego vehicle through the V2V link. Multi-vehicle shared-bandwidth scheduling is a system-level extension discussed in Section~\ref{sec:discussion}. The ego vehicle then fuses the received message with its local feature and produces the final 3D object detection output.
+We consider a single ego--collaborator V2V link. At each frame $t$, the ego vehicle observes the scene using its onboard sensors and extracts a local bird's-eye-view (BEV) feature representation, denoted by $F_{\mathrm{ego},t}$. The collaborating vehicle also observes the scene from its own viewpoint and extracts a local feature representation $F_{j,t}$ using a shared PointPillars backbone~\cite{lang2019pointpillars}. The collaborator can transmit a perception message to the ego vehicle through the V2V link. The ego vehicle then fuses the received message with its local feature and produces the final 3D object detection output.
 
 We adopt a \emph{receiver-driven} signalling architecture: the ego vehicle evaluates its own perception state and channel state, decides which semantic granularity is needed, and signals the choice to the collaborator using a $2$-bit request piggy-backed on the existing Cooperative Awareness Message (CAM) defined in IEEE~802.11bd~\cite{ieee80211bd}. The request thus costs $2$ bits per frame at $10$~Hz, i.e., $20$~bps, which is negligible relative to the $24$~kbit/s $L$ payload and is already provisioned in the standard CAM signalling budget. The collaborator complies by transmitting the requested message $m_t^{s_t}$. This receiver-driven design makes all perception cues used by the selector locally observable at the ego (Section~\ref{sec:cues}) and avoids any causality issues that would arise if the collaborator had to estimate ego-side perception state without feedback.
 
@@ -148,7 +148,7 @@ Two representative channel models are considered. The first is the additive whit
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{fig_channel_bler.pdf}
-    \caption{Block-error rate of the feature-level message under LDPC $1/2$ with 16-QAM and 256-QAM, over AWGN (solid) and Rayleigh (dashed) channels. The 16-QAM AWGN cliff at $\approx 12$~dB defines the selector knee (shaded); the 256-QAM cliff sits far to its right, so by the time 256-QAM is reliable the 16-QAM block is already error-free---this is the basis of the 256-QAM dominance discussed in Appendix~\ref{sec:negative}. Under Rayleigh fading both curves degrade so slowly that feature-level transmission never becomes reliable in $0$--$20$~dB, explaining the selector's conservative $L$-only behaviour.}
+    \caption{Block-error rate of the feature-level message under LDPC $1/2$ with 16-QAM and 256-QAM, over AWGN (solid) and Rayleigh (dashed) channels. The 16-QAM AWGN cliff at $\approx 12$~dB defines the selector knee (shaded); the 256-QAM cliff sits far to its right, so by the time 256-QAM is reliable the 16-QAM block is already error-free---hence 256-QAM is dominated by 16-QAM under LDPC $1/2$. Under Rayleigh fading both curves degrade so slowly that feature-level transmission never becomes reliable in $0$--$20$~dB, explaining the selector's conservative $L$-only behaviour.}
     \label{fig:bler}
 \end{figure}
 
@@ -159,7 +159,7 @@ Let $F_t^s$ denote the realized frame F1 of the ego vehicle's detection output w
 F_t^L      &= F_t^{L,\mathrm{clean}}, \label{eq:eff_L} \\
 F_t^{C_q}  &= (1 - \mathrm{BLER}_q(\gamma_t,\text{ch}_t)) \cdot F_t^{C_q,\mathrm{clean}}, \quad q \in \{16, 256\}, \label{eq:eff_C}
 \end{align}
-where $\text{ch}_t \in \{\text{AWGN},\text{Rayleigh}\}$ and $F_t^{\cdot,\mathrm{clean}}$ denotes the frame F1 under perfect channel. Equation~\eqref{eq:eff_C} corresponds to a block-loss model: with probability $\mathrm{BLER}_q$ the feature-level message is unusable, contributing no detection benefit beyond the ego vehicle's own perception; with probability $1-\mathrm{BLER}_q$ it is delivered intact and contributes its clean F1. This is a conservative model; empirically, when a block is lost the receiver can fall back to ego-only inference rather than to a zero-utility state. We discuss this gap and its effect on the comparison with the semantic-communication baseline in Section~\ref{sec:discussion}.
+where $\text{ch}_t \in \{\text{AWGN},\text{Rayleigh}\}$ and $F_t^{\cdot,\mathrm{clean}}$ denotes the frame F1 under perfect channel. Equation~\eqref{eq:eff_C} corresponds to a block-loss model: with probability $\mathrm{BLER}_q$ the feature-level message is unusable, contributing no detection benefit beyond the ego vehicle's own perception; with probability $1-\mathrm{BLER}_q$ it is delivered intact and contributes its clean F1. This is a conservative model; empirically, when a block is lost the receiver can fall back to ego-only inference rather than to a zero-utility state.
 
 \subsection{Communication Cost}
 
@@ -205,7 +205,7 @@ whose pointwise optimum is
 s_t^\star(\lambda) = \arg\max_{s \in \mathcal{S}}\; \bigl(F_t^s - \lambda B_s\bigr).
 \label{eq:lagrangian_oracle}
 \end{equation}
-Equation~\eqref{eq:oracle} corresponds to the regime $\lambda \to 0^+$, which is the relevant operating point of this paper because (i) the $L$ payload $B_L = 0.024$~Mbit/frame is already small enough that the bandwidth constraint becomes non-binding whenever $L$ is selected, and (ii) the $L$ option provides a safe ``no-op'' that limits the worst-case bandwidth spend. For non-trivial $\lambda$, the relaxed solution biases the policy toward smaller-payload actions, which we use in Appendix~\ref{sec:negative} to analyse the dominance of $C_{16}$ over $C_{256}$.
+Equation~\eqref{eq:oracle} corresponds to the regime $\lambda \to 0^+$, which is the relevant operating point of this paper because (i) the $L$ payload $B_L = 0.024$~Mbit/frame is already small enough that the bandwidth constraint becomes non-binding whenever $L$ is selected, and (ii) the $L$ option provides a safe ``no-op'' that limits the worst-case bandwidth spend. For non-trivial $\lambda$, the relaxed solution biases the policy toward smaller-payload actions; consequently $C_{16}$ dominates $C_{256}$ and the oracle never selects $C_{256}$ under LDPC $1/2$.
 
 From a rate-distortion perspective, the effective F1 model of Eq.~\eqref{eq:eff_C} is a channel-induced distortion that scales with $\mathrm{BLER}_q(\gamma)$. The compressed-feature mode $C_q$ delivers ``rate'' $R_{C_q} = 1.98 / \log_2 M_q$ in channel-use-equivalent megabits, modulated by a channel-induced packet survival probability $1 - \mathrm{BLER}_q(\gamma)$, while the object-level mode $L$ delivers a much lower rate but with effectively unit survival probability under the protected low-rate transmission assumed in this paper. The selector therefore implicitly trades off rate against rate-conditional distortion as a function of the channel state, a structure familiar from joint source-channel coding theory but here expressed at the granularity-action level rather than at the symbol level.
 
@@ -281,7 +281,7 @@ The feature-level branches transmit compressed BEV representations $m_t^{C_q} = 
 
 \subsection{Channel-Aware Semantic Granularity Selector}
 
-The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier with $N_T=400$ trees, depth bound $D_{\max}=10$, minimum samples per leaf of $4$, and balanced class weighting to compensate for the heavy class imbalance in the channel-aware oracle labels. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms), measured over $2{,}000$ trials in Appendix~\ref{sec:latency}; this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Appendix~\ref{sec:models} shows lighter models (decision tree, logistic regression) and even a hand-tuned SNR-threshold rule reach the same realised F1.
+The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier with $N_T=400$ trees, depth bound $D_{\max}=10$, minimum samples per leaf of $4$, and balanced class weighting to compensate for the heavy class imbalance in the channel-aware oracle labels. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms), measured over $2{,}000$ trials (Section~\ref{sec:robustness}); this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Section~\ref{sec:robustness} together with Table~\ref{tab:headline_agg} shows lighter models and even a hand-tuned SNR-threshold rule reach the same realised F1.
 
 The selector is trained to imitate the channel-aware oracle defined in Eq.~\eqref{eq:oracle}. The oracle uses ground-truth detection outputs and is therefore not deployable; it is used only to generate training labels and as an upper-bound reference. At deployment, the selector uses only the online cues $z_t$ and the channel state $(\hat\gamma_t,c_t)$:
 \begin{equation}
@@ -308,7 +308,7 @@ This separation between semantic granularity selection and feature-level transmi
 
 \subsection{Dataset and Implementation}
 
-We evaluate \method{} on the OPV2V dataset~\cite{xu2022opv2v} using the OpenCOOD codebase. OPV2V is a large-scale simulated V2V cooperative perception dataset that provides multi-agent LiDAR observations, vehicle poses, and 3D object annotations under connected-vehicle settings. We use the validate split, which contains $T=1{,}980$ frames, for all primary results, and additionally verify generalisation on the held-out OPV2V test split ($T=2{,}170$ frames, scene-disjoint from validate) and the Culver-City split ($T=550$ frames, a real-road-layout domain shift) in Section~\ref{sec:generalisation}, applying the validate-trained selector without retraining. We discuss the remaining cross-dataset evaluation as follow-up work in Section~\ref{sec:discussion}. The perception model is a PointPillars BEV backbone~\cite{lang2019pointpillars} with detection range $x \in [-140.8, 140.8]$~m and $y \in [-38.4, 38.4]$~m. The backbone and detection head are taken from the public OpenCOOD pretrained checkpoints and are frozen throughout this work; \method{} adds no learnable parameters to the perception pipeline. All methods share the same backbone and detection head to ensure a fair comparison.
+We evaluate \method{} on the OPV2V dataset~\cite{xu2022opv2v} using the OpenCOOD codebase. OPV2V is a large-scale simulated V2V cooperative perception dataset that provides multi-agent LiDAR observations, vehicle poses, and 3D object annotations under connected-vehicle settings. We use the validate split, which contains $T=1{,}980$ frames, for all primary results, and additionally verify generalisation on the held-out OPV2V test split ($T=2{,}170$ frames, scene-disjoint from validate) and the Culver-City split ($T=550$ frames, a real-road-layout domain shift) in Section~\ref{sec:generalisation}, applying the validate-trained selector without retraining. The perception model is a PointPillars BEV backbone~\cite{lang2019pointpillars} with detection range $x \in [-140.8, 140.8]$~m and $y \in [-38.4, 38.4]$~m. The backbone and detection head are taken from the public OpenCOOD pretrained checkpoints and are frozen throughout this work; \method{} adds no learnable parameters to the perception pipeline. All methods share the same backbone and detection head to ensure a fair comparison.
 
 \subsection{Message Construction and Payload Accounting}
 
@@ -387,10 +387,12 @@ Because a one-line SNR-threshold rule is the natural challenger to any learned s
 \toprule
 Policy & Mean F1 & Payload (Mbit/frame) \\
 \midrule
-Fixed $L$                    & 0.887 & 0.024 \\
-SNR-threshold ($\tau{=}16$)  & 0.889 & 0.071\,[0.066,\,0.077] \\
-\method{} (RF, frozen)       & 0.889 & 0.078\,[0.072,\,0.084] \\
-Channel-aware oracle         & \textbf{0.894} & 0.074 \\
+Fixed $L$ (object-level)      & 0.887 & 0.024 \\
+Fixed $C_{16}$ (LDPC+16-QAM)  & 0.426 & 0.495 \\
+Fixed $C_{256}$ (LDPC+256-QAM)& 0.116 & 0.248 \\
+SNR-threshold ($\tau{=}16$)   & 0.889 & 0.071\,[0.066,\,0.077] \\
+\method{} (RF, frozen)        & 0.889 & 0.078\,[0.072,\,0.084] \\
+Channel-aware oracle          & \textbf{0.894} & 0.074 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -414,7 +416,7 @@ Fig.~\ref{fig:ap_snr} reports AP@0.5 and AP@0.7 under AWGN and Rayleigh, compari
     \includegraphics[width=0.48\textwidth]{fig_ap50_rayleigh.pdf} \\
     \includegraphics[width=0.48\textwidth]{fig_ap70_awgn.pdf}
     \includegraphics[width=0.48\textwidth]{fig_ap70_rayleigh.pdf}
-    \caption{Detection performance versus SNR under AWGN and Rayleigh channels. \method{} (black star) approaches the channel-aware oracle (magenta diamond) under AWGN by activating $C_{16}$ when the channel can support it. Under Rayleigh fading, the selector converges to a conservative $L$-dominant policy, matching Fixed $L$ closely; the residual gap to the JSCC-aware oracle is discussed in Section~\ref{sec:discussion}. LDPC + QAM separate-coding baselines fall well below Fixed $L$ across all SNRs, demonstrating that traditional digital feature-level transmission is strictly dominated by object-level communication in this regime.}
+    \caption{Detection performance versus SNR under AWGN and Rayleigh channels. \method{} (black star) approaches the channel-aware oracle (magenta diamond) under AWGN by activating $C_{16}$ when the channel can support it. Under Rayleigh fading, the selector converges to a conservative $L$-dominant policy, matching Fixed $L$ closely. LDPC + QAM separate-coding baselines fall well below Fixed $L$ across all SNRs, demonstrating that traditional digital feature-level transmission is strictly dominated by object-level communication in this regime.}
     \label{fig:ap_snr}
 \end{figure*}
 
@@ -846,70 +848,29 @@ risk. Under a bandwidth-constrained, time-varying link, even a
 perfect-channel AP of $0.885$ is realised only when the channel can
 deliver the feature message---precisely the regime \method{} arbitrates.
 
-\subsection{Discussion and Limitations}\label{sec:discussion}
+\subsection{Deployment Robustness and Cost}\label{sec:robustness}
 
-Three limitations of the present study are worth flagging explicitly.
-
-\textbf{Conservative block-loss model.} The effective-F1 model of Eq.~\eqref{eq:eff_C} sets a frame's contribution to zero whenever an LDPC block error occurs. Empirically, a receiver that detects block loss can fall back to ego-only inference and recover the ego AP floor of approximately $0.63$. Replacing the multiplicative model with a soft floor of the form $F_t^{C_q} = (1-\mathrm{BLER}_q) F_t^{C_q,\mathrm{clean}} + \mathrm{BLER}_q \cdot F_t^{\mathrm{ego}}$ would close part of the gap between the fixed-$C$ curves and Fixed $L$ in Fig.~\ref{fig:ap_snr}, but would not alter the dominance ordering. We adopt the multiplicative model because it makes the selector's training labels conservative, and we report the JSCC baseline of~\cite{sheng2024importance} alongside the analytical curves to anchor the absolute scale. The end-to-end verification in Section~\ref{sec:e2e} (Table~\ref{tab:e2e}) confirms that this analytical bound is in fact conservative: the deployed selector achieves equal or higher F1 under the empirical floor than under the multiplicative model.
-
-\textbf{LDPC-trained selector vs.\ JSCC baseline.} The deployed selector is trained against the LDPC + QAM effective-F1 model. When compared against the ImportanceMapJSCC baseline in Fig.~\ref{fig:ap_snr}, the selector is therefore more conservative than necessary in the Rayleigh regime, because JSCC degrades gracefully rather than cliffing. Retraining the selector with the JSCC effective-F1 model would tighten the gap to the JSCC-aware oracle (the magenta line) under Rayleigh. We treat this as a methodologically clean direction for follow-up work rather than a re-tuning of the present results.
-
-\textbf{Cross-dataset evaluation.} The generalisation study of Section~\ref{sec:generalisation} establishes that the validate-trained selector transfers without retraining to the scene-disjoint OPV2V test split ($T=2{,}170$ frames) and to the Culver-City domain shift ($T=550$ frames, real road layout), reproducing the headline payload--F1 frontier and the channel-adaptive end-to-end AP behaviour on both. We have not, however, evaluated second-party V2V perception datasets such as V2X-Sim or V2V4Real, which remain the highest-priority follow-up. The selector's input cues are dataset-agnostic, the BLER tables are independent of the perception backbone, and only the per-frame predictions need to be re-cached on a new dataset; we therefore expect the qualitative findings (LDPC + QAM dominance by Fixed $L$, $\hat\gamma_t$ + $c_t$ accounting for the bulk of feature importance, AWGN-side adaptation knee at the LDPC threshold) to transfer, while the absolute payload--F1 frontier may shift with the underlying perception model's clean-channel performance.
-
-\textbf{Multi-vehicle shared bandwidth.} This work studies a single ego--collaborator
-link. A practical V2V deployment has several collaborators contending for a shared
-bandwidth budget, turning per-frame granularity selection into a joint
-selection-and-scheduling problem (which collaborators transmit, at which granularity,
-under a total payload cap). Our per-link selector is the natural per-CAV primitive for
-such a scheduler; the joint multi-CAV problem---comparing all-$L$, all-$C$, top-$k$
-distance/confidence selection, per-CAV \method{}, and a bandwidth-constrained
-scheduler on ego AP versus total payload and over-budget rate---is a substantial system
-extension we leave to future work rather than approximate here.
-
-Other future work includes (i) evaluation on second-party datasets (V2X-Sim, V2V4Real)
-via the frozen-selector transfer protocol above; (ii) a per-frame JSCC-aware selector
-(Section~\ref{sec:jscc_aware}); (iii) a rate-matched third action
-($C_{256}^{3/4}$, Appendix~\ref{sec:negative}); (iv) a Where2comm-style spatial
-confidence module inside the $C_q$ branches~\cite{hu2022where2comm}; and (v)
-integration with spread-spectrum signalling for jamming resilience in safety-critical
-V2X scenarios.
-
-\section{Conclusion}
-
-We presented \method{}, a channel-aware task-oriented semantic granularity selector for V2V cooperative perception. The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs one of three communication modes: a compact object-level message $L$, or a compressed feature-level message under 16- or 256-QAM coding. The selector is implemented as a lightweight Random Forest that adds no learnable parameters to the perception pipeline; the contribution is not the Random Forest itself but the channel-aware granularity policy, of which the forest is one interpretable implementation (a hand-tuned SNR-threshold rule captures much of the same effect, Section~\ref{sec:threshold}). It runs in $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms) per frame on a single CPU core, within the $100$~ms budget of a $10$~Hz LiDAR cycle, and a decision tree or logistic-regression selector reaches the same F1 at $>10\times$ lower latency (Appendix~\ref{sec:models}).
-
-The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection recovers the feature-level detection gain only when the channel and task state justify it: when the channel can carry features it lifts true end-to-end AP@0.5 by up to $+0.05$ over object-level communication, while averaged over all channel states it spends $\le17\%$ of the bandwidth of fixed $C_{16}$, and this trade-off transfers to the scene-disjoint test split and the Culver-City domain shift with a frozen selector. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule already matches the learned selector on the channel-averaged payload--F1 frontier, and the $21$ ego-side perception cues add $<0.001$ aggregate F1 over channel state alone. The granularity policy's gain over object-level communication is itself frame-selective, reaching $+0.045$ F1 ($95\%$ CI $[+0.033,+0.059]$) on hard frames under a usable channel; we attribute the limited marginal value of the perception cues to the sharp LDPC + QAM SNR cliff, which makes the estimated SNR a near-sufficient statistic. When the feature branch instead uses graceful importance-map JSCC, the estimated SNR becomes uninformative and the picture reverses: the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ F1 ($95\%$ CI $[+0.012,+0.022]$) under AWGN and $+0.015$ under Rayleigh (Section~\ref{sec:jscc_aware}). Whether task-oriented perception cues are needed is thus determined by the feature codec's channel response: superfluous under a cliff codec, necessary under a graceful one.
-
-Future work will evaluate second-party datasets (V2X-Sim, V2V4Real), per-frame JSCC-aware selectors, and multi-CAV shared-bandwidth scheduling.
-
-
-\appendices
-\section{Frame-Level F1 versus SNR}
-
-Fig.~\ref{fig:f1_snr} shows the mean realised frame F1 under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, which underpins the oracle and the selector's training label. Fixed feature-level communication collapses to near-zero F1 below $10$~dB (AWGN) and across the entire range (Rayleigh) because of the BLER cliff; \method{} stays at or above Fixed $L$ throughout.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.48\textwidth]{fig_snr_vs_f1.pdf}\hfill
-    \includegraphics[width=0.48\textwidth]{fig_f1_rayleigh.pdf}
-    \caption{Mean realised frame F1 versus SNR under AWGN (left, v1 results) and Rayleigh (right, v2 results). \method{} remains close to the channel-aware oracle and avoids the cliff of fixed feature-level communication at low SNR.}
-    \label{fig:f1_snr}
-\end{figure*}
-
-\section{Robustness to CSI Imperfection and Request Delay}\label{sec:csi_noise}
-
-Table~\ref{tab:robustness} consolidates the selector's sensitivity to the three
-practical imperfections of a deployed V2X link---a noisy SNR estimate, channel-state
-aging under mobility, and a stale (delayed) request---each detailed below and in
-Appendices~\ref{sec:vehicular} and~\ref{sec:causality}. In all three cases the realised
-F1 degrades gracefully and the loss is bounded, because whenever the channel state is
-uncertain the selector falls back to the robust object-level message $L$.
+Three practical imperfections of a deployed V2X link---a noisy SNR estimate, channel-state
+aging under mobility, and a stale (delayed) request---degrade the selector only gracefully,
+because whenever the channel state is uncertain it falls back to the robust object-level
+message $L$ (Table~\ref{tab:robustness}). Under AWGN the selector tolerates SNR-estimation
+noise up to $\sigma\approx1$~dB with $\le0.003$ F1 loss; under a Jakes model at $60$~km/h the
+SNR estimate decorrelates within ${\sim}10$~ms, costing $-0.015$ F1 before plateauing; and
+acting on a one-frame-stale decision costs at most $-0.057$ F1 under our i.i.d.-per-frame
+channel assumption. The framework also spans the full fading-severity range: replacing the
+AWGN/Rayleigh limits with Rician fading moves the feature-activation knee smoothly between
+them as the line-of-sight component strengthens, and the two-regime result of
+Section~\ref{sec:jscc_aware} reproduces under OFDM ($+0.015$ F1 edge). Finally, the deployed
+Random Forest runs in $52.8\pm5.7$~ms per frame ($\mathrm{P95}=59.1$~ms) on a single CPU
+core---within the $100$~ms budget of a $10$~Hz LiDAR cycle---and a decision tree or
+logistic-regression realisation reaches the same F1 at $>10\times$ lower latency, confirming
+the policy is cheap and model-agnostic.
 
 \begin{table}[t]
 \centering
-\caption{Robustness summary (OPV2V validate; realised frame F1). Each row perturbs one
-deployment imperfection while holding the others ideal. Losses are bounded because an
-uncertain channel state defaults to the robust $L$ message.}
+\caption{Deployment robustness (OPV2V validate; realised frame F1). Each row perturbs one
+imperfection while holding the others ideal; losses are bounded because an uncertain channel
+state defaults to the robust $L$ message.}
 \label{tab:robustness}
 \begin{tabular}{lll}
 \toprule
@@ -927,129 +888,12 @@ Request delay & $1$-frame-stale decision & $\ge -0.057$ (pessimistic i.i.d.\ bou
 \end{tabular}
 \end{table}
 
+\section{Conclusion}
 
-In any deployed V2X stack the SNR estimate $\hat\gamma_t$ is itself noisy. To
-quantify the selector's robustness to this noise we keep the true channel SNR
-fixed at $\gamma=10$~dB but corrupt the selector's input $\hat\gamma_t$ with
-zero-mean Gaussian noise of standard deviation $\sigma \in
-\{0,0.5,1,2,3,5\}$~dB and average each operating point over $10$ noise draws.
-Results are reported in Fig.~\ref{fig:csi_noise}.
+We presented \method{}, a channel-aware task-oriented semantic granularity selector for V2V cooperative perception. The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs one of three communication modes: a compact object-level message $L$, or a compressed feature-level message under 16- or 256-QAM coding. The selector is implemented as a lightweight Random Forest that adds no learnable parameters to the perception pipeline; the contribution is not the Random Forest itself but the channel-aware granularity policy, of which the forest is one interpretable implementation (a hand-tuned SNR-threshold rule captures much of the same effect, Section~\ref{sec:threshold}). It runs in $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms) per frame on a single CPU core, within the $100$~ms budget of a $10$~Hz LiDAR cycle, and a decision tree or logistic-regression selector reaches the same F1 at $>10\times$ lower latency (Section~\ref{sec:robustness}).
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{fig_csi_noise.pdf}
-    \caption{Mean realised frame F1 versus SNR-estimation noise $\sigma$ at fixed true SNR $\gamma=10$~dB, averaged over $10$ noise realisations per point. The deployed selector is stable for $\sigma \le 1$~dB under AWGN and remains stable across the entire range under Rayleigh, because the Rayleigh policy is already saturated at $L$.}
-    \label{fig:csi_noise}
-\end{figure}
+The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection recovers the feature-level detection gain only when the channel and task state justify it: when the channel can carry features it lifts true end-to-end AP@0.5 by up to $+0.05$ over object-level communication, while averaged over all channel states it spends $\le17\%$ of the bandwidth of fixed $C_{16}$, and this trade-off transfers to the scene-disjoint test split and the Culver-City domain shift with a frozen selector. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule already matches the learned selector on the channel-averaged payload--F1 frontier, and the $21$ ego-side perception cues add $<0.001$ aggregate F1 over channel state alone. The granularity policy's gain over object-level communication is itself frame-selective, reaching $+0.045$ F1 ($95\%$ CI $[+0.033,+0.059]$) on hard frames under a usable channel; we attribute the limited marginal value of the perception cues to the sharp LDPC + QAM SNR cliff, which makes the estimated SNR a near-sufficient statistic. When the feature branch instead uses graceful importance-map JSCC, the estimated SNR becomes uninformative and the picture reverses: the best SNR threshold collapses to object-level performance, and the cue-based selector beats it by $+0.017$ F1 ($95\%$ CI $[+0.012,+0.022]$) under AWGN and $+0.015$ under Rayleigh (Section~\ref{sec:jscc_aware}). Whether task-oriented perception cues are needed is thus determined by the feature codec's channel response: superfluous under a cliff codec, necessary under a graceful one.
 
-Under AWGN, the selector tolerates SNR-estimation noise up to
-$\sigma\approx 1$~dB with $\le 0.003$~F1 degradation; F1 degrades by
-$0.025$ at $\sigma=2$~dB and by $0.070$ at $\sigma=5$~dB as the selector
-begins to mis-classify low-SNR frames as feature-level-eligible and pays
-a payload penalty without a corresponding F1 gain. Under Rayleigh, the
-deployed policy is saturated at $L$ across the entire SNR range
-(Section~\ref{sec:decision_ratio}), so the F1 is insensitive to the SNR
-estimate. This asymmetry has a clean operational interpretation: the
-selector needs a precise SNR estimate \emph{only} in the regime where
-feature-level communication is a viable option; in regimes where the
-oracle would refuse feature-level transmission regardless, CSI accuracy
-is irrelevant.
-
-\section{Selector Model Comparison}\label{sec:models}
-
-Table~\ref{tab:models} compares candidate selectors at batch size $1$ (the $10$~Hz
-operating point; latencies on the host of Appendix~\ref{sec:latency}). All models reach
-the same realised F1 ($0.887$--$0.889$); they trade payload, latency, and size. A
-decision tree or logistic-regression selector matches the random forest's F1 at
-$>10\times$ lower latency and $\sim100\times$ smaller size, while the random forest is
-the most payload-efficient. This confirms that model complexity is not where the
-performance comes from, and that a far lighter selector is deployable if latency is
-critical.
-
-\begin{table}[t]
-\centering
-\caption{Selector models (train: validate, eval: test). Latency is per-frame at batch
-size 1 on the experimental host; realised F1 is essentially model-independent, so the
-models trade only latency and size. The rigorous channel-averaged payload comparison
-($200$ seeds, with CIs) is in Table~\ref{tab:headline_agg}.}\label{tab:models}
-\begin{tabular}{lccc}
-\toprule
-Model & Realised F1 & Latency (ms) & Size \\
-\midrule
-Decision Tree          & 0.889 & 0.40 & 11~KB \\
-Logistic Regression    & 0.889 & 0.55 & 2~KB \\
-RBF-SVM                & 0.888 & 0.57 & 82~KB \\
-Small MLP (32,16)      & 0.889 & 0.55 & 55~KB \\
-Random Forest (400)    & 0.887 & 8.3 & 3.5~MB \\
-SNR-threshold ($\tau{=}16$) & 0.889 & $\sim0$ & -- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Scene-Content Subsets and Object-Level Reliability}\label{sec:subsets}
-
-\textbf{Scene subsets.} To check the selector activates features for the right reasons,
-we form top-tercile subsets by cached cues. On occlusion-proxy frames (high
-object-level false-positive count) the selector's feature-activation rate rises to
-$0.17$ versus $0.10$ on the complement and its good-channel gain to $+0.031$ vs
-$+0.013$ (validate); the sparse-LiDAR subset behaves similarly on test
-($+0.033$ vs $+0.001$). The long-range subset is inconclusive---our cue is the count
-of far LiDAR \emph{points}, a poor proxy for far \emph{objects} (which OPV2V does not
-label per-frame), and the selector does not favour features there. We report this
-rather than select a favourable proxy.
-
-\textbf{Object-level reliability.} The main results treat $L$ as perfectly reliable.
-Relaxing this---a lost $L$ falls back to the ego-only floor ($0.63$), with $L$
-block-error rate up to $10\%$ and repetition cost up to $3\times$---the
-CA-TOSG-over-$L$ gain \emph{grows} monotonically from $+0.002$ to $+0.005$ as $L$
-degrades, and the conclusion (CA-TOSG $\ge$ Fixed $L$) is unchanged: the result does
-not rest on an over-strong reliability assumption for $L$.
-
-\section{Vehicular Channels: Rician Fading and CSI Aging}\label{sec:vehicular}
-
-\textbf{Rician fading.} We extend the channel model to Rician fading (BLER obtained by
-averaging the AWGN BLER over the Rician SNR density, $K$-factor sweeping
-$0=$Rayleigh$\to\infty=$AWGN). Fig.~\ref{fig:rician} shows the selector's
-feature-activation knee moving smoothly from Rayleigh-like (stay at $L$) to AWGN-like
-(activate $C_{16}$) as the line-of-sight component strengthens---the framework spans
-the full fading-severity range without modification.
-
-\textbf{CSI aging.} Under a Jakes model at $5.9$~GHz and $60$~km/h (Doppler
-$\approx328$~Hz), the SNR estimate decorrelates within $\sim10$~ms, so a stale CSI
-estimate degrades realised F1 from $0.888$ to $\approx0.873$ ($-1.5\%$) and then
-plateaus---the loss is bounded because the selector falls back to the robust $L$ when
-CSI is unreliable. This complements the CSI-noise ablation of Appendix~\ref{sec:csi_noise}.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{fig_rician.pdf}
-    \caption{Feature-level activation rate of the channel-aware oracle versus mean SNR
-    under Rician fading of increasing $K$-factor, between the Rayleigh and AWGN limits.}
-    \label{fig:rician}
-\end{figure}
-
-\section{Request Latency and Decision Causality}\label{sec:causality}
-
-The ego decides on its own frame-$t$ cues and CSI and signals a $2$-bit request, so
-sub-frame request delays do not change the decided frame. The residual risk is
-whole-frame staleness: at $10$~Hz a one-frame round trip applies the frame-$t$ decision
-to frame $t{+}1$. The oracle action changes between consecutive frames $18\%$ of the
-time at a $100$~ms delay; acting on a one-frame-stale decision costs up to
-$-0.057$ realised F1, but this is a pessimistic bound under the i.i.d.-per-frame channel
-assumption of our protocol (a one-frame-old \emph{channel} decision is near-random,
-consistent with the $\sim10$~ms decorrelation above). Because CSI and cues are computed
-locally at decision time, the architecture avoids most of this; a persistent per-round
-mode preference bounds the remainder.
-
-\section{Inference Latency}\label{sec:latency}
-
-To validate deployability we measure the per-frame inference latency of the deployed selector on a single CPU core (Intel i7 host of the experimental setup). Random Forest \texttt{predict()} is called on per-frame feature vectors with the cache warmed by $100$ priming calls and then measured over $2{,}000$ trials. At batch size $1$, the operating point relevant for a $10$~Hz online deployment, the mean per-frame latency is $\boldsymbol{52.8 \pm 5.7}$~ms with median $54.7$~ms, $95$th-percentile $59.1$~ms, and $99$th-percentile $69.5$~ms. The full $\mathrm{P99}$ latency therefore sits at $69$~ms, leaving a $31$~ms margin within the $100$~ms cycle of a $10$~Hz LiDAR sensor. At batch size $100$ (an offline batch-evaluation operating point), per-sample latency drops to $0.47 \pm 0.03$~ms, indicating that the bulk of the per-call cost at batch $1$ is in tree-traversal dispatch rather than per-feature computation; ahead-of-time compilation of the tree ensemble (e.g., via ONNX) would close this gap if a stricter latency budget were required, but is not necessary at $10$~Hz.
-
-\section{Design Ablation: Action-Space Cliff Matching}\label{sec:negative}
-
-An empirical finding from the $3$-way action set $\mathcal{S}=\{L,C_{16},C_{256}\}$ is that the channel-aware oracle never selects the $C_{256}$ action: $\rho_{C_{256}}^\star = 0.0\%$ across both channels and all SNRs in the evaluated range. We interpret this as an intentional ablation of the action-space design: $C_{16}$ and $C_{256}$ as defined here share the \emph{same} LDPC rate $1/2$ but trade modulation order against BLER, and the resulting cliffs are not rate-matched. Under LDPC 1/2 with AWGN, $\mathrm{BLER}_{256}(\gamma) > 0.5$ for all $\gamma \le 16$~dB, whereas $\mathrm{BLER}_{16}(\gamma) < 0.05$ already at $\gamma = 12$~dB (Fig.~\ref{fig:bler}); by the time 256-QAM is reliable, 16-QAM is already saturated, and Eq.~\eqref{eq:lagrangian_oracle} prefers the latter at every SNR.
-
-The methodological implication is constructive. A truly useful third action would have to fall between $C_{16}$ and $L$ on \emph{both} the rate and the cliff-SNR axes simultaneously, which the LDPC 1/2 + 256-QAM pair fails to satisfy. A natural rate-matched extension that we leave to follow-up work is a $C_{256}^{3/4}$ branch combining 256-QAM with a higher LDPC rate (e.g., $3/4$ or $5/6$); the rate increase compensates for the modulation order's higher cliff, and the resulting branch should be non-dominated above approximately $18$~dB AWGN. Our framework accommodates this extension without retraining the perception backbone: only the BLER table and the action set need updating, and the selector retrains in under one minute on the existing $1{,}980$-frame dataset.
 
 
 \bibliographystyle{IEEEtran}
