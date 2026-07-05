@@ -6,9 +6,9 @@ Adds two upgrades over v1:
   1. THIRD ACTION 'C-256': same 1.98 Mbit information payload as C-16 but
      half the channel uses (256-QAM = 8 bits/symbol vs 16-QAM = 4 bits/sym),
      at the cost of higher BLER. Selector now picks between
-        L       (0.024 Mbit eq., near-error-free)
-        C-16    (1.98 Mbit eq., robust)
-        C-256   (0.99 Mbit eq., fragile)
+        L       (0.024 Mbit info; 0.024 channel-use eq., near-error-free)
+        C-16    (1.98 Mbit info; 0.495 channel-use eq. @ 16-QAM, robust)
+        C-256   (1.98 Mbit info; 0.248 channel-use eq. @ 256-QAM, fragile)
   2. RAYLEIGH CHANNEL via numerical fading-average of the AWGN BLER table.
      For each mean SNR gamma_bar, BLER_rayleigh = E_gamma[BLER_awgn(gamma)]
      with gamma ~ Exponential(gamma_bar).
