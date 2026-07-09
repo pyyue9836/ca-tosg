@@ -1,7 +1,0 @@
-split,subset,stratum,n,fixedL_f1,catosg_f1,oracle_f1,gain_catosg_minus_L,catosg_payload
-validate,AWGN_SNR>=14,Easy,101,0.9592,0.9624,0.9687,0.0033,0.2991
-validate,AWGN_SNR>=14,Medium,100,0.8733,0.8987,0.9045,0.0254,0.4149
-validate,AWGN_SNR>=14,Hard,100,0.7497,0.789,0.8005,0.0393,0.3537
-test,AWGN_SNR>=14,Easy,108,0.9849,0.9715,0.9888,-0.0134,0.3598
-test,AWGN_SNR>=14,Medium,100,0.9061,0.9067,0.9341,0.0006,0.3301
-test,AWGN_SNR>=14,Hard,115,0.7714,0.8163,0.8447,0.0449,0.3312

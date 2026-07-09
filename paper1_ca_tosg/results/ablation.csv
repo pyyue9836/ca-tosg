@@ -1,0 +1,10 @@
+policy,n_features,oracle_acc,realised_f1,payload
+Channel only (SNR + ch type),2,0.8885,0.8881,0.0663
+Perception cues only,21,0.8945,0.8867,0.024
+Perception + SNR,22,0.8945,0.8867,0.024
+Full (all features),23,0.8954,0.8869,0.0283
+Full - range cues,14,0.8968,0.8868,0.0325
+Full - density cues,19,0.8954,0.887,0.0318
+Full - object-count cues,21,0.8968,0.8872,0.032
+Oracle (upper bound),0,1.0,0.8939,0.0737
+Fixed L,0,0.8945,0.8867,0.024

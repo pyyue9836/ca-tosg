@@ -1,0 +1,2 @@
+method,split,frames,epoch,ap_03,ap_05,ap_07,note
+Where2comm,validate,1980,50,0.8970,0.8849,0.8114,"re-eval 2026-06-29 of point_pillar_where2comm_2026_05_22_17_56_51/net_epoch50.pth; verifies cached 0.88/0.81; replaces stale 37-epoch 0.809/0.672 in paper"

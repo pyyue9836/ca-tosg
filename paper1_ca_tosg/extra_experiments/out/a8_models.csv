@@ -1,7 +1,0 @@
-model,oracle_acc,realised_f1,payload,latency_ms,size_kb
-Decision Tree,0.8954,0.8886,0.0718,0.402,11.4
-Logistic Regression,0.8991,0.8886,0.0618,0.546,2.3
-RBF-SVM,0.9037,0.8878,0.0405,0.574,82.1
-"Small MLP (32,16)",0.9092,0.889,0.057,0.552,54.5
-Random Forest (400),0.8954,0.8869,0.0283,8.29,3531.4
-SNR-threshold rule (tau=16),0.8922,0.8889,0.072,0.001,0.0

@@ -1,27 +1,18 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.ipynb_checkpoints/
-
-# OS
-.DS_Store
-
-# Large binaries that do not belong in a code/paper review repo
+# concise repo: code + results + paper only
+data/
+*.pkl
 *.pth
 *.npy
-*.ckpt
-
-# Figure previews (regenerable; only the .pdf ships)
-*_preview.png
-
-# LaTeX build artifacts
+*.png
+__pycache__/
+*.pyc
+*.zip
+# latex build artifacts
 *.aux
 *.log
 *.out
-*.synctex.gz
-*.fls
-*.fdb_latexmk
 *.bbl
 *.blg
-*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls

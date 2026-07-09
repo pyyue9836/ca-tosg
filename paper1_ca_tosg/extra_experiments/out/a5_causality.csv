@@ -1,5 +1,0 @@
-delay_frames,delay_ms,stale_decision_rate,realised_f1_stale,f1_drop_vs_d0
-0,0,0.0,0.8883,0.0
-1,100,0.1817,0.8315,0.0568
-2,200,0.1877,0.8305,0.0578
-5,500,0.1797,0.8345,0.0538
