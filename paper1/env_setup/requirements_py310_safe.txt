@@ -1,0 +1,15 @@
+cmake
+easydict
+numba
+opencv-python
+matplotlib
+scipy
+scikit-image
+tqdm
+PyYAML
+open3d
+cython
+tensorboardX
+shapely==2.0.0
+einops
+timm

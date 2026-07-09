@@ -1,0 +1,26 @@
+# concise repo: code + results + paper + docs only. Big / local-only artefacts excluded.
+data/
+experiment_logs/
+pretrained_models/
+# scomcp: keep code (.py/.yaml), drop its data/models/logs
+scomcp_reproduction/data/
+scomcp_reproduction/logs/
+scomcp_reproduction/runs/
+scomcp_reproduction/outputs/
+# binaries & caches
+*.pkl
+*.pth
+*.npy
+*.png
+__pycache__/
+*.pyc
+*.zip
+# latex build artifacts
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
