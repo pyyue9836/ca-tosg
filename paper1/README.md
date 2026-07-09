@@ -38,8 +38,8 @@ scomcp_reproduction/    reproduction of the SComCP baseline method      (git-exc
 
 ## Channel × codec coverage (from experiment_logs/opencood_training_logs/jscc_eval/)
 Full 3×3 factorial evaluated: {AWGN, Rayleigh, OFDM} × {LDPC+16QAM, LDPC+256QAM, JSCC}, plus Rician fading.
-(OFDM×LDPC raw eval dirs are under `experiment_logs/...jscc_eval/ofdm_ldpc16*`, `ofdm_ldpc256*`;
-not yet aggregated into a single results CSV.)
+Aggregated AP@0.3/0.5/0.7-vs-SNR for every channel×codec cell (incl. OFDM×LDPC16/256) is in
+`results/channel_codec_ap/*_summary.csv`; the LDPC+QAM BLER table is `results/ldpc_qam_bler_table.csv`.
 
 ## Not in git (kept local only)
 `data/`, `experiment_logs/`, `pretrained_models/`, scomcp models/data, and all `*.pkl/*.pth/*.npy/*.png`.
