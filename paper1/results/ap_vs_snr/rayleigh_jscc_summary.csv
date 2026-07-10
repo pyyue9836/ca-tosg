@@ -1,0 +1,9 @@
+snr_db,ap_03,ap_05,ap_07,return_code,log
+0.0,0.7916,0.7768,0.6704,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp00/inference.log
+6.0,0.8076,0.7928,0.6908,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp06/inference.log
+12.0,0.8195,0.8035,0.6962,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp12/inference.log
+15.0,0.8222,0.8048,0.6953,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp15/inference.log
+18.0,0.8247,0.8070,0.6959,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp18/inference.log
+22.0,0.8260,0.8080,0.6966,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp22/inference.log
+26.0,0.8260,0.8078,0.6955,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp26/inference.log
+30.0,0.8259,0.8078,0.6963,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/rayleigh_jscc_snrp30/inference.log

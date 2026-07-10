@@ -1,0 +1,6 @@
+snr_db,ap_03,ap_05,ap_07,return_code,log
+0.0,0.6779,0.6681,0.5974,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/awgn_ldpc256_snrp00/inference.log
+12.0,0.6781,0.6682,0.5978,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/awgn_ldpc256_snrp12/inference.log
+15.0,0.6888,0.6775,0.6033,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/awgn_ldpc256_snrp15/inference.log
+18.0,0.7318,0.7171,0.6286,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/awgn_ldpc256_snrp18/inference.log
+20.0,0.7481,0.7336,0.6419,0,/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1/gs_rerun/figure_rebuild/jscc_global/awgn_ldpc256_snrp20/inference.log
