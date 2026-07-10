@@ -1,9 +1,0 @@
-snr_db,ap_03,ap_05,ap_07,return_code,log
-0.0,0.8291,0.8140,0.6977,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp00/inference.log
-6.0,0.8777,0.8571,0.7246,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp06/inference.log
-12.0,0.8896,0.8637,0.7288,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp12/inference.log
-15.0,0.8902,0.8644,0.7287,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp15/inference.log
-18.0,0.8901,0.8642,0.7269,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp18/inference.log
-22.0,0.8901,0.8644,0.7279,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp22/inference.log
-26.0,0.8893,0.8639,0.7283,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp26/inference.log
-30.0,0.8896,0.8635,0.7278,0,experiment_logs/importance_map_jscc/jscc_eval/rayleigh_jscc_snrp30/inference.log

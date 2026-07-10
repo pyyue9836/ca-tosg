@@ -1,6 +1,0 @@
-snr_db,ap_03,ap_05,ap_07,return_code,log
-0.0,0.6329,0.6259,0.5648,0,experiment_logs/importance_map_jscc/jscc_eval/awgn_ldpc256_snrp00/inference.log
-12.0,0.6328,0.6259,0.5648,0,experiment_logs/importance_map_jscc/jscc_eval/awgn_ldpc256_snrp12/inference.log
-15.0,0.6433,0.6357,0.5739,0,experiment_logs/importance_map_jscc/jscc_eval/awgn_ldpc256_snrp15/inference.log
-18.0,0.6906,0.6800,0.6059,0,experiment_logs/importance_map_jscc/jscc_eval/awgn_ldpc256_snrp18/inference.log
-20.0,0.7163,0.7029,0.6215,0,experiment_logs/importance_map_jscc/jscc_eval/awgn_ldpc256_snrp20/inference.log
