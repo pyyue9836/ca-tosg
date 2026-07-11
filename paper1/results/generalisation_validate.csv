@@ -1,0 +1,7 @@
+policy,accuracy,mean_payload,mean_f1
+oracle_3way,1.0,0.0733,0.8691
+rf_full,0.9194,0.0841,0.8656
+channel_blind_EU,0.8953,0.024,0.8636
+fixed_L,0.8953,0.024,0.8636
+fixed_C16,0.1047,0.495,0.4135
+fixed_C256,0.0,0.2475,0.1124

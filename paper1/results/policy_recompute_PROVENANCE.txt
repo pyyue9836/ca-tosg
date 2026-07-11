@@ -1,0 +1,10 @@
+rf_checkpoint_md5: eb9358e950c3e12f3131f98561d597e3
+rf_path: data/selector_rf.pkl
+channel_realisations: 200 (seeds 0..199)
+protocol_version: v2-200realisation-2026-07-11
+protocol: per-frame SNR~U[0,20] x channel~Bernoulli(0.5 Rayleigh); eff_f1_C = comp_f1*(1-BLER_a(snr)) [expected F1; block success/failure NOT sampled, enters only as expectation; failure->0 -- ego-only fallback is P1 step 5]; BLER = results/ldpc_qam_bler_table.csv (codeword-level; P1 replaces with Sionna frame-level).
+oracle: channel-state-conditioned expected-utility argmax -- per realisation, per frame, argmax_a eff_a at THAT realisation's est SNR + channel type (same channel info as the deployed selector); block outcome not sampled. Privilege over selector = knows per-frame clean utility (late_f1/comp_f1) while selector sees only cues (standard oracle-imitation asymmetry). NOT a clairvoyant post-hoc bound (deferred to P1 step 5).
+oracle_aggregation: per realisation take per-frame argmax then mean over frames (per-realisation oracle F1); then mean over 200 realisations. accuracy = (RF action == oracle action) counted over frame x realisation pairs.
+channel_blind_EU: argmax over the channel-averaged E[eff], fixed per frame -> collapses to Fixed-L (payload ~0.024); reported as an ablation quantifying the policy-level value of channel state.
+validate_convention: FULL validate (1980 frames) INCLUDING selector training frames = in-sample (train_rf.py test_size=0.30, SEED 0). Validate accuracy NOT comparable to held-out test/Culver without this note.
+sanity_validate_30pct_holdout_SEED0: CA-TOSG F1=0.8694 pay=0.0835 acc=0.9172 (vs full-1980 in-sample F1=0.8656 pay=0.0841 acc=0.9194); F1 gap -0.0038, acc inflation +0.0022

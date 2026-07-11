@@ -21,7 +21,7 @@ scomcp_reproduction/    reproduction of the SComCP baseline method      (git-exc
 
 | Reported result | File |
 |---|---|
-| Payload–accuracy Pareto (Fig. 4.3) | `results/pareto_points.csv` |
+| Payload–accuracy Pareto (Fig. 4.3) | `results/pareto_points.csv` (200-realisation, current selector — see `policy_recompute_PROVENANCE.txt`) |
 | True e2e AP knee — validate / test / Culver (global-sort) | `results/true_e2e_global_{validate,test,culver}.csv` |
 | AP-vs-SNR figure (fig:ap_snr, global-sort) | `results/ap_vs_snr/*.csv` + `results/true_e2e_global_validate.csv` → `code/plot_ap_snr.py` |
 | Two-regime bars (Fig. 4.5) | `results/two_regime_bars.csv` |
@@ -34,7 +34,8 @@ scomcp_reproduction/    reproduction of the SComCP baseline method      (git-exc
 | Ablation / SNR-threshold arm | `results/ablation.csv`, `results/snr_threshold.csv` |
 | Multi-seed confidence intervals | `results/multiseed_hardening.csv` |
 | Model comparison | `results/model_comparison.csv` |
-| Generalisation headline — test / Culver | `results/generalisation_{test,culver}.csv` |
+| Generalisation headline — validate / test / Culver | `results/generalisation_{validate,test,culver}.csv` (200-realisation, current selector; validate is in-sample — see provenance) |
+| Policy recompute provenance (RF hash / seeds / protocol / in-sample sanity) | `results/policy_recompute_PROVENANCE.txt` → `code/recompute_policy_200seed.py` |
 | L-channel reliability / scene subsets | `results/l_channel_reliability.csv`, `results/scene_subsets.csv` |
 
 ## ImportanceMapJSCC = learned (importance_source=learned)
