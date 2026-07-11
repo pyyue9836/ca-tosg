@@ -41,8 +41,14 @@ scomcp_reproduction/    reproduction of the SComCP baseline method      (git-exc
 ## ImportanceMapJSCC = learned (importance_source=learned)
 All ImportanceMapJSCC results use the **learned** importance map (the faithful reproduction of
 Sheng et al. WCSP2023), NOT psm. JSCC-aware analysis (two-regime, SNR-threshold edge) is in
-`results/jscc_selector_{awgn,rayleigh,ofdm}.csv`; the LDPC+QAM BLER table is
-`results/ldpc_qam_bler_table.csv`. The global-sort AP-vs-SNR summaries plotted in fig:ap_snr
+`results/jscc_selector_{awgn,rayleigh,ofdm}.csv`. **BLER table (P1 Step 1, 2026-07-11):**
+the current physically-correct table is `results/bler_sionna/bler_sionna.csv` — Sionna 5G-LDPC
+(k=500,n=1000) rate-1/2 + 16/256-QAM, adaptive MC (≥100 block errors or 1e5 codewords), Es/N0
+axis, with **codeword-level and frame-level** columns (frame = 1−(1−p_cw)^3960; old↔new figure
+`results/bler_sionna/bler_old_vs_new.pdf`; generator `analysis_tools/build_bler_sionna.py`).
+The old `results/ldpc_qam_bler_table.csv` is **DEPRECATED** (40-block MC → 0.025=1/40 quantisation
+floor at 12–14 dB; codeword-level BLER wrongly consumed as frame-level) — retained for provenance
+only. The global-sort AP-vs-SNR summaries plotted in fig:ap_snr
 (learned JSCC / LDPC16 / LDPC256 / identity-upper, AWGN+Rayleigh) are checked in under
 `results/ap_vs_snr/*_summary.csv`. (The older psm `channel_codec_ap/` set was removed as
 stale/inconsistent; OFDM enters the paper only through the F1 edge in `jscc_selector_ofdm.csv`,
