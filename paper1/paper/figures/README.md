@@ -15,15 +15,28 @@ will be overwritten. The table below maps each figure to the script that produce
 | `ca_tosg_method_overview.pdf` | 手工绘制 / hand-made (see `../DRAW_OVERVIEW_FIGURE.md`) | 系统总览 Fig.1 / system overview |
 | `fig_ap50_*.pdf`, `fig_ap70_*.pdf` | `../../code/plot_ap_snr.py` | AP vs SNR（AWGN/Rayleigh，global-sort）|
 | `fig_snr_vs_f1.pdf`, `fig_f1_rayleigh.pdf` | `../../code/snr_decision_plot.py` | 帧级 F1 vs SNR |
-| `fig_payload_*.pdf` | `../../code/snr_decision_plot.py` | payload vs SNR |
+| `fig_payload_awgn.pdf` | `../../code/plot_pareto_payload.py` | payload vs SNR（AWGN，data-sourced 2026-07-11）|
+| `fig_payload_rayleigh.pdf` | `../../code/snr_decision_plot.py` | payload vs SNR（Rayleigh）|
 | `fig_decisions_*.pdf`, `fig_stacked_area.pdf` | `../../code/plot_stacked_area.py` | 决策占比 ρ vs SNR |
 | `fig_feature_importance.pdf` | `../../code/plot_feature_importance.py` | 特征重要性 |
 | `fig_csi_noise.pdf` | `../../code/csi_noise_ablation.py` | CSI 噪声鲁棒性 |
 | `fig_channel_bler.pdf` | 生成脚本未入库 / generator not checked in | LDPC+QAM BLER 曲线（新）|
 | `fig_qualitative_bev.pdf` | 生成脚本未入库 / generator not checked in | 定性 BEV 检测对比（新）|
-| `fig_pareto_validate.pdf`, `fig_pareto_test.pdf` | `../../code/extra_experiments/a1_pareto.py` | payload–F1 帕累托前沿（新）|
+| `fig_pareto_test.pdf` | `../../code/plot_pareto_payload.py` | payload–F1 帕累托（test，data-sourced 2026-07-11）|
+| `fig_pareto_validate.pdf` | `../../code/extra_experiments/a1_pareto.py` | payload–F1 帕累托（validate）|
 | `fig_difficulty.pdf` | `../../code/extra_experiments/a2_difficulty.py` | 难度分层增益（新）|
 | `fig_rician.pdf` | `../../code/extra_experiments/c_channels.py` | Rician 衰落下决策（新）|
 | `fig_jscc_aware.pdf` | `../../code/extra_experiments/a4_jscc_aware.py` | JSCC vs LDPC（新）|
 
 > 标「新」的是本次修订新增的图 / figures marked 新 were added in this revision.
+
+## Figure provenance / 图数据溯源
+
+Regenerated 2026-07-11 straight from committed result CSVs
+(generator `../../code/plot_pareto_payload.py`; PDF + SVG both checked in):
+
+| figure | data source | RF checkpoint md5 | protocol |
+|---|---|---|---|
+| `fig_pareto_test.pdf` (+`.svg`) | `../../results/pareto_points.csv` (test rows) | `eb9358e950c3e12f3131f98561d597e3` | 200-realisation (`v2-200realisation-2026-07-11`); see `../../results/policy_recompute_PROVENANCE.txt` |
+| `fig_payload_awgn.pdf` (+`.svg`) | `../../results/true_e2e_global_test.csv` (AWGN CA-TOSG $\rho_L\to$ payload) | `eb9358e950c3e12f3131f98561d597e3` | global-sort true-e2e |
+| `fig_two_regime.pdf` | `../../results/two_regime_bars.csv` | — | **data-current** — unchanged, not regenerated 2026-07-11 |
