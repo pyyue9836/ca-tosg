@@ -52,10 +52,13 @@ def masked_oracle(eff, b16, b256):
     return m.argmax(1)
 
 
-def eval_series(df, policy, feat=None, model=None, n_seed=N_SEED, mask=None):
+def eval_series(df, policy, feat=None, model=None, n_seed=N_SEED, mask=None, csi_noise_sigma=0.0):
     """Return per-realisation frame-mean (f1, payload) arrays for a policy over 200 realisations.
     policy: 'rf' (needs model with .predict + feat), 'oracle', 'fixedL'/'C16'/'C256', or 'threshold:TAU'.
-    mask: optional boolean over frames to restrict the reported mean (stratum analysis)."""
+    mask: optional boolean over frames to restrict the reported mean (stratum analysis).
+    csi_noise_sigma: if >0, the SELECTOR sees est_snr = true_snr + N(0,sigma) dB (robustness: CSI
+    estimation noise / Jakes aging). The channel does not lie -- eff still uses the TRUE snr's BLER;
+    only the RF's input est_snr is perturbed."""
     n = len(df)
     sel = np.ones(n, bool) if mask is None else np.asarray(mask, bool)
     f1s, pays = [], []
@@ -63,7 +66,9 @@ def eval_series(df, policy, feat=None, model=None, n_seed=N_SEED, mask=None):
         snr, is_ray, b16, b256 = draws(n, s)
         eff = eff_of(df, b16, b256)
         if policy == 'rf':
-            d = df.copy(); d['est_snr_db'] = snr; d['channel_is_rayleigh'] = is_ray.astype(int)
+            d = df.copy()
+            est = snr if csi_noise_sigma <= 0 else snr + np.random.default_rng(s + 10000).normal(0, csi_noise_sigma, n)
+            d['est_snr_db'] = est; d['channel_is_rayleigh'] = is_ray.astype(int)
             idx = np.array([ACTIONS.index(a) for a in np.asarray(model.predict(d[feat]))])
         elif policy == 'oracle':
             idx = masked_oracle(eff, b16, b256)
@@ -91,15 +96,18 @@ def paired_ci_frames_from(df_a_framemean, df_b_framemean, n_boot=5000, seed=1234
     return float(d.mean()), float(lo), float(hi)
 
 
-def frame_means(df, policy, feat=None, model=None, n_seed=N_SEED, what='eff'):
+def frame_means(df, policy, feat=None, model=None, n_seed=N_SEED, what='eff', csi_noise_sigma=0.0):
     """Per-FRAME mean over realisations (for frame-level paired bootstrap).
-    what='eff' -> mean realised F1 per frame; what='pay' -> mean payload per frame."""
+    what='eff' -> mean realised F1 per frame; what='pay' -> mean payload per frame.
+    csi_noise_sigma: perturb the selector's est_snr (robustness), eff at TRUE snr (see eval_series)."""
     n = len(df); acc = np.zeros(n)
     for s in range(n_seed):
         snr, is_ray, b16, b256 = draws(n, s)
         eff = eff_of(df, b16, b256)
         if policy == 'rf':
-            d = df.copy(); d['est_snr_db'] = snr; d['channel_is_rayleigh'] = is_ray.astype(int)
+            d = df.copy()
+            est = snr if csi_noise_sigma <= 0 else snr + np.random.default_rng(s + 10000).normal(0, csi_noise_sigma, n)
+            d['est_snr_db'] = est; d['channel_is_rayleigh'] = is_ray.astype(int)
             idx = np.array([ACTIONS.index(a) for a in np.asarray(model.predict(d[feat]))])
         elif policy == 'oracle':
             idx = masked_oracle(eff, b16, b256)

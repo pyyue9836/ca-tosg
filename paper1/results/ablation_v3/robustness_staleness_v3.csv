@@ -1,0 +1,5 @@
+delay_frames,delay_ms,stale_decision_rate,realised_f1,f1_drop_vs_d0,drop_ci_lo,drop_ci_hi,drop_significant
+0,0,0.0,0.9088,0.0,0.0,0.0,False
+1,100,0.2486,0.8894,0.01929,0.01838,0.02026,True
+2,200,0.2496,0.8896,0.01913,0.01825,0.02009,True
+5,500,0.2531,0.8895,0.01907,0.01821,0.02002,True
