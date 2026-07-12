@@ -1,0 +1,73 @@
+{
+  "train_dataset_md5": "815c64611b1ef97059af6c8b8ea727c6",
+  "deployed_rf_md5": "f8059f3ed073fdcc6cfaf10e07a9cff4",
+  "split_seed": 0,
+  "test_size": 0.3,
+  "n_train": 1386,
+  "n_test": 594,
+  "class_balance": {
+    "full": {
+      "L": 1689,
+      "C16": 291,
+      "C256": 0
+    },
+    "train": {
+      "L": 1182,
+      "C16": 204,
+      "C256": 0
+    },
+    "test": {
+      "L": 507,
+      "C16": 87,
+      "C256": 0
+    }
+  },
+  "feature_names": [
+    "num_cavs",
+    "ego_num_objects",
+    "ego_origin_lidar_shape_0",
+    "ego_origin_lidar_shape_1",
+    "pcd_num_points",
+    "pcd_mean_range",
+    "pcd_max_range",
+    "pcd_std_range",
+    "pcd_near_20m",
+    "pcd_mid_20_50m",
+    "pcd_far_50_80m",
+    "pcd_very_far_80m",
+    "pcd_front_points",
+    "pcd_back_points",
+    "pcd_left_points",
+    "pcd_right_points",
+    "pcd_front_far_30m",
+    "pcd_front_far_50m",
+    "pcd_density_0_20",
+    "pcd_density_20_50",
+    "pcd_density_50_80",
+    "est_snr_db",
+    "channel_is_rayleigh"
+  ],
+  "modes": [
+    {
+      "mode": "base",
+      "n_features": 21,
+      "accuracy": 0.766,
+      "mean_payload": 0.1017,
+      "mean_f1": 0.8923
+    },
+    {
+      "mode": "csi",
+      "n_features": 22,
+      "accuracy": 0.8047,
+      "mean_payload": 0.112,
+      "mean_f1": 0.8957
+    },
+    {
+      "mode": "full",
+      "n_features": 23,
+      "accuracy": 0.8788,
+      "mean_payload": 0.1168,
+      "mean_f1": 0.9135
+    }
+  ]
+}

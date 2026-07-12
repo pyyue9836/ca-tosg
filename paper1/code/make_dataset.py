@@ -1,125 +1,107 @@
-#self+ CA-TOSG paper2 v2: build channel-aware oracle dataset (AWGN+Rayleigh, 3-way L/C16/C256) — main version
+#self+ CA-TOSG P1 Step-4: regenerate 3-way oracle labels (L / C16 / C256) on the canonical v3
+# datasets, using the NEW Sionna frame-level BLER table + ego-only failure fallback.
 # -*- coding: utf-8 -*-
-"""V2 dataset: 3-way action set (L / C-16 / C-256) over AWGN + Rayleigh.
+"""P1 Step-4 dataset finaliser.
 
-Adds two upgrades over v1:
-  1. THIRD ACTION 'C-256': same 1.98 Mbit information payload as C-16 but
-     half the channel uses (256-QAM = 8 bits/symbol vs 16-QAM = 4 bits/sym),
-     at the cost of higher BLER. Selector now picks between
-        L       (0.024 Mbit info; 0.024 channel-use eq., near-error-free)
-        C-16    (1.98 Mbit info; 0.495 channel-use eq. @ 16-QAM, robust)
-        C-256   (1.98 Mbit info; 0.248 channel-use eq. @ 256-QAM, fragile)
-  2. RAYLEIGH CHANNEL via numerical fading-average of the AWGN BLER table.
-     For each mean SNR gamma_bar, BLER_rayleigh = E_gamma[BLER_awgn(gamma)]
-     with gamma ~ Exponential(gamma_bar).
+Inputs  : data/dataset_{split}_v3.csv  (from recompute_canonical_f1.py -- carries the canonical
+          late_f1 / compressed_f1 / ego_f1 columns AND the FROZEN single-draw channel realisation
+          est_snr_db / channel_type / channel_is_rayleigh inherited from the v2 dataset).
+Action  : overwrite ONLY the physical-layer / label columns of each v3 CSV, in place:
+            bler_C16, bler_C256, eff_f1_L, eff_f1_C16, eff_f1_C256, oracle_3way.
+          Everything else (cues, canonical F1 columns, the frozen SNR/channel draw) is untouched.
 
-Per-frame, we sample (snr_db, channel) and pre-compute the effective F1 for
-every action, then label the channel-aware oracle as the argmax.
+Two P1 changes vs v2 (both flow into the oracle label; neither is a bug -- see PROVENANCE):
+  1. BLER SOURCE = Sionna frame-level table results/bler_sionna/bler_sionna.csv, reading the
+     `bler_frame` column (= 1-(1-p_cw)^3960, Es/N0 axis) -- NOT the deprecated codeword-level
+     ldpc_qam_bler_table.csv (whose codeword BLER, used as if frame-level, was ~3 orders too
+     optimistic). est_snr_db is read as Es/N0, identical to true_e2e_global.py.
+  2. FAILURE FALLBACK = ego-only. When a requested feature message fails (BLER) the ego keeps ONLY
+     its own single-vehicle detection (ego_f1), NOT the object-level L message (which was not
+     requested):  eff_f1_C = comp_f1*(1-BLER) + ego_f1*BLER   (v2 used *(1-BLER), i.e. failure->0).
 
-Output: peiyi_work/01_paper_ca_tosg/runs/v2/dataset.csv
+WHY REUSE THE FROZEN DRAW (not redraw): the ONLY controlled changes v2->v3 are {canonical F1,
+Sionna BLER, ego fallback}. Redrawing (snr, channel) would confound the label shift with a new
+random realisation. So est_snr_db / channel_type / channel_is_rayleigh are read straight from the
+v3 CSV and never resampled here.
+
+LAMBDA (pinned, P1 Step-4 requirement 1): the training oracle is the lam=0 channel-state-conditioned
+expected-utility argmax -- argmax_a eff_f1_a with NO payload penalty. This is BOTH v2's lambda VALUE
+(v2's oracle_3way was also the pure argmax) AND v2's SAME criterion; the two interpretations coincide
+at lam=0, so there is nothing to re-tune. The ego fallback + Sionna BLER legitimately MOVE the
+resulting operating point (payload); we do NOT re-tune anything to chase v2's 0.0841 payload. The
+Lagrangian lambda>0 sweep lives only in the pareto experiment (a1_pareto.py) and is not touched here.
 """
+import hashlib
 import os
+
 import numpy as np
 import pandas as pd
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-ARCHIVE = '/home/josh/cooperative_semantic_perception/OpenCOOD_cleanup_archive_20260604'
-CUE_CSV = os.path.join(
-    ARCHIVE, 'peiyi_work/04_experiment_logs/experiment_logs/semantic_value',
-    'frame_level_semantic_value_with_dataloader_pcd.csv')
-BLER_CSV = os.path.join(
-    REPO, 'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv')
-OUT_DIR = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2')
-SEED = 0
+REPO = '/home/josh/cooperative_semantic_perception/OpenCOOD'
+P1 = os.path.join(REPO, 'peiyi_work/paper1')
+DATA = os.path.join(P1, 'data')
+BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')  # frame-level, Es/N0
 
-# Channel-use-equivalent payload (Mbit), accounting for QAM spectral efficiency.
-# Both C variants carry the same 1.98 Mbit perception payload, but C-256 uses
-# half the symbols (8 bits/sym vs 4 bits/sym). L stays at 0.024 Mbit info.
-PAYLOAD_INFO = {'L': 0.024, 'C16': 1.98, 'C256': 1.98}
-SPEC_EFF = {'L': 1.0, 'C16': 4.0, 'C256': 8.0}  # bits / channel use
-CHANNEL_USES = {a: PAYLOAD_INFO[a] / SPEC_EFF[a] for a in PAYLOAD_INFO}  # Mbit-eq.
+SPLITS = ('validate', 'test', 'culver')
+ACTIONS = np.array(['L', 'C16', 'C256'])
+# Channel-use-equivalent payload (Mbit); both C variants carry the same 1.98 Mbit perception
+# payload but C-256 uses half the symbols (8 vs 4 bits/sym). Kept for the printed sanity report;
+# the label itself (lam=0 argmax of eff_f1) does NOT depend on payload.
+PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
 
 
-def bler_awgn_interp(snr_db, bler_df, qam):
-    sub = bler_df[bler_df['qam'] == qam].sort_values('snr_db')
-    xs = sub['snr_db'].to_numpy(); ys = sub['bler'].to_numpy()
-    return np.clip(np.interp(snr_db, xs, ys, left=1.0, right=0.0), 0.0, 1.0)
-
-
-def bler_rayleigh(snr_db_mean, bler_df, qam, n_grid=400):
-    """Numerically average AWGN BLER over instantaneous Rayleigh SNR.
-
-    gamma ~ Exponential(gamma_bar=10^(snr_db_mean/10)); integrate
-    BLER_awgn(10*log10(gamma)) * pdf(gamma) dgamma.
-    """
-    snr_db_mean = np.atleast_1d(snr_db_mean).astype(float)
-    out = np.zeros_like(snr_db_mean)
-    sub = bler_df[bler_df['qam'] == qam].sort_values('snr_db')
-    xs = sub['snr_db'].to_numpy(); ys = sub['bler'].to_numpy()
-    for i, gb_db in enumerate(snr_db_mean):
-        gb = 10.0 ** (gb_db / 10.0)
-        # gamma grid spanning the BLER table range, with extra tails.
-        g_db_grid = np.linspace(-15.0, 40.0, n_grid)
-        g_lin = 10.0 ** (g_db_grid / 10.0)
-        bler_g = np.clip(np.interp(g_db_grid, xs, ys, left=1.0, right=0.0),
-                         0.0, 1.0)
-        pdf = (1.0 / gb) * np.exp(-g_lin / gb)
-        # change of variable dgamma = gamma * ln(10) / 10 * d(gamma_db)
-        jac = g_lin * np.log(10) / 10.0
-        out[i] = np.trapz(bler_g * pdf * jac, g_db_grid)
-    return np.clip(out, 0.0, 1.0)
+def bler_frame_vec(snr_arr, tbl, qam, channel):
+    """Frame-level BLER at Es/N0=snr (dB) for a QAM order over a channel, from the Sionna table.
+    Mirrors true_e2e_global.bler_frame exactly: interp over esno_db on the `bler_frame` column,
+    left-fill=1 (below the table -> certain failure), right-fill = last tabulated value."""
+    s = tbl[(tbl['qam'] == qam) & (tbl['channel'] == channel)].sort_values('esno_db')
+    xs = s['esno_db'].to_numpy(); ys = s['bler_frame'].to_numpy()
+    return np.clip(np.interp(snr_arr, xs, ys, left=1.0, right=float(ys[-1])), 0.0, 1.0)
 
 
 def main():
-    os.makedirs(OUT_DIR, exist_ok=True)
-    rng = np.random.default_rng(SEED)
-    df = pd.read_csv(CUE_CSV)
-    bler = pd.read_csv(BLER_CSV)
-    print('cue CSV:', df.shape)
+    tbl = pd.read_csv(BLER_CSV)
+    print('Sionna BLER table:', BLER_CSV, tbl.shape,
+          '| reading column: bler_frame (NOT bler_cw)')
+    md5s = {}
+    for sp in SPLITS:
+        path = os.path.join(DATA, f'dataset_{sp}_v3.csv')
+        df = pd.read_csv(path)
+        snr = df['est_snr_db'].to_numpy()
+        is_ray = (df['channel_type'].to_numpy() == 'rayleigh')
+        # sanity: the frozen channel_is_rayleigh flag must agree with channel_type
+        assert np.array_equal(is_ray.astype(int), df['channel_is_rayleigh'].to_numpy().astype(int)), \
+            f'{sp}: channel_type vs channel_is_rayleigh mismatch'
 
-    # Per-frame draws: SNR (0-20 dB uniform) and channel type (50/50 AWGN/Rayl).
-    snr_db = rng.uniform(0.0, 20.0, size=len(df))
-    channel = rng.choice(['awgn', 'rayleigh'], size=len(df))
-    df['est_snr_db'] = snr_db
-    df['channel_type'] = channel
-    df['channel_is_rayleigh'] = (channel == 'rayleigh').astype(int)
+        b16 = np.where(is_ray, bler_frame_vec(snr, tbl, 16, 'rayleigh'),
+                       bler_frame_vec(snr, tbl, 16, 'awgn'))
+        b256 = np.where(is_ray, bler_frame_vec(snr, tbl, 256, 'rayleigh'),
+                        bler_frame_vec(snr, tbl, 256, 'awgn'))
+        df['bler_C16'] = b16
+        df['bler_C256'] = b256
 
-    # Pre-compute BLER per QAM order per channel (vectorise AWGN; loop Rayleigh).
-    bler_C16_awgn = bler_awgn_interp(snr_db, bler, qam=16)
-    bler_C256_awgn = bler_awgn_interp(snr_db, bler, qam=256)
-    bler_C16_ray = bler_rayleigh(snr_db, bler, qam=16)
-    bler_C256_ray = bler_rayleigh(snr_db, bler, qam=256)
+        comp = df['compressed_f1'].to_numpy(); ego = df['ego_f1'].to_numpy()
+        df['eff_f1_L'] = df['late_f1']
+        df['eff_f1_C16'] = comp * (1.0 - b16) + ego * b16
+        df['eff_f1_C256'] = comp * (1.0 - b256) + ego * b256
 
-    is_ray = (channel == 'rayleigh')
-    df['bler_C16'] = np.where(is_ray, bler_C16_ray, bler_C16_awgn)
-    df['bler_C256'] = np.where(is_ray, bler_C256_ray, bler_C256_awgn)
+        f1_stack = df[['eff_f1_L', 'eff_f1_C16', 'eff_f1_C256']].to_numpy()
+        df['oracle_3way'] = ACTIONS[np.argmax(f1_stack, axis=1)]
 
-    # Failure model = ego-only fallback (P1, unified with the paper's F_ego formula and
-    # true_e2e_global.py). When a requested feature message fails (BLER) the ego keeps ONLY its own
-    # single-vehicle detection (ego_f1), NOT the object-level L message (which was not requested).
-    # eff_f1_C = comp_f1*(1-BLER) + ego_f1*BLER   (was ...*(1-BLER), i.e. failure->0). L is the robust
-    # low-payload message, treated as delivered. All three per-frame F1 columns (late_f1/compressed_f1/
-    # ego_f1) MUST come from the canonical npz + canonical union GT (no stale dataset column reuse).
-    df['eff_f1_L'] = df['late_f1']
-    df['eff_f1_C16'] = df['compressed_f1'] * (1.0 - df['bler_C16']) + df['ego_f1'] * df['bler_C16']
-    df['eff_f1_C256'] = df['compressed_f1'] * (1.0 - df['bler_C256']) + df['ego_f1'] * df['bler_C256']
+        df.to_csv(path, index=False)
+        md5s[sp] = hashlib.md5(open(path, 'rb').read()).hexdigest()
 
-    f1_stack = df[['eff_f1_L', 'eff_f1_C16', 'eff_f1_C256']].to_numpy()
-    action_names = np.array(['L', 'C16', 'C256'])
-    df['oracle_3way'] = action_names[np.argmax(f1_stack, axis=1)]
+        rates = {a: float((df['oracle_3way'] == a).mean()) for a in ACTIONS}
+        print(f'\n[{sp}] n={len(df)}  oracle base-rate {rates}')
+        print(f'  mean BLER frame: C16 awgn={b16[~is_ray].mean():.4f} ray={b16[is_ray].mean():.4f} '
+              f'| C256 awgn={b256[~is_ray].mean():.4f} ray={b256[is_ray].mean():.4f}')
+        print(f'  mean eff_f1  L={df.eff_f1_L.mean():.4f} C16={df.eff_f1_C16.mean():.4f} '
+              f'C256={df.eff_f1_C256.mean():.4f}')
+        print(f'  md5(dataset_{sp}_v3.csv) = {md5s[sp]}')
 
-    # Sanity report.
-    print('per-action win rates (oracle 3-way):')
-    for a in action_names:
-        print('  %-6s %.3f' % (a, (df['oracle_3way'] == a).mean()))
-    print('mean BLER (16-QAM): AWGN=%.3f  Rayleigh=%.3f'
-          % (bler_C16_awgn.mean(), bler_C16_ray.mean()))
-    print('mean BLER (256-QAM): AWGN=%.3f  Rayleigh=%.3f'
-          % (bler_C256_awgn.mean(), bler_C256_ray.mean()))
-
-    out_path = os.path.join(OUT_DIR, 'dataset.csv')
-    df.to_csv(out_path, index=False)
-    print('wrote', out_path, df.shape)
+    print('\n=== dataset_*_v3.csv md5 (for PROVENANCE) ===')
+    for sp in SPLITS:
+        print(f'  {sp:9s} {md5s[sp]}')
 
 
 if __name__ == '__main__':

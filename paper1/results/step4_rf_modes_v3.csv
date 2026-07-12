@@ -1,0 +1,4 @@
+mode,n_features,accuracy,mean_payload,mean_f1
+base,21,0.766,0.1017,0.8923
+csi,22,0.8047,0.112,0.8957
+full,23,0.8788,0.1168,0.9135

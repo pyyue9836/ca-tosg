@@ -1,0 +1,4 @@
+cls,support,precision,recall,f1,full_split_count,full_split_frac
+L,507,0.956,0.8994,0.9268,1689,0.853
+C16,87,0.5641,0.7586,0.6471,291,0.147
+C256,0,0.0,0.0,0.0,0,0.0
