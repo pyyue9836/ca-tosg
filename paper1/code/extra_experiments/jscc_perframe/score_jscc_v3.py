@@ -19,7 +19,7 @@ JSCC_DIR = os.path.join(GS, 'jscc_v3'); OUT = os.path.join(P1, 'results/jscc_v3'
 
 
 def tt(a, shp):
-    a = np.asarray(a, np.float32); return torch.from_numpy(a) if a.size else torch.zeros(shp, torch.float32)
+    a = np.asarray(a, np.float32); return torch.from_numpy(a) if a.size else torch.zeros(shp, dtype=torch.float32)
 
 
 def f1_vs(boxes, canon, iou=0.5):
