@@ -1,0 +1,16 @@
+split,policy,payload,f1
+validate,Fixed L,0.024,0.9098
+validate,Fixed C16,0.495,0.7958
+validate,Fixed C256,0.2475,0.7499
+validate,Oracle,0.0898,0.9158
+validate,"CA-TOSG (RF, deployed)",0.1081,0.9137
+test,Fixed L,0.024,0.9011
+test,Fixed C16,0.495,0.8513
+test,Fixed C256,0.2475,0.8259
+test,Oracle,0.0963,0.9137
+test,"CA-TOSG (RF, deployed)",0.133,0.9083
+culver,Fixed L,0.024,0.8722
+culver,Fixed C16,0.495,0.8201
+culver,Fixed C256,0.2475,0.7815
+culver,Oracle,0.1465,0.8905
+culver,"CA-TOSG (RF, deployed)",0.0925,0.8834

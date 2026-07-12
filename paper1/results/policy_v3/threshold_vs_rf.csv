@@ -1,0 +1,4 @@
+split,rf_payload,rf_f1,bestF1_tau,bestF1_tau_f1,bestF1_tau_payload,tau_at_rf_payload,tau_at_rf_payload_f1,tau_at_rf_payload_payload,rf_dominates_tau_frontier,rf_minus_tau_at_rf_payload_f1
+validate,0.1015,0.9108,9.5,0.91,0.1481,13.5,0.9088,0.1009,True,0.0019
+test,0.1346,0.9088,8.5,0.9096,0.1599,11.0,0.9083,0.1305,True,0.0005
+culver,0.0894,0.8831,8.0,0.8874,0.1661,14.5,0.8799,0.0892,True,0.0033

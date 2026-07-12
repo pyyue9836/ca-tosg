@@ -1,0 +1,13 @@
+split,channel,snr_db,who,frac_L,frac_C16,frac_C256,agree_with_oracle
+validate,awgn,20.0,oracle,0.503,0.497,0.0,1.0
+validate,awgn,20.0,selector,0.4394,0.5606,0.0,0.7535
+validate,rayleigh,20.0,oracle,1.0,0.0,0.0,1.0
+validate,rayleigh,20.0,selector,1.0,0.0,0.0,1.0
+test,awgn,20.0,oracle,0.4742,0.5258,0.0,1.0
+test,awgn,20.0,selector,0.1862,0.8138,0.0,0.5332
+test,rayleigh,20.0,oracle,1.0,0.0,0.0,1.0
+test,rayleigh,20.0,selector,1.0,0.0,0.0,1.0
+culver,awgn,20.0,oracle,0.1909,0.8091,0.0,1.0
+culver,awgn,20.0,selector,0.5691,0.4309,0.0,0.5527
+culver,rayleigh,20.0,oracle,1.0,0.0,0.0,1.0
+culver,rayleigh,20.0,selector,1.0,0.0,0.0,1.0

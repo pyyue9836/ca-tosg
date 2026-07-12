@@ -1,180 +1,142 @@
-#self+ A1: communication-perception Pareto frontier (F1 vs payload) + Lagrangian lambda sweep
+#self+ A1 v3: communication-perception Pareto frontier (F1 vs payload) + Lagrangian lambda sweep,
+# on the canonical v3 datasets. ADDS the C256 activation rate ALONG the Lagrangian frontier -- the
+# empirical test of whether the rate-matched 3rd action ever earns a foothold once its lower payload
+# (0.2475 vs 0.495 Mbit) is allowed to compete (under lam=0 it is provably dominated: eff_C256 <=
+# eff_C16 pointwise since identical content at higher BLER, so payload-blind argmax never prefers it;
+# the ONLY place C256 can win is lambda>0, here).
 """
-Reframes the contribution from "average-metric gain" to "Pareto-optimality".
-For each split we plot, on the payload--F1 plane:
-  - the fixed policies L / C16 / C256 (single points),
-  - the channel-aware oracle (single point),
-  - the Lagrangian oracle frontier s*=argmax_s(eff_f1_s - lambda * B_s) swept over lambda
-    (the achievable upper frontier; lambda=0 -> max F1, lambda->inf -> min payload = L),
-  - the DEPLOYED Random Forest selector (rf_full.pkl) operating point,
-  - the RF retrained on lambda-cost oracle labels for several lambda (learned achievable frontier).
-Outputs: paper/figures/fig_pareto_{validate,test}.pdf  +  runs CSV of frontier points.
-All numbers come from cached per-frame effective F1 / payload -- no inference re-run.
+Self-contained v3 (does NOT use the stale _common paths). Reads data/dataset_{split}_v3.csv (which
+carry eff_f1_L/C16/C256, bler_C16/C256, oracle_3way from make_dataset.py) + data/selector_rf.pkl.
+Feasibility mask (BLER>=0.999) removes an action from the frontier argmax -- an undeliverable request
+is not a real frontier point. validate uses the same held-out 30% (SEED0) as the deployed selector.
+Outputs: paper/figures/fig_pareto_{validate,test,culver}.pdf + out/a1_pareto_points.csv
+         + out/a1_c256_frontier.csv (lambda, C256 activation, C16 activation, payload, F1 per split).
 """
 import os, sys, pickle
-import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
+import numpy as np, pandas as pd
+import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))))
-ROOT = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg')
-sys.path.insert(0, ROOT)
-import paper_style as PS; PS.apply()
-VAL_CSV = os.path.join(ROOT, 'runs/v2/dataset.csv')
-TEST_CSV = os.path.join(ROOT, 'test_split_pipeline/runs/test_dataset.csv')
-RF_PKL = os.path.join(ROOT, 'runs/v2/rf_full.pkl')
-OUTDIR = os.path.join(ROOT, 'extra_experiments/out')
-FIGDIR = os.path.join(ROOT, 'paper/figures')
-os.makedirs(OUTDIR, exist_ok=True)
+HERE = os.path.dirname(os.path.abspath(__file__)); P1 = os.path.dirname(os.path.dirname(HERE))
+DATA = os.path.join(P1, 'data'); OUTDIR = os.path.join(HERE, 'out')
+FIGDIR = os.path.join(P1, 'paper/figures')
+os.makedirs(OUTDIR, exist_ok=True); os.makedirs(FIGDIR, exist_ok=True)
+try:
+    sys.path.insert(0, os.path.join(P1, 'code')); import paper_style as PS; PS.apply()
+except Exception:
+    PS = None
 
 PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
-ACTIONS = ['L', 'C16', 'C256']
-SEED = 0
-
-# selector feature set (must mirror train_rf_v2.py 'full' mode)
-EXCLUDE = {
-    'sample_id', 'cav_keys', 'channel_type',
-    *[f'{m}_{s}' for m in ['late', 'early', 'intermediate', 'compressed']
-      for s in ['num_pred', 'num_gt', 'tp', 'fp', 'fn', 'precision', 'recall',
-                'f1', 'payload_Mbit']],
-    *[f'{m}_f1_gain_over_late' for m in ['late', 'early', 'intermediate', 'compressed']],
-    *[f'{m}_gain_per_extra_Mbit' for m in ['late', 'early', 'intermediate', 'compressed']],
-    'best_method_by_f1', 'best_level_by_f1', 'best_f1', 'best_payload_Mbit',
-    'bler_C16', 'bler_C256', 'eff_f1_L', 'eff_f1_C16', 'eff_f1_C256', 'oracle_3way',
-}
-
-
-def feat_cols(df):
-    return [c for c in df.columns if c not in EXCLUDE]
+ACTIONS = ['L', 'C16', 'C256']; PAYVEC = np.array([PAYLOAD[a] for a in ACTIONS])
+SEED = 0; BLER_INFEASIBLE = 0.999
+EXCLUDE = {'sample_id', 'cav_keys', 'channel_type', 'est_snr_db', 'channel_is_rayleigh',
+           'bler_C16', 'bler_C256', 'eff_f1_L', 'eff_f1_C16', 'eff_f1_C256', 'oracle_3way', 'ego_f1',
+           *[f'{m}_{s}' for m in ('late', 'early', 'intermediate', 'compressed')
+             for s in ('num_pred', 'num_gt', 'tp', 'fp', 'fn', 'precision', 'recall', 'f1', 'payload_Mbit')],
+           *[f'{m}_f1_gain_over_late' for m in ('late', 'early', 'intermediate', 'compressed')],
+           *[f'{m}_gain_per_extra_Mbit' for m in ('late', 'early', 'intermediate', 'compressed')],
+           'best_method_by_f1', 'best_level_by_f1', 'best_f1', 'best_payload_Mbit'}
 
 
 def eff_matrix(df):
     return df[['eff_f1_L', 'eff_f1_C16', 'eff_f1_C256']].to_numpy()
 
 
+def mask_of(df):
+    m = np.zeros((len(df), 3), bool)
+    m[:, 1] = df['bler_C16'].to_numpy() >= BLER_INFEASIBLE
+    m[:, 2] = df['bler_C256'].to_numpy() >= BLER_INFEASIBLE
+    return m
+
+
 def realised(df, actions):
-    actions = np.asarray(actions)
-    eff = eff_matrix(df)
-    idx = np.array([ACTIONS.index(a) for a in actions])
-    f1 = eff[np.arange(len(df)), idx].mean()
-    pay = np.array([PAYLOAD[a] for a in actions]).mean()
-    return pay, f1
+    eff = eff_matrix(df); idx = np.array([ACTIONS.index(a) for a in actions])
+    return float(np.array([PAYLOAD[a] for a in actions]).mean()), float(eff[np.arange(len(df)), idx].mean())
 
 
-def lambda_oracle_actions(df, lam):
-    eff = eff_matrix(df)
-    payvec = np.array([PAYLOAD[a] for a in ACTIONS])
-    obj = eff - lam * payvec[None, :]
+def lambda_actions(df, lam):
+    """Feasibility-masked Lagrangian argmax over eff - lam*payload."""
+    obj = eff_matrix(df) - lam * PAYVEC[None, :]
+    obj = np.where(mask_of(df), -np.inf, obj)
     return np.array(ACTIONS)[obj.argmax(1)]
 
 
-def fixed_point(df, a):
-    eff = eff_matrix(df)[:, ACTIONS.index(a)]
-    return PAYLOAD[a], eff.mean()
-
-
-def run_split(name, df, train_df=None, rf=None):
+def run_split(name, df, train_df, rf):
     pts = {}
     for a in ACTIONS:
-        pts[f'Fixed {a}'] = fixed_point(df, a)
-    # oracle (lambda=0)
-    pts['Oracle'] = realised(df, df['oracle_3way'].to_numpy())
-    # Lagrangian oracle frontier
+        pts[f'Fixed {a}'] = (PAYLOAD[a], float(eff_matrix(df)[:, ACTIONS.index(a)].mean()))
+    pts['Oracle'] = realised(df, lambda_actions(df, 0.0))          # lam=0 masked oracle
     lams = np.concatenate([[0.0], np.geomspace(1e-3, 5.0, 40)])
-    front = [realised(df, lambda_oracle_actions(df, l)) for l in lams]
+    front, c256_rows = [], []
+    for l in lams:
+        acts = lambda_actions(df, l)
+        pay, f1 = realised(df, acts)
+        front.append((pay, f1))
+        c256_rows.append(dict(split=name, lam=round(float(l), 5),
+                              frac_C256=round(float((acts == 'C256').mean()), 5),
+                              frac_C16=round(float((acts == 'C16').mean()), 5),
+                              frac_L=round(float((acts == 'L').mean()), 5),
+                              payload=round(pay, 4), f1=round(f1, 4)))
     front = np.array(front)
-    # deployed RF
-    cols = feat_cols(df)
-    rf_pay = rf_f1 = None
-    if rf is not None:
-        cols_rf = [c for c in cols if c in df.columns]
-        pred = rf.predict(df[rf.feature_names_in_])
-        rf_pay, rf_f1 = realised(df, pred)
-        pts['CA-TOSG (RF, deployed)'] = (rf_pay, rf_f1)
-    # RF + lambda (retrain on lambda-cost labels using train_df, eval on df)
+    pred = rf.predict(df[list(rf.feature_names_in_)])
+    pts['CA-TOSG (RF, deployed)'] = realised(df, pred)
+    # RF retrained on lambda-cost labels (learned achievable frontier)
     rfl = []
-    if train_df is not None:
-        tcols = feat_cols(train_df)
-        common = [c for c in tcols if c in df.columns]
-        for lam in [0.0, 0.05, 0.2, 0.5, 1.0, 2.0]:
-            y = lambda_oracle_actions(train_df, lam)
-            m = RandomForestClassifier(n_estimators=400, max_depth=10,
-                                       min_samples_leaf=4, random_state=SEED, n_jobs=-1)
-            m.fit(train_df[common], y)
-            p = m.predict(df[common])
-            rfl.append((lam, *realised(df, p)))
-    return pts, lams, front, np.array(rfl) if rfl else None
+    tcols = list(rf.feature_names_in_)
+    for lam in [0.0, 0.05, 0.2, 0.5, 1.0, 2.0]:
+        y = lambda_actions(train_df, lam)
+        m = RandomForestClassifier(n_estimators=400, max_depth=10, min_samples_leaf=4,
+                                   random_state=SEED, n_jobs=-1).fit(train_df[tcols], y)
+        rfl.append((lam, *realised(df, m.predict(df[tcols]))))
+    return pts, front, np.array(rfl), c256_rows
 
 
 def plot(name, pts, front, rfl):
     fig, ax = plt.subplots(figsize=(5.8, 3.4))
-    ax.plot(front[:, 0], front[:, 1], '-', color=PS.C_REF, lw=1.3, zorder=1,
+    ax.plot(front[:, 0], front[:, 1], '-', lw=1.3, zorder=1, color='0.4',
             label='Lagrangian oracle frontier')
-    if rfl is not None:
-        ax.plot(rfl[:, 1], rfl[:, 2], 'o--', color=PS.C_OURS, ms=4, lw=1.1,
-                zorder=2, label=r'CA-TOSG (RF) $\lambda$-sweep')
-    markers = {'Fixed L': ('s', PS.C_L), 'Fixed C16': ('^', PS.C_C16),
-               'Fixed C256': ('v', PS.C_C256), 'Oracle': ('*', PS.C_ORACLE),
-               'CA-TOSG (RF, deployed)': ('D', PS.C_OURS)}
+    if rfl is not None and len(rfl):
+        ax.plot(rfl[:, 1], rfl[:, 2], 'o--', ms=4, lw=1.1, zorder=2,
+                label=r'CA-TOSG (RF) $\lambda$-sweep')
     for k, (x, y) in pts.items():
-        m, c = markers.get(k, ('o', 'k'))
-        ax.scatter([x], [y], marker=m, c=c, s=90 if m == '*' else 55, zorder=4,
-                   edgecolors='k', linewidths=0.5, label=k)
-    ax.set_xlabel('Average payload (Mbit/frame, log scale)')
-    ax.set_ylabel('Mean realised F1')
-    ax.set_xscale('log')
-    ax.set_xlim(0.018, 0.65)
-    ax.set_ylim(0.05, 0.95)
-    ax.grid(True, alpha=0.3, which='both')
-    ax.annotate('fixed feature-level\npolicies are dominated',
-                xy=(0.495, 0.414), xytext=(0.12, 0.30), fontsize=7, color='0.3',
-                arrowprops=dict(arrowstyle='->', color='0.5', lw=0.8))
-    ax.legend(fontsize=7, loc='center left', bbox_to_anchor=(1.01, 0.5),
-              framealpha=0.95)
-    ax.set_title(f'OPV2V {name}', fontsize=9)
-    fig.tight_layout()
+        ax.scatter([x], [y], s=70, zorder=4, edgecolors='k', linewidths=0.5, label=k)
+    ax.set_xlabel('Average payload (Mbit/frame, log)'); ax.set_ylabel('Mean realised F1')
+    ax.set_xscale('log'); ax.grid(True, alpha=0.3, which='both')
+    ax.legend(fontsize=7, loc='center left', bbox_to_anchor=(1.01, 0.5))
+    ax.set_title(f'OPV2V {name}', fontsize=9); fig.tight_layout()
     out = os.path.join(FIGDIR, f'fig_pareto_{name}.pdf')
-    fig.savefig(out, bbox_inches='tight')
-    fig.savefig(out.replace('.pdf', '_preview.png'), bbox_inches='tight', dpi=140)
+    fig.savefig(out, bbox_inches='tight'); fig.savefig(out.replace('.pdf', '_preview.png'), dpi=140, bbox_inches='tight')
     print('wrote', out)
 
 
 def main():
-    from sklearn.model_selection import train_test_split
-    from sklearn.ensemble import RandomForestClassifier as _RF
-    with open(RF_PKL, 'rb') as f:
-        rf = pickle.load(f)
-    val_full = pd.read_csv(VAL_CSV)
-    test_df = pd.read_csv(TEST_CSV)
+    rf = pickle.load(open(os.path.join(DATA, 'selector_rf.pkl'), 'rb'))
+    val = pd.read_csv(os.path.join(DATA, 'dataset_validate_v3.csv'))
+    test = pd.read_csv(os.path.join(DATA, 'dataset_test_v3.csv'))
+    culver = pd.read_csv(os.path.join(DATA, 'dataset_culver_v3.csv'))
+    v_tr, v_te = train_test_split(val, test_size=0.30, random_state=SEED, stratify=val['oracle_3way'])
 
-    # validate: held-out 30% split (matches the paper's tab:headline protocol),
-    # RF retrained on the 70% train partition -> deployed point ~ 0.076/0.865.
-    v_tr, v_te = train_test_split(val_full, test_size=0.30, random_state=SEED,
-                                  stratify=val_full['oracle_3way'])
-    cols_v = feat_cols(v_tr)
-    rf_v = _RF(n_estimators=400, max_depth=10, min_samples_leaf=4,
-               random_state=SEED, n_jobs=-1).fit(v_tr[cols_v], v_tr['oracle_3way'])
-
-    rows = []
-    for name, df, tdf, model in [('validate', v_te, v_tr, rf_v),
-                                 ('test', test_df, val_full, rf)]:
-        pts, lams, front, rfl = run_split(name, df, train_df=tdf, rf=model)
-        plot(name, pts, front, rfl)
+    rows, c256_all = [], []
+    for name, df, tdf in [('validate', v_te, v_tr), ('test', test, val), ('culver', culver, val)]:
+        pts, front, rfl, c256_rows = run_split(name, df, tdf, rf)
+        plot(name, pts, front, rfl); c256_all += c256_rows
         for k, (x, y) in pts.items():
             rows.append(dict(split=name, policy=k, payload=round(x, 4), f1=round(y, 4)))
-        print(f'\n=== {name} key points ===')
+        cmax = max(r['frac_C256'] for r in c256_rows)
+        print(f"\n=== {name} ===  max C256 activation over the lambda frontier = {cmax:.5f}")
         for k, (x, y) in pts.items():
-            print(f'  {k:28s} payload={x:.4f}  F1={y:.4f}')
-        if rfl is not None:
-            print('  RF lambda-sweep (lam, payload, F1):')
-            for r in rfl:
-                print(f'    lam={r[0]:.2f}  payload={r[1]:.4f}  F1={r[2]:.4f}')
+            print(f"  {k:28s} payload={x:.4f}  F1={y:.4f}")
     pd.DataFrame(rows).to_csv(os.path.join(OUTDIR, 'a1_pareto_points.csv'), index=False)
-    print('\nwrote', os.path.join(OUTDIR, 'a1_pareto_points.csv'))
+    pd.DataFrame(c256_all).to_csv(os.path.join(OUTDIR, 'a1_c256_frontier.csv'), index=False)
+    print('\n=== C256 activation along the Lagrangian frontier (max per split) ===')
+    for sp in ('validate', 'test', 'culver'):
+        sub = [r for r in c256_all if r['split'] == sp]
+        cmax = max(r['frac_C256'] for r in sub)
+        at = [r for r in sub if r['frac_C256'] == cmax][0]
+        print(f"  {sp:9s} max frac_C256={cmax:.5f} at lam={at['lam']} (payload={at['payload']}, F1={at['f1']})")
+    print('wrote', os.path.join(OUTDIR, 'a1_pareto_points.csv'), '+ a1_c256_frontier.csv')
 
 
 if __name__ == '__main__':

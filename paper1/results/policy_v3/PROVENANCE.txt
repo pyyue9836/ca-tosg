@@ -1,0 +1,12 @@
+CA-TOSG P1 Step-5 v3 200-realisation policy eval
+rf_checkpoint_md5: d5355fd427b3437c94b6770bb6a68ea1  rf_path: data/selector_rf.pkl (v3-retrained)
+dataset_validate_v3_md5: d357b38e802455bf3cabd3f886353991
+dataset_test_v3_md5: 0946c9f343eed98a337b4bd0229b9b39
+dataset_culver_v3_md5: 746c35ac187ed3eabecb90b183a6c1b6
+channel_realisations: 200 (seeds 0..199); protocol_version: v3-P1-2026-07-12
+BLER: results/bler_sionna/bler_sionna.csv (frame-level bler_frame, Es/N0); awgn+rayleigh direct table lookup (Rayleigh frame BLER=1 across 0-20 dB, no numerical avg).
+eff_a = comp*(1-BLER_a) + ego*BLER_a (ego-only fallback; expected F1, block NOT sampled).
+oracle: channel-state-conditioned expected-utility argmax, feasibility mask BLER>=0.999 removes C from the feasible set. lambda pinned = 0.
+SNR-threshold baseline RE-TUNED on the v3 terrain: awgn & snr>tau -> C16 else L; tau grid 0.0..20.0 step 0.5 dB; best tau = argmax mean realised F1 per split (v2's tau in {12,14,16} NOT reused -- the frame cliff moved to ~8 dB).
+clairvoyant_upper: the ONLY policy that SAMPLES the per-frame block success/failure (succ_a ~ Bernoulli(1-BLER_a)) and takes the post-hoc max over actions of the realised F1 (L->late, C-success->comp, C-fail->ego). Genuine post-hoc upper bound, separate from the oracle.
+validate = FULL 1980 frames incl. selector training frames (in-sample; not comparable to held-out test/culver without this note).
