@@ -8,21 +8,24 @@ import pickle
 import numpy as np
 import pandas as pd
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))))
-ROOT = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg')
+# P1 Step-5 path repair: 01_paper_ca_tosg was renamed to paper1 and extra_experiments moved under
+# code/. ROOT is now the paper1 dir (dirname^3 of this file). All experiments read the CANONICAL v3
+# datasets (data/dataset_{split}_v3.csv) + the v3-retrained deployed selector (data/selector_rf.pkl).
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # .../paper1
+REPO = os.path.dirname(os.path.dirname(ROOT))                                        # .../OpenCOOD
 
 # apply the shared IEEE figure style for every experiment that imports _common
-sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, 'code'))
 try:
     import paper_style as PS
     PS.apply()
 except Exception:
     PS = None
-VAL_CSV = os.path.join(ROOT, 'runs/v2/dataset.csv')
-TEST_CSV = os.path.join(ROOT, 'test_split_pipeline/runs/test_dataset.csv')
-RF_PKL = os.path.join(ROOT, 'runs/v2/rf_full.pkl')
-OUTDIR = os.path.join(ROOT, 'extra_experiments/out')
+VAL_CSV = os.path.join(ROOT, 'data/dataset_validate_v3.csv')
+TEST_CSV = os.path.join(ROOT, 'data/dataset_test_v3.csv')
+CULVER_CSV = os.path.join(ROOT, 'data/dataset_culver_v3.csv')
+RF_PKL = os.path.join(ROOT, 'data/selector_rf.pkl')
+OUTDIR = os.path.join(ROOT, 'code/extra_experiments/out')
 FIGDIR = os.path.join(ROOT, 'paper/figures')
 os.makedirs(OUTDIR, exist_ok=True)
 
@@ -39,6 +42,7 @@ EXCLUDE = {
     *[f'{m}_gain_per_extra_Mbit' for m in ['late', 'early', 'intermediate', 'compressed']],
     'best_method_by_f1', 'best_level_by_f1', 'best_f1', 'best_payload_Mbit',
     'bler_C16', 'bler_C256', 'eff_f1_L', 'eff_f1_C16', 'eff_f1_C256', 'oracle_3way',
+    'ego_f1',  # v3 canonical outcome column -> leakage, exclude from features
 }
 
 
