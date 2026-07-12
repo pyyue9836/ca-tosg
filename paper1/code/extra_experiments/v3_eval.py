@@ -91,8 +91,9 @@ def paired_ci_frames_from(df_a_framemean, df_b_framemean, n_boot=5000, seed=1234
     return float(d.mean()), float(lo), float(hi)
 
 
-def frame_means(df, policy, feat=None, model=None, n_seed=N_SEED):
-    """Per-FRAME mean realised eff over realisations (for frame-level paired bootstrap)."""
+def frame_means(df, policy, feat=None, model=None, n_seed=N_SEED, what='eff'):
+    """Per-FRAME mean over realisations (for frame-level paired bootstrap).
+    what='eff' -> mean realised F1 per frame; what='pay' -> mean payload per frame."""
     n = len(df); acc = np.zeros(n)
     for s in range(n_seed):
         snr, is_ray, b16, b256 = draws(n, s)
@@ -106,5 +107,5 @@ def frame_means(df, policy, feat=None, model=None, n_seed=N_SEED):
             idx = np.full(n, ACTIONS.index(policy.replace('fixed', '')))
         elif policy.startswith('threshold:'):
             tau = float(policy.split(':')[1]); idx = np.where((~is_ray) & (snr > tau), 1, 0)
-        acc += eff[np.arange(n), idx]
+        acc += (eff[np.arange(n), idx] if what == 'eff' else PAYVEC[idx])
     return acc / n_seed

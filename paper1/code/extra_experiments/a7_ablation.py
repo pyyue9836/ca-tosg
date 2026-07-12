@@ -41,9 +41,9 @@ def main():
         ('Full - density cues', [c for c in full if c not in DENSITY_CUES]),
         ('Full - object-count cues', [c for c in full if c not in OBJCOUNT_CUES]),
     ]
-    rows = {}; fm = {}
+    rows = {}; fm = {}; mdl = {}; colmap = {}
     for label, cols in configs:
-        rf = fit(tr, cols)
+        rf = fit(tr, cols); mdl[label] = rf; colmap[label] = cols
         f1s, pays = V.eval_series(te, 'rf', feat=cols, model=rf)
         rows[label] = dict(policy=label, n_features=len(cols), **V.summ(f1s, pays))
         fm[label] = V.frame_means(te, 'rf', feat=cols, model=rf)
@@ -53,18 +53,29 @@ def main():
         policy='Fixed L', n_features=0, **V.summ(f1L, payL))
 
     df = pd.DataFrame(list(rows.values()))
+    # F1-side cue value (accuracy currency)
     d_cues, lo_c, hi_c = V.paired_ci_frames_from(fm['Full (all features)'], fm['Channel only (SNR + ch type)'])
     d_csi, lo_s, hi_s = V.paired_ci_frames_from(fm['Perception + SNR'], fm['Channel only (SNR + ch type)'])
+    # PAYLOAD-side cue value (bandwidth currency) -- same paired machinery, so the "cues buy bandwidth"
+    # half no longer stands on one leg. Full - Channel-only payload; negative = cues SAVE bandwidth.
+    pm_full = V.frame_means(te, 'rf', feat=colmap['Full (all features)'], model=mdl['Full (all features)'], what='pay')
+    pm_chan = V.frame_means(te, 'rf', feat=colmap['Channel only (SNR + ch type)'], model=mdl['Channel only (SNR + ch type)'], what='pay')
+    d_pay, lo_p, hi_p = V.paired_ci_frames_from(pm_full, pm_chan)
     print('=== A7 v3 200-realisation feature ablation (train=validate, eval=test) ===')
     print(df.to_string(index=False))
-    print(f"\ncues_add_over_channel_alone (Full - Channel-only): {d_cues:+.5f}  95% CI [{lo_c:+.5f}, {hi_c:+.5f}]  "
-          f"{'significant' if (lo_c>0 or hi_c<0) else 'NOT significant'}")
-    print(f"perception+SNR - channel-only:                     {d_csi:+.5f}  95% CI [{lo_s:+.5f}, {hi_s:+.5f}]")
+    print(f"\n[F1 currency]      cues_add_over_channel_alone (Full - Channel-only F1): {d_cues:+.5f}  "
+          f"95% CI [{lo_c:+.5f}, {hi_c:+.5f}]  {'significant' if (lo_c>0 or hi_c<0) else 'NOT significant'}")
+    print(f"[payload currency] cues save bandwidth (Full - Channel-only payload):    {d_pay:+.5f}  "
+          f"95% CI [{lo_p:+.5f}, {hi_p:+.5f}]  {'significant' if (lo_p>0 or hi_p<0) else 'NOT significant'}")
+    print(f"perception+SNR - channel-only F1:                                        {d_csi:+.5f}  95% CI [{lo_s:+.5f}, {hi_s:+.5f}]")
     df.to_csv(os.path.join(C.OUTDIR, 'a7_ablation_v3.csv'), index=False)
-    pd.DataFrame([dict(delta='cues_add_over_channel_alone', value=round(d_cues, 5), ci_lo=round(lo_c, 5),
-                       ci_hi=round(hi_c, 5), significant=bool(lo_c > 0 or hi_c < 0)),
-                  dict(delta='perception+SNR_minus_channel_only', value=round(d_csi, 5), ci_lo=round(lo_s, 5),
-                       ci_hi=round(hi_s, 5), significant=bool(lo_s > 0 or hi_s < 0))]).to_csv(
+    pd.DataFrame([
+        dict(delta='cues_add_F1_over_channel_alone', currency='accuracy', value=round(d_cues, 5),
+             ci_lo=round(lo_c, 5), ci_hi=round(hi_c, 5), significant=bool(lo_c > 0 or hi_c < 0)),
+        dict(delta='cues_save_payload_over_channel_alone', currency='bandwidth', value=round(d_pay, 5),
+             ci_lo=round(lo_p, 5), ci_hi=round(hi_p, 5), significant=bool(lo_p > 0 or hi_p < 0)),
+        dict(delta='perception+SNR_minus_channel_only_F1', currency='accuracy', value=round(d_csi, 5),
+             ci_lo=round(lo_s, 5), ci_hi=round(hi_s, 5), significant=bool(lo_s > 0 or hi_s < 0))]).to_csv(
         os.path.join(C.OUTDIR, 'a7_cue_value_v3.csv'), index=False)
     print('wrote out/a7_ablation_v3.csv + a7_cue_value_v3.csv')
 
