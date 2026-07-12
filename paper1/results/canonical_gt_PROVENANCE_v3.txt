@@ -1,0 +1,41 @@
+Canonical GT recipe -- protocol v3 (P1, 2026-07-12). Frozen. v2 and v3 numbers never in the
+same table; the annual-review v2 numbers are frozen at commit 8ab7693.
+
+RECIPE
+  GT source   : the OpenCOOD evaluation-time GT = post_processor.generate_gt_bbx
+                (base_postprocessor.py L45-96): every CAV's object_bbx_center projected to the ego
+                frame, UNIONED and DEDUPED by object_id, filtered to GT_RANGE. The canonical GT is the
+                intermediate (comp) all-CAV union GT -- the fuller cooperative task-truth union
+                (late GT is the same union path but a slightly-truncated batch under its ±70.4 config).
+  GT_RANGE    : [-140, -40, -3, 140, 40, 1]  (standard OPV2V benchmark evaluation range; x±140, y±40).
+  predictions : NOT cropped. Q4 (gt_audit.csv) confirmed late predictions include |x|>70.4 boxes
+                (collaborator detections projected to ego), so there is NO structural range asymmetry
+                and the ±70.4-crop idea is rejected. Far-range late-vs-comp = collaborator boxes vs
+                collaborator features = the L-vs-C comparison itself, not unfairness.
+  ruler       : ALL policies (late / comp / ego / Where2comm ref / CA-TOSG) scored against this ONE
+                canonical GT; F1 at IoU 0.5, AP at IoU {0.3,0.5,0.7}. Same GT feeds the F1 and the
+                AP (true_e2e) pipelines.
+  visibility  : NO ≥1-lidar-point visibility filter. Because the GT is now one-for-all, visibility is
+                a SENSITIVITY question, not a fairness one; no-filter matches the standard OPV2V
+                protocol (zero reviewer friction). A ≥1-point union-visibility variant is an appendix
+                sensitivity candidate, NOT the canonical.
+  ego far     : ego-only has zero far predictions (gt_audit.csv) -> far objects are FN for ego. That is
+                the physical fact (ego is blind there), retained; fallback cost is measured on task truth.
+
+canonical_GT_md5 : 42d28b6fb60ac004f8ed661aa1edb813  (comp all-CAV union GT, 3 splits concatenated)
+frames           : validate 1980, test 2170, culver 550
+generators       : code/gt_audit.py (diagnosis artifact) ; code/canonical_rescore.py (before/after).
+
+DIAGNOSIS PROVENANCE (rule 2026-07-12: diagnosis has provenance too)
+  results/gt_audit.csv : GT_RANGE, late/comp GT near/far + centroid overlap (0.95-0.996 -> the two eval
+  GTs are ~identical unions), late/comp/ego prediction near/far counts, Q4 flag. The round-1 claim
+  "late GT = generate_object_center([ego])" was the TRAIN-time dataset GT (a different path); the
+  eval GT is generate_gt_bbx. That mismatch caused the two rounds' contradictory numbers.
+
+PRE-REGISTERED PREDICTION (confirmed, results/canonical_rescore_v3.csv)
+  Under v3 the own-GT test==Culver late-F1 tie (0.8867/0.8867) SEPARATES: test 0.9011 vs Culver 0.8722.
+  => the earlier 4-dp overlap was ~half operating-point saturation, ~half own-GT convention. P0.1 is
+  NOT overturned (the v2 closure and the shipped annual review stand); the decoupling artifact is
+  re-run under v3 and its conclusion updated accordingly. The Fixed-L<->ceiling gap moves split-
+  dependently: Culver WIDENS (0.061->0.089, feature missed-detection value strengthened), test narrows
+  (0.016->0.003), validate ~flat. Reported faithfully.

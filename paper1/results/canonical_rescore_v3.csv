@@ -1,0 +1,10 @@
+split,policy,F1_before,F1_after,AP50_before,AP50_after,AP70_before,AP70_after
+validate,Fixed-L (late),0.9082,0.9067,0.8928,0.8902,0.8386,0.836
+validate,Feature-ceiling (comp),0.9193,0.9193,0.9169,0.9169,0.8675,0.8675
+validate,ego-only,0.7373,0.7358,0.6135,0.6116,0.5377,0.536
+test,Fixed-L (late),0.8867,0.9011,0.9055,0.9189,0.856,0.8687
+test,Feature-ceiling (comp),0.9325,0.9325,0.9216,0.9216,0.8672,0.8672
+test,ego-only,0.8056,0.8176,0.7243,0.735,0.6413,0.6508
+culver,Fixed-L (late),0.8867,0.8722,0.8114,0.7828,0.724,0.6975
+culver,Feature-ceiling (comp),0.9279,0.9279,0.872,0.872,0.7768,0.7768
+culver,ego-only,0.7855,0.769,0.6438,0.6185,0.5528,0.5312
