@@ -1,24 +1,24 @@
 {
-  "train_dataset_md5": "815c64611b1ef97059af6c8b8ea727c6",
-  "deployed_rf_md5": "f8059f3ed073fdcc6cfaf10e07a9cff4",
+  "train_dataset_md5": "d357b38e802455bf3cabd3f886353991",
+  "deployed_rf_md5": "d5355fd427b3437c94b6770bb6a68ea1",
   "split_seed": 0,
   "test_size": 0.3,
   "n_train": 1386,
   "n_test": 594,
   "class_balance": {
     "full": {
-      "L": 1689,
-      "C16": 291,
+      "L": 1703,
+      "C16": 277,
       "C256": 0
     },
     "train": {
-      "L": 1182,
-      "C16": 204,
+      "L": 1192,
+      "C16": 194,
       "C256": 0
     },
     "test": {
-      "L": 507,
-      "C16": 87,
+      "L": 511,
+      "C16": 83,
       "C256": 0
     }
   },
@@ -51,23 +51,23 @@
     {
       "mode": "base",
       "n_features": 21,
-      "accuracy": 0.766,
-      "mean_payload": 0.1017,
-      "mean_f1": 0.8923
+      "accuracy": 0.7828,
+      "mean_payload": 0.0922,
+      "mean_f1": 0.892
     },
     {
       "mode": "csi",
       "n_features": 22,
-      "accuracy": 0.8047,
-      "mean_payload": 0.112,
-      "mean_f1": 0.8957
+      "accuracy": 0.8249,
+      "mean_payload": 0.1168,
+      "mean_f1": 0.8929
     },
     {
       "mode": "full",
       "n_features": 23,
-      "accuracy": 0.8788,
-      "mean_payload": 0.1168,
-      "mean_f1": 0.9135
+      "accuracy": 0.9074,
+      "mean_payload": 0.1081,
+      "mean_f1": 0.9137
     }
   ]
 }

@@ -1,0 +1,4 @@
+split,n,frac_ego_gt_late,n_ego_gt_late,mean_ego_f1,mean_late_f1,mean_ego_minus_late_on_harm
+validate,1980,0.0091,18,0.7358,0.9067,0.0462
+test,2170,0.0742,161,0.8176,0.9011,0.0477
+culver,550,0.0018,1,0.769,0.8722,0.0212

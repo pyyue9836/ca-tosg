@@ -1,111 +1,123 @@
 CA-TOSG (paper1) — P1 Step-4 PROVENANCE
 ========================================
 Branch p1-phy-rebuild (ca-tosg). v2 frozen at main 8ab7693; v2 and v3 numbers never share a table.
-Env: /home/josh/miniconda3/envs/sionna310/bin/python. Generated 2026-07-12.
+Env: /home/josh/miniconda3/envs/sionna310/bin/python. Generated 2026-07-12 (feasibility-mask revision).
 
 WHAT STEP 4 DID
 ---------------
-1. make_dataset.py rewritten: regenerate the 3-way oracle labels (L/C16/C256) on the canonical v3
-   datasets, using the NEW Sionna frame-level BLER + ego-only failure fallback. Overwrites, in place,
-   ONLY the physical-layer/label columns {bler_C16, bler_C256, eff_f1_L, eff_f1_C16, eff_f1_C256,
-   oracle_3way} of data/dataset_{split}_v3.csv. Cues, canonical F1 columns (late_f1/compressed_f1/
-   ego_f1), and the FROZEN single-draw realisation (est_snr_db/channel_type/channel_is_rayleigh) are
-   untouched. The frozen draw is REUSED, not resampled, so the only controlled changes v2->v3 are
-   {canonical F1, Sionna BLER, ego fallback} with no confound from a new random draw
-   (verified: est_snr_db and channel_type are bit-identical between dataset_{split}.csv and
-   dataset_{split}_v3.csv for all three splits).
-2. train_rf.py rewritten: retrain the deployed 'full' selector on dataset_validate_v3.csv,
-   test_size=0.30, SEED=0, stratified on oracle_3way. Serialize the training/held-out frame lists +
-   split seed + feature names + dataset md5 in data/selector_rf_bundle.pkl (new discipline rule).
+1. make_dataset.py: regenerate the 3-way oracle labels (L/C16/C256) on the canonical v3 datasets,
+   using the NEW Sionna frame-level BLER + ego-only failure fallback + a FEASIBILITY MASK. Overwrites,
+   in place, ONLY {bler_C16, bler_C256, eff_f1_L, eff_f1_C16, eff_f1_C256, oracle_3way} of
+   data/dataset_{split}_v3.csv. Cues, canonical F1 (late_f1/compressed_f1/ego_f1), and the FROZEN
+   single-draw realisation (est_snr_db/channel_type/channel_is_rayleigh) are untouched. The frozen draw
+   is REUSED, not resampled (verified bit-identical v2==v3 for est_snr_db and channel_type on all splits)
+   -> the only controlled changes v2->v3 are {canonical F1, Sionna BLER, ego fallback, feasibility mask}.
+2. train_rf.py: retrain the deployed 'full' selector on dataset_validate_v3.csv, test_size=0.30,
+   SEED=0, stratified on oracle_3way. Serialize train/held-out frame lists + split seed + feature names
+   + dataset md5 in data/selector_rf_bundle.pkl (new discipline rule).
 
-REQUIREMENT (1) — LAMBDA, PINNED
---------------------------------
-The training oracle is the lam=0 channel-state-conditioned expected-utility argmax:
-    oracle_3way = argmax_a eff_f1_a ,  NO payload penalty.
-This is BOTH v2's lambda VALUE (v2's oracle_3way was also the pure argmax) AND v2's SAME criterion;
-the two interpretations coincide at lam=0, so nothing is re-tuned. The ego fallback + Sionna BLER
-LEGITIMATELY move the resulting operating point (payload); we do NOT re-tune anything to chase v2's
-0.0841 Mbit/frame. The Lagrangian lambda>0 sweep lives only in the pareto experiment (a1_pareto.py)
-and its lambda grid is NOT touched here. Consequence to expect (not a bug): the deployed operating
-point payload shifts because "same lambda != same operating point" once the ego floor and the
-Sionna cliff move the per-frame utilities.
+REQUIREMENT (1) — LAMBDA, PINNED = 0
+------------------------------------
+oracle_3way = argmax_a eff_f1_a, NO payload penalty. Both v2's lambda VALUE and v2's SAME criterion
+coincide at lam=0; nothing is re-tuned. Ego fallback + Sionna BLER legitimately move the operating
+point (payload); we do NOT chase v2's 0.0841. The Lagrangian lambda>0 sweep stays only in a1_pareto.
+DOWNSTREAM FLAG (supervisor 2026-07-12): v3 oracle payload will be materially ABOVE v2 (test oracle
+C-active ~0.15) -> the "15.8-18.4% of Fixed C16" payload band does NOT return; not to be chased. v3
+narrative = "payload is spent where it is worth it"; the Step-5 200-realisation numbers decide it.
+
+FEASIBILITY MASK (supervisor RULING 2026-07-12; a CONSTRAINT, not lambda)
+-------------------------------------------------------------------------
+Rule: when a feature action's frame-level BLER >= 0.999 (certain failure), that action is removed from
+the ORACLE's feasible action set, for LABEL GENERATION ONLY. Semantics (protocol, not tuning): "a
+request that cannot be delivered is not a feasible action -- it spends the collaborator's channel-use
+for zero information" (payload is billed per REQUEST; a failed transmission is not refunded).
+Why (the account the earlier pass missed): without the mask the payload-BLIND lam=0 oracle labels a
+Rayleigh (BLER=1) frame C16 purely to fail into the ego fallback whenever ego_f1 > late_f1 -- i.e. it
+makes the collaborator actually EMIT 0.495 Mbit for a guaranteed-failed decode, just to "mute" the
+collaborator. On test that was 7.4% of frames = ~0.037 Mbit/frame of oracle payload burned for zero
+info, and a deployed selector imitating those labels would learn "sparse scene + Rayleigh -> request C"
+= pure wasted bandwidth. The mask is a feasible-SET constraint: it does NOT move a global operating
+point and does NOT reintroduce the lam degree of freedom. It touches ONLY the oracle label argmax; the
+eff_f1_* columns keep the TRUE effective F1, so every POLICY evaluation is unchanged (Fixed C16 is
+still, correctly, beaten to ego level under Rayleigh -- its job as a baseline). Implemented in both
+make_dataset.py and step4_oracle_action_dist.py with the identical threshold BLER_INFEASIBLE=0.999.
+Mask incidence: C16 infeasible on 1322/1980 (validate), 1461/2170 (test), 356/550 (culver);
+C256 on 1790/1980, 1951/2170, 490/550 (all Rayleigh + the low-SNR AWGN tail).
 
 REQUIREMENT (2) — BLER SOURCE = frame level, grep evidence
 ----------------------------------------------------------
-BLER source switched from the deprecated codeword-level ldpc_qam_bler_table.csv to the Sionna
-frame-level table results/bler_sionna/bler_sionna.csv, reading the `bler_frame` column (Es/N0 axis).
+BLER source = Sionna frame-level table results/bler_sionna/bler_sionna.csv, `bler_frame` column, Es/N0.
 Grep evidence (code/make_dataset.py):
-    43: BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')  # frame-level, Es/N0
-    58:     xs = s['esno_db'].to_numpy(); ys = s['bler_frame'].to_numpy()
+    BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')  # frame-level, Es/N0
+    xs = s['esno_db'].to_numpy(); ys = s['bler_frame'].to_numpy()
 The ONLY CSV read is bler_sionna.csv and the ONLY BLER column indexed is `bler_frame`. `bler_cw`
-appears once, in a print label ("reading column: bler_frame (NOT bler_cw)"), and `ldpc_qam_bler_table`
-appears only in a docstring noting the deprecation — neither is read. Interp mirrors
-true_e2e_global.bler_frame exactly (left-fill=1, right-fill=last tabulated value).
+appears only in a print label ("...NOT bler_cw"), `ldpc_qam_bler_table` only in a deprecation docstring
+-- neither is read. Interp mirrors true_e2e_global.bler_frame (left-fill=1, right-fill=last value).
 
-REQUIREMENT (3) — ACCEPTANCE CSVs (send before Step 5)
-------------------------------------------------------
-(i) results/step4_oracle_action_dist_v3.csv  — oracle action mix by split x channel x Es/N0 (0..24 dB).
-    Pre-registered predictions:
-      P1 Rayleigh -> L ~100%: frac_L = 0.9909 (validate) / 0.9258 (test) / 0.9982 (culver).
-         The residual C-picks on Rayleigh are EXACTLY the frames with ego_f1 > late_f1 (val 0.91% /
-         test 7.42% / culver 0.18%): at Rayleigh BLER=1, eff_C16 = eff_C256 = ego_f1, so a
-         payload-BLIND (lam=0) oracle labels a frame C16 whenever ego_f1 > late_f1 (it prefers the
-         ego-fallback outcome to late). This is a faithful consequence of the pinned lam=0 oracle +
-         ego fallback, NOT a bug. test's 7.4% is driven by test being the SPARSEST split (mean GT 15
-         vs 28 validate / 43 culver) so single-vehicle ego detection occasionally beats late fusion.
-         DECISION POINT for the supervisor: a "clean" Rayleigh-all-L oracle would require a
-         payload-aware tie-break (never request C on a guaranteed-failure channel) = a lambda>0
-         choice. NOT applied silently; flagged.
-      P2 AWGN feature-selection concentrated ABOVE the new cliff: C activation @<=4 dB / @>=14 dB =
-         0.009/0.497 (validate), 0.074/0.537 (test), 0.002/0.809 (culver); first SNR with C>1% is
-         ~8 dB (validate/culver). test's non-zero low-SNR floor is the same channel/SNR-INDEPENDENT
-         ego>late tail (7.4%), not genuine low-SNR feature selection. PASS.
-      P3 C256 feasible window ~0 in 0..20 dB: max frac_C256 = 0.0171 (AWGN, 8-16 dB) / 0.0000
-         (Rayleigh). Essentially starved — the hardest motivation for a rate-matched 3rd action. PASS.
-(ii) results/step4_rf_class_report_v3.csv — retrained deployed selector class balance + per-class P/R.
-     Held-out 30% (594 frames): L  precision 0.9560 recall 0.8994 (support 507);
-                                 C16 precision 0.5641 recall 0.7586 (support 87);
-                                 C256 0/0/0 (support 0 — zero C256 in the validate oracle labels).
-     The annual-review 0.48/0.55 (v2 C16 precision/recall) returns officially as the v3 0.5641/0.7586.
-     Class balance (validate oracle_3way counts): full L1689/C16 291/C256 0; train L1182/C16 204/C256 0;
-     test L507/C16 87/C256 0. Full-selector held-out accuracy 0.8788; realised F1 0.9135 @ payload
-     0.1168. (base 0.7660 acc / 0.8923 F1; csi 0.8047 / 0.8957 — see step4_rf_modes_v3.csv.)
+REQUIREMENT (3) — ACCEPTANCE CSVs (post-mask; send before Step 5)
+----------------------------------------------------------------
+(i) results/step4_oracle_action_dist_v3.csv  (+ .pdf/.png plot) — oracle action mix by split x channel
+    x Es/N0 (0..24 dB), feasibility-masked. Pre-registered predictions:
+      P1 Rayleigh -> L 100%: frac_L = 1.0000 at EVERY (split, SNR). PASS (the ego>late artifact is gone).
+      P2 AWGN feature-selection concentrated ABOVE the cliff: C-active @<=4 dB = 0.000 (all splits);
+         @>=14 dB = 0.497 / 0.526 / 0.809 (validate/test/culver); first SNR with C>1% = 8 dB (all splits).
+         Sharp ~8-10 dB cliff. PASS.
+      P3 C256 feasible window ~0: max frac_C256 = 0.0000 everywhere (even where C256 is deliverable,
+         lower-BLER C16 dominates). Fully starved -> hardest motivation for a rate-matched 3rd action. PASS.
+(ii) results/step4_rf_class_report_v3.csv — retrained deployed selector, held-out 30% (594 frames):
+        L    precision 0.9672  recall 0.9237  (support 511)
+        C16  precision 0.6321  recall 0.8072  (support 83)
+        C256 0 / 0 / 0        (support 0 -- zero C256 in the validate oracle labels)
+     Annual-review 0.48/0.55 (v2 C16 P/R) returns officially as the v3 0.6321 / 0.8072 (post-mask).
+     Class balance (validate oracle_3way): full L1703 / C16 277 / C256 0; train L1192 / C16 194 / C256 0;
+     test L511 / C16 83 / C256 0. Full-selector held-out accuracy 0.9074 (up from 0.8788 pre-mask --
+     cleaner labels); realised F1 0.9137 @ payload 0.1081. (base 0.7828/0.8920; csi 0.8249/0.8929 --
+     step4_rf_modes_v3.csv.)
+(iii) results/step4_collaboration_harm_v3.csv — the phenomenon the mask exposed, kept as a paper
+     DISCUSSION point (do NOT discard): frac(ego_f1 > late_f1) = 0.0091 / 0.0742 / 0.0018 (val/test/culver),
+     mean (ego-late) on those frames = +0.046 / +0.048 / +0.021. "Collaboration is sometimes harmful":
+     in sparse scenes the collaborator's boxes net-introduce false positives and single-vehicle ego-only
+     beats late fusion. Paper action (Step-5+ / §5.1.1 action-space review, NOT P1): add an explicit
+     'do-not-request' ego-only 4th action -- FREE in the 2-bit codebook ('11' is reserved) -- together
+     with the rate-matched 3rd action, in one action-space revision.
 
-REQUIREMENT (4) — dataset md5 (not in git; hash-anchored here)
---------------------------------------------------------------
-  data/dataset_validate_v3.csv  md5 = 815c64611b1ef97059af6c8b8ea727c6  (1980 rows, 81 cols)
-  data/dataset_test_v3.csv      md5 = c78635f96d83625c269904f6b0e4a507  (2170 rows)
-  data/dataset_culver_v3.csv    md5 = a9f15b8c295871f563be7e8d9529d318  (550 rows)
-  data/selector_rf.pkl (deployed, bare RF)  md5 = f8059f3ed073fdcc6cfaf10e07a9cff4
+REQUIREMENT (4) — dataset md5 (not in git; hash-anchored here; POST-MASK)
+------------------------------------------------------------------------
+  data/dataset_validate_v3.csv  md5 = d357b38e802455bf3cabd3f886353991  (1980 rows, 81 cols)
+  data/dataset_test_v3.csv      md5 = 0946c9f343eed98a337b4bd0229b9b39  (2170 rows)
+  data/dataset_culver_v3.csv    md5 = 746c35ac187ed3eabecb90b183a6c1b6  (550 rows)
+  data/selector_rf.pkl (deployed, bare RF)  md5 = d5355fd427b3437c94b6770bb6a68ea1
   data/selector_rf_bundle.pkl (rf + train_ids[1386] + seed 0 + test_size 0.30 + feats + dataset md5)
-  v2 deployed selector backed up to data/selector_rf_v2.pkl (not overwritten in place).
+  v2 deployed selector backed up to data/selector_rf_v2.pkl.
 
 EXPECTATION-CHECKLIST RECONCILIATION (honest; "do not tune to chase v2")
 ------------------------------------------------------------------------
-  knee SNR right-shift ............... HOLDS. AWGN C16 mean frame BLER 0.38-0.42; first C>1% at ~8 dB.
-  Fixed C16/C256 F1 rise to ~ego ..... HOLDS. eff_f1_C is now floored at ego_f1 on failure (was ->0),
-                                       so mean eff_f1_C16 = 0.79/0.85/0.82 sits between comp and ego.
-  Rayleigh all-L ..................... MOSTLY (99.1/92.6/99.8%); residual = ego>late tail (above).
-  test gain ~zero .................... to be measured under the Step-5 200-realisation eval, not here.
-  oracle feature-selection rate DROP.. FALSIFIED. Training-oracle C-active ROSE vs v2:
-                                       validate 0.1056 -> 0.1470 (+0.041),
-                                       test     0.1055 -> 0.2097 (+0.104),
-                                       culver   0.1545 -> 0.2618 (+0.107).
-     MECHANISM (not a bug, not tuned): the ego fallback floors eff_f1_C at ego_f1 (~0.74-0.82), which
-     LOOSENS the BLER threshold for "C beats L" from ~0.022 (v2 failure->0) to ~(comp-late)/(comp-ego)
-     ~= 0.10. That loosening outweighs the higher Sionna BLER, so more frames prefer C. A large part of
-     the rise is precisely the channel/SNR-independent ego>late tail (test 7.4%). The earlier
-     "rate drops" prediction weighed only the higher-BLER effect and under-weighted the ego floor;
-     the prediction was wrong, the implementation is faithful. NOT re-tuned.
+  knee SNR right-shift ............... HOLDS. Sharp AWGN cliff at ~8-10 dB (C activation starts 8 dB).
+  Fixed C16/C256 F1 rise to ~ego ..... HOLDS. eff_f1_C floored at ego on failure; mean eff_f1_C16 =
+                                       0.79/0.85/0.82 sits between comp and ego.
+  Rayleigh all-L ..................... HOLDS EXACTLY post-mask (frac_L=1.0000 everywhere).
+  test gain ~zero .................... measured under the Step-5 200-realisation eval, not here.
+  oracle feature-selection rate DROP.. STILL FALSIFIED (acknowledged by supervisor; the pre-registration
+     is kept on the record as the value of pre-registration). Post-mask training-oracle C-active:
+       validate 0.1056 (v2) -> 0.1399 (v3),  test 0.1055 -> 0.1535,  culver 0.1545 -> 0.2600.
+     MECHANISM: the ego fallback floors eff_f1_C at ego_f1 (~0.74-0.82), loosening the "C beats L" BLER
+     threshold from ~1-late/comp ~= 0.02 (v2 failure->0) to ~(comp-late)/(comp-ego) ~= 0.10 -- an
+     order-of-magnitude loosening that outweighs the higher/right-shifted Sionna cliff. The feasibility
+     mask removed the guaranteed-failure tail (Rayleigh + low-SNR AWGN) but the mid/high-SNR AWGN C wins
+     remain, so C-active is still up vs v2. Not a bug, not tuned. (My earlier "rate drops" prediction
+     weighed only the higher-BLER effect and under-weighted the ego floor.)
 
 FILES
 -----
-  code/make_dataset.py, code/train_rf.py, code/step4_oracle_action_dist.py
-  results/step4_oracle_action_dist_v3.csv, results/step4_rf_class_report_v3.csv,
-  results/step4_rf_modes_v3.csv, results/step4_rf_train_meta_v3.json, results/step4_PROVENANCE.txt
+  code/make_dataset.py, code/train_rf.py, code/step4_oracle_action_dist.py,
+  code/plot_oracle_action_dist.py, code/step4_collab_harm.py
+  results/step4_oracle_action_dist_v3.{csv,pdf,png}, results/step4_rf_class_report_v3.csv,
+  results/step4_rf_modes_v3.csv, results/step4_rf_train_meta_v3.json,
+  results/step4_collaboration_harm_v3.csv, results/step4_PROVENANCE.txt,
   results/bler_sionna/bler_sionna.csv (copied into the OpenCOOD runtime tree for self-containment)
   data/dataset_{split}_v3.csv (overwritten), data/selector_rf.pkl, data/selector_rf_bundle.pkl
 
 NOT DONE HERE (Step 5): recompute_policy_200seed.py / true_e2e_global.py still read the OLD codeword
-BLER table + failure->0 (recompute_policy) — the full 200-realisation rebuild, clairvoyant upper
-bound, and paper edits are Step 5, after supervisor sign-off on this acceptance.
+BLER table + failure->0 (recompute_policy); the full 200-realisation rebuild, clairvoyant upper bound,
+and paper edits are Step 5, after supervisor sign-off on this acceptance (cliff position + Rayleigh
+zeroing + class report).

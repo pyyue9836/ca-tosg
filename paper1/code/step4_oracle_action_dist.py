@@ -22,6 +22,7 @@ RESULTS = os.path.join(P1, 'results')
 BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')
 SPLITS = ('validate', 'test', 'culver')
 ACTIONS = np.array(['L', 'C16', 'C256'])
+BLER_INFEASIBLE = 0.999            # mirror make_dataset: infeasible feature action removed from label
 SNR_GRID = list(range(0, 25, 2))   # Es/N0 dB; extends past 20 to probe any C256 window
 
 
@@ -45,7 +46,13 @@ def main():
                 eff = np.stack([late,
                                 comp * (1 - b16) + ego * b16,
                                 comp * (1 - b256) + ego * b256], axis=1)
-                pick = ACTIONS[eff.argmax(1)]
+                # feasibility mask (label-only), identical to make_dataset.py
+                masked = eff.copy()
+                if b16 >= BLER_INFEASIBLE:
+                    masked[:, 1] = -np.inf
+                if b256 >= BLER_INFEASIBLE:
+                    masked[:, 2] = -np.inf
+                pick = ACTIONS[masked.argmax(1)]
                 rows.append(dict(split=sp, channel=ch, snr_db=snr,
                                  bler_C16=round(b16, 4), bler_C256=round(b256, 4),
                                  frac_L=round(float((pick == 'L').mean()), 4),

@@ -30,6 +30,19 @@ expected-utility argmax -- argmax_a eff_f1_a with NO payload penalty. This is BO
 at lam=0, so there is nothing to re-tune. The ego fallback + Sionna BLER legitimately MOVE the
 resulting operating point (payload); we do NOT re-tune anything to chase v2's 0.0841 payload. The
 Lagrangian lambda>0 sweep lives only in the pareto experiment (a1_pareto.py) and is not touched here.
+
+FEASIBILITY MASK (supervisor ruling 2026-07-12, NOT lambda): a request that cannot be delivered is
+not a feasible action -- it spends the collaborator's channel-use for zero information (payload is
+billed per REQUEST; a failed transmission is not refunded). So when the frame-level BLER of a
+feature action is >= BLER_INFEASIBLE (=0.999, i.e. certain failure), that action is removed from the
+ORACLE's feasible action set for LABEL GENERATION ONLY. This is a feasible-set CONSTRAINT, not a
+preference parameter: it does not move a global operating point and does not reintroduce the lam
+degree of freedom we just pinned. It fixes the lam=0 artifact where the payload-blind oracle would
+otherwise label a Rayleigh (BLER=1) frame C16 purely to fail into the ego fallback -- forcing the
+collaborator to actually emit 0.495 Mbit for a guaranteed-failed decode. The eff_f1_* columns keep
+the TRUE effective F1 (comp*(1-BLER)+ego*BLER) so every POLICY evaluation is unchanged (Fixed C16 is
+still, correctly, beaten down to ego level under Rayleigh -- that is its job as a baseline); only the
+oracle LABEL argmax is masked.
 """
 import hashlib
 import os
@@ -44,6 +57,7 @@ BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')  # frame-leve
 
 SPLITS = ('validate', 'test', 'culver')
 ACTIONS = np.array(['L', 'C16', 'C256'])
+BLER_INFEASIBLE = 0.999  # frame BLER >= this => action cannot be delivered => infeasible for the label
 # Channel-use-equivalent payload (Mbit); both C variants carry the same 1.98 Mbit perception
 # payload but C-256 uses half the symbols (8 vs 4 bits/sym). Kept for the printed sanity report;
 # the label itself (lam=0 argmax of eff_f1) does NOT depend on payload.
@@ -85,14 +99,23 @@ def main():
         df['eff_f1_C16'] = comp * (1.0 - b16) + ego * b16
         df['eff_f1_C256'] = comp * (1.0 - b256) + ego * b256
 
-        f1_stack = df[['eff_f1_L', 'eff_f1_C16', 'eff_f1_C256']].to_numpy()
-        df['oracle_3way'] = ACTIONS[np.argmax(f1_stack, axis=1)]
+        # eff_f1_* columns keep the TRUE eff (used by every policy evaluation). The feasibility mask
+        # acts ONLY on the oracle LABEL argmax: an action whose frame BLER >= BLER_INFEASIBLE is a
+        # guaranteed-failed request (spends channel-use for zero info) and is removed from the set.
+        masked = df[['eff_f1_L', 'eff_f1_C16', 'eff_f1_C256']].to_numpy().copy()
+        n_c16_masked = int((b16 >= BLER_INFEASIBLE).sum())
+        n_c256_masked = int((b256 >= BLER_INFEASIBLE).sum())
+        masked[b16 >= BLER_INFEASIBLE, 1] = -np.inf
+        masked[b256 >= BLER_INFEASIBLE, 2] = -np.inf
+        df['oracle_3way'] = ACTIONS[np.argmax(masked, axis=1)]
 
         df.to_csv(path, index=False)
         md5s[sp] = hashlib.md5(open(path, 'rb').read()).hexdigest()
 
         rates = {a: float((df['oracle_3way'] == a).mean()) for a in ACTIONS}
         print(f'\n[{sp}] n={len(df)}  oracle base-rate {rates}')
+        print(f'  feasibility mask: C16 infeasible on {n_c16_masked}/{len(df)} frames, '
+              f'C256 on {n_c256_masked}/{len(df)} (BLER>={BLER_INFEASIBLE})')
         print(f'  mean BLER frame: C16 awgn={b16[~is_ray].mean():.4f} ray={b16[is_ray].mean():.4f} '
               f'| C256 awgn={b256[~is_ray].mean():.4f} ray={b256[is_ray].mean():.4f}')
         print(f'  mean eff_f1  L={df.eff_f1_L.mean():.4f} C16={df.eff_f1_C16.mean():.4f} '
