@@ -23,18 +23,23 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]          # OpenCOOD repo root
-INFER = REPO / 'peiyi_work/03_analysis_tools/inference_subset.py'
+# P1 Step-5 path repair: after the 01_paper_ca_tosg->paper1 rename + moving extra_experiments under
+# code/, the repo root is parents[5] (was [4]); inference_subset.py moved to paper1/analysis_tools/;
+# the learned stage2 checkpoints live on the H: drive (registered in results/DATA_MANIFEST.md, md5
+# awgn 74c1319ab562 / rayleigh c5a02fd77154 / ofdm d75126199898). Checkpoints used AS-IS (no retrain).
+REPO = Path(__file__).resolve().parents[5]          # OpenCOOD repo root
+INFER = REPO / 'peiyi_work/paper1/analysis_tools/inference_subset.py'
 HERE = Path(__file__).resolve().parent
+CKPT_ROOT = Path('/mnt/h/opencood_project/outputs/experiment_logs/importance_map_jscc')
 CFG = {
     'awgn':     REPO / 'opencood/hypes_yaml/point_pillar_importance_map_jscc_awgn_learned.yaml',
     'rayleigh': REPO / 'opencood/hypes_yaml/point_pillar_importance_map_jscc_rayleigh_learned.yaml',
     'ofdm':     REPO / 'opencood/hypes_yaml/point_pillar_importance_map_jscc_ofdm_learned.yaml',
 }
 CKPT = {
-    'awgn':     REPO / 'peiyi_work/04_experiment_logs/importance_map_jscc/stage2_awgn_learned_v3/stage2_whole_map_4000steps.pth',
-    'rayleigh': REPO / 'peiyi_work/04_experiment_logs/importance_map_jscc/stage2_rayleigh_learned_v3/stage2_whole_map_4000steps.pth',
-    'ofdm':     REPO / 'peiyi_work/04_experiment_logs/importance_map_jscc/stage2_ofdm_learned_v3/stage2_whole_map_4000steps.pth',
+    'awgn':     CKPT_ROOT / 'stage2_awgn_learned_v3/stage2_whole_map_4000steps.pth',
+    'rayleigh': CKPT_ROOT / 'stage2_rayleigh_learned_v3/stage2_whole_map_4000steps.pth',
+    'ofdm':     CKPT_ROOT / 'stage2_ofdm_learned_v3/stage2_whole_map_4000steps.pth',
 }
 
 
