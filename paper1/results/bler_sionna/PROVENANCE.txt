@@ -1,0 +1,32 @@
+BLER table provenance (P1 Step 1, 2026-07-11) -- protocol frozen for the physical layer.
+
+generator: analysis_tools/build_bler_sionna.py  (Sionna 1.1.0, TensorFlow CPU -- no sm_120 kernels)
+code: 5G-LDPC (LDPC5GEncoder/Decoder, num_iter=20), k=500, n=1000, rate-1/2.
+modulation: 16-QAM (4 bits/symbol) and 256-QAM (8 bits/symbol), Gray-mapped (Sionna "qam").
+axis: Es/N0 (dB) = received symbol SNR (what the selector's estimated-SNR feature measures).
+      Eb/N0 column also stored:  Eb/N0 = Es/N0 - 10*log10(coderate * bits_per_symbol)
+      (16-QAM: -3.01 dB ; 256-QAM: -6.02 dB).
+monte_carlo: adaptive stop at >=100 block errors OR >=1e5 codewords per point; cliff band
+      (codeword BLER in [0.001,0.9]) densified to 0.5 dB.
+granularity: codeword-level bler_cw (measured) and frame-level bler_frame = 1-(1-bler_cw)^N_CW,
+      N_CW = ceil(1.98e6 / K) = 3960 codewords per feature frame (all-or-nothing message).
+
+FADING COHERENCE MODEL (explicit assumption):
+  Rayleigh = per-CODEWORD independent flat block-fading with perfect receiver CSI: each 1000-bit
+  codeword experiences an independent |h|^2 ~ Exp(1) power gain (effective per-block Es/N0 =
+  |h|^2 * mean). Justification: at ~60 km/h the channel coherence time is ~1-3 ms, far shorter
+  than the over-the-air time of a full 1.98 Mbit feature frame spanning 3960 codewords, so the
+  3960 blocks fade independently and the frame-level product 1-(1-p_cw)^3960 holds. This is a
+  no-diversity, no-HARQ, no-interleaving-across-frames model.
+
+CONSEQUENCE (physics, not a bug): under Rayleigh the frame-level BLER is ~1.0 across 0-20 dB
+  (feature-frame delivery infeasible). Downstream: under Rayleigh all policies incl. the oracle
+  collapse to L; the interesting channel-adaptive structure lives entirely in the AWGN half;
+  overall feature-selection rate drops. Paper positions this as motivation, not a defect:
+  "under Rayleigh without diversity or retransmission, frame-level feature delivery is infeasible,
+  motivating the HARQ extension" (Paper C hook).
+
+acceptance (passed): no 1/40 quantisation floor at 12-14 dB (16-QAM AWGN 8 dB = 1.3e-4);
+  frame cliff steeper + right-shifted ~1.7 dB vs codeword; codeword waterfall starts leaving 1
+  at ~5.5 dB Es/N0, ~1 dB from the rate-1/2 16-QAM Shannon limit (Es/N0 = 4.77 dB) -- correct for
+  a medium-blocklength 5G LDPC. Old-vs-new figure: bler_old_vs_new.pdf.
