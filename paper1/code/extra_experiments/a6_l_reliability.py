@@ -3,11 +3,12 @@
 The main results treat the object-level message L as perfectly reliable and cheap.
 We relax both assumptions to show the conclusions are not built on that:
   - L block-error rate bler_L in {0, 1, 5, 10}% : a lost L message falls back to
-    ego-only detection, so eff_f1_L = (1-bler_L)*late_f1 + bler_L*EGO_FLOOR;
+    ego-only detection, so eff_f1_L = (1-bler_L)*late_f1 + bler_L*ego_f1;
   - L repetition cost rep in {1,2,3}x : payload_L = 0.024 * rep.
 For each setting we re-derive the channel-aware oracle and re-evaluate the DEPLOYED
 RF (trained under the reliable-L assumption) and Fixed L, on the test split.
-EGO_FLOOR = 0.63 is the empirical ego-only AP floor reported in the paper.
+P1: the ego-only floor is now the PER-FRAME canonical ego_f1 column (from the ego-only npz
+scored on the canonical union GT), replacing the old scalar EGO_FLOOR = 0.63.
 Output: out/a6_l_reliability.csv
 """
 import os
@@ -15,7 +16,7 @@ import numpy as np
 import pandas as pd
 import _common as C
 
-EGO_FLOOR = 0.63
+EGO_FLOOR = 0.63   # DEPRECATED (P1): superseded by the per-frame ego_f1 column; kept for reference.
 ACT = C.ACTIONS
 
 
@@ -40,11 +41,12 @@ def main():
     rf = C.load_rf()
     rf_act = np.asarray(C.rf_predict(rf, df))
     late = df['late_f1'].to_numpy()
+    ego = df['ego_f1'].to_numpy()   # P1: per-frame ego-only F1 (canonical), replaces scalar EGO_FLOOR
 
     rows = []
     for bler_L in [0.0, 0.01, 0.05, 0.10]:
         for rep in [1, 2, 3]:
-            eff_L = (1 - bler_L) * late + bler_L * EGO_FLOOR
+            eff_L = (1 - bler_L) * late + bler_L * ego
             payL = 0.024 * rep
             # fixed L
             _, fL = realised_mod(df, np.array(['L'] * len(df)), eff_L, payL)

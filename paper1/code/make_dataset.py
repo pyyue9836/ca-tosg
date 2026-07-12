@@ -94,9 +94,15 @@ def main():
     df['bler_C16'] = np.where(is_ray, bler_C16_ray, bler_C16_awgn)
     df['bler_C256'] = np.where(is_ray, bler_C256_ray, bler_C256_awgn)
 
+    # Failure model = ego-only fallback (P1, unified with the paper's F_ego formula and
+    # true_e2e_global.py). When a requested feature message fails (BLER) the ego keeps ONLY its own
+    # single-vehicle detection (ego_f1), NOT the object-level L message (which was not requested).
+    # eff_f1_C = comp_f1*(1-BLER) + ego_f1*BLER   (was ...*(1-BLER), i.e. failure->0). L is the robust
+    # low-payload message, treated as delivered. All three per-frame F1 columns (late_f1/compressed_f1/
+    # ego_f1) MUST come from the canonical npz + canonical union GT (no stale dataset column reuse).
     df['eff_f1_L'] = df['late_f1']
-    df['eff_f1_C16'] = df['compressed_f1'] * (1.0 - df['bler_C16'])
-    df['eff_f1_C256'] = df['compressed_f1'] * (1.0 - df['bler_C256'])
+    df['eff_f1_C16'] = df['compressed_f1'] * (1.0 - df['bler_C16']) + df['ego_f1'] * df['bler_C16']
+    df['eff_f1_C256'] = df['compressed_f1'] * (1.0 - df['bler_C256']) + df['ego_f1'] * df['bler_C256']
 
     f1_stack = df[['eff_f1_L', 'eff_f1_C16', 'eff_f1_C256']].to_numpy()
     action_names = np.array(['L', 'C16', 'C256'])
