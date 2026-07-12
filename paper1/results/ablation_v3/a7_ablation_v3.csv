@@ -1,0 +1,10 @@
+policy,n_features,mean_f1,std_f1,mean_payload
+Channel only (SNR + ch type),2,0.9089,0.0008,0.1442
+Perception cues only,21,0.8996,0.0004,0.0555
+Perception + SNR,22,0.8973,0.0009,0.101
+Full (all features),23,0.9086,0.0007,0.1293
+Full - range cues,14,0.9087,0.0007,0.1203
+Full - density cues,19,0.9087,0.0007,0.134
+Full - object-count cues,21,0.9085,0.0007,0.1265
+Oracle (upper bound),0,0.914,0.0007,0.0995
+Fixed L,0,0.9011,0.0,0.024

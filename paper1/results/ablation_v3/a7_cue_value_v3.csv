@@ -1,0 +1,3 @@
+delta,value,ci_lo,ci_hi,significant
+cues_add_over_channel_alone,-0.00024,-0.00052,3e-05,False
+perception+SNR_minus_channel_only,-0.01161,-0.01255,-0.01066,True
