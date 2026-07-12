@@ -11,7 +11,7 @@ Three lines of insurance against a full-round GPU re-run.
 | compressed per-frame boxes+scores | `gs_rerun/comp_{validate,test,culver}.npz` | 83d5eb8988a3 / f5126baaad88 / 11b61a9e020e | `code/regen_preds_with_scores.py` (comp) | ~GPU 10 min/split | PRESENT |
 | ego-only per-frame boxes+scores | `gs_rerun/ego_{validate,test,culver}.npz` | fd66abd89e46 / c14cad677e0a / e62b17375a27 | `code/run_ego_only.py` | ~GPU 10 min/split | PRESENT |
 | **JSCC learned stage2 checkpoints** | `/mnt/h/opencood_project/outputs/experiment_logs/importance_map_jscc/stage2_{ch}_learned_v3/stage2_whole_map_4000steps.pth` | awgn 74c1319ab562 / rayleigh c5a02fd77154 / ofdm d75126199898 | training run (NOT retrained per Step-5 scope; used as-is) | 33 MB each | **FOUND on H: (verified, smoke-tested)** |
-| JSCC per-frame decode (per split×channel×SNR) | `code/extra_experiments/jscc_perframe/runs/<tag>_<ch>_snrNN/npy/` | — | `run_jscc_perframe.py` (paths repaired; H: ckpt) | ~40 min / 1980-frame run | to (re)generate for Track A |
+| **JSCC per-frame decode boxes+scores+gts (36 = 3ch×2split×6SNR)** | `gs_rerun/jscc_v3/jscc_{ch}_{split}_snr{NN}.npz` | 36-npz set md5 `02b9187dc8e1005b` (288 MB) | `code/extra_experiments/jscc_perframe/jscc_v3_sweep.py --mode sweep` | **~10 GPU-hours (full sweep)** | **PRESENT (36/36, survived the 2026-07-12 power outage)** |
 | channel_codec_ap JSCC rows | `results/channel_codec_ap/*jscc*` | — | derived from JSCC decode above | — | pending Track A |
 
 ## RESOLVED (2026-07-12): JSCC learned checkpoints are on the H: drive
