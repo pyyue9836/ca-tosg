@@ -1,4 +1,8 @@
 #self+ A9: statistical hardening -- multi-seed CIs, bandwidth efficiency, hard-frame significance
+# DEPRECATED (P1 Step-5, supervisor 2026-07-12): its role -- multi-seed CIs / hard-frame significance --
+# is now ABSORBED by the 200-realisation engine (recompute_policy_200seed.py) and v3_eval.py, which
+# carry frame-level paired bootstrap CIs directly. Keeping A9 alive only manufactures a SECOND,
+# conflicting set of "hardening" numbers. Do NOT run or cite. Kept for history only.
 """
 Three cheap robustness checks (all from cached per-frame CSVs, no GPU):
 

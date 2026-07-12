@@ -38,7 +38,35 @@ Two-pronged, both halves required:
       for validate/test/culver; see c256_frontier_band.csv). Low-and-WIDE, not low-and-narrow
       (supersedes the earlier "narrow lambda band" wording, which was a single-frozen-draw artifact).
 
-## Protocol rule (elevated)
-Every number that appears ANYWHERE in the paper = 200 channel realisations. Single-frozen-draw
-computations are for never-published internal diagnostics ONLY. (The Pareto figure is now 200-real;
-the single-draw a1 CSVs were deleted.)
+## Protocol rule (elevated) + the PUBLICATION TEST (supervisor 2026-07-12)
+Every number that appears ANYWHERE in the paper = the FULL canonical protocol: 200 channel
+realisations + v3 GT + Sionna frame-level BLER + ego fallback. Single-frozen-draw computations are for
+never-published internal diagnostics ONLY, and such scripts + their output CSVs MUST carry the header
+`DIAGNOSTIC - single frozen realisation - NOT FOR PUBLICATION`.
+Evidence the single-draw is TOXIC (tighter in v3, not looser): a7 single-frozen-draw RF test payload
+0.0461 vs the 200-realisation 0.1346 -- a 3x drift (v3's higher C-active amplifies the single
+channel-mix variance; worse than the P0.2-era drift).
+
+### Ablation disposition (by the publication test)
+UPGRADE to 200-realisation (cited in main.tex):
+- a2 difficulty strata -- 4.4.2 hard-frame gains (+0.039/+0.045 in v2) re-emit under v3.
+- a7 feature ablation -- 4.4.4 "cues add <X over channel state alone"; the number likely CHANGES under
+  v3 (ego floor widened the feasible window -> cue marginal value may rise, same mechanism as the edge).
+- a8 F1 column -- 4.4.4 "lighter models reach the same accuracy" must hold under the same protocol.
+  a8 LATENCY column is channel-protocol-independent -> kept as-is.
+- robustness triple (csi_noise / csi_aging / request_staleness) -- 4.4.4 numbers 0.003/0.015/0.057 are
+  published; after the old-codeword-BLER->v3 port they must ALSO run under 200 realisations (porting is
+  necessary but NOT sufficient -- a single-draw run of the ported script still fails the publication test).
+DIAGNOSTIC / DEPRECATED (not cited):
+- a3 scene subsets -> DIAGNOSTIC header (single frozen draw, not for publication).
+- multiseed_hardening -> DEPRECATED: its role is absorbed by the 200-realisation engine itself; keeping
+  it only manufactures a second, conflicting set of "hardening" numbers.
+
+## Interpolation error path (JSCC side ONLY) -- do not cross-apply
+The JSCC two-regime edge carries a systematic term from the 6-point SNR interpolation: aggregate bias
+<= 0.0012 (mid-grid probe at SNR 10), an order below the measured edge (~0.015). Paper wording:
+"interpolation-induced aggregate bias <=0.0012 (mid-grid probe), an order below the measured edge."
+**This 0.0012 belongs to the JSCC side ONLY** -- it must NOT be set against the LDPC-side +0.0005 edge.
+The LDPC side is evaluated through the Sionna BLER table and never touches JSCC interpolation; the paper
+must state which error path attaches to which regime so a reviewer does not wrongly divide 0.0012 into
+the LDPC edge.

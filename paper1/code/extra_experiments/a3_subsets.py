@@ -1,4 +1,6 @@
 #self+ A3: long-range / sparse-LiDAR / occlusion subsets -- selector activates C where it helps
+# DIAGNOSTIC - single frozen realisation - NOT FOR PUBLICATION (not cited in main.tex; if any A3
+# number is ever cited, it must first be re-run through the 200-realisation v3 protocol -- see v3_eval).
 """
 Shows the selector is not randomly saving bandwidth: in subsets that plausibly
 need richer semantics it requests feature-level C more often AND the CA-TOSG-over-L
