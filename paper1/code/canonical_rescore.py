@@ -2,8 +2,9 @@
 # canonical GT = the post-processor union GT @ standard GT_RANGE (=[-140,-40,-3,140,40,1]),
 # predictions NOT cropped, all policies on the same ruler. Q4 confirmed late has far preds, so
 # no structural range problem and no ±70.4 crop. No visibility filter (GT is one-for-all ->
-# visibility is a sensitivity issue, appendix candidate, not canonical). Canonical GT source =
-# the intermediate (comp) all-CAV union GT (the cooperative task-truth union).
+# visibility is a sensitivity issue, appendix candidate, not canonical). The ruler is the
+# "canonical union GT" (eval-time post-processor union, standard OPV2V range) -- its name carries
+# no tested-pipeline name; it is materialised from the intermediate dataset's (fuller) union output.
 # Prints and writes results/canonical_rescore_v3.csv with BEFORE (own-GT) vs AFTER (canonical).
 import os, sys
 import numpy as np, torch, pandas as pd
@@ -48,7 +49,7 @@ def main():
         la = np.load(f'{GS}/late_{sp}.npz', allow_pickle=True)
         co = np.load(f'{GS}/comp_{sp}.npz', allow_pickle=True)
         eg = np.load(f'{GS}/ego_{sp}.npz', allow_pickle=True)
-        canon = co['gts']                                  # canonical = comp all-CAV union GT
+        canon = co['gts']                                  # canonical union GT (materialised from intermediate union)
         for pol, d, own in [('Fixed-L (late)', la, la['gts']),
                             ('Feature-ceiling (comp)', co, co['gts']),
                             ('ego-only', eg, la['gts'])]:   # ego "before" was scored on late GT

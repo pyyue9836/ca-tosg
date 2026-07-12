@@ -2,11 +2,15 @@ Canonical GT recipe -- protocol v3 (P1, 2026-07-12). Frozen. v2 and v3 numbers n
 same table; the annual-review v2 numbers are frozen at commit 8ab7693.
 
 RECIPE
+  NAME        : "canonical union GT" (evaluation-time post-processor union, standard OPV2V range).
+                The ruler's name deliberately carries NO tested-pipeline name -- it is not "comp GT" /
+                "feature GT" / "late GT"; it is the one evaluation ground truth all policies are scored on.
   GT source   : the OpenCOOD evaluation-time GT = post_processor.generate_gt_bbx
                 (base_postprocessor.py L45-96): every CAV's object_bbx_center projected to the ego
-                frame, UNIONED and DEDUPED by object_id, filtered to GT_RANGE. The canonical GT is the
-                intermediate (comp) all-CAV union GT -- the fuller cooperative task-truth union
-                (late GT is the same union path but a slightly-truncated batch under its ±70.4 config).
+                frame, UNIONED and DEDUPED by object_id, filtered to GT_RANGE. The canonical union GT is
+                materialised from the intermediate dataset's union output (the fuller cooperative
+                task-truth union); the late dataset's GT is the same union path but on a slightly-
+                truncated batch under its ±70.4 config, hence is not used as the ruler.
   GT_RANGE    : [-140, -40, -3, 140, 40, 1]  (standard OPV2V benchmark evaluation range; x±140, y±40).
   predictions : NOT cropped. Q4 (gt_audit.csv) confirmed late predictions include |x|>70.4 boxes
                 (collaborator detections projected to ego), so there is NO structural range asymmetry
@@ -22,7 +26,8 @@ RECIPE
   ego far     : ego-only has zero far predictions (gt_audit.csv) -> far objects are FN for ego. That is
                 the physical fact (ego is blind there), retained; fallback cost is measured on task truth.
 
-canonical_GT_md5 : 42d28b6fb60ac004f8ed661aa1edb813  (comp all-CAV union GT, 3 splits concatenated)
+canonical_GT_md5 : 42d28b6fb60ac004f8ed661aa1edb813  (canonical union GT, materialised from the
+                   intermediate union output; 3 splits concatenated)
 frames           : validate 1980, test 2170, culver 550
 generators       : code/gt_audit.py (diagnosis artifact) ; code/canonical_rescore.py (before/after).
 
@@ -31,6 +36,18 @@ DIAGNOSIS PROVENANCE (rule 2026-07-12: diagnosis has provenance too)
   GTs are ~identical unions), late/comp/ego prediction near/far counts, Q4 flag. The round-1 claim
   "late GT = generate_object_center([ego])" was the TRAIN-time dataset GT (a different path); the
   eval GT is generate_gt_bbx. That mismatch caused the two rounds' contradictory numbers.
+
+VALIDATE F1-CACHE ANOMALY (root cause, blocker cleared for Step 4)
+  dataset_validate.csv late_f1 (mean 0.8636, the v2 value) does NOT come from the same inference as the
+  current late_validate.npz (mean 0.9082): per-frame correlation 0.897 (<1.0) with a systematic +0.045
+  offset. A pure score-threshold / GT-convention shift would keep corr~=1.0, so it is a DIFFERENT
+  inference (older checkpoint / different dump) -- NOT a convention difference. test/culver reproduce
+  bit-for-bit (corr 1.000, |diff| 0.000), so only the validate dataset F1 column is stale. Implications:
+  (a) the shipped v2 annual-review validate rows (Fixed-L 0.8636, dev 0.8656) rest on this stale column
+  -- v2 is frozen, not touched, but the paper's v2->v3 diff note must state this root cause in one line.
+  (b) MANDATE: in Step 3/4 every per-frame F1 column (late/comp/ego, all 3 splits) is recomputed from the
+  canonical npz + canonical union GT; NO old dataset CSV F1 column is reused (validate proves them
+  untrustworthy). Diagnostic: per-frame corr/|diff| above.
 
 PRE-REGISTERED PREDICTION (confirmed, results/canonical_rescore_v3.csv)
   Under v3 the own-GT test==Culver late-F1 tie (0.8867/0.8867) SEPARATES: test 0.9011 vs Culver 0.8722.
