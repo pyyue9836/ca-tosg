@@ -54,11 +54,17 @@ def run_one(channel, split, snr, out_dir, model_root, limit, tag):
     if limit:
         cmd += ['--limit', str(limit)]
     env = os.environ.copy(); env['PYTHONPATH'] = str(REPO)
-    print(f'[RUN] {name} -> {out_npz}', flush=True)
-    with open(log, 'w') as f:
-        ret = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, cwd=str(REPO), env=env).returncode
+    # Retry: an occasional early SIGSEGV (ret=-11, empty log) was observed at model/dataset init
+    # (transient, likely a CUDA/TF-init race between back-to-back subprocesses) -- retry up to 3x.
+    for attempt in range(1, 4):
+        print(f'[RUN] {name} (attempt {attempt}) -> {out_npz}', flush=True)
+        with open(log, 'w') as f:
+            ret = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, cwd=str(REPO), env=env).returncode
+        if ret == 0 and os.path.exists(out_npz):
+            break
+        print(f"[RETRY] {name} attempt {attempt} ret={ret}", flush=True)
     tail = log.read_text(errors='ignore').splitlines()[-2:]
-    print(f"[{'OK' if ret == 0 else 'FAIL'}] {name} ret={ret}: {' | '.join(tail)}", flush=True)
+    print(f"[{'OK' if ret == 0 else 'FAIL'}] {name} ret={ret} (attempt {attempt}): {' | '.join(tail)}", flush=True)
     return ret
 
 

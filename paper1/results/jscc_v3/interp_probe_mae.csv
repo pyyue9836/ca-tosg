@@ -1,0 +1,2 @@
+probe,n,mae,max_abs_dev,mean_real,mean_interp,noise_floor_adj_10_12,interp_only_excess,aggregate_bias,verdict
+awgn_validate_snr10_from_8_12,200,0.007462,0.076923,0.9091,0.9079,0.00673,0.00073,0.0012,"6-point grid OK: interpolation adds ~0 beyond the single-decode noise floor; aggregate bias 1e-3; densifying would not help (per-frame spread is channel noise, not grid coarseness)"
