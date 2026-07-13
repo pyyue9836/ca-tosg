@@ -352,28 +352,28 @@ Because the value of feature-level cooperation is realised only when the channel
 
 \begin{table}[t]
 \centering
-\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge14$~dB feature-active regime (selector requests $C_{16}$). When the channel can carry features, \method{} lifts AP toward the feature-level ceiling; when it cannot, it safely retains the $L$ operating point. Payload is channel-use-equivalent Mbit/frame; channel-\emph{averaged} \method{} payload is $0.078$--$0.091$~Mbit/frame across splits, i.e.\ $15.8$--$18.4\%$ of Fixed $C_{16}$ ($0.495$).}
+\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge14$~dB feature-active regime (selector requests $C_{16}$). When the channel can carry features, \method{} lifts AP toward the feature-level ceiling on validate and Culver-City and remains comparable to object-level on the easier test split; when the channel cannot, it safely retains the $L$ operating point. Payload is per-frame channel use (Msym, at rate-1/2); channel-\emph{averaged} \method{} payload is $0.158$--$0.251$~Msym/frame across splits, i.e.\ $16$--$25\%$ of Fixed $C_{16}$ ($0.990$).}
 \label{tab:headline}
 \begin{tabular}{llccc}
 \toprule
 Split & Regime & AP@0.5 & AP@0.7 & Payload \\
 \midrule
 \multirow{2}{*}{Validate ($1{,}980$)}
-  & Fallback ($L$)  & 0.893 & 0.839 & 0.024 \\
-  & AWGN $\ge14$~dB & \textbf{0.911} & \textbf{0.865} & 0.339 \\
+  & Fallback ($L$)  & 0.890 & 0.836 & 0.024 \\
+  & AWGN $\ge14$~dB & \textbf{0.916} & \textbf{0.857} & 0.632 \\
 \midrule
 \multirow{2}{*}{Test ($2{,}170$)}
-  & Fallback ($L$)  & 0.905 & 0.856 & 0.024 \\
-  & AWGN $\ge14$~dB & \textbf{0.920} & \textbf{0.865} & 0.340 \\
+  & Fallback ($L$)  & 0.919 & 0.869 & 0.024 \\
+  & AWGN $\ge14$~dB & 0.920 & 0.865 & 0.874 \\
 \midrule
 \multirow{2}{*}{Culver-City ($550$)}
-  & Fallback ($L$)  & 0.811 & 0.724 & 0.024 \\
-  & AWGN $\ge14$~dB & \textbf{0.865} & \textbf{0.771} & 0.402 \\
+  & Fallback ($L$)  & 0.783 & 0.698 & 0.024 \\
+  & AWGN $\ge14$~dB & \textbf{0.855} & \textbf{0.754} & 0.565 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Three observations follow. (i) When the channel can carry features, the selector captures the cooperative AP gain: AP@0.5 rises by $+0.018$ (validate), $+0.015$ (test), and $+0.054$ (Culver-City) over the object-level baseline, and AP@0.7 by $+0.026$, $+0.009$, and $+0.047$, respectively---the gain is largest on the harder Culver-City domain. On validate and test this sits within $0.006$ and $0.002$~AP@0.5 of the perfect-channel feature-level ceiling ($0.917$ and $0.922$). (ii) Under fading or low SNR the selector holds $L$ and incurs no AP loss relative to object-level communication, so feature-level transmission is never activated where it would be wasteful; the fixed feature-level policies $C_{16}$ and $C_{256}$, by contrast, are \emph{strictly dominated}---they cost $10\text{--}21\times$ more bandwidth yet fall below Fixed $L$ in realised AP because of the LDPC cliff (Fig.~\ref{fig:ap_snr}). (iii) Averaged over all channel states the selector's payload is $0.078$--$0.091$~Mbit/frame across splits, i.e.\ $15.8$--$18.4\%$ of Fixed $C_{16}$, because the expensive feature-active regime occupies only the high-SNR AWGN tail.
+Three observations follow. (i) When the channel can carry features, the selector captures the cooperative AP gain on the splits where feature-level detection helps: AP@0.5 rises by $+0.026$ (validate) and $+0.072$ (Culver-City) over the object-level baseline, and AP@0.7 by $+0.021$ and $+0.057$; on the easier test split, where object-level detection is already near-ceiling, the feature-active regime is \emph{comparable} to object-level (AP@0.5 $+0.002$, AP@0.7 $-0.003$; no significant change). The gain is largest on the harder Culver-City domain, and on validate sits within $0.001$~AP@0.5 of the perfect-channel feature-level ceiling ($0.917$). (ii) Under fading or low SNR the selector holds $L$ and incurs no AP loss relative to object-level communication, so feature-level transmission is never activated where it would be wasteful; the fixed feature-level policies $C_{16}$ and $C_{256}$, by contrast, are \emph{strictly dominated}---they cost $21\text{--}41\times$ more channel use yet fall below Fixed $L$ in realised AP because of the LDPC cliff (Fig.~\ref{fig:ap_snr}). (iii) Averaged over all channel states the selector's channel use is $0.158$--$0.251$~Msym/frame across splits, i.e.\ $16$--$25\%$ of Fixed $C_{16}$, because the expensive feature-active regime occupies only the high-SNR AWGN tail.
 
 \method{} is not designed to raise channel-\emph{averaged} AP above Fixed $L$ on every frame: on many frames object-level communication is already sufficient, and a channel-averaged mean necessarily dilutes the gain. Its value is to activate feature-level communication \emph{only} when the expected task gain justifies the payload and channel risk. The complementary channel-averaged payload--F1 frontier (Section~\ref{sec:pareto}), the difficulty stratification that localises the gain (Section~\ref{sec:difficulty}), and the SNR-threshold comparison (Section~\ref{sec:threshold}) further characterise where and why the policy helps.
 
