@@ -1,0 +1,40 @@
+OFDM-LDPC BLER table provenance (P1 Step-5, supervisor ruling 2026-07-12) -- protocol frozen.
+Generator: analysis_tools/build_bler_sionna_ofdm.py  (Sionna 1.1.0, TensorFlow CPU).
+Same core as build_bler_sionna.py: 5G-LDPC k=500/n=1000 rate-1/2, 16/256-QAM, Es/N0 axis (Eb/N0 stored),
+adaptive MC (>=100 block errors or <=1e5 codewords; cliff band densified to 0.5 dB), frame BLER =
+1-(1-p_cw)^3960 (N_CW=3960 codewords/feature frame).
+
+WHY THIS TABLE EXISTS (standards-basis gap, not "just a characterisation figure"): the paper's PHY
+anchor 802.11bd IS an OFDM system whose cross-subcarrier coding carries FREQUENCY DIVERSITY. The digital
+branch was previously evaluated only on AWGN + FLAT Rayleigh; the "feature-level infeasible under
+Rayleigh" sub-finding rested on no-diversity flat fading, which a comms reviewer can dismiss as a
+strawman against 802.11bd. OFDM-LDPC is the scientifically interesting MIDDLE case between flat-Rayleigh
+(diversity order 1, all-dead in 0-20 dB) and AWGN (sharp cliff): frequency diversity should re-open a
+usable high-SNR window.
+
+MODEL (fixed once, ONE profile -- no profile sweep, that is another paper):
+- OFDM: 802.11bd 10 MHz numerology -> N_FFT=64, SCS Delta_f=156.25 kHz, N_SC=52 data subcarriers.
+- Channel: frequency-selective TDL, exponential power-delay profile, L=8 taps at uniform delays
+  0..3*tau_rms, per-CODEWORD-INDEPENDENT complex tap gains g_l ~ CN(0, P_l), Sum P_l = 1 so the average
+  subcarrier power E[|H[k]|^2]=1 (matches the flat-Rayleigh Es/N0 normalisation). SAME coherence
+  assumption as the flat-Rayleigh table: independent per codeword (coherence ~1-3 ms << frame OTA time),
+  no HARQ, no cross-frame interleaving. Coded symbols frequency-INTERLEAVED (symbol i -> subcarrier
+  i mod N_SC), the standard 802.11 interleaver, so one 1000-bit codeword spans the N_SC subcarrier gains
+  = frequency diversity of order ~L. Perfect per-subcarrier CSI (per-symbol effective N0 = N0/|H[k]|^2).
+- tau_rms = 100 ns : order-of-magnitude V2V value (3GPP TR 37.885 V2V highway-NLOS regime). TO VERIFY:
+  the exact TR 37.885 tabulated delay spread should be pinned against the document; the qualitative
+  finding (frequency diversity opens a high-SNR window) is insensitive to the precise value, which only
+  shifts the curve horizontally. Flagged for the supervisor to confirm the exact citation/value.
+
+HARD BOUNDARY (scope, per ruling): this table feeds ONLY Figure A and the two-regime discussion. It does
+NOT enter the selector's training or deployment sweeps. The 200-realisation protocol channel set stays
+{AWGN, Rayleigh}; the channel-type feature stays BINARY (channel_is_rayleigh). Adding OFDM to the
+selector would require a full retrain + full 200-real re-run of the whole chain -- explicitly out of scope.
+
+PRE-REGISTERED (both directions net gain, no direction bet): if the high-SNR usable window OPENS, the
+Rayleigh sub-finding refines from "feature infeasible under Rayleigh" to "feature infeasible under
+NO-DIVERSITY flat fading; OFDM frequency diversity restores a usable window at high SNR" -- a stronger,
+mechanism-level ("diversity order determines feasibility") statement that pre-empts the 802.11bd-strawman
+attack as our own discussion. If the window does NOT open, the original statement stands, with one more
+supporting data cell. Output: results/bler_sionna/bler_sionna_ofdm.csv; merged into bler_sionna.csv only
+after supervisor review of the curve.
