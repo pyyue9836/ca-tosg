@@ -5,6 +5,10 @@ source -> [ ] done). Substitute against THIS list, tick each; a residual is wors
 STATUS: ALL numbers final (F1-side + AP-side true_e2e_global_v3 done). Was:
 v3 true_e2e re-run (true_e2e_global_v3_*.csv, running bv2d7ua0d).
 
+AP +0.002 WORDING LANDMINE (test AP@.5 feature-active gain): NO CI support -> NEVER "improves"; write
+"comparable to object-level" / "no significant change". Only bring a number if a CI backs it. (culver
++0.074 and validate +0.026 are the reportable AP gains; test is "comparable".)
+
 Band DEFINITION (write once, cite everywhere; NEVER "RF/0.99"): "\method's channel-averaged payload is
 X Msym of channel use per frame (at rate-1/2), i.e. Y% of the Fixed C_16 feature-level cost (0.99 Msym);
 Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0.1 pp / 3 dp, declared once.
@@ -17,9 +21,9 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
   (a7 payload -0.031 sig, F1 +0 ns); graceful JSCC cues buy accuracy (edge awgn test +0.0266
   [+0.0242,+0.0290]). src two_regime_edge_v3 + a7_cue_value_v3.
 - L34 `52.8` ms -> keep (batch-1 conservative; add the a8 13.9 ms protocol note; unify once).
-- L69 `+0.045` (hard-frame gain) -> v3 reliable-ch hard gain test +0.0896 [+0.0829,+0.0963] (all-channel
+- [x] L69 `+0.045` (hard-frame gain) -> v3 reliable-ch hard gain test +0.0896 [+0.0829,+0.0963] (all-channel
   +0.0240); DECLARE reliable-channel condition (AWGN 16 dB, deterministic). src a2.
-- L70 `+0.017 ... +0.015 (Rayleigh and OFDM)` -> v3 edges: awgn +0.0266, rayleigh +0.0223, ofdm +0.0251
+- [x] L70 `+0.017 ... +0.015 (Rayleigh and OFDM)` -> v3 edges: awgn +0.0266, rayleigh +0.0223, ofdm +0.0251
   (test); + feasibility monotone (diversity order 8 / ~24 / unbounded dB; OFDM d=2.01 R2=0.99, Rayleigh
   d=0.84 R2=0.94). src two_regime_edge_v3 + PROVENANCE_ofdm.
 
