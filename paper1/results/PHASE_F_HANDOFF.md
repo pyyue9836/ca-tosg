@@ -67,3 +67,22 @@ The last item done in a fatigue stretch is the risk peak. Re-read cae8654 (gener
 
 ## JOSH: HARQ para is a FINALISED DRAFT (JOSH_PARAGRAPHS.md #4) -> 3 paragraphs remain to hand-write
 (C256 dominance, CoDS positioning, collaboration-harm). This is the schedule's long pole for the final gate.
+Order (supervisor): C256 -> collaboration-harm (both use today's frozen numbers, write while hot) -> CoDS
+(outward positioning, highest wording risk, LAST; check arXiv 2512.22513's CURRENT version before writing --
+positioning against an old competitor version is a submission liability).
+
+## FINAL-GATE FIGURE VISUAL INSPECTION (rendered figures are NOT covered by the .tex diff)
+The diff covers .tex text only. At the final gate, EACH rendered figure is visually inspected against this
+thread's frozen caliber, item by item -- a claim-checklist is not evidence. fig_channel_codec_ap_test.pdf:
+[ ] 3x3 structure (rows AWGN/Rayleigh/OFDM, cols LDPC+16-QAM/LDPC+256-QAM/JSCC); [ ] shared y-axis 0.70-0.95
+all 9 panels; [ ] 3 reference-line styles distinct (ceiling dashed / L dash-dot / ego dotted) + values in
+legend; [ ] 6 SNR markers + straight guides (no spline); [ ] caption covers all 4 dead panels + monotone
+(8/~24/unbounded) + headroom sentence (no directional "saturates" claim); [ ] 0.922/0.919/0.735 byte-exact
+vs tab:headline. fig:ap_snr (regen, item 7): same-rule inspection when regenerated.
+
+## VALIDATE channel_codec_ap ACCEPTANCE CRITERION (nailed, so "verified" is not subjective)
+Regime SHAPE must be INVARIANT vs test: AWGN-LDPC (2 panels) cliff (ego floor -> ceiling transition);
+Rayleigh/OFDM-LDPC (4 panels) FLAT-DEAD at the ego floor; JSCC (3 panels) graceful monotone. ONLY the AP
+levels and small cliff-position shifts may move. ANY panel breaking the regime (e.g. Rayleigh-LDPC off the
+floor) => STOP and investigate, NOT a footnote. If shape holds -> drop the "validate in appendix" line and
+post a single-line confirmation with the commit hash.

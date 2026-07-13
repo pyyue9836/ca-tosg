@@ -4,6 +4,13 @@ Supervisor: the agent swaps numbers, but the muscle memory for these arguments i
 the viva. Due before the full-manuscript diff. Evidence + a finalised draft where one exists are below;
 write the prose yourself.
 
+ORDER (supervisor, start TODAY): 1. C256 dominance -> 2. collaboration-harm (both ride today's frozen
+numbers -- write while hot) -> 3. CoDS positioning LAST (outward-facing, highest wording risk; BEFORE
+writing, pull arXiv 2512.22513's CURRENT version -- positioning against a stale competitor version is a
+submission liability). The agent reviews your drafts for the ledger discipline (forbidden notations; the
+CI-wording rule -- e.g. "comparable" not "improves" for a per-mille gain without a CI -- applies to your
+paragraphs too). Writing is not gated; only entry into the manuscript is. Paste drafts into the thread.
+
 ## 1. C256 dominance argument (Method / message candidates)
 Two-pronged; both halves required:
 - lambda=0 DOMINANCE THEOREM: eff_C256 <= eff_C16 pointwise -- identical 1.98 Mbit content at strictly

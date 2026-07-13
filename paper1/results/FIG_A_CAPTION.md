@@ -5,8 +5,9 @@ each curve is the AP of always transmitting the feature message through that cod
 as the failure fallback (this is a codec-response figure; it shows no selector curve). Rows: AWGN / Rayleigh
 / OFDM; columns: LDPC + 16-QAM / LDPC + 256-QAM / JSCC. Reference lines: the error-free delivery ceiling
 (identity channel, AP $=0.922$); the object-level $L$ alternative available to an adaptive selector
-(AP $=0.919$)---on this test split the two nearly coincide, the graphical form of the $+0.002$ ``comparable''
-result of Table~\ref{tab:headline}; and the ego-only failure floor (AP $=0.735$). Digital LDPC delivery shows
+(AP $=0.919$)---on this test split $L$ lies only ${\approx}0.003$ below the delivery ceiling, so any
+selector-obtainable gain is inherently at the per-mille scale, consistent with the $+0.002$ (comparable)
+of Table~\ref{tab:headline}; and the ego-only failure floor (AP $=0.735$). Digital LDPC delivery shows
 a cliff whose feasibility threshold rises as the diversity order falls: AWGN (no fading) clears the
 frame-error cliff by $8$~dB; OFDM (frequency-selective, empirical diversity order $\approx 2$ from a BLER
 slope fit) only near $24$~dB, above the evaluated $0$--$20$~dB range; flat Rayleigh (no diversity, frame
