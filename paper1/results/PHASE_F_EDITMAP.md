@@ -27,14 +27,23 @@ Source: results/policy_v3/generalisation_{split}.csv (200-real, canonical GT v3)
   culver 0.7585 (was 0.895/0.845).
 - oracle-F1 recovery = RF/oracle: validate 99.8%, test 99.4%, culver 99.3% (was 99.4/99.6 — HOLDS).
 
-## Payload wording -> CHANNEL USES + band update (whole-paper unit sweep)
-- Payload accounting -> channel uses: C coefficients x2 (C16 0.495->0.99 ch-use? NO -- 0.495 IS already the
-  Mbit channel-use-equiv; supervisor's "x2" = express the two C variants' CHANNEL USES: C16 1.98/4=0.495,
-  C256 1.98/8=0.2475 Mbit-eq; L stays 0.024). SWEEP the whole paper: label payload axis "Mbit channel-use
-  equivalent" consistently; L unchanged. (Verify each Mbit figure/caption uses channel-use-eq, not raw info bit.)
-- "15.8-18.4% of Fixed C16 bandwidth" (abstract L34, obs, captions) -> GONE. v3 RF payload/0.495 = validate
-  20.5% / test 27.2% / culver 18.1% => new band "18-27% of Fixed C16" (per-split; NO single-threshold claim).
-- v2 payloads 0.074/0.081/0.085 (oracle/test/culver) -> v3 oracle 0.089/0.100/0.138; RF 0.102/0.135/0.089.
+## Payload wording -> CHANNEL USES + band update (whole-paper unit sweep) [MY ERROR, CORRECTED]
+- CORRECTION (2026-07-12): I wrongly marked the supervisor's x2 as "NO". The modulator carries the CODED
+  stream (rate-1/2 -> 2x info bits), so channel uses (Msym) = info/coderate/bits_per_sym:
+  C16 = 1.98/0.5/4 = 0.99, C256 = 1.98/0.5/8 = 0.495, L = 0.024/0.5/2 (QPSK) = 0.024. My 1.98/4=0.495 was
+  the UNCODED count -- half too small on the C's, while L was accidentally right => intra-column mismatch
+  (a TVT reviewer computes 1.98x2/4 in one step). PAYLOAD constants corrected in v3_eval/recompute_policy_
+  200seed/build_two_regime_edge/make_dataset/_common/train_rf; eval re-run (ZERO re-sim: F1/actions
+  invariant, only the payload axis rescales -- verified F1 identical 0.9108/0.9088/0.8831).
+- Whole-paper unit sweep: payload axis = "channel uses per frame (Msym), at rate-1/2". C16=0.99, C256=0.495,
+  L=0.024. Mixed payloads recombine linearly from the rho columns.
+- v3 payloads (corrected): oracle 0.157/0.179/0.257 (val/test/culver); RF 0.183/0.251/0.158; best-tau
+  0.279/0.303/0.315. (F1 unchanged: oracle 0.9129/0.9140/0.8891; RF 0.9108/0.9088/0.8831.)
+- Band = RF payload / Fixed C16 (0.99): validate 18.5% / test 25.3% / culver 16.0% => "16-25% of Fixed
+  C16" per-split (ORDER: unit sweep FIRST, then ratio -- L does not scale so the ratio moved from the old
+  wrong-coeff "18-27%"). NO single-threshold claim.
+- LANDMINE (L587 relapse): recovery = RF/oracle F1 = validate 99.8% / test 99.4% / CULVER 99.33%. Write
+  "99.3-99.8%" -- NEVER ">=99.4%" (Culver is 99.33, below 99.4; the >=99.4 wording is the L587 accident).
 
 ## Central-finding numbers (currency) — PARTIAL v3, [OFDM] for the OFDM edge
 Source: results/jscc_v3/two_regime_edge_v3.csv + results/ablation_v3/a7_cue_value_v3.csv.

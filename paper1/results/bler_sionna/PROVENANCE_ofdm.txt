@@ -21,10 +21,17 @@ MODEL (fixed once, ONE profile -- no profile sweep, that is another paper):
   no HARQ, no cross-frame interleaving. Coded symbols frequency-INTERLEAVED (symbol i -> subcarrier
   i mod N_SC), the standard 802.11 interleaver, so one 1000-bit codeword spans the N_SC subcarrier gains
   = frequency diversity of order ~L. Perfect per-subcarrier CSI (per-symbol effective N0 = N0/|H[k]|^2).
-- tau_rms = 100 ns : order-of-magnitude V2V value (3GPP TR 37.885 V2V highway-NLOS regime). TO VERIFY:
-  the exact TR 37.885 tabulated delay spread should be pinned against the document; the qualitative
-  finding (frequency diversity opens a high-SNR window) is insensitive to the precise value, which only
-  shifts the curve horizontally. Flagged for the supervisor to confirm the exact citation/value.
+- tau_rms = 46.2 ns : READ FROM 3GPP TR 37.885 (ATIS.3GPP.37.885.V1530), the below-6-GHz eV2X channel
+  model delay-spread table. Urban NLOSv row: mu_lgDS = -0.4*log10(1+fc) - 7, sigma_lgDS = 0.1, with
+  lgDS = log10(DS/1s). At fc = 5.9 GHz (802.11bd): mu_lgDS = -0.4*log10(6.9) - 7 = -7.3355 =>
+  DS(median) = 10^(-7.3355) = 46.2 ns (1-sigma range 36.7-58.2 ns). Scenario = Urban NLOSv (LOS blocked
+  by vehicles, same street), matching OPV2V urban intersections + the occlusion frames where feature-
+  level help is most valuable. [Corrected from a placeholder 100 ns; table re-run at 46.2 ns.]
+- PHYSICS SELF-CHECK (frequency selectivity must span the codeword, else the diversity mechanism is
+  vacuous): coherence bandwidth B_c ~ 1/(5*tau_rms) = 1/(5*46.2 ns) ~ 4.3 MHz. 802.11bd SCS = 156.25 kHz;
+  the codeword is frequency-interleaved across N_SC=52 subcarriers = 8.125 MHz > B_c. So the codeword
+  spans ~8.125/4.3 ~ 1.9 coherence bands (diversity order ~2): frequency selectivity DOES span the
+  codeword. PASS -- the OFDM diversity mechanism is real, not vacuous.
 
 HARD BOUNDARY (scope, per ruling): this table feeds ONLY Figure A and the two-regime discussion. It does
 NOT enter the selector's training or deployment sweeps. The 200-realisation protocol channel set stays

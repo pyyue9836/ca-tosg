@@ -39,7 +39,10 @@ DATA = os.path.join(P1, 'data'); OUT = os.path.join(P1, 'gs_rerun/policy_200seed
 BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')
 RF_PKL = os.path.join(DATA, 'selector_rf.pkl')
 N_SEED = 200
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+# Channel USES per frame (Msym) at rate-1/2: info/coderate/bits_per_sym (modulator carries the CODED
+# stream). C16=1.98/0.5/4=0.99, C256=1.98/0.5/8=0.495, L=0.024. (1.98/4 was the UNCODED count -- wrong
+# for the rate-1/2 chain; corrected 2026-07-12.)
+PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}
 ACTIONS = ['L', 'C16', 'C256']
 PAYVEC = np.array([PAYLOAD[a] for a in ACTIONS])
 BLER_INFEASIBLE = 0.999

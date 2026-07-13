@@ -25,7 +25,8 @@ import score_jscc_v3 as SC
 P1 = os.path.join(REPO, 'peiyi_work/paper1'); DATA = os.path.join(P1, 'data')
 JSCC_DIR = os.path.join(P1, 'gs_rerun/jscc_v3'); OUT = os.path.join(P1, 'results/jscc_v3')
 SNR_GRID = np.array([0, 4, 8, 12, 16, 20], float)
-PAY_L, PAY_C = 0.024, 1.98 / 4.0   # L vs one feature-level message (C16-equivalent channel use)
+PAY_L, PAY_C = 0.024, 0.99   # channel uses (Msym) at rate-1/2: L=0.024, C=C16=1.98/0.5/4=0.99
+#                              (1.98/4=0.495 was the UNCODED count -- wrong for the rate-1/2 chain)
 TAU_GRID = np.round(np.arange(0.0, 20.0001, 0.5), 3)
 INTERP_BIAS = 0.0012
 CUES = None  # set from dataset feature columns

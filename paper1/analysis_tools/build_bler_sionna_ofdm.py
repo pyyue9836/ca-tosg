@@ -43,7 +43,9 @@ MAX_CW = 100_000
 CLIFF_LO, CLIFF_HI = 0.001, 0.9
 # OFDM / TDL
 N_FFT = 64; N_SC = 52; SCS = 156.25e3        # 802.11bd 10 MHz
-TAU_RMS = 100e-9; L_TAPS = 8                  # exponential PDP, V2V order-of-magnitude
+# TR 37.885 Urban NLOSv (below-6 GHz eV2X): mu_lgDS = -0.4*log10(1+fc) - 7, sigma_lgDS = 0.1.
+# fc = 5.9 GHz (802.11bd) -> DS = 10^(-0.4*log10(6.9) - 7) = 10^(-7.3355) = 46.2 ns (median).
+TAU_RMS = 46.2e-9; L_TAPS = 8                  # 3GPP TR 37.885 Urban NLOSv @ 5.9 GHz (read from the doc)
 HERE = os.path.dirname(os.path.abspath(__file__)); P1 = os.path.dirname(HERE)
 OUT = os.path.join(P1, "results/bler_sionna")
 

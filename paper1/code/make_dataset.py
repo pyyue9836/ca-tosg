@@ -61,7 +61,9 @@ BLER_INFEASIBLE = 0.999  # frame BLER >= this => action cannot be delivered => i
 # Channel-use-equivalent payload (Mbit); both C variants carry the same 1.98 Mbit perception
 # payload but C-256 uses half the symbols (8 vs 4 bits/sym). Kept for the printed sanity report;
 # the label itself (lam=0 argmax of eff_f1) does NOT depend on payload.
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+# channel uses (Msym) at rate-1/2 (report only; the lam=0 oracle label does NOT depend on payload):
+# C16=1.98/0.5/4=0.99, C256=1.98/0.5/8=0.495, L=0.024. (1.98/4 was the UNCODED count -- corrected.)
+PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}
 
 
 def bler_frame_vec(snr_arr, tbl, qam, channel):

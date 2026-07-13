@@ -29,7 +29,7 @@ OUTDIR = os.path.join(ROOT, 'code/extra_experiments/out')
 FIGDIR = os.path.join(ROOT, 'paper/figures')
 os.makedirs(OUTDIR, exist_ok=True)
 
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}  # channel uses (Msym) at rate-1/2; corrected 2026-07-12
 ACTIONS = ['L', 'C16', 'C256']
 SEED = 0
 

@@ -42,7 +42,7 @@ DATASET = os.path.join(DATA, f'dataset_{TRAIN_SPLIT}_v3.csv')
 SEED = 0
 TEST_SIZE = 0.30
 ACTIONS = ['L', 'C16', 'C256']
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}  # channel uses (Msym) at rate-1/2; corrected 2026-07-12
 
 EXCLUDE_COLS = {
     'sample_id', 'cav_keys', 'channel_type',
