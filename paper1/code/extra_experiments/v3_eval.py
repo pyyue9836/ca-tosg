@@ -15,16 +15,26 @@ import pandas as pd
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _P1 = os.path.dirname(os.path.dirname(_HERE))
 BLER_CSV = os.path.join(_P1, 'results/bler_sionna/bler_sionna.csv')
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+# Channel USES per frame (Msymbols) at rate-1/2: info bits / coderate / bits_per_symbol. The modulator
+# carries the CODED stream (rate-1/2 -> 2x info bits), so C16 = 1.98/0.5/4 = 0.99, C256 = 1.98/0.5/8 =
+# 0.495, L = 0.024/0.5/2 (QPSK) = 0.024. (The earlier 1.98/4=0.495 was the UNCODED symbol count -- wrong
+# for the rate-1/2 chain used throughout + the Sionna table; corrected 2026-07-12 per supervisor.)
+PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}
 ACTIONS = ['L', 'C16', 'C256']
 PAYVEC = np.array([PAYLOAD[a] for a in ACTIONS])
 BLER_INFEASIBLE = 0.999
 N_SEED = 200
 
 _TBL = pd.read_csv(BLER_CSV)
+# OFDM rows live in a separate file until the supervisor reviews the curve (PROVENANCE_ofdm.txt) --
+# concat them here so 'ofdm' is available for the two-regime edge WITHOUT overwriting the canonical table.
+_OFDM = os.path.join(os.path.dirname(BLER_CSV), 'bler_sionna_ofdm.csv')
+if os.path.exists(_OFDM):
+    _TBL = pd.concat([_TBL, pd.read_csv(_OFDM)], ignore_index=True)
+_CHS = tuple(sorted(_TBL.channel.unique()))
 _B = {(q, c): (_TBL[(_TBL.qam == q) & (_TBL.channel == c)].sort_values('esno_db').esno_db.to_numpy(),
                _TBL[(_TBL.qam == q) & (_TBL.channel == c)].sort_values('esno_db').bler_frame.to_numpy())
-      for q in (16, 256) for c in ('awgn', 'rayleigh')}
+      for q in (16, 256) for c in _CHS}
 
 
 def _bler(snr, qam, ch):

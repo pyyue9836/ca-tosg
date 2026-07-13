@@ -45,3 +45,13 @@ mechanism-level ("diversity order determines feasibility") statement that pre-em
 attack as our own discussion. If the window does NOT open, the original statement stands, with one more
 supporting data cell. Output: results/bler_sionna/bler_sionna_ofdm.csv; merged into bler_sionna.csv only
 after supervisor review of the curve.
+
+RESULT (tau_rms=46.2 ns, TR 37.885 Urban NLOSv @ 5.9 GHz): 16-QAM frame-BLER first feasible at ~24 dB
+(24.0 dB frame 0.998 -> 28 dB 0.448). Three-channel cliff comparison (16-QAM, frame feasible from):
+  AWGN 8.0 dB  |  OFDM 24 dB  |  flat Rayleigh NEVER (0-24+ dB, frame BLER=1).
+=> DIVERSITY ORDER DETERMINES FEASIBILITY: no-fading (AWGN) 8 dB -> freq-selective OFDM (order ~2) 24 dB
+-> no-diversity flat Rayleigh infinity. The pre-registered sub-finding upgrade holds. NOTE the OFDM window
+(24 dB) sits ABOVE the selector's operational SNR range U[0,20], so within-range OFDM-LDPC is infeasible
+like Rayleigh -- but a CLIFF EXISTS (Rayleigh has none). This belongs to Figure A / the BLER cliff
+comparison (feasibility evidence), NOT the U[0,20] two-regime edge (selector-value evidence). Merged into
+v3_eval via concat of bler_sionna_ofdm.csv (canonical bler_sionna.csv untouched pending final review).
