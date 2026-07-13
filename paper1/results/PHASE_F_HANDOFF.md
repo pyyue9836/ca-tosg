@@ -47,3 +47,18 @@ The last item done in a fatigue stretch is the risk peak. Re-read cae8654 (gener
   row/col layout to the supervisor for review; figure INSERTION only is gated, not the .tex pass.
 - fig:ap_snr regen: part of item 7.
 - Josh's 4 hand-written paragraphs: see results/JOSH_PARAGRAPHS.md (independent of this pause).
+
+## OLD-ACCOUNT CHECKS (recorded, not verbal; 2026-07-12)
+- clairvoyant vs ceiling: DISTINCT quantities, NOT the same (hypothesis "clairvoyant = ceiling" is FALSE).
+  clairvoyant_upper = F1 metric, 200-real, the SELECTOR's post-hoc block-sampling upper bound
+  (0.9139/0.9170/0.8900 val/test/culver). Feature-ceiling = AP@0.5 metric, the compressed model under an
+  identity channel (0.9169/0.9216/0.8720). Different metric AND different object; the test-split near-match
+  (0.917 vs 0.922) is coincidental. Both kept, labelled separately, in different tables (headline_agg F1 vs
+  tab:headline AP). Account resolved: not redundant, do not conflate.
+- channel_codec_ap vs two_regime_edge: SEPARATE artifacts, correctly NOT merged. channel_codec_ap_v3_test.csv
+  (channel,codec,snr_db,ap50) = Figure-A fixed-codec AP-vs-SNR characterisation; two_regime_edge_v3.csv
+  (rf_f1,edge_...) = RF-vs-threshold F1 edge (selector value). Different metric (AP vs F1) + object (codec
+  vs selector). No merge -- by design.
+
+## JOSH: HARQ para is a FINALISED DRAFT (JOSH_PARAGRAPHS.md #4) -> 3 paragraphs remain to hand-write
+(C256 dominance, CoDS positioning, collaboration-harm). This is the schedule's long pole for the final gate.
