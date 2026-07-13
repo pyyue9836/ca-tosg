@@ -86,3 +86,15 @@ Rayleigh/OFDM-LDPC (4 panels) FLAT-DEAD at the ego floor; JSCC (3 panels) gracef
 levels and small cliff-position shifts may move. ANY panel breaking the regime (e.g. Rayleigh-LDPC off the
 floor) => STOP and investigate, NOT a footnote. If shape holds -> drop the "validate in appendix" line and
 post a single-line confirmation with the commit hash.
+
+## VALIDATE channel_codec_ap VERIFICATION RESULT (execution-side check; verdict is the supervisor's)
+channel_codec_ap_v3_validate.csv committed (this commit). Initial shape-check FALSE-flagged breaks because
+it hard-coded TEST levels (ego 0.735, JSCC>0.78); investigated per criterion (3) -> a CHECK BUG, not a
+regime break. Re-checked against VALIDATE's OWN levels (validate ego-only AP 0.6116 vs test 0.7350; validate
+ceiling 0.9169): regime SHAPE INVARIANT on all 9 panels -- AWGN-LDPC x2 cliff (ego 0.612 -> ceiling 0.917);
+Rayleigh/OFDM-LDPC x4 flat-dead byte-exact at validate ego 0.612; JSCC x3 graceful, monotone-increasing,
+cliff-free, above the ego floor. Only AP levels shifted down (validate harder), as (3) allows. ONE HONEST
+FLAG surfaced (not a verdict): ofdm-JSCC validate spread 0.071 (vs awgn 0.016) -- still graceful+monotone+
+cliff-free (regime intact); the larger low-SNR spread is OFDM's real structure-sensitivity, consistent with
+the JSCC F1 curves (ofdm 0.79-0.82 with a 0-dB dip). Supervisor to rule; "validate in appendix" line pending
+that ruling.
