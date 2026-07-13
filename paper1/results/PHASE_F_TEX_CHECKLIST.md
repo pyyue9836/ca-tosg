@@ -54,11 +54,11 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 - L496 `0.917 +-0.015` -> v3 full F1 0.9086 (@payload). L495 RF+CSI row -> Perception+SNR 0.8973.
 
 ## Generalisation (L579-663)
-- L583 `88.9%/91.3%` agreement -> test 85.4% / culver 87.0% (rf acc). `~11%` activation -> test 16.0% /
+- [x] L583 `88.9%/91.3%` agreement -> test 85.4% / culver 87.0% (rf acc). `~11%` activation -> test 16.0% /
   culver 24.2%. `0.895/0.845` base rate -> test 0.8394 / culver 0.7585. `99.4%/99.6%` recovery -> test 99.4 /
   culver 99.3 (band 99.3-99.8, max validate 99.8). `16.4%/17.1%` -> per-split band. `0.913` culver acc -> 0.8703.
-- L587 caption `99.3-99.7% / 15.8-18.4%` -> `99.3-99.8% / 16-25%`. Mean over SNR [0,20], 50/50 AWGN/Rayleigh.
-- L594-605 tab:gen_headline: test oracle 0.074@0.894, Fixed-L 0.024@0.887, RF 0.081@0.888; culver oracle
+- [x] L587 caption `99.3-99.7% / 15.8-18.4%` -> `99.3-99.8% / 16-25%`. Mean over SNR [0,20], 50/50 AWGN/Rayleigh.
+- [x] L594-605 tab:gen_headline: test oracle 0.074@0.894, Fixed-L 0.024@0.887, RF 0.081@0.888; culver oracle
   0.894, Fixed-L 0.887, RF 0.085@0.891 -> v3: test oracle 0.9140@0.179, Fixed-L 0.9011@0.024, RF 0.9088@0.251;
   culver oracle 0.8891@0.257, Fixed-L 0.8722@0.024, RF 0.8831@0.158. + clairvoyant rows. "RF + CSI + ch" ->
   "RF + est. SNR + ch. type". src policy_v3.
