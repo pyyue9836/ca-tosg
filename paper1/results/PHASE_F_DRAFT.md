@@ -17,10 +17,23 @@ Evidence lines (all under the v3 canonical protocol: 200 real. + v3 GT + Sionna 
 2. **a7 feature ablation** (results/ablation_v3/a7_cue_value_v3.csv): over channel state alone, cues add
    -0.00024 F1 (NOT significant, "cues add <0.001" holds) BUT save payload (Full vs Channel-only,
    frame-level CI: see a7 run) -> under the LDPC cliff codec, cues pay in BANDWIDTH not accuracy.
-3. **JSCC two-regime edge** (Track A, PENDING): under the graceful JSCC codec (no cliff), cues are
-   expected to pay in ACCURACY (the v2 +0.017 side) -- to be measured under v3 GT, per-channel edge with
-   frame-level paired CI, validate & test separate. NO direction predicted (supervisor down-weighted his
-   own direction calls after 4 data-driven corrections; acceptance = structure only).
+3. **JSCC two-regime edge** (Track A, DONE 2026-07-12, results/jscc_v3/two_regime_edge_v3.csv): under the
+   graceful JSCC codec (no cliff) cues pay in ACCURACY. RF - best-tau edge, 200-real, frame-level paired
+   95% CI, ALL significant:
+       awgn      LDPC +0.0033/+0.0047 (val/test)   JSCC +0.0044/+0.0266
+       rayleigh  LDPC +0.0004/+0.0019               JSCC +0.0040/+0.0223
+   JSCC edge is 1.3x-12x the LDPC edge, LARGEST on the hard channels (test, rayleigh). The SNR threshold
+   is structurally useless under JSCC (best-tau=20 or 0; JSCC F1 is ~SNR-flat, no cliff) -> the JSCC-side
+   selector value is ENTIRELY perception-cue. JSCC F1 curves confirm graceful (awgn ~0.81 val/~0.89 test,
+   rayleigh ~0.81/~0.88, ofdm 0.79-0.82 with a low-SNR-0dB dip). Interp bias <=0.0012 (JSCC side only).
+
+### SHARPER SUB-FINDING (Rayleigh): codec response determines FEASIBILITY, not just currency
+On Rayleigh the frame BLER is 1 across 0-20 dB, so DIGITAL LDPC feature transmission is INFEASIBLE -- the
+selector collapses to all-L and the LDPC edge is ~0 (+0.0004 val / +0.0019 test; RF payload 0.03/0.07 =
+mostly L). ANALOG JSCC survives the fading (no cliff) and the selector extracts +0.0040/+0.0223 -- a
+~10-12x edge gap on the SAME channel. Under deep fading the codec choice decides whether feature-level
+cooperation is POSSIBLE at all, not merely how the cues pay. This is the strongest single figure in the
+two-regime story and the direct HARQ / analog-JSCC-advantage motivation.
 
 ## Error-path assignment (keep the two regimes' uncertainties SEPARATE)
 - JSCC side carries the interpolation systematic term: aggregate bias <=0.0012 (mid-grid probe, SNR 10),

@@ -76,10 +76,13 @@ def main():
         print('\n[PROBE]', row); print('wrote results/jscc_v3/interp_probe_mae.csv')
         return
 
+    GRID = {0, 4, 8, 12, 16, 20}   # exclude the leftover probe npz (e.g. snr10, 200-frame subset)
     rows = []
     for p in sorted(glob.glob(os.path.join(JSCC_DIR, 'jscc_*_snr*.npz'))):
         base = os.path.basename(p)[:-4]                     # jscc_<ch>_<split>_snrNN
         _, ch, split, snrtag = base.split('_'); snr = int(snrtag[3:])
+        if snr not in GRID:
+            continue
         canon = canon_of(split)
         pf, n = perframe_f1(p, canon); a30, a50, a70 = global_ap(p, canon)
         rows.append(dict(channel=ch, split=split, snr_db=snr, n=n,
