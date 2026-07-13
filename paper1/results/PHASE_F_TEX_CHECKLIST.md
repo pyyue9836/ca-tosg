@@ -34,10 +34,10 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 - L355 caption `0.078-0.091 / 15.8-18.4% / 0.495` -> v3 payload band; Fixed C16 = 0.99 (channel use). band def.
 - L376 `+0.018/+0.015/+0.054` -> v3 +0.026/+0.002/+0.074 (AP@.5); ceiling 0.917/0.922 -> 0.9169/0.9216/0.8720; Fixed-L 0.8902/0.9189/0.7828. src true_e2e_global_v3.
 - L376/380 `0.078 / 15.8-18.4%` -> band def.
-- L380 `0.889 @ 0.071` (threshold) vs `0.078` (RF) -> v3 test: threshold 0.9096@0.303, RF 0.9088@0.251.
+- [x] L380 `0.889 @ 0.071` (threshold) vs `0.078` (RF) -> v3 test: threshold 0.9096@0.303, RF 0.9088@0.251.
   RECAST to Pareto: at MATCHED payload RF > threshold (frame CI excludes 0; +0.00049 test). src threshold_vs_rf.
-- L380 `+0.045 [+0.033,+0.059]` -> a2 reliable hard +0.0896 [.0829,.0963] / all-ch +0.0240 [.0222,.0259].
-- L390-395 tab:headline_agg: Fixed-L `0.887`@`0.024`; oracle `0.894`@`0.074`; RF `0.078`; threshold `0.071` ->
+- [x] L380 `+0.045 [+0.033,+0.059]` -> a2 reliable hard +0.0896 [.0829,.0963] / all-ch +0.0240 [.0222,.0259].
+- [x] L390-395 tab:headline_agg: Fixed-L `0.887`@`0.024`; oracle `0.894`@`0.074`; RF `0.078`; threshold `0.071` ->
   v3 test: Fixed-L 0.9011@0.024, oracle 0.9140@0.179, RF 0.9088@0.251, threshold 0.9096@0.303, clairvoyant
   0.9170@0.123 (NEW row). src policy_v3/generalisation_test.
 

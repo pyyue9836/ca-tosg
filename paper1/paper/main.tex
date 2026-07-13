@@ -377,22 +377,23 @@ Three observations follow. (i) When the channel can carry features, the selector
 
 \method{} is not designed to raise channel-\emph{averaged} AP above Fixed $L$ on every frame: on many frames object-level communication is already sufficient, and a channel-averaged mean necessarily dilutes the gain. Its value is to activate feature-level communication \emph{only} when the expected task gain justifies the payload and channel risk. The complementary channel-averaged payload--F1 frontier (Section~\ref{sec:pareto}), the difficulty stratification that localises the gain (Section~\ref{sec:difficulty}), and the SNR-threshold comparison (Section~\ref{sec:threshold}) further characterise where and why the policy helps.
 
-Because a one-line SNR-threshold rule is the natural challenger to any learned selector, we place it in the headline rather than an appendix. Table~\ref{tab:headline_agg} reports the channel-averaged frame F1 and payload of Fixed $L$, an SNR-threshold rule, the learned selector, and the oracle over $200$ random SNR/channel draws on the frozen test split. The honest reading is that, \emph{averaged over all channel states, the learned selector and the threshold rule lie on the same payload--F1 frontier}---at equal F1 the threshold is in fact marginally cheaper ($0.889$ at payload $0.071$ versus the RF's $0.078$). On an LDPC + QAM channel the estimated SNR is therefore a near-sufficient statistic for the granularity decision, and the $21$ ego-side perception cues add no aggregate bandwidth advantage over channel state alone. We report this rather than hide it: it is the central diagnostic finding of the paper. The learned selector's residual value is (i) frame-selective---the granularity policy's gain over Fixed~$L$ reaches $+0.045$ F1 (bootstrap $95\%$ CI $[+0.033,+0.059]$) on hard frames under a usable channel (Section~\ref{sec:difficulty})---and (ii) decisive on channels without a sharp SNR cliff, such as JSCC: when SNR ceases to be a sufficient statistic the cue-based selector beats the best SNR threshold by $+0.017$ F1 (Section~\ref{sec:jscc_aware}).
+Because a one-line SNR-threshold rule is the natural challenger to any learned selector, we place it in the headline rather than an appendix. Table~\ref{tab:headline_agg} reports the channel-averaged frame F1 and per-frame channel use of Fixed $L$, a re-tuned SNR-threshold rule, the learned selector, and the oracle over $200$ random SNR/channel draws on the frozen test split. On the payload--F1 plane the learned selector \emph{Pareto-dominates} the re-tuned threshold: at matched channel use its realised F1 exceeds the best threshold by $+0.0005$ (frame-level paired bootstrap $95\%$ CI $[+0.0002,+0.0008]$ on test; $+0.0019$ and $+0.0033$ on validate and Culver-City), and the best-F1 threshold reaches comparable F1 only by transmitting ${\approx}21\%$ more channel use on this split. Equivalently, on an LDPC + QAM cliff the estimated SNR is a near-sufficient \emph{accuracy} statistic and the $21$ ego-side perception cues buy \emph{bandwidth efficiency} rather than peak accuracy---they add no significant realised-F1 gain over channel state alone (Section~\ref{sec:ablation}) yet cut the selector's channel use by ${\approx}12\%$ at matched F1. We report this rather than hide it: it is the central diagnostic finding of the paper, and it recurs as the codec-dependent \emph{currency} of the task cues (Section~\ref{sec:jscc_aware}). The learned selector's residual accuracy value is (i) frame-selective---the gain over Fixed~$L$ reaches $+0.09$ F1 (frame-level paired $95\%$ CI $[+0.083,+0.096]$) on the hardest frames under a usable channel (Section~\ref{sec:difficulty})---and (ii) decisive on channels without a sharp SNR cliff, such as JSCC, where the cue-based selector beats the best SNR threshold by $+0.027$ F1 (Section~\ref{sec:jscc_aware}).
 
 \begin{table}[t]
 \centering
-\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames). Mean realised frame F1 and channel-use-equivalent payload over $200$ random draws of per-frame SNR ($\mathcal{U}[0,20]$~dB) and channel type ($50/50$ AWGN/Rayleigh); payload $95\%$ CI in brackets, F1 CI half-widths $<0.0011$ for the learned policies. The SNR-threshold rule lies on the same payload--F1 frontier as the learned selector.}
+\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames). Mean realised frame F1 and per-frame channel use (Msym, at rate-1/2; $C_{16}=0.990$) over $200$ random draws of per-frame SNR ($\mathcal{U}[0,20]$~dB) and channel type ($50/50$ AWGN/Rayleigh); F1 CI half-widths $<0.0011$ for the learned policies. On the payload--F1 plane the learned selector \emph{Pareto-dominates} the re-tuned SNR-threshold rule---at matched channel use its realised F1 is higher (see text). The clairvoyant upper bound samples the per-frame block outcome post hoc and is not achievable online.}
 \label{tab:headline_agg}
 \begin{tabular}{lcc}
 \toprule
-Policy & Mean F1 & Payload (Mbit/frame) \\
+Policy & Mean F1 & Channel use (Msym/frame) \\
 \midrule
-Fixed $L$ (object-level)      & 0.887 & 0.024 \\
-Fixed $C_{16}$ (LDPC+16-QAM)  & 0.426 & 0.495 \\
-Fixed $C_{256}$ (LDPC+256-QAM)& 0.116 & 0.248 \\
-SNR-threshold ($\tau{=}16$)   & 0.889 & 0.071\,[0.066,\,0.077] \\
-\method{} (RF, frozen)        & 0.889 & 0.078\,[0.072,\,0.084] \\
-Channel-aware oracle          & \textbf{0.894} & 0.074 \\
+Fixed $L$ (object-level)      & 0.901 & 0.024 \\
+Fixed $C_{16}$ (LDPC+16-QAM)  & 0.852 & 0.990 \\
+Fixed $C_{256}$ (LDPC+256-QAM)& 0.826 & 0.495 \\
+SNR-threshold (re-tuned $\tau{=}8.5$) & 0.910 & 0.303 \\
+\method{} (RF, frozen)        & \textbf{0.909} & 0.251 \\
+Channel-aware oracle          & 0.914 & 0.179 \\
+Clairvoyant upper bound       & 0.917 & 0.123 \\
 \bottomrule
 \end{tabular}
 \end{table}
