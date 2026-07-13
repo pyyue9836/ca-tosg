@@ -14,13 +14,13 @@ X Msym of channel use per frame (at rate-1/2), i.e. Y% of the Fixed C_16 feature
 Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0.1 pp / 3 dp, declared once.
 
 ## Abstract (L34) + intro central finding (L69-70)
-- L34 `+0.05` (AP gain) -> `up to +0.074` (culver AP@.5 feat-active over Fixed-L; validate +0.026, test +0.002~0). src true_e2e_global_v3.
-- L34 `15.8-18.4%` -> `16.0-25.3%` (band def above). src policy_v3.
-- L34 `65%` (SNR+ch importance) -> `62%` (channel_is_rayleigh 0.349 + est_snr_db 0.275 = 0.624). src results/feature_importance_v3.csv.
-- L34 `+0.017 [+0.012,+0.022]` (JSCC edge) -> reframe to CURRENCY: cliff LDPC cues buy bandwidth
+- [x] L34 `+0.05` (AP gain) -> `up to +0.074` (culver AP@.5 feat-active over Fixed-L; validate +0.026, test +0.002~0). src true_e2e_global_v3.
+- [x] L34 `15.8-18.4%` -> `16.0-25.3%` (band def above). src policy_v3.
+- [x] L34 `65%` (SNR+ch importance) -> `62%` (channel_is_rayleigh 0.349 + est_snr_db 0.275 = 0.624). src results/feature_importance_v3.csv.
+- [x] L34 `+0.017 [+0.012,+0.022]` (JSCC edge) -> reframe to CURRENCY: cliff LDPC cues buy bandwidth
   (a7 payload -0.031 sig, F1 +0 ns); graceful JSCC cues buy accuracy (edge awgn test +0.0266
   [+0.0242,+0.0290]). src two_regime_edge_v3 + a7_cue_value_v3.
-- L34 `52.8` ms -> keep (batch-1 conservative; add the a8 13.9 ms protocol note; unify once).
+- [x] L34 `52.8` ms -> keep (batch-1 conservative; add the a8 13.9 ms protocol note; unify once).
 - [x] L69 `+0.045` (hard-frame gain) -> v3 reliable-ch hard gain test +0.0896 [+0.0829,+0.0963] (all-channel
   +0.0240); DECLARE reliable-channel condition (AWGN 16 dB, deterministic). src a2.
 - [x] L70 `+0.017 ... +0.015 (Rayleigh and OFDM)` -> v3 edges: awgn +0.0266, rayleigh +0.0223, ofdm +0.0251
