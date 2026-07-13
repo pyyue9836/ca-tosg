@@ -2,7 +2,7 @@
 
 Grep-verified list of ALL stale v2 numbers in paper/main.tex (line -> v2 value -> v3 replacement ->
 source -> [ ] done). Substitute against THIS list, tick each; a residual is worse than a bridge para.
-STATUS: F1-side = v3 values ready (policy_v3 / ablation_v3 / jscc_v3). AP-side [AP-PENDING] = awaits the
+STATUS: ALL numbers final (F1-side + AP-side true_e2e_global_v3 done). Was:
 v3 true_e2e re-run (true_e2e_global_v3_*.csv, running bv2d7ua0d).
 
 Band DEFINITION (write once, cite everywhere; NEVER "RF/0.99"): "\method's channel-averaged payload is
@@ -10,7 +10,7 @@ X Msym of channel use per frame (at rate-1/2), i.e. Y% of the Fixed C_16 feature
 Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0.1 pp / 3 dp, declared once.
 
 ## Abstract (L34) + intro central finding (L69-70)
-- L34 `+0.05` (AP gain) -> [AP-PENDING] v3 true_e2e AP gain (feature-active vs Fixed-L).
+- L34 `+0.05` (AP gain) -> `up to +0.074` (culver AP@.5 feat-active over Fixed-L; validate +0.026, test +0.002~0). src true_e2e_global_v3.
 - L34 `15.8-18.4%` -> `16.0-25.3%` (band def above). src policy_v3.
 - L34 `65%` (SNR+ch importance) -> `62%` (channel_is_rayleigh 0.349 + est_snr_db 0.275 = 0.624). src results/feature_importance_v3.csv.
 - L34 `+0.017 [+0.012,+0.022]` (JSCC edge) -> reframe to CURRENCY: cliff LDPC cues buy bandwidth
@@ -28,7 +28,7 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 
 ## Headline results (L349-405)
 - L355 caption `0.078-0.091 / 15.8-18.4% / 0.495` -> v3 payload band; Fixed C16 = 0.99 (channel use). band def.
-- L376 `+0.018/+0.015/+0.054` AP + `0.917/0.922` ceiling -> [AP-PENDING] v3 true_e2e.
+- L376 `+0.018/+0.015/+0.054` -> v3 +0.026/+0.002/+0.074 (AP@.5); ceiling 0.917/0.922 -> 0.9169/0.9216/0.8720; Fixed-L 0.8902/0.9189/0.7828. src true_e2e_global_v3.
 - L376/380 `0.078 / 15.8-18.4%` -> band def.
 - L380 `0.889 @ 0.071` (threshold) vs `0.078` (RF) -> v3 test: threshold 0.9096@0.303, RF 0.9088@0.251.
   RECAST to Pareto: at MATCHED payload RF > threshold (frame CI excludes 0; +0.00049 test). src threshold_vs_rf.
