@@ -54,11 +54,16 @@ The last item done in a fatigue stretch is the risk peak. Re-read cae8654 (gener
   (0.9139/0.9170/0.8900 val/test/culver). Feature-ceiling = AP@0.5 metric, the compressed model under an
   identity channel (0.9169/0.9216/0.8720). Different metric AND different object; the test-split near-match
   (0.917 vs 0.922) is coincidental. Both kept, labelled separately, in different tables (headline_agg F1 vs
-  tab:headline AP). Account resolved: not redundant, do not conflate.
-- channel_codec_ap vs two_regime_edge: SEPARATE artifacts, correctly NOT merged. channel_codec_ap_v3_test.csv
-  (channel,codec,snr_db,ap50) = Figure-A fixed-codec AP-vs-SNR characterisation; two_regime_edge_v3.csv
-  (rf_f1,edge_...) = RF-vs-threshold F1 edge (selector value). Different metric (AP vs F1) + object (codec
-  vs selector). No merge -- by design.
+  tab:headline AP). Account resolved: not redundant, do not conflate. HARD LABEL REQUIREMENT (post the
+  Culver 0.8867 coincidence lesson -- labels must be self-contained out of context): selector side ->
+  "selector F1 upper bound (clairvoyant CSI)"; codec side -> "delivery ceiling (error-free transport, AP)".
+  If the two numbers appear ADJACENT in the body, a footnote must pre-empt: "different metric and object;
+  the closeness is coincidental." (Apply during the .tex pass, items 3/7.)
+- channel_codec_ap v3 RE-OUTPUT (the actual old account, = attribution answered above but the re-run status
+  is separate): TEST split DONE = channel_codec_ap_v3_test.csv, commit a1f4b8c. VALIDATE split = running
+  (b1wu3r539) -> channel_codec_ap_v3_validate.csv; when done this line gets its md5/commit and the data-closure
+  declaration is airtight for both splits. (channel_codec_ap NOT merged into two_regime_edge -- separate by
+  design, different metric AP vs F1 and object codec vs selector.)
 
 ## JOSH: HARQ para is a FINALISED DRAFT (JOSH_PARAGRAPHS.md #4) -> 3 paragraphs remain to hand-write
 (C256 dominance, CoDS positioning, collaboration-harm). This is the schedule's long pole for the final gate.
