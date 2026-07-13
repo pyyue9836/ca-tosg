@@ -43,7 +43,12 @@ two-regime story and the direct HARQ / analog-JSCC-advantage motivation.
   be set against the LDPC +0.0005 edge. State which error path attaches to which regime so a reviewer
   does not wrongly divide.
 
-## v2->v3 differences to DECLARE explicitly (not silently substitute)
+## v2->v3 differences — SUPERVISOR-ONLY PAGE (NOT a paper section; ruling 2026-07-10, re-confirmed 07-12)
+The paper presents ONLY the final (v3) method; NO version comparison, NO v2 numbers appear anywhere.
+These differences live on a one-page note for the supervisor + as OUR internal-consistency checklist
+(don't leave a stray v2 number in a table). In the paper, the method choices are argued in Methods as
+the method's own justification, not as "we changed X from v2". Josh's hand-written paragraphs are FOUR
+(v2->v3 methodology is NOT among them): C256 dominance / CoDS positioning / collaboration-harm / HARQ.
 - Absolute F1 basis shifted ~+0.045 from the canonical-GT change alone: v2 0.8656 and v3 0.9108 are NOT
   comparable across tables.
 - Oracle/RF payloads ROSE vs v2 (ego floor + higher Sionna BLER); the "15.8-18.4% of Fixed C16" band

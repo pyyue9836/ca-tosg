@@ -71,15 +71,29 @@ Source: results/ablation_v3/a2_difficulty*.csv (200-real, frame paired CI).
   at 15-18x lower latency (0.8-1.1 vs 13.9 ms). Latency 52.8 ms (abstract) vs 13.9 ms (a8) -- unify protocol note.
 
 ## Ledger items (supervisor) — prose, mostly no number dep
-- CoDS positioning paragraph (related work) -- NEW.
+- CoDS positioning paragraph (related work) -- NEW (Josh writes).
 - L583/L605: "CSI" label -> "estimated SNR + channel-type indicator" (NOT CSI -- reviewer landmine). Body
   per-split numbers per the tables above.
-- v2->v3 bridge paragraph: F1 basis +~0.045 from canonical-GT change (v2 0.8656 vs v3 0.9108 NOT comparable);
-  payload band moved; cliff 12-14->8 dB (Sionna frame-level); a2 condition redefine; C256 dominance+foothold.
-- HARQ motivation sentence: Rayleigh frame BLER=1 across 0-20 dB (flat, no diversity) -> feature infeasible
-  -> HARQ/retransmission or [OFDM] frequency diversity needed. [OFDM result sharpens this.]
+- **NO v2->v3 bridge paragraph IN THE PAPER** (supervisor ruling ~2026-07-10, re-confirmed 2026-07-12): the
+  paper presents ONLY the final method; the methodology choices (canonical GT, feasibility mask, ego
+  fallback, Sionna frame BLER) are argued in Methods as the method's own justification, with NO version
+  comparison and NO v2 numbers anywhere. The number substitutions in this map are just corrections to the
+  final numbers, not a "we changed from v2" story. The one-page v2->v3 explanation is a SUPERVISOR-ONLY doc
+  (results/PHASE_F_DRAFT.md keeps the diff list for that page + for our own consistency), NOT a paper section.
+- HARQ motivation sentence: flat Rayleigh frame BLER=1 across 0-20 dB (no diversity) -> feature infeasible.
+  Now QUANTITATIVE (Josh's para): frequency diversity (order ~2) pulls the feasibility threshold from
+  unbounded (flat Rayleigh) back to ~24 dB (OFDM), still above the vehicular SNR range; HARQ provides TIME
+  diversity = the next lever to pull the threshold into the operating range (Paper C motivation, from our table).
 - C256: lambda=0 dominance theorem + lambda>0 minority foothold (<=5% across low-payload region 0.024-0.13 Mbit).
 
-## OFDM-DEPENDENT (hold until bler_sionna_ofdm.csv merged + TR 37.885 value pinned)
-- Figure A OFDM-LDPC panels; two-regime OFDM edge (both regimes); the Rayleigh->diversity feasibility
-  refinement in the sub-finding + HARQ sentence; abstract/intro "+0.015 under OFDM" number.
+## Figure A (channel_codec_ap 9-panel) — CAPTION REQUIREMENT (supervisor 2026-07-12)
+Body + Figure A caption MUST state: "the OFDM-LDPC feasibility threshold (~24 dB, diversity order ~2) lies
+ABOVE the evaluated SNR range" -- else the flat dead-line in the two OFDM-LDPC panels reads as a plotting
+error. Feasibility claim = clean monotone in diversity order: threshold 8 dB (AWGN) / ~24 dB (OFDM, order
+~2) / unbounded (flat Rayleigh, order 1). JSCC panels done (jscc_ap_f1_v3); LDPC/upper AP panels = CPU TODO.
+
+## OFDM status — RESOLVED (table done at TR 37.885 46.2 ns; two-regime OFDM edge done)
+- two-regime OFDM edge: ldpc +0.0004/+0.0019 (val/test, ~dead in-range), jscc +0.0037/+0.0251 -> two_regime_
+  edge_v3.csv complete (3ch). Rayleigh->diversity feasibility upgrade CONFIRMED (8/24/unbounded).
+- abstract/intro central-finding numbers: replace v2 "+0.017 [+.012,+.022] AWGN; +0.015 Rayleigh and OFDM"
+  with the v3 edges (currency framing) + the feasibility monotone. (Numbers now all available.)
