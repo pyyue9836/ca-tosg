@@ -98,3 +98,21 @@ FLAG surfaced (not a verdict): ofdm-JSCC validate spread 0.071 (vs awgn 0.016) -
 cliff-free (regime intact); the larger low-SNR spread is OFDM's real structure-sensitivity, consistent with
 the JSCC F1 curves (ofdm 0.79-0.82 with a 0-dB dip). Supervisor to rule; "validate in appendix" line pending
 that ruling.
+
+## VALIDATE channel_codec_ap -- VERDICT: PASS (supervisor 2026-07-14). Row CLOSED.
+f24d4d2 | 9/9 panels regime-invariant vs test (four flat-dead panels byte-exact min=max=ego -- the
+strictest pass form, not "near-flat"; validate ceiling 0.917 matches the thread's true_e2e v3 record
+0.917/0.922/0.872, cross-stage consistent) | FLAG (ofdm-JSCC validate spread 0.071) PASSED, not
+investigated. Two consistency arguments for the flag: (i) cross-split RATIO reproduction -- OFDM-JSCC
+spread is 3-4x AWGN-JSCC on BOTH splits (test 0.036 vs 0.012 = 3.1x; validate 0.071 vs 0.016 = 4.4x), so
+"OFDM more low-SNR-sensitive" is a structure present on both, only amplified by validate's difficulty ->
+shape invariant, level scaled = squarely inside criterion (3); (ii) F1-side corroboration (ofdm JSCC F1
+0.79-0.82 with a 0-dB dip). Flag -> ARCHIVE (here), NOT the caption (it is within-regime; over-annotation
+invites questions). DATA-CLOSURE DECLARATION now truly holds (both splits).
+
+## DISCIPLINE RULE (elevated from the check-bug, 2026-07-14): verification scripts derive reference values
+programmatically from the split's OWN source CSV -- NEVER hardcode a literal. The isomorph of "numbers are
+not transcribed from memory", applied to verification code. Qualitative note: this bug was a LOUD failure
+(false-positive -> triggered the (3) stop-and-investigate -> the protocol ran correctly, handling was
+right). The real danger is a SILENT failure -- the same hardcode in the OTHER direction is a false-PASS.
+The rule seals that direction. [[hash-line-every-delivery]] [[negative-existence-search-scope]] family.
