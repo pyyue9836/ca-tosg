@@ -55,3 +55,11 @@ RESULT (tau_rms=46.2 ns, TR 37.885 Urban NLOSv @ 5.9 GHz): 16-QAM frame-BLER fir
 like Rayleigh -- but a CLIFF EXISTS (Rayleigh has none). This belongs to Figure A / the BLER cliff
 comparison (feasibility evidence), NOT the U[0,20] two-regime edge (selector-value evidence). Merged into
 v3_eval via concat of bler_sionna_ofdm.csv (canonical bler_sionna.csv untouched pending final review).
+
+DIVERSITY ORDER PROVENANCE (supervisor requirement -- no unmeasured order): empirical diversity order
+from a log-log slope fit of the 16-QAM codeword BLER over its waterfall region (BLER_cw in [1e-4, 0.1]):
+d = -10 * slope of log10(BLER_cw) vs Es/N0(dB). Results: OFDM d = 2.01 (23 pts, 14.5-28 dB) -> "empirical
+diversity order ~2 (BLER slope fit)"; flat Rayleigh d = 0.84 (~1, 10 pts, 16.5-21 dB) = theoretical order
+1; AWGN has no waterfall in that band (no fading, effectively unbounded order). The coherence-bandwidth
+self-check (~1.9) and the slope fit (2.01) agree. Feasibility threshold monotone in diversity order:
+AWGN 8 dB (no fading) / OFDM ~24 dB (order 2) / flat Rayleigh unbounded (order 1).
