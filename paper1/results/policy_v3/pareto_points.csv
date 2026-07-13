@@ -1,25 +1,25 @@
 split,policy,payload,f1
 validate,Fixed L,0.024,0.9067
-validate,Fixed C16,0.495,0.7907
-validate,Fixed C256,0.2475,0.7499
-validate,Channel-blind EU (->Fixed-L),0.0398,0.9076
-validate,SNR-threshold (best tau),0.1481,0.91
-validate,"CA-TOSG (RF, deployed)",0.1015,0.9108
-validate,"Oracle (ch-aware, masked)",0.0886,0.9129
-validate,"Clairvoyant (post-hoc, samples block)",0.0969,0.9139
+validate,Fixed C16,0.99,0.7907
+validate,Fixed C256,0.495,0.7499
+validate,Channel-blind EU (->Fixed-L),0.0564,0.9076
+validate,SNR-threshold (best tau),0.2785,0.91
+validate,"CA-TOSG (RF, deployed)",0.183,0.9108
+validate,"Oracle (ch-aware, masked)",0.1565,0.9129
+validate,"Clairvoyant (post-hoc, samples block)",0.1735,0.9139
 test,Fixed L,0.024,0.9011
-test,Fixed C16,0.495,0.8519
-test,Fixed C256,0.2475,0.8263
-test,Channel-blind EU (->Fixed-L),0.122,0.91
-test,SNR-threshold (best tau),0.1599,0.9096
-test,"CA-TOSG (RF, deployed)",0.1346,0.9088
-test,"Oracle (ch-aware, masked)",0.0995,0.914
-test,"Clairvoyant (post-hoc, samples block)",0.1228,0.917
+test,Fixed C16,0.99,0.8519
+test,Fixed C256,0.495,0.8263
+test,Channel-blind EU (->Fixed-L),0.2253,0.91
+test,SNR-threshold (best tau),0.3027,0.9096
+test,"CA-TOSG (RF, deployed)",0.2509,0.9088
+test,"Oracle (ch-aware, masked)",0.1789,0.914
+test,"Clairvoyant (post-hoc, samples block)",0.2267,0.917
 culver,Fixed L,0.024,0.8722
-culver,Fixed C16,0.495,0.8166
-culver,Fixed C256,0.2475,0.7811
-culver,Channel-blind EU (->Fixed-L),0.1199,0.8767
-culver,SNR-threshold (best tau),0.1661,0.8874
-culver,"CA-TOSG (RF, deployed)",0.0894,0.8831
-culver,"Oracle (ch-aware, masked)",0.1378,0.8891
-culver,"Clairvoyant (post-hoc, samples block)",0.1386,0.89
+culver,Fixed C16,0.99,0.8166
+culver,Fixed C256,0.495,0.7811
+culver,Channel-blind EU (->Fixed-L),0.2207,0.8767
+culver,SNR-threshold (best tau),0.3153,0.8874
+culver,"CA-TOSG (RF, deployed)",0.1581,0.8831
+culver,"Oracle (ch-aware, masked)",0.2573,0.8891
+culver,"Clairvoyant (post-hoc, samples block)",0.2591,0.89

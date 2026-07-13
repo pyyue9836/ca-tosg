@@ -1,4 +1,4 @@
 delta,currency,value,ci_lo,ci_hi,significant
 cues_add_F1_over_channel_alone,accuracy,-0.00024,-0.00052,3e-05,False
-cues_save_payload_over_channel_alone,bandwidth,-0.01495,-0.01689,-0.01306,True
+cues_save_payload_over_channel_alone,bandwidth,-0.03066,-0.03464,-0.02679,True
 perception+SNR_minus_channel_only_F1,accuracy,-0.01161,-0.01255,-0.01066,True

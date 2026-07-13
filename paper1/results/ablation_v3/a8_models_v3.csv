@@ -1,7 +1,7 @@
 model,oracle_acc,realised_f1,realised_f1_std,payload,latency_ms,size_kb
-Decision Tree,0.8318,0.9072,0.0007,0.1278,0.765,9.0
-Logistic Regression,0.8175,0.9065,0.0009,0.1603,0.89,2.3
-RBF-SVM,0.8415,0.9073,0.0007,0.1458,1.052,121.9
-"Small MLP (32,16) [no class_weight]",0.8742,0.906,0.0006,0.0752,0.967,53.4
-Random Forest (400),0.8567,0.9086,0.0007,0.1293,13.919,3739.3
-SNR-threshold (retuned tau=8.5),,0.9096,0.0008,0.1599,0.001,0.0
+Decision Tree,0.8318,0.9072,0.0007,0.2369,1.183,9.0
+Logistic Regression,0.8175,0.9065,0.0009,0.3036,1.553,2.3
+RBF-SVM,0.8415,0.9073,0.0007,0.2738,1.943,121.9
+"Small MLP (32,16) [no class_weight]",0.8742,0.906,0.0006,0.129,1.726,53.4
+Random Forest (400),0.8567,0.9086,0.0007,0.2399,24.499,3739.3
+SNR-threshold (retuned tau=8.5),,0.9096,0.0008,0.3027,0.001,0.0

@@ -1,9 +1,9 @@
 policy,accuracy,mean_payload,mean_f1
-oracle_masked,1.0,0.0886,0.9129
-clairvoyant_upper,,0.0969,0.9139
-rf_full,0.9234,0.1015,0.9108
-snr_threshold_best(tau=9.5),,0.1481,0.91
-channel_blind_EU,0.8628,0.0398,0.9076
+oracle_masked,1.0,0.1565,0.9129
+clairvoyant_upper,,0.1735,0.9139
+rf_full,0.9234,0.183,0.9108
+snr_threshold_best(tau=9.5),,0.2785,0.91
+channel_blind_EU,0.8628,0.0564,0.9076
 fixed_L,0.8628,0.024,0.9067
-fixed_C16,0.1372,0.495,0.7907
-fixed_C256,0.0001,0.2475,0.7499
+fixed_C16,0.1372,0.99,0.7907
+fixed_C256,0.0001,0.495,0.7499
