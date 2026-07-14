@@ -13,18 +13,32 @@ paragraphs too). Writing is not gated; only entry into the manuscript is. Paste 
 
 ## 1. C256 dominance argument (Method / message candidates) -- REVIEW STANDARD: 3 required elements (a,b,c)
 ### (a) Precise dominance definition (metric / SNR range / channels; numbers CSV-direct + verified)
-SYMBOL BINDING (source note, put in the paragraph): eff = effective F1 $= \mathrm{comp}(1-b) + \mathrm{ego}\,b$;
-$b$ = frame BLER (a probability, Sionna table); comp = compressed-model F1 (message delivered); ego =
-ego-only F1 (failure fallback); all at the frame's drawn SNR + channel. From this, the IDENTITY
+SYMBOL BINDING + IDENTITY DOMAIN (source note, put in the paragraph -- supervisor: "nail the domain of
+validity, or max|err|=0 looks suspicious"): eff = effective F1 $= \mathrm{comp}(1-b) + \mathrm{ego}\,b$, the
+expected utility of "fail back to ego with probability $b$". BINDINGS: comp = compressed-model F1 and ego =
+ego-only F1 are that FRAME's own measured values; $b$ = the frame's grid-point frame-level BLER -- the
+Sionna table value at that frame's (SNR, channel) grid point, a per-grid CONSTANT shared by all frames at
+that grid point, NOT a per-frame draw. GIVEN THIS BINDING, the identity
     eff\_C256 $-$ eff\_C16 $= (\mathrm{comp}-\mathrm{ego})(b_{16}-b_{256})$
-holds EXACTLY (verified max|err| $=0$; b256 $\ge$ b16 everywhere) -- see results/c256_dominance_verify.csv
-(code/verify_c256_dominance.py, per-frame recompute, verification-derive-not-hardcode). Since $b_{256}\ge
-b_{16}$ at every SNR and channel, the sign is set by $(\mathrm{comp}-\mathrm{ego})$: where comp $\ge$ ego,
-C256 is dominated. CAVEAT YOU MUST STATE (a reviewer cross-checking per-frame data breaks the paragraph
-otherwise): dominance is CONDITIONAL, not unconditional -- eff\_C256 $\le$ eff\_C16 on 99.7\% / 98.5\% /
-100\% of frames (validate/test/culver), and it reverses on the $\le$1.5\% where comp $<$ ego (partial
-delivery) -- EXACTLY the collaboration-harm frames of para 3. So write "dominated wherever the collaborator
-helps ($\ge$98.5\% of frames)", never "always dominated". src results/c256_dominance_verify.csv.
+is an ALGEBRAIC identity in $b$ (both sides expand from eff $=\mathrm{comp}(1-b)+\mathrm{ego}\,b$); it holds
+by construction, NOT empirically. So max|err| $=0.0$ is NECESSARY, not a discovered regularity -- the
+verification (code/verify_c256_dominance.py, results/c256_dominance_verify.csv) confirms the IMPLEMENTATION
+carries no transcription/indexing error; it is not evidence about the world. STATE THIS: a perfect check of
+an algebraic identity verifies the code, not a phenomenon (else a reviewer reads max|err|=0 as either too
+good or a tautology). b256 $\ge$ b16 everywhere (also verified). Since $b_{256}\ge b_{16}$ at every grid
+point, the sign of eff\_C256 $-$ eff\_C16 is set by $(\mathrm{comp}-\mathrm{ego})$.
+### DOMINANCE DEFINITION SENTENCE (supervisor: elevate from source note to a written definition, with the
+### tie parenthetical AT the claim -- a reviewer recomputing frac(comp>=ego) from the CSV gets a DIFFERENT
+### number and will call it an error unless the explanation waits for them here; 3rd application of the
+### clairvoyant/ceiling-footnote + Figure-A-near-overlap rule -- explain a recomputable gap where it is doubted):
+Write the definition explicitly: C256 is DOMINATED means eff\_C256 $\le$ eff\_C16 (WEAK dominance -- ties
+count). This holds on 99.7\% / 98.5\% / 100.0\% of frames (validate/test/culver). Then the tie parenthetical,
+in-line: "(the dominated fraction exceeds frac(comp $\ge$ ego) $=$ 99.0\% / 94.2\% / 99.1\% because the tie
+mass -- frames where $b_{16}=b_{256}$ exactly, i.e. flat-dead Rayleigh or both-delivered high-SNR -- gives
+eff\_C256 $=$ eff\_C16 and counts as dominated though comp $<$ ego may hold there)". CAVEAT (still state):
+dominance is CONDITIONAL, not unconditional -- it reverses (eff\_C256 $>$ eff\_C16) on the frames where
+comp $<$ ego AND $b_{16}<b_{256}$ (partial delivery), EXACTLY the collaboration-harm frames of para 3. Write
+"dominated wherever the collaborator helps", never "always dominated". src results/c256_dominance_verify.csv.
 ### WELD TO PARA 3 (supervisor: the two paragraphs share one mathematical foundation, cross-reference it):
 the sign of $(\mathrm{comp}-\mathrm{ego})$ SIMULTANEOUSLY sets the C256 dominance direction (here) AND
 whether collaboration is harmful (para 3). Write the C256 and collaboration-harm paragraphs as mutually
