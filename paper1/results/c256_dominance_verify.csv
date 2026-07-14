@@ -1,0 +1,4 @@
+split,n,identity_max_abs_err,frac_C256_dominated,frac_comp_ge_ego,b256_ge_b16_everywhere
+validate,1980,0.0,0.997,0.9899,True
+test,2170,0.0,0.9848,0.9424,True
+culver,550,0.0,1.0,0.9909,True

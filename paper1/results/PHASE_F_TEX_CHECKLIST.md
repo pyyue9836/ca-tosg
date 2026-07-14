@@ -81,3 +81,12 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 
 ## Feature importance (L450-482) -- [TODO regen v3 feature_importance CSV]
 - `65%` -> `62%` (0.624; channel_is_rayleigh dominates 0.349, est_snr_db 0.275). src feature_importance_v3.csv. DONE.
+
+## CROSS-CUTTING NOTATION (unify during the .tex pass; reviewer flags mismatches)
+- C256 AWGN cliff = 16.5 dB (Sionna frame-BLER onset, frame BLER < 0.999; 16-QAM = 8.0 dB). ONE convention
+  across: the C256 paragraph (Josh), FIG_A_CAPTION, and any body table. Figure A's coarse 6-pt grid renders
+  it as the 16->20 dB AP transition -- note the correspondence, do NOT write "17-20 dB" in one place and
+  "16.5 dB" in another. src results/bler_sionna/bler_sionna.csv.
+- C256 dominance = CONDITIONAL (eff_C256<=eff_C16 on 99.7/98.5/100% of frames; reverses on the <=1.5%
+  comp<ego collaboration-harm frames). Identity eff_C256-eff_C16=(comp-ego)(b16-b256) verified max|err|=0.
+  src results/c256_dominance_verify.csv. Weld the C256 and collaboration-harm paragraphs (shared (comp-ego)).

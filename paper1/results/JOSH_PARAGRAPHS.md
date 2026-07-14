@@ -12,19 +12,31 @@ CI-wording rule -- e.g. "comparable" not "improves" for a per-mille gain without
 paragraphs too). Writing is not gated; only entry into the manuscript is. Paste drafts into the thread.
 
 ## 1. C256 dominance argument (Method / message candidates) -- REVIEW STANDARD: 3 required elements (a,b,c)
-### (a) Precise dominance definition (metric / SNR range / channels; numbers CSV-direct)
-Metric = effective F1. eff_C256 - eff_C16 = (comp - ego)(b16 - b256). Since b256 >= b16 at EVERY SNR and on
-EVERY channel (256-QAM's weaker protection), the sign is set by (comp - ego): where comp >= ego (the normal
-case), eff_C256 <= eff_C16 -- C256 is dominated at all SNR and all channels; a payload-blind (lambda=0)
-argmax never strictly prefers it. CAVEAT YOU MUST STATE (a reviewer will find it otherwise): dominance is
-NOT unconditional -- it reverses on the frames where ego > comp (the collaboration-harm frames of para 3),
-where both C variants already underperform L. Measured: frac(eff_C256 <= eff_C16) per frame (frozen draw) =
-0.997 / 0.985 / 1.000 (validate/test/culver). So write "dominated wherever the collaborator helps (>=98.5%
-of frames)", NOT "always dominated". src data/dataset_{split}_v3.csv.
-### (b) Physics mechanism (one sentence)
-256-QAM right-shifts the AWGN frame-error cliff from 8 dB (16-QAM) to 16.5 dB; under Rayleigh (and OFDM
-within 0-20 dB) both are flat-dead; so there is NO SNR window in which C256 opens before C16. src
-results/bler_sionna/bler_sionna.csv.
+### (a) Precise dominance definition (metric / SNR range / channels; numbers CSV-direct + verified)
+SYMBOL BINDING (source note, put in the paragraph): eff = effective F1 $= \mathrm{comp}(1-b) + \mathrm{ego}\,b$;
+$b$ = frame BLER (a probability, Sionna table); comp = compressed-model F1 (message delivered); ego =
+ego-only F1 (failure fallback); all at the frame's drawn SNR + channel. From this, the IDENTITY
+    eff\_C256 $-$ eff\_C16 $= (\mathrm{comp}-\mathrm{ego})(b_{16}-b_{256})$
+holds EXACTLY (verified max|err| $=0$; b256 $\ge$ b16 everywhere) -- see results/c256_dominance_verify.csv
+(code/verify_c256_dominance.py, per-frame recompute, verification-derive-not-hardcode). Since $b_{256}\ge
+b_{16}$ at every SNR and channel, the sign is set by $(\mathrm{comp}-\mathrm{ego})$: where comp $\ge$ ego,
+C256 is dominated. CAVEAT YOU MUST STATE (a reviewer cross-checking per-frame data breaks the paragraph
+otherwise): dominance is CONDITIONAL, not unconditional -- eff\_C256 $\le$ eff\_C16 on 99.7\% / 98.5\% /
+100\% of frames (validate/test/culver), and it reverses on the $\le$1.5\% where comp $<$ ego (partial
+delivery) -- EXACTLY the collaboration-harm frames of para 3. So write "dominated wherever the collaborator
+helps ($\ge$98.5\% of frames)", never "always dominated". src results/c256_dominance_verify.csv.
+### WELD TO PARA 3 (supervisor: the two paragraphs share one mathematical foundation, cross-reference it):
+the sign of $(\mathrm{comp}-\mathrm{ego})$ SIMULTANEOUSLY sets the C256 dominance direction (here) AND
+whether collaboration is harmful (para 3). Write the C256 and collaboration-harm paragraphs as mutually
+supporting -- one causal chain, not two parallel observations.
+### (b) Physics mechanism (one sentence) -- NOTATION MUST MATCH Figure A + body (see checklist)
+256-QAM right-shifts the AWGN frame-error cliff from 8.0 dB (16-QAM) to 16.5 dB [both = the Sionna
+frame-BLER onset, the first Es/N0 at which frame BLER $<0.999$; results/bler_sionna/bler_sionna.csv]; under
+Rayleigh (and OFDM within 0-20 dB) both are flat-dead; so there is NO SNR window in which C256 opens before
+C16. NOTATION ALIGNMENT: Figure A's coarse 6-point grid renders this same 256-QAM cliff as the 16$\to$20 dB
+AP transition; the paragraph, the Figure A caption, and any body table must all use ONE convention (the
+16.5 dB fine BLER-onset, with the coarse-grid correspondence noted) -- 16.5 vs 17-20 in different places =
+a reviewer-flagged inconsistency (checklist item).
 ### (c) Pre-answer the design question ("why keep a dominated action in the set?")
 Reviewers WILL ask. Answer in the paragraph, not in rebuttal: the action set is the complete 2-bit request
 space; C256 is retained for completeness, and the negative result -- a rate-matched (same-payload-class,
