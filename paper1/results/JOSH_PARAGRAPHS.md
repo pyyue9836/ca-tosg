@@ -80,10 +80,13 @@ CORE MECHANISM CHAIN (write this): requesting a feature message when the channel
 the collaborator's transmission budget for nothing and collapses the output to the ego-only floor -- this
 is exactly why the oracle carries a feasibility mask and the failure fallback is ego-only, not a phantom
 feature. That is the paragraph's job.
-Evidence: Easy-stratum gain is NEGATIVE on test -- CORRECTED 2026-07-15: the value is -0.0134 (good channel
-AWGN SNR>=14, n=108, fixedL 0.9849 vs CATOSG 0.9715; difficulty_strata_goodchannel.csv), NOT the old -0.0147
-(which does not reproduce anywhere in results). NO CI exists for this stratum -> the claim is DESCRIPTIVE, not
-"95% CI excludes 0". The FP-mechanism gloss is dropped (no ego/compressed confusion columns to verify it). Structural quantifier (descriptive, no
+Evidence (with CI): Easy-stratum gain is significantly NEGATIVE on test = -0.0147 (frame-level paired 95% CI
+[-0.0179,-0.0115], gain_significant=True, n=713; reliable AWGN 16 dB; code/extra_experiments/out/
+a2_difficulty_reliable_v3.csv). [History: on 2026-07-15 the agent briefly "corrected" this to -0.0134 after
+grepping only results/ and missing code/extra_experiments/out/ -- a negative-existence-search-scope error;
+-0.0147 is correct and sourced. -0.0134 is the STALE v2 est_snr>=14/n=108 number.] The FP-mechanism gloss is
+dropped (no ego/compressed confusion columns to verify "adds false positives"); the -0.0147 is an aggregate
+realised-F1 gain, not an FP decomposition. Structural quantifier (descriptive, no
 claim): frac(ego_f1 > late_f1) = 0.9% / 7.4% / 0.2% (validate/test/culver; test sparsest, mean GT 15 vs
 28/43). src results/ablation_v3/a2_difficulty*.csv, results/step4_collaboration_harm_v3.csv.
 QUANTITATIVE ANCHOR + WELD (supervisor: this paragraph's anchor already lies in the C256 CSV -- write the

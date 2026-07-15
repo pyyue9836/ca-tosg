@@ -141,3 +141,25 @@ REPORTS 0.990 -- a live internal contradiction, and the incoming C256 paragraph 
 3.96 Mbit, /4 /8) contradicts L168/L315 until fixed. tab:headline_agg CONFIRMED corrected (rho_L path, not
 the pareto file). Figure generator plot_pareto_payload.py reads the STALE top-level pareto_points.csv and
 hardcodes B_C=0.495 / Fixed-C256=1.98/8 -> fig_pareto_test + fig_payload_* carry halved C payloads.
+
+## HAND-WRITTEN-PARAGRAPH GATE ARCHIVAL (2026-07-15) -- what the provenance gate actually caught
+Collaboration-harm v1 real defects caught by the gate (the bar working): (1) GT count 43 was stale -> 41.0
+(gt_object_stats_v3.csv); (2) "adds false positives" over-reached -- no ego/compressed confusion columns
+exist to verify an FP decomposition -> result-level wording. RULE (confirmed): hand-written paragraphs pass
+NUMBERS first, rhetoric second -- prose is the highest-concentration zone for memory-transcription risk.
+AGENT ERROR in v2 (owned, reversed in v3): the "-0.0147 is unsourced / no CI" catch was a FALSE ALARM from
+grepping only results/ (missed code/extra_experiments/out/a2_difficulty_reliable_v3.csv). -0.0147 is correct,
+n=713, 95% CI [-0.0179,-0.0115], significant. The agent replaced it with the STALE v2 -0.0134 (n=108). The
+supervisor's point-2 gate (footnote evidence must match the sentence) forced the return to the CSV that
+surfaced the agent's own error. negative-existence-search-scope reinforced: "no source exists" REQUIRES the
+search scope stated; searching one dir and generalising to "whole tree" is the violation.
+
+## plot_with_rf.py -- BINARY RESOLVED: NOT-FOR-PAPER. Writes fig_{ap50,ap70}_{awgn,rayleigh} to
+peiyi_work/01_paper_ca_tosg/runs/v3_with_rf/ (OLD path, NOT paper/figures/); plots payload with 1.98 FLAT =
+source-bit (a THIRD convention, distinct from stale-half and corrected-Msym). main.tex's AP figures come from
+plot_ap_snr.py (item 7), not here. Marked not-for-paper. Guard if ever revived: its payload panel is
+source-bit, must NOT be cross-read with Msym axes.
+
+## MULTISEED PAY RE-DERIVE -> A-CLASS BATCH: multiseed_hardening.csv pay_* columns are stale (train_rf_
+## multiseed report-only), re-derive under corrected PAYLOAD alongside the A-class figure regen (execution
+## order: ... -> A-class (incl. multiseed pay re-derive) -> fig:ap_snr).

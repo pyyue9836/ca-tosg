@@ -62,49 +62,52 @@ Eq.~(7)/(11) are placeholders to resolve in the .tex pass.
 ### selector requests"; 8 last-sentence grammar + "a finding" (not "the result") + payload-penalised
 ### frontier (lambda not assumed defined); 9 footnote-4 0.999 shared with feasibility mask.
 
-## 2. Collaboration-is-sometimes-harmful (Discussion) -- DRAFT v2 (2026-07-15; 6 revisions applied).
-## RELABELLED #2 (writing order: C256=1, collab-harm=2, CoDS=3). Anchor 1.0/5.8/0.9% from the c256 verify CSV
-## (F1-based, NO payload kinship) -> unaffected by item-12; independent of C256 landing.
-## PROVENANCE CATCH (report, do not bury): the old "-0.0147, 95% CI excludes 0" does NOT reproduce -- grep of
-## the whole results tree finds no -0.0147 and NO Easy-stratum harm CI anywhere. The CSV-direct value is
-## -0.0134 (test Easy, good channel AWGN SNR>=14, n=108, fixedL 0.9849 vs CATOSG 0.9715;
-## difficulty_strata_goodchannel.csv). No CI -> per the section-3 wording rule the harm claim is now
-## DESCRIPTIVE (point value in a footnote, not a headline magnitude+CI). Supervisor to rule on the substitution.
+## 2. Collaboration-is-sometimes-harmful (Discussion) -- DRAFT v3 (2026-07-15). RELABELLED #2 (writing order).
+## ERROR OWNED + REVERSED: my v2 "provenance catch" was a FALSE ALARM -- I grepped only results/ and missed
+## code/extra_experiments/out/a2_difficulty_reliable_v3.csv, then declared "-0.0147 has no source and no CI".
+## It DOES: test Easy, reliable_awgn_16dB, n=713, gain -0.0147, 95% CI [-0.0179,-0.0115], gain_significant=
+## True. I had replaced the CORRECT v3 -0.0147 with the STALE v2 -0.0134 (est_snr>=14, n=108) and stripped a
+## valid CI. RESTORED here. (negative-existence-search-scope: "no source" needs the search scope stated.)
+## The v1 defects the gate genuinely caught: 43->41 (GT) and the FP-mechanism over-reach. The -0.0147 was
+## never a v1 defect. Supervisor point-3 "descriptive substitution" is therefore MOOT -- CI-carrying claim kept.
 
 Collaboration is not unconditionally beneficial, and that is what makes an explicit per-frame selector
 necessary rather than a convenience. Two failure modes call for two responses. When the channel cannot carry
 a feature message, requesting one spends the collaborator's transmission budget for nothing and collapses the
 output to the ego-only floor (the ego vehicle's own pre-fusion detection); the design answer is already in
 place -- the oracle removes any action whose frame-level failure probability is $\ge 0.999$ from its feasible
-set (the same $0.999$ constant as the \S\ref{sec:method} mask) and falls back to the ego-only output rather
-than a phantom feature. When the channel \emph{can} carry the message it can still hurt: on easy frames where
-ego-only detection already suffices, feature-level fusion can leave the fused output below the ego-only
-one.[^harm] This mode has no masking answer; its remedy is left to future work. Two CSV-verified quantifiers
-bound where harm occurs: the ego-only output strictly exceeds the object-level fused output on 0.9 / 7.4 /
-0.2\% of validation / test / Culver-City frames, and -- from the same per-frame $(\mathrm{comp}-\mathrm{ego})$
-identity and CSV as the C256 analysis (\S\ref{sec:method}) -- the compressed-feature message, when delivered,
-yields lower frame F1 than the ego-only fallback on 1.0 / 5.8 / 0.9\% of frames. Test carries the harm most,
-consistent with fusion having the least to add in thin scenes (mean $15$ ground-truth objects on test vs $28$
-on validate and $41$ on Culver-City). A remedy adds no signalling overhead: the `11' codeword of the 2-bit
-request is unused, so an explicit do-not-request (ego-only) action is free to add.
+set (the same $0.999$ constant as the \S\ref{sec:method} mask), and on failure the pipeline reverts to the
+ego-only output rather than a phantom feature. When the channel \emph{can} carry the message, requesting it
+can still cost accuracy: on the easy stratum the selector's realised output falls below even the
+always-object-level baseline.[^harm] This mode has no masking answer; its remedy is left to future work. Two
+CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the
+object-level fused output on 0.9 / 7.4 / 0.2\% of validation / test / Culver-City frames, and -- from the same
+per-frame $(\mathrm{comp}-\mathrm{ego})$ identity and CSV as the C256 analysis (\S\ref{sec:method}) -- the
+compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.0 / 5.8 /
+0.9\% of frames. Test carries the harm most, consistent with fusion having the least to add in thin scenes
+(mean $15.2$ ground-truth objects on test vs $27.8$ on validate and $41.0$ on Culver-City). A remedy adds no
+signalling overhead: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request
+(ego-only) action can be added without any change to the two-bit message format.
 
-[^harm]: On the test Easy stratum under a usable channel (AWGN SNR $\ge 14$~dB, $n=108$) feature-level fusion
-sits just below the object-level baseline ($0.9715$ vs $0.9849$; difficulty table, \S\ref{sec:difficulty});
-the effect is small and reported as a mechanism, not a magnitude -- no CI is available for this stratum.
+[^harm]: Test Easy stratum (top tercile of the ego's own object-level F1), reliable AWGN $16$~dB: the
+selector's realised F1 is $0.9719$ vs the Fixed-$L$ object-level baseline $0.9866$ -- a gain of $-0.0147$
+(frame-level paired $95\%$ CI $[-0.0179,-0.0115]$, significant; $n=713$; a2\_difficulty\_reliable\_v3.csv).
+The selector requests $C_{16}$ on ${\approx}89\%$ of these frames (payload-derived), so the loss is
+attributable to feature requests on already-easy frames. The $16$~dB deterministic reliable-channel condition
+($b_{16}{\approx}0$, safely above the ${\approx}8$~dB cliff) replaces v2's frozen est\_snr${\ge}14$~dB,
+isolating the difficulty axis from the channel.
 
-Word count (body, excl. footnote) ~230. src results/c256_dominance_verify.csv (frac_comp_lt_ego =
+Word count (body, excl. footnote) ~235. src: results/c256_dominance_verify.csv (frac_comp_lt_ego =
 1.0/5.8/0.9%, same run/commit as the C256 fractions); results/step4_collaboration_harm_v3.csv (frac_ego_gt_
-late = 0.9/7.4/0.2%, STRICT inequality, ties excluded); results/difficulty_strata_goodchannel.csv (test Easy
--0.0134, n=108); results/gt_object_stats_v3.csv (mean late_num_gt: test 15.2 / validate 27.8 / culver 41.0).
-Cross-refs \S\ref{sec:method}, \S\ref{sec:difficulty} placeholders.
-### 6 REVISIONS APPLIED: 1 causal split (undeliverable->mask+ego = existing design; deliverable-but-harmful
-### -> quantified + remedy explicitly future work, no "precisely why" over-attribution); 2 cross-para fix
-### (C256 "granularity ladder spanned by the 2-bit request", not "codebook" -- the '11'-unused sentence no
-### longer breaks it); 3 provenance (-0.0147->-0.0134 CSV-direct + no-CI->descriptive; 0.9/7.4/0.2 strict
-### frac_ego_gt_late; 15/28/41 from gt_object_stats_v3.csv, 43->41 corrected); 4 FP claim removed (no ego/
-### compressed confusion columns exist -> result-level "below the ego-only one", mechanism-bar not met);
-### 5 precision (>=0.999; "when delivered, yields lower frame F1"; "consistent with...thin scenes"; "adds no
-### signalling overhead"; ego-only glossed once, single-vehicle term dropped); 6 "per-frame selector" first line.
-### WORDING SELF-CHECK: no directional claim carries an unsourced CI; the sole magnitude (-0.0134) is in a
-### footnote, descriptive; body statements are hedged/descriptive (can leave/strictly exceeds/yields lower/
-### carries most). WELD: shares the (comp-ego) identity + same CSV as C256 -> one causal chain.
+late = 0.9/7.4/0.2%, STRICT inequality, ties excluded); code/extra_experiments/out/a2_difficulty_reliable_v3
+.csv (test Easy -0.0147, CI [-0.0179,-0.0115], n=713); results/gt_object_stats_v3.csv (mean late_num_gt: test
+15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:method} placeholder.
+### REVISIONS (v2->v3): -0.0147 RESTORED with CI (v2's -0.0134 was my search-scope error); sentence rebound
+### to the always-object-level (Fixed-L) baseline, NOT ego -- the footnote evidence is CA-TOSG realised vs
+### Fixed-L, and "fusion" mislabel dropped (0.9719 is the selector's mixed-action realised output); footnote
+### adds the ~89% C16 action share (attribution) + the 16 dB provenance; tail "free to add" -> "without any
+### change to the two-bit message format" (no back-door revival of the killed claim); "on failure the
+### pipeline reverts" (fallback is a pipeline act, not the oracle's); GT means to 1 dp (15.2/27.8/41.0).
+### Retained from v2: causal split, cross-para "granularity ladder", >=0.999, ego>late source, "per-frame".
+### WORDING SELF-CHECK: the one directional magnitude (-0.0147) carries a CI excluding 0; the two fracs are
+### descriptive; sentence verbs hedged (can still cost / strictly exceeds / yields lower / carries most).
