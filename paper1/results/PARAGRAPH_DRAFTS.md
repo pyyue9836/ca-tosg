@@ -61,3 +61,30 @@ Eq.~(7)/(11) are placeholders to resolve in the .tex pass.
 ### probability" + grid-constant footnote; 6 "flatline at the ego floor (BLER~1)"; 7 subject = "learned
 ### selector requests"; 8 last-sentence grammar + "a finding" (not "the result") + payload-penalised
 ### frontier (lambda not assumed defined); 9 footnote-4 0.999 shared with feasibility mask.
+
+## 3. Collaboration-is-sometimes-harmful (Discussion) -- DRAFT v1 (2026-07-15). Anchor 1.0/5.8/0.9% from the
+## c256 verify CSV (F1-based, NO payload kinship) -> unaffected by the item-12 payload fix; independent of C256 landing.
+
+Collaboration is not unconditionally beneficial, and that is what makes an explicit selector necessary rather
+than a convenience. A feature request the channel cannot deliver spends the collaborator's transmission
+budget for nothing and collapses the fused output to the ego-only floor; on a frame where the ego detector
+already suffices it can instead add false positives that a single-vehicle detector would avoid. This is
+precisely why the oracle carries a feasibility mask -- an action whose frame-level failure probability
+exceeds $0.999$ is removed from its feasible set -- and why the failure fallback is the ego-only output
+rather than a phantom feature. The effect is measurable but small, and we report it as a mechanism, not a
+headline: on the Easy stratum of the test split the collaborator's message changes realised F1 by $-0.0147$
+(frame-level paired $95\%$ CI excludes $0$), i.e.\ single-vehicle ego-only detection is ahead of fusion
+there. Two descriptive quantifiers bound where this occurs: the ego-only output exceeds the object-level
+fused output on 0.9 / 7.4 / 0.2\% of validation / test / Culver-City frames, and -- from the same per-frame
+account and identity as the C256 analysis (\S\ref{sec:method}) -- the compressed-feature message's delivered
+utility falls below the ego-only fallback on 1.0 / 5.8 / 0.9\% of frames. Test is the sparsest split (mean
+$15$ ground-truth objects vs $28/43$), where thin scenes give fusion the least to add. A free remedy remains
+for future work: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request (ego-only)
+action costs nothing to add.
+
+Word count ~235. src results/c256_dominance_verify.csv (frac_comp_lt_ego = 1.0/5.8/0.9%, same run/commit as
+the C256 fractions), results/ablation_v3/a2_difficulty*.csv (-0.0147 CI), results/step4_collaboration_harm_v3
+.csv (frac ego>late 0.9/7.4/0.2%). Cross-refs \S\ref{sec:method} placeholder. WELD: shares the (comp-ego)
+identity and the SAME CSV as the C256 paragraph -- the sign of (comp-ego) drives both dominance reversal and
+collaboration harm. WORDING SELF-CHECK: the one directional claim (-0.0147) carries a CI that excludes 0; all
+other statements descriptive (changes/exceeds/falls below/ahead), no unqualified harms/degrades/hurts.

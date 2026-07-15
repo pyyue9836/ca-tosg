@@ -4,9 +4,15 @@ Paused at 5/11 items by deliberate decision (mechanical pass = fatigue-error hot
 asymmetry favours a fresh pass over a tired one). Zero-archaeology restart: work straight off this file +
 PHASE_F_TEX_CHECKLIST.md. Final gate unchanged: 11/11 + all figures -> full manuscript diff, supervisor + Josh.
 
-## EXECUTION ORDER (FIXED 2026-07-15, not re-litigable): re-verify (EXPANDED) -> item 12 -> items 6-11 ->
-## script sweep (item 13) -> fig:ap_snr. Re-verify is ALWAYS first; item 12 does NOT precede it (supervisor
-## rejected "item 12 first" -- they are not sequential; the fatigue-tail recheck comes before any new edit).
+## EXECUTION ORDER (FIXED 2026-07-15, note inserted before item 12): re-verify (EXPANDED) -> INVARIANCE note
+## -> item 12 -> items 6-11 -> A-class figure regen -> fig:ap_snr. The note gates everything after it: until
+## the INVARIANCE note is delivered/clear, item 12 and all downstream stay frozen (else the note vanishes
+## from the pipeline and item 12 lands C256 on an unproven frontier equivalence). Re-verify is ALWAYS first;
+## item 12 does NOT precede it (supervisor rejected "item 12 first" -- not sequential; fatigue-tail recheck
+## before any new edit). NOTE STATUS: DONE 2026-07-15 -- INVARIANCE_NOTE.md, frontier_is_corrected=True all
+## splits (verify_frontier_payload_invariance.py); the 2.5/3.2/4.5% share is the corrected-payload object.
+## C256 PARAGRAPH LANDING GATE = item 12 AND the INVARIANCE note BOTH clear (not item 12 alone). Note leg now
+## clear; item 12 (Method L168/L280/L315) remains.
 ## NEXT-SESSION FIRST STEP: re-verify cae8654 (item 5), EXPANDED to a 5-item payload cross-check.
 The last item done in a fatigue stretch is the risk peak. Re-read cae8654 (generalisation + tab:gen_headline
 + AP-vs-SNR) fresh, against policy_v3 / true_e2e_global_v3. NOW EXPANDED (post the 2026-07-15 provenance

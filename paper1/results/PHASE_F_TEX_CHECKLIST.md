@@ -114,22 +114,31 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
       divisors being the bits-per-symbol" -> "1.98 Mbit source at rate-1/2 gives 3.96 Mbit coded, divided by
       the 4/8 bits-per-symbol of 16/256-QAM". Keep "~82x" object ratio (uses B_C=1.98 Mbit perception
       payload, unaffected). Confirm no other B_{C} literal survives (grep 0.495/0.248 in main.tex).
-13. FIGURE/NUMBER-EMITTING SCRIPT SWEEP (exposure surface is a FAMILY, not one file -- do not under-scope
-    to plot_pareto_payload.py). Every script below hardcodes the STALE PAYLOAD {C16: 1.98/4=0.495,
-    C256: 1.98/8=0.248}; canonical corrected source = recompute_policy_200seed.py:45 {C16:0.99, C256:0.495}.
-    For EACH: (i) does it emit a payload number into a main.tex figure/table? (ii) if yes, regenerate from the
-    corrected constant/policy_v3 source and cross-check the rendered value; (iii) change the hardcode to read
-    the corrected source programmatically -- verification-derive-not-hardcode extends from verify scripts to
-    ALL number-emitting code; PLOTTING IS NOT EXEMPT.
-    - code/plot_pareto_payload.py:29,58,74  (B_C=1.98/4; annotation xy=(0.495,..); Fixed-C256 line 1.98/8)
-      + repoint read results/pareto_points.csv -> results/policy_v3/pareto_points.csv. Figs: fig_pareto_test,
+13. FIGURE/NUMBER-EMITTING SCRIPT SWEEP -- GRADED A/B/C (supervisor: train_rf_multiseed is a TRAINING-path
+    script, not a plotting chore; do not one-pot them into "item 13 regen"). Every script hardcodes the STALE
+    PAYLOAD {C16: 1.98/4=0.495, C256: 1.98/8=0.248}; canonical corrected = recompute_policy_200seed.py:45
+    {C16:0.99, C256:0.495}. Common rule: change the hardcode to read the corrected source programmatically
+    (verification-derive-not-hardcode extends to ALL number-emitting code; PLOTTING NOT EXEMPT). Disposition
+    differs by class:
+    CLASS A (pure figure generators -- regen + final-gate visual inspection; the "A-class regen" slot in the
+    execution order):
+    - code/plot_pareto_payload.py:29,58,74  (B_C=1.98/4; annotation xy=(0.495,..); Fixed-C256 line 1.98/8) +
+      repoint read results/pareto_points.csv -> results/policy_v3/pareto_points.csv. Figs: fig_pareto_test,
       fig_payload_{awgn,rayleigh}.
-    - code/train_rf_multiseed.py:25         (multiseed_hardening.csv pay_rf -- deployed-point CI; check L866-902 robustness)
     - code/snr_decision_plot.py:31          (decision figure)
-    - code/csi_noise_ablation.py:38         (CSI-noise robustness, item 10)
-    - code/e2e_inference_verify.py:47        (verification path)
-    - code/test_split_pipeline/04_eval_rf_on_test.py:27
+    CLASS B (TRAINING / INFERENCE / reported-number path -- higher stakes; a stale payload biases an EMITTED
+    METRIC, not just a plot axis. Recompute + CROSS-CHECK the reported value against main.tex; if it feeds a
+    cited number, re-derive that number. Handle in the cross-check phase, NOT the figure-regen slot):
+    - code/train_rf_multiseed.py:25         (multiseed_hardening.csv pay_rf -- deployed-point CI; L866-902 robustness)
+    - code/e2e_inference_verify.py:47        (true-e2e inference verification path)
+    - code/test_split_pipeline/04_eval_rf_on_test.py:27  (test-split eval numbers)
+    CLASS C (ablation/robustness feeders -- fold into the owning item's recompute):
+    - code/csi_noise_ablation.py:38         (CSI-noise robustness, folds into item 10)
     - code/plot_with_rf.py:55                (uses 1.98 flat = perception payload; confirm intent, not channel-use)
+    GREP DISCIPLINE for this sweep (0.495 is DOUBLE-MEANING -- stale C16 AND corrected C256; a bare grep 0.495
+    cannot tell them apart). Scan with binding context, and prefer the UNAMBIGUOUS fingerprints of the stale
+    account: 0.2475, `1.98/4`, `1.98/8`, and any derivation missing the x2 (1/rate) factor. A hit on 0.495
+    must be read in situ (is it C16-stale or C256-correct?), never bulk-replaced.
 14. Regenerate/retire the DEPRECATED_UNCODED_PAYLOAD.md orphans; confirm no live reader points at them.
 15. RENDERED PDF DEPRECATION: every already-rendered Pareto/payload figure PDF (fig_pareto_test,
     fig_payload_{awgn,rayleigh}, any decision/robustness fig fed by a stale-PAYLOAD script) is marked

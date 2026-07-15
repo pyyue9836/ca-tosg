@@ -1,0 +1,4 @@
+split,max_frac_C256,reconcile_err_NEW,reconcile_err_OLD,frontier_is_corrected
+validate,0.02546,5e-05,0.06788,True
+test,0.03155,5e-05,0.0794,True
+culver,0.04517,5e-05,0.11955,True

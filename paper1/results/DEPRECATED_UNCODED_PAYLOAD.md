@@ -22,6 +22,12 @@ is a SILENT failure (L34 reports 0.990, L168 defines 0.495, both sat in one manu
 whole-repo grep of the old literal is what forces it to announce. Correct-a-number => grep-the-old-literal is
 part of the rule now, not a nicety.
 
+DOUBLE-MEANING-LITERAL sub-rule: 0.495 is ambiguous -- it is the STALE C16 payload AND the CORRECTED C256
+payload. A whole-repo grep of the old literal (the corollary) is necessary but a bare `grep 0.495` cannot
+distinguish the two; every hit must be read with binding context (which mode?). Prefer the UNAMBIGUOUS
+fingerprints of the stale account -- 0.2475, `1.98/4`, `1.98/8`, and derivations that omit the x2 (1/rate)
+factor -- and never bulk-replace 0.495. (Applied in PHASE_F_TEX_CHECKLIST item 13.)
+
 SCRIPT FAMILY carrying the stale hardcode PAYLOAD {C16:1.98/4, C256:1.98/8} (canonical corrected =
 recompute_policy_200seed.py:45 {C16:0.99, C256:0.495}); see PHASE_F_TEX_CHECKLIST item 13 for the per-script
 disposition: plot_pareto_payload.py, train_rf_multiseed.py, snr_decision_plot.py, csi_noise_ablation.py,
