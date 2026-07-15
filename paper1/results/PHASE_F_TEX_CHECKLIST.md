@@ -103,3 +103,19 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
   pareto_points.csv (and any payload table/figure) to 0.99/0.495 and confirm same value + same Msym notation
   as the C256 paragraph footnote [1.98 Mbit (Eq.7) x rate-1/2 -> 3.96 Mbit (Eq.11); /8 and /4 bit/sym].
   Frontier/band CSVs already carry corrected payloads; only the Fixed-baseline pareto row is stale.
+
+## PARETO/PAYLOAD PROPAGATION FIX (NEW items 12-14, from the 2026-07-15 provenance event; item 12 is HIGH --
+## it blocks C256-paragraph consistency)
+12. METHOD payload definitions -- fix stale uncoded units to rate-1/2 coded, to match the results sections
+    and the C256 paragraph footnote:
+    - L168 Eq: B_{C16}=1.98/4~0.495 -> 1.98/(0.5*4)=0.99 ; B_{C256}=1.98/8~0.248 -> 1.98/(0.5*8)=0.495.
+    - L280: B_{C16}~0.495 -> 0.99 ; B_{C256}~0.248 -> 0.495.
+    - L315: B_{C16}=1.98/4~0.495 -> 0.99 ; B_{C256}=1.98/8~0.248 -> 0.495; REWRITE the derivation "the
+      divisors being the bits-per-symbol" -> "1.98 Mbit source at rate-1/2 gives 3.96 Mbit coded, divided by
+      the 4/8 bits-per-symbol of 16/256-QAM". Keep "~82x" object ratio (uses B_C=1.98 Mbit perception
+      payload, unaffected). Confirm no other B_{C} literal survives (grep 0.495/0.248 in main.tex).
+13. plot_pareto_payload.py: repoint pareto read results/pareto_points.csv -> results/policy_v3/pareto_points
+    .csv (corrected); B_C 0.495 -> 0.99; Fixed-C256 axis line 1.98/8 -> 1.98/(0.5*8)=0.495; annotation
+    xy=(0.495,0.431) -> corrected coords. Then regenerate fig_pareto_test + fig_payload_{awgn,rayleigh};
+    final-gate visual inspection (payload axis now 0.024 / 0.99 / 0.495).
+14. Regenerate/retire the DEPRECATED_UNCODED_PAYLOAD.md orphans; confirm no live reader points at them.

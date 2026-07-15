@@ -24,9 +24,17 @@ flatline, or both deliver at high SNR -- which tie rather than reverse. Dominanc
 collaboration-harm regime ($\mathrm{comp}<\mathrm{ego}$, $b_{16}<b_{256}$; \S\ref{sec:harm}). Physically,
 256-QAM right-shifts the AWGN frame-error cliff from 8.0 to 16.5 dB,[^cliff] while under Rayleigh and OFDM
 (0--20 dB) both flatline at the ego floor (frame-level BLER $\approx 1$); no SNR window opens C256 before
-C16. We retain C256 for completeness of the 2-bit request codebook: that a rate-matched, lower-channel-use
-action is never requested at the deployed operating point, and peaks at only 2.5 / 3.2 / 4.5\% of frames on
-the oracle's payload-penalised frontier, is itself a finding.
+C16. We retain C256 for completeness of the 2-bit request codebook, yet it earns no operational role:
+trained to imitate an oracle that assigns C256 zero support at this operating point, the learned selector
+never requests it -- 0 of $3.96/4.34/1.10\times10^{5}$ deployment predictions[^req] -- and even the oracle's
+payload-penalised frontier activates it at only 2.5 / 3.2 / 4.5\% of frames. That a rate-matched,
+lower-channel-use action earns no more than a marginal share is itself a finding.
+
+[^req]: Measured by replaying the 200-realisation deployment (drawn CSI) through the deployed selector and
+counting C256 predictions -> 0 / 0 / 0 (validate/test/culver). The deployed classifier's class set is
+$\{L, \mathrm{C16}\}$ -- the imitated oracle labels carry zero C256 at this operating point -- so the count
+is structurally zero; we report the measured count rather than infer it. src c256_dominance_verify.csv
+(columns selector_C256_requests, selector_has_C256_class).
 
 [^pay]: Feature payload 1.98 Mbit (Eq.~(7)) at LDPC rate-$1/2$ gives 3.96 Mbit of coded bits (Eq.~(11));
 $\div 8$ bit/sym (256-QAM) $=0.495$ Msym, $\div 4$ bit/sym (16-QAM) $=0.99$ Msym.

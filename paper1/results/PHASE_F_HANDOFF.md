@@ -116,3 +116,14 @@ not transcribed from memory", applied to verification code. Qualitative note: th
 (false-positive -> triggered the (3) stop-and-investigate -> the protocol ran correctly, handling was
 right). The real danger is a SILENT failure -- the same hardcode in the OTHER direction is a false-PASS.
 The rule seals that direction. [[hash-line-every-delivery]] [[negative-existence-search-scope]] family.
+
+## PARETO_POINTS PROVENANCE EVENT (2026-07-15) -- old-vs-new diff is NOT all-same
+pareto_points.csv staleness is a propagation-incompleteness event (the annual-review doc-vs-repo mismatch,
+same file). Diff result: the payload correction reached the RESULTS sections (main.tex L34/L355/L376:
+Fixed C16 0.990, 16-25%, 0.158-0.251 Msym = corrected policy_v3) but NOT the METHOD payload DEFINITIONS
+(main.tex L168 Eq B_s, L280, L315: B_C16=1.98/4=0.495, B_C256=1.98/8=0.248 -- uncoded; L315 even states
+"divisors being the bits-per-symbol", omitting rate-1/2). The manuscript currently DEFINES 0.495 then
+REPORTS 0.990 -- a live internal contradiction, and the incoming C256 paragraph footnote (1.98 x rate-1/2 ->
+3.96 Mbit, /4 /8) contradicts L168/L315 until fixed. tab:headline_agg CONFIRMED corrected (rho_L path, not
+the pareto file). Figure generator plot_pareto_payload.py reads the STALE top-level pareto_points.csv and
+hardcodes B_C=0.495 / Fixed-C256=1.98/8 -> fig_pareto_test + fig_payload_* carry halved C payloads.
