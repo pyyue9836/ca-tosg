@@ -15,10 +15,17 @@ for sp in ('validate', 'test', 'culver'):
     rhs = (comp - ego) * (b16 - b256)                            # algebraic identity
     id_max_err = float(np.abs(lhs - rhs).max())                  # identity holds if ~0
     frac_dom = float((d.eff_f1_C256.to_numpy() <= d.eff_f1_C16.to_numpy() + 1e-12).mean())
-    frac_comp_ge_ego = float((comp >= ego).mean())               # should ~equal frac_dom (b256>=b16 given)
+    frac_comp_ge_ego = float((comp >= ego).mean())               # dominance mechanism condition
+    frac_comp_lt_ego = float((comp < ego).mean())                # collaboration-harm anchor (para 3)
+    tie = np.abs(b16 - b256) <= 1e-12                            # b16 == b256 (flat-dead / both-delivered)
+    frac_gap = float(((comp < ego) & tie).mean())                # the EXACT dominated-minus-comp_ge_ego gap
+    # internal consistency: dominated set = {comp>=ego} U {tie}; disjoint decomposition frac_dom =
+    # frac_comp_ge_ego + frac(comp<ego & tie). Assert (verification-derive-not-hardcode; no hand arithmetic).
+    assert abs(frac_dom - (frac_comp_ge_ego + frac_gap)) < 1e-9, (sp, frac_dom, frac_comp_ge_ego, frac_gap)
     b256_ge_b16 = bool((b256 >= b16 - 1e-12).all())
     rows.append(dict(split=sp, n=len(d), identity_max_abs_err=round(id_max_err, 9),
                      frac_C256_dominated=round(frac_dom, 4), frac_comp_ge_ego=round(frac_comp_ge_ego, 4),
+                     frac_comp_lt_ego=round(frac_comp_lt_ego, 4), frac_comp_lt_ego_and_tie=round(frac_gap, 4),
                      b256_ge_b16_everywhere=b256_ge_b16))
 out = pd.DataFrame(rows)
 out.to_csv(os.path.join(os.path.dirname(D), 'results/c256_dominance_verify.csv'), index=False)

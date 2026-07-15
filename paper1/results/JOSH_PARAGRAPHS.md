@@ -32,13 +32,20 @@ point, the sign of eff\_C256 $-$ eff\_C16 is set by $(\mathrm{comp}-\mathrm{ego}
 ### number and will call it an error unless the explanation waits for them here; 3rd application of the
 ### clairvoyant/ceiling-footnote + Figure-A-near-overlap rule -- explain a recomputable gap where it is doubted):
 Write the definition explicitly: C256 is DOMINATED means eff\_C256 $\le$ eff\_C16 (WEAK dominance -- ties
-count). This holds on 99.7\% / 98.5\% / 100.0\% of frames (validate/test/culver). Then the tie parenthetical,
-in-line: "(the dominated fraction exceeds frac(comp $\ge$ ego) $=$ 99.0\% / 94.2\% / 99.1\% because the tie
-mass -- frames where $b_{16}=b_{256}$ exactly, i.e. flat-dead Rayleigh or both-delivered high-SNR -- gives
-eff\_C256 $=$ eff\_C16 and counts as dominated though comp $<$ ego may hold there)". CAVEAT (still state):
-dominance is CONDITIONAL, not unconditional -- it reverses (eff\_C256 $>$ eff\_C16) on the frames where
-comp $<$ ego AND $b_{16}<b_{256}$ (partial delivery), EXACTLY the collaboration-harm frames of para 3. Write
-"dominated wherever the collaborator helps", never "always dominated". src results/c256_dominance_verify.csv.
+count). This holds on 99.7\% / 98.5\% / 100.0\% of frames (validate/test/culver). Then the parenthetical,
+in-line and WORDED EXACTLY (supervisor: the gap is NOT all tie frames -- comp$\ge$ego ties are already
+inside frac(comp$\ge$ego); the gap is the INTERSECTION, else a reviewer recomputing frac(tie) gets a larger
+number and doubts a second time): "(the dominated fraction exceeds frac(comp $\ge$ ego) $=$ 99.0\% / 94.2\% /
+99.1\% by the frames where comp $<$ ego BUT $b_{16}=b_{256}$ -- Rayleigh double-flatline or high-SNR
+both-delivered -- which give eff\_C256 $=$ eff\_C16 and so count as (weakly) dominated: 0.7\% / 4.2\% / 0.9\%
+of frames)". CAVEAT (still state): dominance is CONDITIONAL -- it reverses (eff\_C256 $>$ eff\_C16) on the
+frames where comp $<$ ego AND $b_{16}<b_{256}$ (partial delivery), a SUBSET of the collaboration-harm frames
+of para 3. Write "dominated wherever the collaborator helps", never "always dominated".
+### PROVENANCE (source note, one line): all four fractions -- frac\_dominated 99.7/98.5/100.0,
+### frac(comp$\ge$ego) 99.0/94.2/99.1, frac(comp$<$ego $\wedge$ tie) 0.7/4.2/0.9, and the para-3 anchor
+### frac(comp$<$ego) 1.0/5.8/0.9 -- come from ONE run of code/verify_c256_dominance.py written to
+### results/c256_dominance_verify.csv (same commit); the disjoint decomposition frac\_dominated $=$
+### frac(comp$\ge$ego) $+$ frac(comp$<$ego $\wedge$ tie) is asserted in-script, NOT hand-computed.
 ### WELD TO PARA 3 (supervisor: the two paragraphs share one mathematical foundation, cross-reference it):
 the sign of $(\mathrm{comp}-\mathrm{ego})$ SIMULTANEOUSLY sets the C256 dominance direction (here) AND
 whether collaboration is harmful (para 3). Write the C256 and collaboration-harm paragraphs as mutually
@@ -77,6 +84,14 @@ Evidence (with CIs where a claim is made): a2 Easy-stratum gain is significantly
 net-adds false positives and single-vehicle ego-only beats fusion. Structural quantifier (descriptive, no
 claim): frac(ego_f1 > late_f1) = 0.9% / 7.4% / 0.2% (validate/test/culver; test sparsest, mean GT 15 vs
 28/43). src results/ablation_v3/a2_difficulty*.csv, results/step4_collaboration_harm_v3.csv.
+QUANTITATIVE ANCHOR + WELD (supervisor: this paragraph's anchor already lies in the C256 CSV -- write the
+two paragraphs off ONE number source, not just a cross-reference). Descriptive, no directional verb: "on
+frac(comp $<$ ego) $=$ 1.0\% / 5.8\% / 0.9\% of frames the compressed-feature message's delivered utility is
+below the ego-only fallback" -- this is the $(\mathrm{comp}-\mathrm{ego})<0$ set whose sign SIMULTANEOUSLY
+drives the C256 dominance reversal (para 1); the two paragraphs share one CSV and one identity. src
+results/c256_dominance_verify.csv (column frac_comp_lt_ego; same run/commit as the C256 fractions). This is
+the compressed-feature-side counterpart to the object-level-side frac(ego $>$ late) above; each hand-written
+paragraph now carries one source-anchored number (C256, collaboration-harm, HARQ) -- isomorphic anchors.
 Fix pointer (future work, not this paper): an explicit "do-not-request" ego-only 4th action is free in the
 2-bit codebook ('11' reserved) -- fold into the 5.1.1 action-space review.
 
