@@ -12,6 +12,7 @@ CI-wording rule -- e.g. "comparable" not "improves" for a per-mille gain without
 paragraphs too). Writing is not gated; only entry into the manuscript is. Paste drafts into the thread.
 
 ## 1. C256 dominance argument (Method / message candidates) -- REVIEW STANDARD: 3 required elements (a,b,c)
+### FINAL PROSE LANDED (agent-drafted per Josh 2026-07-15, 9 revisions + hard-error fix, no re-review): results/PARAGRAPH_DRAFTS.md #1. This block stays as the review standard.
 ### (a) Precise dominance definition (metric / SNR range / channels; numbers CSV-direct + verified)
 SYMBOL BINDING + IDENTITY DOMAIN (source note, put in the paragraph -- supervisor: "nail the domain of
 validity, or max|err|=0 looks suspicious"): eff = effective F1 $= \mathrm{comp}(1-b) + \mathrm{ego}\,b$, the

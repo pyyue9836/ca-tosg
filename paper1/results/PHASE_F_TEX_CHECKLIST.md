@@ -90,3 +90,16 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 - C256 dominance = CONDITIONAL (eff_C256<=eff_C16 on 99.7/98.5/100% of frames; reverses on the <=1.5%
   comp<ego collaboration-harm frames). Identity eff_C256-eff_C16=(comp-ego)(b16-b256) verified max|err|=0.
   src results/c256_dominance_verify.csv. Weld the C256 and collaboration-harm paragraphs (shared (comp-ego)).
+
+## CROSS-CUTTING (added 2026-07-15, from the C256 paragraph review)
+- ABSOLUTE-SENTENCE GREP: grep the whole manuscript for "never select / never request / never activate /
+  earns no place / always" and reconcile each with the C256 paragraph's caliber -- the deployed selector
+  never REQUESTS C256 (class support 0/0/0), but the oracle frontier activates it at a minority 2.5/3.2/4.5%.
+  An unqualified "never activated" anywhere conflicts with the frontier number; qualify by object (deployed
+  selector vs oracle frontier). Twin of the killed "unconditional dominance" error.
+- PAYLOAD TABLE CONSISTENCY: results/policy_v3/pareto_points.csv is STALE -- Fixed C16 0.495 / Fixed C256
+  0.2475 are the OLD UNCODED payloads (pre rate-1/2 correction; file dated Jul 13, not regenerated). Correct
+  = C16 0.99 / C256 0.495 (verified: frontier lam=0 payload 0.1565 = 0.863*0.024 + 0.137*0.99). Regenerate
+  pareto_points.csv (and any payload table/figure) to 0.99/0.495 and confirm same value + same Msym notation
+  as the C256 paragraph footnote [1.98 Mbit (Eq.7) x rate-1/2 -> 3.96 Mbit (Eq.11); /8 and /4 bit/sym].
+  Frontier/band CSVs already carry corrected payloads; only the Fixed-baseline pareto row is stale.
