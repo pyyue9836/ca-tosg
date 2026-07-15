@@ -114,8 +114,27 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
       divisors being the bits-per-symbol" -> "1.98 Mbit source at rate-1/2 gives 3.96 Mbit coded, divided by
       the 4/8 bits-per-symbol of 16/256-QAM". Keep "~82x" object ratio (uses B_C=1.98 Mbit perception
       payload, unaffected). Confirm no other B_{C} literal survives (grep 0.495/0.248 in main.tex).
-13. plot_pareto_payload.py: repoint pareto read results/pareto_points.csv -> results/policy_v3/pareto_points
-    .csv (corrected); B_C 0.495 -> 0.99; Fixed-C256 axis line 1.98/8 -> 1.98/(0.5*8)=0.495; annotation
-    xy=(0.495,0.431) -> corrected coords. Then regenerate fig_pareto_test + fig_payload_{awgn,rayleigh};
-    final-gate visual inspection (payload axis now 0.024 / 0.99 / 0.495).
+13. FIGURE/NUMBER-EMITTING SCRIPT SWEEP (exposure surface is a FAMILY, not one file -- do not under-scope
+    to plot_pareto_payload.py). Every script below hardcodes the STALE PAYLOAD {C16: 1.98/4=0.495,
+    C256: 1.98/8=0.248}; canonical corrected source = recompute_policy_200seed.py:45 {C16:0.99, C256:0.495}.
+    For EACH: (i) does it emit a payload number into a main.tex figure/table? (ii) if yes, regenerate from the
+    corrected constant/policy_v3 source and cross-check the rendered value; (iii) change the hardcode to read
+    the corrected source programmatically -- verification-derive-not-hardcode extends from verify scripts to
+    ALL number-emitting code; PLOTTING IS NOT EXEMPT.
+    - code/plot_pareto_payload.py:29,58,74  (B_C=1.98/4; annotation xy=(0.495,..); Fixed-C256 line 1.98/8)
+      + repoint read results/pareto_points.csv -> results/policy_v3/pareto_points.csv. Figs: fig_pareto_test,
+      fig_payload_{awgn,rayleigh}.
+    - code/train_rf_multiseed.py:25         (multiseed_hardening.csv pay_rf -- deployed-point CI; check L866-902 robustness)
+    - code/snr_decision_plot.py:31          (decision figure)
+    - code/csi_noise_ablation.py:38         (CSI-noise robustness, item 10)
+    - code/e2e_inference_verify.py:47        (verification path)
+    - code/test_split_pipeline/04_eval_rf_on_test.py:27
+    - code/plot_with_rf.py:55                (uses 1.98 flat = perception payload; confirm intent, not channel-use)
 14. Regenerate/retire the DEPRECATED_UNCODED_PAYLOAD.md orphans; confirm no live reader points at them.
+15. RENDERED PDF DEPRECATION: every already-rendered Pareto/payload figure PDF (fig_pareto_test,
+    fig_payload_{awgn,rayleigh}, any decision/robustness fig fed by a stale-PAYLOAD script) is marked
+    pending-regen; the old PDF is DEPRECATED (same rule as the CSV orphans) until regenerated from a
+    corrected source and visually inspected.
+
+## FINAL-GATE VISUAL INSPECTION -- NEW COLUMN (per figure): PAYLOAD SOURCE = (generator script + source CSV +
+## commit). A figure with a payload axis is not "passed" until its payload provenance is a corrected source.

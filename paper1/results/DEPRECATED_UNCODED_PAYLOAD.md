@@ -13,3 +13,17 @@ Rule (elevated 2026-07-15): after a unit-convention change, EVERY CSV/figure art
 either regenerated or marked DEPRECATED here; a single-point reconciliation (e.g. frontier lam=0 payload
 0.1565 = 0.863*0.024 + 0.137*0.99) proves the live file, it does NOT sweep the repo -- grep the old literal
 to find all sibling orphans at once. [[verification-derive-not-hardcode]] family.
+
+COROLLARY (the highest-value catch of 2026-07-15): when you CORRECT a number, the grep target is the OLD
+LITERAL VALUE ITSELF, whole-repo. The payload-correction commit changed only the 3 results-side spots and
+left 3 Method-side spots (main.tex L168/L280/L315) + a family of number-emitting scripts untouched --
+PRECISELY because 0.495/0.248 was never grepped across the whole tree at correction time. The stale artifact
+is a SILENT failure (L34 reports 0.990, L168 defines 0.495, both sat in one manuscript unseen); the
+whole-repo grep of the old literal is what forces it to announce. Correct-a-number => grep-the-old-literal is
+part of the rule now, not a nicety.
+
+SCRIPT FAMILY carrying the stale hardcode PAYLOAD {C16:1.98/4, C256:1.98/8} (canonical corrected =
+recompute_policy_200seed.py:45 {C16:0.99, C256:0.495}); see PHASE_F_TEX_CHECKLIST item 13 for the per-script
+disposition: plot_pareto_payload.py, train_rf_multiseed.py, snr_decision_plot.py, csi_noise_ablation.py,
+e2e_inference_verify.py, test_split_pipeline/04_eval_rf_on_test.py. Rendered Pareto/payload PDFs (item 15)
+are DEPRECATED pending regen -- same rule as the CSV orphans.

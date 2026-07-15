@@ -4,9 +4,17 @@ Paused at 5/11 items by deliberate decision (mechanical pass = fatigue-error hot
 asymmetry favours a fresh pass over a tired one). Zero-archaeology restart: work straight off this file +
 PHASE_F_TEX_CHECKLIST.md. Final gate unchanged: 11/11 + all figures -> full manuscript diff, supervisor + Josh.
 
-## NEXT-SESSION FIRST STEP (before item 6): re-verify commit cae8654 (item 5)
+## EXECUTION ORDER (FIXED 2026-07-15, not re-litigable): re-verify (EXPANDED) -> item 12 -> items 6-11 ->
+## script sweep (item 13) -> fig:ap_snr. Re-verify is ALWAYS first; item 12 does NOT precede it (supervisor
+## rejected "item 12 first" -- they are not sequential; the fatigue-tail recheck comes before any new edit).
+## NEXT-SESSION FIRST STEP: re-verify cae8654 (item 5), EXPANDED to a 5-item payload cross-check.
 The last item done in a fatigue stretch is the risk peak. Re-read cae8654 (generalisation + tab:gen_headline
-+ AP-vs-SNR) fresh, against policy_v3 / true_e2e_global_v3, BEFORE starting item 6. Five minutes.
++ AP-vs-SNR) fresh, against policy_v3 / true_e2e_global_v3. NOW EXPANDED (post the 2026-07-15 provenance
+event): re-pass ALL 5 done items for payload literals WITH the new prior "stale dual-notation (0.495 vs 0.990)
+can coexist unseen in one manuscript". tab:headline_agg was checked (rho_L path, corrected); the untested
+surface is the abstract band (L34) and the generalisation section (L584+) -- confirm every payload literal
+there is the corrected 0.99 / 0.495 / 0.158-0.251, not a stray 0.495/0.248. THEN item 12 (Method L168/L280/
+L315 + Eq), then items 6-11, then item 13 script sweep, then fig:ap_snr. Five minutes became fifteen; still first.
 
 ## DONE 5/11 (each: CSV-traced values, per-item commit + checklist tick, forbidden-notation clean)
 1. intro central finding (L69-70) currency reframing            -- commit 8f1caa6
