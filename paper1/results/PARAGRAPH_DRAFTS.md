@@ -24,7 +24,7 @@ flatline, or both deliver at high SNR -- which tie rather than reverse. Dominanc
 collaboration-harm regime ($\mathrm{comp}<\mathrm{ego}$, $b_{16}<b_{256}$; \S\ref{sec:harm}). Physically,
 256-QAM right-shifts the AWGN frame-error cliff from 8.0 to 16.5 dB,[^cliff] while under Rayleigh and OFDM
 (0--20 dB) both flatline at the ego floor (frame-level BLER $\approx 1$); no SNR window opens C256 before
-C16. We retain C256 for completeness of the 2-bit request codebook, yet it earns no operational role:
+C16. We retain C256 for completeness of the granularity ladder spanned by the 2-bit request, yet it earns no operational role:
 trained to imitate an oracle that assigns C256 zero support at this operating point, the learned selector
 never requests it -- 0 of $3.96/4.34/1.10\times10^{5}$ deployment predictions[^req] -- and even the oracle's
 payload-penalised frontier activates it at only 2.5 / 3.2 / 4.5\% of frames. That a rate-matched,
@@ -62,29 +62,49 @@ Eq.~(7)/(11) are placeholders to resolve in the .tex pass.
 ### selector requests"; 8 last-sentence grammar + "a finding" (not "the result") + payload-penalised
 ### frontier (lambda not assumed defined); 9 footnote-4 0.999 shared with feasibility mask.
 
-## 3. Collaboration-is-sometimes-harmful (Discussion) -- DRAFT v1 (2026-07-15). Anchor 1.0/5.8/0.9% from the
-## c256 verify CSV (F1-based, NO payload kinship) -> unaffected by the item-12 payload fix; independent of C256 landing.
+## 2. Collaboration-is-sometimes-harmful (Discussion) -- DRAFT v2 (2026-07-15; 6 revisions applied).
+## RELABELLED #2 (writing order: C256=1, collab-harm=2, CoDS=3). Anchor 1.0/5.8/0.9% from the c256 verify CSV
+## (F1-based, NO payload kinship) -> unaffected by item-12; independent of C256 landing.
+## PROVENANCE CATCH (report, do not bury): the old "-0.0147, 95% CI excludes 0" does NOT reproduce -- grep of
+## the whole results tree finds no -0.0147 and NO Easy-stratum harm CI anywhere. The CSV-direct value is
+## -0.0134 (test Easy, good channel AWGN SNR>=14, n=108, fixedL 0.9849 vs CATOSG 0.9715;
+## difficulty_strata_goodchannel.csv). No CI -> per the section-3 wording rule the harm claim is now
+## DESCRIPTIVE (point value in a footnote, not a headline magnitude+CI). Supervisor to rule on the substitution.
 
-Collaboration is not unconditionally beneficial, and that is what makes an explicit selector necessary rather
-than a convenience. A feature request the channel cannot deliver spends the collaborator's transmission
-budget for nothing and collapses the fused output to the ego-only floor; on a frame where the ego detector
-already suffices it can instead add false positives that a single-vehicle detector would avoid. This is
-precisely why the oracle carries a feasibility mask -- an action whose frame-level failure probability
-exceeds $0.999$ is removed from its feasible set -- and why the failure fallback is the ego-only output
-rather than a phantom feature. The effect is measurable but small, and we report it as a mechanism, not a
-headline: on the Easy stratum of the test split the collaborator's message changes realised F1 by $-0.0147$
-(frame-level paired $95\%$ CI excludes $0$), i.e.\ single-vehicle ego-only detection is ahead of fusion
-there. Two descriptive quantifiers bound where this occurs: the ego-only output exceeds the object-level
-fused output on 0.9 / 7.4 / 0.2\% of validation / test / Culver-City frames, and -- from the same per-frame
-account and identity as the C256 analysis (\S\ref{sec:method}) -- the compressed-feature message's delivered
-utility falls below the ego-only fallback on 1.0 / 5.8 / 0.9\% of frames. Test is the sparsest split (mean
-$15$ ground-truth objects vs $28/43$), where thin scenes give fusion the least to add. A free remedy remains
-for future work: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request (ego-only)
-action costs nothing to add.
+Collaboration is not unconditionally beneficial, and that is what makes an explicit per-frame selector
+necessary rather than a convenience. Two failure modes call for two responses. When the channel cannot carry
+a feature message, requesting one spends the collaborator's transmission budget for nothing and collapses the
+output to the ego-only floor (the ego vehicle's own pre-fusion detection); the design answer is already in
+place -- the oracle removes any action whose frame-level failure probability is $\ge 0.999$ from its feasible
+set (the same $0.999$ constant as the \S\ref{sec:method} mask) and falls back to the ego-only output rather
+than a phantom feature. When the channel \emph{can} carry the message it can still hurt: on easy frames where
+ego-only detection already suffices, feature-level fusion can leave the fused output below the ego-only
+one.[^harm] This mode has no masking answer; its remedy is left to future work. Two CSV-verified quantifiers
+bound where harm occurs: the ego-only output strictly exceeds the object-level fused output on 0.9 / 7.4 /
+0.2\% of validation / test / Culver-City frames, and -- from the same per-frame $(\mathrm{comp}-\mathrm{ego})$
+identity and CSV as the C256 analysis (\S\ref{sec:method}) -- the compressed-feature message, when delivered,
+yields lower frame F1 than the ego-only fallback on 1.0 / 5.8 / 0.9\% of frames. Test carries the harm most,
+consistent with fusion having the least to add in thin scenes (mean $15$ ground-truth objects on test vs $28$
+on validate and $41$ on Culver-City). A remedy adds no signalling overhead: the `11' codeword of the 2-bit
+request is unused, so an explicit do-not-request (ego-only) action is free to add.
 
-Word count ~235. src results/c256_dominance_verify.csv (frac_comp_lt_ego = 1.0/5.8/0.9%, same run/commit as
-the C256 fractions), results/ablation_v3/a2_difficulty*.csv (-0.0147 CI), results/step4_collaboration_harm_v3
-.csv (frac ego>late 0.9/7.4/0.2%). Cross-refs \S\ref{sec:method} placeholder. WELD: shares the (comp-ego)
-identity and the SAME CSV as the C256 paragraph -- the sign of (comp-ego) drives both dominance reversal and
-collaboration harm. WORDING SELF-CHECK: the one directional claim (-0.0147) carries a CI that excludes 0; all
-other statements descriptive (changes/exceeds/falls below/ahead), no unqualified harms/degrades/hurts.
+[^harm]: On the test Easy stratum under a usable channel (AWGN SNR $\ge 14$~dB, $n=108$) feature-level fusion
+sits just below the object-level baseline ($0.9715$ vs $0.9849$; difficulty table, \S\ref{sec:difficulty});
+the effect is small and reported as a mechanism, not a magnitude -- no CI is available for this stratum.
+
+Word count (body, excl. footnote) ~230. src results/c256_dominance_verify.csv (frac_comp_lt_ego =
+1.0/5.8/0.9%, same run/commit as the C256 fractions); results/step4_collaboration_harm_v3.csv (frac_ego_gt_
+late = 0.9/7.4/0.2%, STRICT inequality, ties excluded); results/difficulty_strata_goodchannel.csv (test Easy
+-0.0134, n=108); results/gt_object_stats_v3.csv (mean late_num_gt: test 15.2 / validate 27.8 / culver 41.0).
+Cross-refs \S\ref{sec:method}, \S\ref{sec:difficulty} placeholders.
+### 6 REVISIONS APPLIED: 1 causal split (undeliverable->mask+ego = existing design; deliverable-but-harmful
+### -> quantified + remedy explicitly future work, no "precisely why" over-attribution); 2 cross-para fix
+### (C256 "granularity ladder spanned by the 2-bit request", not "codebook" -- the '11'-unused sentence no
+### longer breaks it); 3 provenance (-0.0147->-0.0134 CSV-direct + no-CI->descriptive; 0.9/7.4/0.2 strict
+### frac_ego_gt_late; 15/28/41 from gt_object_stats_v3.csv, 43->41 corrected); 4 FP claim removed (no ego/
+### compressed confusion columns exist -> result-level "below the ego-only one", mechanism-bar not met);
+### 5 precision (>=0.999; "when delivered, yields lower frame F1"; "consistent with...thin scenes"; "adds no
+### signalling overhead"; ego-only glossed once, single-vehicle term dropped); 6 "per-frame selector" first line.
+### WORDING SELF-CHECK: no directional claim carries an unsourced CI; the sole magnitude (-0.0134) is in a
+### footnote, descriptive; body statements are hedged/descriptive (can leave/strictly exceeds/yields lower/
+### carries most). WELD: shares the (comp-ego) identity + same CSV as C256 -> one causal chain.

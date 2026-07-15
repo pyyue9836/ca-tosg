@@ -134,7 +134,9 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
     - code/test_split_pipeline/04_eval_rf_on_test.py:27  (test-split eval numbers)
     CLASS C (ablation/robustness feeders -- fold into the owning item's recompute):
     - code/csi_noise_ablation.py:38         (CSI-noise robustness, folds into item 10)
-    - code/plot_with_rf.py:55                (uses 1.98 flat = perception payload; confirm intent, not channel-use)
+    FAMILY EXHAUSTIVE = 6 scripts (CLOSED), by unambiguous-fingerprint grep (0.2475 / 1.98/4 / 1.98/8 in live
+    .py, excluding comments/data/logs/correction-docs). NOT in the family: code/plot_with_rf.py:55 uses `1.98`
+    flat = perception payload (not a channel-use /4 or /8) -> separate, intent-confirm only, no rescale.
     GREP DISCIPLINE for this sweep (0.495 is DOUBLE-MEANING -- stale C16 AND corrected C256; a bare grep 0.495
     cannot tell them apart). Scan with binding context, and prefer the UNAMBIGUOUS fingerprints of the stale
     account: 0.2475, `1.98/4`, `1.98/8`, and any derivation missing the x2 (1/rate) factor. A hit on 0.495

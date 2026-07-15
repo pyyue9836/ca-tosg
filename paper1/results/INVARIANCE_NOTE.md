@@ -29,3 +29,21 @@ corrected-payload object and the paragraph's use of it is valid.
 
 HAD the check failed (committed frontier == OLD), this would have been a full-stop recompute/retrain
 decision, NOT a paragraph edit -- recorded so the failure branch is explicit.
+
+RESIDUAL (a) -- B-class scripts, "what the stale dict feeds" (one line each; supervisor 2026-07-15):
+- train_rf_multiseed.py: the PAYLOAD dict fills a REPORTED payload column only (best_method_by_f1 / best_f1
+  -> selection is by F1, `best_payload_Mbit` is a label of the F1-chosen method). NO model/seed/method
+  selection is payload-weighted. => report-only: multiseed_hardening.csv's pay_* columns are stale (halved),
+  but NO committed DECISION was made under the old account. Model selection is F1-only; all committed metrics
+  that are payloads must be re-derived under the corrected account, but no retrain is implied.
+- e2e_inference_verify.py, test_split_pipeline/04_eval_rf_on_test.py: same -- PAYLOAD labels the payload
+  column of already-decided actions (from the deployed selector); report-only, no selection influence.
+The DEPLOYED selector itself (train_rf.py) imitates lambda=0 masked-argmax oracle labels -> payload-
+independent by construction; no committed decision is under the old account.
+
+RESIDUAL (b) -- family EXHAUSTIVE (supervisor: the 7th name appeared silently; declare the total + closure).
+Unambiguous-fingerprint grep (`0.2475` / `1.98/4` / `1.98/8` in live .py, excluding comments/data/logs and
+the correction-documenting scripts) => EXACTLY 6 live stale-hardcode scripts: plot_pareto_payload,
+snr_decision_plot (Class A); train_rf_multiseed, e2e_inference_verify, 04_eval_rf_on_test (Class B);
+csi_noise_ablation (Class C). The list is CLOSED at 6. plot_with_rf uses `1.98` flat (perception payload, not
+a channel-use /4 or /8) -> NOT in this family; flagged separately for intent confirmation only.

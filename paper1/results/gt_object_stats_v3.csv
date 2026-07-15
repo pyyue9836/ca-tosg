@@ -1,0 +1,4 @@
+split,n,mean_late_num_gt,mean_ego_num_objects
+validate,1980,27.8,22.6
+test,2170,15.2,13.3
+culver,550,41.0,36.8
