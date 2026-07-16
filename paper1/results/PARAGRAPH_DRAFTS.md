@@ -117,3 +117,35 @@ late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:met
 ### Retained from v2: causal split, cross-para "granularity ladder", >=0.999, ego>late source, "per-frame".
 ### WORDING SELF-CHECK: the one directional magnitude (-0.0147) carries a CI excluding 0; the two fracs are
 ### descriptive; sentence verbs hedged (can still cost / strictly exceeds / yields lower / carries most).
+
+## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- DRAFT v1 (2026-07-16).
+## PRE-WRITE VERIFIED (WebFetch arXiv:2512.22513, v1, submitted 2025-12-27): title "CoDS: Collaborative
+## Perception via Digital Semantic Communication"; 5 authors Jipeng Gan, Le Liang, Hua Zhang, Chongtao Guo,
+## Shi Jin (a subset of the SComCP/gan2026scomcp group -- DISTINCT paper, distinct bib entry needed). All
+## claims below are abstract-level and drawn verbatim from the abstract; concurrent preprint, NO priority claim.
+## STYLE: positive-contrast only (each side stated by what it DOES) -> zero negative-existence checks needed.
+
+A concurrent line of work pushes semantic communication for collaborative perception into the digital domain.
+CoDS~\cite{gan2025cods} pairs a task-oriented semantic compression codec with a semantic analog-to-digital
+converter, so that learned features traverse a standard digital V2X bitstream rather than an analog channel,
+and adds an uncertainty-aware network that scores each received feature and discards those corrupted by
+decoding failures, mitigating the LDPC cliff at the receiver after decoding. \method{} operates at a
+different level of the same pipeline. Where CoDS refines what a feature message is and repairs it post-hoc
+once received, \method{} decides, per frame and before any high-payload transmission, whether a feature
+message should be sent at all: from its own perception cues and estimated channel state it requests either
+the compact object-level message or the feature-level message through the 2-bit codebook, gating the feature
+request out when the channel cannot carry it and falling back to the robust object-level message. The two are
+complementary rather than competing -- a digital semantic codec such as that of CoDS can serve as the
+feature-level branch that \method{} activates, placing granularity selection one level above codec design.
+Both address the cliff effect, but at different points in the pipeline: CoDS discards corrupted features
+after they are received, whereas \method{} avoids spending the feature payload when the channel is infeasible.
+
+Word count ~205. src: WebFetch arXiv:2512.22513 v1 (2025-12-27); claims from the abstract only. BIB ENTRY TO
+ADD (.tex pass): @article{gan2025cods, author={Gan, Jipeng and Liang, Le and Zhang, Hua and Guo, Chongtao and
+Jin, Shi}, title={{CoDS}: Collaborative Perception via Digital Semantic Communication}, journal={arXiv
+preprint arXiv:2512.22513}, year={2025}, note={v1, 27 Dec 2025}}. DISTINCT from gan2026scomcp (SComCP, 7
+authors, TVT2026) -- do not conflate the \cite keys.
+### PRE-STANDARDS SELF-CHECK: (i) no negative-existence claim -- every contrast is positive ("CoDS discards
+### post-hoc; \method gates pre-hoc"), no "CoDS cannot/lacks/ignores"; (ii) NO performance-number duel (code
+### not reproduced, comparability unproven) -- mechanism axis only; (iii) citation = arXiv:2512.22513 v1, 5
+### authors listed, concurrent-preprint wording, no priority claim, all claims abstract-level (verified).
