@@ -181,3 +181,34 @@ Rounds and what each round's gate stopped from reaching a TVT reviewer:
 - CoDS positioning (3 rounds): killed a FAKE QUOTE ("not adaptive to channel state" = summarizer paraphrase,
   not in the paper) and a FAKE STANDARD-FAMILY claim ("same 802.11bd family we adopt" -- our PHY is NR-LDPC).
 Not one of these should have appeared in front of a reviewer. Paragraph drafts final in PARAGRAPH_DRAFTS.md.
+
+## SCORECARD -- BIDIRECTIONAL (the symmetric record; without it the scorecard is PR, not a record)
+The 9 rounds' 9 catches are ONE family -- un-sourced assertions -- and the protocol intercepted them on BOTH
+sides. That two-sided interception is the actual evidence it works.
+- EXECUTION-side catches (5): unconditional-dominance overclaim; 43->41 stale GT; FP-mechanism over-reach
+  (no confusion cols); fake quote "not adaptive to channel state" (summarizer paraphrase); fake standard-
+  family "same 802.11bd we adopt" (our PHY is NR-LDPC).
+- REVIEW-side origins (4), owned here: (a) the equivalence "golden ticket" -- the assumption that B_L is
+  negligible, FALSIFIED by B_L=0.024 (it is the fixed anchor that breaks the lambda-rescale); (b) a ruling
+  built directly on a scope-less negative -- the -0.0147 wrong case, co-responsibility accepted; (c) the E2
+  "strongest source" stamp -- a paraphrase certified as a quotation, the stamp was the reviewer's; (d) the
+  pre/post-hoc axis -- drawn from abstract granularity, shattered the moment the full text arrived.
+Same protocol, both directions. That is why it holds.
+
+## INSERTION PROTOCOL (plugs the last real gap: rounds 6-9 audits are silently VOID if "polished" at insert)
+(a) SOURCE: the 4 paragraphs live ONLY in PARAGRAPH_DRAFTS.md #1-#4 -- the sole insertion source.
+(b) INSERTION = VERBATIM. Only three transforms permitted: (1) placeholder resolution (\S VI / \S Method /
+    \S Difficulty / Fig. placeholders -> real \ref; grep each label's existence FIRST); (2) LaTeX-ification
+    (\method macro, subscript math mode, escaping); (3) footnote-number adaptation. ANY other word change =
+    RE-OPEN that paragraph's review. No "while I'm here" polishing.
+(c) COMMIT: one commit per paragraph insertion; one checklist item each; the C256 insertion item is PREFIXED
+    with the item-12 gate (C256 cannot enter Method until item 12 clears).
+(d) VERIFY: after insertion, a scripted normalize-and-compare (drafts vs the landed .tex paragraph, whitespace
+    /macro-normalised) -- verification-derive family; the comparison result goes INTO the commit.
+
+## RE-VERIFY EXPANDED -- RESULT (execution-side; ruling is the supervisor's): PASS. All 5 done items' payload
+## literals correct (Fixed C16=0.990, C256=0.495, L=0.024, \method 0.158-0.251, band 16-25%); the "stale dual-
+## notation coexists" prior found NOTHING in the done surface (every 0.495 is C256, never C16); forbidden
+## notations (>=99.4%, RF/0.99) absent. The only stale payload literals are L168/L280/L315 = item-12's known
+## target, NOT a done-item regression. cae8654 (item 5): tab:gen_headline C16=0.990 / C256=0.495 / RF 0.251
+## /0.158 confirmed. -> item 12 next.
