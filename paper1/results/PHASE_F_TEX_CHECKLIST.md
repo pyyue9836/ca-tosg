@@ -159,3 +159,8 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
   {fallback, fall back} and confirm each is the failure-revert sense.
 - "2-bit codebook" as a mechanism name -> "2-bit request" (codebook retired; "codeword" may stay for the '11'
   slot). Grep {codebook} and normalise. (C256 para already moved "codebook" -> "granularity ladder".)
+- STANDARD-FAMILY grep "802.11": main.tex is standard-AGNOSTIC (names both 802.11bd and NR sidelink as
+  example signalling stacks, cites {ieee80211bd, 3gpp38885}, models generic rate-1/2 LDPC+QAM; the BLER table
+  is Sionna NR-LDPC + TR 37.885 = 3GPP NR lineage). CONFIRM no sentence anywhere claims the PHY "adopts" or
+  "is in" the 802.11bd family exclusively (that would be false -- 802.11bd is IEEE/DSRC; our PHY model is NR).
+  The CoDS paragraph uses NO family name (neutral "cliff-prone class of digital transport"). Keep it agnostic.

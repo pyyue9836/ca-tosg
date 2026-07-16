@@ -118,52 +118,61 @@ late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:met
 ### WORDING SELF-CHECK: the one directional magnitude (-0.0147) carries a CI excluding 0; the two fracs are
 ### descriptive; sentence verbs hedged (can still cost / strictly exceeds / yields lower / carries most).
 
-## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- DRAFT v2 (2026-07-16).
-## RETURNED per the flow: full-text check found (a) = YES (a transmit-side selection exists), so v1's contrast
-## "Where CoDS ... post-hoc, \method ... before transmission" was FALSE and the axis is RE-DRAWN below. Not
-## auto-landed -- awaiting the ruling on the re-drawn axis.
-## FULL-TEXT CHECK (three-part provenance): tool = WebFetch https://arxiv.org/html/2512.22513v1 (full HTML,
-## v1); fingerprints = {transmit, sender, feature/spatial selection, importance map, gating, request, rate/
-## bandwidth adaptation, before transmission | LDPC, Polar, Turbo, channel code, QAM, MCS}.
-##  (a) TRANSMIT-SIDE SELECTION = YES but CHANNEL-INDEPENDENT: a learned feature-selection network F_beta emits
-##      a binary spatial mask C_sel in {0,1}^{HxW} ("identify important perception features for transmission"),
-##      pruning spatially unimportant locations BEFORE transmission -- but by TASK IMPORTANCE, "not adaptive to
-##      channel state ... learned during training". So CoDS DOES select pre-transmission; the distinguishing
-##      axis is not pre/post-hoc but WHAT the selection conditions on (task-importance/decode-reliability vs
-##      channel state) and WHAT it selects (spatial locations vs message granularity). v1 contrast corrected.
-##  (b) CHANNEL CODE = LDPC, named: "LDPC codes with a block length of 1,296", referenced to IEEE 802.11bd,
-##      16/64-QAM. -> "LDPC cliff" is now FULL-TEXT-VERIFIED (revision-2 "retain" branch); same 802.11bd
-##      LDPC+QAM family as \method's digital baselines -> shared setting strengthens the complementary framing.
+## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- DRAFT v3 (2026-07-16). STILL RETURNED.
+## SECOND full-text pass caught an unsourced load-bearing clause BEFORE landing: the "not adaptive to channel
+## state ... learned during training" phrase (from the 1st WebFetch) is the small-model's PARAPHRASE, NOT
+## verbatim in the paper (2nd WebFetch: "cannot locate a verbatim statement"). Per verbatim-only, the clause
+## is DROPPED -- the axis no longer asserts CoDS is channel-independent (an unsourced negative). It now states
+## only what each side POSITIVELY does; cleaner, zero negative-existence claims about CoDS.
+## FULL-TEXT PROVENANCE (three-part): tool = WebFetch https://arxiv.org/html/2512.22513v1 (full HTML v1);
+## fingerprints = {transmit, sender, feature/spatial selection, gating, request, rate adaptation | LDPC,
+## Polar, Turbo, QAM, MCS}. VERBATIM + LOCATION archived:
+##   [E1] sender-side selection -- SS II-A CAV Module: "we employ a feature selection network F_beta(.) ... to
+##        identify important perception features for transmission, thereby reducing communication overhead."
+##   [E2] "not adaptive to channel state / learned during training" -- NOT LOCATABLE verbatim (2nd WebFetch).
+##        -> clause DROPPED; no channel-independence claim about CoDS made.
+##   [E3] coding -- SS IV-A Experimental Setup: "LDPC codes with a block length of 1,296"; "MCSs ... designed
+##        with reference to the IEEE 802.11bd standard"; "1/2-rate LDPC code, and the resulting bits are
+##        modulated using 16-QAM".
+## FAMILY-NAME BRANCH = (a) NEUTRAL, grep-decided: main.tex is standard-AGNOSTIC -- it names BOTH "802.11bd or
+## NR sidelink" as example signalling stacks (L34/L113/L144/L220/L270), cites {ieee80211bd, 3gpp38885}, and
+## models a GENERIC "rate-1/2 LDPC + QAM" BLER (Sionna NR-LDPC under the hood). It does NOT exclusively self-
+## identify as 802.11bd (so "same 802.11bd family we adopt" is FALSE on our side) NOR as NR/3GPP (so the
+## explicit-contrast branch (b) is unavailable). -> NO family name; neutral "same cliff-prone class of digital
+## transport". [Cross-cut: grep main.tex "802.11" added to checklist -- confirm no stray "same family" claim.]
 
 A concurrent line of work pushes semantic communication for collaborative perception into the digital domain.
 CoDS~\cite{gan2025cods} pairs a task-oriented semantic compression codec with a semantic analog-to-digital
-converter, so that learned features traverse a standard digital V2X bitstream -- LDPC-coded and QAM-modulated
-in the same IEEE~802.11bd family we adopt -- rather than an analog channel; a learned feature-selection
-network prunes spatially unimportant locations before transmission, and a receiver-side uncertainty-aware
-network discards features corrupted by decoding failures, filtering the LDPC cliff after decoding. CoDS thus
-conditions its selection on task importance and on decode reliability. \method{} conditions instead on the
-channel: from local task cues and the estimated channel state it selects the message \emph{granularity} per
-frame, requesting either the compact object-level message or one of the feature-level variants through the
-2-bit request before any high-payload transmission, and gating the feature request out when the channel
-cannot carry it, defaulting to the compact object-level message instead. The two are complementary rather
-than competing -- a digital semantic codec such as that of CoDS could serve as the feature-level branch that
-\method{} activates, placing channel-conditioned granularity selection one level above codec and
-spatial-selection design. Both address the cliff effect, at different points: CoDS discards corrupted
-features after they are received, whereas \method{} avoids spending the collaborator's transmission budget on
-an undeliverable feature message.
+converter, so that learned features traverse a standard digital V2X bitstream -- LDPC-coded and QAM-modulated,
+the same cliff-prone class of digital transport we characterise -- rather than an analog channel. On the
+sender side a feature-selection network identifies task-important spatial locations for transmission; on the
+receiver side an uncertainty-aware network discards features corrupted by decoding failures, mitigating the
+LDPC cliff after decoding. CoDS thus selects by task importance at the sender and filters by decode
+reliability at the receiver. \method{} makes the prevailing channel state a first-class conditioning signal
+alongside the task: from local task cues and the estimated channel state it selects the message
+\emph{granularity} per frame -- the compact object-level message or one of the feature-level variants --
+signalled through the 2-bit request before any high-payload transmission, and gated out when the channel
+cannot carry the feature message, defaulting to the compact object-level message instead. The two are
+complementary rather than competing -- a digital semantic codec such as that of CoDS could serve as the
+feature-level branch that \method{} activates, placing channel-conditioned granularity selection one level
+above codec and spatial-selection design. Both address the cliff effect, at different points: CoDS discards
+corrupted features after they are received, whereas \method{} avoids spending the collaborator's transmission
+budget on an undeliverable feature message.
 
-Word count ~235. src: WebFetch arXiv:2512.22513 v1 (2025-12-27), FULL TEXT (a/b above). BIB ENTRY TO ADD
-(.tex pass): @article{gan2025cods, author={Gan, Jipeng and Liang, Le and Zhang, Hua and Guo, Chongtao and
-Jin, Shi}, title={{CoDS}: Collaborative Perception via Digital Semantic Communication}, journal={arXiv
-preprint arXiv:2512.22513}, year={2025}, note={v1, 27 Dec 2025}}. DISTINCT from gan2026scomcp (SComCP, 7
-authors, TVT2026) -- do not conflate the \cite keys.
-### FIXES APPLIED (v1->v2): HARD -- "repairs post-hoc" -> "discards ... corrupted by decoding failures" (no
-### "repair"); "LDPC cliff" retained (b: full-text-verified); "falling back" -> "defaulting to ... instead"
-### (fallback reserved for failure-revert -> term-grep); "2-bit codebook" -> "2-bit request" (term-grep).
-### PRECISION -- "the feature-level message" -> "one of the feature-level variants" (3 actions); "should be
-### sent" -> request-framed throughout (receiver-driven); "its own perception cues" -> "local task cues".
-### BONUS adopted -- "avoids spending the collaborator's transmission budget on an undeliverable feature
-### message" (collab-harm motif echo); "could serve" (subjunctive). AXIS RE-DRAWN for (a): CoDS's pre-tx
-### spatial selection acknowledged; contrast now conditioning-axis (task-importance/decode vs channel state),
-### positive on both sides -- no negative-existence claim.
-### PENDING RULING: (a)=YES -> per "有则回传", NOT landed; awaiting confirmation of the re-drawn axis.
+Word count ~235. src/archival: WebFetch arXiv:2512.22513 v1 (2025-12-27) FULL TEXT, verbatim E1/E3 above (E2
+unsourceable -> clause dropped). BIB ENTRY (.tex pass): @article{gan2025cods, author={Gan, Jipeng and Liang,
+Le and Zhang, Hua and Guo, Chongtao and Jin, Shi}, title={{CoDS}: Collaborative Perception via Digital
+Semantic Communication}, journal={arXiv preprint arXiv:2512.22513}, year={2025}, note={v1, 27 Dec 2025}}.
+DISTINCT from gan2026scomcp (SComCP, 7 authors, TVT2026) -- do not conflate the \cite keys.
+### FIXES (v2->v3): HARD-1 family name -> NEUTRAL (grep: main.tex agnostic; "802.11bd family we adopt" was
+### false on our side, NR-LDPC/Sionna PHY); HARD-2 "conditions instead" -> ADDITIVE "makes the channel a
+### first-class conditioning signal alongside the task" (task not replaced), "requesting...request" double
+### word -> "signalled through the 2-bit request". PRECISION-1 two verbs two places "selects by task
+### importance at the sender and filters by decode reliability at the receiver" (E2 channel-independence
+### clause DROPPED as unsourceable). PRECISION-2 "filtering the cliff" -> "discards ... corrupted ...,
+### mitigating the LDPC cliff". Retained v1->v2 fixes (discards-not-repairs, 2-bit request, feature-level
+### variants, local task cues, could serve, budget-motif echo).
+### PENDING RULING: still RETURNED. Two deviations from the release list to rule on: (1) family branch (a)
+### neutral (grep-forced), not (b); (2) archival is E1+E3 only -- E2 unsourceable, so the channel-
+### independence clause is dropped and the axis rests on positive descriptions alone. No negative-existence
+### claim about CoDS remains. If both accepted -> #3 lands.
