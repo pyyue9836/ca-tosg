@@ -151,8 +151,16 @@ AGENT ERROR in v2 (owned, reversed in v3): the "-0.0147 is unsourced / no CI" ca
 grepping only results/ (missed code/extra_experiments/out/a2_difficulty_reliable_v3.csv). -0.0147 is correct,
 n=713, 95% CI [-0.0179,-0.0115], significant. The agent replaced it with the STALE v2 -0.0134 (n=108). The
 supervisor's point-2 gate (footnote evidence must match the sentence) forced the return to the CSV that
-surfaced the agent's own error. negative-existence-search-scope reinforced: "no source exists" REQUIRES the
-search scope stated; searching one dir and generalising to "whole tree" is the violation.
+surfaced the agent's own error. negative-existence-search-scope reinforced (2026-07-16, receipt-format
+upgrade): a "no source / doesn't exist / not found" assertion MUST carry THREE things or it is INVALID --
+(1) search scope (path set), (2) fingerprint (pattern set), (3) tool line. TWO-SIDED responsibility: the
+adjudicator who ruled "descriptive substitution" on the scope-less negative shares the fault; a ruling
+built on an unverified negative inherits its invalidity, so a scope-less negative is BOUNCED for its scope
+before any ruling. The -0.0134/n=108 v2 artifact that the agent swapped in is now DEPRECATED
+(DEPRECATED_V2_DIFFICULTY.md) -- it actively supplied a wrong number, the stale-artifact protocol's 2nd
+poster. Point-4 structural upgrade: the -0.0147 attribution is now a verified structural fact
+(harm_stratum_structural.csv) -- 635/713 request C16, the 78 L-frames are frame-identical to Fixed-L
+(max|diff|=0), so the paired difference arises entirely on the C16 frames.
 
 ## plot_with_rf.py -- BINARY RESOLVED: NOT-FOR-PAPER. Writes fig_{ap50,ap70}_{awgn,rayleigh} to
 peiyi_work/01_paper_ca_tosg/runs/v3_with_rf/ (OLD path, NOT paper/figures/); plots payload with 1.98 FLAT =
@@ -160,6 +168,7 @@ source-bit (a THIRD convention, distinct from stale-half and corrected-Msym). ma
 plot_ap_snr.py (item 7), not here. Marked not-for-paper. Guard if ever revived: its payload panel is
 source-bit, must NOT be cross-read with Msym axes.
 
-## MULTISEED PAY RE-DERIVE -> A-CLASS BATCH: multiseed_hardening.csv pay_* columns are stale (train_rf_
-## multiseed report-only), re-derive under corrected PAYLOAD alongside the A-class figure regen (execution
-## order: ... -> A-class (incl. multiseed pay re-derive) -> fig:ap_snr).
+## A-CLASS BATCH (execution order: ... -> A-class -> fig:ap_snr): (1) multiseed_hardening.csv pay_* columns
+## re-derive under corrected PAYLOAD (train_rf_multiseed report-only); (2) fold in the v2-difficulty artifact
+## DEPRECATION (DEPRECATED_V2_DIFFICULTY.md -- difficulty_strata{,_goodchannel}.csv, no live reader, Jun-17
+## v2, superseded by a2_difficulty_{,reliable_}v3.csv).

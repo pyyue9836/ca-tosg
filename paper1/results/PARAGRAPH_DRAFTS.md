@@ -79,7 +79,7 @@ place -- the oracle removes any action whose frame-level failure probability is 
 set (the same $0.999$ constant as the \S\ref{sec:method} mask), and on failure the pipeline reverts to the
 ego-only output rather than a phantom feature. When the channel \emph{can} carry the message, requesting it
 can still cost accuracy: on the easy stratum the selector's realised output falls below even the
-always-object-level baseline.[^harm] This mode has no masking answer; its remedy is left to future work. Two
+always-object-level (Fixed-$L$) baseline.[^harm] This mode has no masking answer; its remedy is left to future work. Two
 CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the
 object-level fused output on 0.9 / 7.4 / 0.2\% of validation / test / Culver-City frames, and -- from the same
 per-frame $(\mathrm{comp}-\mathrm{ego})$ identity and CSV as the C256 analysis (\S\ref{sec:method}) -- the
@@ -89,25 +89,31 @@ compressed-feature message, when delivered, yields lower frame F1 than the ego-o
 signalling overhead: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request
 (ego-only) action can be added without any change to the two-bit message format.
 
-[^harm]: Test Easy stratum (top tercile of the ego's own object-level F1), reliable AWGN $16$~dB: the
-selector's realised F1 is $0.9719$ vs the Fixed-$L$ object-level baseline $0.9866$ -- a gain of $-0.0147$
-(frame-level paired $95\%$ CI $[-0.0179,-0.0115]$, significant; $n=713$; a2\_difficulty\_reliable\_v3.csv).
-The selector requests $C_{16}$ on ${\approx}89\%$ of these frames (payload-derived), so the loss is
-attributable to feature requests on already-easy frames. The $16$~dB deterministic reliable-channel condition
-($b_{16}{\approx}0$, safely above the ${\approx}8$~dB cliff) replaces v2's frozen est\_snr${\ge}14$~dB,
-isolating the difficulty axis from the channel.
+[^harm]: Test Easy stratum (top tercile of the ego's own object-level F1, the \S\ref{sec:difficulty}
+stratification), evaluated under a deterministic reliable-channel condition (AWGN $16$~dB; frame-level BLER
+${\approx}0$, well above the $8.0$~dB onset), isolating the difficulty axis from channel variability: the
+selector's realised F1 is $0.9719$ vs the Fixed-$L$ baseline $0.9866$ -- a gain of $-0.0147$ (frame-level
+paired $95\%$ CI $[-0.0179,-0.0115]$; $n=713$ frames; a2\_difficulty\_reliable\_v3.csv). The selector
+requests $C_{16}$ on $635$ of these $713$ frames; on the remaining $78$, where it requests $L$, its output is
+frame-identical to Fixed-$L$, so the paired difference arises entirely on the $C_{16}$-request frames
+(verified, harm\_stratum\_structural.csv) -- the loss is a structural consequence of requesting features on
+already-easy frames.
 
 Word count (body, excl. footnote) ~235. src: results/c256_dominance_verify.csv (frac_comp_lt_ego =
 1.0/5.8/0.9%, same run/commit as the C256 fractions); results/step4_collaboration_harm_v3.csv (frac_ego_gt_
 late = 0.9/7.4/0.2%, STRICT inequality, ties excluded); code/extra_experiments/out/a2_difficulty_reliable_v3
-.csv (test Easy -0.0147, CI [-0.0179,-0.0115], n=713); results/gt_object_stats_v3.csv (mean late_num_gt: test
-15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:method} placeholder.
-### REVISIONS (v2->v3): -0.0147 RESTORED with CI (v2's -0.0134 was my search-scope error); sentence rebound
-### to the always-object-level (Fixed-L) baseline, NOT ego -- the footnote evidence is CA-TOSG realised vs
-### Fixed-L, and "fusion" mislabel dropped (0.9719 is the selector's mixed-action realised output); footnote
-### adds the ~89% C16 action share (attribution) + the 16 dB provenance; tail "free to add" -> "without any
-### change to the two-bit message format" (no back-door revival of the killed claim); "on failure the
-### pipeline reverts" (fallback is a pipeline act, not the oracle's); GT means to 1 dp (15.2/27.8/41.0).
+.csv (test Easy -0.0147, CI [-0.0179,-0.0115], n=713); results/harm_stratum_structural.csv (DIRECT count 635/
+713 C16 + verified L-frame frame-identity, structural attribution); results/gt_object_stats_v3.csv (mean
+late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:method}, \S\ref{sec:difficulty}.
+### REVISIONS (v3->v4, supervisor 2026-07-16): footnote point 3 -- dropped "replaces v2's est_snr>=14"
+### (ledger: paper shows v3 only, no version comparison), self-contained condition, 8.0 dB (not ~8),
+### "reliable" self-defined in-clause; point 4 -- ~89% (payload-derived) -> DIRECT 635/713 from the same
+### 200-realisation prediction source as 0/0/0, and attribution UPGRADED to structural: verified L-frames are
+### frame-identical to Fixed-L (max|diff|=0, harm_stratum_structural.csv) so the paired diff arises entirely
+### on C16 frames; point 5 -- sentence names "(Fixed-L)", "n=713 frames", "significant" deleted (CSV-column
+### language out of prose), Easy stratum bound to \S\ref{sec:difficulty}, ego-only term.
+### PRIOR (v2->v3): -0.0147 RESTORED (v2's -0.0134/n=108 was my search-scope error -> now DEPRECATED); "on
+### failure the pipeline reverts"; tail "without any change to the two-bit message format"; GT means 1 dp.
 ### Retained from v2: causal split, cross-para "granularity ladder", >=0.999, ego>late source, "per-frame".
 ### WORDING SELF-CHECK: the one directional magnitude (-0.0147) carries a CI excluding 0; the two fracs are
 ### descriptive; sentence verbs hedged (can still cost / strictly exceeds / yields lower / carries most).

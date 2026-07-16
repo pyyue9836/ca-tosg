@@ -1,0 +1,2 @@
+stratum,n,n_C16,n_L,frac_C16,mean_gain,L_frame_max_abs_diff,structural_holds
+test_Easy_reliable_awgn16,713,635,78,0.8906,-0.0147,0.0,True
