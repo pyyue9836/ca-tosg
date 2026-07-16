@@ -164,3 +164,8 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
   is Sionna NR-LDPC + TR 37.885 = 3GPP NR lineage). CONFIRM no sentence anywhere claims the PHY "adopts" or
   "is in" the 802.11bd family exclusively (that would be false -- 802.11bd is IEEE/DSRC; our PHY model is NR).
   The CoDS paragraph uses NO family name (neutral "cliff-prone class of digital transport"). Keep it agnostic.
+- CODE-SPEC PIN (6-11 batch, conditional): grep main.tex {Sionna, NR, 5G, LDPC5G, 37.885, base graph}. If
+  Methods already names the specific simulated code -> no-op. Else add once: "we instantiate this transport
+  with the 5G NR LDPC (Sionna) under TR 37.885 Urban NLOSv." Framework stays class-agnostic (802.11bd OR NR
+  sidelink for signalling); the SIMULATED entity must be named -- the 8.0/16.5 dB onset is code-construction-
+  dependent (NR-LDPC != 802.11 n=1296), a reproducibility gap otherwise.

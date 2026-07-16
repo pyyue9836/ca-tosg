@@ -172,3 +172,12 @@ source-bit, must NOT be cross-read with Msym axes.
 ## re-derive under corrected PAYLOAD (train_rf_multiseed report-only); (2) fold in the v2-difficulty artifact
 ## DEPRECATION (DEPRECATED_V2_DIFFICULTY.md -- difficulty_strata{,_goodchannel}.csv, no live reader, Jun-17
 ## v2, superseded by a2_difficulty_{,reliable_}v3.csv).
+
+## HAND-WRITTEN-PARAGRAPH SCORECARD (all 4 CLOSED 2026-07-16)
+Rounds and what each round's gate stopped from reaching a TVT reviewer:
+- C256 dominance (2 rounds): killed "UNCONDITIONAL dominance" (it is conditional, 99.7/98.5/100%).
+- Collaboration-harm (3 rounds): killed an UNSOURCED CI ("-0.0147, 95% CI" -- the number was real but my
+  "no source" catch was a scope-less negative; net: restored -0.0147 w/ CI, DEPRECATED the wrong -0.0134).
+- CoDS positioning (3 rounds): killed a FAKE QUOTE ("not adaptive to channel state" = summarizer paraphrase,
+  not in the paper) and a FAKE STANDARD-FAMILY claim ("same 802.11bd family we adopt" -- our PHY is NR-LDPC).
+Not one of these should have appeared in front of a reviewer. Paragraph drafts final in PARAGRAPH_DRAFTS.md.

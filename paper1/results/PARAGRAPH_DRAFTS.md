@@ -118,7 +118,13 @@ late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:met
 ### WORDING SELF-CHECK: the one directional magnitude (-0.0147) carries a CI excluding 0; the two fracs are
 ### descriptive; sentence verbs hedged (can still cost / strictly exceeds / yields lower / carries most).
 
-## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- DRAFT v3 (2026-07-16). STILL RETURNED.
+## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- FINAL v4 (2026-07-16). LANDED:
+## participle-chain grammar fix (supervisor-supplied text) + UAN verbatim archived (E_UAN); both deviations
+## (neutral family branch, E2-dropped axis) approved. Source note closed (E1 + E_UAN + E3).
+##   [E_UAN] receiver-side discard -- ABSTRACT (verbatim): "we develop an uncertainty-aware network (UAN) that
+##        assesses the reliability of each received feature and discards those corrupted by decoding failures,
+##        thereby mitigating the cliff effect of conventional channel coding schemes under low signal-to-noise
+##        ratio (SNR) conditions."
 ## SECOND full-text pass caught an unsourced load-bearing clause BEFORE landing: the "not adaptive to channel
 ## state ... learned during training" phrase (from the 1st WebFetch) is the small-model's PARAPHRASE, NOT
 ## verbatim in the paper (2nd WebFetch: "cannot locate a verbatim statement"). Per verbatim-only, the clause
@@ -150,9 +156,10 @@ receiver side an uncertainty-aware network discards features corrupted by decodi
 LDPC cliff after decoding. CoDS thus selects by task importance at the sender and filters by decode
 reliability at the receiver. \method{} makes the prevailing channel state a first-class conditioning signal
 alongside the task: from local task cues and the estimated channel state it selects the message
-\emph{granularity} per frame -- the compact object-level message or one of the feature-level variants --
-signalled through the 2-bit request before any high-payload transmission, and gated out when the channel
-cannot carry the feature message, defaulting to the compact object-level message instead. The two are
+\emph{granularity} per frame -- the compact object-level message or one of the feature-level variants -- and
+signals the choice through the 2-bit request before any high-payload transmission; when the channel cannot
+carry a feature message, the feature-level actions are gated out of the feasible set and the selector
+defaults to the compact object-level message. The two are
 complementary rather than competing -- a digital semantic codec such as that of CoDS could serve as the
 feature-level branch that \method{} activates, placing channel-conditioned granularity selection one level
 above codec and spatial-selection design. Both address the cliff effect, at different points: CoDS discards
@@ -172,7 +179,12 @@ DISTINCT from gan2026scomcp (SComCP, 7 authors, TVT2026) -- do not conflate the 
 ### clause DROPPED as unsourceable). PRECISION-2 "filtering the cliff" -> "discards ... corrupted ...,
 ### mitigating the LDPC cliff". Retained v1->v2 fixes (discards-not-repairs, 2-bit request, feature-level
 ### variants, local task cues, could serve, budget-motif echo).
-### PENDING RULING: still RETURNED. Two deviations from the release list to rule on: (1) family branch (a)
-### neutral (grep-forced), not (b); (2) archival is E1+E3 only -- E2 unsourceable, so the channel-
-### independence clause is dropped and the axis rests on positive descriptions alone. No negative-existence
-### claim about CoDS remains. If both accepted -> #3 lands.
+### LANDED v4 (supervisor 2026-07-16): both deviations approved [(1) neutral family branch, (2) E2-dropped
+### axis]. Landing conditions met: participle-chain grammar fixed (dangling "signalled/gated/defaulting" all
+### hung on "granularity"; supervisor-supplied replacement uses "feasible set"/"gated out"/"defaults", reusing
+### the collab-harm mask wording for cross-paragraph coherence) + UAN abstract sentence archived (E_UAN). All
+### 4 hand-written paragraphs now CLOSED.
+### RELATED 6-11 CONDITIONAL (not this paragraph's gate): grep main.tex {Sionna, NR, 5G, LDPC5G, 37.885, base
+### graph} -- if Methods already pins the specific code -> no-op; else add "we instantiate this transport with
+### the 5G NR LDPC (Sionna) under TR 37.885 Urban NLOSv" (framework stays class-agnostic; the SIMULATED entity
+### must be named -- the 8.0/16.5 dB onset is code-construction-dependent, NR-LDPC != 802.11 n=1296 cliff).
