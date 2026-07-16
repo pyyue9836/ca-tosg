@@ -681,13 +681,13 @@ A channel-averaged mean masks where \method{} matters. We stratify frames into
 easy/medium/hard terciles by the ego's own object-level detection F1 (low $=$ hard),
 and report realised F1 in two regimes (Fig.~\ref{fig:difficulty}). Averaged over all
 channels the CA-TOSG-over-Fixed-$L$ gain is small and rises with difficulty
-($+0.000/+0.008$ easy/hard on test); but on realisations where the channel can carry
-features (AWGN, SNR $\ge 14$~dB) the gain on hard frames reaches $\mathbf{+0.045}$ on
-test ($+0.039$ on validate), an order of magnitude above the all-channel mean, while
+($-0.004/+0.024$ easy/hard on test); but under a reliable channel (deterministic AWGN
+at $16$~dB) the gain on hard frames reaches $\mathbf{+0.090}$ on
+test ($+0.035$ on validate), an order of magnitude above the all-channel mean, while
 staying near zero on easy frames. The value of \method{} is therefore two-dimensional:
 it materialises where a \emph{hard frame meets a usable channel}, and the
 channel-averaged headline necessarily dilutes it. (On easy frames under a good channel
-the deployed selector occasionally over-requests $C_{16}$, a small $-0.013$ F1 effect
+the deployed selector occasionally over-requests $C_{16}$, a small $-0.0147$ F1 effect
 the $\lambda$-cost variant of Section~\ref{sec:pareto} removes.)
 
 \begin{figure}[t]
@@ -695,8 +695,8 @@ the $\lambda$-cost variant of Section~\ref{sec:pareto} removes.)
     \includegraphics[width=\linewidth]{fig_difficulty.pdf}
     \caption{Realised F1 by frame difficulty (ego object-level F1 tercile) on OPV2V test.
     \emph{Left}: all channels---gain grows with difficulty but is small. \emph{Right}:
-    AWGN, SNR$\ge$14~dB---when the channel can support features the hard-frame gain over
-    Fixed $L$ reaches $+0.045$. Numbers above bars are CA-TOSG$-$Fixed-$L$.}
+    AWGN, $16$~dB---when the channel can support features the hard-frame gain over
+    Fixed $L$ reaches $+0.090$. Numbers above bars are CA-TOSG$-$Fixed-$L$.}
     \label{fig:difficulty}
 \end{figure}
 

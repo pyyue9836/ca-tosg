@@ -33,3 +33,11 @@ recompute_policy_200seed.py:45 {C16:0.99, C256:0.495}); see PHASE_F_TEX_CHECKLIS
 disposition: plot_pareto_payload.py, train_rf_multiseed.py, snr_decision_plot.py, csi_noise_ablation.py,
 e2e_inference_verify.py, test_split_pipeline/04_eval_rf_on_test.py. Rendered Pareto/payload PDFs (item 15)
 are DEPRECATED pending regen -- same rule as the CSV orphans.
+
+THREE-PART ALIGNMENT (supervisor 2026-07-16, after the 3rd double-notation species): a number entering the
+paper must align on THREE things -- VALUE, SOURCE, and ATTRIBUTION LABEL (which split / channel / codec it
+belongs to). The double-notation disease has three species now, all caught this session: (1) NUMERIC (0.495
+dual-meaning C16/C256); (2) NARRATIVE (the gamma-dominant old story after c_t overtook it); (3) LABEL (v3
+test-derived robustness numbers sitting under an "OPV2V validate" caption). grep covers value+source; the
+attribution label is verified by cross-reading the generating SCRIPT HEADER (e.g. robustness_v3.py "Eval
+split = test"), not from memory. Attribution is verified with EQUAL weight to the value.
