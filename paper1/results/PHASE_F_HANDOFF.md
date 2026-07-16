@@ -221,3 +221,12 @@ subsection. STALE-fingerprint grep (0.2475 / 1.98/4 / 1.98/8 / 0.248 / "divisors
 GEN SPOT-CHECK (closes the re-verify coverage gap -- non-payload dimension): tab:gen_headline test \method
 F1 0.909 == generalisation_test.csv rf_full 0.9088; culver oracle F1 0.889 == generalisation_culver.csv
 oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace to source. cae8654 closed.
+
+## ITEM 11 (upgraded record, not "62.4% aligned"): v3 DOMINANT-FEATURE FLIP (gamma -> c_t). channel_is_
+## rayleigh 0.349 now outranks est_snr_db 0.275 (v2: gamma 0.405 > c_t 0.245). This is a narrative head-swap,
+## not a number tweak. Flip is self-consistent with v3 physics (Rayleigh feasible set -> L regardless of SNR).
+## DONE: table reordered+revalued, prose 34.9/27.5/62.4, captions 62.4%, MECHANISM SENTENCE placed (c_t
+## outranks gamma because Rayleigh collapses the feasible set to L). Narrative grep (a) SWEPT: no "SNR is the
+## dominant feature" violation; reconciliation touch-ups (L717/755/787/812 "channel state" not "SNR alone";
+## L34 reorder) queued for the dense block. item-10 csi_noise judgment DONE (report-only; v3 -0.0002/-0.0009/
+## -0.0037 from robustness_csi_noise_v3.csv; stale csi_noise_ablation.py -> C-class DEPRECATE).

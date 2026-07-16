@@ -179,3 +179,23 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 ## RECEIPT-COVERAGE RULE (supervisor 2026-07-16): a receipt's coverage claim must align with the item's
 ## ORIGINAL definition -- one line for what was done, one for what was not. (Re-verify expanded's spot-check
 ## dimension was under-reported; closed by the gen-section spot-check below.)
+
+## PRE-BLOCK JUDGMENTS (2026-07-16; done BEFORE opening L676-902, per supervisor)
+### item-10 csi_noise judgment (C-class traceability -- the data task, conclusion-first):
+csi_noise feeds ONLY the SNR-estimation-noise ΔF1 rows of tab:robustness (L866-902). Per-number:
+  - sigma<=1 dB  ΔF1 : F1-based -> report-only re payload. v3 = -0.0002 (robustness_csi_noise_v3.csv)
+  - sigma=2 dB   ΔF1 : F1-based -> report-only.            v3 = -0.0009
+  - sigma=5 dB   ΔF1 : F1-based -> report-only.            v3 = -0.0037
+NO csi_noise PAYLOAD number is cited in main.tex -> the stale PAYLOAD dict is report-only (no contamination).
+BUT the CITED ΔF1 values are STALE v2 (-0.003/-0.025/-0.070) and must update to v3 (-0.0002/-0.0009/-0.0037,
+~20x smaller -- v3 far more CSI-noise robust); v3 source = robustness_csi_noise_v3.csv (corrected payload
+0.2509, WITH CI). The stale-hardcode code/csi_noise_ablation.py (PAYLOAD 1.98/4, OUT v4_csi_noise, no CI) is
+SUPERSEDED by it -> C-class DEPRECATE (add to DEPRECATED_UNCODED_PAYLOAD script family disposition).
+### item-11 narrative grep (a): NOT zero hits, but NO statement asserts "SNR is the single dominant FEATURE".
+Fingerprints {SNR ... dominant/sufficient/first, gamma alone} -> hits at L503 (item-6 ablation prose, stale
+0.839/0.851), L717/L755/L787/L812 ("SNR is a (near-)sufficient statistic" = the CURRENCY finding: channel
+state sufficient vs perception cues UNDER THE CLIFF -- consistent with c_t-dominance, different regime), and
+abstract L34 ("estimated SNR and channel-type ... jointly", lists SNR first). RECONCILE in the dense block:
+(i) confirm "sufficient statistic" reads as CHANNEL STATE (SNR+type), not "SNR alone" where a7 shows both
+matter; (ii) abstract L34 reorder to "channel-type and estimated SNR" (c_t 0.349 > gamma 0.275). No
+narrative-flip VIOLATION found; these are consistency touch-ups, recorded with scope+fingerprint.
