@@ -166,6 +166,7 @@ where $\text{ch}_t \in \{\text{AWGN},\text{Rayleigh}\}$ and $F_t^{\cdot,\mathrm{
 Let $B_s$ denote the per-frame payload in channel-use-equivalent megabits for mode $s$, accounting for the spectral efficiency of the modulation:
 \begin{equation}
 B_L = 0.024, \quad B_{C_{16}} = 3.96/4 \approx 0.99, \quad B_{C_{256}} = 3.96/8 \approx 0.495,
+\label{eq:payload}
 \end{equation}
 all in Mbit/frame, where $3.96 = 1.98/(1/2)$ is the coded-bit count produced by rate-$1/2$ LDPC from the $1.98$-Mbit feature payload, and the divisors $4$ and $8$ are the bits-per-symbol of 16-QAM and 256-QAM, respectively. The average communication cost over $T$ evaluated frames is
 \begin{equation}
@@ -312,7 +313,7 @@ We evaluate \method{} on the OPV2V dataset~\cite{xu2022opv2v} using the OpenCOOD
 
 \subsection{Message Construction and Payload Accounting}
 
-The two payloads are derived from first principles rather than assumed. The object-level message $L$ carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average $27$ detected objects, and encoding each as an ETSI-CPM-style perceived-object container (3D box, dimensions, class, confidence and position covariance, ${\approx}110$~bytes) gives $B_L \approx 27 \times 110 \times 8 \approx 0.024$~Mbit/frame---a deliberately conservative figure that, if anything, overstates the object-level cost. The feature-level message encodes the transmitted BEV feature tensor of size $256 \times 48 \times 176 \approx 2.16\times10^{6}$ elements: the $281.6 \times 76.8$~m detection range at $0.4$~m voxels yields a $704 \times 192$ pillar grid, down-sampled by $4$ to $48 \times 176$ with $256$ channels; at a compact ${\approx}1$-bit-per-element encoding this is $B_C \approx 1.98$~Mbit/frame, matching the value adopted by the importance-map JSCC baseline~\cite{sheng2024importance} for a like-for-like comparison. The feature-level message is therefore ${\approx}82\times$ the object-level payload. Both feature modes $C_{16}$ and $C_{256}$ carry this same $1.98$~Mbit perception payload but require different numbers of channel uses: the $1.98$-Mbit payload first becomes $3.96$~Mbit of coded bits under rate-$1/2$ LDPC, which is then divided by the bits-per-symbol of each modulation, giving $B_{C_{16}}=3.96/4 \approx 0.99$~Mbit/frame for 16-QAM and $B_{C_{256}}=3.96/8 \approx 0.495$~Mbit/frame for 256-QAM. All payload comparisons in this paper use this channel-use-equivalent definition.
+The two payloads are derived from first principles rather than assumed. The object-level message $L$ carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average $27$ detected objects, and encoding each as an ETSI-CPM-style perceived-object container (3D box, dimensions, class, confidence and position covariance, ${\approx}110$~bytes) gives $B_L \approx 27 \times 110 \times 8 \approx 0.024$~Mbit/frame---a deliberately conservative figure that, if anything, overstates the object-level cost. The feature-level message encodes the transmitted BEV feature tensor of size $256 \times 48 \times 176 \approx 2.16\times10^{6}$ elements: the $281.6 \times 76.8$~m detection range at $0.4$~m voxels yields a $704 \times 192$ pillar grid, down-sampled by $4$ to $48 \times 176$ with $256$ channels; at a compact ${\approx}1$-bit-per-element encoding this is $B_C \approx 1.98$~Mbit/frame, matching the value adopted by the importance-map JSCC baseline~\cite{sheng2024importance} for a like-for-like comparison. The feature-level message is therefore ${\approx}82\times$ the object-level payload. Both feature modes $C_{16}$ and $C_{256}$ carry this same $1.98$~Mbit perception payload but require different numbers of channel uses; applying the rate-$1/2$ coded-bit conversion of Eq.~(\ref{eq:payload}) gives $B_{C_{16}} \approx 0.99$~Mbit/frame for 16-QAM and $B_{C_{256}} \approx 0.495$~Mbit/frame for 256-QAM. All payload comparisons in this paper use this channel-use-equivalent definition.
 
 \subsection{Channel Settings}
 
@@ -450,32 +451,32 @@ Fig.~\ref{fig:decision_ratio} shows the per-mode selection ratios $\rho_s$ as a 
 
 \subsection{Feature Importance}\label{sec:feat_imp}
 
-Fig.~\ref{fig:feat_imp} and Table~\ref{tab:feat_imp} report the top Gini feature importances of the deployed selector. The two channel-side features dominate: $\hat\gamma_t$ alone contributes $40.5\%$ of importance and the channel-type indicator $c_t$ contributes a further $24.5\%$, totalling $65\%$ of importance from just two features. The next strongest scene-side cue, \texttt{pcd\_mean\_range}, contributes only $3.3\%$, and no individual perception-side cue exceeds $4\%$. This quantifies the central design claim of the paper: channel-state information is the dominant signal for the granularity decision, and the $21$ perception-side cues serve a secondary refinement role.
+Fig.~\ref{fig:feat_imp} and Table~\ref{tab:feat_imp} report the top Gini feature importances of the deployed selector. The two channel-side features dominate: the channel-type indicator $c_t$ contributes $34.9\%$ of importance and the estimated SNR $\hat\gamma_t$ a further $27.5\%$, totalling $62.4\%$ of importance from just two features. The next strongest scene-side cue, \texttt{pcd\_mean\_range}, contributes only $3.6\%$, and no individual perception-side cue exceeds $4\%$. This quantifies the central design claim of the paper: channel-state information is the dominant signal for the granularity decision, and the $21$ perception-side cues serve a secondary refinement role.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth]{fig_feature_importance.pdf}
-    \caption{Top-12 features by Gini importance of the deployed selector. The channel-side features (red) jointly account for $65\%$ of total importance, dominating all $21$ perception-side LiDAR cues (blue).}
+    \caption{Top-12 features by Gini importance of the deployed selector. The channel-side features (red) jointly account for $62.4\%$ of total importance, dominating all $21$ perception-side LiDAR cues (blue).}
     \label{fig:feat_imp}
 \end{figure}
 
 \begin{table}[t]
 \centering
-\caption{Top-7 features by Gini importance for the deployed \method{} selector (trained on OPV2V validate, $T=1{,}980$ frames). The two channel-side features account for $65\%$ of total importance.}
+\caption{Top-7 features by Gini importance for the deployed \method{} selector (trained on OPV2V validate, $T=1{,}980$ frames). The two channel-side features account for $62.4\%$ of total importance.}
 \label{tab:feat_imp}
 \begin{tabular}{lc}
 \toprule
 Feature & Gini importance \\
 \midrule
-\texttt{est\_snr\_db}             & \textbf{0.405} \\
-\texttt{channel\_is\_rayleigh}    & \textbf{0.245} \\
-\texttt{pcd\_mean\_range}         & 0.033 \\
-\texttt{pcd\_std\_range}          & 0.024 \\
-\texttt{pcd\_left\_points}        & 0.021 \\
-\texttt{pcd\_density\_20\_50}     & 0.019 \\
-\texttt{pcd\_max\_range}          & 0.018 \\
+\texttt{channel\_is\_rayleigh}    & \textbf{0.349} \\
+\texttt{est\_snr\_db}             & \textbf{0.275} \\
+\texttt{pcd\_mean\_range}         & 0.036 \\
+\texttt{pcd\_mid\_20\_50m}        & 0.026 \\
+\texttt{pcd\_density\_20\_50}     & 0.025 \\
+\texttt{pcd\_max\_range}          & 0.024 \\
+\texttt{num\_cavs}                & 0.023 \\
 \midrule
-$\hat\gamma_t + c_t$ subtotal     & \textbf{0.650} \\
+$\hat\gamma_t + c_t$ subtotal     & \textbf{0.624} \\
 \bottomrule
 \end{tabular}
 \end{table}
