@@ -118,34 +118,52 @@ late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:met
 ### WORDING SELF-CHECK: the one directional magnitude (-0.0147) carries a CI excluding 0; the two fracs are
 ### descriptive; sentence verbs hedged (can still cost / strictly exceeds / yields lower / carries most).
 
-## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- DRAFT v1 (2026-07-16).
-## PRE-WRITE VERIFIED (WebFetch arXiv:2512.22513, v1, submitted 2025-12-27): title "CoDS: Collaborative
-## Perception via Digital Semantic Communication"; 5 authors Jipeng Gan, Le Liang, Hua Zhang, Chongtao Guo,
-## Shi Jin (a subset of the SComCP/gan2026scomcp group -- DISTINCT paper, distinct bib entry needed). All
-## claims below are abstract-level and drawn verbatim from the abstract; concurrent preprint, NO priority claim.
-## STYLE: positive-contrast only (each side stated by what it DOES) -> zero negative-existence checks needed.
+## 3. CoDS positioning (Related Work, near semantic-comm / ML-Cooper) -- DRAFT v2 (2026-07-16).
+## RETURNED per the flow: full-text check found (a) = YES (a transmit-side selection exists), so v1's contrast
+## "Where CoDS ... post-hoc, \method ... before transmission" was FALSE and the axis is RE-DRAWN below. Not
+## auto-landed -- awaiting the ruling on the re-drawn axis.
+## FULL-TEXT CHECK (three-part provenance): tool = WebFetch https://arxiv.org/html/2512.22513v1 (full HTML,
+## v1); fingerprints = {transmit, sender, feature/spatial selection, importance map, gating, request, rate/
+## bandwidth adaptation, before transmission | LDPC, Polar, Turbo, channel code, QAM, MCS}.
+##  (a) TRANSMIT-SIDE SELECTION = YES but CHANNEL-INDEPENDENT: a learned feature-selection network F_beta emits
+##      a binary spatial mask C_sel in {0,1}^{HxW} ("identify important perception features for transmission"),
+##      pruning spatially unimportant locations BEFORE transmission -- but by TASK IMPORTANCE, "not adaptive to
+##      channel state ... learned during training". So CoDS DOES select pre-transmission; the distinguishing
+##      axis is not pre/post-hoc but WHAT the selection conditions on (task-importance/decode-reliability vs
+##      channel state) and WHAT it selects (spatial locations vs message granularity). v1 contrast corrected.
+##  (b) CHANNEL CODE = LDPC, named: "LDPC codes with a block length of 1,296", referenced to IEEE 802.11bd,
+##      16/64-QAM. -> "LDPC cliff" is now FULL-TEXT-VERIFIED (revision-2 "retain" branch); same 802.11bd
+##      LDPC+QAM family as \method's digital baselines -> shared setting strengthens the complementary framing.
 
 A concurrent line of work pushes semantic communication for collaborative perception into the digital domain.
 CoDS~\cite{gan2025cods} pairs a task-oriented semantic compression codec with a semantic analog-to-digital
-converter, so that learned features traverse a standard digital V2X bitstream rather than an analog channel,
-and adds an uncertainty-aware network that scores each received feature and discards those corrupted by
-decoding failures, mitigating the LDPC cliff at the receiver after decoding. \method{} operates at a
-different level of the same pipeline. Where CoDS refines what a feature message is and repairs it post-hoc
-once received, \method{} decides, per frame and before any high-payload transmission, whether a feature
-message should be sent at all: from its own perception cues and estimated channel state it requests either
-the compact object-level message or the feature-level message through the 2-bit codebook, gating the feature
-request out when the channel cannot carry it and falling back to the robust object-level message. The two are
-complementary rather than competing -- a digital semantic codec such as that of CoDS can serve as the
-feature-level branch that \method{} activates, placing granularity selection one level above codec design.
-Both address the cliff effect, but at different points in the pipeline: CoDS discards corrupted features
-after they are received, whereas \method{} avoids spending the feature payload when the channel is infeasible.
+converter, so that learned features traverse a standard digital V2X bitstream -- LDPC-coded and QAM-modulated
+in the same IEEE~802.11bd family we adopt -- rather than an analog channel; a learned feature-selection
+network prunes spatially unimportant locations before transmission, and a receiver-side uncertainty-aware
+network discards features corrupted by decoding failures, filtering the LDPC cliff after decoding. CoDS thus
+conditions its selection on task importance and on decode reliability. \method{} conditions instead on the
+channel: from local task cues and the estimated channel state it selects the message \emph{granularity} per
+frame, requesting either the compact object-level message or one of the feature-level variants through the
+2-bit request before any high-payload transmission, and gating the feature request out when the channel
+cannot carry it, defaulting to the compact object-level message instead. The two are complementary rather
+than competing -- a digital semantic codec such as that of CoDS could serve as the feature-level branch that
+\method{} activates, placing channel-conditioned granularity selection one level above codec and
+spatial-selection design. Both address the cliff effect, at different points: CoDS discards corrupted
+features after they are received, whereas \method{} avoids spending the collaborator's transmission budget on
+an undeliverable feature message.
 
-Word count ~205. src: WebFetch arXiv:2512.22513 v1 (2025-12-27); claims from the abstract only. BIB ENTRY TO
-ADD (.tex pass): @article{gan2025cods, author={Gan, Jipeng and Liang, Le and Zhang, Hua and Guo, Chongtao and
+Word count ~235. src: WebFetch arXiv:2512.22513 v1 (2025-12-27), FULL TEXT (a/b above). BIB ENTRY TO ADD
+(.tex pass): @article{gan2025cods, author={Gan, Jipeng and Liang, Le and Zhang, Hua and Guo, Chongtao and
 Jin, Shi}, title={{CoDS}: Collaborative Perception via Digital Semantic Communication}, journal={arXiv
 preprint arXiv:2512.22513}, year={2025}, note={v1, 27 Dec 2025}}. DISTINCT from gan2026scomcp (SComCP, 7
 authors, TVT2026) -- do not conflate the \cite keys.
-### PRE-STANDARDS SELF-CHECK: (i) no negative-existence claim -- every contrast is positive ("CoDS discards
-### post-hoc; \method gates pre-hoc"), no "CoDS cannot/lacks/ignores"; (ii) NO performance-number duel (code
-### not reproduced, comparability unproven) -- mechanism axis only; (iii) citation = arXiv:2512.22513 v1, 5
-### authors listed, concurrent-preprint wording, no priority claim, all claims abstract-level (verified).
+### FIXES APPLIED (v1->v2): HARD -- "repairs post-hoc" -> "discards ... corrupted by decoding failures" (no
+### "repair"); "LDPC cliff" retained (b: full-text-verified); "falling back" -> "defaulting to ... instead"
+### (fallback reserved for failure-revert -> term-grep); "2-bit codebook" -> "2-bit request" (term-grep).
+### PRECISION -- "the feature-level message" -> "one of the feature-level variants" (3 actions); "should be
+### sent" -> request-framed throughout (receiver-driven); "its own perception cues" -> "local task cues".
+### BONUS adopted -- "avoids spending the collaborator's transmission budget on an undeliverable feature
+### message" (collab-harm motif echo); "could serve" (subjunctive). AXIS RE-DRAWN for (a): CoDS's pre-tx
+### spatial selection acknowledged; contrast now conditioning-axis (task-importance/decode vs channel state),
+### positive on both sides -- no negative-existence claim.
+### PENDING RULING: (a)=YES -> per "有则回传", NOT landed; awaiting confirmation of the re-drawn axis.

@@ -154,3 +154,8 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 - ego-only vs "ego's own object-level F1" vs "single-vehicle": unify to the glossed term "ego-only" across
   the manuscript (collab-harm footnote says "the ego's own object-level F1" -> "ego-only object-level F1").
   Grep {ego-only, ego's own, single-vehicle} and normalise; gloss once at first use.
+- fallback = RESERVED word: bound to "transmission failed -> pipeline reverts to ego-only" ONLY. Do NOT use
+  "fall back" for feasibility-gated selection of L (that is "defaults to the object-level message"). Grep
+  {fallback, fall back} and confirm each is the failure-revert sense.
+- "2-bit codebook" as a mechanism name -> "2-bit request" (codebook retired; "codeword" may stay for the '11'
+  slot). Grep {codebook} and normalise. (C256 para already moved "codebook" -> "granularity ladder".)
