@@ -165,9 +165,9 @@ where $\text{ch}_t \in \{\text{AWGN},\text{Rayleigh}\}$ and $F_t^{\cdot,\mathrm{
 
 Let $B_s$ denote the per-frame payload in channel-use-equivalent megabits for mode $s$, accounting for the spectral efficiency of the modulation:
 \begin{equation}
-B_L = 0.024, \quad B_{C_{16}} = 1.98/4 \approx 0.495, \quad B_{C_{256}} = 1.98/8 \approx 0.248,
+B_L = 0.024, \quad B_{C_{16}} = 3.96/4 \approx 0.99, \quad B_{C_{256}} = 3.96/8 \approx 0.495,
 \end{equation}
-all in Mbit/frame, where the divisors $4$ and $8$ are the bits-per-symbol of 16-QAM and 256-QAM, respectively. The average communication cost over $T$ evaluated frames is
+all in Mbit/frame, where $3.96 = 1.98/(1/2)$ is the coded-bit count produced by rate-$1/2$ LDPC from the $1.98$-Mbit feature payload, and the divisors $4$ and $8$ are the bits-per-symbol of 16-QAM and 256-QAM, respectively. The average communication cost over $T$ evaluated frames is
 \begin{equation}
 \bar{B} = \frac{1}{T}\sum_{t=1}^{T} B_{s_t} = \sum_{s \in \mathcal{S}} \rho_s B_s,
 \end{equation}
@@ -277,7 +277,7 @@ The role of $(\hat\gamma_t,c_t)$ is fundamentally different from the perception 
 The object-level branch transmits compact detection results $m_t^L = \{(b_k,c_k,p_k)\}_{k=1}^{N_t}$. Its average payload is approximately $B_L = 0.024$~Mbit/frame, allowing it to be transmitted with strong channel coding and treated as channel-invariant in the evaluated SNR range.
 
 \subsubsection{Feature-Level Branches}
-The feature-level branches transmit compressed BEV representations $m_t^{C_q} = \phi_q(F_{j,t})$, where $\phi_q(\cdot)$ uses $q$-QAM modulation under rate-$1/2$ LDPC coding. The $C_{16}$ mode is more reliable but less spectrally efficient (channel-use payload $B_{C_{16}} \approx 0.495$~Mbit/frame), while the $C_{256}$ mode is more spectrally efficient but more channel-sensitive (channel-use payload $B_{C_{256}} \approx 0.248$~Mbit/frame).
+The feature-level branches transmit compressed BEV representations $m_t^{C_q} = \phi_q(F_{j,t})$, where $\phi_q(\cdot)$ uses $q$-QAM modulation under rate-$1/2$ LDPC coding. The $C_{16}$ mode is more reliable but less spectrally efficient (channel-use payload $B_{C_{16}} \approx 0.99$~Mbit/frame), while the $C_{256}$ mode is more spectrally efficient but more channel-sensitive (channel-use payload $B_{C_{256}} \approx 0.495$~Mbit/frame).
 
 \subsection{Channel-Aware Semantic Granularity Selector}
 
@@ -312,7 +312,7 @@ We evaluate \method{} on the OPV2V dataset~\cite{xu2022opv2v} using the OpenCOOD
 
 \subsection{Message Construction and Payload Accounting}
 
-The two payloads are derived from first principles rather than assumed. The object-level message $L$ carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average $27$ detected objects, and encoding each as an ETSI-CPM-style perceived-object container (3D box, dimensions, class, confidence and position covariance, ${\approx}110$~bytes) gives $B_L \approx 27 \times 110 \times 8 \approx 0.024$~Mbit/frame---a deliberately conservative figure that, if anything, overstates the object-level cost. The feature-level message encodes the transmitted BEV feature tensor of size $256 \times 48 \times 176 \approx 2.16\times10^{6}$ elements: the $281.6 \times 76.8$~m detection range at $0.4$~m voxels yields a $704 \times 192$ pillar grid, down-sampled by $4$ to $48 \times 176$ with $256$ channels; at a compact ${\approx}1$-bit-per-element encoding this is $B_C \approx 1.98$~Mbit/frame, matching the value adopted by the importance-map JSCC baseline~\cite{sheng2024importance} for a like-for-like comparison. The feature-level message is therefore ${\approx}82\times$ the object-level payload. Both feature modes $C_{16}$ and $C_{256}$ carry this same $1.98$~Mbit perception payload but require different numbers of channel uses: $B_{C_{16}}=1.98/4 \approx 0.495$~Mbit/frame for 16-QAM and $B_{C_{256}}=1.98/8 \approx 0.248$~Mbit/frame for 256-QAM, the divisors being the bits-per-symbol of each modulation. All payload comparisons in this paper use this channel-use-equivalent definition.
+The two payloads are derived from first principles rather than assumed. The object-level message $L$ carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average $27$ detected objects, and encoding each as an ETSI-CPM-style perceived-object container (3D box, dimensions, class, confidence and position covariance, ${\approx}110$~bytes) gives $B_L \approx 27 \times 110 \times 8 \approx 0.024$~Mbit/frame---a deliberately conservative figure that, if anything, overstates the object-level cost. The feature-level message encodes the transmitted BEV feature tensor of size $256 \times 48 \times 176 \approx 2.16\times10^{6}$ elements: the $281.6 \times 76.8$~m detection range at $0.4$~m voxels yields a $704 \times 192$ pillar grid, down-sampled by $4$ to $48 \times 176$ with $256$ channels; at a compact ${\approx}1$-bit-per-element encoding this is $B_C \approx 1.98$~Mbit/frame, matching the value adopted by the importance-map JSCC baseline~\cite{sheng2024importance} for a like-for-like comparison. The feature-level message is therefore ${\approx}82\times$ the object-level payload. Both feature modes $C_{16}$ and $C_{256}$ carry this same $1.98$~Mbit perception payload but require different numbers of channel uses: the $1.98$-Mbit payload first becomes $3.96$~Mbit of coded bits under rate-$1/2$ LDPC, which is then divided by the bits-per-symbol of each modulation, giving $B_{C_{16}}=3.96/4 \approx 0.99$~Mbit/frame for 16-QAM and $B_{C_{256}}=3.96/8 \approx 0.495$~Mbit/frame for 256-QAM. All payload comparisons in this paper use this channel-use-equivalent definition.
 
 \subsection{Channel Settings}
 

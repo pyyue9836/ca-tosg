@@ -169,3 +169,13 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
   with the 5G NR LDPC (Sionna) under TR 37.885 Urban NLOSv." Framework stays class-agnostic (802.11bd OR NR
   sidelink for signalling); the SIMULATED entity must be named -- the 8.0/16.5 dB onset is code-construction-
   dependent (NR-LDPC != 802.11 n=1296), a reproducibility gap otherwise.
+
+## ITEM 12 DONE (2026-07-16): L168 Eq / L280 / L315 -> corrected 0.99 / 0.495 with the rate-1/2 coded-bit
+## derivation (1.98 Mbit -> 3.96 Mbit coded -> /4, /8). STALE fingerprint grep = 0. C256 insertion UNBLOCKED.
+## - C256 insertion note (spec a): at insertion, trim the C256 footnote [^pay] to REFERENCE the Method payload
+##   derivation (now canonical at L315 / Eq) rather than repeat it; the [^pay] Eq.(7)/(11) placeholders
+##   resolve to the real Method labels. This is an allowed insertion-time refinement, flag it in the C256
+##   insertion commit.
+## RECEIPT-COVERAGE RULE (supervisor 2026-07-16): a receipt's coverage claim must align with the item's
+## ORIGINAL definition -- one line for what was done, one for what was not. (Re-verify expanded's spot-check
+## dimension was under-reported; closed by the gen-section spot-check below.)

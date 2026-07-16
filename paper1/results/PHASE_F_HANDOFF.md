@@ -212,3 +212,12 @@ Same protocol, both directions. That is why it holds.
 ## notations (>=99.4%, RF/0.99) absent. The only stale payload literals are L168/L280/L315 = item-12's known
 ## target, NOT a done-item regression. cae8654 (item 5): tab:gen_headline C16=0.990 / C256=0.495 / RF 0.251
 ## /0.158 confirmed. -> item 12 next.
+
+## ITEM 12 DONE (2026-07-16) + GEN SPOT-CHECK
+Item 12: L168 (Eq) / L280 / L315 corrected 1.98/4->3.96/4=0.99 and 1.98/8->3.96/8=0.495; the rate-1/2
+coded-bit derivation (1.98 Mbit -> 3.96 Mbit coded -> /log2 M) now stated once in the Eq + payload-accounting
+subsection. STALE-fingerprint grep (0.2475 / 1.98/4 / 1.98/8 / 0.248 / "divisors being the bits-per-symbol")
+= 0 across main.tex. C256 insertion gate cleared.
+GEN SPOT-CHECK (closes the re-verify coverage gap -- non-payload dimension): tab:gen_headline test \method
+F1 0.909 == generalisation_test.csv rf_full 0.9088; culver oracle F1 0.889 == generalisation_culver.csv
+oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace to source. cae8654 closed.
