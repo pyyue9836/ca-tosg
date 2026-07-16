@@ -863,13 +863,13 @@ Three practical imperfections of a deployed V2X link---a noisy SNR estimate, cha
 aging under mobility, and a stale (delayed) request---degrade the selector only gracefully,
 because whenever the channel state is uncertain it falls back to the robust object-level
 message $L$ (Table~\ref{tab:robustness}). Under AWGN the selector tolerates SNR-estimation
-noise up to $\sigma\approx1$~dB with $\le0.003$ F1 loss; under a Jakes model at $60$~km/h the
-SNR estimate decorrelates within ${\sim}10$~ms, costing $-0.015$ F1 before plateauing; and
-acting on a one-frame-stale decision costs at most $-0.057$ F1 under our i.i.d.-per-frame
-channel assumption. The framework also spans the full fading-severity range: replacing the
+noise up to $\sigma\approx1$~dB with $\le0.0003$ F1 loss; under a Jakes model at $60$~km/h the
+SNR estimate decorrelates within ${\sim}10$~ms, costing $-0.004$ F1 before plateauing; and
+acting on a one-frame-stale decision costs at most $-0.019$ F1 under our i.i.d.-per-frame
+channel assumption. This near-immunity to SNR-estimation noise is consistent with the channel-type-dominated policy of Section~\ref{sec:feat_imp}: perturbing the continuous $\hat\gamma_t$ rarely flips a decision anchored on the discrete channel-type flag, and under Rayleigh the action remains $L$ regardless. The framework also spans the full fading-severity range: replacing the
 AWGN/Rayleigh limits with Rician fading moves the feature-activation knee smoothly between
 them as the line-of-sight component strengthens, and the two-regime result of
-Section~\ref{sec:jscc_aware} reproduces under OFDM ($+0.015$ F1 edge). Finally, the deployed
+Section~\ref{sec:jscc_aware} reproduces under OFDM ($+0.025$ F1 edge). Finally, the deployed
 Random Forest runs in $52.8\pm5.7$~ms per frame ($\mathrm{P95}=59.1$~ms) on a single CPU
 core---within the $100$~ms budget of a $10$~Hz LiDAR cycle---and a decision tree or
 logistic-regression realisation reaches the same F1 at $>10\times$ lower latency, confirming
@@ -877,7 +877,7 @@ the policy is cheap and model-agnostic.
 
 \begin{table}[t]
 \centering
-\caption{Deployment robustness (OPV2V validate; realised frame F1). Each row perturbs one
+\caption{Deployment robustness (OPV2V test; realised frame F1). Each row perturbs one
 imperfection while holding the others ideal; losses are bounded because an uncertain channel
 state defaults to the robust $L$ message.}
 \label{tab:robustness}
@@ -886,13 +886,13 @@ state defaults to the robust $L$ message.}
 Imperfection & Operating point & $\Delta$F1 \\
 \midrule
 \multirow{3}{*}{SNR-estimation noise $\sigma$}
-   & $\le 1$~dB              & $\ge -0.003$ \\
-   & $2$~dB                  & $-0.025$ \\
-   & $5$~dB                  & $-0.070$ \\
+   & $\le 1$~dB              & $-0.0002$ \\
+   & $2$~dB                  & $-0.0009$ \\
+   & $5$~dB                  & $-0.0037$ \\
 \midrule
-CSI aging (Jakes, $60$~km/h) & stale by ${\sim}10$~ms & $-0.015$ (then plateaus) \\
+CSI aging (Jakes, $60$~km/h) & stale by ${\sim}10$~ms & $-0.004$ (then plateaus) \\
 \midrule
-Request delay & $1$-frame-stale decision & $\ge -0.057$ (pessimistic i.i.d.\ bound) \\
+Request delay & $1$-frame-stale decision & $-0.019$ (pessimistic i.i.d.\ bound) \\
 \bottomrule
 \end{tabular}
 \end{table}
