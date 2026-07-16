@@ -149,3 +149,8 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 
 ## FINAL-GATE VISUAL INSPECTION -- NEW COLUMN (per figure): PAYLOAD SOURCE = (generator script + source CSV +
 ## commit). A figure with a payload axis is not "passed" until its payload provenance is a corrected source.
+
+## TERM-GREP (unify at .tex time; drafts NOT reopened for these)
+- ego-only vs "ego's own object-level F1" vs "single-vehicle": unify to the glossed term "ego-only" across
+  the manuscript (collab-harm footnote says "the ego's own object-level F1" -> "ego-only object-level F1").
+  Grep {ego-only, ego's own, single-vehicle} and normalise; gloss once at first use.

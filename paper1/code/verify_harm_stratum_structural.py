@@ -40,7 +40,15 @@ print(f"STRUCTURAL: max|CA-TOSG - Fixed-L| on L-frames = {l_frame_max_abs_diff:.
 print(f"  paired-diff sum on L-frames = {diff_sum_on_L:.4f} ; on C16-frames = {diff_sum_on_C16:.4f}")
 structural = bool(l_frame_max_abs_diff < 1e-9)
 print(f"STRUCTURAL CLAIM HOLDS (diff arises entirely on C16 frames) = {structural}")
+# EPISTEMIC NOTE (supervisor 2026-07-16): n_C16 + n_L == n implies ZERO C256 on this stratum. That zero is
+# the SAME SOURCE as the deployment 0/0/0 C256 count -- both come from this one classifier (selector_rf.pkl,
+# class set {L, C16}), so it is an internal consistency check, NOT independent corroboration. Record as
+# consistency, not independence.
+c256_zero = (n_c16 + n_l == n)
+print(f"n_C16+n_L == n ({n_c16}+{n_l}=={n}) -> zero C256 on stratum = {c256_zero}; SAME SOURCE as the "
+      f"deployment 0/0/0 (one classifier, class set {sorted(RF.classes_)}) -> consistency, not independent evidence.")
 pd.DataFrame([dict(stratum='test_Easy_reliable_awgn16', n=n, n_C16=n_c16, n_L=n_l,
                    frac_C16=round(n_c16/n, 4), mean_gain=round(gain, 4),
-                   L_frame_max_abs_diff=l_frame_max_abs_diff, structural_holds=structural)]
+                   L_frame_max_abs_diff=l_frame_max_abs_diff, structural_holds=structural,
+                   C256_zero_same_source_as_deployment_000=c256_zero)]
              ).to_csv(os.path.join(P1, 'results/harm_stratum_structural.csv'), index=False)

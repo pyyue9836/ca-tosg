@@ -100,13 +100,24 @@ paragraph now carries one source-anchored number (C256, collaboration-harm, HARQ
 Fix pointer (future work, not this paper): an explicit "do-not-request" ego-only 4th action is free in the
 2-bit codebook ('11' reserved) -- fold into the 5.1.1 action-space review.
 
-## 2. CoDS positioning (Related Work, near ML-Cooper) -- REVIEW STANDARD: verify-before-write, no strawman
-BEFORE writing, do ONE thing: pull arXiv 2512.22513's CURRENT version number + date and record it in the
-paragraph's source note (positioning against a stale competitor version is a submission liability). Then:
+## 3. CoDS positioning (Related Work, near ML-Cooper) -- REVIEW STANDARD: verify-before-write, no strawman.
+## THREE PRE-STANDARDS (supervisor 2026-07-16, positioning-paragraph-specific landmines):
+## (i) NEGATIVE-EXISTENCE RULE APPLIES TO THE COMPETITOR TOO. Any "CoDS does not / lacks / ignores X" is a
+##     negative-existence assertion needing scope (full v1 text) + fingerprint (search terms) + tool line --
+##     "the abstract doesn't mention it" != "the paper doesn't do it" (we paid for this on ourselves this
+##     week). BETTER SOLUTION: replace every negative with a POSITIVE contrast -- "CoDS mitigates the cliff by
+##     post-hoc discard of corrupted features; \method gates infeasible requests before transmission." Both
+##     sides state only what each DOES; no full-text negative check is needed, and the positioning is sharper.
+##     The positioning paragraph is the highest-density habitat for scope-less negatives -- this style immunises it.
+## (ii) NO NUMBER DUELS. Their code is not reproduced and dataset/eval comparability is unproven -> ZERO
+##     performance-number comparison. Position on the MECHANISM axis only: representation/codec design vs
+##     granularity-selection policy; post-hoc vs pre-hoc; complementary, not competing.
+## (iii) CITATION SPEC: concurrent-preprint wording; cite arXiv:2512.22513 (v1); list all FIVE authors; no
+##     priority claim. Any specific claim beyond abstract granularity -> check against the full text before
+##     writing (standing requirement, restated). BEFORE writing: pull 2512.22513's CURRENT version + date
+##     into the source note (stale-competitor-version positioning is a submission liability).
 - Positioning axis uses ONLY what \method actually has (all real, all in this thread): receiver-driven
   2-bit request; channel-state-conditioned oracle; frame-level (Sionna) BLER physics; feasibility mask.
-- Write only CITABLE claims about CoDS's content -- no strawman, no "unlike CoDS which cannot..." unless
-  the cited version actually cannot. Your call on framing; the constraint is verifiability.
 
 ## 4. HARQ motivation (Discussion / future work / Paper C hook) -- FINALISED DRAFT, write prose around it
 The OFDM result makes this quantitative and it comes from your own table:
