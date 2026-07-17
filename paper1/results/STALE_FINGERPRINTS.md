@@ -50,5 +50,5 @@ RX alone improves F1
 RX 5\.3 percentage
 RX 15\.8
 RX 18\.4
-RX easier test split
+RX easier[a-z -]{0,25}(test|scene|split)
 RX easy split
