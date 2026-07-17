@@ -221,3 +221,19 @@ narrative-flip VIOLATION found; these are consistency touch-ups, recorded with s
   "cues cut/save/reduce/buy payload" invites "how does a cue reduce bits?". Use: "with perception cues the
   selector selects the low-payload action more often, lowering deployed channel use by ~12% at equal F1."
   grep {cut, save, reduce, buy} x {payload, channel use, bandwidth} across the block; reconcile hits.
+
+## GAMMA-FLIP REVERSE-DEPENDENCY SCAN (2026-07-17, the debt I owed -- item-6 receipt had treated the flip as
+## an in-section rewrite and skipped the scan). Fingerprints {improves F1, adding gamma/SNR improves, est_snr
+## adds, "improves F1 by 0.012"}. RESULT: A/B = ZERO -- the reversed v2 claim "gamma improves F1" is fully
+## gone (the merge deleted the old caption "improves F1 by 0.012 ... 5.3 percentage points"). Sites:
+##  (i) §Features: c_t>gamma narrative + its mechanism sentence already self-consistent -- gamma has
+##      importance yet adding it atop perception cues doesn't help; NO contradiction, no edit.
+##  (ii) intro/abstract: no "channel features improve F1" claim (62% is IMPORTANCE, not F1 improvement). clean.
+##  (iii) L721/738/794 "SNR (near-)sufficient statistic" (currency): surface-contradiction with the flip ->
+##      RECONCILED with one sentence landed in the ablation prose (sec:ablation): SNR is decisive as the
+##      THRESHOLD SIGNAL but adds no F1 as an ADDITIONAL RF FEATURE atop perception cues -- two distinct roles.
+## DEFERRED to item-9 reconciliation (do not open separately): whether to add a gamma-marginal MECHANISM
+## sentence (welded to item 10/11 -- three v3 flips one physics line: c_t-dominant / CSI-noise immunity /
+## gamma-marginal-no-gain). Paper DOES report the gamma-alone number (ablation table + prose) -> likely add.
+## BLOCK-EXIT GREP UNION now includes the gamma-improves family: {v2 payload fingerprints} U {old-conclusion
+## keywords: threshold matches/suffices, no Pareto advantage} U {improves F1, adding gamma/SNR improves}.
