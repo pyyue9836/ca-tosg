@@ -705,27 +705,27 @@ the $\lambda$-cost variant of Section~\ref{sec:pareto} removes.)
 Since channel features dominate importance (Section~\ref{sec:feat_imp}), we test
 whether a hand-tuned rule suffices. Table~\ref{tab:ablation_threshold} compares RF
 feature subsets and a rule ``if AWGN and $\hat\gamma_t>\tau$ then $C_{16}$ else $L$''
-(train on validate, evaluate on test). We report this honestly. \emph{Channel-averaged,
-the SNR-threshold rule matches the learned RF on the payload--F1 frontier}: over $200$
-random SNR/channel draws the RF attains mean F1 $0.8886$ ($95\%$ CI $[0.8878,0.8895]$) at
-mean payload $0.078$, and a tuned threshold reaches the same F1 at essentially the same
-payload---the learned selector gives \emph{no channel-averaged Pareto advantage} over the
-threshold. This is the key honest message: \emph{channel awareness is the dominant decision
-factor}, and a simple, fully interpretable SNR threshold already captures it. The $21$
-ego-side perception cues add $<0.001$ aggregate F1 over channel state alone on this
-LDPC + QAM channel; we attribute this to the sharp SNR cliff, which makes the estimated
-SNR a near-sufficient statistic for the decision. What the granularity \emph{policy}
-adds over object-level communication is nonetheless frame-selective, not aggregate: on
-hard frames under a usable channel (Section~\ref{sec:difficulty}) the policy's gain over
-Fixed~$L$ is $+0.045$ F1 with bootstrap $95\%$ CI $[+0.033,+0.059]$ (significant). We
+(train on validate, evaluate on test). We report this honestly. \emph{Under cliff transport a
+retuned SNR threshold captures most of the attainable F1}: on the payload--F1 frontier the
+learned RF and a tuned threshold sit almost on top of each other. As established in
+Section~\ref{sec:headline}, the selector's edge there is \emph{marginal but one-sided}---it
+Pareto-dominates the best threshold at matched channel use (frame-level $95\%$ CI excluding
+zero)---and is paid mainly in \emph{bandwidth}: the $21$ ego-side perception cues add no
+significant aggregate F1 over channel state alone on this LDPC + QAM channel, yet cut channel
+use by ${\approx}12\%$ at matched F1. We attribute the small accuracy margin to the sharp SNR
+cliff, which makes the estimated SNR a near-sufficient statistic for the decision. What the granularity \emph{policy}
+adds over object-level communication is nonetheless frame-selective: on
+hard frames under a reliable channel (Section~\ref{sec:difficulty}) its gain over
+Fixed~$L$ reaches $+0.090$ F1. We
 therefore frame \method{} as a \emph{lightweight, interpretable channel-aware selection
-policy} whose aggregate operating point matches a threshold on this cliff codec; the
+policy} whose aggregate operating point closely tracks a threshold on this cliff codec while
+dominating it at matched payload; the
 perception cues become decisive on graceful-degradation channels, where SNR is no longer
 a sufficient statistic and the cue-based selector beats the best SNR threshold by
-$+0.017$ F1 (Section~\ref{sec:jscc_aware}). Dropping the range, density, or object-count cue
-groups changes F1 by $<0.001$; the channel-averaged payloads, with $95\%$ CIs over
-$200$ seeds, are in Table~\ref{tab:headline_agg} (RF $0.078$ versus the $\tau{=}16$
-threshold's $0.071$).
+$+0.027$ F1 (Section~\ref{sec:jscc_aware}). Dropping the range, density, or object-count cue
+groups changes F1 by $<0.001$; the channel-averaged payloads
+are in Table~\ref{tab:headline_agg} (RF $0.251$ versus the $\tau{=}8.5$
+threshold's $0.303$).
 
 \begin{table}[t]
 \centering

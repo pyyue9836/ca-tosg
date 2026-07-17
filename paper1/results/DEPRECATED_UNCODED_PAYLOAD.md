@@ -41,3 +41,11 @@ dual-meaning C16/C256); (2) NARRATIVE (the gamma-dominant old story after c_t ov
 test-derived robustness numbers sitting under an "OPV2V validate" caption). grep covers value+source; the
 attribution label is verified by cross-reading the generating SCRIPT HEADER (e.g. robustness_v3.py "Eval
 split = test"), not from memory. Attribution is verified with EQUAL weight to the value.
+
+REVERSE-DEPENDENCY SCAN (supervisor 2026-07-17, from the 12th interception -- the gravest: two contradictory
+CONCLUSIONS coexisting in main.tex, L708-713 "threshold matches RF, no Pareto advantage" vs the headline "RF
+Pareto-dominates"). RULE: a conclusion-level edit (changing a CLAIM, not just a number) carries a
+whole-manuscript scan on the claim's KEYWORDS; every hit is reconciled or flipped, zero-hits recorded with
+scope+fingerprint. Numbers have the "correct-a-number => grep-the-old-literal" fingerprint scan; conclusions
+get the isomorphic keyword scan. It survived because item-3's verification checked that item's own
+correctness, never "does another passage carry a claim coupled to this one?". Twin of change-a-number=>grep.

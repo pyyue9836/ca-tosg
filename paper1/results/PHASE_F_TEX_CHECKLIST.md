@@ -199,3 +199,15 @@ abstract L34 ("estimated SNR and channel-type ... jointly", lists SNR first). RE
 (i) confirm "sufficient statistic" reads as CHANNEL STATE (SNR+type), not "SNR alone" where a7 shows both
 matter; (ii) abstract L34 reorder to "channel-type and estimated SNR" (c_t 0.349 > gamma 0.275). No
 narrative-flip VIOLATION found; these are consistency touch-ups, recorded with scope+fingerprint.
+
+## REVERSE-DEPENDENCY SCAN result (item-8 threshold flip, 2026-07-17): fingerprints {threshold matches/
+## suffices, no Pareto advantage, marginal, sufficient statistic}. NON-zero -- 3 coupled residuals in the
+## JSCC-aware section (item 9) still carry the OLD "threshold matches the learned selector under LDPC":
+##   L756 "a one-line threshold matches the learned selector"
+##   L778 "the threshold suffices, reproducing Section~\ref{sec:threshold}"
+##   L802 "Under LDPC the threshold matches \method; under JSCC the threshold collapses"
+## RECONCILE at item-9 edit: "matches/suffices" -> "nearly matches / captures most of the F1 (marginally
+## Pareto-dominated at matched payload)" -- consistent with the flipped threshold section + headline. The
+## LDPC-half currency claim (threshold captures most) stays; "matches" (= equal) must not survive next to the
+## headline's "Pareto-dominates". intro(L34/70)/conclusion(L902+): no residual old-conclusion hit (currency
+## framing only). Scan scope = full main.tex; recorded per the reverse-dependency-scan rule.
