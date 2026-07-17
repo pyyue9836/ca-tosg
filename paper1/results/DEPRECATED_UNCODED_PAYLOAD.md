@@ -56,3 +56,15 @@ A value quoted in a spec/instruction/memory is a POINTER; its authority is the m
 ledger entry. The "~10%" cue-payload figure was carried in the review-side ledger for two weeks and
 re-issued in specs, while main.tex + CSV say ~12% (0.03066/0.2509=12.2%). Three-part alignment (value/source/
 label) binds review-side numbers too: when a spec-quoted number meets the manuscript, the manuscript+CSV win.
+
+CLEAN-VERDICT NEEDS ITS GREP LINE (supervisor 2026-07-17, 6th review-side unsourced assertion + 14th
+interception). Any "clean / 干净 / zero-hit / no residual" verdict in a receipt MUST carry its grep line
+(pattern set + scope) to be VALID -- cleanliness is demoted from a judgement word to an executable statement.
+A clean-claim with no grep line = not scanned = a bare negative-existence assertion -> BOUNCED (my own
+rule). Concrete: item-8's receipt asserted "intro/conclusion clean"; the conclusion carried "matches the
+learned selector" + five v2 numbers; the ledger caught it on first run. Same family as scope-less negatives.
+
+LEDGER SYNONYM-FAMILY RULE: a claim fingerprint is stored as a WORD-FAMILY regex, not one surface form
+(RF|selector|policy ; matches|suffices|equals ; threshold|tau ; cut|save|reduce|buy). Incomplete surface
+coverage = half a fingerprint. Term-grep reserved words (fallback, codebook) are synonym seeds. ("matches the
+learned RF" missed "matches the learned selector" -> now a family.)

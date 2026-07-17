@@ -31,7 +31,8 @@ RX 0\.0134
 RX n=108
 RX difficulty_strata
 RX no channel-averaged Pareto advantage
-RX matches the learned (RF|selector)
+RX (matches|suffices|equals) the learned (RF|selector|policy)
+RX threshold (matches|suffices|equals) 
 RX 0\.8886
 RX 93\.3
 RX accuracy versus the oracle

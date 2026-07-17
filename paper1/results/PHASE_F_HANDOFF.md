@@ -230,3 +230,14 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## dominant feature" violation; reconciliation touch-ups (L717/755/787/812 "channel state" not "SNR alone";
 ## L34 reorder) queued for the dense block. item-10 csi_noise judgment DONE (report-only; v3 -0.0002/-0.0009/
 ## -0.0037 from robustness_csi_noise_v3.csv; stale csi_noise_ablation.py -> C-class DEPRECATE).
+
+## ITEM-6 #4 JUDGMENT (belated report, supervisor flagged the receipt gap): a7_ablation.py RETRAINS an RF per
+## feature subset (line 6 "Train an RF per feature subset on the FROZEN v3 oracle_3way labels"; fit() builds a
+## new RandomForestClassifier). So the 0.240 Full row is a per-cut retrained instance, NOT the deployed
+## selector_rf.pkl (0.251 in tab:headline_agg). The 0.240-vs-0.251 near-but-different is expected -> caption
+## note added. Judgment = RETRAINED (source: code/extra_experiments/a7_ablation.py:6,24-28).
+## CONCLUSION-FIX TRACEABILITY (exit-grep-triggered, NOT exempt from the final-gate diff-to-checklist map):
+## L886 conclusion fixes -> commit 0b7ca48 (band/AP/gains/matches-narrative) + this turn (AP Culver-City
+## attribution). Each conclusion number's label: AP +0.07 = Culver-City (validate +0.026, test comparable);
+## hard +0.090 = test (a2 reliable Hard, validate +0.035, CI [+0.083,+0.096]); JSCC +0.027 = AWGN/test,
+## +0.022 = Rayleigh/test (two_regime_edge_v3). Every final-gate diff hunk maps to a checklist/HANDOFF line.
