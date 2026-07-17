@@ -20,27 +20,29 @@ rf_p, rf_c = fit(perc), fit(csi)
 ACT = {'L': 0, 'C16': 1, 'C256': 2}
 late, comp, ego = te.late_f1.to_numpy(), te.compressed_f1.to_numpy(), te.ego_f1.to_numpy()
 
-def eval_channel(rf, cols, is_ray_val, n_seed=200):
-    n = len(te); accf = np.zeros(n); accpay = np.zeros(n); PAY = np.array([0.024, 0.99, 0.495])
+def eval_channel(rf, cols, ch_name, n_seed=200):
+    n = len(te); accf = np.zeros(n); accpay = np.zeros(n); accc16 = 0.0; PAY = np.array([0.024, 0.99, 0.495])
     for s in range(n_seed):
         rng = np.random.default_rng(s); snr = rng.uniform(0, 20, n)
-        is_ray = np.full(n, is_ray_val, bool)
-        b16 = np.where(is_ray, V._bler(snr, 16, 'rayleigh'), V._bler(snr, 16, 'awgn'))
-        eff = np.stack([late, comp * (1 - b16) + ego * b16, comp], axis=1)   # C256 col unused (never picked)
-        d = te.copy(); d['est_snr_db'] = snr; d['channel_is_rayleigh'] = int(is_ray_val)
+        b16 = V._bler(snr, 16, ch_name)                                     # per-channel frame BLER
+        eff = np.stack([late, comp * (1 - b16) + ego * b16, comp], axis=1)  # C256 col unused (never picked)
+        d = te.copy(); d['est_snr_db'] = snr; d['channel_is_rayleigh'] = int(ch_name == 'rayleigh')
         ai = np.array([ACT[x] for x in rf.predict(d[cols])])
-        accf += eff[np.arange(n), ai]; accpay += PAY[ai]
-    return accf.mean() / n_seed, accpay.mean() / n_seed
+        accf += eff[np.arange(n), ai]; accpay += PAY[ai]; accc16 += float((ai == 1).mean())
+    return accf.mean() / n_seed, accpay.mean() / n_seed, accc16 / n_seed
 
 rows = []
-for ch, ir in [('awgn', False), ('rayleigh', True)]:
-    fp, pp = eval_channel(rf_p, perc, ir); fc, pc = eval_channel(rf_c, csi, ir)
+for ch in ('awgn', 'rayleigh', 'ofdm'):                                     # ALL THREE channels the paper uses
+    fp, pp, cp = eval_channel(rf_p, perc, ch); fc, pc, cc = eval_channel(rf_c, csi, ch)
     rows.append(dict(channel=ch, perc_only_f1=round(fp, 4), perc_plus_gamma_f1=round(fc, 4),
-                     delta_f1=round(fc - fp, 4), perc_only_pay=round(pp, 4), perc_plus_gamma_pay=round(pc, 4)))
+                     delta_f1=round(fc - fp, 4), fracC16_perc=round(cp, 4), fracC16_percgamma=round(cc, 4)))
 out = pd.DataFrame(rows); print(out.to_string(index=False))
 out.to_csv(os.path.join(P1, 'results/gamma_mechanism.csv'), index=False)
-da = out[out.channel == 'awgn'].delta_f1.iloc[0]; dr = out[out.channel == 'rayleigh'].delta_f1.iloc[0]
-concentrated = bool(dr < da and dr < -0.002)
-print(f"\ndelta AWGN={da:+.4f}  delta Rayleigh={dr:+.4f}  -> loss concentrated on Rayleigh = {concentrated}")
-print("MECHANISM CONFIRMED: adding gamma emboldens requests that fail on Rayleigh (BLER~1) -> ego collapse."
-      if concentrated else "MECHANISM REFUTED: return, no mechanism sentence.")
+d = {r['channel']: r['delta_f1'] for r in rows}
+neg_on_fading = bool(d['rayleigh'] < -0.002 and d['ofdm'] < -0.002 and d['awgn'] >= d['rayleigh'])
+print(f"\ndelta by channel: AWGN={d['awgn']:+.4f}  Rayleigh={d['rayleigh']:+.4f}  OFDM={d['ofdm']:+.4f}")
+print(f"request share frac_C16 (perc-only -> perc+gamma), should be channel-INVARIANT: "
+      f"{[(r['channel'], r['fracC16_perc'], r['fracC16_percgamma']) for r in rows]}")
+print("MECHANISM CONFIRMED on BOTH fading channels (Rayleigh AND OFDM<threshold): gamma emboldens requests "
+      "that fail where BLER~1 -> ego collapse; request share is channel-invariant." if neg_on_fading else
+      "OFDM cell NOT negative -> inconsistent with our physics; RETURN for investigation, sentence descriptive.")

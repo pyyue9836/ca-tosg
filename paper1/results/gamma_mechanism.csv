@@ -1,3 +1,4 @@
-channel,perc_only_f1,perc_plus_gamma_f1,delta_f1,perc_only_pay,perc_plus_gamma_pay
-awgn,0.9021,0.9081,0.006,0.0885,0.1818
-rayleigh,0.8969,0.8864,-0.0105,0.0885,0.1818
+channel,perc_only_f1,perc_plus_gamma_f1,delta_f1,fracC16_perc,fracC16_percgamma
+awgn,0.9021,0.9081,0.006,0.0668,0.1634
+rayleigh,0.8969,0.8864,-0.0105,0.0668,0.1634
+ofdm,0.8969,0.8864,-0.0105,0.0668,0.1634
