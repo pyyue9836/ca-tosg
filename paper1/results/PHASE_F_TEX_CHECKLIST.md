@@ -237,3 +237,21 @@ narrative-flip VIOLATION found; these are consistency touch-ups, recorded with s
 ## gamma-marginal-no-gain). Paper DOES report the gamma-alone number (ablation table + prose) -> likely add.
 ## BLOCK-EXIT GREP UNION now includes the gamma-improves family: {v2 payload fingerprints} U {old-conclusion
 ## keywords: threshold matches/suffices, no Pareto advantage} U {improves F1, adding gamma/SNR improves}.
+
+## GAMMA MECHANISM -- CONFIRMED (verify_gamma_mechanism.py -> gamma_mechanism.csv, 2026-07-17): the strong
+## hypothesis holds. delta(Perception+gamma - Perception-only) by channel: AWGN +0.0060, Rayleigh -0.0105
+## (loss concentrated on Rayleigh = True). Both cuts request the SAME extra payload 0.089->0.182 on BOTH
+## channels (Perception+gamma cannot see channel type), but on Rayleigh (frame BLER~1) the emboldened C16
+## requests fail and collapse to the ego floor. Net (0.006-0.0105)/2 ~ -0.0023 ~ observed -0.003. My earlier
+## "continuous noise dimension" hypothesis is RETRACTED (unsourced); this is the sourced structural version.
+## READY SENTENCE (write at item-9 decision point, LAND at ablation prose beside the gamma-alone number,
+## welded to §Features): "The loss is channel-specific: without $c_t$ the extra $\hat\gamma_t$-driven $C_{16}$
+## requests fire on Rayleigh frames too, where the LDPC block almost always fails (Fig.~\ref{fig:bler}) and
+## the output collapses to the ego floor (AWGN $+0.006$, Rayleigh $-0.011$ F1); adding $c_t$ restores the
+## gating." Three v3 flips = one physics line: c_t-dominant (§Features) / CSI-noise immunity (item 10) /
+## gamma-marginal-and-Rayleigh-harmful (here).
+## ITEM-9 SPEC (two-role reconciliation single home): the "SNR threshold-signal vs RF-feature" sentence lives
+## in §Ablation; item-9's L738/756/778/802 handling REFERENCES it ("as distinguished in Section~\ref{sec:
+## ablation}"), does NOT restate -- argument-double-notation defence applies to the reconciliation sentence too.
+## ITEM-6 #4 (same-reader): a7 RETRAINS per cut -> tab:ablation caption note added (per-cut retrained; deployed
+## = Full, 0.909@0.251 vs per-cut Full 0.240 as separate instances). Resolved.

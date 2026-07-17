@@ -487,7 +487,7 @@ To isolate the contribution of the two channel-state features, we train selector
 
 \begin{table}[t]
 \centering
-\caption{Selector feature ablation and the SNR-threshold challenger (train: validate, eval: frozen OPV2V test, $T=2{,}170$ frames, $200$ SNR/channel realisations). Realised frame F1 is nearly invariant across feature subsets---channel state alone ($2$ features) already reaches $0.909$ and the full $23$-feature selector matches it to within $0.001$---while the deployed channel use varies with the action mix. The rigorous channel-averaged payload--F1 comparison (with CIs) is in Table~\ref{tab:headline_agg}.}
+\caption{Selector feature ablation and the SNR-threshold challenger (train: validate, eval: frozen OPV2V test, $T=2{,}170$ frames, $200$ SNR/channel realisations). Realised frame F1 is nearly invariant across feature subsets---channel state alone ($2$ features) already reaches $0.909$ and the full $23$-feature selector matches it to within $0.001$---while the deployed channel use varies with the action mix. Each row is a selector retrained on its feature subset; the deployed selector is the Full configuration, whose channel-averaged operating point in Table~\ref{tab:headline_agg} ($0.909$ at $0.251$~Msym) differs slightly from the per-cut Full row ($0.240$~Msym) only as a separately trained instance. The rigorous channel-averaged payload--F1 comparison (with CIs) is in Table~\ref{tab:headline_agg}.}
 \label{tab:ablation}
 \begin{tabular}{lccc}
 \toprule
