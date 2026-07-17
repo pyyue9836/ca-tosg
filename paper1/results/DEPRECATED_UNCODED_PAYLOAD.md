@@ -49,3 +49,10 @@ whole-manuscript scan on the claim's KEYWORDS; every hit is reconciled or flippe
 scope+fingerprint. Numbers have the "correct-a-number => grep-the-old-literal" fingerprint scan; conclusions
 get the isomorphic keyword scan. It survived because item-3's verification checked that item's own
 correctness, never "does another passage carry a claim coupled to this one?". Twin of change-a-number=>grep.
+
+REVIEW-SIDE LEDGER = POINTER NOT SOURCE (supervisor 2026-07-17, 5th review-side unsourced assertion, joining
+the equivalence golden-ticket, the scope-less-negative ruling, the E2 quote-stamp, the pre/post-hoc axis).
+A value quoted in a spec/instruction/memory is a POINTER; its authority is the manuscript + CSV, never the
+ledger entry. The "~10%" cue-payload figure was carried in the review-side ledger for two weeks and
+re-issued in specs, while main.tex + CSV say ~12% (0.03066/0.2509=12.2%). Three-part alignment (value/source/
+label) binds review-side numbers too: when a spec-quoted number meets the manuscript, the manuscript+CSV win.

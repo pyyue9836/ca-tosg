@@ -483,24 +483,29 @@ $\hat\gamma_t + c_t$ subtotal     & \textbf{0.624} \\
 
 \subsection{Ablation: Effect of Channel-State Features}\label{sec:ablation}
 
-To isolate the contribution of the two channel-state features, we train three variants of the selector under identical RF hyperparameters: \textsc{RF-base} uses only the $21$ LiDAR cues; \textsc{RF+CSI} adds $\hat\gamma_t$; \textsc{RF+CSI+ch} adds both $\hat\gamma_t$ and $c_t$ and is the deployed configuration. Table~\ref{tab:ablation} summarises the results.
+To isolate the contribution of the two channel-state features, we train selector variants under identical RF hyperparameters over the feature subsets of Table~\ref{tab:ablation}: perception cues only ($21$ LiDAR cues); the perception cues plus the estimated SNR $\hat\gamma_t$; the full configuration adding the channel-type indicator $c_t$ (the deployed selector); and, for reference, channel state alone ($\hat\gamma_t,c_t$) and a hand-tuned SNR threshold. Table~\ref{tab:ablation} summarises the results.
 
 \begin{table}[t]
 \centering
-\caption{Ablation of the channel-state features on the $30\%$ test split. Means and standard deviations for the deployed variant are computed over $5$ random splits (seeds $0$--$4$). Adding $\hat\gamma_t$ improves F1 by $0.012$; adding $c_t$ on top improves F1 by a further $0.014$ and lifts accuracy versus the oracle by $5.3$ percentage points on average.}
+\caption{Selector feature ablation and the SNR-threshold challenger (train: validate, eval: frozen OPV2V test, $T=2{,}170$ frames, $200$ SNR/channel realisations). Realised frame F1 is nearly invariant across feature subsets---channel state alone ($2$ features) already reaches $0.909$ and the full $23$-feature selector matches it to within $0.001$---while the deployed channel use varies with the action mix. The rigorous channel-averaged payload--F1 comparison (with CIs) is in Table~\ref{tab:headline_agg}.}
 \label{tab:ablation}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccc}
 \toprule
-Variant & Features & Acc.\ vs.\ oracle & Payload & Mean F1 \\
+Selector & \#feat & Realised F1 & Deployed payload (Msym) \\
 \midrule
-\textsc{RF-base}    & $21$ cues only          & 0.864 & 0.048 & 0.839 \\
-\textsc{RF+CSI}     & $+\hat\gamma_t$         & 0.860 & 0.089 & 0.851 \\
-\textsc{RF+CSI+ch}  & $+\hat\gamma_t,c_t$     & \textbf{0.917 $\pm$ 0.015} & 0.089 $\pm$ 0.011 & \textbf{0.865 $\pm$ 0.007} \\
+Channel only ($\hat\gamma,c$)        & 2  & 0.909 & 0.271 \\
+Perception cues only                 & 21 & 0.900 & 0.089 \\
+Perception $+\ \hat\gamma$           & 22 & 0.897 & 0.182 \\
+Full (all features)                  & 23 & \textbf{0.909} & 0.240 \\
+SNR-threshold ($\tau{=}8.5$)         & -- & 0.910 & 0.303 \\
+\midrule
+Oracle (upper bound)                 & -- & 0.914 & 0.179 \\
+Fixed $L$                            & -- & 0.901 & 0.024 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two findings stand out. First, $\hat\gamma_t$ alone improves F1 from $0.839$ to $0.851$ but actually \emph{increases} payload, because the selector tends to over-select $C_{16}$ when it cannot distinguish AWGN from Rayleigh and treats the average SNR as informative on both. Second, adding $c_t$ corrects this by enabling a channel-conditional policy: under Rayleigh the selector becomes $L$-dominant, lowering payload from $0.089$ to $0.076$, while under AWGN it activates $C_{16}$ above the LDPC threshold. The full selector reaches $93.3\%$ accuracy versus the oracle.
+Two findings stand out. First, on this cliff codec the perception cues barely move realised F1: channel state alone reaches $0.909$ and the full selector matches it, and adding $\hat\gamma_t$ to the perception cues even nudges F1 down ($0.900\!\to\!0.897$) while raising payload, because SNR alone cannot separate AWGN from Rayleigh and the selector over-requests $C_{16}$. Second, adding $c_t$ enables a channel-conditional policy---under Rayleigh the selector becomes $L$-dominant while under AWGN it activates $C_{16}$ above the LDPC threshold---so what the cues change is \emph{deployed channel use}, not accuracy: by selecting the low-payload $L$ action more often at equal F1, the full selector spends $0.240$~Msym versus $0.271$ for channel state alone (the channel-averaged ${\approx}12\%$ reduction is quantified in Section~\ref{sec:headline}).
 
 \subsection{End-to-end Deployment Verification}\label{sec:e2e}
 
@@ -703,7 +708,7 @@ the $\lambda$-cost variant of Section~\ref{sec:pareto} removes.)
 \subsection{Is a Learned Selector Necessary? Feature Ablation and an SNR-Threshold Rule}\label{sec:threshold}
 
 Since channel features dominate importance (Section~\ref{sec:feat_imp}), we test
-whether a hand-tuned rule suffices. Table~\ref{tab:ablation_threshold} compares RF
+whether a hand-tuned rule suffices. Table~\ref{tab:ablation} compares RF
 feature subsets and a rule ``if AWGN and $\hat\gamma_t>\tau$ then $C_{16}$ else $L$''
 (train on validate, evaluate on test). We report this honestly. \emph{Under cliff transport a
 retuned SNR threshold captures most of the attainable F1}: on the payload--F1 frontier the
@@ -726,29 +731,6 @@ $+0.027$ F1 (Section~\ref{sec:jscc_aware}). Dropping the range, density, or obje
 groups changes F1 by $<0.001$; the channel-averaged payloads
 are in Table~\ref{tab:headline_agg} (RF $0.251$ versus the $\tau{=}8.5$
 threshold's $0.303$).
-
-\begin{table}[t]
-\centering
-\caption{Selector feature ablation (train: validate, eval: test; frozen selector,
-$T=2{,}170$ frames). Realised frame F1 is nearly invariant across feature subsets and
-across a hand-tuned SNR threshold: channel state alone (2 features) already reaches
-F1 $0.888$, and adding the $21$ ego-side perception cues changes F1 by $<0.001$. The
-rigorous channel-averaged payload comparison ($200$ seeds, with CIs) is in
-Table~\ref{tab:headline_agg}.}\label{tab:ablation_threshold}
-\begin{tabular}{lcc}
-\toprule
-Selector & \#feat & Realised F1 \\
-\midrule
-Channel only ($\hat\gamma,c$)        & 2  & 0.888 \\
-Perception cues only                 & 21 & 0.887 \\
-Perception $+\ \hat\gamma$           & 22 & 0.887 \\
-Full (all features)                  & 23 & 0.887 \\
-SNR-threshold $\tau{=}16$            & -- & 0.889 \\
-\midrule
-Oracle / Fixed $L$                   & -- & 0.894 / 0.887 \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \subsection{When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation}\label{sec:jscc_aware}
 

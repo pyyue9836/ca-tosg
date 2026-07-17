@@ -211,3 +211,13 @@ narrative-flip VIOLATION found; these are consistency touch-ups, recorded with s
 ## LDPC-half currency claim (threshold captures most) stays; "matches" (= equal) must not survive next to the
 ## headline's "Pareto-dominates". intro(L34/70)/conclusion(L902+): no residual old-conclusion hit (currency
 ## framing only). Scan scope = full main.tex; recorded per the reverse-dependency-scan rule.
+
+## ITEM 6 SPECS (2026-07-17):
+- DENOMINATOR (cue payload saving): 0.03066 Msym / RF-deployed 0.2509 = 12.2% ~ 12% (a7_cue_value_v3). Unify
+  all four "~12%" sites: body (L70/L381/L715) = "of the selector's deployed channel use" (full denominator,
+  ONE definition, others reference); abstract (L34) stays terse = "~12% lower channel use". No "~10%" anywhere.
+- MECHANISM-TRANSPARENT WORDING (new landmine): Full payload 0.2399 < Channel-only 0.2706 because perception
+  cues make the selector pick the low-payload action (L) MORE OFTEN -- nothing is compressed. Transitive
+  "cues cut/save/reduce/buy payload" invites "how does a cue reduce bits?". Use: "with perception cues the
+  selector selects the low-payload action more often, lowering deployed channel use by ~12% at equal F1."
+  grep {cut, save, reduce, buy} x {payload, channel use, bandwidth} across the block; reconcile hits.
