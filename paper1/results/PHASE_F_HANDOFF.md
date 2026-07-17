@@ -241,3 +241,14 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## attribution). Each conclusion number's label: AP +0.07 = Culver-City (validate +0.026, test comparable);
 ## hard +0.090 = test (a2 reliable Hard, validate +0.035, CI [+0.083,+0.096]); JSCC +0.027 = AWGN/test,
 ## +0.022 = Rayleigh/test (two_regime_edge_v3). Every final-gate diff hunk maps to a checklist/HANDOFF line.
+
+## GAMMA-MECHANISM RAYLEIGH=OFDM BIT-IDENTITY -- NECESSITY PROVEN (2026-07-17, 3rd application of "a perfect
+## number must self-prove its necessity", after identity max|err|=0 and the L-frame identity). delta_F1
+## Rayleigh -0.0105 == OFDM -0.0105 to 4 dp; per-frame realised-eff max|diff| (Rayleigh vs OFDM, Perception+
+## gamma, 200 real) = 1.7e-16 (floating zero) -> STRUCTURAL, not a copy/index bug. Root: rayleigh frame-BLER
+## == 1.0 at every 0-20 dB grid point; ofdm interpolates to 1.0 across [0,20] (its <1 grid points are ABOVE
+## 20 dB) -> eff_C16 = comp*(1-b)+ego*b = ego EXACTLY on BOTH channels -> identical requests (frac_C16
+## channel-invariant) x identical delivery -> identical per-frame outcome -> delta bit-identical NECESSARILY.
+## The gamma sentence's "-0.011 on both Rayleigh and OFDM" is therefore a structural statement. My earlier
+## equal-weight OFDM~-0.004 guess was a non-source arithmetic expectation (aggregate F1 is not stratum-linear);
+## the measured -0.0105 stands.
