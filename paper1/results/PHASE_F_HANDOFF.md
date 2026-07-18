@@ -285,3 +285,18 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
   fig_feature_importance (feature_importance_v3, c_t-dominant), fig_difficulty (a2_difficulty_reliable_v3),
   fig_payload_rayleigh, fig_decisions/fig_stacked_area (rho_L v3). Each: commit w/ gen-script+input; visual
   inspection is the FINAL-GATE human task (I regenerate + verify data source, not visual quality).
+
+## A-CLASS PROGRESS (2026-07-18): 3 figures done, each with a figure-text number cross-read (execution-side
+## pre-check; visual/layout is the final-gate human task):
+- fig_pareto_test (TEST): plot_pareto_payload, corrected payloads; annotation (0.495,0.826)=Fixed-C256 test F1
+  (policy_v3/pareto_points), same source as curve. [OK]
+- fig_payload_awgn (VALIDATE, FLAG-resolved): same split as its item-7 prose; 14dB rho_L 0.370 -> payload
+  0.632 == prose 0.633; B_L 0.024 / B_C 0.990 == prose. [OK]
+- fig_feature_importance (v3): IN v2 -> results/feature_importance_v3.csv; top-2 channel_is_rayleigh 0.349 /
+  est_snr_db 0.275, subtotal 0.6245=62.4% == §Features (c_t-dominant); caption states fact only, mechanism in
+  §Features prose (one-root-two-pointers, spec c). [OK]
+## REMAINING A-class: fig:ap_snr (plot_ap_snr -> true_e2e_global_v3 validate; caption per the new per-SNR
+## narrative, spec b), fig:two_regime (test, split moved), fig_difficulty (a2_difficulty_reliable_v3),
+## fig_payload_rayleigh (flat at L=0.024; generator lacks a payload_rayleigh() -- add or confirm), fig_decisions
+## / fig_stacked_area (rho_L v3), fig_channel_codec_ap (Figure A 9-panel, if not already v3). Each: gen-script +
+## input id in commit, figure-text cross-read, then final-gate visual inspection (+ "payload source" column).

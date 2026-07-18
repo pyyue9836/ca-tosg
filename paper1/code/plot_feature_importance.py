@@ -16,9 +16,9 @@ _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 import paper_style as _ps; _ps.apply()
 import pandas as pd
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-IN = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2/feature_importance_full.csv')
-OUT_DIR = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v4_figures')
+P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+IN = os.path.join(P1, 'results/feature_importance_v3.csv')      # v3: c_t (channel_is_rayleigh) 0.349 dominant
+OUT_DIR = os.path.join(P1, 'paper/figures')
 
 
 def main():
