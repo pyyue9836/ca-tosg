@@ -52,6 +52,7 @@ def _first_existing(*paths):
 # Data lives in results/ in the clean ca-tosg repo, and in gs_rerun/ in the OpenCOOD
 # working tree. Resolve whichever exists so one script serves both layouts.
 TRUE_E2E = _first_existing(
+    os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv'),  # v3: matches the item-7 section
     os.path.join(P1, 'results/true_e2e_global_validate.csv'),
     os.path.join(P1, 'gs_rerun/true_e2e_global_validate.csv'))
 JSCC_DIR = _first_existing(

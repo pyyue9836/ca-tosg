@@ -300,3 +300,20 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## fig_payload_rayleigh (flat at L=0.024; generator lacks a payload_rayleigh() -- add or confirm), fig_decisions
 ## / fig_stacked_area (rho_L v3), fig_channel_codec_ap (Figure A 9-panel, if not already v3). Each: gen-script +
 ## input id in commit, figure-text cross-read, then final-gate visual inspection (+ "payload source" column).
+
+## A-CLASS status update (2026-07-18):
+- 0.632 pinned: item-7 payload prose 0.633 -> 0.632 (single rule: from CSV rho_L 0.370202 EXACT, then 3dp;
+  0.633 came from the rounded-rho path). Figure and prose now identical, "~" removed.
+- Figure A (fig_channel_codec_ap): generator has NO hardcoded payload (AP-only, ref lines 0.922/0.919/0.735)
+  -> NO-OP; the frozen-caliber approval carries (no regen -> no re-verify).
+- fig_difficulty: NO-OP -- fig_difficulty.pdf (2026-07-13) co-generated with a2_difficulty_reliable_v3.csv
+  (same date), already v3.
+- fig_feature_importance: DONE (v3, c_t-dominant, cross-read pass).
+- fig:ap_snr: plot_ap_snr TRUE_E2E repointed -> true_e2e_v3/..._validate; JSCC/LDPC baseline source (JSCC_DIR
+  = results/ap_vs_snr or gs_rerun) NEEDS v3 verification before regen (the reframed narrative -- JSCC ~0.71,
+  LDPC-16 -> 0.917 crossing -- depends on the baseline curves being v3; v3 baseline data is in
+  jscc_v3/channel_codec_ap_v3_validate). NOT yet regenerated.
+- STILL TODO (data-source plumbing, each a real fix): fig:two_regime (make_two_regime_figure reads VAL_CSV ->
+  move to test per item-9 A + split-dependence caption consistency), fig_decisions (snr_decision_plot reads
+  runs/v2 + PAYLOAD 1.98/4 -> v3 + payload fix), fig_stacked_area (plot_stacked_area reads runs/v2/snr_sweep
+  -> v3), fig_payload_rayleigh (no generator found -- add, flat at L=0.024, or confirm superseded).
