@@ -93,3 +93,11 @@ DEPRECATED FIGURE (2026-07-18): fig_payload_rayleigh.pdf -- historical orphan (n
 provenance) rendering a zero-information flat line at B_L=0.024. Deleted from the manuscript (ruling b): its
 one-sentence content (selector holds L under Rayleigh -> payload = B_L) is carried by prose L429 + tab:true_e2e
 + the fig:payload_snr caption pointer. fig:payload_snr is now a single AWGN figure. Do not re-include.
+
+DEPRECATED (2026-07-18, fig:ap_snr -> AP@0.5 only, ruling c): (i) fig_ap70_awgn.pdf / fig_ap70_rayleigh.pdf
+-- ap70 panels dropped (no v3 LDPC ap70 baseline exists; ap70 is isomorphic to ap50 and AP@0.5 is the
+manuscript's anchor). (ii) gs_rerun/figure_rebuild/jscc_global/*_summary.csv -- the OLD V2 baseline source
+(JSCC ~0.80, LDPC not reaching the ceiling); plot_ap_snr now reads the v3 CSVs (jscc_ap_f1_v3 for JSCC,
+channel_codec_ap_v3 for LDPC). (iii) jscc_ap_f1_v3's ap70 COLUMN is intentionally KEPT in the CSV -- data
+closure: if a reviewer asks about the stricter threshold, the rebuttal has an anchor even though the figure
+does not plot it.

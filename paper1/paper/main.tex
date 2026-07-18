@@ -410,15 +410,13 @@ Fig.~\ref{fig:qualitative} gives a qualitative view of the subset of frames on w
 
 \subsection{Detection Performance versus SNR}
 
-Fig.~\ref{fig:ap_snr} reports AP@0.5 and AP@0.7 under AWGN and Rayleigh, comparing \method{} with the fixed object-level baseline, ImportanceMapJSCC~\cite{sheng2024importance}, LDPC + 16/256-QAM separate coding, and the perfect-channel feature-level ceiling. All curves are scored under the global-sort AP protocol used throughout the paper.
+Fig.~\ref{fig:ap_snr} reports AP@0.5 under AWGN and Rayleigh, comparing \method{} with the fixed object-level baseline, ImportanceMapJSCC~\cite{sheng2024importance}, LDPC + 16/256-QAM separate coding, and the perfect-channel feature-level ceiling. All curves are scored under the global-sort AP protocol used throughout the paper.
 
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.48\textwidth]{fig_ap50_awgn.pdf}
-    \includegraphics[width=0.48\textwidth]{fig_ap50_rayleigh.pdf} \\
-    \includegraphics[width=0.48\textwidth]{fig_ap70_awgn.pdf}
-    \includegraphics[width=0.48\textwidth]{fig_ap70_rayleigh.pdf}
-    \caption{Detection performance versus SNR under AWGN and Rayleigh channels, scored under the global-sort AP protocol. \method{} (purple stars) holds the object-level message $L$ at low SNR and, once the LDPC + 16-QAM threshold is crossed near $12$~dB, activates the attentive-compression feature branch and climbs toward the perfect-channel feature-level ceiling (grey dashed). Under Rayleigh fading the selector stays on the conservative $L$ policy, matching Fixed $L$ across the whole range. The ImportanceMapJSCC baseline sits well below Fixed $L$ at all SNR, while the LDPC + QAM baselines rise from the ego-only floor to the feature-level ceiling once past their decoding thresholds; fixed feature-level transmission of this payload is thus dominated by object-level communication \emph{on a channel-averaged basis}---the low-SNR cliff outweighs the high-SNR gain---unless the selector gates it per frame.}
+    \includegraphics[width=0.48\textwidth]{fig_ap50_rayleigh.pdf}
+    \caption{AP@0.5 versus SNR under AWGN and Rayleigh channels, scored under the global-sort AP protocol. \method{} (purple stars) holds the object-level message $L$ at low SNR and, once the LDPC + 16-QAM threshold is crossed near $12$~dB, activates the attentive-compression feature branch and climbs toward the perfect-channel feature-level ceiling (grey dashed). Under Rayleigh fading the selector stays on the conservative $L$ policy, matching Fixed $L$ across the whole range. The ImportanceMapJSCC baseline sits well below Fixed $L$ at all SNR, while the LDPC + QAM baselines rise from the ego-only floor to the feature-level ceiling once past their decoding thresholds; fixed feature-level transmission of this payload is thus dominated by object-level communication \emph{on a channel-averaged basis}---the low-SNR cliff outweighs the high-SNR gain---unless the selector gates it per frame.}
     \label{fig:ap_snr}
 \end{figure*}
 

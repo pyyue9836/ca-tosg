@@ -55,17 +55,24 @@ TRUE_E2E = _first_existing(
     os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv'),  # v3: matches the item-7 section
     os.path.join(P1, 'results/true_e2e_global_validate.csv'),
     os.path.join(P1, 'gs_rerun/true_e2e_global_validate.csv'))
-JSCC_DIR = _first_existing(
-    os.path.join(P1, 'results/ap_vs_snr'),
-    os.path.join(P1, 'gs_rerun/figure_rebuild/jscc_global'))
+# v3 baseline sources (the old gs_rerun/figure_rebuild summaries are V2 -- JSCC ~0.80, LDPC not reaching the
+# ceiling -- and would re-render the narrative item-7 replaced; read the v3 CSVs instead). AP@0.5 only:
+# channel_codec_ap_v3 is ap50-only (no ap70 baseline exists), so fig:ap_snr is an AP@0.5 figure.
+JSCC_V3 = os.path.join(P1, 'results/jscc_v3/jscc_ap_f1_v3.csv')            # JSCC baseline (has ap50 + ap70)
+CODEC_V3 = os.path.join(P1, 'results/jscc_v3/channel_codec_ap_v3_validate.csv')  # LDPC-16/256 baseline (ap50)
+_CODEC = {'ldpc16': 'LDPC-16', 'ldpc256': 'LDPC-256'}
 
-METRICS = {'ap50': ('ap_05', 'ap50', 'AP@0.5'),   # (jscc col, true_e2e col, label)
-           'ap70': ('ap_07', 'ap70', 'AP@0.7')}
+METRICS = {'ap50': ('ap50', 'ap50', 'AP@0.5')}   # (baseline col, true_e2e col, label) -- AP@0.5 only
 
 
 def jscc_csv(channel, scheme):
-    p = os.path.join(JSCC_DIR, '%s_%s_summary.csv' % (channel, scheme))
-    return pd.read_csv(p).sort_values('snr_db')
+    if scheme == 'jscc':
+        d = pd.read_csv(JSCC_V3)
+        d = d[(d['channel'] == channel) & (d['split'] == 'validate')].copy()
+    else:
+        d = pd.read_csv(CODEC_V3)
+        d = d[(d['channel'] == channel) & (d['codec'] == _CODEC[scheme])].copy()
+    return d.sort_values('snr_db')      # both carry an 'ap50' column
 
 
 def main():
