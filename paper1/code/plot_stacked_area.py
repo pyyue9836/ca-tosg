@@ -14,8 +14,20 @@ _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
 import paper_style as _ps; _ps.apply()
 import pandas as pd
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT_DIR = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v4_figures')
+P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(P1, 'paper/figures')
+V3 = os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv')  # deployed selector rho_L per SNR
+
+
+def _v3_shares(channel):
+    d = pd.read_csv(V3)
+    d = d[(d.policy == 'CA-TOSG') & (d.channel == channel)].copy()
+    d['snr_db'] = pd.to_numeric(d['snr_db']); d = d.sort_values('snr_db')
+    d['rf_frac_L'] = d['rho_L']
+    d['rf_frac_C16'] = 1.0 - d['rho_L']          # feature action = C16 (selector never requests C256)
+    d['rf_frac_C256'] = 0.0                       # C256 = 0 at the deployed point; assert -- premise, not comment
+    assert (d['rf_frac_C256'] == 0).all(), 'C256 share must be 0 (selector never requests C256); rho_C16=1-rho_L premise'
+    return d
 
 
 def plot_side(ax, df, title):
@@ -35,8 +47,8 @@ def plot_side(ax, df, title):
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    df_a = pd.read_csv(os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2/snr_sweep_awgn.csv'))
-    df_r = pd.read_csv(os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2/snr_sweep_rayleigh.csv'))
+    df_a = _v3_shares('awgn')                     # v3: derived from true_e2e_v3 rho_L (C256 layer drawn = zero)
+    df_r = _v3_shares('rayleigh')
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3.6), sharey=True)
     plot_side(ax1, df_a, 'AWGN')
