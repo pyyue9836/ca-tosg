@@ -22,13 +22,12 @@ import numpy as np
 import pandas as pd
 
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-RUN_DIR = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2')
-DATASET = os.path.join(RUN_DIR, 'dataset.csv')
-BLER_CSV = os.path.join(REPO,
-                       'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv')
+P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(P1, 'paper/figures')
+SEL = os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv')  # deployed selector rho_L per SNR
+ORC = os.path.join(P1, 'results/step4_oracle_action_dist_v3.csv')             # oracle frac_{L,C16,C256} per SNR
 
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}      # rate-1/2 coded channel-use (unused after v3 rewire)
 SNR_GRID = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20], dtype=float)
 ACTIONS = ['L', 'C16', 'C256']
 COLOURS = {'L': 'tab:green', 'C16': 'tab:blue', 'C256': 'tab:orange'}
@@ -161,28 +160,37 @@ def plot_payload(df_sw, channel, save_path):
     fig.savefig(save_path.replace('.png', '.pdf'))
 
 
+def _v3_sweep(channel):
+    # v3 rewire: read the selector's rho_L (true_e2e_v3) and the oracle's action fracs (step4_oracle_action_
+    # dist_v3), NO recompute. SNR-grid alignment = INTERSECTION only, NEVER interpolate -- rf_frac/oracle_frac
+    # are discrete action shares; an interpolated share is an unsourced number. selector grid
+    # {0,8,12,14,16,20} is a subset of the oracle grid {0,2,...,20}, so the intersection is the 6 selector
+    # points and covers 0--20 dB (no axis shrink). rf_frac_C16 = 1-rho_L, rf_frac_C256 = 0 (asserted).
+    sel = pd.read_csv(SEL); sel = sel[(sel.policy == 'CA-TOSG') & (sel.channel == channel)].copy()
+    sel['snr_db'] = pd.to_numeric(sel['snr_db'])
+    orc = pd.read_csv(ORC); orc = orc[(orc.split == 'validate') & (orc.channel == channel)].copy()
+    snrs = sorted(set(sel['snr_db']) & set(orc['snr_db']))          # intersection, no interpolation
+    rows = []
+    for s in snrs:
+        rl = float(sel[sel['snr_db'] == s]['rho_L'].iloc[0]); o = orc[orc['snr_db'] == s].iloc[0]
+        rows.append(dict(snr_db=s, rf_frac_L=rl, rf_frac_C16=1.0 - rl, rf_frac_C256=0.0,
+                         oracle_frac_L=float(o['frac_L']), oracle_frac_C16=float(o['frac_C16']),
+                         oracle_frac_C256=float(o['frac_C256'])))
+    df = pd.DataFrame(rows).sort_values('snr_db')
+    assert (df['rf_frac_C256'] == 0).all(), 'selector C256 share must be 0 (never requested at the deployed point)'
+    return df
+
+
 def main():
-    df = pd.read_csv(DATASET)
-    bler_df = pd.read_csv(BLER_CSV)
-    with open(os.path.join(RUN_DIR, 'rf_full.pkl'), 'rb') as f:
-        rf = pickle.load(f)
-    feat_cols = list(rf.feature_names_in_)
-    print('feature cols (%d):' % len(feat_cols))
-    for c in feat_cols: print(' ', c)
-
+    os.makedirs(OUT_DIR, exist_ok=True)
     for ch in ('awgn', 'rayleigh'):
-        sw = sweep(df, rf, feat_cols, bler_df, ch)
-        sw.to_csv(os.path.join(RUN_DIR, 'snr_sweep_%s.csv' % ch), index=False)
-        print('\n%s sweep:' % ch.upper())
-        cols = ['snr_db'] + ['rf_frac_' + a for a in ACTIONS] + \
-               ['rf_f1', 'oracle_f1', 'rf_pay']
-        print(sw[cols].round(3).to_string(index=False))
-        plot_decisions(sw, ch,
-                       os.path.join(RUN_DIR, 'fig_decisions_%s.png' % ch))
-        plot_f1(sw, ch, os.path.join(RUN_DIR, 'fig_f1_%s.png' % ch))
-        plot_payload(sw, ch, os.path.join(RUN_DIR, 'fig_payload_%s.png' % ch))
+        sw = _v3_sweep(ch)
+        print('\n%s sweep (v3, intersection grid %s):' % (ch.upper(), list(sw['snr_db'])))
+        print(sw.round(3).to_string(index=False))
+        plot_decisions(sw, ch, os.path.join(OUT_DIR, 'fig_decisions_%s.png' % ch))  # only fig_decisions is
+        # used in main.tex; fig_f1 is not a manuscript figure and fig_payload comes from plot_pareto_payload.
 
-    print('\nwrote 6 figures to', RUN_DIR)
+    print('wrote fig_decisions_{awgn,rayleigh} to', OUT_DIR)
 
 
 if __name__ == '__main__':
