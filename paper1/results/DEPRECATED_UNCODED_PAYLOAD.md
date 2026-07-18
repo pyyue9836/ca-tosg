@@ -68,3 +68,15 @@ LEDGER SYNONYM-FAMILY RULE: a claim fingerprint is stored as a WORD-FAMILY regex
 (RF|selector|policy ; matches|suffices|equals ; threshold|tau ; cut|save|reduce|buy). Incomplete surface
 coverage = half a fingerprint. Term-grep reserved words (fallback, codebook) are synonym seeds. ("matches the
 learned RF" missed "matches the learned selector" -> now a family.)
+
+REPLACEMENT PASSES THE SAME ANCHOR CHECK (supervisor 2026-07-18): after retiring an evaluative word, the
+replacement TEXT is subject to the identical CSV-anchor-or-delete rule -- retiring "easier" and swapping in
+"stronger/weaker" is not a retirement, just a synonym still running naked. Concrete: my L590 fix replaced
+"finds test scenes easier" with "detection stronger on test", turning an object-level-baseline LEVEL diff
+(Fixed-L AP 0.919/0.890/0.783) into a "detection difficulty" claim -- same disease, and 0.919 vs 0.890 as
+"stronger" is the +0.002-no-CI-no-direction mirror. Fix = state the three anchored numbers, Culver drop ->
+domain shift, no comparative. ALSO: the supervisor's pointer "AP 0.917 for validate" was the validate
+CEILING (0.9169), not the baseline (0.890) -- verified against true_e2e_global_v3 (pointer != source). Ledger
+family added: {stronger|weaker|better|worse} x (split|scene|test|domain). Evaluative-retirement fingerprints
+are STEM+WILDCARD (eas(y|ier) near split|scene|test), never a full phrase (the full-phrase "easier test
+split" missed "easier scene-disjoint test split" and "easy split").

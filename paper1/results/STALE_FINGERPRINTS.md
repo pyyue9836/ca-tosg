@@ -52,3 +52,5 @@ RX 15\.8
 RX 18\.4
 RX easier[a-z -]{0,25}(test|scene|split)
 RX easy split
+RX (stronger|weaker|better|worse)[a-z, -]{0,30}(split|scene|test|domain)
+RX eas(y|ier)[a-z -]{0,25}(test|scene|split)

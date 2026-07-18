@@ -247,7 +247,7 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## Rayleigh -0.0105 == OFDM -0.0105 to 4 dp; per-frame realised-eff max|diff| (Rayleigh vs OFDM, Perception+
 ## gamma, 200 real) = 1.7e-16 (floating zero) -> STRUCTURAL, not a copy/index bug. Root: rayleigh frame-BLER
 ## == 1.0 at every 0-20 dB grid point; ofdm interpolates to 1.0 across [0,20] (its <1 grid points are ABOVE
-## 20 dB) -> eff_C16 = comp*(1-b)+ego*b = ego EXACTLY on BOTH channels -> identical requests (frac_C16
+## 20 dB -- an independent anchor for the ~24 dB OFDM feasibility threshold, same source as the Figure A caption) -> eff_C16 = comp*(1-b)+ego*b = ego EXACTLY on BOTH channels -> identical requests (frac_C16
 ## channel-invariant) x identical delivery -> identical per-frame outcome -> delta bit-identical NECESSARILY.
 ## The gamma sentence's "-0.011 on both Rayleigh and OFDM" is therefore a structural statement. My earlier
 ## equal-weight OFDM~-0.004 guess was a non-source arithmetic expectation (aggregate F1 is not stratum-linear);
