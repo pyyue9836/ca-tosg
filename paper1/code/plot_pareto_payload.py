@@ -9,7 +9,7 @@ fig_pareto_test.pdf  <- results/policy_v3/pareto_points.csv (test rows, correcte
 
 fig_payload_awgn.pdf <- results/true_e2e_v3/true_e2e_global_v3_test.csv (AWGN CA-TOSG rows)
     Average channel-use-equivalent payload vs SNR under AWGN, from the deployed selector's
-    per-SNR rho_L: payload = rho_L*B_L + (1-rho_L)*B_C, B_L=0.024, B_C=0.495 (Fixed C16).
+    per-SNR rho_L: payload = rho_L*B_L + (1-rho_L)*B_C, B_L=0.024, B_C=0.99 (Fixed C16, rate-1/2).
     Global-sort true-e2e protocol, same selector md5 eb9358e9.
 
 Provenance is recorded in paper/figures/README.md (Figure provenance section).
