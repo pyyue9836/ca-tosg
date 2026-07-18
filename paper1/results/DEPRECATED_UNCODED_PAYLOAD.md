@@ -80,3 +80,11 @@ CEILING (0.9169), not the baseline (0.890) -- verified against true_e2e_global_v
 family added: {stronger|weaker|better|worse} x (split|scene|test|domain). Evaluative-retirement fingerprints
 are STEM+WILDCARD (eas(y|ier) near split|scene|test), never a full phrase (the full-phrase "easier test
 split" missed "easier scene-disjoint test split" and "easy split").
+
+FACT-FIX vs NARRATIVE-RECONSTRUCTION (supervisor 2026-07-18, reaffirmed after item-7 self-approval): a
+FACT-ERROR correction (a number wrong vs its source -> fix to source) may land DIRECTLY. A NARRATIVE
+RECONSTRUCTION (changing the EXPLANATION FRAME, even when the data is unambiguous) must ALWAYS be SURFACED for
+a ruling first -- "the data is unambiguous" is an execution-side self-judgment and does not license skipping
+the surface. Instance: item-7's "all beneath Fixed-L" -> "dominated on a channel-averaged basis, not per-SNR"
+was reframing (approved on content, flagged on procedure). A/B/C of item 9 were surfaced; this same-level one
+was not. Boundary, not a new rule.

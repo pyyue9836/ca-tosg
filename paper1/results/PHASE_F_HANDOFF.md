@@ -270,3 +270,18 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## *** Dense block (items 6-11) COMPLETE. fig regens (fig:ap_snr, fig:two_regime, fig_pareto, fig_payload,
 ## *** fig_feature_importance, fig_difficulty) are A-CLASS (figure regeneration, not .tex numbers) -> next.
 ## *** Then: 4-paragraph insertion (insertion protocol; C256 gate cleared) -> A-class -> diff -> final gate.
+
+## A-CLASS FIGURE REGEN (started 2026-07-18):
+- plot_pareto_payload.py (item-13 stale-hardcode generator) FIXED: B_C 1.98/4 -> 0.99; Fixed-C256 line
+  1.98/8 -> 0.495; pareto source results/pareto_points.csv -> results/policy_v3/pareto_points.csv; payload
+  source -> true_e2e_v3/true_e2e_global_v3_test.csv; annotation xy -> (0.495, 0.826); docstring updated. No
+  stale payload literal remains. REGENERATED fig_pareto_test + fig_payload_awgn (copied to ca-tosg).
+- FLAG (fig_payload split): the generator reads test (true_e2e_global_v3_test) but the AP-vs-SNR/payload
+  section (item 7) is VALIDATE -- confirm which split fig_payload should be (final-gate consistency).
+- Rayleigh row semantic CONFIRMED: tab:true_e2e Rayleigh 0.890 = fallback-to-L (rho_L col = 1.000; selector
+  holds L). Caption already states "the selector stays at the Fixed-L point" -> adequate, not coincidental.
+- REMAINING A-class generators (need v3 data + no stale payload, then regen + copy): fig:ap_snr (plot_ap_snr
+  -> true_e2e_global_v3, validate; + new per-SNR narrative in caption), fig:two_regime (-> test, split moved),
+  fig_feature_importance (feature_importance_v3, c_t-dominant), fig_difficulty (a2_difficulty_reliable_v3),
+  fig_payload_rayleigh, fig_decisions/fig_stacked_area (rho_L v3). Each: commit w/ gen-script+input; visual
+  inspection is the FINAL-GATE human task (I regenerate + verify data source, not visual quality).

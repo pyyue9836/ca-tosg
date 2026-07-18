@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """Two test-split figures, each read straight from a committed results CSV.
 
-fig_pareto_test.pdf  <- results/pareto_points.csv (test rows)
+fig_pareto_test.pdf  <- results/policy_v3/pareto_points.csv (test rows, corrected rate-1/2 payloads)
     Payload--F1 plane. Fixed L / C16 / C256, channel-blind EU policy (collapses to Fixed-L),
     channel-state-conditioned oracle, and CA-TOSG (RF, deployed). 200-realisation protocol,
     selector md5 eb9358e9 (see results/policy_recompute_PROVENANCE.txt).
 
-fig_payload_awgn.pdf <- results/true_e2e_global_test.csv (AWGN CA-TOSG rows)
+fig_payload_awgn.pdf <- results/true_e2e_v3/true_e2e_global_v3_test.csv (AWGN CA-TOSG rows)
     Average channel-use-equivalent payload vs SNR under AWGN, from the deployed selector's
     per-SNR rho_L: payload = rho_L*B_L + (1-rho_L)*B_C, B_L=0.024, B_C=0.495 (Fixed C16).
     Global-sort true-e2e protocol, same selector md5 eb9358e9.
@@ -26,7 +26,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__)); P1 = os.path.dirname(HERE)
 RES = os.path.join(P1, 'results'); FIG = os.path.join(P1, 'paper/figures')
-B_L, B_C = 0.024, 1.98 / 4.0            # object-level; Fixed C16 channel-use payload
+B_L, B_C = 0.024, 0.99                   # object-level; Fixed C16 channel-use payload (rate-1/2: 1.98/(0.5*4))
 
 
 def save(fig, stem):
@@ -36,7 +36,7 @@ def save(fig, stem):
 
 
 def pareto_test():
-    df = pd.read_csv(os.path.join(RES, 'pareto_points.csv'))
+    df = pd.read_csv(os.path.join(RES, 'policy_v3', 'pareto_points.csv'))  # corrected rate-1/2 payloads
     d = df[df.split == 'test']
     style = {
         'Fixed L': ('s', PS.C_L), 'Fixed C16': ('^', PS.C_C16),
@@ -55,7 +55,7 @@ def pareto_test():
     ax.set_xlabel('Average payload (Mbit/frame, log scale)')
     ax.set_ylabel('Mean realised F1'); ax.set_title('OPV2V test', fontsize=9)
     ax.grid(True, alpha=0.3, which='both')
-    ax.annotate('fixed feature-level\npolicies are dominated', xy=(0.495, 0.431),
+    ax.annotate('fixed feature-level\npolicies are dominated', xy=(0.495, 0.826),
                 xytext=(0.11, 0.30), fontsize=7, color='0.3',
                 arrowprops=dict(arrowstyle='->', color='0.5', lw=0.8))
     ax.legend(fontsize=6.8, loc='center left', bbox_to_anchor=(1.01, 0.5), framealpha=0.95)
@@ -63,7 +63,7 @@ def pareto_test():
 
 
 def payload_awgn():
-    df = pd.read_csv(os.path.join(RES, 'true_e2e_global_test.csv'))
+    df = pd.read_csv(os.path.join(RES, 'true_e2e_v3', 'true_e2e_global_v3_test.csv'))  # corrected v3 source
     d = df[(df.policy == 'CA-TOSG') & (df.channel == 'awgn')].copy()
     d['snr_db'] = pd.to_numeric(d['snr_db']); d = d.sort_values('snr_db')
     pay = d['rho_L'] * B_L + (1 - d['rho_L']) * B_C
@@ -71,7 +71,7 @@ def payload_awgn():
     ax.plot(d['snr_db'], pay, 'o-', color=PS.C_OURS, lw=2, ms=6, label='CA-TOSG (deployed)')
     ax.axhline(B_L, color=PS.C_L, ls='-.', lw=1.3, label='Fixed $L$ = %.3f' % B_L)
     ax.axhline(B_C, color=PS.C_C16, ls=':', lw=1.3, label='Fixed $C_{16}$ = %.3f' % B_C)
-    ax.axhline(1.98 / 8.0, color=PS.C_C256, ls=':', lw=1.1, label='Fixed $C_{256}$ = %.3f' % (1.98 / 8.0))
+    ax.axhline(0.495, color=PS.C_C256, ls=':', lw=1.1, label='Fixed $C_{256}$ = %.3f' % 0.495)
     ax.set_yscale('log'); ax.set_xlim(-1, 21); ax.set_xticks([0, 4, 8, 12, 16, 20])
     ax.set_xlabel('Estimated SNR (dB)')
     ax.set_ylabel('Mean payload (Mbit channel-use eq., log)')
