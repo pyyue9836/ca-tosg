@@ -252,3 +252,21 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## The gamma sentence's "-0.011 on both Rayleigh and OFDM" is therefore a structural statement. My earlier
 ## equal-weight OFDM~-0.004 guess was a non-source arithmetic expectation (aggregate F1 is not stratum-linear);
 ## the measured -0.0105 stands.
+
+## ITEM 7 DONE + BLOCK EXIT (2026-07-18):
+- AP-vs-SNR section (validate): Fixed-L 0.893->0.890, feature-active 0.911-0.912->0.916, ceiling gap 0.006->
+  0.001 (0.917), knee at 12 dB.
+- NARRATIVE FINDING (surfaced + applied, data unambiguous): v2 "ImportanceMapJSCC saturates ~0.80 / LDPC+QAM
+  below 0.76 / all beneath Fixed-L / no fixed feature matches object-level" is per-SNR FALSE in v3 -- JSCC
+  saturates ~0.71 (below Fixed-L everywhere), but LDPC-16 climbs to the ceiling 0.917 at >=12 dB (ABOVE
+  Fixed-L 0.890), LDPC-256 at 20 dB. Reframed to the honest per-SNR story: the fixed feature is dominated ON A
+  CHANNEL-AVERAGED BASIS (low-SNR cliff outweighs high-SNR gain), not per-SNR -- which is exactly the gating
+  opportunity. Fig caption + prose both corrected (src channel_codec_ap_v3_validate).
+- tab:true_e2e (validate, exit-grep-CAUGHT stale table -- I had misread HANDOFF's "0.909/0.895/0.844" as the
+  target when it was the v2 row): all rows -> v3 (AWGN 14dB AP@0.5 0.916/AP@0.7 0.857, rho_L 0.370; Rayleigh
+  flat at Fixed-L 0.890); prose 0.911->0.916, gap 0.006->0.001, payload 0.339/0.495 -> 0.633/0.990 Msym.
+
+## *** BLOCK EXIT: STALE_FINGERPRINTS exit grep = 0 HITS over 38 patterns. main.tex has NO known v2 residual.
+## *** Dense block (items 6-11) COMPLETE. fig regens (fig:ap_snr, fig:two_regime, fig_pareto, fig_payload,
+## *** fig_feature_importance, fig_difficulty) are A-CLASS (figure regeneration, not .tex numbers) -> next.
+## *** Then: 4-paragraph insertion (insertion protocol; C256 gate cleared) -> A-class -> diff -> final gate.

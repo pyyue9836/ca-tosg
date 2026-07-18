@@ -418,11 +418,11 @@ Fig.~\ref{fig:ap_snr} reports AP@0.5 and AP@0.7 under AWGN and Rayleigh, compari
     \includegraphics[width=0.48\textwidth]{fig_ap50_rayleigh.pdf} \\
     \includegraphics[width=0.48\textwidth]{fig_ap70_awgn.pdf}
     \includegraphics[width=0.48\textwidth]{fig_ap70_rayleigh.pdf}
-    \caption{Detection performance versus SNR under AWGN and Rayleigh channels, scored under the global-sort AP protocol. \method{} (purple stars) holds the object-level message $L$ at low SNR and, once the LDPC + 16-QAM threshold is crossed near $12$~dB, activates the attentive-compression feature branch and climbs toward the perfect-channel feature-level ceiling (grey dashed). Under Rayleigh fading the selector stays on the conservative $L$ policy, matching Fixed $L$ across the whole range. The learned ImportanceMapJSCC and LDPC + QAM feature baselines all sit well below Fixed $L$, showing that fixed feature-level transmission of this payload is strictly dominated by object-level communication unless the selector gates it.}
+    \caption{Detection performance versus SNR under AWGN and Rayleigh channels, scored under the global-sort AP protocol. \method{} (purple stars) holds the object-level message $L$ at low SNR and, once the LDPC + 16-QAM threshold is crossed near $12$~dB, activates the attentive-compression feature branch and climbs toward the perfect-channel feature-level ceiling (grey dashed). Under Rayleigh fading the selector stays on the conservative $L$ policy, matching Fixed $L$ across the whole range. The ImportanceMapJSCC baseline sits well below Fixed $L$ at all SNR, while the LDPC + QAM baselines rise from the ego-only floor to the feature-level ceiling once past their decoding thresholds; fixed feature-level transmission of this payload is thus dominated by object-level communication \emph{on a channel-averaged basis}---the low-SNR cliff outweighs the high-SNR gain---unless the selector gates it per frame.}
     \label{fig:ap_snr}
 \end{figure*}
 
-Under AWGN, \method{} sits on the Fixed $L$ line ($0.893$ AP@0.5) for SNR $\le 12$~dB and rises to $0.911$--$0.912$ AP@0.5 for SNR $\ge 14$~dB, within $0.006$~AP of the perfect-channel feature-level ceiling ($0.917$). The bandwidth panel (Section~\ref{sec:payload_snr}) reflects this transition with a step-shaped payload increase at the LDPC decoding threshold. Under Rayleigh, \method{} remains on Fixed $L$ across the entire SNR range; the residual deep-fade risk keeps the selector from activating the feature branch even at $20$~dB mean SNR. Throughout, the learned ImportanceMapJSCC baseline saturates near $0.80$ AP@0.5 and the LDPC + QAM baselines below $0.76$---all beneath the Fixed $L$ line---so no fixed feature-level policy matches object-level communication in the evaluated regime.
+Under AWGN, \method{} sits on the Fixed $L$ line ($0.890$ AP@0.5) for SNR $\le 8$~dB and rises to $0.916$ AP@0.5 for SNR $\ge 12$~dB, within $0.001$~AP of the perfect-channel feature-level ceiling ($0.917$). The bandwidth panel (Section~\ref{sec:payload_snr}) reflects this transition with a step-shaped payload increase at the LDPC decoding threshold. Under Rayleigh, \method{} remains on Fixed $L$ across the entire SNR range; the residual deep-fade risk keeps the selector from activating the feature branch even at $20$~dB mean SNR. The ImportanceMapJSCC baseline saturates near $0.71$ AP@0.5, well below Fixed $L$ at every SNR; the LDPC + QAM baselines sit at the ego-only floor ($0.61$) below their decoding thresholds and climb toward the feature-level ceiling only once the channel clears the cliff (LDPC + 16-QAM reaches $0.917$ at $\ge 12$~dB, crossing above Fixed $L$). No fixed feature-level policy beats object-level communication \emph{on a channel-averaged basis}---the low-SNR cliff outweighs the high-SNR gain---which is precisely the per-frame gating opportunity \method{} exploits by holding $L$ below the threshold and activating the feature above it.
 
 \subsection{Payload versus SNR}\label{sec:payload_snr}
 
@@ -568,20 +568,20 @@ Table~\ref{tab:e2e} reports the deployment-mode \emph{frame-level F1} aggregated
 \toprule
 Channel & SNR (dB) & $\rho_L$ & AP@0.5 & AP@0.7 \\
 \midrule
-AWGN     & 0.0  & 1.000 & 0.893 & 0.839 \\
-AWGN     & 8.0  & 1.000 & 0.893 & 0.839 \\
-AWGN     & 12.0 & 0.909 & 0.895 & 0.844 \\
-AWGN     & 14.0 & 0.331 & \textbf{0.911} & \textbf{0.865} \\
-AWGN     & 16.0 & 0.326 & 0.912 & 0.866 \\
-AWGN     & 20.0 & 0.362 & 0.912 & 0.867 \\
-Rayleigh & 0.0  & 1.000 & 0.893 & 0.839 \\
-Rayleigh & 10.0 & 1.000 & 0.893 & 0.839 \\
-Rayleigh & 20.0 & 0.998 & 0.893 & 0.839 \\
+AWGN     & 0.0  & 1.000 & 0.890 & 0.836 \\
+AWGN     & 8.0  & 0.984 & 0.890 & 0.835 \\
+AWGN     & 12.0 & 0.385 & 0.916 & 0.857 \\
+AWGN     & 14.0 & 0.370 & \textbf{0.916} & \textbf{0.857} \\
+AWGN     & 16.0 & 0.372 & 0.916 & 0.858 \\
+AWGN     & 20.0 & 0.439 & 0.917 & 0.857 \\
+Rayleigh & 0.0  & 1.000 & 0.890 & 0.836 \\
+Rayleigh & 10.0 & 1.000 & 0.890 & 0.836 \\
+Rayleigh & 20.0 & 1.000 & 0.890 & 0.836 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two observations support the central claim. First, the deployment-mode AP at AWGN $14$~dB reaches $0.911$ at IoU $0.5$ and $0.865$ at IoU $0.7$, sitting within $0.006$ AP of the perfect-channel reference of the underlying attentive-compression model ($0.917$, see Section~\ref{sec:headline}). The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, while paying only $0.339$~Mbit/frame instead of $0.495$. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
+Two observations support the central claim. First, the deployment-mode AP at AWGN $14$~dB reaches $0.916$ at IoU $0.5$ and $0.857$ at IoU $0.7$, sitting within $0.001$ AP of the perfect-channel reference of the underlying attentive-compression model ($0.917$, see Section~\ref{sec:headline}). The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, while paying only $0.633$~Msym/frame at this operating point instead of the $0.990$ of always-on Fixed $C_{16}$. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
 
 \subsection{Generalisation to OPV2V Test and Culver-City Splits}\label{sec:generalisation}
 
