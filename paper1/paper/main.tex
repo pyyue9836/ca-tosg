@@ -718,7 +718,7 @@ Pareto-dominates the best threshold at matched channel use (frame-level $95\%$ C
 zero)---and is paid mainly in \emph{bandwidth}: the $21$ ego-side perception cues add no
 significant aggregate F1 over channel state alone on this LDPC + QAM channel, yet cut channel
 use by ${\approx}12\%$ at matched F1. We attribute the small accuracy margin to the sharp SNR
-cliff, which makes the estimated SNR a near-sufficient statistic for the decision. What the granularity \emph{policy}
+cliff, which makes channel state a near-sufficient statistic for the decision. What the granularity \emph{policy}
 adds over object-level communication is nonetheless frame-selective: on
 hard frames under a reliable channel (Section~\ref{sec:difficulty}) its gain over
 Fixed~$L$ reaches $+0.090$ F1. We
@@ -735,7 +735,7 @@ threshold's $0.303$).
 \subsection{When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation}\label{sec:jscc_aware}
 
 Section~\ref{sec:threshold} established that under LDPC + QAM the estimated SNR is a
-near-sufficient statistic, so a one-line threshold matches the learned selector. This
+near-sufficient statistic, so a one-line threshold closely tracks the learned selector. This
 raises the sharper question that decides whether \emph{task}-oriented cues are needed at
 all: does that equivalence survive a feature codec \emph{without} a sharp SNR cliff? We
 answer it directly by replacing the LDPC + QAM feature branch with importance-map
@@ -753,16 +753,26 @@ estimated SNR carries almost no information about whether a feature message will
 a given frame.
 
 This flips the selector comparison (Fig.~\ref{fig:two_regime}(b), Table~\ref{tab:two_regime}).
-We evaluate both codecs on the \emph{same} $1{,}000$ validate frames under the identical
+We evaluate both codecs on the \emph{same} $2{,}170$ test frames under the identical
 $200$-seed protocol, and report the \emph{edge} of the learned selector over the best
 SNR-threshold rule---where the threshold is even granted an oracle-tuned $\tau$ on the
-evaluation frames. Under LDPC + QAM the edge is $+0.002$ F1 ($95\%$ CI $[-0.001,+0.006]$),
-\emph{not} significant: the threshold suffices, reproducing Section~\ref{sec:threshold}.
-Under JSCC the best SNR threshold collapses to the Fixed-$L$ operating point---it cannot
-gate on an uninformative SNR---and only the cue-based selector extracts the content-driven
-gain: the edge is $+0.017$ F1 ($[+0.012,+0.022]$) under AWGN, $+0.015$
-($[+0.011,+0.020]$) under Rayleigh, and $+0.015$ ($[+0.011,+0.019]$) under OFDM, all
-significant.
+evaluation frames. Evaluated on the frozen test split, under LDPC + QAM the edge is $+0.005$ F1 ($95\%$ CI
+$[+0.004,+0.006]$): small, and---as the feature ablation shows---not attributable to the
+perception cues, which add no F1 over channel state alone (Section~\ref{sec:ablation}); it
+is the margin of a learned selector over even an oracle-tuned single threshold.\footnote{This
+per-frame edge over an oracle-tuned threshold ($+0.005$) is distinct from, and must not be
+conflated with, two other LDPC-regime quantities: the feature-ablation gain of the cues
+(Full vs.\ channel-state-only, $-0.0002$, Section~\ref{sec:ablation}) and the matched-payload
+Pareto margin over the retuned threshold ($+0.0005$, Section~\ref{sec:headline}). The three
+measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively;
+the ordering $-0.0002 < +0.0005 < +0.005$ is itself informative.} Under JSCC the best SNR
+threshold collapses to the Fixed-$L$ operating point---it cannot gate on an uninformative
+SNR---and the edge widens to $+0.027$ F1 ($[+0.024,+0.029]$) under AWGN, $+0.022$
+($[+0.020,+0.025]$) under Rayleigh, and $+0.025$ ($[+0.023,+0.028]$) under OFDM (all
+significant): a gain not attainable by SNR thresholding alone.\footnote{The JSCC edge is
+split-dependent (test $+0.027$, validate $+0.004$ under AWGN): on validate the Fixed-$L$
+baseline already sits close to the selector's JSCC F1 ($0.907$ vs.\ $0.911$), leaving little
+to recover, whereas on test the selector reaches $0.928$ over a $0.901$ baseline.}
 
 The interpretation is the central message of this paper: \emph{whether task-oriented
 perception cues are needed for granularity selection is determined by the feature codec's
@@ -780,8 +790,8 @@ task-oriented selector this paper proposes.
     (AWGN): the LDPC + QAM feature has a cliff at $\approx 12$~dB (SNR informative),
     whereas the learned JSCC feature is flat at $\approx 0.86$ (SNR uninformative).
     \emph{(b)} Realised F1 of Fixed $L$, the best SNR-threshold rule, the learned selector
-    (\method), and the oracle, on the same $1{,}000$ validate frames under each feature
-    codec. Under LDPC the threshold matches \method; under JSCC the threshold collapses to
+    (\method), and the oracle, on the same $2{,}170$ test frames under each feature
+    codec. Under LDPC the threshold closely tracks \method; under JSCC the threshold collapses to
     Fixed $L$ and only \method{} captures the content-driven gain. Error bars are $95\%$
     CIs over $200$ seeds.}
     \label{fig:two_regime}
@@ -790,18 +800,19 @@ task-oriented selector this paper proposes.
 \begin{table}[t]
 \centering
 \caption{Learned-selector edge over the best (oracle-tuned) SNR-threshold rule on the
-same $1{,}000$ validate frames, $200$-seed protocol. The edge is insignificant under the
-LDPC cliff (SNR is a sufficient statistic) but significant under graceful JSCC (the
-perception cues become necessary).}
+same $2{,}170$ test frames, $200$-seed protocol. The edge is small under the
+LDPC cliff (the selector's function-form margin over a threshold, not a cue gain---the
+cues add no F1 there, Section~\ref{sec:ablation}) but $5$--$6{\times}$ larger under
+graceful JSCC, where an SNR threshold cannot reach it.}
 \label{tab:two_regime}
 \begin{tabular}{llc}
 \toprule
 Feature codec & Channel & Edge (RF $-$ threshold) F1 \\
 \midrule
-LDPC + QAM (cliff)      & AWGN     & $+0.002$~$[-0.001,+0.006]$ \\
-Importance-map JSCC     & AWGN     & $\mathbf{+0.017}$~$[+0.012,+0.022]$ \\
-Importance-map JSCC     & Rayleigh & $\mathbf{+0.015}$~$[+0.011,+0.020]$ \\
-Importance-map JSCC     & OFDM     & $\mathbf{+0.015}$~$[+0.011,+0.019]$ \\
+LDPC + QAM (cliff)      & AWGN     & $+0.005$~$[+0.004,+0.006]$ \\
+Importance-map JSCC     & AWGN     & $\mathbf{+0.027}$~$[+0.024,+0.029]$ \\
+Importance-map JSCC     & Rayleigh & $\mathbf{+0.022}$~$[+0.020,+0.025]$ \\
+Importance-map JSCC     & OFDM     & $\mathbf{+0.025}$~$[+0.023,+0.028]$ \\
 \bottomrule
 \end{tabular}
 \end{table}

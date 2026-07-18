@@ -255,3 +255,21 @@ narrative-flip VIOLATION found; these are consistency touch-ups, recorded with s
 ## ablation}"), does NOT restate -- argument-double-notation defence applies to the reconciliation sentence too.
 ## ITEM-6 #4 (same-reader): a7 RETRAINS per cut -> tab:ablation caption note added (per-cut retrained; deployed
 ## = Full, 0.909@0.251 vs per-cut Full 0.240 as separate instances). Resolved.
+
+## ITEM 9 DONE (2026-07-18, two-regime central-message section):
+- A (split): moved from "1000 validate frames" -> "2170 test frames" (currency +0.027 is test; validate JSCC
+  edge only +0.004). fig:two_regime caption now says test -> A-CLASS REGEN REQUIRED (figure still shows
+  validate data). Split-dependence acknowledged in a footnote (test +0.027 vs validate +0.004; anchored in
+  rf_f1/FixedL per split: validate 0.911/0.907, test 0.928/0.901).
+- B (JSCC cue anchor): no independent JSCC-domain cue ablation -> retreated to "not attainable by SNR
+  thresholding alone" (no cue-driven mechanism claim). Edges test: JSCC +0.027/+0.022/+0.025, LDPC +0.005.
+- B (LDPC now significant): v2 "insignificant, threshold suffices" -> "small (+0.005), the selector's
+  function-form margin, not a cue gain (cues add no F1, sec:ablation); ~6x smaller than the JSCC edge".
+- C (THREE "LDPC edge" values, three names, NEVER unify -- highest same-reader risk): footnote distinguishes
+  a7 -0.0002 (feature ablation, Full vs channel-only) / headline +0.0005 (matched-payload Pareto vs retuned
+  tau) / two-regime +0.005 (per-frame vs oracle-tuned tau); ordering -0.0002<+0.0005<+0.005 is informative.
+  Each site cites its name; ledger has the bare-quote fingerprint.
+- D: 5 residuals L738/L756/L778/L784/L802 reconciled ("matches/suffices"->"closely tracks/captures most";
+  table caption "insignificant"->"small"); grep matches/suffices/insignificant/+0.017 = 0.
+- L717 touchpoint: L721 "estimated SNR a near-sufficient statistic" -> "channel state a near-sufficient
+  statistic" (a7: Channel-only = SNR+type is what suffices, not SNR alone).

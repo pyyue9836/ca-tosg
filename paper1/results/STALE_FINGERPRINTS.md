@@ -54,3 +54,8 @@ RX easier[a-z -]{0,25}(test|scene|split)
 RX easy split
 RX (stronger|weaker|better|worse)[a-z, -]{0,30}(split|scene|test|domain)
 RX eas(y|ier)[a-z -]{0,25}(test|scene|split)
+RX \+0\.017.{0,15}(under|F1|jscc|AWGN)
+RX 1\{?,?\}?000 validate frames
+RX 0\.844
+RX 0\.895
+RX C-value = three-name distinction (a7 -0.0002 / Pareto +0.0005 / two-regime +0.005) -- see checklist
