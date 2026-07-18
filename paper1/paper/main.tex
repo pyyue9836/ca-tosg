@@ -428,13 +428,12 @@ Under AWGN, \method{} sits on the Fixed $L$ line ($0.890$ AP@0.5) for SNR $\le 8
 
 Fig.~\ref{fig:payload_snr} reports the average payload of each policy as a function of SNR. \method{} uses the $L$-payload of $0.024$~Mbit/frame across all SNRs under Rayleigh, and switches from $L$-payload to a near-$C_{16}$-payload at SNR $\approx 12$~dB under AWGN, matching the channel-aware oracle behaviour. The fixed-mode baselines are flat at their constant payload, providing the worst-case bandwidth reference.
 
-\begin{figure*}[t]
+\begin{figure}[t]
     \centering
-    \includegraphics[width=0.48\textwidth]{fig_payload_awgn.pdf}\hfill
-    \includegraphics[width=0.48\textwidth]{fig_payload_rayleigh.pdf}
-    \caption{Average channel-use-equivalent payload versus SNR. \method{} spends bandwidth proportionally to channel quality, holding $L$ in low-SNR and fading regimes and activating $C_{16}$ only when the channel can support useful feature-level transmission.}
+    \includegraphics[width=0.72\linewidth]{fig_payload_awgn.pdf}
+    \caption{Average channel-use-equivalent payload versus SNR under AWGN. \method{} spends bandwidth proportionally to channel quality, holding $L$ below the LDPC threshold and activating $C_{16}$ above it; under Rayleigh the selector holds $L$ throughout, pinning the payload at $B_L=0.024$ (Table~\ref{tab:true_e2e}).}
     \label{fig:payload_snr}
-\end{figure*}
+\end{figure}
 
 \subsection{Selector Decision Ratios}\label{sec:decision_ratio}
 

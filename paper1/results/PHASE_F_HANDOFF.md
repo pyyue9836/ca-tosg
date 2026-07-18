@@ -306,7 +306,7 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
   0.633 came from the rounded-rho path). Figure and prose now identical, "~" removed.
 - Figure A (fig_channel_codec_ap): generator has NO hardcoded payload (AP-only, ref lines 0.922/0.919/0.735)
   -> NO-OP; the frozen-caliber approval carries (no regen -> no re-verify).
-- fig_difficulty: NO-OP -- fig_difficulty.pdf (2026-07-13) co-generated with a2_difficulty_reliable_v3.csv
+- fig_difficulty: DATA-V3 (no regen needed), NEEDS FINAL-GATE VISUAL INSPECTION (never in-thread approved, so NOT approval-carry) -- fig_difficulty.pdf (2026-07-13) co-generated with a2_difficulty_reliable_v3.csv
   (same date), already v3.
 - fig_feature_importance: DONE (v3, c_t-dominant, cross-read pass).
 - fig:ap_snr: plot_ap_snr TRUE_E2E repointed -> true_e2e_v3/..._validate; JSCC/LDPC baseline source (JSCC_DIR

@@ -88,3 +88,8 @@ a ruling first -- "the data is unambiguous" is an execution-side self-judgment a
 the surface. Instance: item-7's "all beneath Fixed-L" -> "dominated on a channel-averaged basis, not per-SNR"
 was reframing (approved on content, flagged on procedure). A/B/C of item 9 were surfaced; this same-level one
 was not. Boundary, not a new rule.
+
+DEPRECATED FIGURE (2026-07-18): fig_payload_rayleigh.pdf -- historical orphan (no generator found; unknown
+provenance) rendering a zero-information flat line at B_L=0.024. Deleted from the manuscript (ruling b): its
+one-sentence content (selector holds L under Rayleigh -> payload = B_L) is carried by prose L429 + tab:true_e2e
++ the fig:payload_snr caption pointer. fig:payload_snr is now a single AWGN figure. Do not re-include.
