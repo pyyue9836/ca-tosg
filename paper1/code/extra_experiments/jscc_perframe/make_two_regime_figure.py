@@ -25,13 +25,8 @@ PS = C.PS
 
 N_SEED = 200
 TAUS = np.arange(0, 21, 1.0)
-BLER = pd.read_csv(os.path.join(C.REPO,
-    'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv'))
-
-
-def bler16(snr):
-    sub = BLER[BLER['qam'] == 16].sort_values('snr_db')
-    return np.clip(np.interp(snr, sub['snr_db'], sub['bler'], left=1.0, right=0.0), 0, 1)
+# panel-(a) cliff uses BE.V._bler (Sionna v3), not the old v2 ldpc_qam_bler_table.csv;
+# the module-level table load + bler16 helper are retired with the v3 rewire.
 
 
 def ci(x):
@@ -66,40 +61,40 @@ def eval_regime(df, cues, late_f1, eff_C_fn, rng_seed):
 
 
 def main():
-    df = pd.read_csv(C.VAL_CSV)
-    jf = pd.read_csv(os.path.join(HERE, 'out', 'jscc_perframe_jscc_awgn.csv'))
-    frames = np.sort(jf['sample_id'].unique())
-    df = df[df['sample_id'].isin(frames)].sort_values('sample_id').reset_index(drop=True)
-    cue_cols = [c for c in C.feat_cols(df, 'full') if c not in ('est_snr_db', 'channel_is_rayleigh')]
-    cues = df[cue_cols].to_numpy(); late_f1 = df['late_f1'].to_numpy()
-    comp_f1 = df['compressed_f1'].to_numpy()
+    # v3 rewire: TEST split, reusing build_two_regime_edge's EXACT mechanism so the figure's edges bit-
+    # reproduce two_regime_edge_v3 (RF random_state=0, TAU_GRID, 200-seed, PAY 0.024/0.99 -- all in BE).
+    import build_two_regime_edge as BE
+    SPLIT, CH = 'test', 'awgn'
+    df = pd.read_csv(os.path.join(BE.DATA, f'dataset_{SPLIT}_v3.csv')).reset_index(drop=True)
+    feat = C.feat_cols(df, 'full')
+    late_f1 = df['late_f1'].to_numpy(); comp_f1 = df['compressed_f1'].to_numpy()
+    piv, njscc = BE.jscc_grid(CH, SPLIT)            # (n x 6) per-frame JSCC F1 at BE.SNR_GRID (test npz)
+    grid = BE.SNR_GRID
 
-    # JSCC per-frame interpolator
-    grid = np.sort(jf['snr_db'].unique())
-    piv = jf.pivot_table(index='sample_id', columns='snr_db', values='jscc_f1_05').sort_index()[grid].to_numpy()
+    # --- aggregates via the SAME function as two_regime_edge_v3 (spec 1: bit-reproduce; spec 2: same seed/protocol) ---
+    r_ldpc = BE.edge(CH, SPLIT, 'ldpc', feat)
+    r_jscc = BE.edge(CH, SPLIT, 'jscc', feat)
+    ref = pd.read_csv(os.path.join(BE.OUT, 'two_regime_edge_v3.csv'))
+    for reg, r in (('ldpc', r_ldpc), ('jscc', r_jscc)):
+        want = float(ref[(ref.channel == CH) & (ref.split == SPLIT) & (ref.regime == reg)].edge_rf_minus_threshold.iloc[0])
+        assert abs(r['edge_rf_minus_threshold'] - want) < 1e-9, (reg, r['edge_rf_minus_threshold'], want)
+        print(f"[bit-match {reg}] figure edge {r['edge_rf_minus_threshold']:+.5f} == two_regime_edge_v3 {want:+.5f}")
 
-    def eff_C_ldpc(snr):
-        return comp_f1 * (1 - bler16(snr))
+    def oracle_mean(regime):                        # per-frame max(eff_L, eff_C), 200-seed -- context bar
+        gr, n = (piv, njscc) if regime == 'jscc' else (None, len(df))
+        d = df.iloc[:n]; lt = d['late_f1'].to_numpy(); acc = 0.0
+        for s in range(BE.V.N_SEED):
+            rng = np.random.default_rng(s); snr = rng.uniform(0, 20, n)
+            b16 = BE.V._bler(snr, 16, CH); effC = BE.eff_C_of(regime, d, gr, snr, b16)
+            acc += np.maximum(lt, effC).mean()
+        return acc / BE.V.N_SEED
 
-    def eff_C_jscc(snr):
-        return np.array([np.interp(snr[k], grid, piv[k]) for k in range(len(snr))])
-
-    bars_csv = os.path.join(HERE, 'out', 'two_regime_bars.csv')
-    if '--replot' in sys.argv and os.path.exists(bars_csv):
-        print('[replot] loading cached bars (skip 400 RF fits)')
-        bars = pd.read_csv(bars_csv).to_dict('records')
-    else:
-        print('computing LDPC regime (same frames)...')
-        R_ldpc = eval_regime(df, cues, late_f1, eff_C_ldpc, 1000)
-        print('computing JSCC regime (same frames)...')
-        R_jscc = eval_regime(df, cues, late_f1, eff_C_jscc, 2000)
-        bars = []
-        for reg, R in [('LDPC+QAM\n(cliff)', R_ldpc), ('Importance-map JSCC\n(graceful)', R_jscc)]:
-            for k in ['L', 'thr', 'RF', 'oracle']:
-                m, lo, hi = ci(R[k]); bars.append(dict(regime=reg, policy=k, mean=m, lo=lo, hi=hi))
-        em, elo, ehi = ci(R_ldpc['edge']); ej, ejlo, ejhi = ci(R_jscc['edge'])
-        print(f'LDPC edge = {em:+.4f} [{elo:+.4f},{ehi:+.4f}]   JSCC edge = {ej:+.4f} [{ejlo:+.4f},{ejhi:+.4f}]')
-        pd.DataFrame(bars).to_csv(bars_csv, index=False)
+    bars = []
+    for reg_label, reg, r in (('LDPC+QAM\n(cliff)', 'ldpc', r_ldpc), ('Importance-map JSCC\n(graceful)', 'jscc', r_jscc)):
+        vals = {'L': float(df.iloc[:r['n']]['late_f1'].mean()), 'thr': r['threshold_f1'],
+                'RF': r['rf_f1'], 'oracle': oracle_mean(reg)}
+        for k, v in vals.items():
+            bars.append(dict(regime=reg_label, policy=k, mean=v, lo=v, hi=v))   # point bars (edge CI is in the table)
 
     # ---------- figure ----------
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(7.2, 3.0))
@@ -109,7 +104,7 @@ def main():
     # (a) feature F1 vs SNR
     sw = np.linspace(0, 20, 81)
     ax = axA
-    ax.plot(sw, comp_f1.mean() * (1 - bler16(sw)), '-', color=cThr, lw=2,
+    ax.plot(sw, comp_f1.mean() * (1 - BE.V._bler(sw, 16, CH)), '-', color=cThr, lw=2,
             label='LDPC+QAM feature (cliff)')
     ax.plot(grid, piv.mean(0), 'o-', color=cRF, lw=2, ms=4,
             label='JSCC feature (graceful)')
@@ -133,9 +128,14 @@ def main():
         yerr = np.vstack([sub['mean'] - sub['lo'], sub['hi'] - sub['mean']])
         ax.bar(xs, sub['mean'], w, yerr=yerr, capsize=2, color=cols[pol], label=labels[pol])
     ax.set_xticks(np.arange(len(regimes))); ax.set_xticklabels(regimes, fontsize=7.5)
-    ax.set_ylim(0.83, 0.905); ax.set_ylabel('realised F1')
+    # data-driven y-range (test bars sit higher than the retired validate render): floor a hair below the
+    # shortest bar, headroom above the tallest for the legend strip. Range shift vs validate is expected.
+    ymean = B['mean']
+    ax.set_ylim(ymean.min() - 0.012, ymean.max() + 0.030); ax.set_ylabel('realised F1')
     ax.set_title('(b) selector vs threshold', fontsize=9)
-    ax.legend(fontsize=6.3, ncol=2, loc='upper left'); ax.grid(alpha=0.3, axis='y')
+    ax.legend(fontsize=6.3, ncol=4, loc='upper center', columnspacing=1.0,
+              handlelength=1.3); ax.grid(alpha=0.3, axis='y')
+    print('[bars]\n' + B.to_string(index=False))
 
     fig.tight_layout()
     out = os.path.join(C.FIGDIR, 'fig_two_regime.pdf')

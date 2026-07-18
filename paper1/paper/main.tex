@@ -743,7 +743,7 @@ selector---no perception-backbone change.
 
 The mechanism is shown in Fig.~\ref{fig:two_regime}(a). The LDPC + QAM feature F1 has a
 sharp cliff at the $12$~dB decoding threshold, so SNR is highly informative. The learned
-JSCC feature F1, by contrast, is \emph{essentially flat} at $\approx 0.86$ across the
+JSCC feature F1, by contrast, is \emph{essentially flat} at $\approx 0.89$ across the
 entire $0$--$20$~dB range (real per-frame data): the codec is trained to degrade
 gracefully and in this operating range the channel barely degrades it at all, so the
 estimated SNR carries almost no information about whether a feature message will help on
@@ -785,7 +785,7 @@ task-oriented selector this paper proposes.
     \includegraphics[width=\linewidth]{fig_two_regime.pdf}
     \caption{When do task-oriented cues matter? \emph{(a)} Mean feature F1 versus SNR
     (AWGN): the LDPC + QAM feature has a cliff at $\approx 12$~dB (SNR informative),
-    whereas the learned JSCC feature is flat at $\approx 0.86$ (SNR uninformative).
+    whereas the learned JSCC feature is flat at $\approx 0.89$ (SNR uninformative).
     \emph{(b)} Realised F1 of Fixed $L$, the best SNR-threshold rule, the learned selector
     (\method), and the oracle, on the same $2{,}170$ test frames under each feature
     codec. Under LDPC the threshold closely tracks \method; under JSCC the threshold collapses to
