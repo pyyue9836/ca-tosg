@@ -80,6 +80,15 @@ PARAS = {
              "B2"),
         ],
     ),
+    3: dict(
+        body_first="A concurrent line of work pushes semantic communication",
+        body_last="on an undeliverable feature message.",
+        start_anchor="A concurrent line of work pushes semantic communication",
+        next_boundary=r"\\(subsection|section)\{",
+        subs=[],       # #3 carries no placeholders: \cite{gan2025cods} resolves via the bib
+                       # entry added in the infra commit; \method{}/\emph{} are existing macros.
+        rulings=[],
+    ),
     2: dict(
         body_first="Collaboration is not unconditionally beneficial",
         body_last="without any change to the two-bit message format.",
