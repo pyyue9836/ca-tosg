@@ -19,11 +19,20 @@ A difference is "allowed" iff it is produced by one of these; everything else co
       (draft_substring -> inserted_substring) pairs in PARAS[n]['subs']. Same-token
       placeholders that resolve differently (e.g. two \S\ref{sec:method}) are
       disambiguated by including surrounding context in the pair.
-  T2  LaTeX-ification: escape/markup the draft did not already carry. Declared as
-      (draft -> inserted) pairs in the same 'subs' list (they compose left-to-right).
+  T2  LaTeX-ification: escaping of text-mode special chars the draft did not carry.
+      Handled transparently by _canon(): \_ \% \& \# are canonicalised to _ % & # on
+      BOTH sides before the diff, so escaping a filename underscore is not a diff. Any
+      further markup transform is declared as a (draft -> inserted) pair in 'subs'.
   T3  footnote renumber/inline: markdown "[^k]" marker + "[^k]: <def>" block -> LaTeX
       "\footnote{<def>}" at the marker. Handled structurally by _inline_footnotes():
       the <def> text itself is compared (it is draft content), only the wrapping differs.
+
+RULING-AUTHORISED ADAPTATIONS (per paragraph, in 'rulings'): changes beyond the three
+mechanical transforms that a supervisor ruling explicitly authorised (e.g. B2: the
+[^cliff] cross-ref to a cut figure is redirected to fig:bler and its wording adapted to
+that figure). Each is an explicit (draft -> inserted, ruling_id) triple, applied like a
+sub but REPORTED SEPARATELY so the audit trail shows exactly which non-mechanical edits
+were made and under which ruling. The gate still requires 0 residual diffs after these.
 EXCLUDED SCAFFOLDING (disclosed in the commit, NOT gated): the \subsection{<title>} and
 \label{<sec>} that give a Discussion paragraph a home + a cross-ref anchor. These are not
 draft prose; the gate compares only the prose body + footnote content.
@@ -50,6 +59,27 @@ TEX = os.path.join(P1, 'paper/main.tex')
 # next_boundary          : regex that ends the inserted block (next sectioning command).
 # subs                   : ordered list of (draft_text -> inserted_text) whitelist pairs (T1/T2).
 PARAS = {
+    1: dict(
+        body_first="Among the feature-message candidates we also expose",
+        body_last="earns no more than a marginal share is itself a finding.",
+        start_anchor="Among the feature-message candidates we also expose",
+        next_boundary=r"\\(subsection|section)\{",
+        subs=[
+            # T1: [^pay] Eq.(7) (payload) and Eq.(11) (coded bits) both resolve to eq:payload,
+            # which states both the payload values and the 3.96 coded-bit derivation in one place.
+            ("(Eq.~(7))", "(Eq.~\\eqref{eq:payload})"),
+            ("(Eq.~(11))", "(Eq.~\\eqref{eq:payload})"),
+        ],
+        rulings=[
+            # B2 (supervisor ruling): the [^cliff] cross-ref pointed to fig:channel_codec_ap,
+            # a 9-panel AP figure cut in figure consolidation. Redirect to fig:bler (the present
+            # codec-cliff BLER figure) and adapt the wording from an AP-grid statement to what
+            # fig:bler actually shows (256-QAM BLER curve to the right of the 16-QAM curve).
+            ("Fig.~\\ref{fig:channel_codec_ap}'s coarse grid renders this cliff as the 16$\\to$20 dB AP transition.",
+             "Fig.~\\ref{fig:bler} plots this cliff directly, with the 256-QAM BLER curve sitting to the right of the 16-QAM curve.",
+             "B2"),
+        ],
+    ),
     2: dict(
         body_first="Collaboration is not unconditionally beneficial",
         body_last="without any change to the two-bit message format.",
@@ -109,8 +139,23 @@ def _apply_subs(text, subs):
     return text
 
 
+def _apply_rulings(text, rulings):
+    for a, b, tag in rulings:
+        if a not in text:
+            sys.exit('ruling %s: source not found in draft:\n  %r' % (tag, a))
+        text = text.replace(a, b)
+    return text
+
+
 def _norm_ws(text):
     return ' '.join(text.split())
+
+
+def _canon(text):
+    """T2: canonicalise text-mode LaTeX escapes so escaping is transparent to the diff."""
+    for esc, raw in ((r'\_', '_'), (r'\%', '%'), (r'\&', '&'), (r'\#', '#')):
+        text = text.replace(esc, raw)
+    return text
 
 
 def _inserted_block(tex, cfg):
@@ -127,15 +172,18 @@ def gate(n):
     section = _draft_section(md, n)
     body, fns = _extract_body_and_footnotes(section, cfg)
     # forward-transform the draft through the whitelist ONLY:
-    expected = _inline_footnotes(body, fns)          # T3
-    expected = _apply_subs(expected, cfg['subs'])    # T1 + T2
+    expected = _inline_footnotes(body, fns)                        # T3
+    expected = _apply_subs(expected, cfg['subs'])                  # T1 (+ declared T2)
+    expected = _apply_rulings(expected, cfg.get('rulings', []))    # ruling-authorised
     actual = _inserted_block(_read(TEX), cfg)
 
-    exp_n, act_n = _norm_ws(expected), _norm_ws(actual)
+    exp_n, act_n = _canon(_norm_ws(expected)), _canon(_norm_ws(actual))  # T2 escapes
     if exp_n == act_n:
         print('GATE PASS (para %d): 0 non-whitelist diffs' % n)
         print('  draft body chars=%d  footnotes=%d  inserted chars=%d'
               % (len(body), len(fns), len(actual)))
+        print('  whitelist subs (T1/T2)=%d  ruling-authorised=%s'
+              % (len(cfg['subs']), [r[2] for r in cfg.get('rulings', [])] or 0))
         return 0
     print('GATE FAIL (para %d): non-whitelist difference' % n)
     diff = difflib.unified_diff(exp_n.split(), act_n.split(),
