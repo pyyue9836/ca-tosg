@@ -321,7 +321,7 @@ The two payloads are derived from first principles rather than assumed. The obje
 
 \subsection{Channel Settings}
 
-We sweep the estimated SNR over $\gamma \in \{0,2,4,\ldots,20\}$~dB, giving $11$ SNR points per channel. We evaluate two channel models: AWGN and Rayleigh fading. For training data, each of the $1{,}980$ frames is independently assigned a SNR uniformly sampled from $[0,20]$~dB and a channel type uniformly sampled from $\{\text{AWGN},\text{Rayleigh}\}$, mirroring the training-SNR sweep used by~\cite{sheng2024importance,gan2026scomcp}. The BLER functions $\mathrm{BLER}_q(\gamma,\text{ch})$ are tabulated from a separate LDPC + QAM simulation. For Rayleigh fading we average the AWGN BLER table over the exponential instantaneous-SNR distribution to obtain the effective BLER at each mean SNR.
+We sweep the estimated SNR over $\gamma \in \{0,2,4,\ldots,20\}$~dB, giving $11$ SNR points per channel. We evaluate two channel models: AWGN and Rayleigh fading. For training data, each of the $1{,}980$ frames is independently assigned a SNR uniformly sampled from $[0,20]$~dB and a channel type uniformly sampled from $\{\text{AWGN},\text{Rayleigh}\}$, mirroring the training-SNR sweep used by~\cite{sheng2024importance,gan2026scomcp}. The BLER functions $\mathrm{BLER}_q(\gamma,\text{ch})$ are tabulated from a separate LDPC + QAM simulation; we instantiate this transport with the 5G NR LDPC (Sionna) under TR 37.885 Urban NLOSv. For Rayleigh fading we average the AWGN BLER table over the exponential instantaneous-SNR distribution to obtain the effective BLER at each mean SNR.
 
 \subsection{Selector Training}
 
