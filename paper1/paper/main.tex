@@ -114,7 +114,7 @@ We adopt a \emph{receiver-driven} signalling architecture: the ego vehicle evalu
 
 Let $Y_t$ denote the ground-truth objects at frame $t$, and let $\hat{Y}_t$ denote the predicted detection output at the ego vehicle after fusion. The objective of cooperative perception is to improve the task utility of $\hat{Y}_t$, such as average precision (AP) or F1 score, while keeping the V2V communication payload low. Unlike conventional cooperative perception settings that assume a fixed type of transmitted representation, we consider an ego-side selector that can choose the semantic granularity of the requested message according to both perception-side task cues and the estimated channel condition.
 
-\subsection{Message Candidates}
+\subsection{Message Candidates}\label{sec:candidates}
 
 At each frame, the sender selects one communication mode from a finite set of message candidates:
 \begin{equation}
@@ -212,7 +212,7 @@ From a rate-distortion perspective, the effective F1 model of Eq.~\eqref{eq:eff_
 
 This formulation leads to a key design principle: the most informative message is not always the most useful message under communication constraints. A feature-level message may provide richer semantics, but if the channel is poor, its realized task utility may be lower than that of a compact object-level message. Therefore, the selector must consider both the task state and the channel state before deciding the semantic granularity of the transmitted message.
 
-\section{Proposed Method}
+\section{Proposed Method}\label{sec:method}
 
 \subsection{Overview}
 
@@ -284,7 +284,7 @@ The feature-level branches transmit compressed BEV representations $m_t^{C_q} = 
 
 The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier with $N_T=400$ trees, depth bound $D_{\max}=10$, minimum samples per leaf of $4$, and balanced class weighting to compensate for the heavy class imbalance in the channel-aware oracle labels. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.8 \pm 5.7$~ms ($\mathrm{P95} = 59.1$~ms), measured over $2{,}000$ trials (Section~\ref{sec:robustness}); this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Section~\ref{sec:robustness} together with Table~\ref{tab:headline_agg} shows lighter models and even a hand-tuned SNR-threshold rule reach the same realised F1.
 
-The selector is trained to imitate the channel-aware oracle defined in Eq.~\eqref{eq:oracle}. The oracle uses ground-truth detection outputs and is therefore not deployable; it is used only to generate training labels and as an upper-bound reference. At deployment, the selector uses only the online cues $z_t$ and the channel state $(\hat\gamma_t,c_t)$:
+The selector is trained to imitate the channel-aware oracle defined in Eq.~\eqref{eq:oracle}. The oracle uses ground-truth detection outputs and is therefore not deployable; it is used only to generate training labels and as an upper-bound reference. Before taking the argmax in Eq.~\eqref{eq:oracle}, the oracle applies a \emph{feasibility mask}: any mode whose frame-level block-error rate exceeds $0.999$ at the operating $(\gamma_t,\mathrm{ch}_t)$ grid point is removed from $\mathcal{S}$, so that neither the oracle labels nor the deployed selector request a message the channel almost surely cannot deliver; when a requested feature block is nonetheless lost, the pipeline reverts to the ego-only output rather than a zero-utility state (Eq.~\eqref{eq:eff_C}). At deployment, the selector uses only the online cues $z_t$ and the channel state $(\hat\gamma_t,c_t)$:
 \begin{equation}
 s_t = g(z_t,\hat\gamma_t,c_t).
 \end{equation}
