@@ -54,8 +54,15 @@ sentence). **0 orphan commits ⇒ 0 orphan hunks.**
 | 18 | tab:two_regime + **sec:harm** | **paragraph #2 (harm)** insert **+** tab v3 | para-#2, item-9 | 64f0299, 1dee697 |
 | 19 | Robustness (L861) | σ-noise/aging/staleness v3 values | item-10 | 2189b2d |
 | 20 | Robustness (L875) | mechanism sentence | item-10 | 2189b2d |
-| 21 | Conclusion (L884) | AP→Culver-City attribution, +0.090, JSCC +0.027 | conclusion audit | 2b9c023, 3fd5265 |
-| 22 | tab:robustness (L899) | request-delay bound | item-10 | 2189b2d |
+| 21 | tab:robustness table body (v2 L884) | σ-noise/aging/staleness v3 values (−0.0002/−0.0009/−0.0037; −0.004; −0.019) | item-10 | 2189b2d |
+| 22 | **Conclusion** prose (v2 L899) | three conclusions: +0.074 Culver / +0.026 val / comparable test; band 16–25%; +0.090 hard; +0.027/+0.022 JSCC | conclusion audit | 2b9c023, 3fd5265 |
+
+> Correction (final-gate read): rows 21/22 were swapped in the first cut of this table.
+> The git `@@` context line is the nearest preceding scope line, which for main.tex's
+> long single-line paragraphs points at the *previous* element (the robustness table's
+> last row precedes the conclusion). The change *content* was re-verified against the
+> first changed `-/+` line of every hunk; only these two labels moved. Orphan count is
+> unaffected — both hunks already map to authorised commits (item-10 / conclusion audit).
 
 Every hunk resolves to a numbered Phase-F item, a paragraph-insert id, an infra edit, or
 a supervisor ruling (B1 mask / B2 fig / RELATED-6-11 NR / fig ruling-c). **Orphan hunks: 0.**
