@@ -7,7 +7,7 @@ cross-refs (\S, Fig.) are placeholders to resolve in the .tex pass. Target: 150-
 ## 1. C256 dominance (Method / message candidates) -- FINAL (v2, 9 revisions + hard-error fix applied
 ## 2026-07-15; supervisor: land without re-review). Deployed-point activation = 0 verified vs CSV (branch 1).
 
-Among the feature-message candidates we also expose a 256-QAM variant (C256), which halves the per-frame
+Of the two feature-level modes, the 256-QAM variant (C256) halves the per-frame
 channel use of the 16-QAM feature message (0.495 vs. 0.99 Msym for C256 and C16, respectively[^pay]) and is
 thus an apparent bandwidth bargain. The learned selector nonetheless never requests it, for a structural
 reason whose scope we verify empirically. The two variants carry the identical feature payload and hence
@@ -26,17 +26,16 @@ collaboration-harm regime ($\mathrm{comp}<\mathrm{ego}$, $b_{16}<b_{256}$; \S\re
 (0--20 dB) both flatline at the ego floor (frame-level BLER $\approx 1$); no SNR window opens C256 before
 C16. We retain C256 for completeness of the granularity ladder spanned by the 2-bit request, yet it earns no operational role:
 trained to imitate an oracle that assigns C256 zero support at this operating point, the learned selector
-never requests it -- 0 of $3.96/4.34/1.10\times10^{5}$ deployment predictions[^req] -- and even the oracle's
+never requests it -- 0 of the $396{,}000/434{,}000/110{,}000$ deployment predictions[^req] -- and even the oracle's
 payload-penalised frontier activates it at only 2.5 / 3.2 / 4.5\% of frames. That a rate-matched,
 lower-channel-use action earns no more than a marginal share is itself a finding.
 
 [^req]: Measured by replaying the 200-realisation deployment (drawn CSI) through the deployed selector and
 counting C256 predictions -> 0 / 0 / 0 (validate/test/culver). The deployed classifier's class set is
 $\{L, \mathrm{C16}\}$ -- the imitated oracle labels carry zero C256 at this operating point -- so the count
-is structurally zero; we report the measured count rather than infer it. src c256_dominance_verify.csv
-(columns selector_C256_requests, selector_has_C256_class).
+is structurally zero; we report the measured count rather than infer it, verified programmatically from the per-frame deployment account.
 
-[^pay]: Feature payload 1.98 Mbit (Eq.~(7)) at LDPC rate-$1/2$ gives 3.96 Mbit of coded bits (Eq.~(11));
+[^pay]: Feature payload 1.98 Mbit (Eq.~(7)) at LDPC rate-$1/2$ gives 3.96 Mbit of coded bits;
 $\div 8$ bit/sym (256-QAM) $=0.495$ Msym, $\div 4$ bit/sym (16-QAM) $=0.99$ Msym.
 
 [^id]: comp and ego are the frame's own measured F1; $b$ is the frame-level BLER table value at that frame's
@@ -44,9 +43,9 @@ $\div 8$ bit/sym (256-QAM) $=0.495$ Msym, $\div 4$ bit/sym (16-QAM) $=0.99$ Msym
 construction; verification confirms it to $\max|\cdot|=0$, checking the implementation for transcription
 error rather than an empirical regularity.
 
-[^round]: Fractions rounded to 0.1 pp. All four come from one run of verify_c256_dominance.py ->
-c256_dominance_verify.csv, which asserts $\mathrm{frac\_dominated}=\mathrm{frac}(\mathrm{comp}\ge\mathrm{ego})
-+\mathrm{frac}(\mathrm{comp}<\mathrm{ego}\wedge b_{16}=b_{256})$.
+[^round]: Fractions rounded to 0.1 pp. All four come from one run of the dominance-verification procedure,
+which asserts $\mathrm{frac\_dominated}=\mathrm{frac}(\mathrm{comp}\ge\mathrm{ego})
++\mathrm{frac}(\mathrm{comp}<\mathrm{ego}\wedge b_{16}=b_{256})$ at the count level; displayed percentages may differ from the total by up to $0.1$~pp due to rounding.
 
 [^cliff]: Es/N0 onset at which the frame-level BLER first falls below 0.999 -- the same 0.999 constant that
 defines the feasibility mask -- with 16-QAM at 8.0 dB. Fig.~\ref{fig:channel_codec_ap}'s coarse grid renders

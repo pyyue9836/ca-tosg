@@ -60,15 +60,15 @@ TEX = os.path.join(P1, 'paper/main.tex')
 # subs                   : ordered list of (draft_text -> inserted_text) whitelist pairs (T1/T2).
 PARAS = {
     1: dict(
-        body_first="Among the feature-message candidates we also expose",
+        body_first="Of the two feature-level modes, the 256-QAM variant",
         body_last="earns no more than a marginal share is itself a finding.",
-        start_anchor="Among the feature-message candidates we also expose",
+        start_anchor="Of the two feature-level modes, the 256-QAM variant",
         next_boundary=r"\\(subsection|section)\{",
         subs=[
-            # T1: [^pay] Eq.(7) (payload) and Eq.(11) (coded bits) both resolve to eq:payload,
-            # which states both the payload values and the 3.96 coded-bit derivation in one place.
+            # T1: [^pay] Eq.(7) (payload) resolves to eq:payload, which states both the payload
+            # values and the 3.96 coded-bit derivation in one place. (TG-4 removed the duplicate
+            # second Eq reference that the draft carried as Eq.(11).)
             ("(Eq.~(7))", "(Eq.~\\eqref{eq:payload})"),
-            ("(Eq.~(11))", "(Eq.~\\eqref{eq:payload})"),
         ],
         rulings=[
             # B2 (supervisor ruling): the [^cliff] cross-ref pointed to fig:channel_codec_ap,
