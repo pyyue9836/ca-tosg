@@ -168,11 +168,13 @@ def _canon(text):
 
 
 def _inserted_block(tex, cfg):
+    # Bound the inserted block by the draft's own last sentence (body_last), not by the next
+    # sectioning command: a paragraph may be followed by relocated prose (e.g. TG-18 moved the
+    # subsection's closing sentence to sit after paragraph #3) that is not part of the draft.
     i = tex.index(cfg['start_anchor'])
     rest = tex[i:]
-    b = re.search(cfg['next_boundary'], rest)
-    block = rest[:b.start()] if b else rest
-    return block.strip()
+    j = rest.index(cfg['body_last']) + len(cfg['body_last'])
+    return rest[:j].strip()
 
 
 def gate(n):
