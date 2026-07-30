@@ -18,6 +18,8 @@
 # 11 gamma-improves (narrative)           RX: improves F1 by ; alone improves F1 ; 5\.3 percentage
 # 13 review-side ~10% payload             RX: 10\\%.{0,30}(payload|channel use) ; (payload|channel use).{0,30}10\\%
 # AP/band v2                              RX: 15\.8 ; 18\.4 ; \+0\.045 ; \+0\.017 ; \+0\.018 ; \+0\.05[^0-9]
+# 14 two_regime panel(a) JSCC-flat level  RX: \$\\approx 0\.86 (validate flat 0.86 -> test 0.89; the near-
+#    approx form only; bare table 0.864 untouched. Anchors the $\approx$ so 0.864 F1 cells never trip it.)
 
 ## MACHINE-READABLE PATTERNS (lines beginning "RX "; the exit grep extracts col-4-onward)
 RX 0\.2475
@@ -58,3 +60,4 @@ RX \+0\.017.{0,15}(under|F1|jscc|AWGN)
 RX 1\{?,?\}?000 validate frames
 RX 0\.844
 RX 0\.895
+RX \$\\approx 0\.86
