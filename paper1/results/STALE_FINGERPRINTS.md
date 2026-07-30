@@ -64,3 +64,5 @@ RX 0\.844
 RX 0\.895
 RX \$\\approx 0\.86
 RX (cut|save)[a-z' ]{0,28}channel use by
+RX 0\.081
+RX 0\.888[^6]

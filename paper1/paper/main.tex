@@ -169,12 +169,12 @@ where $\text{ch}_t \in \{\text{AWGN},\text{Rayleigh}\}$ and $F_t^{\cdot,\mathrm{
 
 \subsection{Communication Cost}
 
-Let $B_s$ denote the per-frame payload in channel-use-equivalent megabits for mode $s$, accounting for the spectral efficiency of the modulation:
+Let $B_s$ denote the per-frame payload in channel-use-equivalent mega-symbols (Msym) for mode $s$, accounting for the spectral efficiency of the modulation:
 \begin{equation}
 B_L = 0.024, \quad B_{C_{16}} = 3.96/4 \approx 0.99, \quad B_{C_{256}} = 3.96/8 \approx 0.495,
 \label{eq:payload}
 \end{equation}
-all in Mbit/frame, where $3.96 = 1.98/(1/2)$ is the coded-bit count produced by rate-$1/2$ LDPC from the $1.98$-Mbit feature payload, and the divisors $4$ and $8$ are the bits-per-symbol of 16-QAM and 256-QAM, respectively. The average communication cost over $T$ evaluated frames is
+all in Msym/frame, where $3.96 = 1.98/(1/2)$ is the coded-bit count produced by rate-$1/2$ LDPC from the $1.98$-Mbit feature payload, and the divisors $4$ and $8$ are the bits-per-symbol of 16-QAM and 256-QAM, respectively. The object-level message is sent as a protected low-rate message at approximately $1$ bit per channel use (rate-$1/2$ QPSK), so its $0.024$~Mbit of information occupies ${\approx}0.024$~Msym. The average communication cost over $T$ evaluated frames is
 \begin{equation}
 \bar{B} = \frac{1}{T}\sum_{t=1}^{T} B_{s_t} = \sum_{s \in \mathcal{S}} \rho_s B_s,
 \end{equation}
@@ -212,7 +212,7 @@ whose pointwise optimum is
 s_t^\star(\lambda) = \arg\max_{s \in \mathcal{S}}\; \bigl(F_t^s - \lambda B_s\bigr).
 \label{eq:lagrangian_oracle}
 \end{equation}
-Equation~\eqref{eq:oracle} corresponds to the regime $\lambda \to 0^+$, which is the relevant operating point of this paper because (i) the $L$ payload $B_L = 0.024$~Mbit/frame is already small enough that the bandwidth constraint becomes non-binding whenever $L$ is selected, and (ii) the $L$ option provides a safe ``no-op'' that limits the worst-case bandwidth spend. For non-trivial $\lambda$, the relaxed solution biases the policy toward smaller-payload actions; consequently $C_{16}$ dominates $C_{256}$ and the oracle never selects $C_{256}$ under LDPC $1/2$.
+Equation~\eqref{eq:oracle} corresponds to the regime $\lambda \to 0^+$, which is the relevant operating point of this paper because (i) the $L$ payload $B_L = 0.024$~Msym/frame is already small enough that the bandwidth constraint becomes non-binding whenever $L$ is selected, and (ii) the $L$ option provides a safe ``no-op'' that limits the worst-case bandwidth spend. For non-trivial $\lambda$, the relaxed solution biases the policy toward smaller-payload actions; consequently $C_{16}$ dominates $C_{256}$ and the oracle never selects $C_{256}$ under LDPC $1/2$.
 
 From a rate-distortion perspective, the effective F1 model of Eq.~\eqref{eq:eff_C} is a channel-induced distortion that scales with $\mathrm{BLER}_q(\gamma)$. The compressed-feature mode $C_q$ delivers ``rate'' $R_{C_q} = 1.98 / \log_2 M_q$ in channel-use-equivalent megabits, modulated by a channel-induced packet survival probability $1 - \mathrm{BLER}_q(\gamma)$, while the object-level mode $L$ delivers a much lower rate but with effectively unit survival probability under the protected low-rate transmission assumed in this paper. The selector therefore implicitly trades off rate against rate-conditional distortion as a function of the channel state, a structure familiar from joint source-channel coding theory but here expressed at the granularity-action level rather than at the symbol level.
 
@@ -281,7 +281,7 @@ The role of $(\hat\gamma_t,c_t)$ is fundamentally different from the perception 
 \subsection{Message Branches}
 
 \subsubsection{Object-Level Branch}
-The object-level branch transmits compact detection results $m_t^L = \{(b_k,c_k,p_k)\}_{k=1}^{N_t}$. Its average payload is approximately $B_L = 0.024$~Mbit/frame, allowing it to be transmitted with strong channel coding and treated as channel-invariant in the evaluated SNR range.
+The object-level branch transmits compact detection results $m_t^L = \{(b_k,c_k,p_k)\}_{k=1}^{N_t}$. Its average payload is approximately $B_L = 0.024$~Msym/frame, allowing it to be transmitted with strong channel coding and treated as channel-invariant in the evaluated SNR range.
 
 \subsubsection{Feature-Level Branches}
 The feature-level branches transmit compressed BEV representations $m_t^{C_q} = \phi_q(F_{j,t})$, where $\phi_q(\cdot)$ uses $q$-QAM modulation under rate-$1/2$ LDPC coding. The $C_{16}$ mode is more reliable but less spectrally efficient (channel-use payload $B_{C_{16}} \approx 0.99$~Msym/frame), while the $C_{256}$ mode is more spectrally efficient but more channel-sensitive (channel-use payload $B_{C_{256}} \approx 0.495$~Msym/frame).
@@ -349,13 +349,13 @@ We compare \method{} with the following baselines:
 
 \subsection{Evaluation Metrics}
 
-We report AP@0.5 and AP@0.7 for end-to-end detection performance, mean realised frame F1 for fine-grained frame-level behaviour, and average payload in channel-use-equivalent Mbit/frame for communication cost. We also report the selection ratios $\rho_s = (1/T)\sum_t \mathbf{1}(s_t=s)$ to expose how the selector's policy varies with channel quality.
+We report AP@0.5 and AP@0.7 for end-to-end detection performance, mean realised frame F1 for fine-grained frame-level behaviour, and average payload in channel-use-equivalent Msym/frame for communication cost. We also report the selection ratios $\rho_s = (1/T)\sum_t \mathbf{1}(s_t=s)$ to expose how the selector's policy varies with channel quality.
 
 \section{Results and Analysis}
 
 \subsection{Headline Results}\label{sec:headline}
 
-Because the value of feature-level cooperation is realised only when the channel can deliver it, a single channel-averaged number understates the effect: under Rayleigh fading and low-SNR AWGN the selector deliberately holds the object-level message $L$, so averaging over all channel states dilutes the gain. We therefore report the \emph{true end-to-end} detection AP in the two regimes that define the policy: the fallback regime (fading or low-SNR AWGN), where \method{} holds $L$ at $0.024$~Mbit/frame, and the feature-active regime (AWGN $\hat\gamma_t \ge 14$~dB), where the selector requests $C_{16}$. AP is computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth (full protocol in Section~\ref{sec:true_e2e}); the per-SNR breakdown and the Rayleigh curves are in Tables~\ref{tab:true_e2e}--\ref{tab:gen_true_e2e_culver}.
+Because the value of feature-level cooperation is realised only when the channel can deliver it, a single channel-averaged number understates the effect: under Rayleigh fading and low-SNR AWGN the selector deliberately holds the object-level message $L$, so averaging over all channel states dilutes the gain. We therefore report the \emph{true end-to-end} detection AP in the two regimes that define the policy: the fallback regime (fading or low-SNR AWGN), where \method{} holds $L$ at $0.024$~Msym/frame, and the feature-active regime (AWGN $\hat\gamma_t \ge 14$~dB), where the selector requests $C_{16}$. AP is computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth (full protocol in Section~\ref{sec:true_e2e}); the per-SNR breakdown and the Rayleigh curves are in Tables~\ref{tab:true_e2e}--\ref{tab:gen_true_e2e_culver}.
 
 \begin{table}[t]
 \centering
@@ -430,7 +430,7 @@ Under AWGN, \method{} sits on the Fixed $L$ line ($0.890$ AP@0.5) for SNR $\le 8
 
 \subsection{Payload versus SNR}\label{sec:payload_snr}
 
-Fig.~\ref{fig:payload_snr} reports the average payload of each policy as a function of SNR. \method{} uses the $L$-payload of $0.024$~Mbit/frame across all SNRs under Rayleigh, and switches from $L$-payload to a near-$C_{16}$-payload at SNR $\approx 12$~dB under AWGN, matching the channel-aware oracle behaviour. The fixed-mode baselines are flat at their constant payload, providing the worst-case bandwidth reference.
+Fig.~\ref{fig:payload_snr} reports the average payload of each policy as a function of SNR. \method{} uses the $L$-payload of $0.024$~Msym/frame across all SNRs under Rayleigh, and switches from $L$-payload to a near-$C_{16}$-payload at SNR $\approx 12$~dB under AWGN, matching the channel-aware oracle behaviour. The fixed-mode baselines are flat at their constant payload, providing the worst-case bandwidth reference.
 
 \begin{figure}[t]
     \centering
@@ -670,8 +670,8 @@ achievable upper frontier; the fixed feature-level policies $C_{16}$ and $C_{256
 sit far below it (high payload, low realised F1 due to the LDPC cliff), i.e.\ they
 are strictly dominated. \method{} and a $\lambda$-cost RF retrained on
 $\arg\max_s(F_t^s-\lambda B_s)$ labels lie on the frontier between Fixed $L$ and the
-oracle: on test, the deployed selector reaches F1 $0.888$ at $0.081$~Mbit/frame,
-within $0.006$ F1 of the oracle and at $16\%$ of the $C_{16}$ payload.
+oracle: on test, the deployed selector reaches F1 $0.909$ at $0.251$~Msym/frame,
+within $0.005$ F1 of the oracle and at $25\%$ of the $C_{16}$ payload.
 
 \begin{figure}[t]
     \centering
