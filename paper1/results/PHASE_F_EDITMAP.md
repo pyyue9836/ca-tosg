@@ -97,3 +97,6 @@ error. Feasibility claim = clean monotone in diversity order: threshold 8 dB (AW
   edge_v3.csv complete (3ch). Rayleigh->diversity feasibility upgrade CONFIRMED (8/24/unbounded).
 - abstract/intro central-finding numbers: replace v2 "+0.017 [+.012,+.022] AWGN; +0.015 Rayleigh and OFDM"
   with the v3 edges (currency framing) + the feasibility monotone. (Numbers now all available.)
+
+## TG-21c (final-gate): sec:e2e + tab:e2e DELETED
+- Three locks: function superseded by sec:true_e2e; fixed-0.63-floor model replaced by per-frame ego fallback; v2 numbers (0.864/0.875/0.878) have no v3 source. Archived results/DEPRECATED_V2_SEC_E2E.md. Succession mission folded into sec:true_e2e intro; deployment-mode term retired.

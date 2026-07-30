@@ -510,59 +510,9 @@ Fixed $L$                            & -- & 0.901 & 0.024 \\
 
 Two findings stand out. First, on this cliff codec the perception cues barely move realised F1: channel state alone reaches $0.909$ and the full selector matches it, and adding $\hat\gamma_t$ to the perception cues even nudges F1 down ($0.900\!\to\!0.897$) while raising payload, because SNR alone cannot separate AWGN from Rayleigh and the selector over-requests $C_{16}$. These extra $C_{16}$ requests are channel-blind---the same $0.07\!\to\!0.16$ request share on every channel, since $\hat\gamma_t$ carries no channel type---so on features-infeasible channels, Rayleigh and OFDM below its ${\approx}24$~dB threshold, where the LDPC block almost always fails, they collapse to the ego floor: the loss is channel-specific ($+0.006$ on AWGN, $-0.011$ on both Rayleigh and OFDM). The channel-type flag $c_t$ restores the gating, the same root that makes it the model's top feature (Section~\ref{sec:feat_imp}). This does not contradict the sufficiency of the SNR threshold in Section~\ref{sec:threshold}: SNR is decisive as the \emph{threshold signal} that gates the feature request under AWGN, but as an \emph{additional RF feature} atop the perception cues it adds a noisy continuous dimension without an F1 gain---the two roles are distinct. Second, adding $c_t$ enables a channel-conditional policy---under Rayleigh the selector becomes $L$-dominant while under AWGN it activates $C_{16}$ above the LDPC threshold---so what the cues change is \emph{deployed channel use}, not accuracy: by selecting the low-payload $L$ action more often at equal F1, the full selector spends $0.240$~Msym versus $0.271$ for channel state alone (the channel-averaged ${\approx}12\%$ reduction is quantified in Section~\ref{sec:headline}).
 
-\subsection{End-to-end Deployment Verification}\label{sec:e2e}
-
-Throughout Sections~\ref{sec:headline}--\ref{sec:ablation} the realised
-frame F1 is computed by the analytical block-loss model of
-Eq.~\eqref{eq:eff_C}, in which a block-error event contributes zero F1.
-A receiver in a deployed V2X stack can detect block loss and fall back
-to ego-only inference instead, recovering an empirical F1 floor of
-approximately $0.63$ observed in our earlier reproduction of the
-LDPC+QAM baselines~\cite{sheng2024importance}. To verify that the
-analytical model is conservative and that our reported numbers survive
-this softer floor, we re-evaluate the deployed selector under a
-\emph{deployment-mode} pipeline: per frame, the selector picks $s_t$
-from $(\hat\gamma_t,c_t)$; for each $C_q$-selected frame, the message
-either survives with probability $1-\mathrm{BLER}_q(\gamma_t,\text{ch}_t)$
-and contributes its clean F1, or is dropped with probability
-$\mathrm{BLER}_q$ and contributes the ego-only floor $F_{\mathrm{floor}}=0.63$.
-The Bernoulli realisations are averaged over $50$ runs per operating point.
-
-\begin{table}[t]
-\centering
-\caption{End-to-end deployment-mode verification at single operating points (OPV2V validate, $T=1{,}980$ frames; deployed selector). The deployment-mode F1 with empirical ego-only floor is equal to or higher than the analytical lower bound used during selector training, confirming that the analytical numbers in Section~\ref{sec:headline}--\ref{sec:ablation} are conservative.}
-\label{tab:e2e}
-\begin{tabular}{lccccc}
-\toprule
-Channel & SNR (dB) & $\rho_L$ & Analytical F1 & E2E F1 (floor=0.63) & Payload \\
-\midrule
-AWGN     & 0.0  & 1.000 & 0.864 & $0.864 \pm 0.000$ & 0.024 \\
-AWGN     & 10.0 & 1.000 & 0.864 & $0.864 \pm 0.000$ & 0.024 \\
-AWGN     & 12.0 & 0.909 & 0.866 & $0.867 \pm 0.000$ & 0.067 \\
-AWGN     & 14.0 & 0.331 & 0.864 & $\mathbf{0.875 \pm 0.001}$ & 0.339 \\
-AWGN     & 16.0 & 0.326 & 0.878 & $0.878 \pm 0.000$ & 0.342 \\
-AWGN     & 20.0 & 0.362 & 0.879 & $0.879 \pm 0.000$ & 0.324 \\
-Rayleigh & 0.0  & 1.000 & 0.864 & $0.864 \pm 0.000$ & 0.024 \\
-Rayleigh & 10.0 & 1.000 & 0.864 & $0.864 \pm 0.000$ & 0.024 \\
-Rayleigh & 20.0 & 0.998 & 0.864 & $0.864 \pm 0.000$ & 0.025 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:e2e} confirms two properties. First, at every operating
-point the deployment-mode F1 is at least as large as the analytical F1;
-the gap reaches $0.010$~F1 at AWGN $14$~dB, where the selector is
-transitioning between $L$ and $C_{16}$ and a non-negligible fraction of
-$C_{16}$ frames experience block loss. The selector training objective is
-therefore conservative, and the headline numbers in
-Section~\ref{sec:headline} are a valid lower bound on the realised
-deployment performance. Second, the Bernoulli sampling variance is small
-(at most $0.001$ F1 across the table), which means that the analytical
-expectation is a tight estimator of the deployment-mode realised F1.
-
 \subsection{True End-to-end AP Verification}\label{sec:true_e2e}
 
-Table~\ref{tab:e2e} reports the deployment-mode \emph{frame-level F1} aggregated under the analytical block-loss model and a Bernoulli channel with an empirical ego-only floor. To address the residual concern that a reviewer might raise about whether the analytical proxy translates to actual end-to-end \emph{AP}, we also run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the late-fusion prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over $5$ stochastic channel realisations. Table~\ref{tab:true_e2e} reports the result.
+The realised frame F1 reported so far is computed under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, where a lost feature block falls back to the ego vehicle's own pre-fusion detection. To confirm that this analytical F1 proxy translates to actual end-to-end detection \emph{AP} under a deployed pipeline, we run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the late-fusion prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over $5$ stochastic channel realisations. Table~\ref{tab:true_e2e} reports the result.
 
 \begin{table}[t]
 \centering
@@ -584,7 +534,7 @@ Rayleigh & 20.0 & 1.000 & 0.890 & 0.836 \\
 \end{tabular}
 \end{table}
 
-Two observations support the central claim. First, the deployment-mode AP at AWGN $14$~dB reaches $0.916$ at IoU $0.5$ and $0.857$ at IoU $0.7$, sitting within $0.001$ AP of the perfect-channel reference of the underlying attentive-compression model ($0.917$, see Section~\ref{sec:headline}). The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, while paying only $0.632$~Msym/frame at this operating point instead of the $0.990$ of always-on Fixed $C_{16}$. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
+Two observations support the central claim. First, the true end-to-end AP at AWGN $14$~dB reaches $0.916$ at IoU $0.5$ and $0.857$ at IoU $0.7$, sitting within $0.001$ AP of the perfect-channel reference of the underlying attentive-compression model ($0.917$, see Section~\ref{sec:headline}). The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, while paying only $0.632$~Msym/frame at this operating point instead of the $0.990$ of always-on Fixed $C_{16}$. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
 
 \subsection{Generalisation to OPV2V Test and Culver-City Splits}\label{sec:generalisation}
 
