@@ -21,6 +21,7 @@
 # 14 two_regime panel(a) JSCC-flat level  RX: \$\\approx 0\.86 (validate flat 0.86 -> test 0.89; the near-
 #    approx form only; bare table 0.864 untouched. Anchors the $\approx$ so 0.864 F1 cells never trip it.)
 # 15 transitive-verb evasion (TG-10)       RX: (cut|save)[a-z' ]{0,28}channel use by  (retired "cut/save
+# 16 acc-vs-oracle escape (TG-22)          RX: reproduces \$[0-9] ; decision agreement ; base rate ; selection accuracy (item-6 killed the metric; generalisation prose kept it via "reproduces X%")
 #    channel use by X%"; fixed to "lower ... deployed channel use"; narrow enough to skip "reduce payload")
 
 ## MACHINE-READABLE PATTERNS (lines beginning "RX "; the exit grep extracts col-4-onward)
@@ -66,3 +67,7 @@ RX \$\\approx 0\.86
 RX (cut|save)[a-z' ]{0,28}channel use by
 RX 0\.081
 RX 0\.888[^6]
+RX reproduces \$[0-9]
+RX decision agreement
+RX base rate
+RX selection accuracy
