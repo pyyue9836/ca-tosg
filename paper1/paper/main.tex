@@ -706,7 +706,7 @@ the $\lambda$-cost variant of Section~\ref{sec:pareto} removes.)
     \label{fig:difficulty}
 \end{figure}
 
-\subsection{Is a Learned Selector Necessary? Feature Ablation and an SNR-Threshold Rule}\label{sec:threshold}
+\subsection{Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule}\label{sec:threshold}
 
 Since channel features dominate importance (Section~\ref{sec:feat_imp}), we test
 whether a hand-tuned rule suffices. Table~\ref{tab:ablation} compares RF
@@ -802,7 +802,7 @@ task-oriented selector this paper proposes.
 \caption{Learned-selector edge over the best (oracle-tuned) SNR-threshold rule on the
 same $2{,}170$ test frames, $200$-seed protocol. The edge is small under the
 LDPC cliff (the selector's function-form margin over a threshold, not a cue gain---the
-cues add no F1 there, Section~\ref{sec:ablation}) but $5$--$6{\times}$ larger under
+cues add no significant F1 there, Section~\ref{sec:ablation}) but $5$--$6{\times}$ larger under
 graceful JSCC, where an SNR threshold cannot reach it.}
 \label{tab:two_regime}
 \begin{tabular}{llc}
