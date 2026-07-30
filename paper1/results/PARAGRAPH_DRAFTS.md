@@ -92,10 +92,10 @@ signalling overhead: the `11' codeword of the 2-bit request is unused, so an exp
 stratification), evaluated under a deterministic reliable-channel condition (AWGN $16$~dB; frame-level BLER
 ${\approx}0$, well above the $8.0$~dB onset), isolating the difficulty axis from channel variability: the
 selector's realised F1 is $0.9719$ vs the Fixed-$L$ baseline $0.9866$ -- a gain of $-0.0147$ (frame-level
-paired $95\%$ CI $[-0.0179,-0.0115]$; $n=713$ frames; a2\_difficulty\_reliable\_v3.csv). The selector
+paired $95\%$ CI $[-0.0179,-0.0115]$; $n=713$ frames). The selector
 requests $C_{16}$ on $635$ of these $713$ frames; on the remaining $78$, where it requests $L$, its output is
 frame-identical to Fixed-$L$, so the paired difference arises entirely on the $C_{16}$-request frames
-(verified, harm\_stratum\_structural.csv) -- the loss is a structural consequence of requesting features on
+(verified programmatically from the per-frame account) -- the loss is a structural consequence of requesting features on
 already-easy frames.
 
 Word count (body, excl. footnote) ~235. src: results/c256_dominance_verify.csv (frac_comp_lt_ego =
