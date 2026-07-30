@@ -100,3 +100,6 @@ error. Feasibility claim = clean monotone in diversity order: threshold 8 dB (AW
 
 ## TG-21c (final-gate): sec:e2e + tab:e2e DELETED
 - Three locks: function superseded by sec:true_e2e; fixed-0.63-floor model replaced by per-frame ego fallback; v2 numbers (0.864/0.875/0.878) have no v3 source. Archived results/DEPRECATED_V2_SEC_E2E.md. Succession mission folded into sec:true_e2e intro; deployment-mode term retired.
+
+## Figure A (channel_codec_ap): approved figure-out, NOT placed (TVT page constraint)
+- git log -S confirms \includegraphics never existed in main.tex. No orphaned claim (OFDM/~24dB/diversity carried by intro L70 + ablation + tab:two_regime + fig:bler). Archived DEPRECATED_FIGURE_A_NOT_PLACED.md. Explicit decision, not evaporation.
