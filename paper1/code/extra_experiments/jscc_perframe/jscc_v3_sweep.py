@@ -28,7 +28,8 @@ CKPT = {c: CKPT_ROOT / f'stage2_{c}_learned_v3/stage2_whole_map_4000steps.pth'
         for c in ('awgn', 'rayleigh', 'ofdm')}
 DATA = REPO / 'opencood/../opv2v_data_dumping'           # -> OpenCOOD/opv2v_data_dumping
 SPLIT_DIR = {'validate': str((REPO / 'opv2v_data_dumping/validate')),
-             'test': str((REPO / 'opv2v_data_dumping/test'))}
+             'test': str((REPO / 'opv2v_data_dumping/test')),
+             'culver': str((REPO / 'opv2v_data_dumping/test_culver_city'))}
 SNR_GRID = [0, 4, 8, 12, 16, 20]
 CH_ORDER = ['awgn', 'rayleigh', 'ofdm']
 
