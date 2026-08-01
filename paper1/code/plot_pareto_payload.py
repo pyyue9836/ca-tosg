@@ -30,7 +30,7 @@ B_L, B_C = 0.024, 0.99                   # object-level; Fixed C16 channel-use p
 
 
 def save(fig, stem):
-    for ext in ('pdf', 'svg'):
+    for ext in ('pdf', 'png'):
         fig.savefig(os.path.join(FIG, f'{stem}.{ext}'))
     plt.close(fig); print('wrote', stem + '.{pdf,svg}')
 
@@ -52,7 +52,7 @@ def pareto_test():
                    zorder=4, edgecolors='k', linewidths=0.5,
                    label=label.get(r.policy, r.policy))
     ax.set_xscale('log'); ax.set_xlim(0.018, 0.65); ax.set_ylim(0.05, 0.95)
-    ax.set_xlabel('Average payload (Mbit/frame, log scale)')
+    ax.set_xlabel('Average payload (Msym/frame, log scale)')
     ax.set_ylabel('Mean realised F1'); ax.set_title('OPV2V test', fontsize=9)
     ax.grid(True, alpha=0.3, which='both')
     ax.annotate('fixed feature-level\npolicies are dominated', xy=(0.495, 0.826),
@@ -74,7 +74,7 @@ def payload_awgn():
     ax.axhline(0.495, color=PS.C_C256, ls=':', lw=1.1, label='Fixed $C_{256}$ = %.3f' % 0.495)
     ax.set_yscale('log'); ax.set_xlim(-1, 21); ax.set_xticks([0, 4, 8, 12, 16, 20])
     ax.set_xlabel('Estimated SNR (dB)')
-    ax.set_ylabel('Mean payload (Mbit channel-use eq., log)')
+    ax.set_ylabel('Mean payload (Msym channel-use eq., log)')
     ax.set_title('Bandwidth vs SNR — AWGN', fontsize=9)
     ax.grid(alpha=0.3, which='both'); ax.legend(fontsize=7.5, loc='center right')
     fig.tight_layout(); save(fig, 'fig_payload_awgn')
