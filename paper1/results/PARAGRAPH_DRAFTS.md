@@ -31,7 +31,7 @@ payload-penalised frontier activates it at only 2.5 / 3.2 / 4.5\% of frames. Tha
 lower-channel-use action earns no more than a marginal share is itself a finding.
 
 [^req]: Measured by replaying the 200-realisation deployment (drawn CSI) through the deployed selector and
-counting C256 predictions -> 0 / 0 / 0 (validate/test/culver). The deployed classifier's class set is
+counting C256 predictions $\to$ 0 / 0 / 0 (validate/test/culver). The deployed classifier's class set is
 $\{L, \mathrm{C16}\}$ -- the imitated oracle labels carry zero C256 at this operating point -- so the count
 is structurally zero; we report the measured count rather than infer it, verified programmatically from the per-frame deployment account.
 
