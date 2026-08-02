@@ -71,3 +71,11 @@ RX reproduces \$[0-9]
 RX decision agreement
 RX base rate
 RX selection accuracy
+# 17 leaky JSCC two_regime edge (RF + tau tuned ON the eval split). Clean double-freeze reverses it
+#    to negative and the leakage-free k-fold gives the honest in-dist +0.022/+0.018/+0.020 (2026-08-02,
+#    build_two_regime_edge_clean.py + kfold_two_regime_diag.py). Retired forms: the leaky +0.027 AWGN /
+#    +0.025 OFDM edges, and the "oracle-tuned tau on the evaluation frames" phrasing. Abstract/intro/
+#    conclusion now carry NO JSCC number; sec:jscc_aware carries in-dist +0.022 and deployed -0.004.
+RX \+0\.027
+RX oracle-tuned
+RX \+0\.025.{0,8}F1 edge
