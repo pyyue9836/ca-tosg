@@ -1,5 +1,16 @@
 # 怎么画 §4.1 那张 Method Overview 框图
 
+> ## ⚠️ 2026-08-02 更新 (Q2, S={L,C16}) —— 重画/改图时必须落实（Josh 手动 draw.io）
+> 配合 S={L,C16} 形式化改动（Eq.(1) 已改为 2 元），overview 图要一次编辑做三件事：
+> 1. **C16/C256 归组进同一个 feature-level 分支块**（已经是"Feature codec C16/C256"块，确认视觉上归组）。
+> 2. **C256 行/标签加注**：`C256 (dominated — excluded from deployment, §III-B)`；部署选择器只在 {L, C16}
+>    间择一，C256 只作 granularity ladder 的第三个 PHY 码点存在、不被选。
+> 3. **载荷标注改成 channel-use Msym 值**（旧的 Mbit 值是错的、且单位错）：
+>    `L ≈ 0.024 Msym/frame`、`C16 ≈ 0.99 Msym/frame`、`C256 ≈ 0.495 Msym/frame`（rate-1/2）。
+> 4. selector 输出的分支择一：主箭头 `s_t ∈ {L, C16}`（2-bit 请求；'11' 及 C256 码点未用，§VI-M）。
+> 下面正文的旧标注（第"文字标注"节）已按此更新；画完截图发我核 IEEE 风格。
+
+
 ## 用什么工具
 
 [draw.io](https://app.diagrams.net/) 免费、网页版、所见即所得，IEEE 论文标准选项。
@@ -94,7 +105,7 @@
 
 - 公式记号用 LaTeX 风格的 italic 字符：`X_j`、`F_{j,t}`、`M_j`、`z_t`、`γ̂_t`、`c_t`、`s_t`、`m_t^{s_t}`、`Ψ`、`Ŷ_t`
 - 函数名等用 mono 字体：`PointPillars`, `Cue extractor`, `RF Selector`, `Fusion`
-- 标注数值：`~0.024 Mbit/frame` (L 分支)、`~0.495 Mbit/frame` (C16)、`~0.248 Mbit/frame` (C256)
+- 标注数值（channel-use Msym，rate-1/2）：`~0.024 Msym/frame` (L 分支)、`~0.99 Msym/frame` (C16)、`~0.495 Msym/frame` (C256, dominated/excluded — 见顶部 Q2 更新)
 
 ## 导出步骤
 
