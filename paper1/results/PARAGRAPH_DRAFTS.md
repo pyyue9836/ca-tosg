@@ -140,7 +140,7 @@ late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:met
 ##        with reference to the IEEE 802.11bd standard"; "1/2-rate LDPC code, and the resulting bits are
 ##        modulated using 16-QAM".
 ## FAMILY-NAME BRANCH = (a) NEUTRAL, grep-decided: main.tex is standard-AGNOSTIC -- it names BOTH "802.11bd or
-## NR sidelink" as example signalling stacks (L34/L113/L144/L220/L270), cites {ieee80211bd, 3gpp38885}, and
+## NR sidelink" as example signalling stacks (L34/L113/L144/L220/L270), cites {ieee80211bd, 3gpp37885}, and
 ## models a GENERIC "rate-1/2 LDPC + QAM" BLER (Sionna NR-LDPC under the hood). It does NOT exclusively self-
 ## identify as 802.11bd (so "same 802.11bd family we adopt" is FALSE on our side) NOR as NR/3GPP (so the
 ## explicit-contrast branch (b) is unavailable). -> NO family name; neutral "same cliff-prone class of digital
