@@ -157,7 +157,7 @@ upgrade): a "no source / doesn't exist / not found" assertion MUST carry THREE t
 adjudicator who ruled "descriptive substitution" on the scope-less negative shares the fault; a ruling
 built on an unverified negative inherits its invalidity, so a scope-less negative is BOUNCED for its scope
 before any ruling. The -0.0134/n=108 v2 artifact that the agent swapped in is now DEPRECATED
-(DEPRECATED_V2_DIFFICULTY.md) -- it actively supplied a wrong number, the stale-artifact protocol's 2nd
+(DEPRECATED_V2_DIFFICULTY.md [removed in cleanup; git history]) -- it actively supplied a wrong number, the stale-artifact protocol's 2nd
 poster. Point-4 structural upgrade: the -0.0147 attribution is now a verified structural fact
 (harm_stratum_structural.csv) -- 635/713 request C16, the 78 L-frames are frame-identical to Fixed-L
 (max|diff|=0), so the paired difference arises entirely on the C16 frames.
@@ -170,7 +170,7 @@ source-bit, must NOT be cross-read with Msym axes.
 
 ## A-CLASS BATCH (execution order: ... -> A-class -> fig:ap_snr): (1) multiseed_hardening.csv pay_* columns
 ## re-derive under corrected PAYLOAD (train_rf_multiseed report-only); (2) fold in the v2-difficulty artifact
-## DEPRECATION (DEPRECATED_V2_DIFFICULTY.md -- difficulty_strata{,_goodchannel}.csv, no live reader, Jun-17
+## DEPRECATION (DEPRECATED_V2_DIFFICULTY.md [removed in cleanup; git history] -- difficulty_strata{,_goodchannel}.csv, no live reader, Jun-17
 ## v2, superseded by a2_difficulty_{,reliable_}v3.csv).
 
 ## HAND-WRITTEN-PARAGRAPH SCORECARD (all 4 CLOSED 2026-07-16)

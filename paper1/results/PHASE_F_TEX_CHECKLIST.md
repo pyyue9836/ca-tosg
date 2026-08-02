@@ -141,7 +141,7 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
     cannot tell them apart). Scan with binding context, and prefer the UNAMBIGUOUS fingerprints of the stale
     account: 0.2475, `1.98/4`, `1.98/8`, and any derivation missing the x2 (1/rate) factor. A hit on 0.495
     must be read in situ (is it C16-stale or C256-correct?), never bulk-replaced.
-14. Regenerate/retire the DEPRECATED_UNCODED_PAYLOAD.md orphans; confirm no live reader points at them.
+14. Regenerate/retire the DEPRECATED_UNCODED_PAYLOAD.md [removed in cleanup; git history] orphans; confirm no live reader points at them.
 15. RENDERED PDF DEPRECATION: every already-rendered Pareto/payload figure PDF (fig_pareto_test,
     fig_payload_{awgn,rayleigh}, any decision/robustness fig fed by a stale-PAYLOAD script) is marked
     pending-regen; the old PDF is DEPRECATED (same rule as the CSV orphans) until regenerated from a
