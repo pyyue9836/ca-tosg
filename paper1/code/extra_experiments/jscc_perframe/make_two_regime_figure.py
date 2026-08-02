@@ -71,30 +71,24 @@ def main():
     piv, njscc = BE.jscc_grid(CH, SPLIT)            # (n x 6) per-frame JSCC F1 at BE.SNR_GRID (test npz)
     grid = BE.SNR_GRID
 
-    # --- aggregates via the SAME function as two_regime_edge_v3 (spec 1: bit-reproduce; spec 2: same seed/protocol) ---
-    r_ldpc = BE.edge(CH, SPLIT, 'ldpc', feat)
-    r_jscc = BE.edge(CH, SPLIT, 'jscc', feat)
-    ref = pd.read_csv(os.path.join(BE.OUT, 'two_regime_edge_v3.csv'))
-    for reg, r in (('ldpc', r_ldpc), ('jscc', r_jscc)):
-        want = float(ref[(ref.channel == CH) & (ref.split == SPLIT) & (ref.regime == reg)].edge_rf_minus_threshold.iloc[0])
-        assert abs(r['edge_rf_minus_threshold'] - want) < 1e-9, (reg, r['edge_rf_minus_threshold'], want)
-        print(f"[bit-match {reg}] figure edge {r['edge_rf_minus_threshold']:+.5f} == two_regime_edge_v3 {want:+.5f}")
+    # --- panel (b) uses the leakage-free IN-DISTRIBUTION k-fold table (two_regime_kfold_diag.csv),
+    #     the same numbers reported in sec:jscc_aware(a). The old leaky edge() (train/tune on the eval
+    #     split) is retired; the cross-split deployment gap (sec:jscc_aware(b)) is a textual limitation,
+    #     not plotted here. Values are read straight from the CSV so the figure bit-tracks the table. ---
+    kf = pd.read_csv(os.path.join(BE.OUT, 'two_regime_kfold_diag.csv'))
 
-    def oracle_mean(regime):                        # per-frame max(eff_L, eff_C), 200-seed -- context bar
-        gr, n = (piv, njscc) if regime == 'jscc' else (None, len(df))
-        d = df.iloc[:n]; lt = d['late_f1'].to_numpy(); acc = 0.0
-        for s in range(BE.V.N_SEED):
-            rng = np.random.default_rng(s); snr = rng.uniform(0, 20, n)
-            b16 = BE.V._bler(snr, 16, CH); effC = BE.eff_C_of(regime, d, gr, snr, b16)
-            acc += np.maximum(lt, effC).mean()
-        return acc / BE.V.N_SEED
+    def kfrow(reg):
+        return kf[(kf.channel == CH) & (kf.split == SPLIT) & (kf.regime == reg)].iloc[0]
 
     bars = []
-    for reg_label, reg, r in (('LDPC+QAM\n(cliff)', 'ldpc', r_ldpc), ('Importance-map JSCC\n(graceful)', 'jscc', r_jscc)):
-        vals = {'L': float(df.iloc[:r['n']]['late_f1'].mean()), 'thr': r['threshold_f1'],
-                'RF': r['rf_f1'], 'oracle': oracle_mean(reg)}
+    for reg_label, reg in (('LDPC+QAM\n(cliff)', 'ldpc'), ('Importance-map JSCC\n(graceful)', 'jscc')):
+        r = kfrow(reg)
+        vals = {'L': float(r['all_L']), 'thr': float(r['kfold_threshold_f1']),
+                'RF': float(r['kfold_rf_f1']), 'oracle': float(r['oracle'])}
         for k, v in vals.items():
             bars.append(dict(regime=reg_label, policy=k, mean=v, lo=v, hi=v))   # point bars (edge CI is in the table)
+        print(f"[panel-b in-dist {reg}] L={r['all_L']} thr={r['kfold_threshold_f1']} "
+              f"RF={r['kfold_rf_f1']} oracle={r['oracle']} edge={r['kfold_edge']:+.5f}")
 
     # ---------- figure ----------
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(7.2, 3.0))
