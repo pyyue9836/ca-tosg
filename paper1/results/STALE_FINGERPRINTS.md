@@ -79,3 +79,13 @@ RX selection accuracy
 RX \+0\.027
 RX oracle-tuned
 RX \+0\.025.{0,8}F1 edge
+# 18 S={L,C16} formalism (2026-08-02): C256 is dominated -> EXCLUDED from the deployed action set S,
+#    which is now 2-element (Eq 1). Retired forms: the 3-element set literal {L,C_{16},C_{256}}, any
+#    "selector picks C256" (s_t=C_{256}), and ternary-selector language (three-way/3-way; never present,
+#    locked to prevent reintroduction). C256 STILL appears legitimately as the excluded PHY mode (Eq 5
+#    q in {16,256}, payload B_{C256}, sec:candidates dominance, Fixed-C256 baseline, rho) -- only the
+#    set-membership and selector-choice forms are stale.
+RX \{L, ?C_\{16\}, ?C_\{256\}\}
+RX s_t ?= ?C_\{256\}
+RX three-way
+RX 3-way

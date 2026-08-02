@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """Stacked-area selection ratio versus SNR, AWGN + Rayleigh side-by-side.
 
-Visualises rho_L, rho_C16, rho_C256 as a stacked area chart, the canonical
-"channel-adaptive policy" diagnostic.
+Visualises rho_L, rho_C16 (deployed action set S={L,C16}) as a stacked area
+chart, the canonical "channel-adaptive policy" diagnostic. C256 is excluded
+from S (dominated, sec:candidates), so no C256 layer is drawn.
 """
 import os
 import matplotlib
@@ -24,18 +25,15 @@ def _v3_shares(channel):
     d = d[(d.policy == 'CA-TOSG') & (d.channel == channel)].copy()
     d['snr_db'] = pd.to_numeric(d['snr_db']); d = d.sort_values('snr_db')
     d['rf_frac_L'] = d['rho_L']
-    d['rf_frac_C16'] = 1.0 - d['rho_L']          # feature action = C16 (selector never requests C256)
-    d['rf_frac_C256'] = 0.0                       # C256 = 0 at the deployed point; assert -- premise, not comment
-    assert (d['rf_frac_C256'] == 0).all(), 'C256 share must be 0 (selector never requests C256); rho_C16=1-rho_L premise'
+    d['rf_frac_C16'] = 1.0 - d['rho_L']          # deployed action set S={L,C16}; feature action = C16
     return d
 
 
 def plot_side(ax, df, title):
     ax.stackplot(df['snr_db'],
-                  df['rf_frac_L'], df['rf_frac_C16'], df['rf_frac_C256'],
-                  labels=['L  (object-level)', 'C$_{16}$  (16-QAM feature)',
-                          'C$_{256}$  (256-QAM feature)'],
-                  colors=['#82B366', '#6C8EBF', '#D79B00'],
+                  df['rf_frac_L'], df['rf_frac_C16'],
+                  labels=['L  (object-level)', 'C$_{16}$  (16-QAM feature)'],
+                  colors=['#82B366', '#6C8EBF'],
                   alpha=0.85, edgecolor='black', linewidth=0.4)
     ax.set_xlim(df['snr_db'].min(), df['snr_db'].max())
     ax.set_ylim(0, 1)

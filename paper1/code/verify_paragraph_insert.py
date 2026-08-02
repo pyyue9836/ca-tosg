@@ -78,6 +78,13 @@ PARAS = {
             ("Fig.~\\ref{fig:channel_codec_ap}'s coarse grid renders this cliff as the 16$\\to$20 dB AP transition.",
              "Fig.~\\ref{fig:bler} plots this cliff directly, with the 256-QAM BLER curve sitting to the right of the 16-QAM curve.",
              "B2"),
+            # Q2 (supervisor ruling, 2026-08-02): reframe the paragraph's role from a "completeness
+            # defence" for retaining C256 to the "exclusion basis" for it -- C256 is dominated by C16
+            # and excluded from the now 2-element deployed action set S={L,C16} (Eq.~\ref{eq:action_set}).
+            # Approved together with the S={L,C16} formalism change.
+            ("We retain C256 for completeness of the granularity ladder spanned by the 2-bit request, yet it earns no operational role:",
+             "As established above, $C_{256}$ is dominated by $C_{16}$ and is therefore excluded from the deployed action set $\\mathcal{S}$ (Eq.~\\eqref{eq:action_set}); it completes the granularity ladder addressable by the request field but earns no operational role:",
+             "Q2"),
         ],
     ),
     3: dict(
