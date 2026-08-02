@@ -4,8 +4,8 @@ policy_v3/ outputs but left these older siblings carrying the WRONG uncoded unit
 Found by `grep -rn '0\.2475\|0\.495' results/` (whole-repo sweep, not a single-point reconciliation).
 
 STALE (superseded by the policy_v3/ equivalent with corrected 0.99/0.495):
-- results/pareto_points.csv                      -> use results/policy_v3/pareto_points.csv
-- results/generalisation_{validate,test,culver}.csv -> use results/policy_v3/generalisation_*.csv
+- results/pareto_points.csv                      -> use results/policy/pareto_points.csv
+- results/generalisation_{validate,test,culver}.csv -> use results/policy/generalisation_*.csv
   (also older F1 accounting, not only payload)
 - code/extra_experiments/out/a1_pareto_points.csv   -> regenerate from a1_pareto.py (corrected PAYLOAD)
 
@@ -39,7 +39,7 @@ paper must align on THREE things -- VALUE, SOURCE, and ATTRIBUTION LABEL (which 
 belongs to). The double-notation disease has three species now, all caught this session: (1) NUMERIC (0.495
 dual-meaning C16/C256); (2) NARRATIVE (the gamma-dominant old story after c_t overtook it); (3) LABEL (v3
 test-derived robustness numbers sitting under an "OPV2V validate" caption). grep covers value+source; the
-attribution label is verified by cross-reading the generating SCRIPT HEADER (e.g. robustness_v3.py "Eval
+attribution label is verified by cross-reading the generating SCRIPT HEADER (e.g. robustness.py "Eval
 split = test"), not from memory. Attribution is verified with EQUAL weight to the value.
 
 REVERSE-DEPENDENCY SCAN (supervisor 2026-07-17, from the 12th interception -- the gravest: two contradictory
@@ -97,7 +97,7 @@ one-sentence content (selector holds L under Rayleigh -> payload = B_L) is carri
 DEPRECATED (2026-07-18, fig:ap_snr -> AP@0.5 only, ruling c): (i) fig_ap70_awgn.pdf / fig_ap70_rayleigh.pdf
 -- ap70 panels dropped (no v3 LDPC ap70 baseline exists; ap70 is isomorphic to ap50 and AP@0.5 is the
 manuscript's anchor). (ii) gs_rerun/figure_rebuild/jscc_global/*_summary.csv -- the OLD V2 baseline source
-(JSCC ~0.80, LDPC not reaching the ceiling); plot_ap_snr now reads the v3 CSVs (jscc_ap_f1_v3 for JSCC,
-channel_codec_ap_v3 for LDPC). (iii) jscc_ap_f1_v3's ap70 COLUMN is intentionally KEPT in the CSV -- data
+(JSCC ~0.80, LDPC not reaching the ceiling); plot_ap_snr now reads the v3 CSVs (jscc_ap_f1 for JSCC,
+channel_codec_ap for LDPC). (iii) jscc_ap_f1's ap70 COLUMN is intentionally KEPT in the CSV -- data
 closure: if a reviewer asks about the stricter threshold, the rebuttal has an anchor even though the figure
 does not plot it.

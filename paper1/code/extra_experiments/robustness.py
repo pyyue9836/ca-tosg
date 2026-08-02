@@ -10,7 +10,7 @@ All three degrade only the SELECTOR's information; the channel does not lie (eff
       10 Hz), d in {0,1,2,5} frames; scenario boundaries respected (sample_id resets).
 Each reports realised F1 vs the perturbation + the F1 DROP vs the unperturbed point with a FRAME-level
 paired bootstrap 95% CI. Eval split = test (held-out).
-Outputs: out/robustness_csi_noise_v3.csv, out/robustness_aging_v3.csv, out/robustness_staleness_v3.csv
+Outputs: out/robustness_csi_noise.csv, out/robustness_aging.csv, out/robustness_staleness.csv
 """
 import os
 import numpy as np
@@ -101,9 +101,9 @@ def staleness(te, rf, feat, n_seed=V.N_SEED):
 def main():
     te = pd.read_csv(C.TEST_CSV); rf = C.load_rf(); feat = list(rf.feature_names_in_)
     cn = csi_noise(te, rf, feat); ag = aging(te, rf, feat); st = staleness(te, rf, feat)
-    cn.to_csv(os.path.join(C.OUTDIR, 'robustness_csi_noise_v3.csv'), index=False)
-    ag.to_csv(os.path.join(C.OUTDIR, 'robustness_aging_v3.csv'), index=False)
-    st.to_csv(os.path.join(C.OUTDIR, 'robustness_staleness_v3.csv'), index=False)
+    cn.to_csv(os.path.join(C.OUTDIR, 'robustness_csi_noise.csv'), index=False)
+    ag.to_csv(os.path.join(C.OUTDIR, 'robustness_aging.csv'), index=False)
+    st.to_csv(os.path.join(C.OUTDIR, 'robustness_staleness.csv'), index=False)
     print('=== CSI noise (200-real, test) ==='); print(cn.to_string(index=False))
     print('\n=== Channel aging Jakes 60 km/h fd=%.0f Hz (200-real, test) ===' % FD); print(ag.to_string(index=False))
     print('\n=== Decision staleness (200-real, test) ==='); print(st.to_string(index=False))

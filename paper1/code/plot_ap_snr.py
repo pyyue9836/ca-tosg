@@ -52,14 +52,14 @@ def _first_existing(*paths):
 # Data lives in results/ in the clean ca-tosg repo, and in gs_rerun/ in the OpenCOOD
 # working tree. Resolve whichever exists so one script serves both layouts.
 TRUE_E2E = _first_existing(
-    os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv'),  # v3: matches the item-7 section
+    os.path.join(P1, 'results/true_e2e_global_validate.csv'),  # v3: matches the item-7 section
     os.path.join(P1, 'results/true_e2e_global_validate.csv'),
     os.path.join(P1, 'gs_rerun/true_e2e_global_validate.csv'))
 # v3 baseline sources (the old gs_rerun/figure_rebuild summaries are V2 -- JSCC ~0.80, LDPC not reaching the
 # ceiling -- and would re-render the narrative item-7 replaced; read the v3 CSVs instead). AP@0.5 only:
-# channel_codec_ap_v3 is ap50-only (no ap70 baseline exists), so fig:ap_snr is an AP@0.5 figure.
-JSCC_V3 = os.path.join(P1, 'results/jscc_v3/jscc_ap_f1_v3.csv')            # JSCC baseline (has ap50 + ap70)
-CODEC_V3 = os.path.join(P1, 'results/jscc_v3/channel_codec_ap_v3_validate.csv')  # LDPC-16/256 baseline (ap50)
+# channel_codec_ap is ap50-only (no ap70 baseline exists), so fig:ap_snr is an AP@0.5 figure.
+JSCC_V3 = os.path.join(P1, 'results/jscc/jscc_ap_f1.csv')            # JSCC baseline (has ap50 + ap70)
+CODEC_V3 = os.path.join(P1, 'results/jscc/channel_codec_ap_validate.csv')  # LDPC-16/256 baseline (ap50)
 _CODEC = {'ldpc16': 'LDPC-16', 'ldpc256': 'LDPC-256'}
 
 METRICS = {'ap50': ('ap50', 'ap50', 'AP@0.5')}   # (baseline col, true_e2e col, label) -- AP@0.5 only

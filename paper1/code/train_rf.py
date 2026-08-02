@@ -20,7 +20,7 @@ OUTCOME (leakage), so it is excluded from the features -- alongside late_f1/comp
 eff_f1_*/bler_*/oracle_3way label machinery.
 
 Deployed selector -> data/selector_rf.pkl (overwrites; v2 pkl backed up to selector_rf_v2.pkl).
-Also retains the base/csi/full ablation comparison in results/step4_rf_modes_v3.csv.
+Also retains the base/csi/full ablation comparison in results/step4_rf_modes.csv.
 """
 import hashlib
 import json
@@ -157,17 +157,17 @@ def main():
           f'(train_ids={len(tr_ids)}, seed={SEED}, test_size={TEST_SIZE}, dataset_md5={ds_md5})')
 
     # ---- acceptance CSVs ----
-    rep.to_csv(os.path.join(RESULTS, 'step4_rf_class_report_v3.csv'), index=False)
+    rep.to_csv(os.path.join(RESULTS, 'step4_rf_class_report.csv'), index=False)
     pd.DataFrame([r_base, r_csi, r_full]).to_csv(
-        os.path.join(RESULTS, 'step4_rf_modes_v3.csv'), index=False)
-    with open(os.path.join(RESULTS, 'step4_rf_train_meta_v3.json'), 'w') as fh:
+        os.path.join(RESULTS, 'step4_rf_modes.csv'), index=False)
+    with open(os.path.join(RESULTS, 'step4_rf_train_meta.json'), 'w') as fh:
         json.dump(dict(train_dataset_md5=ds_md5, deployed_rf_md5=rf_md5,
                        split_seed=SEED, test_size=TEST_SIZE,
                        n_train=len(tr_ids), n_test=len(te_ids),
                        class_balance=bal, feature_names=cols_full,
                        modes=[r_base, r_csi, r_full]), fh, indent=2)
-    print('acceptance -> results/step4_rf_class_report_v3.csv, step4_rf_modes_v3.csv, '
-          'step4_rf_train_meta_v3.json')
+    print('acceptance -> results/step4_rf_class_report.csv, step4_rf_modes.csv, '
+          'step4_rf_train_meta.json')
 
 
 if __name__ == '__main__':

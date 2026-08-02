@@ -5,7 +5,7 @@
 Compare candidate selectors (Decision Tree, Logistic Regression, RBF-SVM, small MLP, Random Forest) +
 the zero-cost SNR-threshold rule. Train on validate (frozen v3 oracle_3way labels), evaluate realised
 F1 + payload over 200 channel realisations on test; latency at batch 1 (10 Hz online point); model size.
-Output: out/a8_models_v3.csv
+Output: out/a8_models.csv
 """
 import os, time, pickle, io
 import numpy as np
@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 import _common as C
 import v3_eval as V
 
-RETUNED_TAU = 8.5   # engine best-tau on test (results/policy_v3/threshold_vs_rf.csv)
+RETUNED_TAU = 8.5   # engine best-tau on test (results/policy/threshold_vs_rf.csv)
 
 
 def latency_ms(model, X1, n_warm=100, n_meas=1000):
@@ -71,7 +71,7 @@ def main():
                      realised_f1_std=round(float(f1s.std()), 4), payload=round(float(pays.mean()), 4),
                      latency_ms=0.001, size_kb=0.0))
     out = pd.DataFrame(rows)
-    out.to_csv(os.path.join(C.OUTDIR, 'a8_models_v3.csv'), index=False)
+    out.to_csv(os.path.join(C.OUTDIR, 'a8_models.csv'), index=False)
     print('=== A8 v3 model comparison (realised F1/payload = 200-realisation; latency batch-1) ===')
     print(out.to_string(index=False))
     rf_f1 = [r['realised_f1'] for r in rows if r['model'].startswith('Random Forest')][0]

@@ -17,7 +17,7 @@ import pandas as pd
 
 P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(P1, 'paper/figures')
-V3 = os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv')  # deployed selector rho_L per SNR
+V3 = os.path.join(P1, 'results/true_e2e_global_validate.csv')  # deployed selector rho_L per SNR
 
 
 def _v3_shares(channel):
@@ -45,7 +45,7 @@ def plot_side(ax, df, title):
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    df_a = _v3_shares('awgn')                     # v3: derived from true_e2e_v3 rho_L (C256 layer drawn = zero)
+    df_a = _v3_shares('awgn')                     # v3: derived from true_e2e rho_L (C256 layer drawn = zero)
     df_r = _v3_shares('rayleigh')
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3.6), sharey=True)

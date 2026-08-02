@@ -3,7 +3,7 @@
 # selector as the 0/0/0 C256 count), and TESTS the structural claim: on frames where the selector requests L,
 # its realised output is frame-identical to Fixed-L, so the paired (CA-TOSG - Fixed-L) difference arises
 # ENTIRELY on the C16-request frames. Stratum = test Easy (top tercile of ego object-level late_f1), under the
-# deterministic reliable channel (AWGN, 16 dB), matching a2_difficulty_reliable_v3.csv.
+# deterministic reliable channel (AWGN, 16 dB), matching a2_difficulty_reliable.csv.
 import os, pickle, numpy as np, pandas as pd
 P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = os.path.join(P1, 'data'); BLER = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')

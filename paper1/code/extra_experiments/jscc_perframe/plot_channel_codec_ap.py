@@ -10,7 +10,7 @@ import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.abspath(__file__)); P1 = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
-POL = os.path.join(P1, 'results/jscc_v3'); FIGDIR = os.path.join(P1, 'paper/figures')
+POL = os.path.join(P1, 'results/jscc'); FIGDIR = os.path.join(P1, 'paper/figures')
 os.makedirs(FIGDIR, exist_ok=True)
 try:
     sys.path.insert(0, os.path.join(P1, 'code')); import paper_style as PS; PS.apply()
@@ -25,7 +25,7 @@ CODEC_COL = {'LDPC-16': '#0072B2', 'LDPC-256': '#D55E00', 'JSCC': '#009E73'}
 
 
 def main(split='test'):
-    d = pd.read_csv(os.path.join(POL, f'channel_codec_ap_v3_{split}.csv'))
+    d = pd.read_csv(os.path.join(POL, f'channel_codec_ap_{split}.csv'))
     fig, axes = plt.subplots(3, 3, figsize=(8.4, 7.2), sharex=True, sharey=True)
     for i, ch in enumerate(CHANNELS):
         for j, cd in enumerate(CODECS):

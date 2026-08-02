@@ -3,7 +3,7 @@
 """Sweep the training oracle's action mix over an Es/N0 grid x channel x split, holding the
 per-frame cues/F1 fixed and setting every frame to the swept (channel, snr). Recomputes the same
 Sionna frame BLER + ego fallback + lam=0 argmax as make_dataset.py. Checks 3 pre-registered
-predictions and writes results/step4_oracle_action_dist_v3.csv.
+predictions and writes results/step4_oracle_action_dist.csv.
 
 Predictions (from the P1 Step-4 GO):
   P1  Rayleigh -> L ~ 100% at every SNR (Sionna Rayleigh frame BLER = 1 for 16- and 256-QAM).
@@ -60,10 +60,10 @@ def main():
                                  frac_C256=round(float((pick == 'C256').mean()), 4),
                                  n=n))
     out = pd.DataFrame(rows)
-    out.to_csv(os.path.join(RESULTS, 'step4_oracle_action_dist_v3.csv'), index=False)
+    out.to_csv(os.path.join(RESULTS, 'step4_oracle_action_dist.csv'), index=False)
 
     # ---- check the 3 predictions ----
-    print('wrote results/step4_oracle_action_dist_v3.csv', out.shape)
+    print('wrote results/step4_oracle_action_dist.csv', out.shape)
     ray = out[out.channel == 'rayleigh']
     p1 = float(ray['frac_L'].min())
     print(f'\n[P1] Rayleigh frac_L min over all (split,SNR) = {p1:.4f}  '

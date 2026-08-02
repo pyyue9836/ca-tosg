@@ -7,7 +7,7 @@ not assumed. Train an RF per feature subset on the FROZEN v3 oracle_3way labels 
 EVALUATE each over 200 channel realisations on the held-out TEST split (train=validate). Report mean F1
 + payload (200-real) per subset, the key delta (full - channel_only = "cues add ..."), and its
 FRAME-level paired bootstrap 95% CI. Single-frozen-draw numbers are NOT used here.
-Outputs: out/a7_ablation_v3.csv + out/a7_cue_value_v3.csv
+Outputs: out/a7_ablation.csv + out/a7_cue_value.csv
 """
 import os
 import numpy as np
@@ -68,7 +68,7 @@ def main():
     print(f"[payload currency] cues save bandwidth (Full - Channel-only payload):    {d_pay:+.5f}  "
           f"95% CI [{lo_p:+.5f}, {hi_p:+.5f}]  {'significant' if (lo_p>0 or hi_p<0) else 'NOT significant'}")
     print(f"perception+SNR - channel-only F1:                                        {d_csi:+.5f}  95% CI [{lo_s:+.5f}, {hi_s:+.5f}]")
-    df.to_csv(os.path.join(C.OUTDIR, 'a7_ablation_v3.csv'), index=False)
+    df.to_csv(os.path.join(C.OUTDIR, 'a7_ablation.csv'), index=False)
     pd.DataFrame([
         dict(delta='cues_add_F1_over_channel_alone', currency='accuracy', value=round(d_cues, 5),
              ci_lo=round(lo_c, 5), ci_hi=round(hi_c, 5), significant=bool(lo_c > 0 or hi_c < 0)),
@@ -76,8 +76,8 @@ def main():
              ci_lo=round(lo_p, 5), ci_hi=round(hi_p, 5), significant=bool(lo_p > 0 or hi_p < 0)),
         dict(delta='perception+SNR_minus_channel_only_F1', currency='accuracy', value=round(d_csi, 5),
              ci_lo=round(lo_s, 5), ci_hi=round(hi_s, 5), significant=bool(lo_s > 0 or hi_s < 0))]).to_csv(
-        os.path.join(C.OUTDIR, 'a7_cue_value_v3.csv'), index=False)
-    print('wrote out/a7_ablation_v3.csv + a7_cue_value_v3.csv')
+        os.path.join(C.OUTDIR, 'a7_cue_value.csv'), index=False)
+    print('wrote out/a7_ablation.csv + a7_cue_value.csv')
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ chooses between L (late) and C (feature-level).
 2-way oracle (per regime) is trained ONCE on the frozen est_snr labels (labels fixed); EVAL is
 200-realisation. Reports RF F1 / best-tau-threshold F1 / their frame-level paired 95% CI, + payloads.
 Interpolation systematic term (JSCC side only): aggregate bias <=0.0012 (mid-grid probe), attached here.
-Outputs: results/jscc_v3/two_regime_edge_v3.csv (appends per channel,split,regime).
+Outputs: results/jscc/two_regime_edge.csv (appends per channel,split,regime).
 """
 import os, sys
 import numpy as np, pandas as pd
@@ -20,10 +20,10 @@ HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.abspath(os.pat
 sys.path.insert(0, REPO); sys.path.insert(0, os.path.join(REPO, 'peiyi_work/paper1/code/extra_experiments'))
 sys.path.insert(0, HERE)
 import v3_eval as V
-import score_jscc_v3 as SC
+import score_jscc as SC
 
 P1 = os.path.join(REPO, 'peiyi_work/paper1'); DATA = os.path.join(P1, 'data')
-JSCC_DIR = os.path.join(P1, 'gs_rerun/jscc_v3'); OUT = os.path.join(P1, 'results/jscc_v3')
+JSCC_DIR = os.path.join(P1, 'gs_rerun/jscc_v3'); OUT = os.path.join(P1, 'results/jscc')
 SNR_GRID = np.array([0, 4, 8, 12, 16, 20], float)
 PAY_L, PAY_C = 0.024, 0.99   # channel uses (Msym) at rate-1/2: L=0.024, C=C16=1.98/0.5/4=0.99
 #                              (1.98/4=0.495 was the UNCODED count -- wrong for the rate-1/2 chain)
@@ -110,7 +110,7 @@ def main():
                 except Exception as e:
                     print(f"[{ch} {sp} {regime}] SKIP: {e}", flush=True)
     out = pd.DataFrame(rows)
-    path = os.path.join(OUT, 'two_regime_edge_v3.csv')
+    path = os.path.join(OUT, 'two_regime_edge.csv')
     if os.path.exists(path):
         out = pd.concat([pd.read_csv(path), out]).drop_duplicates(['channel', 'split', 'regime'], keep='last')
     out.to_csv(path, index=False)

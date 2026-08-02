@@ -16,16 +16,16 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 ## Abstract (L34) + intro central finding (L69-70)
 - [x] L34 `+0.05` (AP gain) -> `up to +0.074` (culver AP@.5 feat-active over Fixed-L; validate +0.026, test +0.002~0). src true_e2e_global_v3.
 - [x] L34 `15.8-18.4%` -> `16.0-25.3%` (band def above). src policy_v3.
-- [x] L34 `65%` (SNR+ch importance) -> `62%` (channel_is_rayleigh 0.349 + est_snr_db 0.275 = 0.624). src results/feature_importance_v3.csv.
+- [x] L34 `65%` (SNR+ch importance) -> `62%` (channel_is_rayleigh 0.349 + est_snr_db 0.275 = 0.624). src results/feature_importance.csv.
 - [x] L34 `+0.017 [+0.012,+0.022]` (JSCC edge) -> reframe to CURRENCY: cliff LDPC cues buy bandwidth
   (a7 payload -0.031 sig, F1 +0 ns); graceful JSCC cues buy accuracy (edge awgn test +0.0266
-  [+0.0242,+0.0290]). src two_regime_edge_v3 + a7_cue_value_v3.
+  [+0.0242,+0.0290]). src two_regime_edge + a7_cue_value.
 - [x] L34 `52.8` ms -> keep (batch-1 conservative; add the a8 13.9 ms protocol note; unify once).
 - [x] L69 `+0.045` (hard-frame gain) -> v3 reliable-ch hard gain test +0.0896 [+0.0829,+0.0963] (all-channel
   +0.0240); DECLARE reliable-channel condition (AWGN 16 dB, deterministic). src a2.
 - [x] L70 `+0.017 ... +0.015 (Rayleigh and OFDM)` -> v3 edges: awgn +0.0266, rayleigh +0.0223, ofdm +0.0251
   (test); + feasibility monotone (diversity order 8 / ~24 / unbounded dB; OFDM d=2.01 R2=0.99, Rayleigh
-  d=0.84 R2=0.94). src two_regime_edge_v3 + PROVENANCE_ofdm.
+  d=0.84 R2=0.94). src two_regime_edge + PROVENANCE_ofdm.
 
 ## Method (L284)
 - L284 `52.8 +-5.7 ms / P95 59.1` -> keep (latency protocol unchanged; channel-independent). Confirm vs a8.
@@ -48,9 +48,9 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 ## Ablation tab:ablation (L482-496, 740-746) -- CSI LABEL + v3 F1
 - Relabel variants: `RF+CSI` -> `RF + est. SNR`; `RF+CSI+ch` -> `RF + est. SNR + ch. type` (also L598/605).
 - L740-746 F1 col `0.888/0.887/0.887/0.887 / 0.894/0.887` -> v3 a7: Channel-only 0.9089, Perception-only
-  0.8996, Perception+SNR 0.8973, Full 0.9086, Oracle 0.9140, Fixed-L 0.9011 (@payloads). src a7_ablation_v3.
+  0.8996, Perception+SNR 0.8973, Full 0.9086, Oracle 0.9140, Fixed-L 0.9011 (@payloads). src a7_ablation.
 - L733 "adding 21 cues changes F1 by <0.001" -> v3 cues_add -0.00024 [-.00052,+.00003] ns (HOLDS). + payload
-  currency: cues save 0.031 Msym (12%) sig. src a7_cue_value_v3.
+  currency: cues save 0.031 Msym (12%) sig. src a7_cue_value.
 - L496 `0.917 +-0.015` -> v3 full F1 0.9086 (@payload). L495 RF+CSI row -> Perception+SNR 0.8973.
 
 ## Generalisation (L579-663)
@@ -71,16 +71,16 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 
 ## JSCC-aware (L779, 818-820, 837) -- currency
 - L779/818 `+0.017 [+0.012,+0.022] AWGN, +0.015 Rayleigh/OFDM` -> v3 edges awgn +0.0266, rayleigh +0.0223,
-  ofdm +0.0251 (test); + threshold structurally useless (best-tau=20/0). src two_regime_edge_v3.
+  ofdm +0.0251 (test); + threshold structurally useless (best-tau=20/0). src two_regime_edge.
 - L837 `0.917` -> v3 ceiling [AP-PENDING or JSCC F1 context].
 
 ## Robustness (L866-871, 893-902)
-- L866/893 `-0.057` staleness -> v3 -0.0193 [-.0184,-.0203]. src robustness_staleness_v3.
+- L866/893 `-0.057` staleness -> v3 -0.0193 [-.0184,-.0203]. src robustness_staleness.
 - L870 `+0.015` -> v3 edge. L871/900 `52.8` -> keep. L902 (conclusion) `15.8-18.4% +0.045 +0.017 +0.015` ->
   v3 band + v3 gains + currency edges.
 
 ## Feature importance (L450-482) -- [TODO regen v3 feature_importance CSV]
-- `65%` -> `62%` (0.624; channel_is_rayleigh dominates 0.349, est_snr_db 0.275). src feature_importance_v3.csv. DONE.
+- `65%` -> `62%` (0.624; channel_is_rayleigh dominates 0.349, est_snr_db 0.275). src feature_importance.csv. DONE.
 
 ## CROSS-CUTTING NOTATION (unify during the .tex pass; reviewer flags mismatches)
 - C256 AWGN cliff = 16.5 dB (Sionna frame-BLER onset, frame BLER < 0.999; 16-QAM = 8.0 dB). ONE convention
@@ -97,7 +97,7 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
   never REQUESTS C256 (class support 0/0/0), but the oracle frontier activates it at a minority 2.5/3.2/4.5%.
   An unqualified "never activated" anywhere conflicts with the frontier number; qualify by object (deployed
   selector vs oracle frontier). Twin of the killed "unconditional dominance" error.
-- PAYLOAD TABLE CONSISTENCY: results/policy_v3/pareto_points.csv is STALE -- Fixed C16 0.495 / Fixed C256
+- PAYLOAD TABLE CONSISTENCY: results/policy/pareto_points.csv is STALE -- Fixed C16 0.495 / Fixed C256
   0.2475 are the OLD UNCODED payloads (pre rate-1/2 correction; file dated Jul 13, not regenerated). Correct
   = C16 0.99 / C256 0.495 (verified: frontier lam=0 payload 0.1565 = 0.863*0.024 + 0.137*0.99). Regenerate
   pareto_points.csv (and any payload table/figure) to 0.99/0.495 and confirm same value + same Msym notation
@@ -123,7 +123,7 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
     CLASS A (pure figure generators -- regen + final-gate visual inspection; the "A-class regen" slot in the
     execution order):
     - code/plot_pareto_payload.py:29,58,74  (B_C=1.98/4; annotation xy=(0.495,..); Fixed-C256 line 1.98/8) +
-      repoint read results/pareto_points.csv -> results/policy_v3/pareto_points.csv. Figs: fig_pareto_test,
+      repoint read results/pareto_points.csv -> results/policy/pareto_points.csv. Figs: fig_pareto_test,
       fig_payload_{awgn,rayleigh}.
     - code/snr_decision_plot.py:31          (decision figure)
     CLASS B (TRAINING / INFERENCE / reported-number path -- higher stakes; a stale payload biases an EMITTED
@@ -183,12 +183,12 @@ Y ranges 16.0-25.3% across the validate/test/Culver splits." Rounding: nearest 0
 ## PRE-BLOCK JUDGMENTS (2026-07-16; done BEFORE opening L676-902, per supervisor)
 ### item-10 csi_noise judgment (C-class traceability -- the data task, conclusion-first):
 csi_noise feeds ONLY the SNR-estimation-noise ΔF1 rows of tab:robustness (L866-902). Per-number:
-  - sigma<=1 dB  ΔF1 : F1-based -> report-only re payload. v3 = -0.0002 (robustness_csi_noise_v3.csv)
+  - sigma<=1 dB  ΔF1 : F1-based -> report-only re payload. v3 = -0.0002 (robustness_csi_noise.csv)
   - sigma=2 dB   ΔF1 : F1-based -> report-only.            v3 = -0.0009
   - sigma=5 dB   ΔF1 : F1-based -> report-only.            v3 = -0.0037
 NO csi_noise PAYLOAD number is cited in main.tex -> the stale PAYLOAD dict is report-only (no contamination).
 BUT the CITED ΔF1 values are STALE v2 (-0.003/-0.025/-0.070) and must update to v3 (-0.0002/-0.0009/-0.0037,
-~20x smaller -- v3 far more CSI-noise robust); v3 source = robustness_csi_noise_v3.csv (corrected payload
+~20x smaller -- v3 far more CSI-noise robust); v3 source = robustness_csi_noise.csv (corrected payload
 0.2509, WITH CI). The stale-hardcode code/csi_noise_ablation.py (PAYLOAD 1.98/4, OUT v4_csi_noise, no CI) is
 SUPERSEDED by it -> C-class DEPRECATE (add to DEPRECATED_UNCODED_PAYLOAD script family disposition).
 ### item-11 narrative grep (a): NOT zero hits, but NO statement asserts "SNR is the single dominant FEATURE".
@@ -213,7 +213,7 @@ narrative-flip VIOLATION found; these are consistency touch-ups, recorded with s
 ## framing only). Scan scope = full main.tex; recorded per the reverse-dependency-scan rule.
 
 ## ITEM 6 SPECS (2026-07-17):
-- DENOMINATOR (cue payload saving): 0.03066 Msym / RF-deployed 0.2509 = 12.2% ~ 12% (a7_cue_value_v3). Unify
+- DENOMINATOR (cue payload saving): 0.03066 Msym / RF-deployed 0.2509 = 12.2% ~ 12% (a7_cue_value). Unify
   all four "~12%" sites: body (L70/L381/L715) = "of the selector's deployed channel use" (full denominator,
   ONE definition, others reference); abstract (L34) stays terse = "~12% lower channel use". No "~10%" anywhere.
 - MECHANISM-TRANSPARENT WORDING (new landmine): Full payload 0.2399 < Channel-only 0.2706 because perception

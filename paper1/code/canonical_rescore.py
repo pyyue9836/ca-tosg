@@ -5,13 +5,13 @@
 # visibility is a sensitivity issue, appendix candidate, not canonical). The ruler is the
 # "canonical union GT" (eval-time post-processor union, standard OPV2V range) -- its name carries
 # no tested-pipeline name; it is materialised from the intermediate dataset's (fuller) union output.
-# Prints and writes results/canonical_rescore_v3.csv with BEFORE (own-GT) vs AFTER (canonical).
+# Prints and writes results/canonical_rescore.csv with BEFORE (own-GT) vs AFTER (canonical).
 import os, sys
 import numpy as np, torch, pandas as pd
 REPO = '/home/josh/cooperative_semantic_perception/OpenCOOD'; sys.path.insert(0, REPO)
 from opencood.utils import eval_utils
 GS = os.path.join(REPO, 'peiyi_work/paper1/gs_rerun')
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results/canonical_rescore_v3.csv')
+OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results/canonical_rescore.csv')
 
 
 def f1(boxes, gts, iou=0.5):

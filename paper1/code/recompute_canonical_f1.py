@@ -41,8 +41,8 @@ def main():
                          comp_f1_old=round(old_cf,4), comp_f1_v3=round(cf.mean(),4),
                          ego_f1_v3=round(ef.mean(),4)))
         print(f"{sp:9s} late {old_lf:.4f}->{lf.mean():.4f}  comp {old_cf:.4f}->{cf.mean():.4f}  ego(new)={ef.mean():.4f}  -> dataset_{sp}_v3.csv", flush=True)
-    pd.DataFrame(summ).to_csv(os.path.join(P1,'..','..','ca-tosg/paper1/results/canonical_f1_columns_v3.csv'), index=False)
-    print("[artifact] results/canonical_f1_columns_v3.csv ; datasets: data/dataset_{split}_v3.csv")
+    pd.DataFrame(summ).to_csv(os.path.join(P1,'..','..','ca-tosg/paper1/results/canonical_f1_columns.csv'), index=False)
+    print("[artifact] results/canonical_f1_columns.csv ; datasets: data/dataset_{split}_v3.csv")
 
 
 if __name__=='__main__':

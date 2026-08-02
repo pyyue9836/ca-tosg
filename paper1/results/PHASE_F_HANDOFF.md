@@ -31,7 +31,7 @@ L315 + Eq), then items 6-11, then item 13 script sweep, then fig:ap_snr. Five mi
 
 ## REMAINING 6/11 (mechanical; all v3 numbers final; ~1 h fresh)
 6. tab:ablation (L485-497) + CSI relabel L485/496/497: RF-base / RF+CSI->RF + est. SNR / RF+CSI+ch->RF + est.
-   SNR + ch. type; F1 col (L740-746 too) -> a7_ablation_v3 (Channel-only 0.909, Perception-only 0.900,
+   SNR + ch. type; F1 col (L740-746 too) -> a7_ablation (Channel-only 0.909, Perception-only 0.900,
    Perception+SNR 0.897, Full 0.909, Oracle 0.914, Fixed-L 0.901). L497 "0.917+-0.015" -> v3 full 0.909.
 7. true-e2e AP-vs-SNR section (L409-437) + fig:ap_snr REGEN: rows 0.909/0.895/0.844 + knee -> true_e2e_
    global_v3_*.csv (Fixed-L AP@.5 0.890/0.919/0.783; feat14 0.916/0.920/0.855; knee ~12 dB). fig:ap_snr
@@ -74,8 +74,8 @@ L315 + Eq), then items 6-11, then item 13 script sweep, then fig:ap_snr. Five mi
   If the two numbers appear ADJACENT in the body, a footnote must pre-empt: "different metric and object;
   the closeness is coincidental." (Apply during the .tex pass, items 3/7.)
 - channel_codec_ap v3 RE-OUTPUT (the actual old account, = attribution answered above but the re-run status
-  is separate): TEST split DONE = channel_codec_ap_v3_test.csv, commit a1f4b8c. VALIDATE split = running
-  (b1wu3r539) -> channel_codec_ap_v3_validate.csv; when done this line gets its md5/commit and the data-closure
+  is separate): TEST split DONE = channel_codec_ap_test.csv, commit a1f4b8c. VALIDATE split = running
+  (b1wu3r539) -> channel_codec_ap_validate.csv; when done this line gets its md5/commit and the data-closure
   declaration is airtight for both splits. (channel_codec_ap NOT merged into two_regime_edge -- separate by
   design, different metric AP vs F1 and object codec vs selector.)
 
@@ -102,7 +102,7 @@ floor) => STOP and investigate, NOT a footnote. If shape holds -> drop the "vali
 post a single-line confirmation with the commit hash.
 
 ## VALIDATE channel_codec_ap VERIFICATION RESULT (execution-side check; verdict is the supervisor's)
-channel_codec_ap_v3_validate.csv committed (this commit). Initial shape-check FALSE-flagged breaks because
+channel_codec_ap_validate.csv committed (this commit). Initial shape-check FALSE-flagged breaks because
 it hard-coded TEST levels (ego 0.735, JSCC>0.78); investigated per criterion (3) -> a CHECK BUG, not a
 regime break. Re-checked against VALIDATE's OWN levels (validate ego-only AP 0.6116 vs test 0.7350; validate
 ceiling 0.9169): regime SHAPE INVARIANT on all 9 panels -- AWGN-LDPC x2 cliff (ego 0.612 -> ceiling 0.917);
@@ -144,11 +144,11 @@ hardcodes B_C=0.495 / Fixed-C256=1.98/8 -> fig_pareto_test + fig_payload_* carry
 
 ## HAND-WRITTEN-PARAGRAPH GATE ARCHIVAL (2026-07-15) -- what the provenance gate actually caught
 Collaboration-harm v1 real defects caught by the gate (the bar working): (1) GT count 43 was stale -> 41.0
-(gt_object_stats_v3.csv); (2) "adds false positives" over-reached -- no ego/compressed confusion columns
+(gt_object_stats.csv); (2) "adds false positives" over-reached -- no ego/compressed confusion columns
 exist to verify an FP decomposition -> result-level wording. RULE (confirmed): hand-written paragraphs pass
 NUMBERS first, rhetoric second -- prose is the highest-concentration zone for memory-transcription risk.
 AGENT ERROR in v2 (owned, reversed in v3): the "-0.0147 is unsourced / no CI" catch was a FALSE ALARM from
-grepping only results/ (missed code/extra_experiments/out/a2_difficulty_reliable_v3.csv). -0.0147 is correct,
+grepping only results/ (missed code/extra_experiments/out/a2_difficulty_reliable.csv). -0.0147 is correct,
 n=713, 95% CI [-0.0179,-0.0115], significant. The agent replaced it with the STALE v2 -0.0134 (n=108). The
 supervisor's point-2 gate (footnote evidence must match the sentence) forced the return to the CSV that
 surfaced the agent's own error. negative-existence-search-scope reinforced (2026-07-16, receipt-format
@@ -229,7 +229,7 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## outranks gamma because Rayleigh collapses the feasible set to L). Narrative grep (a) SWEPT: no "SNR is the
 ## dominant feature" violation; reconciliation touch-ups (L717/755/787/812 "channel state" not "SNR alone";
 ## L34 reorder) queued for the dense block. item-10 csi_noise judgment DONE (report-only; v3 -0.0002/-0.0009/
-## -0.0037 from robustness_csi_noise_v3.csv; stale csi_noise_ablation.py -> C-class DEPRECATE).
+## -0.0037 from robustness_csi_noise.csv; stale csi_noise_ablation.py -> C-class DEPRECATE).
 
 ## ITEM-6 #4 JUDGMENT (belated report, supervisor flagged the receipt gap): a7_ablation.py RETRAINS an RF per
 ## feature subset (line 6 "Train an RF per feature subset on the FROZEN v3 oracle_3way labels"; fit() builds a
@@ -240,7 +240,7 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 ## L886 conclusion fixes -> commit 0b7ca48 (band/AP/gains/matches-narrative) + this turn (AP Culver-City
 ## attribution). Each conclusion number's label: AP +0.07 = Culver-City (validate +0.026, test comparable);
 ## hard +0.090 = test (a2 reliable Hard, validate +0.035, CI [+0.083,+0.096]); JSCC +0.027 = AWGN/test,
-## +0.022 = Rayleigh/test (two_regime_edge_v3). Every final-gate diff hunk maps to a checklist/HANDOFF line.
+## +0.022 = Rayleigh/test (two_regime_edge). Every final-gate diff hunk maps to a checklist/HANDOFF line.
 
 ## GAMMA-MECHANISM RAYLEIGH=OFDM BIT-IDENTITY -- NECESSITY PROVEN (2026-07-17, 3rd application of "a perfect
 ## number must self-prove its necessity", after identity max|err|=0 and the L-frame identity). delta_F1
@@ -261,7 +261,7 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
   saturates ~0.71 (below Fixed-L everywhere), but LDPC-16 climbs to the ceiling 0.917 at >=12 dB (ABOVE
   Fixed-L 0.890), LDPC-256 at 20 dB. Reframed to the honest per-SNR story: the fixed feature is dominated ON A
   CHANNEL-AVERAGED BASIS (low-SNR cliff outweighs high-SNR gain), not per-SNR -- which is exactly the gating
-  opportunity. Fig caption + prose both corrected (src channel_codec_ap_v3_validate).
+  opportunity. Fig caption + prose both corrected (src channel_codec_ap_validate).
 - tab:true_e2e (validate, exit-grep-CAUGHT stale table -- I had misread HANDOFF's "0.909/0.895/0.844" as the
   target when it was the v2 row): all rows -> v3 (AWGN 14dB AP@0.5 0.916/AP@0.7 0.857, rho_L 0.370; Rayleigh
   flat at Fixed-L 0.890); prose 0.911->0.916, gap 0.006->0.001, payload 0.339/0.495 -> 0.633/0.990 Msym.
@@ -273,8 +273,8 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
 
 ## A-CLASS FIGURE REGEN (started 2026-07-18):
 - plot_pareto_payload.py (item-13 stale-hardcode generator) FIXED: B_C 1.98/4 -> 0.99; Fixed-C256 line
-  1.98/8 -> 0.495; pareto source results/pareto_points.csv -> results/policy_v3/pareto_points.csv; payload
-  source -> true_e2e_v3/true_e2e_global_v3_test.csv; annotation xy -> (0.495, 0.826); docstring updated. No
+  1.98/8 -> 0.495; pareto source results/pareto_points.csv -> results/policy/pareto_points.csv; payload
+  source -> true_e2e/true_e2e_global_v3_test.csv; annotation xy -> (0.495, 0.826); docstring updated. No
   stale payload literal remains. REGENERATED fig_pareto_test + fig_payload_awgn (copied to ca-tosg).
 - FLAG (fig_payload split): the generator reads test (true_e2e_global_v3_test) but the AP-vs-SNR/payload
   section (item 7) is VALIDATE -- confirm which split fig_payload should be (final-gate consistency).
@@ -282,7 +282,7 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
   holds L). Caption already states "the selector stays at the Fixed-L point" -> adequate, not coincidental.
 - REMAINING A-class generators (need v3 data + no stale payload, then regen + copy): fig:ap_snr (plot_ap_snr
   -> true_e2e_global_v3, validate; + new per-SNR narrative in caption), fig:two_regime (-> test, split moved),
-  fig_feature_importance (feature_importance_v3, c_t-dominant), fig_difficulty (a2_difficulty_reliable_v3),
+  fig_feature_importance (feature_importance, c_t-dominant), fig_difficulty (a2_difficulty_reliable),
   fig_payload_rayleigh, fig_decisions/fig_stacked_area (rho_L v3). Each: commit w/ gen-script+input; visual
   inspection is the FINAL-GATE human task (I regenerate + verify data source, not visual quality).
 
@@ -292,11 +292,11 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
   (policy_v3/pareto_points), same source as curve. [OK]
 - fig_payload_awgn (VALIDATE, FLAG-resolved): same split as its item-7 prose; 14dB rho_L 0.370 -> payload
   0.632 == prose 0.633; B_L 0.024 / B_C 0.990 == prose. [OK]
-- fig_feature_importance (v3): IN v2 -> results/feature_importance_v3.csv; top-2 channel_is_rayleigh 0.349 /
+- fig_feature_importance (v3): IN v2 -> results/feature_importance.csv; top-2 channel_is_rayleigh 0.349 /
   est_snr_db 0.275, subtotal 0.6245=62.4% == §Features (c_t-dominant); caption states fact only, mechanism in
   §Features prose (one-root-two-pointers, spec c). [OK]
 ## REMAINING A-class: fig:ap_snr (plot_ap_snr -> true_e2e_global_v3 validate; caption per the new per-SNR
-## narrative, spec b), fig:two_regime (test, split moved), fig_difficulty (a2_difficulty_reliable_v3),
+## narrative, spec b), fig:two_regime (test, split moved), fig_difficulty (a2_difficulty_reliable),
 ## fig_payload_rayleigh (flat at L=0.024; generator lacks a payload_rayleigh() -- add or confirm), fig_decisions
 ## / fig_stacked_area (rho_L v3), fig_channel_codec_ap (Figure A 9-panel, if not already v3). Each: gen-script +
 ## input id in commit, figure-text cross-read, then final-gate visual inspection (+ "payload source" column).
@@ -306,13 +306,13 @@ oracle_masked 0.8891. Both round-match -> gen-section non-payload numbers trace 
   0.633 came from the rounded-rho path). Figure and prose now identical, "~" removed.
 - Figure A (fig_channel_codec_ap): generator has NO hardcoded payload (AP-only, ref lines 0.922/0.919/0.735)
   -> NO-OP; the frozen-caliber approval carries (no regen -> no re-verify).
-- fig_difficulty: DATA-V3 (no regen needed), NEEDS FINAL-GATE VISUAL INSPECTION (never in-thread approved, so NOT approval-carry) -- fig_difficulty.pdf (2026-07-13) co-generated with a2_difficulty_reliable_v3.csv
+- fig_difficulty: DATA-V3 (no regen needed), NEEDS FINAL-GATE VISUAL INSPECTION (never in-thread approved, so NOT approval-carry) -- fig_difficulty.pdf (2026-07-13) co-generated with a2_difficulty_reliable.csv
   (same date), already v3.
 - fig_feature_importance: DONE (v3, c_t-dominant, cross-read pass).
-- fig:ap_snr: plot_ap_snr TRUE_E2E repointed -> true_e2e_v3/..._validate; JSCC/LDPC baseline source (JSCC_DIR
+- fig:ap_snr: plot_ap_snr TRUE_E2E repointed -> true_e2e/..._validate; JSCC/LDPC baseline source (JSCC_DIR
   = results/ap_vs_snr or gs_rerun) NEEDS v3 verification before regen (the reframed narrative -- JSCC ~0.71,
   LDPC-16 -> 0.917 crossing -- depends on the baseline curves being v3; v3 baseline data is in
-  jscc_v3/channel_codec_ap_v3_validate). NOT yet regenerated.
+  jscc_v3/channel_codec_ap_validate). NOT yet regenerated.
 - STILL TODO (data-source plumbing, each a real fix): fig:two_regime (make_two_regime_figure reads VAL_CSV ->
   move to test per item-9 A + split-dependence caption consistency), fig_decisions (snr_decision_plot reads
   runs/v2 + PAYLOAD 1.98/4 -> v3 + payload fix), fig_stacked_area (plot_stacked_area reads runs/v2/snr_sweep

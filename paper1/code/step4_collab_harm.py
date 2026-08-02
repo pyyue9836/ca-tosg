@@ -6,7 +6,7 @@ This is the phenomenon the feasibility-masked oracle exposed: on a guaranteed-fa
 payload-blind oracle used to prefer a failed C-request (-> ego fallback) over L, precisely on these
 frames. The mask removes that artifact from the LABEL; the phenomenon itself is a free paper
 discussion point (§5.1.1 action-space review: an explicit 'do-not-request' ego-only 4th action is
-free in the 2-bit codebook -- '11' is reserved). Writes results/step4_collaboration_harm_v3.csv.
+free in the 2-bit codebook -- '11' is reserved). Writes results/step4_collaboration_harm.csv.
 """
 import os
 import numpy as np
@@ -30,9 +30,9 @@ def main():
             mean_late_f1=round(float(late.mean()), 4),
             mean_ego_minus_late_on_harm=round(float((ego - late)[harm].mean()), 4) if harm.any() else 0.0))
     out = pd.DataFrame(rows)
-    out.to_csv(os.path.join(RESULTS, 'step4_collaboration_harm_v3.csv'), index=False)
+    out.to_csv(os.path.join(RESULTS, 'step4_collaboration_harm.csv'), index=False)
     print(out.to_string(index=False))
-    print('\nwrote results/step4_collaboration_harm_v3.csv')
+    print('\nwrote results/step4_collaboration_harm.csv')
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ Full sweep = 3 channels x 2 splits x 6 SNRs = 36 runs (~25 GPU-hours). SNR grid 
 Modes:
   --mode sweep   : the full 36-run queue (or a subset via --channels/--splits/--snrs).
   --mode probe   : interpolation-validity probe -- decode validate at SNR 8/10/12 (limit frames),
-                   so score_jscc_v3.py can report interp(8,12)->10 vs real-10 per-frame F1 MAE.
+                   so score_jscc.py can report interp(8,12)->10 vs real-10 per-frame F1 MAE.
 """
 import argparse, os, re, shutil, subprocess, sys
 from pathlib import Path

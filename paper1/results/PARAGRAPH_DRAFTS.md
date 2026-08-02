@@ -63,7 +63,7 @@ Eq.~(7)/(11) are placeholders to resolve in the .tex pass.
 
 ## 2. Collaboration-is-sometimes-harmful (Discussion) -- DRAFT v3 (2026-07-15). RELABELLED #2 (writing order).
 ## ERROR OWNED + REVERSED: my v2 "provenance catch" was a FALSE ALARM -- I grepped only results/ and missed
-## code/extra_experiments/out/a2_difficulty_reliable_v3.csv, then declared "-0.0147 has no source and no CI".
+## code/extra_experiments/out/a2_difficulty_reliable.csv, then declared "-0.0147 has no source and no CI".
 ## It DOES: test Easy, reliable_awgn_16dB, n=713, gain -0.0147, 95% CI [-0.0179,-0.0115], gain_significant=
 ## True. I had replaced the CORRECT v3 -0.0147 with the STALE v2 -0.0134 (est_snr>=14, n=108) and stripped a
 ## valid CI. RESTORED here. (negative-existence-search-scope: "no source" needs the search scope stated.)
@@ -99,10 +99,10 @@ frame-identical to Fixed-$L$, so the paired difference arises entirely on the $C
 already-easy frames.
 
 Word count (body, excl. footnote) ~235. src: results/c256_dominance_verify.csv (frac_comp_lt_ego =
-1.0/5.8/0.9%, same run/commit as the C256 fractions); results/step4_collaboration_harm_v3.csv (frac_ego_gt_
-late = 0.9/7.4/0.2%, STRICT inequality, ties excluded); code/extra_experiments/out/a2_difficulty_reliable_v3
+1.0/5.8/0.9%, same run/commit as the C256 fractions); results/step4_collaboration_harm.csv (frac_ego_gt_
+late = 0.9/7.4/0.2%, STRICT inequality, ties excluded); code/extra_experiments/out/a2_difficulty_reliable
 .csv (test Easy -0.0147, CI [-0.0179,-0.0115], n=713); results/harm_stratum_structural.csv (DIRECT count 635/
-713 C16 + verified L-frame frame-identity, structural attribution); results/gt_object_stats_v3.csv (mean
+713 C16 + verified L-frame frame-identity, structural attribution); results/gt_object_stats.csv (mean
 late_num_gt: test 15.2 / validate 27.8 / culver 41.0). Cross-refs \S\ref{sec:method}, \S\ref{sec:difficulty}.
 ### REVISIONS (v3->v4, supervisor 2026-07-16): footnote point 3 -- dropped "replaces v2's est_snr>=14"
 ### (ledger: paper shows v3 only, no version comparison), self-contained condition, 8.0 dB (not ~8),

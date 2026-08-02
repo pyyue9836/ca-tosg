@@ -9,7 +9,7 @@ views, both under the v3 canonical protocol:
   (2) RELIABLE-CHANNEL conditional (AWGN, 16 dB, C deliverable): isolates the frame-difficulty axis from
       the channel axis -- the per-frame gain the channel-averaged view dilutes. Deterministic condition
       (NOT a single random draw): every frame at est_snr=16, awgn.
-Outputs: out/a2_difficulty_v3.csv, out/a2_difficulty_reliable_v3.csv, paper/figures/fig_difficulty.pdf
+Outputs: out/a2_difficulty.csv, out/a2_difficulty_reliable.csv, paper/figures/fig_difficulty.pdf
 """
 import os
 import numpy as np
@@ -98,8 +98,8 @@ def main():
         allc += all_channel(name, df, rf, feat)
         rel += reliable_channel(name, df, rf, feat)
     ac = pd.DataFrame(allc); rc = pd.DataFrame(rel)
-    ac.to_csv(os.path.join(C.OUTDIR, 'a2_difficulty_v3.csv'), index=False)
-    rc.to_csv(os.path.join(C.OUTDIR, 'a2_difficulty_reliable_v3.csv'), index=False)
+    ac.to_csv(os.path.join(C.OUTDIR, 'a2_difficulty.csv'), index=False)
+    rc.to_csv(os.path.join(C.OUTDIR, 'a2_difficulty_reliable.csv'), index=False)
     print('=== A2 v3 all-channel (200-realisation) ==='); print(ac.to_string())
     print('\n=== A2 v3 reliable-channel conditional (AWGN 16 dB) ==='); print(rc.to_string())
     try:

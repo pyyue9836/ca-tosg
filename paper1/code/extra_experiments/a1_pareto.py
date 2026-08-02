@@ -3,8 +3,8 @@
 """RULE (supervisor 2026-07-12): every number that appears anywhere in the paper is 200-realisation.
 This script no longer COMPUTES anything from a single frozen draw -- it only PLOTS the Lagrangian
 frontier + policy points already produced (200-realisation averaged) by recompute_policy_200seed.py:
-  results/policy_v3/frontier_{split}.csv   (lambda, payload, f1, frac_C256/C16/L)
-  results/policy_v3/pareto_points.csv      (Fixed L/C16/C256, oracle, clairvoyant, RF, tau, blind)
+  results/policy/frontier_{split}.csv   (lambda, payload, f1, frac_C256/C16/L)
+  results/policy/pareto_points.csv      (Fixed L/C16/C256, oracle, clairvoyant, RF, tau, blind)
 Outputs paper/figures/fig_pareto_{validate,test,culver}.pdf (+ _preview.png).
 """
 import os, sys
@@ -13,7 +13,7 @@ import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.abspath(__file__)); P1 = os.path.dirname(os.path.dirname(HERE))
-POL = os.path.join(P1, 'results/policy_v3'); FIGDIR = os.path.join(P1, 'paper/figures')
+POL = os.path.join(P1, 'results/policy'); FIGDIR = os.path.join(P1, 'paper/figures')
 os.makedirs(FIGDIR, exist_ok=True)
 try:
     sys.path.insert(0, os.path.join(P1, 'code')); import paper_style as PS; PS.apply()

@@ -2,8 +2,8 @@
 
 Every stale v2 number in main.tex (909 lines) mapped to its v3 replacement + source. `[OFDM]` = awaits
 the OFDM BLER table (running). Do the substitution as one reviewable batch; OFDM-tagged rows land after
-the table + supervisor pin the TR 37.885 delay-spread value. Sources: results/policy_v3/*,
-results/ablation_v3/*, results/jscc_v3/*.
+the table + supervisor pin the TR 37.885 delay-spread value. Sources: results/policy/*,
+results/ablation/*, results/jscc/*.
 
 ## LOCKED framing (currency) — central claim, done this turn
 - L70 (intro central finding) + L34 (abstract): "codec response determines the CURRENCY in which task
@@ -11,7 +11,7 @@ results/ablation_v3/*, results/jscc_v3/*.
   sub-finding. Qualitative wording LOCKED (3 evidence lines confirmed). Numbers below.
 
 ## Headline / generalisation tables (tab:headline, tab:gen_headline; L~350-605) — v3, NO OFDM dep
-Source: results/policy_v3/generalisation_{split}.csv (200-real, canonical GT v3).
+Source: results/policy/generalisation_{split}.csv (200-real, canonical GT v3).
 | policy | validate F1@pay | test F1@pay | culver F1@pay |
 |---|---|---|---|
 | Channel-aware oracle | 0.9129@0.0886 | 0.9140@0.0995 | 0.8891@0.1378 |
@@ -46,7 +46,7 @@ Source: results/policy_v3/generalisation_{split}.csv (200-real, canonical GT v3)
   "99.3-99.8%" -- NEVER ">=99.4%" (Culver is 99.33, below 99.4; the >=99.4 wording is the L587 accident).
 
 ## Central-finding numbers (currency) — PARTIAL v3, [OFDM] for the OFDM edge
-Source: results/jscc_v3/two_regime_edge_v3.csv + results/ablation_v3/a7_cue_value_v3.csv.
+Source: results/jscc/two_regime_edge.csv + results/ablation/a7_cue_value.csv.
 - LDPC cliff -> cues buy BANDWIDTH: a7 Full vs Channel-only F1 -0.00024 [-.00052,+.00003] NOT sig; PAYLOAD
   -0.01495 [-.01689,-.01306] SIG (cues save ~10% bandwidth at equal F1). + RF Pareto-dominates retuned tau
   at matched payload: +0.00194/+0.00049/+0.00325 (val/test/culver), frame CI excludes 0 (threshold_vs_rf.csv).
@@ -58,13 +58,13 @@ Source: results/jscc_v3/two_regime_edge_v3.csv + results/ablation_v3/a7_cue_valu
   dominates; a7 channel-only F1 0.9089 ~ full 0.9086). [need v3 feature_importance CSV -- TODO regen.]
 
 ## Difficulty / gain-concentration (sec:difficulty, L676+) — v3, NO OFDM dep
-Source: results/ablation_v3/a2_difficulty*.csv (200-real, frame paired CI).
+Source: results/ablation/a2_difficulty*.csv (200-real, frame paired CI).
 - "up to +0.045 F1 on hard frames" -> v3 all-channel hard gain +0.0095/+0.0240/+0.0264 (val/test/culver, sig);
   RELIABLE-channel (AWGN 16dB) hard gain +0.0347/+0.0896/+0.1064 => "up to +0.09-0.11 F1 on hard frames under
   a reliable channel". DECLARE the condition redefine (v2 sampled snr>=14 -> v3 deterministic 16 dB).
 - Easy-stratum gain SIG NEGATIVE (test -0.0147) = collaboration-sometimes-harmful; NEW honest sentence.
 
-## Robustness (sec 4.4.4) — v3, NO OFDM dep. Source: results/ablation_v3/robustness_*_v3.csv
+## Robustness (sec 4.4.4) — v3, NO OFDM dep. Source: results/ablation/robustness_*_v3.csv
 - csi_noise@5dB 0.0037 [.0035,.0038] / aging@50ms 0.0044 [.0042,.0047] / staleness@1fr 0.0193 [.0184,.0203]
   (was 0.003/0.015/0.057; aging+staleness LOWER = more robust). All frame-level paired CI, all sig.
 - "lighter models same accuracy" -> precisely within 0.003 F1 (a8: DT/LogReg/SVM/MLP 0.906-0.907 vs RF 0.9086)
@@ -90,7 +90,7 @@ Source: results/ablation_v3/a2_difficulty*.csv (200-real, frame paired CI).
 Body + Figure A caption MUST state: "the OFDM-LDPC feasibility threshold (~24 dB, diversity order ~2) lies
 ABOVE the evaluated SNR range" -- else the flat dead-line in the two OFDM-LDPC panels reads as a plotting
 error. Feasibility claim = clean monotone in diversity order: threshold 8 dB (AWGN) / ~24 dB (OFDM, order
-~2) / unbounded (flat Rayleigh, order 1). JSCC panels done (jscc_ap_f1_v3); LDPC/upper AP panels = CPU TODO.
+~2) / unbounded (flat Rayleigh, order 1). JSCC panels done (jscc_ap_f1); LDPC/upper AP panels = CPU TODO.
 
 ## OFDM status — RESOLVED (table done at TR 37.885 46.2 ns; two-regime OFDM edge done)
 - two-regime OFDM edge: ldpc +0.0004/+0.0019 (val/test, ~dead in-range), jscc +0.0037/+0.0251 -> two_regime_

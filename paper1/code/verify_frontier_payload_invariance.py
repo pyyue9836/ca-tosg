@@ -14,7 +14,7 @@
 # invariance question is SAFE (recomputed, not rescaled). If it matches OLD -> STOP: the share is stale, a
 # recompute/retrain decision, not a paragraph edit.
 import os, pandas as pd, numpy as np
-R = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results/policy_v3')
+R = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results/policy')
 NEW = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}      # corrected (rate-1/2 coded)
 OLD = {'L': 0.024, 'C16': 0.495, 'C256': 0.2475}    # stale (uncoded)
 rows = []

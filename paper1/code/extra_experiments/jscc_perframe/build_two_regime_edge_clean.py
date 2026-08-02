@@ -15,7 +15,7 @@ Regimes (identical eff_C model to build_two_regime_edge.py -- only the train/eva
 The threshold baseline is AWGN-only by construction (an instantaneous-SNR gate has no CSI under
 fading) -> for rayleigh/ofdm the threshold policy degenerates to all-L; tau* is then a no-op. This
 matches build_two_regime_edge.py exactly; only the leakage is removed.
-Output: results/jscc_v3/two_regime_edge_clean_v3.csv (one row per channel,regime,eval_split).
+Output: results/jscc/two_regime_edge_clean.csv (one row per channel,regime,eval_split).
 """
 import os, sys
 import numpy as np, pandas as pd
@@ -27,21 +27,21 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, 'peiyi_work/paper1/code/extra_experiments'))
 sys.path.insert(0, HERE)
 import v3_eval as V
-import score_jscc_v3 as SC
+import score_jscc as SC
 # reuse the EXACT eff_C model + constants from the leaky script (single source of truth). jscc_grid
-# is overridden below to read the cached per-frame F1 npz (score_jscc_v3.py output) instead of
+# is overridden below to read the cached per-frame F1 npz (score_jscc.py output) instead of
 # re-scoring from the decode npz -- same values, ~100x faster.
 from build_two_regime_edge import (jscc_grid as _jscc_grid_rescore, eff_C_of, SNR_GRID,
                                     PAY_L, PAY_C, TAU_GRID, INTERP_BIAS)
 
 P1 = os.path.join(REPO, 'peiyi_work/paper1'); DATA = os.path.join(P1, 'data')
-OUT = os.path.join(P1, 'results/jscc_v3')
+OUT = os.path.join(P1, 'results/jscc')
 TRAIN_SPLIT = 'validate'
 
 
 def jscc_grid(channel, split):
     """(n,6) per-frame JSCC F1 over the SNR grid, from cached jscc_perframe_f1_*.npz if present
-    (identical to score_jscc_v3.perframe_f1), else fall back to re-scoring the decode npz."""
+    (identical to score_jscc.perframe_f1), else fall back to re-scoring the decode npz."""
     cols, n = [], None
     for snr in SNR_GRID:
         cache = os.path.join(OUT, f'jscc_perframe_f1_{channel}_{split}_snr{int(snr):02d}.npz')
@@ -118,7 +118,7 @@ def main():
     ap.add_argument('--channels', default='awgn,rayleigh,ofdm')
     ap.add_argument('--regimes', default='ldpc,jscc')
     ap.add_argument('--eval_splits', default='validate,test,culver')
-    ap.add_argument('--out', default=os.path.join(OUT, 'two_regime_edge_clean_v3.csv'))
+    ap.add_argument('--out', default=os.path.join(OUT, 'two_regime_edge_clean.csv'))
     o = ap.parse_args()
     import _common as C
     feat = C.feat_cols(pd.read_csv(os.path.join(DATA, 'dataset_validate_v3.csv')), 'full')

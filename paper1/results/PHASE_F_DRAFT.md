@@ -11,13 +11,13 @@ This SUPERSEDES the v2 binary ("cues needed / not needed"). It is more precise, 
 and rests on three interlocking evidence lines — DO NOT lock the wording until line 3 (JSCC edge) lands.
 
 Evidence lines (all under the v3 canonical protocol: 200 real. + v3 GT + Sionna frame BLER + ego):
-1. **RF vs retuned-tau Pareto dominance** (results/policy_v3/threshold_vs_rf.csv): at MATCHED bandwidth,
+1. **RF vs retuned-tau Pareto dominance** (results/policy/threshold_vs_rf.csv): at MATCHED bandwidth,
    RF > tau on all 3 splits, frame-level paired 95% CI excludes 0 (+0.00194/+0.00049/+0.00325). A
    channel-only threshold must OVER-transmit 46-86% payload to match RF's F1 -> cues buy bandwidth.
-2. **a7 feature ablation** (results/ablation_v3/a7_cue_value_v3.csv): over channel state alone, cues add
+2. **a7 feature ablation** (results/ablation/a7_cue_value.csv): over channel state alone, cues add
    -0.00024 F1 (NOT significant, "cues add <0.001" holds) BUT save payload (Full vs Channel-only,
    frame-level CI: see a7 run) -> under the LDPC cliff codec, cues pay in BANDWIDTH not accuracy.
-3. **JSCC two-regime edge** (Track A, DONE 2026-07-12, results/jscc_v3/two_regime_edge_v3.csv): under the
+3. **JSCC two-regime edge** (Track A, DONE 2026-07-12, results/jscc/two_regime_edge.csv): under the
    graceful JSCC codec (no cliff) cues pay in ACCURACY. RF - best-tau edge, 200-real, frame-level paired
    95% CI, ALL significant:
        awgn      LDPC +0.0033/+0.0047 (val/test)   JSCC +0.0044/+0.0266

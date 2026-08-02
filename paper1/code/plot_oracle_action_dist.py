@@ -1,8 +1,8 @@
 #self+ CA-TOSG P1 Step-4: SNR curve of the feasibility-masked oracle action distribution.
 # -*- coding: utf-8 -*-
-"""Reads results/step4_oracle_action_dist_v3.csv and plots the oracle action mix vs Es/N0 for each
+"""Reads results/step4_oracle_action_dist.csv and plots the oracle action mix vs Es/N0 for each
 split x channel (3 splits rows x 2 channels cols). Shows the ~8 dB AWGN cliff and the Rayleigh
-all-L collapse after the feasibility mask. Outputs results/step4_oracle_action_dist_v3.{pdf,png}.
+all-L collapse after the feasibility mask. Outputs results/step4_oracle_action_dist.{pdf,png}.
 """
 import os
 import numpy as np
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.abspath(__file__)); P1 = os.path.dirname(HERE)
 RESULTS = os.path.join(P1, 'results')
-CSV = os.path.join(RESULTS, 'step4_oracle_action_dist_v3.csv')
+CSV = os.path.join(RESULTS, 'step4_oracle_action_dist.csv')
 SPLITS = ('validate', 'test', 'culver')
 CHANNELS = ('awgn', 'rayleigh')
 
@@ -46,7 +46,7 @@ def main():
                  '(dotted = 8 dB AWGN cliff)', fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, 0.98))
     for ext in ('pdf', 'png'):
-        out = os.path.join(RESULTS, f'step4_oracle_action_dist_v3.{ext}')
+        out = os.path.join(RESULTS, f'step4_oracle_action_dist.{ext}')
         fig.savefig(out, bbox_inches='tight', dpi=140 if ext == 'png' else None)
         print('wrote', out)
 

@@ -24,8 +24,8 @@ import pandas as pd
 
 P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(P1, 'paper/figures')
-SEL = os.path.join(P1, 'results/true_e2e_v3/true_e2e_global_v3_validate.csv')  # deployed selector rho_L per SNR
-ORC = os.path.join(P1, 'results/step4_oracle_action_dist_v3.csv')             # oracle frac_{L,C16,C256} per SNR
+SEL = os.path.join(P1, 'results/true_e2e_global_validate.csv')  # deployed selector rho_L per SNR
+ORC = os.path.join(P1, 'results/step4_oracle_action_dist.csv')             # oracle frac_{L,C16,C256} per SNR
 
 PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}      # rate-1/2 coded channel-use (unused after v3 rewire)
 SNR_GRID = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20], dtype=float)
@@ -163,7 +163,7 @@ def plot_payload(df_sw, channel, save_path):
 
 
 def _v3_sweep(channel):
-    # v3 rewire: read the selector's rho_L (true_e2e_v3) and the oracle's action fracs (step4_oracle_action_
+    # v3 rewire: read the selector's rho_L (true_e2e) and the oracle's action fracs (step4_oracle_action_
     # dist_v3), NO recompute. SNR-grid alignment = INTERSECTION only, NEVER interpolate -- rf_frac/oracle_frac
     # are discrete action shares; an interpolated share is an unsourced number. selector grid
     # {0,8,12,14,16,20} is a subset of the oracle grid {0,2,...,20}, so the intersection is the 6 selector

@@ -71,21 +71,21 @@ a supervisor ruling (B1 mask / B2 fig / RELATED-6-11 NR / fig ruling-c). **Orpha
 
 13 figures are `\includegraphics`'d in main.tex. Payload convention throughout (rate-1/2
 coded channel-use, Msym): **L = 0.024, C16 = 0.990, C256 = 0.495**; payload rows in figures
-must read from the true_e2e_v3 / pareto_points_v3 / policy_v3 CSVs (never a hardcoded literal).
+must read from the true_e2e / pareto_points / policy_v3 CSVs (never a hardcoded literal).
 
 | figure | file | status | payload source (if any) | visual check |
 |---|---|---|---|---|
 | fig:overview | ca_tosg_method_overview.pdf | UNTOUCHED (07-05) | — | schematic only; no data |
 | fig:bler | fig_channel_bler.pdf | UNTOUCHED (06-17) | — | 16-QAM cliff ≈12 dB, 256-QAM cliff to its right; **now also the target of #1 [^cliff] (B2)** — confirm the footnote's "256-QAM curve to the right of 16-QAM" matches the plot |
 | fig:qualitative | fig_qualitative_bev.pdf | UNTOUCHED (06-17) | — | F1 0.67 vs 0.95 frame |
-| fig:ap_snr | fig_ap50_{awgn,rayleigh}.pdf | REGEN (07-18) | true_e2e_v3 (Fixed-L 0.890, ceiling 0.917, knee 12 dB) | AP@0.5 only; CA-TOSG stars climb past 12 dB; JSCC below Fixed-L; no ap70 panel |
-| fig:payload_snr | fig_payload_awgn.pdf | REGEN (07-18) | true_e2e_v3 rho_L; B_C16 0.99 | single AWGN panel; step at LDPC threshold; **Rayleigh panel deleted** |
-| fig:decision_ratio | fig_decisions_{awgn,rayleigh}.pdf | REGEN (07-18) | true_e2e_v3 rho_L, step4_oracle_v3; C256=0 asserted | intersection SNR grid, no interpolation; zero C256 layer |
-| — | fig_stacked_area.pdf | REGEN (07-18) | true_e2e_v3 rho_L (rho_C16=1−rho_L) | 3-layer, zero C256 layer drawn |
-| fig:feat_imp | fig_feature_importance.pdf | REGEN (07-18) | feature_importance_v3.csv | c_t 0.349 top, channel-side Σ=0.624 |
-| fig:pareto | fig_pareto_test.pdf | REGEN (07-18) | pareto_points_v3, true_e2e_v3_validate | Fixed-C256 line at 0.495; annotation (0.495,0.826) |
-| fig:difficulty | fig_difficulty.pdf | **DATA-V3, PENDING VISUAL (07-13)** | a2_difficulty_v3 | **never in-thread approved — inspect at this gate** (hardest-stratum +0.090) |
-| fig:two_regime | fig_two_regime.pdf | REGEN (07-18) | two_regime_edge_v3 test (bit-match) | (a) JSCC flat ≈0.89, LDPC cliff; (b) LDPC thr≈RF, JSCC L≈thr≪RF; edges +0.005/+0.027 |
+| fig:ap_snr | fig_ap50_{awgn,rayleigh}.pdf | REGEN (07-18) | true_e2e (Fixed-L 0.890, ceiling 0.917, knee 12 dB) | AP@0.5 only; CA-TOSG stars climb past 12 dB; JSCC below Fixed-L; no ap70 panel |
+| fig:payload_snr | fig_payload_awgn.pdf | REGEN (07-18) | true_e2e rho_L; B_C16 0.99 | single AWGN panel; step at LDPC threshold; **Rayleigh panel deleted** |
+| fig:decision_ratio | fig_decisions_{awgn,rayleigh}.pdf | REGEN (07-18) | true_e2e rho_L, step4_oracle_v3; C256=0 asserted | intersection SNR grid, no interpolation; zero C256 layer |
+| — | fig_stacked_area.pdf | REGEN (07-18) | true_e2e rho_L (rho_C16=1−rho_L) | 3-layer, zero C256 layer drawn |
+| fig:feat_imp | fig_feature_importance.pdf | REGEN (07-18) | feature_importance.csv | c_t 0.349 top, channel-side Σ=0.624 |
+| fig:pareto | fig_pareto_test.pdf | REGEN (07-18) | pareto_points, true_e2e_validate | Fixed-C256 line at 0.495; annotation (0.495,0.826) |
+| fig:difficulty | fig_difficulty.pdf | **DATA-V3, PENDING VISUAL (07-13)** | a2_difficulty | **never in-thread approved — inspect at this gate** (hardest-stratum +0.090) |
+| fig:two_regime | fig_two_regime.pdf | REGEN (07-18) | two_regime_edge test (bit-match) | (a) JSCC flat ≈0.89, LDPC cliff; (b) LDPC thr≈RF, JSCC L≈thr≪RF; edges +0.005/+0.027 |
 
 **Deleted from the manuscript (2 logical figures, 0 remaining `\includegraphics`):**
 - fig_ap70_{awgn,rayleigh}.pdf — AP@0.7 panels dropped (fig ruling-c; no v3 ap70 baseline).

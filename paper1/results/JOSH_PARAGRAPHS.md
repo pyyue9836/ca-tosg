@@ -65,7 +65,7 @@ space; C256 is retained for completeness, and the negative result -- a rate-matc
 lower-channel-use) action earns no place even on the lambda>0 frontier -- is itself a contribution.
 Support: on the 200-realisation Lagrangian frontier C256 activation peaks at a minority 2.5/3.2/4.5%
 (val/test/culver), only in a narrow lambda band over the low-payload region (0.024-0.16/0.18/0.24 Msym),
-never a majority. src results/policy_v3/c256_frontier_band.csv, results/a1_c256_frontier_v3.csv.
+never a majority. src results/policy/c256_frontier_band.csv, results/a1_c256_frontier_v3.csv.
 
 ## 2. CoDS positioning (Related Work, near ML-Cooper)
 Place CoDS relative to \method: where CoDS sits in the compression-vs-selection landscape, what it shares
@@ -82,13 +82,13 @@ is exactly why the oracle carries a feasibility mask and the failure fallback is
 feature. That is the paragraph's job.
 Evidence (with CI): Easy-stratum gain is significantly NEGATIVE on test = -0.0147 (frame-level paired 95% CI
 [-0.0179,-0.0115], gain_significant=True, n=713; reliable AWGN 16 dB; code/extra_experiments/out/
-a2_difficulty_reliable_v3.csv). [History: on 2026-07-15 the agent briefly "corrected" this to -0.0134 after
+a2_difficulty_reliable.csv). [History: on 2026-07-15 the agent briefly "corrected" this to -0.0134 after
 grepping only results/ and missing code/extra_experiments/out/ -- a negative-existence-search-scope error;
 -0.0147 is correct and sourced. -0.0134 is the STALE v2 est_snr>=14/n=108 number.] The FP-mechanism gloss is
 dropped (no ego/compressed confusion columns to verify "adds false positives"); the -0.0147 is an aggregate
 realised-F1 gain, not an FP decomposition. Structural quantifier (descriptive, no
 claim): frac(ego_f1 > late_f1) = 0.9% / 7.4% / 0.2% (validate/test/culver; test sparsest, mean GT 15 vs
-28/43). src results/ablation_v3/a2_difficulty*.csv, results/step4_collaboration_harm_v3.csv.
+28/43). src results/ablation/a2_difficulty*.csv, results/step4_collaboration_harm.csv.
 QUANTITATIVE ANCHOR + WELD (supervisor: this paragraph's anchor already lies in the C256 CSV -- write the
 two paragraphs off ONE number source, not just a cross-reference). Descriptive, no directional verb: "on
 frac(comp $<$ ego) $=$ 1.0\% / 5.8\% / 0.9\% of frames the compressed-feature message's delivered utility is

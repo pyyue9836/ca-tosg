@@ -17,7 +17,7 @@ import paper_style as _ps; _ps.apply()
 import pandas as pd
 
 P1 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IN = os.path.join(P1, 'results/feature_importance_v3.csv')      # v3: c_t (channel_is_rayleigh) 0.349 dominant
+IN = os.path.join(P1, 'results/feature_importance.csv')      # v3: c_t (channel_is_rayleigh) 0.349 dominant
 OUT_DIR = os.path.join(P1, 'paper/figures')
 
 

@@ -8,8 +8,8 @@ STALE (Jun-17 v2; est_snr>=14 "good channel" stratum def; NO CI; no live reader 
 - results/difficulty_strata.csv               (all-channel, act_ cols, no CI)
 
 CANONICAL v3 (Jul-13; deterministic reliable channel AWGN 16 dB; WITH frame-level paired CIs):
-- code/extra_experiments/out/a2_difficulty_reliable_v3.csv  (test Easy -0.0147, 95% CI [-0.0179,-0.0115], n=713)
-- code/extra_experiments/out/a2_difficulty_v3.csv           (all-channel 200-real, with CIs)
+- code/extra_experiments/out/a2_difficulty_reliable.csv  (test Easy -0.0147, 95% CI [-0.0179,-0.0115], n=713)
+- code/extra_experiments/out/a2_difficulty.csv           (all-channel 200-real, with CIs)
 
 Rule (same as the payload orphans): a superseded artifact is either regenerated or marked DEPRECATED here.
 The v3 threshold moved 14->16 dB for a documented reason (cliff ~8 dB; a2_difficulty.py) -- but that

@@ -1,14 +1,14 @@
 #self+ P1 Step-5 Figure A: channel x codec AP@0.5 vs SNR (9 panels), all vs canonical GT v3.
 # Rows = channels {AWGN, Rayleigh, OFDM}; cols = codecs {LDPC-16, LDPC-256, JSCC}. + Fixed-L and
 # upper (identity comp) references. LDPC/upper from the FROZEN comp/ego npz (no GPU); JSCC from
-# results/jscc_v3/jscc_ap_f1_v3.csv (already scored). Reads only frozen inputs (comp/ego npz + v3 GT +
+# results/jscc/jscc_ap_f1.csv (already scored). Reads only frozen inputs (comp/ego npz + v3 GT +
 # BLER tables) -- ZERO dependency on the paper edit map.
 """
 LDPC codec AP at (channel, snr): per realisation sample per-frame block success ~ Bernoulli(1-BLER),
 mix comp (success) / ego (fail) boxes+scores, global-sort AP vs the canonical union GT; average over
 N_SEED realisations. upper = comp AP (identity channel, no BLER). N_SEED small (characterisation figure,
 not a CI headline) -- documented. Sends a review table BEFORE any plotting.
-Output: results/jscc_v3/channel_codec_ap_v3.csv (long form: channel, codec, snr_db, ap50).
+Output: results/jscc/channel_codec_ap.csv (long form: channel, codec, snr_db, ap50).
 """
 import os, sys, argparse
 import numpy as np, pandas as pd, torch
@@ -17,9 +17,9 @@ sys.path.insert(0, REPO); sys.path.insert(0, os.path.join(REPO, 'peiyi_work/pape
 sys.path.insert(0, HERE)
 from opencood.utils import eval_utils
 import v3_eval as V
-import score_jscc_v3 as SC
+import score_jscc as SC
 
-P1 = os.path.join(REPO, 'peiyi_work/paper1'); GS = os.path.join(P1, 'gs_rerun'); OUT = os.path.join(P1, 'results/jscc_v3')
+P1 = os.path.join(REPO, 'peiyi_work/paper1'); GS = os.path.join(P1, 'gs_rerun'); OUT = os.path.join(P1, 'results/jscc')
 SNR_GRID = [0, 4, 8, 12, 16, 20]
 N_SEED = 25
 THR = 0.5
@@ -45,7 +45,7 @@ def main():
     cb, cs, canon = list(co['boxes']), list(co['scores']), list(co['gts'])
     eb, es = list(eg['boxes']), list(eg['scores'])
     n = len(canon)
-    jscc = pd.read_csv(os.path.join(OUT, 'jscc_ap_f1_v3.csv'))
+    jscc = pd.read_csv(os.path.join(OUT, 'jscc_ap_f1.csv'))
     rows = []
     # upper (identity comp, no channel) reference; Fixed-L reference = the late-fusion AP (Fig ap_snr)
     upper = ap_mixed(cb, cs, eb, es, canon, np.ones(n, bool))
@@ -69,9 +69,9 @@ def main():
                              ap50_std=0.0, bler_frame=np.nan))
     df = pd.DataFrame(rows)
     df.attrs['upper'] = upper
-    df.to_csv(os.path.join(OUT, f'channel_codec_ap_v3_{sp}.csv'), index=False)
+    df.to_csv(os.path.join(OUT, f'channel_codec_ap_{sp}.csv'), index=False)
     print(f'\nupper(identity comp) AP@.5={upper:.4f}  [Fixed-L / L-branch reference is the late-fusion AP]')
-    print('wrote', os.path.join(OUT, f'channel_codec_ap_v3_{sp}.csv'))
+    print('wrote', os.path.join(OUT, f'channel_codec_ap_{sp}.csv'))
     # review pivot (rows=channel, cols=codec) at a few SNRs
     for snr in (0, 8, 16, 20):
         piv = df[df.snr_db == snr].pivot_table(index='channel', columns='codec', values='ap50')

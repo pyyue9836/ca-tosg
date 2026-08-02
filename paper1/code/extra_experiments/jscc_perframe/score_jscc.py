@@ -4,10 +4,10 @@
 Modes:
   --mode score : for every gs_rerun/jscc_v3/jscc_<ch>_<split>_snr<NN>.npz, per-frame F1 + global-sort
                  AP vs the canonical union GT (gs_rerun/comp_<split>.npz['gts']); writes
-                 results/jscc_v3/jscc_ap_f1_v3.csv and per-frame F1 npz jscc_perframe_f1_<ch>_<split>.npz.
+                 results/jscc/jscc_ap_f1.csv and per-frame F1 npz jscc_perframe_f1_<ch>_<split>.npz.
   --mode probe : interpolation-validity check. Reads the probe npz at SNR 8/10/12 (validate), computes
                  per-frame F1 at each, then MAE + max|dev| of the linear interp 0.5*(F1_8+F1_12) vs the
-                 real F1_10. One row -> results/jscc_v3/interp_probe_mae.csv.
+                 real F1_10. One row -> results/jscc/interp_probe_mae.csv.
 """
 import argparse, glob, os, sys
 import numpy as np, pandas as pd, torch
@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.abspath(os.pat
 sys.path.insert(0, REPO)
 from opencood.utils import eval_utils
 P1 = os.path.join(REPO, 'peiyi_work/paper1'); GS = os.path.join(P1, 'gs_rerun')
-JSCC_DIR = os.path.join(GS, 'jscc_v3'); OUT = os.path.join(P1, 'results/jscc_v3')
+JSCC_DIR = os.path.join(GS, 'jscc_v3'); OUT = os.path.join(P1, 'results/jscc')
 
 
 def tt(a, shp):
@@ -73,7 +73,7 @@ def main():
                    max_abs_dev=round(mx, 6), mean_real=round(float(real10.mean()), 4),
                    mean_interp=round(float(interp10.mean()), 4))
         pd.DataFrame([row]).to_csv(os.path.join(OUT, 'interp_probe_mae.csv'), index=False)
-        print('\n[PROBE]', row); print('wrote results/jscc_v3/interp_probe_mae.csv')
+        print('\n[PROBE]', row); print('wrote results/jscc/interp_probe_mae.csv')
         return
 
     GRID = {0, 4, 8, 12, 16, 20}   # exclude the leftover probe npz (e.g. snr10, 200-frame subset)
@@ -91,8 +91,8 @@ def main():
         np.savez(os.path.join(OUT, f'jscc_perframe_f1_{ch}_{split}_snr{snr:02d}.npz'), f1=pf)
         print(f'  {ch} {split} snr{snr}: n={n} F1={pf.mean():.4f} AP50={a50:.4f}', flush=True)
     pd.DataFrame(rows).sort_values(['channel', 'split', 'snr_db']).to_csv(
-        os.path.join(OUT, 'jscc_ap_f1_v3.csv'), index=False)
-    print('wrote results/jscc_v3/jscc_ap_f1_v3.csv')
+        os.path.join(OUT, 'jscc_ap_f1.csv'), index=False)
+    print('wrote results/jscc/jscc_ap_f1.csv')
 
 
 if __name__ == '__main__':
