@@ -104,7 +104,9 @@ def sweep(df, rf, feat_cols, bler_df, channel):
 
 def plot_decisions(df_sw, channel, save_path):
     fig, ax = plt.subplots(figsize=(5.5, 3.6))
-    for a in ACTIONS:
+    # deployed action set S={L,C16}; C256 is excluded (dominated) so no C256 series is drawn
+    # (rf and oracle C256 shares are both 0 -- a non-member constructive zero, not a curve).
+    for a in ('L', 'C16'):
         ax.plot(df_sw['snr_db'], df_sw['rf_frac_' + a], 'o-',
                 color=COLOURS[a], label='RF %s' % a, linewidth=2)
         ax.plot(df_sw['snr_db'], df_sw['oracle_frac_' + a], 's--',
@@ -112,7 +114,7 @@ def plot_decisions(df_sw, channel, save_path):
                 label='Oracle %s' % a)
     ax.set_xlabel('Estimated SNR (dB)')
     ax.set_ylabel('Fraction of frames')
-    ax.set_title('3-way selector behaviour — %s' % channel.upper())
+    ax.set_title('Selector vs oracle action share — %s' % channel.upper())
     ax.set_ylim(-0.02, 1.02)
     ax.grid(alpha=0.3); ax.legend(ncol=2, fontsize=8)
     fig.tight_layout()
