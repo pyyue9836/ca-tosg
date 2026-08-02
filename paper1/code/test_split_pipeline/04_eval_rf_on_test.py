@@ -7,12 +7,18 @@ This is the genuine held-out generalisation test for the paper.
 Output: runs/test_rf_results.csv  +  runs/test_snr_sweep.csv
 """
 import os
+import sys
 import pickle
 import numpy as np
 import pandas as pd
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
+
+# read the channel-use payloads from the single canonical source (code/extra_experiments/_common.py)
+# instead of the old uncoded literal 1.98/4, 1.98/8 (=0.495/0.2475, wrong for the rate-1/2 chain).
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                'extra_experiments'))
 
 RUNS = 'runs' if 'culver' not in os.environ.get('CATOSG_SPLIT', 'test') else 'runs_culver'
 DATASET = os.path.join(REPO,
@@ -24,7 +30,7 @@ BLER_CSV = os.path.join(REPO,
 OUT_DIR = os.path.join(REPO,
     f'peiyi_work/01_paper_ca_tosg/test_split_pipeline/{RUNS}')
 
-PAYLOAD = {'L': 0.024, 'C16': 1.98 / 4.0, 'C256': 1.98 / 8.0}
+from _common import PAYLOAD  # {'L':0.024,'C16':0.99,'C256':0.495} -- rate-1/2 coded channel-use (Msym)
 SNR_GRID = np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20], dtype=float)
 ACTIONS = ['L', 'C16', 'C256']
 
