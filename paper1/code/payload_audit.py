@@ -24,9 +24,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(HERE)                                   # paper1
 THRVRF = os.path.join(P1, 'results/policy/threshold_vs_rf.csv')
 MAIN = os.path.join(P1, 'paper/main.tex')
+# external OpenCOOD-runtime inputs for the two UPSTREAM links (sibling checkout; skipped if absent)
+OPENCOOD = os.path.join(os.path.dirname(os.path.dirname(P1)), 'OpenCOOD')
+JSCC_CFG = os.path.join(OPENCOOD, 'opencood/hypes_yaml/point_pillar_importance_map_jscc_awgn_learned.yaml')
+DATASET = os.path.join(OPENCOOD, 'peiyi_work/paper1/data/dataset_validate_v3.csv')
 
 # --- rate / modulation parameters (the ONLY inputs; everything else is derived) ---
-B_FEAT_INFO = 1.98      # Mbit, feature-level information payload (adopted from the JSCC baseline)
+B_FEAT_INFO = 1.98      # Mbit, feature-level source budget for the feature message
+#                         (declared convention: ~=0.92 bit/element of the 2.16M-element tensor,
+#                          see main.tex payload paragraph; NOT a source-paper-adopted value --
+#                          sheng2024importance carries no fixed 1.98 Mbit budget)
 B_L_INFO = 0.024        # Mbit, object-level information payload
 CODE_RATE = 0.5         # rate-1/2 LDPC
 BITS_PER_SYM = {'C16': 4, 'C256': 8}   # 16-QAM / 256-QAM
@@ -67,6 +74,37 @@ def parse_paper_headline_agg():
     return (float(rf.group(1)), float(rf.group(2))) if rf else (None, None)
 
 
+def upstream_source_budgets():
+    """(0a) feature 1.98 Mbit is a DECLARED convention, not a source-paper value: verify that
+    1.98 Mbit spread over the real feature tensor is ~=0.92 bit/element, reading the tensor dims from
+    the JSCC config (256 x 48 x 176 = 2.16e6 elements) -- NOT hardcoded. (0b) object 0.024 Mbit from
+    the message format: mean detected objects (from the dataset) x 110 B (ETSI-CPM container) x 8.
+    Both read external OpenCOOD-runtime inputs; each is skipped with a printed note if absent."""
+    if os.path.exists(JSCC_CFG):
+        t = open(JSCC_CFG).read()
+        rng = [float(x) for x in re.search(r'cav_lidar_range:\s*&?\w*\s*\[([^\]]+)\]', t).group(1).split(',')]
+        vox = float(re.search(r'voxel_size:\s*&?\w*\s*\[([^\]]+)\]', t).group(1).split(',')[0])
+        stride = int(re.search(r'feature_stride:\s*(\d+)', t).group(1))
+        ch = int(re.search(r'head_dim:\s*(\d+)', t).group(1))
+        fx = round(round((rng[3] - rng[0]) / vox) / stride)
+        fy = round(round((rng[4] - rng[1]) / vox) / stride)
+        elems = fx * fy * ch
+        bit_per_elem = B_FEAT_INFO * 1e6 / elems     # declared: 1.98 Mbit over the 2.16e6-elem tensor
+        chk(f'(0a) declared 1.98 Mbit = {bit_per_elem:.4f} bit/elem of the {elems:,}-elem tensor '
+            f'({ch}x{fy}x{fx}; dims read from JSCC config)', bit_per_elem, 0.92,
+            'config dims + declared 1.98/2.16 convention', tol=6e-3)
+    else:
+        print(f'(0a) SKIP: JSCC config absent (OpenCOOD runtime not present) -> {JSCC_CFG}')
+    if os.path.exists(DATASET):
+        import pandas as pd
+        nobj = float(pd.read_csv(DATASET)['late_num_pred'].mean())
+        bl = nobj * 110 * 8 / 1e6
+        chk(f'(0b) B_L = mean objects({nobj:.2f}) x 110 B x 8 = {bl:.5f} Mbit',
+            bl, 0.024, 'dataset late_num_pred x ETSI-CPM 110 B', tol=5e-4)
+    else:
+        print(f'(0b) SKIP: dataset absent (OpenCOOD runtime not present) -> {DATASET}')
+
+
 def deployed_averages(pay):
     """Read per-split deployed CA-TOSG / threshold payloads and verify they are built from B_L / B_C16."""
     with open(THRVRF) as f:
@@ -85,6 +123,8 @@ def deployed_averages(pay):
 
 
 def main():
+    print('=== 0) upstream source budgets (declared 1.98 Mbit convention + object format) ===')
+    upstream_source_budgets()
     print('=== 1) first-principles chain ===')
     pay = analytic_chain()
     print('=== 2) paper Eq.(7) cross-check (main.tex) ===')

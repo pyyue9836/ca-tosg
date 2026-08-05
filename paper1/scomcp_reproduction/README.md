@@ -1,3 +1,5 @@
+<!-- KEEP: revision-ammo -- exempt from the zero-reference deletion rule -->
+
 # SComCP Reproduction
 
 Faithful reproduction of **Gan et al., "SComCP: Task-Oriented Semantic
