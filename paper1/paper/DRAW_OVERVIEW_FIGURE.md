@@ -21,72 +21,67 @@
 ## 画布布局（横排，长宽比约 2:1，最终尺寸约 14cm × 6cm）
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  [Collaborator vehicle X_j]              ┌──── L branch ────┐                │
-│         │ LiDAR                          │ obj-level msg    │                │
-│         ▼                                │ {b,c,p}_k        │                │
-│   ┌──────────┐    M_j      ┌──────────┐  └──────────────────┘                │
-│   │PointPillars├───────────►│  Cue z_t │            ┌─────────────┐          │
-│   │  backbone  │            │ extractor│            │             │          │
-│   └────────────┘            └──────────┘            │             │ s_t      │
-│         │                       │                   │             │  selected│
-│         │ F_j,t                 │ z_t (21-d)        │  RF Selector│  message │
-│         ▼                       │                   │             │ ◄────────│
-│   ┌──────────┐                  │                   │  g(z,γ̂,c)   │ via V2V  │
-│   │ C16/C256 │                  │                   │             │  channel │
-│   │  feature │                  │                   └─────────────┘          │
-│   │  codec   │                  │                   ▲      ▲                 │
-│   └──────────┘                  │                   │ γ̂_t  │ c_t             │
-│         │                       │                   │      │                 │
-│         ▼                       └──────────────────►│      │                 │
-│   ┌──── C branch ────┐                              │      │                 │
-│   │ compressed BEV   │              ┌───────────────┴──────┴──┐              │
-│   │ ~1.98 Mbit info  │              │ Channel quality estimator│              │
-│   └──────────────────┘              │ γ̂_t (SNR dB), c_t (AWGN  │              │
-│                                     │           or Rayleigh)   │              │
-│                                     └──────────────────────────┘              │
-│  ═══════════════════════ V2V channel ════════════════════════════════════════ │
-│                                                                                │
-│                                                          [Ego vehicle X_e]    │
-│                            ┌──────────┐                       │ LiDAR          │
-│                  m_t^s_t   │ Fusion   │     M_e               ▼                │
-│                ───────────►│  module  │◄────────────  ┌──────────┐             │
-│                            │   Ψ(·)   │               │PointPillars│            │
-│                            └──────────┘               │  backbone  │            │
-│                                  │                    └────────────┘            │
-│                                  ▼                                              │
-│                            ┌──────────┐                                         │
-│                            │Detection │  →  Ŷ_t  (3D boxes)                     │
-│                            │  head D  │                                         │
-│                            └──────────┘                                         │
-└──────────────────────────────────────────────────────────────────────────────┘
+     COLLABORATOR (X_j)                                      EGO (X_e)   <-- selector lives HERE
+     -----------------                                       ---------
+        | LiDAR                                                 | LiDAR
+        v                                                       v
+  +------------+                                          +------------+
+  |PointPillars| <--------- weights shared -------------> |PointPillars|
+  |  backbone  |                                          |  backbone  |
+  +-----+------+                                          +-----+------+
+        | F_j,t                                                 | F_ego,t  (local feature + local detections)
+    +---+-----+                                     +-----------+------------+
+    v         v                                     v           |            v
+ +--------+ +--------+                          +--------+      |       +----------+
+ |L branch| |C branch|                          |  Cue   |      |       | Channel  |
+ |obj msg | |codec-> |                          |extractor|     |       |estimator |
+ |{b,c,p}_k| |comp.BEV|                          | -> z_t |      |       | ^gamma_t |
+ +---+----+ +---+----+                          +---+----+      |       |   c_t    |
+     |          |                                   | z_t(21-d) |       +----+-----+
+     |  transmit ONLY the                           +----> +----+-------+ <--+ (^gamma,c)
+     |  requested message                                 | RF Selector|      (ego receiver-side
+     |     m_t^{s_t}                                       | g(z,^g,c)  |       link-adaptation)
+     +----------+---------                                 +-----+------+
+                |                                                | s_t
+   m_t^{s_t}    |                     s_t : EGO --> COLLABORATOR  | (2-bit request)
+ (collab->ego) v   <=============== 2-bit request s_t ============+
+   ============================== V2V wireless channel ==============================
+                |  (requested message m_t^{s_t} arrives at ego)
+                v
+          +----------+        F_ego,t (skip)        (F_ego,t)
+          | Fusion   | <---------------------------------+
+          | module   |
+          |  Psi(.)  |
+          +----+-----+
+               v
+          +----------+
+          |Detection | -->  Y_hat_t  (3D boxes)
+          |  head D  |
+          +----------+
 ```
 
 ## 元素清单（务必都画上）
 
-**左侧 Collaborator 侧**（4 个组件）：
-1. 车图标 + LiDAR scan icon（draw.io 自带"Car"形状）
-2. **PointPillars Backbone** 矩形块（蓝色填充推荐）
-3. **Cue extractor** 椭圆（输出 z_t 21 维向量）
-4. **Feature codec C16/C256** 矩形块（橙色填充推荐）
+**左侧 Collaborator 侧（X_j）——只负责按请求发消息**：
+1. 车图标 + LiDAR scan icon
+2. **PointPillars Backbone** 矩形块（蓝，注明 weights shared with ego）
+3. **L branch**：object-level message `{b,c,p}_k`（橙）
+4. **C branch**：Feature codec C16 → compressed BEV feature（橙）
+5. 收到 2-bit 请求 `s_t` 后，**只发被选中的那一条** `m_t^{s_t}`（不同时发两条）
 
-**中间 Selector**：
-5. **RF Selector g(z_t, γ̂_t, c_t)** 大矩形块（绿色填充推荐）
-6. 三个输出箭头分别标 `L`, `C16`, `C256` —— 但只画一个"selected message m_t^{s_t}"用粗虚线表示分支择一
+**右侧 Ego 侧（X_e）——选择器、cue、信道估计都在这边（正文 §III-B / L228 为准）**：
+6. 车图标 + LiDAR
+7. **PointPillars backbone**（蓝）→ 本地特征 `F_ego,t` + 本地检测流
+8. **Cue extractor** 椭圆 → `z_t`（21 维）——**从 ego 自己的检测流算，不依赖 collaborator**
+9. **Channel quality estimator** 小矩形 → `γ̂_t`(SNR dB)、`c_t`(信道类型)——ego 接收机侧链路自适应（802.11bd / 5G NR）
+10. **RF Selector g(z_t, γ̂_t, c_t)**（绿，大块）——输入 `(z_t, γ̂_t, c_t)`，输出 `s_t`
+11. **Fusion module Ψ**（紫）——把收到的 `m_t^{s_t}` 与本地 `F_ego,t` 融合
+12. **Detection head D** → `Ŷ_t`（3D bounding boxes）
 
-**右上 Channel cue 来源**：
-7. **Channel quality estimator** 小矩形（从 802.11bd 或 5G NR 接收机给出）
-8. 两个箭头：γ̂_t（SNR in dB）和 c_t（channel type）射到 selector
-
-**右侧 Ego 侧**（5 个组件）：
-9. 车图标
-10. **PointPillars backbone** 矩形块（蓝色，注明 weights shared with collaborator）
-11. **Fusion module Ψ** 矩形块（紫色填充推荐）
-12. **Detection head D** 矩形块
-13. 最终输出 **Ŷ_t (3D bounding boxes)** 文字
-
-**横跨中间**：
-14. 一条粗水平线标注 `V2V wireless channel`（带 BLER 和 SNR 标记）
+**横跨中间的 V2V channel（两条方向相反的箭头）**：
+13. **`s_t` 2-bit 请求箭头：ego → collaborator**（粗虚线，标 "2-bit request `s_t`"）——决策在 ego，先发请求
+14. **`m_t^{s_t}` 消息箭头：collaborator → ego**（标 "requested message"）——collaborator 收到请求后回传
+15. 一条粗水平线标注 `V2V wireless channel`（带 BLER / SNR 标记）
 
 ## 颜色建议（统一 IEEE 图风格）
 
