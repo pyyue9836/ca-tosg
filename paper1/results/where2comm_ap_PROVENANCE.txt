@@ -1,0 +1,19 @@
+Where2comm baseline AP — generator provenance (P1, 2026-08)
+============================================================
+CSV: results/where2comm_ap.csv
+Numbers: Where2comm on OPV2V validate, 1980 frames, epoch 50, GLOBAL-sort eval.
+  ap_03=0.8867  ap_05=0.8707  ap_07=0.7897
+
+GENERATOR (authoritative): the OpenCOOD global-sort evaluation recorded in the CSV's `source`
+column, i.e. the checkpoint's eval yaml
+  experiment_logs/opencood_training_logs/point_pillar_where2comm_2026_05_22_17_56_51/eval_global_sort.yaml
+This is the SAME global-sort AP protocol used for every other method in the comparison table
+(true_e2e_global.py family), so the Where2comm row is protocol-matched to the CA-TOSG rows.
+
+NOT the generator: code/where2comm_compare.py is DEPRECATED and does NOT produce these numbers.
+It computes an epoch-37, perfect-channel, single-point AP (an early defence line), not the
+epoch-50 global-sort curve reported here. Epoch and eval protocol both differ; the two must not
+be conflated.
+
+P2 note: when the comparison table is regenerated, re-emit this row from the epoch-50 global-sort
+eval (not from where2comm_compare.py) and refresh this provenance.

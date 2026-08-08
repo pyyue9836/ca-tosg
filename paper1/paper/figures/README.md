@@ -37,6 +37,6 @@ Regenerated 2026-07-11 straight from committed result CSVs
 
 | figure | data source | RF checkpoint md5 | protocol |
 |---|---|---|---|
-| `fig_pareto_test.pdf` (+`.svg`) | `../../results/pareto_points.csv` (test rows) | `eb9358e950c3e12f3131f98561d597e3` | 200-realisation (`v2-200realisation-2026-07-11`); see `../../results/policy_recompute_PROVENANCE.txt` |
+| `fig_pareto_test.pdf` (+`.svg`) | `../../results/policy/pareto_points.csv` (test rows) | md5/protocol **superseded — pending P2 re-freeze** | this row's `eb9358e9` md5 + `v2-200realisation-2026-07-11` predate the v3 re-freeze; see `../../results/policy/PROVENANCE.txt` (v3-P1). Regenerate figure + fingerprint in P2. |
 | `fig_payload_awgn.pdf` (+`.svg`) | `../../results/true_e2e_global_test.csv` (AWGN CA-TOSG $\rho_L\to$ payload) | `eb9358e950c3e12f3131f98561d597e3` | global-sort true-e2e |
 | `fig_two_regime.pdf` | `../../results/two_regime_bars.csv` | — | **data-current** — unchanged, not regenerated 2026-07-11 |

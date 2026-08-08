@@ -5,7 +5,7 @@
 fig_pareto_test.pdf  <- results/policy/pareto_points.csv (test rows, corrected rate-1/2 payloads)
     Payload--F1 plane. Fixed L / C16 / C256, channel-blind EU policy (collapses to Fixed-L),
     channel-state-conditioned oracle, and CA-TOSG (RF, deployed). 200-realisation protocol,
-    selector md5 eb9358e9 (see results/policy_recompute_PROVENANCE.txt).
+    selector md5 pending P2 re-freeze (see results/policy/PROVENANCE.txt; the old eb9358e9 was v2).
 
 fig_payload_awgn.pdf <- results/true_e2e_global_validate.csv (AWGN CA-TOSG rows; matches the validate AP/payload section)
     Average channel-use-equivalent payload vs SNR under AWGN, from the deployed selector's

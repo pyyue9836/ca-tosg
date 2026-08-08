@@ -2,6 +2,15 @@
 # -*- coding: utf-8 -*-
 """Where2comm single-point baseline.
 
+DEPRECATED (P1, 2026-08) -- NOT the source of the paper's Where2comm numbers.
+This script computes an epoch-37, PERFECT-CHANNEL, single-point AP (an early "we did compare"
+defence line, auto-discovering net_epoch37.pth from an archive checkout). The Where2comm results
+actually reported in the paper are the epoch-50 global-sort AP in results/where2comm_ap.csv,
+produced by the OpenCOOD global-sort eval recorded in that CSV's `source` column (eval yaml) --
+see results/where2comm_ap_PROVENANCE.txt. Do not run this script for the paper's Where2comm row;
+it is kept only as the historical single-point reference. (Epoch 37 != epoch 50; perfect-channel
+single point != the SNR-swept global-sort curve.)
+
 Runs inference on OPV2V validate using your existing Where2comm checkpoint
 at perfect channel (= upper bound for the spatial-confidence-mask family),
 producing AP@0.5 / AP@0.7. Used as a "we did compare with Where2comm"

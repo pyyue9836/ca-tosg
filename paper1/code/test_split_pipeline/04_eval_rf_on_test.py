@@ -25,6 +25,11 @@ DATASET = os.path.join(REPO,
     f'peiyi_work/01_paper_ca_tosg/test_split_pipeline/{RUNS}/test_dataset.csv')
 RF_PATH = os.path.join(REPO,
     'peiyi_work/01_paper_ca_tosg/runs/v2/rf_full.pkl')
+# SUPERSEDED (P1, 2026-08): consumes the DEPRECATED codeword-level ldpc_qam_bler_table.csv and the
+# RETIRED v2 selector (runs/v2/rf_full.pkl). NOT a source of any frozen paper number -- the held-out
+# test-split policy numbers now come from recompute_policy_200seed.py (bler_sionna frame-level).
+# Do not rerun for paper values; P2 regenerates under PROTOCOL.md. NOT repointed to bler_sionna:
+# incompatible schema would break this codeword-level loader.
 BLER_CSV = os.path.join(REPO,
     'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv')
 OUT_DIR = os.path.join(REPO,

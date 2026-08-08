@@ -19,6 +19,12 @@ IN_CSV = os.path.join(REPO,
 BLER_CSV = os.path.join(REPO,
     'peiyi_work/04_experiment_logs/baseline_csvs/'
     '..')  # placeholder; corrected below
+# SUPERSEDED (P1, 2026-08): consumes the DEPRECATED codeword-level ldpc_qam_bler_table.csv
+# (schema qam,snr_db,ber,bler; used as frame-level -> ~3 orders too optimistic). NOT a source of
+# any frozen paper number -- the test-split oracle dataset now comes from make_dataset.py on the
+# v3 datasets (bler_sionna frame-level, ego fallback, feasibility mask). Do not rerun for paper
+# values; P2 regenerates under PROTOCOL.md. NOT repointed to bler_sionna: incompatible schema
+# (qam,channel,esno_db,bler_frame) would break this codeword-level loader.
 BLER_CSV = os.path.join(REPO,
     'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv')
 OUT_CSV = os.path.join(REPO,

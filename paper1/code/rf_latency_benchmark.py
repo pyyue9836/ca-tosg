@@ -8,7 +8,13 @@ on the deployed rf_full.pkl. Reports per-sample latency (mean, std,
 P50, P95, P99) over batches of size 1 to match the per-frame online
 operating point of a 10 Hz LiDAR cycle.
 
-Output: peiyi_work/01_paper_ca_tosg/runs/v4_latency/results.csv
+Output: peiyi_work/01_paper_ca_tosg/runs/p2_latency/results.csv
+
+P1 RETIREMENT (2026-08): the old 52.8 ms figure was measured on the RETIRED v2 selector
+(runs/v2/rf_full.pkl); its CSV is archived at results/archive/latency_benchmark.csv and is no
+longer cited. Latency must be RE-MEASURED on the P2 frozen selector (PROTOCOL.md step 4). The
+model/dataset pointers below are TODO(P2) sentinels; the guard in main() fails closed so this
+cannot be silently re-run against the retired v2 model and re-mint 52.8 ms.
 """
 import os
 import pickle
@@ -18,9 +24,12 @@ import numpy as np
 import pandas as pd
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATASET = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2/dataset.csv')
-RF_PATH = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v2/rf_full.pkl')
-OUT_DIR = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/v4_latency')
+# TODO(P2): repoint to the frozen selector + its dataset produced by the PROTOCOL.md step-4 freeze.
+# Left None on purpose -- the retired v2 pointers (runs/v2/rf_full.pkl, runs/v2/dataset.csv) must
+# NOT be reused (they re-mint the archived 52.8 ms). No replacement value is pre-set.
+RF_PATH = None    # TODO(P2): path to the frozen P2 selector .pkl
+DATASET = None    # TODO(P2): path to the P2 dataset the selector was frozen on
+OUT_DIR = os.path.join(REPO, 'peiyi_work/01_paper_ca_tosg/runs/p2_latency')
 
 WARMUP = 100      # discard first 100 to avoid sklearn JIT warm-up
 N_TRIALS = 2000   # measured samples per regime
@@ -28,6 +37,11 @@ SEED = 0
 
 
 def main():
+    if RF_PATH is None or DATASET is None:
+        raise SystemExit(
+            'rf_latency_benchmark: RF_PATH/DATASET are TODO(P2) sentinels. Set them to the P2 '
+            'frozen selector + dataset before running. The retired v2 pointers are intentionally '
+            'not restored (old 52.8 ms is archived at results/archive/latency_benchmark.csv).')
     os.makedirs(OUT_DIR, exist_ok=True)
     df = pd.read_csv(DATASET)
     with open(RF_PATH, 'rb') as f: rf = pickle.load(f)

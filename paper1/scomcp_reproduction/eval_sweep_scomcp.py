@@ -57,6 +57,10 @@ def set_eval_channel(fusion_net, channel, snr):
     if fusion_net.ldpc_baseline_control:
         fusion_net.ldpc_qam_order = 16 if '16' in ch else 256
         if fusion_net._bler_xs is None:
+            # NOTE (P1, 2026-08): this is the SComCP-reproduction subsystem; its ldpc16/256qam
+            # comparator arm uses the codeword-level table by the SComCP paper's own convention.
+            # It is NOT a CA-TOSG frozen-number path and is intentionally left on this table (not
+            # repointed to bler_sionna, a different BLER convention/schema).
             fusion_net._load_bler_table(
                 'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv')
     # Analog codec channels: rebuild the channel module on the codec.

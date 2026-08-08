@@ -30,6 +30,11 @@ AP_PATTERN = re.compile(
     r"The Average Precision at IOU 0\.5 is ([0-9.]+), "
     r"The Average Precision at IOU 0\.7 is ([0-9.]+)"
 )
+# NOTE (P1, 2026-08): consumes the DEPRECATED codeword-level ldpc_qam_bler_table.csv. If the
+# committed ap_vs_snr LDPC16/256 summaries were produced here, they predate bler_sionna and must be
+# re-derived against results/bler_sionna/bler_sionna.csv in P2. Annotated, NOT rerun now (a rerun
+# against a different table would change the frozen fig:ap_snr LDPC curves). NOT repointed to
+# bler_sionna: incompatible schema (frame-level, multi-channel, Es/N0) would break this loader.
 BLER_CSV = str(Path("experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv").resolve())
 
 
