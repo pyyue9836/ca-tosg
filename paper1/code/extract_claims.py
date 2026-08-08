@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""CLAIMS ledger extractor (P1).
+
+Pulls every number-bearing sentence out of paper/main.tex and emits paper1/CLAIMS.md,
+an 8-column ledger:
+
+  Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording
+
+Only the first two columns are auto-filled (Claim = the sentence; Exact value = the numeric
+tokens found in it). The six evidence columns are left blank ON PURPOSE: P2-P4 back-fill each
+row against a regenerated source CSV + generator. A blank evidence column is a TODO, not an
+assertion.
+
+HEURISTIC (disclosed, deliberately conservative -> may miss integer-only claims):
+a sentence is a candidate iff it contains a *value token* -- a decimal (\\d+\\.\\d+) or an integer
+immediately followed by a result unit (dB, ms, %, Msym, Msym/frame, Mbit, Mbit/s, bps, kbit,
+Hz, MHz, QAM, bit, trees, -QAM). Bare integers that are section / equation / figure / citation
+indices (the argument of \\ref/\\eqref/\\cite/\\pageref, or 'Section N' / 'Fig. N' / 'Eq. (N)')
+are NOT value tokens and do not by themselves qualify a sentence. This filter is intentionally
+loose on the Claim side (better to over-collect and prune in P2 than to silently drop a number).
+
+No number is hardcoded here: the script reads main.tex and writes what it finds. Re-run after any
+main.tex edit to refresh the ledger skeleton.
+
+Run:  python paper1/code/extract_claims.py        # writes paper1/CLAIMS.md
+      python paper1/code/extract_claims.py --check # exit 1 if CLAIMS.md is stale (CI use)
+"""
+import os
+import re
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+P1 = os.path.dirname(HERE)
+TEX = os.path.join(P1, 'paper/main.tex')
+OUT = os.path.join(P1, 'CLAIMS.md')
+
+# result units that promote an adjacent integer to a value token
+UNIT = r'(?:dB|ms|Msym(?:/frame)?|Mbit(?:/s)?|kbit|bps|Hz|MHz|QAM|-QAM|bit|bits|trees|frames|scenes)'
+# a value token: a decimal, OR an integer glued to a unit, OR a percentage
+VALUE_TOKEN = re.compile(r'(?<![\\A-Za-z])(?:\d+\.\d+|\d+\s*%|\d+\s*[+\-]?\s*' + UNIT + r')')
+# numbers we want to LIST in the Exact-value column once a sentence qualifies (broader: any number)
+NUMBER = re.compile(r'[-+]?\d[\d,]*(?:\.\d+)?')
+
+
+def strip_tex(tex):
+    """Reduce main.tex to prose: drop the preamble, comments, and displayed-math environments,
+    which carry equation indices we do not want to mine as claims."""
+    # body only
+    m = re.search(r'\\begin\{document\}(.*)\\end\{document\}', tex, re.S)
+    if m:
+        tex = m.group(1)
+    out_lines = []
+    for line in tex.splitlines():
+        # drop full-line and trailing comments (respect \% escape)
+        line = re.sub(r'(?<!\\)%.*$', '', line)
+        out_lines.append(line)
+    tex = '\n'.join(out_lines)
+    # remove displayed-math / table / figure environments (indices, not prose claims)
+    for env in ('equation', 'align', 'aligned', 'tabular', 'array', 'figure', 'table', 'gather'):
+        tex = re.sub(r'\\begin\{%s\*?\}.*?\\end\{%s\*?\}' % (env, env), ' ', tex, flags=re.S)
+    tex = re.sub(r'\$\$.*?\$\$', ' ', tex, flags=re.S)         # display math
+    return tex
+
+
+def sentences(tex):
+    """Coarse sentence split on '. ' boundaries, after flattening whitespace. Inline math is kept
+    (a value can live inside $...$), but we avoid splitting on the '.' inside \\ref/numbers."""
+    tex = re.sub(r'\s+', ' ', tex)
+    # protect decimals and common abbreviations from the splitter
+    tex = re.sub(r'(\d)\.(\d)', r'\1<DOT>\2', tex)
+    tex = tex.replace('e.g.', 'e<DOT>g<DOT>').replace('i.e.', 'i<DOT>e<DOT>')
+    tex = re.sub(r'\b([A-Z])\.', r'\1<DOT>', tex)              # initials / abbrevs like Fig.
+    parts = re.split(r'(?<=[.:])\s+(?=[A-Z\\$])', tex)
+    return [p.replace('<DOT>', '.').strip() for p in parts if p.strip()]
+
+
+def is_index_only(sent):
+    """True if every number in the sentence is a section/eq/fig/cite index (no value token)."""
+    return VALUE_TOKEN.search(sent) is None
+
+
+def clean_claim(sent):
+    """Trim a sentence to a compact, human-readable claim string for the ledger cell."""
+    s = sent
+    s = re.sub(r'\\(cite|ref|eqref|pageref|label)\{[^}]*\}', lambda m: '[' + m.group(1) + ']', s)
+    s = re.sub(r'\\(emph|textbf|textit|method|texttt)\{([^}]*)\}', r'\2', s)
+    s = s.replace('\\method{}', 'CA-TOSG').replace('\\method', 'CA-TOSG')
+    s = re.sub(r'\\[a-zA-Z]+\*?', '', s)                        # residual macros
+    s = s.replace('{', '').replace('}', '').replace('~', ' ')
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s.replace('|', r'\|')                                # escape for markdown table
+
+
+def exact_values(sent):
+    vals = []
+    for m in NUMBER.finditer(sent):
+        v = m.group(0)
+        if v not in vals:
+            vals.append(v)
+    return ', '.join(vals).replace('|', r'\|')
+
+
+HEADER = (
+    "# CA-TOSG — CLAIMS LEDGER (P1)\n\n"
+    "Every number-bearing sentence in `paper/main.tex`, one row per claim. **Auto-generated by "
+    "`code/extract_claims.py`** — do not hand-edit the first two columns (re-run the extractor). "
+    "The six evidence columns are back-filled by hand in P2–P4: each claim must resolve to a "
+    "regenerated source CSV + generator + statistical support + the exact wording the paper is "
+    "allowed to use. A blank cell is an open TODO, not a verified fact.\n\n"
+    "Extraction heuristic (see the script header): a sentence qualifies iff it carries a *value "
+    "token* (a decimal, or an integer glued to a result unit, or a percentage). Bare "
+    "section/equation/figure/citation indices do not qualify. Frozen numbers are expected to "
+    "change in P2; this ledger is the checklist that forces every one of them back to a source.\n\n"
+    "| # | Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording |\n"
+    "|---|---|---|---|---|---|---|---|---|\n"
+)
+
+
+def build():
+    tex = open(TEX, encoding='utf-8').read()
+    prose = strip_tex(tex)
+    rows = []
+    for sent in sentences(prose):
+        if len(sent) < 8 or is_index_only(sent):
+            continue
+        rows.append((clean_claim(sent), exact_values(sent)))
+    lines = [HEADER]
+    for i, (claim, vals) in enumerate(rows, 1):
+        lines.append(f"| {i} | {claim} | {vals} |  |  |  |  |  |  |\n")
+    lines.append(f"\n_Total: {len(rows)} number-bearing claims extracted from "
+                 f"`paper/main.tex`. Evidence columns: 0 filled / {len(rows)} pending (P2–P4)._\n")
+    return ''.join(lines)
+
+
+def main():
+    content = build()
+    if '--check' in sys.argv:
+        cur = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
+        if cur != content:
+            print('CLAIMS.md is STALE vs main.tex -- re-run: python code/extract_claims.py')
+            sys.exit(1)
+        print('CLAIMS.md up to date.')
+        return
+    with open(OUT, 'w', encoding='utf-8') as f:
+        f.write(content)
+    n = content.count('\n| ') - 0
+    print(f'wrote {OUT} ({content.count(chr(10))} lines)')
+
+
+if __name__ == '__main__':
+    main()
