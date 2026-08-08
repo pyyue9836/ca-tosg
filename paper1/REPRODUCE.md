@@ -39,6 +39,9 @@ c. **JSCC per-frame decodes** `gs_rerun/jscc_v3/jscc_{ch}_{split}_snr{NN}.npz` �
    per-frame F1 by `score_jscc.py --mode score`.
 d. **Deployed selector** `data/selector_rf.pkl` — the 400-tree RandomForest, trained once on the full
    `dataset_validate_v3.csv` oracle labels by `code/train_rf.py`. Never retrained for test/culver.
+   *(Superseded by PROTOCOL.md §6; retraining in P2 — hyper-parameters + λ\* now selected by
+   scene-level 9-fold LOSO on validate, then the final selector is retrained on full validate and
+   frozen via `FROZEN_MANIFEST.json`. `train_rf.py`'s single full-validate fit is the legacy path.)*
 
 ## 2. Tables → generator → source CSV
 
@@ -76,7 +79,8 @@ copied into this repo. (`fig_*_preview.png` are gitignored previews.)
   for `s ∈ 0..199`; per frame `snr ~ U[0,20]` dB, channel type `is_rayleigh = rng.random() < 0.5`
   (Bernoulli 0.5). Fully seeded → deterministic.
 - **RandomForest**: `n_estimators=400, max_depth=10, min_samples_leaf=4, class_weight='balanced',
-  random_state=0`.
+  random_state=0`. *(Superseded by PROTOCOL.md §6; retraining in P2 — `class_weight='balanced'` is
+  dropped, the class cost is carried by λ; hyper-parameters are re-selected by scene-level LOSO.)*
 - **k-fold in-distribution diagnostic** (`kfold_two_regime_diag.py`): `StratifiedKFold(5, shuffle=True,
   random_state=0)`.
 - **Frame-level paired bootstrap CI** (`paired_ci_frames_from`): `n_boot=5000`, `seed=12345`.

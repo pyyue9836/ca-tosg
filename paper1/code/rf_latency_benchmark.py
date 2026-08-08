@@ -11,8 +11,8 @@ operating point of a 10 Hz LiDAR cycle.
 Output: peiyi_work/01_paper_ca_tosg/runs/p2_latency/results.csv
 
 P1 RETIREMENT (2026-08): the old 52.8 ms figure was measured on the RETIRED v2 selector
-(runs/v2/rf_full.pkl); its CSV is archived at results/archive/latency_benchmark.csv and is no
-longer cited. Latency must be RE-MEASURED on the P2 frozen selector (PROTOCOL.md step 4). The
+(runs/v2/rf_full.pkl); its CSV was archived and then REMOVED in P1.5 (single-version policy) and is
+no longer cited. Latency must be RE-MEASURED on the P2 frozen selector (PROTOCOL.md step 4). The
 model/dataset pointers below are TODO(P2) sentinels; the guard in main() fails closed so this
 cannot be silently re-run against the retired v2 model and re-mint 52.8 ms.
 """
@@ -41,7 +41,7 @@ def main():
         raise SystemExit(
             'rf_latency_benchmark: RF_PATH/DATASET are TODO(P2) sentinels. Set them to the P2 '
             'frozen selector + dataset before running. The retired v2 pointers are intentionally '
-            'not restored (old 52.8 ms is archived at results/archive/latency_benchmark.csv).')
+            'not restored (old 52.8 ms was archived then removed in P1.5; P2 re-measures).')
     os.makedirs(OUT_DIR, exist_ok=True)
     df = pd.read_csv(DATASET)
     with open(RF_PATH, 'rb') as f: rf = pickle.load(f)

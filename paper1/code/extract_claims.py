@@ -1,30 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CLAIMS ledger extractor (P1).
+"""CLAIMS ledger extractor (P1 / P1.5).
 
-Pulls every number-bearing sentence out of paper/main.tex and emits paper1/CLAIMS.md,
-an 8-column ledger:
+Pulls every number-bearing sentence out of paper/main.tex and emits paper1/CLAIMS.md, an 8-column
+ledger:
 
   Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording
 
-Only the first two columns are auto-filled (Claim = the sentence; Exact value = the numeric
-tokens found in it). The six evidence columns are left blank ON PURPOSE: P2-P4 back-fill each
-row against a regenerated source CSV + generator. A blank evidence column is a TODO, not an
-assertion.
+The first two columns are auto-filled (Claim = the sentence; Exact value = the numeric tokens in it,
+excluding citation/label/ref keys). The six evidence columns are back-filled BY HAND in P2-P4.
 
-HEURISTIC (disclosed, deliberately conservative -> may miss integer-only claims):
-a sentence is a candidate iff it contains a *value token* -- a decimal (\\d+\\.\\d+) or an integer
-immediately followed by a result unit (dB, ms, %, Msym, Msym/frame, Mbit, Mbit/s, bps, kbit,
-Hz, MHz, QAM, bit, trees, -QAM). Bare integers that are section / equation / figure / citation
-indices (the argument of \\ref/\\eqref/\\cite/\\pageref, or 'Section N' / 'Fig. N' / 'Eq. (N)')
-are NOT value tokens and do not by themselves qualify a sentence. This filter is intentionally
-loose on the Claim side (better to over-collect and prune in P2 than to silently drop a number).
+MERGE-PRESERVE (P1.5): on re-run the extractor regenerates columns 1-2 but PRESERVES any hand-filled
+evidence column. Rows are matched by a number-insensitive "claim skeleton" (letters only), so a
+change in number formatting does not orphan an evidence row. The extractor therefore NEVER clears an
+evidence cell a human filled (e.g. the "evidence-orphaned" flag on the 0.801/0.688 identity-ceiling
+row). --check exits 1 if CLAIMS.md is stale vs the merged regeneration.
 
-No number is hardcoded here: the script reads main.tex and writes what it finds. Re-run after any
-main.tex edit to refresh the ledger skeleton.
+TOKENISATION (P1.5 fixes): (a) \pm/\times/\approx/\le/\ge/\to render as ±/×/≈/≤/≥/→ in the Claim, so
+"52.8\pm5.7" reads "52.8 ± 5.7"; (b) thousands separators: "1,980" is one number; (c) glued numbers:
+numbers inside \cite{...}/\ref{...}/\label{...}/\eqref{...} keys (e.g. "80211" in ieee80211bd, a cite
+year) are stripped BEFORE number extraction and before the value-token qualification.
 
-Run:  python paper1/code/extract_claims.py        # writes paper1/CLAIMS.md
-      python paper1/code/extract_claims.py --check # exit 1 if CLAIMS.md is stale (CI use)
+HEURISTIC (disclosed): a sentence qualifies iff, after stripping ref/cite/label keys, it carries a
+value token -- a decimal, an integer (with optional thousands commas) glued to a result unit, or a
+percentage. Bare section/equation/figure indices do not qualify.
+
+Run:  python paper1/code/extract_claims.py          # writes paper1/CLAIMS.md (merge-preserving)
+      python paper1/code/extract_claims.py --check   # exit 1 if CLAIMS.md is stale
 """
 import os
 import re
@@ -35,108 +37,136 @@ P1 = os.path.dirname(HERE)
 TEX = os.path.join(P1, 'paper/main.tex')
 OUT = os.path.join(P1, 'CLAIMS.md')
 
-# result units that promote an adjacent integer to a value token
 UNIT = r'(?:dB|ms|Msym(?:/frame)?|Mbit(?:/s)?|kbit|bps|Hz|MHz|QAM|-QAM|bit|bits|trees|frames|scenes)'
-# a value token: a decimal, OR an integer glued to a unit, OR a percentage
-VALUE_TOKEN = re.compile(r'(?<![\\A-Za-z])(?:\d+\.\d+|\d+\s*%|\d+\s*[+\-]?\s*' + UNIT + r')')
-# numbers we want to LIST in the Exact-value column once a sentence qualifies (broader: any number)
+# value token: decimal | integer(+thousands) glued to a unit | percentage
+VALUE_TOKEN = re.compile(r'(?<![\\A-Za-z])(?:\d[\d,]*\.\d+|\d[\d,]*\s*%|\d[\d,]*\s*[+\-]?\s*' + UNIT + r')')
+# numbers to LIST in the Exact-value column (decimals, signed, thousands separators)
 NUMBER = re.compile(r'[-+]?\d[\d,]*(?:\.\d+)?')
+REFKEY = re.compile(r'\\(?:cite[a-z]*|ref|eqref|pageref|label|autoref|Cref|cref)\*?\{[^}]*\}')
+EVIDENCE_COLS = 6                                       # Split..Allowed wording
+
+
+def _read(path):
+    with open(path, encoding='utf-8') as f:
+        return f.read()
+
+
+def _strip_refs(text):
+    """Remove \\cite/\\ref/\\label/\\eqref keys so their internal digits (ieee80211bd, years) are not
+    mined as claim numbers; normalise the LaTeX thousands separator 2{,}000 -> 2,000 so a thousands
+    number is one token, not two."""
+    return REFKEY.sub(' ', text).replace('{,}', ',')
 
 
 def strip_tex(tex):
-    """Reduce main.tex to prose: drop the preamble, comments, and displayed-math environments,
-    which carry equation indices we do not want to mine as claims."""
-    # body only
     m = re.search(r'\\begin\{document\}(.*)\\end\{document\}', tex, re.S)
     if m:
         tex = m.group(1)
-    out_lines = []
-    for line in tex.splitlines():
-        # drop full-line and trailing comments (respect \% escape)
-        line = re.sub(r'(?<!\\)%.*$', '', line)
-        out_lines.append(line)
-    tex = '\n'.join(out_lines)
-    # remove displayed-math / table / figure environments (indices, not prose claims)
+    tex = '\n'.join(re.sub(r'(?<!\\)%.*$', '', line) for line in tex.splitlines())
     for env in ('equation', 'align', 'aligned', 'tabular', 'array', 'figure', 'table', 'gather'):
         tex = re.sub(r'\\begin\{%s\*?\}.*?\\end\{%s\*?\}' % (env, env), ' ', tex, flags=re.S)
-    tex = re.sub(r'\$\$.*?\$\$', ' ', tex, flags=re.S)         # display math
+    tex = re.sub(r'\$\$.*?\$\$', ' ', tex, flags=re.S)
     return tex
 
 
 def sentences(tex):
-    """Coarse sentence split on '. ' boundaries, after flattening whitespace. Inline math is kept
-    (a value can live inside $...$), but we avoid splitting on the '.' inside \\ref/numbers."""
     tex = re.sub(r'\s+', ' ', tex)
-    # protect decimals and common abbreviations from the splitter
     tex = re.sub(r'(\d)\.(\d)', r'\1<DOT>\2', tex)
     tex = tex.replace('e.g.', 'e<DOT>g<DOT>').replace('i.e.', 'i<DOT>e<DOT>')
-    tex = re.sub(r'\b([A-Z])\.', r'\1<DOT>', tex)              # initials / abbrevs like Fig.
+    tex = re.sub(r'\b([A-Z])\.', r'\1<DOT>', tex)
     parts = re.split(r'(?<=[.:])\s+(?=[A-Z\\$])', tex)
     return [p.replace('<DOT>', '.').strip() for p in parts if p.strip()]
 
 
 def is_index_only(sent):
-    """True if every number in the sentence is a section/eq/fig/cite index (no value token)."""
-    return VALUE_TOKEN.search(sent) is None
+    return VALUE_TOKEN.search(_strip_refs(sent)) is None
 
 
 def clean_claim(sent):
-    """Trim a sentence to a compact, human-readable claim string for the ledger cell."""
     s = sent
-    s = re.sub(r'\\(cite|ref|eqref|pageref|label)\{[^}]*\}', lambda m: '[' + m.group(1) + ']', s)
+    s = REFKEY.sub(lambda m: '[' + re.match(r'\\([a-zA-Z]+)', m.group(0)).group(1) + ']', s)
+    for a, b in ((r'\pm', ' ± '), (r'\times', ' × '), (r'\approx', ' ≈ '), (r'\leq', ' ≤ '),
+                 (r'\geq', ' ≥ '), (r'\le', ' ≤ '), (r'\ge', ' ≥ '), (r'\to', ' → ')):
+        s = s.replace(a, b)
     s = re.sub(r'\\(emph|textbf|textit|method|texttt)\{([^}]*)\}', r'\2', s)
     s = s.replace('\\method{}', 'CA-TOSG').replace('\\method', 'CA-TOSG')
-    s = re.sub(r'\\[a-zA-Z]+\*?', '', s)                        # residual macros
-    s = s.replace('{', '').replace('}', '').replace('~', ' ')
+    s = re.sub(r'\\[a-zA-Z]+\*?', '', s)
+    s = s.replace('{', '').replace('}', '').replace('~', ' ').replace('$', '')
     s = re.sub(r'\s+', ' ', s).strip()
-    return s.replace('|', r'\|')                                # escape for markdown table
+    return s.replace('|', r'\|')
 
 
 def exact_values(sent):
     vals = []
-    for m in NUMBER.finditer(sent):
+    for m in NUMBER.finditer(_strip_refs(sent)):
         v = m.group(0)
         if v not in vals:
             vals.append(v)
     return ', '.join(vals).replace('|', r'\|')
 
 
+def _skeleton(claim):
+    """Number-insensitive key for merge-preserve: letters only, lowercased."""
+    return re.sub(r'[^a-zA-Z]', '', claim).lower()
+
+
+def parse_existing(path):
+    """Return {skeleton -> [6 evidence cells]} for rows that have ANY non-empty evidence cell."""
+    if not os.path.exists(path):
+        return {}
+    keep = {}
+    for line in _read(path).splitlines():
+        if not line.startswith('| ') or line.startswith('| # ') or line.startswith('|---'):
+            continue
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        if len(cells) != 9:                            # # | Claim | Exact | +6 evidence
+            continue
+        claim, ev = cells[1], cells[3:9]
+        if any(ev):
+            keep[_skeleton(claim)] = ev
+    return keep
+
+
 HEADER = (
-    "# CA-TOSG — CLAIMS LEDGER (P1)\n\n"
+    "# CA-TOSG — CLAIMS LEDGER (P1.5)\n\n"
     "Every number-bearing sentence in `paper/main.tex`, one row per claim. **Auto-generated by "
-    "`code/extract_claims.py`** — do not hand-edit the first two columns (re-run the extractor). "
-    "The six evidence columns are back-filled by hand in P2–P4: each claim must resolve to a "
-    "regenerated source CSV + generator + statistical support + the exact wording the paper is "
-    "allowed to use. A blank cell is an open TODO, not a verified fact.\n\n"
-    "Extraction heuristic (see the script header): a sentence qualifies iff it carries a *value "
-    "token* (a decimal, or an integer glued to a result unit, or a percentage). Bare "
-    "section/equation/figure/citation indices do not qualify. Frozen numbers are expected to "
-    "change in P2; this ledger is the checklist that forces every one of them back to a source.\n\n"
+    "`code/extract_claims.py`** (columns 1-2). The six evidence columns are back-filled by hand in "
+    "P2–P4 and are **merge-preserved** across re-runs — the extractor never clears an evidence cell "
+    "a human filled. A blank evidence cell is an open TODO, not a verified fact.\n\n"
+    "Extraction heuristic (script header): a sentence qualifies iff, after ref/cite/label keys are "
+    "stripped, it carries a value token (decimal, integer+unit, or percentage). Frozen numbers change "
+    "in P2; this ledger forces every one back to a source.\n\n"
     "| # | Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording |\n"
     "|---|---|---|---|---|---|---|---|---|\n"
 )
 
 
 def build():
-    tex = open(TEX, encoding='utf-8').read()
-    prose = strip_tex(tex)
-    rows = []
+    prose = strip_tex(_read(TEX))
+    preserved = parse_existing(OUT)
+    rows, n_pres = [], 0
     for sent in sentences(prose):
         if len(sent) < 8 or is_index_only(sent):
             continue
-        rows.append((clean_claim(sent), exact_values(sent)))
+        claim = clean_claim(sent)
+        ev = preserved.get(_skeleton(claim), [''] * EVIDENCE_COLS)
+        if any(ev):
+            n_pres += 1
+        rows.append((claim, exact_values(sent), ev))
     lines = [HEADER]
-    for i, (claim, vals) in enumerate(rows, 1):
-        lines.append(f"| {i} | {claim} | {vals} |  |  |  |  |  |  |\n")
-    lines.append(f"\n_Total: {len(rows)} number-bearing claims extracted from "
-                 f"`paper/main.tex`. Evidence columns: 0 filled / {len(rows)} pending (P2–P4)._\n")
+    for i, (claim, vals, ev) in enumerate(rows, 1):
+        lines.append('| %d | %s | %s | %s |\n' % (i, claim, vals, ' | '.join(ev)))
+    filled = sum(1 for _, _, ev in rows if any(ev))
+    lines.append(f"\n_Total: {len(rows)} number-bearing claims from `paper/main.tex`. "
+                 f"Evidence columns: {filled} filled / {len(rows) - filled} pending (P2–P4); "
+                 f"{n_pres} preserved across this re-run._\n")
     return ''.join(lines)
 
 
 def main():
     content = build()
     if '--check' in sys.argv:
-        cur = open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
+        cur = _read(OUT) if os.path.exists(OUT) else ''
         if cur != content:
             print('CLAIMS.md is STALE vs main.tex -- re-run: python code/extract_claims.py')
             sys.exit(1)
@@ -144,7 +174,6 @@ def main():
         return
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write(content)
-    n = content.count('\n| ') - 0
     print(f'wrote {OUT} ({content.count(chr(10))} lines)')
 
 

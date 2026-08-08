@@ -23,13 +23,13 @@ scomcp_reproduction/    reproduction of the SComCP baseline method      (git-exc
 |---|---|
 | Payload–accuracy Pareto (Fig. 4.3) | `results/policy/pareto_points.csv` (200-realisation, current selector — see `results/policy/PROVENANCE.txt`) |
 | True e2e AP knee — validate / test / Culver (global-sort) | `results/true_e2e_global_{validate,test,culver}.csv` |
-| AP-vs-SNR figure (fig:ap_snr, global-sort) | `results/ap_vs_snr/*.csv` + `results/true_e2e_global_validate.csv` → `code/plot_ap_snr.py` |
+| AP-vs-SNR figure (fig:ap_snr, global-sort) | source `ap_vs_snr/*.csv` **removed in P1.5** (stale JSCC/LDPC summaries); P2 regenerates against `bler_sionna` |
 | Two-regime edge (fig:two_regime, Table III) | `results/jscc/two_regime_edge_clean.csv` (deployed), `results/jscc/two_regime_kfold_diag.csv` (in-dist) |
 | JSCC selector edge — AWGN / Rayleigh / OFDM | `results/jscc_selector_{awgn,rayleigh,ofdm}.csv` |
 | Where2comm baseline (global-sort 0.887/0.871/0.790, epoch-50) | `results/where2comm_ap.csv` |
 | Feature importance | `results/feature_importance.csv` — SNR+channel share **pending P2 re-freeze** (do not cite the old 65% figure) |
-| Latency | **archived** `results/archive/latency_benchmark.csv` — old 52.8 ms retired; P2 re-measures on the frozen selector |
-| Robustness: CSI noise / aging / request delay | `results/robustness_csi_noise.csv`, `results/robustness_csi_aging.csv`, `results/robustness_request_delay.csv` (Rician **archived**, convention in doubt — `results/archive/robustness_rician.csv`) |
+| Latency | old 52.8 ms **retired and removed in P1.5** (single-version policy); P2 re-measures on the frozen selector |
+| Robustness: CSI noise / aging / request delay | `results/robustness_csi_noise.csv`, `results/robustness_csi_aging.csv`, `results/robustness_request_delay.csv` (Rician **removed in P1.5**, convention in doubt; P2 regenerates) |
 | Difficulty strata (hard-frame gain) | `results/a2_difficulty.csv`, `results/a2_difficulty_reliable.csv` |
 | Ablation / SNR-threshold arm | `results/ablation/a7_ablation.csv`, `results/ablation/a7_cue_value.csv`, `results/snr_threshold.csv` |
 | Multi-seed confidence intervals | `results/multiseed_hardening.csv` |

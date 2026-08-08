@@ -27,8 +27,8 @@ import matplotlib.pyplot as plt
 import _common as C
 
 # SUPERSEDED (P1, 2026-08): consumes the DEPRECATED codeword-level ldpc_qam_bler_table.csv. Its
-# Rician-fading output (results/robustness_rician.csv) is ARCHIVED as convention-in-doubt
-# (results/archive/) and must be regenerated in P2 under the current bler_sionna / ego-fallback /
+# Rician-fading output (results/robustness_rician.csv) was archived then REMOVED in P1.5 as
+# convention-in-doubt, and must be regenerated in P2 under the current bler_sionna / ego-fallback /
 # S={E,L,F} system. NOT repointed to bler_sionna: incompatible schema would break this loader.
 BLER = pd.read_csv(os.path.join(C.REPO,
     'peiyi_work/04_experiment_logs/importance_map_jscc/ldpc_qam_bler_table.csv'))

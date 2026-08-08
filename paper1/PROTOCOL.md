@@ -1,10 +1,16 @@
-# CA-TOSG — FROZEN EXPERIMENTAL PROTOCOL (P1)
+# CA-TOSG — FROZEN EXPERIMENTAL PROTOCOL (P1.5)
 
 **Status:** frozen protocol contract for the P2 rebuild. This file fixes the evaluation
 protocol *before* any number is regenerated. It does **not** report results — every number
 below is either a protocol parameter (an input we choose) or a payload constant derived from
 the rate/modulation chain and cited to its generator. Reported results live in `results/` and
 are indexed by `CLAIMS.md`.
+
+**§7 — Single authoritative version.** This is the ONE formal version of the CA-TOSG evaluation
+protocol. It supersedes any protocol description embedded elsewhere (README / REPRODUCE /
+PROVENANCE / handoff notes / main.tex prose); where another file disagrees, this file governs and
+the other is to be annotated "superseded by PROTOCOL.md". All revisions are pre-registered in the
+**Change-log** at the foot of this file, each with a reason and a date, *before* any P2 training.
 
 **Authority.** Where a value is derivable, this file cites the script that derives it rather than
 restating a literal. Payload constants are cited to `code/payload_audit.py` (which re-derives them
@@ -16,11 +22,12 @@ generator; if this file and a generator disagree, the generator wins and this fi
 ## 1. Split roles (HARD bans)
 
 Four data partitions, three distinct roles. The bans are **hard**: a violation is a protocol
-breach, not a judgement call, and `code/check_leakage.py` is the resident gate that enforces them.
+breach, not a judgement call, and `code/p2_dataprep/check_leakage.py` is the resident gate that
+enforces them.
 
 | Split | Role | Permitted operations | BANNED operations |
 |---|---|---|---|
-| **validate** (1980 frames, 9 OPV2V scenes) | training + development + λ / threshold selection | fit selector; scene-level train/dev sub-split; sweep λ; tune SNR threshold τ; model selection | — |
+| **validate** (1980 frames, 9 OPV2V scenes) | training + development + λ / threshold selection | fit selector; scene-level LOSO (9-fold) for hyper-parameter + λ selection; sweep λ; tune SNR threshold τ; model selection | — |
 | **test** (scene-disjoint) | one-shot final test | a single frozen-model evaluation | **any** training, cross-validation, threshold search, λ re-selection, model selection, or hyper-parameter touch |
 | **Culver-City** (domain shift) | one-shot final test | a single frozen-model evaluation | same bans as test |
 
@@ -44,12 +51,16 @@ breach, not a judgement call, and `code/check_leakage.py` is the resident gate t
 
 **BANNED: expand-then-split.** Creating the frame×SNR×channel grid first and then splitting rows
 is forbidden — it places channel copies of the same scene on both sides and leaks. The within-
-validate train/dev sub-split (§6) obeys the same scene-first order.
+validate cross-validation (§6, scene-level LOSO) obeys the same scene-first order: folds are cut by
+scene, and channel copies inherit the scene's fold.
 
 *OPV2V validate has 9 scenes* (frame counts 112/157/135/202/64/48/57/459/746 = 1980, sorted
-scene-dir order; reconstructed by `code/expand_grid_clean.py` / `code/make_scene_split.py` and
-asserted to sum to the dataset length). A scene-level 70/30 sub-split is therefore coarse
-(≈6–7 train scenes / 2–3 dev scenes); this coarseness is recorded, not hidden.
+scene-dir order; reconstructed by `code/p2_dataprep/expand_grid_clean.py` /
+`code/p2_dataprep/make_scene_split.py`, asserted to sum to the dataset length, and independently
+cross-checked against a loader-order scene manifest, §7-independence). Model/hyper-parameter and λ
+selection use **scene-level 9-fold LOSO** over these 9 scenes rather than a single 70/30 dev split
+(Change-log R1): a single split leaves the dev set at only 2 scenes, whose F1 is too high-variance
+to select on.
 
 ## 3. Channel grid
 
@@ -78,10 +89,15 @@ asserted to sum to the dataset length). A scene-level 70/30 sub-split is therefo
 - **Main experiment transports F with rate-1/2 LDPC + 16-QAM.**
 - **Effective utility** per cell: `eff_E = ego_f1`; `eff_L = late_f1` (BLER_L = 0 mainline);
   `eff_F = compressed_f1·(1 − BLER_F) + ego_f1·BLER_F` (ego-only failure fallback).
-- **Oracle label** = argmax over {E, L, F} of the effective utility (E is a first-class action,
-  so an infeasible F simply loses to E/L; the label naturally handles undeliverable requests).
-  This is the P2 formalism and **differs** from the legacy `oracle_3way` over {L, C16, C256} in
-  the v3 datasets — the legacy label folds ego only into the failure fallback, not as an action.
+- **Oracle label** = argmax over {E, L, F} of the effective utility, computed on a **feasibility-
+  masked** utility vector: where BLER_F ≥ 0.999 (certain failure), F's oracle target is set to
+  −∞ so an undeliverable feature request can never be labelled (it would spend channel-use for zero
+  information; masking, not preference — same semantics as `make_dataset.py`, Change-log R2). The
+  `eff_F` COLUMN keeps the true effective utility (used by every policy evaluation); only the oracle
+  LABEL argmax is masked. E is a first-class action, so E/L still win naturally where F is feasible
+  but weak. This is the P2 formalism and **differs** from the legacy `oracle_3way` over
+  {L, C16, C256} in the v3 datasets — the legacy label folds ego only into the failure fallback,
+  not as an action.
 - **C256 (256-QAM feature variant), positioning — frozen wording (do not paraphrase):**
 
   > The same feature-level message is additionally evaluated with 256-QAM as a physical-layer
@@ -92,15 +108,17 @@ asserted to sum to the dataset length). A scene-level 70/30 sub-split is therefo
 - **B_max ∈ {0.10, 0.20, 0.30} Msym/frame** — the operating budgets swept for the constrained
   problem (§6).
 - **Intended derivation:** available channel-uses/s ÷ LiDAR frame rate (802.11bd parameters).
-- **Status: NOT physically derived — frozen as *normalized resource budgets*.** The repo commits
-  an 802.11bd 10 MHz OFDM numerology only for the *channel BLER model*
-  (`analysis_tools/build_bler_sionna_ofdm.py`: N_FFT=64, N_SC=52 data subcarriers, Δf=156.25 kHz);
-  it commits **no** channel-uses/s → per-frame-symbol-budget mapping, and none is derived here (a
-  physical mapping requires guard-interval / occupied-bandwidth assumptions not committed, and
-  fabricating them would put a memory-sourced number into a frozen contract). The three B_max
-  values are therefore treated as **relative operating points on the payload–accuracy frontier**,
-  not physical link capacities. A physical-capacity mapping is deferred (P2+); until then all
-  B_max-referenced text must say "normalized resource budget", not a Mbit/s link rate.
+- **Status: NOT physically derived — frozen as *prespecified channel-use budgets*** (Change-log
+  R3; the earlier "normalized resource budget" wording is retired — "normalized" wrongly implied a
+  unit-normalisation). The repo commits an 802.11bd 10 MHz OFDM numerology only for the *channel
+  BLER model* (`analysis_tools/build_bler_sionna_ofdm.py`: N_FFT=64, N_SC=52 data subcarriers,
+  Δf=156.25 kHz); it commits **no** channel-uses/s → per-frame-symbol-budget mapping, and none is
+  derived here (a physical mapping requires guard-interval / occupied-bandwidth assumptions not
+  committed, and fabricating them would put a memory-sourced number into a frozen contract). The
+  three B_max values are therefore **prespecified operating points (in Msym/frame) on the
+  payload–accuracy frontier**, not physical link capacities. A physical-capacity mapping is deferred
+  (P2+); until then all B_max-referenced text must say "prespecified channel-use budget", not a
+  Mbit/s link rate.
 
 ## 6. λ selection (five steps) + freeze rule
 
@@ -109,22 +127,106 @@ Lagrange multiplier λ ≥ 0 (`main.tex` Eq. around L204). λ, the selector, and
 baseline τ are all chosen on **validate only**, then frozen.
 
 1. **Build the validate substrate.** On validate, compute the per-cell effective utilities over
-   the §3 grid (`eff_E/eff_L/eff_F`) and the feasibility mask (F removed where BLER_F ≥ 0.999).
+   the §3 grid (`eff_E/eff_L/eff_F`) and the feasibility mask (F removed where BLER_F ≥ 0.999, §4).
 2. **Sweep λ.** Over a fixed λ grid ({0} ∪ geomspace, as in `recompute_policy_200seed.py`),
    compute the feasibility-masked argmax policy `argmax_a (eff_a − λ·B_a)` per λ → the validate
    payload–F1 frontier.
-3. **Select λ\*(B_max).** For each target B_max ∈ {0.10, 0.20, 0.30}, pick λ\* as the smallest λ
-   whose validate mean payload ≤ B_max (the tightest-utility point meeting the budget). Report
-   the mapping B_max → λ\* as part of the frontier, not as a tuned free parameter.
-4. **Freeze, then train the deployed selector.** Freeze λ\*. Train the Random-Forest selector to
-   imitate the λ\*-oracle labels **on validate only** (scene-level train/dev sub-split per §2/§6;
-   model/hyper-parameter selection uses dev, never test/Culver).
+3. **Select hyper-parameters and λ\*(B_max) by scene-level 9-fold LOSO** (Change-log R1). For each
+   candidate selector hyper-parameter set and each target B_max ∈ {0.10, 0.20, 0.30}: leave one of
+   the 9 validate scenes out, train the selector to imitate the λ-oracle labels on the other 8, and
+   evaluate realised F1/payload on the held-out scene; rotate over all 9 scenes and aggregate.
+   Choose the hyper-parameters and the λ\* per B_max that maximise the LOSO-aggregated F1 subject to
+   the LOSO-aggregated payload ≤ B_max. This replaces the single 70/30 dev split (dev = only 2
+   scenes → high-variance selection). Report B_max → λ\* as a frontier point, not a tuned free
+   parameter.
+4. **Freeze the config, then retrain the final selector on FULL validate.** Freeze the chosen
+   hyper-parameters and {λ\*(B_max)}. Retrain the deployed Random-Forest selector once on **all 1980
+   validate frames** at the frozen config and write `FROZEN_MANIFEST.json` (model sha256, training
+   scene list, hyper-parameters, λ\*/τ\* per B_max, input-data md5, freeze timestamp). Nothing after
+   this point may look at test/Culver labels to pick a knob.
 5. **Apply frozen everything to test/Culver.** Evaluate the frozen selector at the frozen λ\* on
-   test and Culver **once**, with no re-tuning. The SNR-threshold baseline τ is likewise tuned on
-   validate (fine grid, argmax mean validate F1) and reused verbatim on test/Culver — the τ from a
-   different terrain is never carried over, and τ is never re-fit on the test terrain.
+   test and Culver **once**, reading only `FROZEN_MANIFEST.json`, with no re-tuning. The
+   SNR-threshold baseline τ\* is likewise selected on validate — **budget-matched**: per B_max, the
+   threshold giving the highest validate F1 within that budget (per-split threshold search is
+   banned from here on) — and reused verbatim on test/Culver.
 
-**Freeze rule.** Once step 4 completes, λ\*, the selector checkpoint, and τ are immutable for the
-remainder of the evaluation. Any change to any of them invalidates every test/Culver number and
-requires re-freezing from validate. `code/check_leakage.py` asserts no fitting/tuning artefact on
-test/Culver.
+**Freeze rule.** Once step 4 writes `FROZEN_MANIFEST.json`, the hyper-parameters, {λ\*}, the
+selector checkpoint, and {τ\*} are immutable. Any change invalidates every test/Culver number and
+requires re-freezing from validate. `code/p2_dataprep/check_leakage.py` asserts no fitting/tuning
+artefact on test/Culver.
+
+## 8. Post-P2 anomaly review — expectations + handling rules
+
+After P2 regenerates the numbers, run the full anomaly checklist (`P2 submit-B step f`) and produce
+a report. Every item below is an **expectation to test, not a target to hit**.
+
+Expectations (each must hold on the regenerated results, else halt — see handling rules):
+- **Provenance / plumbing (original checklist):** every reported number resolves to a regenerated
+  source CSV + generator (CLAIMS.md rows closed); no v1/v2/v3/_old/_bak naming survives in the
+  pipeline or in main.tex/results (P2 submit-D assertion); `FROZEN_MANIFEST.json` exists and its
+  md5s match the data actually used; payload chain still bit-audits (`code/payload_audit.py`).
+- **Rayleigh:** BLER_F ≈ 1 so F ≈ ego, but the oracle/selector should still show **both E and L**
+  (not necessarily 100 % L) — E wins where ego ≥ late, L where the object message helps.
+- **AWGN low SNR:** the mix is **E/L-dominated** (F mostly infeasible or beaten).
+- **High SNR:** the **F share increases** monotonically-ish as BLER_F falls.
+- **No deployed action-distribution curve contains C256** (it is a physical-layer comparator only, §4).
+- **validate budget points:** each B_max ∈ {0.10, 0.20, 0.30} operating point has validate mean
+  payload ≤ its B_max.
+- **test / Culver:** produced with **exactly one** frozen model + {λ\*} + {τ\*} from
+  `FROZEN_MANIFEST.json`; no per-split refit anywhere.
+
+Handling rules (binding):
+1. **Expectation not met → STOP and diagnose.** Do not continue the pipeline; report the anomaly
+   as-is with the numbers that produced it.
+2. **No "artefact" hand-waves.** An unexpected result may NOT be annotated away as an "artefact"
+   / "rounding" / "known quirk" without a diagnosed, written root cause.
+3. **Never adjust the data to meet an expectation.** Expectations are falsifiable predictions; if
+   the data disagrees, the finding changes, not the data.
+
+## 9. JSCC edge — pre-registration
+
+The graceful-channel (importance-map JSCC) two-regime edge is reported as an **in-distribution
+analysis**, pre-registered here before P2/P5 recomputation (see the leakage history):
+- Report **both** the k-fold **in-distribution** edge (the graceful-channel signal lives in the
+  perception cues) **and** the cross-split **deployed** number (the honest transfer gap). The
+  in-distribution qualifier is mandatory wherever the JSCC edge appears.
+- **No headline JSCC number in the abstract.** The abstract carries no JSCC edge figure.
+- The JSCC selector is fit/evaluated by **k-fold in-distribution** on the same split, explicitly
+  distinct from the main deployed selector (§6), and this distinction must be stated at every use.
+- Any JSCC edge value whose source was deleted in the P1/P1.5 cleanup is **evidence-orphaned** in
+  `CLAIMS.md` and must be recomputed under this rule or the sentence dropped (P5).
+
+## 10. Pre-freeze data-generation constraint (Change-log R4)
+
+Before `FROZEN_MANIFEST.json` exists (the **pre-freeze** stage), the ONLY data that may be
+generated is the **validate** grid (`expand_grid_clean.py --split validate`, the default).
+
+- **test / Culver grids and their oracle labels MUST NOT exist pre-freeze.** They are generated by a
+  **separate command, run only AFTER** the manifest is written (P2 submit-B step d).
+- `code/p2_dataprep/check_leakage.py` enforces this: with no manifest present it asserts the
+  test/Culver grids are **absent**; with a manifest present it asserts they exist, are column-pure,
+  and were built after the manifest timestamp.
+- Rationale: generating the final-test substrate before the model is frozen is the first step of an
+  accidental leak; forbidding it structurally removes the temptation.
+
+---
+
+## Change-log — pre-registered protocol revisions
+
+All entries are pre-registered **before P2 training** (legitimate: a protocol may be revised until
+the model is frozen, provided each change is logged with a reason and a date up front).
+
+- **R1 (2026-08-08) — §2/§6: selection by scene-level 9-fold LOSO, replacing the single 70/30 dev
+  split.** Reason: a single scene-first 70/30 split leaves the dev set at only 2 of the 9 validate
+  scenes, whose realised F1 is too high-variance to select hyper-parameters or λ\* on. LOSO uses all
+  9 scenes as held-out folds. The 70/30 split (`make_scene_split.py`) is retained only as an
+  auditable scene-partition example and for the leakage gate's disjointness check; it no longer
+  drives selection.
+- **R2 (2026-08-08) — §4: oracle label definition made explicit about the feasibility mask**
+  (BLER_F ≥ 0.999 → F's oracle target = −∞). This was always the intended semantics
+  (`make_dataset.py`); it is now stated in the protocol and implemented in `expand_grid_clean.py`.
+- **R3 (2026-08-08) — §5: "normalized resource budget" → "prespecified channel-use budget".** The
+  budgets are still not physically mapped to a link rate; the rename drops the misleading
+  "normalized" (which implied a unit-normalisation that was never performed).
+- **R4 (2026-08-08) — §10: pre-freeze stage restricted to validate-grid generation;** test/Culver
+  grids + labels generated by a separate post-manifest command.
