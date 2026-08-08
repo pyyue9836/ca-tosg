@@ -1,0 +1,25 @@
+CA-TOSG P2 data prep -- clean-cache grid expansion (expand_grid_clean.py)
+========================================================================
+SNR grid: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20] dB (Es/N0)  x  channels: ['awgn', 'rayleigh']
+Action set S = ['E', 'L', 'F']; F = 16-QAM rate-1/2 LDPC.
+eff_E=ego_f1 (B_E=0); eff_L=late_f1 (BLER_L=0 mainline); eff_F=compressed_f1*(1-BLER_F)+ego_f1*BLER_F (ego fallback).
+oracle_ELF = argmax over [E,L,F] (ties -> E then L). NOT the legacy oracle_3way {L,C16,C256}.
+BLER source: results/bler_sionna/bler_sionna.csv (frame-level bler_frame, md5 be3f5e1278ddda6efc271281ccbf449e).
+Payload (Msym, report-only): {'E': 0.0, 'L': 0.024, 'F': 0.99}.
+Grid artifacts are git-excluded (data/p2/); regenerate with expand_grid_clean.py.
+
+[validate] src=dataset_validate_v3.csv md5=d357b38e802455bf3cabd3f886353991
+    frames=1980 scenes=9 rows=43560
+    out=data/p2/p2_grid_validate.csv md5=3314418d4e53ff30d0d246e1594e4bed
+    oracle base-rate E/L/F = {'E': 0.007690541781450872, 'L': 0.8539256198347107, 'F': 0.1383838383838384}
+    scene frame-counts = [('2021_08_20_21_48_35', 112), ('2021_08_21_17_30_41', 157), ('2021_08_22_13_37_16', 135), ('2021_08_22_22_01_17', 202), ('2021_08_23_10_51_24', 64), ('2021_08_23_13_17_21', 48), ('2021_08_23_19_42_07', 57), ('2021_09_09_19_27_35', 459), ('2021_09_11_00_33_16', 746)]
+[test] src=dataset_test_v3.csv md5=0946c9f343eed98a337b4bd0229b9b39
+    frames=2170 scenes=16 rows=47740
+    out=data/p2/p2_grid_test.csv md5=6b1490017b19b0f88b835b022d5e0149
+    oracle base-rate E/L/F = {'E': 0.13202764976958525, 'L': 0.7120025136154169, 'F': 0.15596983661499791}
+    scene frame-counts = [('2021_08_18_19_48_05', 178), ('2021_08_20_21_10_24', 98), ('2021_08_21_09_28_12', 147), ('2021_08_22_07_52_02', 167), ('2021_08_22_09_08_29', 151), ('2021_08_22_21_41_24', 71), ('2021_08_23_12_58_19', 104), ('2021_08_23_15_19_19', 167), ('2021_08_23_16_06_26', 134), ('2021_08_23_17_22_47', 102), ('2021_08_23_21_07_10', 141), ('2021_08_23_21_47_19', 77), ('2021_08_24_07_45_41', 135), ('2021_08_24_11_37_54', 104), ('2021_08_24_20_09_18', 220), ('2021_08_24_20_49_54', 174)]
+[culver] src=dataset_culver_v3.csv md5=746c35ac187ed3eabecb90b183a6c1b6
+    frames=550 scenes=4 rows=12100
+    out=data/p2/p2_grid_culver.csv md5=c52f92c755201aa2178ad38be1abb963
+    oracle base-rate E/L/F = {'E': 0.09049586776859504, 'L': 0.6681818181818182, 'F': 0.2413223140495868}
+    scene frame-counts = [('2021_09_03_09_32_17', 90), ('2021_09_03_10_53_32', 118), ('2021_09_03_20_08_37', 135), ('2021_09_03_22_43_57', 207)]

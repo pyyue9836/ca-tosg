@@ -89,4 +89,9 @@ copied into this repo. (`fig_*_preview.png` are gitignored previews.)
 python code/payload_audit.py                       # 15/15 links MATCH (payload chain -> tables)
 python code/verify_paragraph_insert.py 1 2 3       # GATE PASS (hand-written paragraphs verbatim)
 grep -nE -f <(grep '^RX ' results/STALE_FINGERPRINTS.md | cut -c4-) paper/main.tex   # expect 0 (block-exit)
+python code/extract_claims.py --check              # CLAIMS.md up to date vs main.tex
+python code/p2_dataprep/check_leakage.py           # LEAKAGE GATE PASS (resident, P2 data prep)
 ```
+
+The leakage gate needs the P2 grids (data/p2/, git-excluded); build them first with
+`python code/p2_dataprep/expand_grid_clean.py && python code/p2_dataprep/make_scene_split.py`.
