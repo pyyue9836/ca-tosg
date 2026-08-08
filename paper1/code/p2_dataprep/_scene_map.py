@@ -10,8 +10,8 @@ count is identical for every CAV in a scene) and ASSERT the reconstructed total 
 length -- fail-closed if the scene-order assumption is ever violated (then a scene split cannot be
 trusted, so we refuse rather than guess).
 
-This is the SINGLE source of scene identity for both the split (make_scene_split.py) and the leakage
-gate (check_leakage.py), so the split and its audit share one definition by construction.
+This is the SINGLE source of scene identity for the LOSO folds (train_p2_loso.py) and the leakage
+gate (check_leakage.py), so the folds and their audit share one definition by construction.
 """
 import os
 

@@ -6,16 +6,13 @@ below is either a protocol parameter (an input we choose) or a payload constant 
 the rate/modulation chain and cited to its generator. Reported results live in `results/` and
 are indexed by `CLAIMS.md`.
 
-**§7 — Single authoritative version.** This is the ONE formal version of the CA-TOSG evaluation
-protocol. It supersedes any protocol description embedded elsewhere (README / REPRODUCE /
-PROVENANCE / handoff notes / main.tex prose); where another file disagrees, this file governs and
-the other is to be annotated "superseded by PROTOCOL.md". All revisions are pre-registered in the
-**Change-log** at the foot of this file, each with a reason and a date, *before* any P2 training.
-
-**Authority.** Where a value is derivable, this file cites the script that derives it rather than
-restating a literal. Payload constants are cited to `code/payload_audit.py` (which re-derives them
-from first principles and bit-compares against `main.tex`). Nothing here supersedes a committed
-generator; if this file and a generator disagree, the generator wins and this file is the bug.
+**Authority.** This file **defines the experiment's intent**: the protocol, the candidate set, and
+the selection rules are specified here and nowhere else. If a generator (training/eval script)
+disagrees with this file, that is a **code bug** — stop immediately and fix the code to match the
+protocol; do not "reconcile" by editing the protocol to match the code. Where a value is derivable,
+this file cites the script that derives it rather than restating a literal (e.g. payload constants →
+`code/payload_audit.py`, which re-derives them from first principles and bit-compares against
+`main.tex`); a citation is a pointer to a derivation, not a delegation of authority.
 
 ---
 
@@ -39,6 +36,9 @@ enforces them.
 - validate accuracy reported on the **full** 1980 frames (incl. the selector's own training
   frames) is **in-sample** and must be labelled as such wherever it appears; it is not comparable
   to held-out test/Culver without that note.
+- **Canonical framing sentence** (use this wording; do not write "never inspected" or similar):
+  *All parameters were frozen on the validate split before the reported P2 evaluation on test and
+  Culver-City.*
 
 ## 2. Split construction rule: scene-first, then channel-copy expansion
 
@@ -55,9 +55,10 @@ validate cross-validation (§6, scene-level LOSO) obeys the same scene-first ord
 scene, and channel copies inherit the scene's fold.
 
 *OPV2V validate has 9 scenes* (frame counts 112/157/135/202/64/48/57/459/746 = 1980, sorted
-scene-dir order; reconstructed by `code/p2_dataprep/expand_grid_clean.py` /
-`code/p2_dataprep/make_scene_split.py`, asserted to sum to the dataset length, and independently
-cross-checked against a loader-order scene manifest, §7-independence). Model/hyper-parameter and λ
+scene-dir order; reconstructed by `code/p2_dataprep/_scene_map.py`, asserted to sum to the dataset
+length, and independently
+cross-checked by `check_leakage.py` against an independent loader-order scene manifest
+(`export_scene_manifest.py`, a different code path)). Model/hyper-parameter and λ
 selection use **scene-level 9-fold LOSO** over these 9 scenes rather than a single 70/30 dev split
 (Change-log R1): a single split leaves the dev set at only 2 scenes, whose F1 is too high-variance
 to select on.
@@ -107,6 +108,9 @@ to select on.
 
 - **B_max ∈ {0.10, 0.20, 0.30} Msym/frame** — the operating budgets swept for the constrained
   problem (§6).
+- **One model per budget** (Change-log R5): a **separate** selector is frozen for each B_max —
+  `selector_B010` / `selector_B020` / `selector_B030` — because λ\*(B_max) differs; the manifest
+  records all three model hashes.
 - **Intended derivation:** available channel-uses/s ÷ LiDAR frame rate (802.11bd parameters).
 - **Status: NOT physically derived — frozen as *prespecified channel-use budgets*** (Change-log
   R3; the earlier "normalized resource budget" wording is retired — "normalized" wrongly implied a
@@ -120,40 +124,70 @@ to select on.
   (P2+); until then all B_max-referenced text must say "prespecified channel-use budget", not a
   Mbit/s link rate.
 
-## 6. λ selection (five steps) + freeze rule
+## 6. Selection candidates + LOSO procedure + freeze rule (ONE MODEL PER BUDGET)
 
 The constrained objective is `max_g E[F_t^{s_t}]  s.t.  E[B_{s_t}] ≤ B̄_max`, relaxed with a
-Lagrange multiplier λ ≥ 0 (`main.tex` Eq. around L204). λ, the selector, and the SNR-threshold
-baseline τ are all chosen on **validate only**, then frozen.
+Lagrange multiplier λ ≥ 0 (`main.tex` Eq. around L204). For **each** budget B_max ∈ {0.10, 0.20, 0.30}
+a **separate** selector is frozen — `selector_B010`, `selector_B020`, `selector_B030` (§5, Change-log
+R5) — because λ\*(B_max) differs; all three model hashes are recorded in `FROZEN_MANIFEST.json`.
 
-1. **Build the validate substrate.** On validate, compute the per-cell effective utilities over
-   the §3 grid (`eff_E/eff_L/eff_F`) and the feasibility mask (F removed where BLER_F ≥ 0.999, §4).
-2. **Sweep λ.** Over a fixed λ grid ({0} ∪ geomspace, as in `recompute_policy_200seed.py`),
-   compute the feasibility-masked argmax policy `argmax_a (eff_a − λ·B_a)` per λ → the validate
-   payload–F1 frontier.
-3. **Select hyper-parameters and λ\*(B_max) by scene-level 9-fold LOSO** (Change-log R1). For each
-   candidate selector hyper-parameter set and each target B_max ∈ {0.10, 0.20, 0.30}: leave one of
-   the 9 validate scenes out, train the selector to imitate the λ-oracle labels on the other 8, and
-   evaluate realised F1/payload on the held-out scene; rotate over all 9 scenes and aggregate.
-   Choose the hyper-parameters and the λ\* per B_max that maximise the LOSO-aggregated F1 subject to
-   the LOSO-aggregated payload ≤ B_max. This replaces the single 70/30 dev split (dev = only 2
-   scenes → high-variance selection). Report B_max → λ\* as a frontier point, not a tuned free
-   parameter.
-4. **Freeze the config, then retrain the final selector on FULL validate.** Freeze the chosen
-   hyper-parameters and {λ\*(B_max)}. Retrain the deployed Random-Forest selector once on **all 1980
-   validate frames** at the frozen config and write `FROZEN_MANIFEST.json` (model sha256, training
-   scene list, hyper-parameters, λ\*/τ\* per B_max, input-data md5, freeze timestamp). Nothing after
-   this point may look at test/Culver labels to pick a knob.
-5. **Apply frozen everything to test/Culver.** Evaluate the frozen selector at the frozen λ\* on
-   test and Culver **once**, reading only `FROZEN_MANIFEST.json`, with no re-tuning. The
-   SNR-threshold baseline τ\* is likewise selected on validate — **budget-matched**: per B_max, the
-   threshold giving the highest validate F1 within that budget (per-split threshold search is
-   banned from here on) — and reused verbatim on test/Culver.
+**Candidate set — SINGLE SOURCE OF TRUTH.** `code/p2_dataprep/train_p2_loso.py` **parses the JSON
+block below** and must not hard-code these values anywhere else. A *candidate* is one
+(RF hyper-parameters, `class_weight`, λ) tuple; τ is a separate SNR-threshold baseline, not an RF
+candidate. **IRON RULE:** any expansion of these candidates *after* training requires a new Change-log
+entry **and a full retrain** — the frozen models must always correspond to exactly this block.
 
-**Freeze rule.** Once step 4 writes `FROZEN_MANIFEST.json`, the hyper-parameters, {λ\*}, the
-selector checkpoint, and {τ\*} are immutable. Any change invalidates every test/Culver number and
-requires re-freezing from validate. `code/p2_dataprep/check_leakage.py` asserts no fitting/tuning
-artefact on test/Culver.
+```json CATOSG-CANDIDATES
+{
+  "seed": 0,
+  "hyperparameters": {
+    "n_estimators": [400],
+    "max_depth": [10, null],
+    "min_samples_leaf": [2, 4],
+    "max_features": ["sqrt", 0.5]
+  },
+  "class_weight": [null, "balanced"],
+  "lambda_grid": [0.0, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5],
+  "tau_grid": {"start": 0.0, "stop": 20.0, "step": 0.5},
+  "budgets": [0.10, 0.20, 0.30],
+  "loso": {"scheme": "scene-level", "folds": 9, "each_scene_heldout_once": true},
+  "aggregation": {"primary": "scene_mean_realised_f1"},
+  "tie_break": ["max_f1", "min_payload", "shallower_model", "min_candidate_index"]
+}
+```
+
+**LOSO procedure (Change-log R1).** Scene-level 9-fold LOSO on validate: each of the 9 scenes is held
+out **exactly once**. For each candidate, train the RF on the 8 non-held-out scenes' λ-oracle labels
+(feasibility-masked argmax of `eff_a − λ·B_a`, §4) and score **realised** F1/payload (mean `eff` /
+mean payload of the selector's OWN picks) on the held-out scene. Every (fold × candidate) realised
+F1/payload is written to `results/p2_dataprep/validate_loso_folds.csv`. The **primary criterion is the
+scene-level mean** of the 9 per-fold realised F1 (scenes weighted equally). Per B_max, pick the
+candidate whose scene-mean payload ≤ B_max with the highest scene-mean F1; **tie-break, in order:**
+higher F1 → lower scene-mean payload → shallower model (smaller `max_depth`; `null` = deepest, ranked
+last) → smallest candidate index (the enumeration order of the JSON block). No `class_weight` default
+is assumed — both `null` and `balanced` are candidates and the class cost is otherwise carried by λ.
+
+**τ\*(B_max) — budget-matched.** On the FULL validate grid, sweep the SNR-threshold baseline
+(awgn & snr>τ → F else L; Rayleigh → L) over the τ grid; τ\*(B_max) = the threshold with the highest
+realised F1 whose payload ≤ B_max. Per-split threshold search is banned from here on.
+
+**Freeze.** For each B_max, retrain the chosen candidate on **all 1980** validate frames and freeze →
+`selector_B0{10,20,30}`. Write `FROZEN_MANIFEST.json` (schema + three model sha256 + training-data
+md5 + scene list + per-budget hyper-parameters/λ\*/τ\* + timestamp). Nothing after may look at
+test/Culver labels. `code/p2_dataprep/check_leakage.py` **parses and validates** the manifest (empty
+file / missing field / hash mismatch = FAIL) and asserts the LOSO fold structure (each scene held out
+exactly once).
+
+**Apply to test/Culver (P2 submit-B).** Evaluate the three frozen selectors at their frozen λ\*/τ\*
+on test and Culver **once**, reading only `FROZEN_MANIFEST.json`, with no re-tuning.
+
+## 7. Single authoritative version
+
+This is the ONE formal version of the CA-TOSG evaluation protocol. It supersedes any protocol
+description embedded elsewhere (README / REPRODUCE / PROVENANCE / handoff notes / main.tex prose);
+where another file disagrees, this file governs and the other is to be annotated "superseded by
+PROTOCOL.md". All revisions are pre-registered in the **Change-log** at the foot of this file, each
+with a reason and a date, *before* any P2 training.
 
 ## 8. Post-P2 anomaly review — expectations + handling rules
 
@@ -204,8 +238,9 @@ generated is the **validate** grid (`expand_grid_clean.py --split validate`, the
 - **test / Culver grids and their oracle labels MUST NOT exist pre-freeze.** They are generated by a
   **separate command, run only AFTER** the manifest is written (P2 submit-B step d).
 - `code/p2_dataprep/check_leakage.py` enforces this: with no manifest present it asserts the
-  test/Culver grids are **absent**; with a manifest present it asserts they exist, are column-pure,
-  and were built after the manifest timestamp.
+  test/Culver grids are **absent**; with a manifest present they are optional (regenerated by the
+  separate post-manifest command of P2 submit-B) and any that are present must be column-pure and
+  built after the manifest timestamp.
 - Rationale: generating the final-test substrate before the model is frozen is the first step of an
   accidental leak; forbidding it structurally removes the temptation.
 
@@ -219,9 +254,10 @@ the model is frozen, provided each change is logged with a reason and a date up 
 - **R1 (2026-08-08) — §2/§6: selection by scene-level 9-fold LOSO, replacing the single 70/30 dev
   split.** Reason: a single scene-first 70/30 split leaves the dev set at only 2 of the 9 validate
   scenes, whose realised F1 is too high-variance to select hyper-parameters or λ\* on. LOSO uses all
-  9 scenes as held-out folds. The 70/30 split (`make_scene_split.py`) is retained only as an
-  auditable scene-partition example and for the leakage gate's disjointness check; it no longer
-  drives selection.
+  9 scenes as held-out folds (each held out exactly once). The 70/30 mechanism
+  (`make_scene_split.py`, `validate_scene_split.csv`, `PROVENANCE_split.txt`) is **removed entirely**
+  (P2 submit-A); the leakage gate's disjointness check is replaced by the LOSO fold-structure
+  assertion (each scene held out exactly once) against `validate_loso_folds.csv`.
 - **R2 (2026-08-08) — §4: oracle label definition made explicit about the feasibility mask**
   (BLER_F ≥ 0.999 → F's oracle target = −∞). This was always the intended semantics
   (`make_dataset.py`); it is now stated in the protocol and implemented in `expand_grid_clean.py`.
@@ -230,3 +266,15 @@ the model is frozen, provided each change is logged with a reason and a date up 
   "normalized" (which implied a unit-normalisation that was never performed).
 - **R4 (2026-08-08) — §10: pre-freeze stage restricted to validate-grid generation;** test/Culver
   grids + labels generated by a separate post-manifest command.
+- **R5 (2026-08-08, P2 submit-A) — §5/§6: one model per budget + full candidate set as single source
+  of truth + authority clause.** (i) A separate selector is frozen per B_max
+  (`selector_B010/B020/B030`), all three hashes in the manifest, because λ\*(B_max) differs. (ii) §6
+  now carries the complete candidate set — RF hyper-parameters (`n_estimators/max_depth/
+  min_samples_leaf/max_features`), `class_weight ∈ {null, balanced}`, an explicit λ grid, a
+  0–20 dB/0.5 dB τ grid, seed, scene-mean aggregation, and a fully-specified tie-break — as a machine
+  -parseable `CATOSG-CANDIDATES` JSON block that `train_p2_loso.py` parses (no candidate values are
+  hard-coded in code). IRON RULE: expanding the candidates after training needs a new Change-log entry
+  and a full retrain. (iii) The Authority clause now states PROTOCOL defines intent and a
+  generator that disagrees is a code bug (the earlier "generator wins" sentence is removed). Legacy
+  selectors `train_rf.py` and `recompute_policy_200seed.py` are fused off (hard error at entry;
+  removed at P2 submit-D).

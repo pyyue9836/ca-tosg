@@ -38,6 +38,11 @@ DIAGNOSIS PROVENANCE (rule 2026-07-12: diagnosis has provenance too)
   eval GT is generate_gt_bbx. That mismatch caused the two rounds' contradictory numbers.
 
 VALIDATE F1-CACHE ANOMALY (root cause, blocker cleared for Step 4)
+  [P2 submit-A note, 2026-08-08: the file `dataset_validate.csv` referenced below was the STALE v2-era
+   file; the versionless name has since been MIGRATED to the current v3 content (md5
+   d357b38e..., identical to dataset_validate_v3.csv) for the versionless pipeline. The "mean 0.8636,
+   the v2 value" statement here is HISTORICAL and describes the pre-migration v2 file, not the current
+   versionless file.]
   dataset_validate.csv late_f1 (mean 0.8636, the v2 value) does NOT come from the same inference as the
   current late_validate.npz (mean 0.9082): per-frame correlation 0.897 (<1.0) with a systematic +0.045
   offset. A pure score-threshold / GT-convention shift would keep corr~=1.0, so it is a DIFFERENT

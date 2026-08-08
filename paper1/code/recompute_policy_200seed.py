@@ -201,6 +201,12 @@ def action_dist_20db(df, rf, split):
 
 
 def main():
+    raise SystemExit(
+        "recompute_policy_200seed.py is FUSED OFF (superseded by PROTOCOL.md, P2 submit-A). The P2 "
+        "deployment eval is rebuilt as a versionless P2 submit-B script that reads only "
+        "FROZEN_MANIFEST.json (frozen model/lambda*/tau* per budget). This legacy engine "
+        "(single selector, oracle_3way{L,C16,C256}, per-split tau retune) is removed at P2 submit-D "
+        "via the reference gate.")
     os.makedirs(OUT, exist_ok=True)
     rf = pickle.load(open(RF_PKL, 'rb'))
     rf_md5 = hashlib.md5(open(RF_PKL, 'rb').read()).hexdigest()

@@ -1,0 +1,10 @@
+CA-TOSG P2 submit-A -- LOSO selection + freeze (train_p2_loso.py)
+========================================================================
+freeze_timestamp: 2026-08-08T22:43:48.212378+00:00; seed=0; candidate_block_md5=ad11c7073e1912abed89b1374b222262
+112 candidates (from PROTOCOL.md CATOSG-CANDIDATES) x 9-fold LOSO; primary = scene-mean realised F1; tie-break F1>payload>shallower>index.
+one model per budget:
+  B_max=0.1: selector_B010 cand#28 cw=None lambda*=0.0 tau*=18.0 sha256=4a045f94fb750ad5...
+  B_max=0.2: selector_B020 cand#7 cw=balanced lambda*=0.0 tau*=12.0 sha256=093cb8f871170a41...
+  B_max=0.3: selector_B030 cand#7 cw=balanced lambda*=0.0 tau*=8.0 sha256=093cb8f871170a41...
+models git-excluded (data/p2/); manifest+folds tracked (results/p2_dataprep/).
+versionless: dataset_validate.csv md5=d357b38e802455bf3cabd3f886353991 (== dataset_validate_v3.csv).

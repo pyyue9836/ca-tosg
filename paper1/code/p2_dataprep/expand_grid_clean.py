@@ -49,6 +49,9 @@ OUT_DATA = os.path.join(P1, 'data/p2')                            # git-excluded
 OUT_PROV = os.path.join(P1, 'results/p2_dataprep')               # tracked provenance
 MANIFEST = os.path.join(OUT_PROV, 'FROZEN_MANIFEST.json')         # P2 freeze marker (PROTOCOL sec 10)
 
+# versionless pipeline naming (P2 submit-A migration); test/culver stay _v3 until P2 submit-B rebuild
+DATASET_NAME = {'validate': 'dataset_validate.csv',
+                'test': 'dataset_test_v3.csv', 'culver': 'dataset_culver_v3.csv'}
 SNR_GRID = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 CHANNELS = ['awgn', 'rayleigh']
 QAM_F = 16                                                        # F = feature-level, 16-QAM rate-1/2
@@ -67,7 +70,7 @@ def bler_frame(snr_arr, tbl, qam, channel):
 
 
 def expand_split(split, tbl):
-    path = os.path.join(DATA, f'dataset_{split}_v3.csv')
+    path = os.path.join(DATA, DATASET_NAME[split])
     if not os.path.exists(path):
         raise SystemExit(f'{split}: clean cache absent -> {path}')
     df = pd.read_csv(path)
@@ -154,7 +157,7 @@ def main():
         if split != 'validate':
             f.write("POST-FREEZE artifact: built after FROZEN_MANIFEST.json (PROTOCOL sec 10).\n")
         f.write("\n")
-        f.write(f"[{r['split']}] src=dataset_{r['split']}_v3.csv md5={r['src_md5']}\n")
+        f.write(f"[{r['split']}] src={DATASET_NAME[r['split']]} md5={r['src_md5']}\n")
         f.write(f"    frames={r['n_frames']} scenes={r['n_scenes']} rows={r['rows']}\n")
         f.write(f"    out={os.path.relpath(r['out'], P1)} md5={r['md5']}\n")
         f.write(f"    oracle base-rate E/L/F = {r['base_rate']}\n")

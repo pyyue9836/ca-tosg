@@ -97,5 +97,8 @@ python code/extract_claims.py --check              # CLAIMS.md up to date vs mai
 python code/p2_dataprep/check_leakage.py           # LEAKAGE GATE PASS (resident, P2 data prep)
 ```
 
-The leakage gate needs the P2 grids (data/p2/, git-excluded); build them first with
-`python code/p2_dataprep/expand_grid_clean.py && python code/p2_dataprep/make_scene_split.py`.
+The leakage gate needs the P2 validate grid + scene manifest + the freeze manifest (data/p2/ is
+git-excluded); build them with `python code/p2_dataprep/expand_grid_clean.py`,
+`python code/p2_dataprep/export_scene_manifest.py`, then
+`python code/p2_dataprep/train_p2_loso.py` (LOSO 9-fold + freeze; writes FROZEN_MANIFEST.json +
+validate_loso_folds.csv).

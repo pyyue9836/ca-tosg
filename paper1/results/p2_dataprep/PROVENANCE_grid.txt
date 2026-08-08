@@ -8,7 +8,7 @@ BLER source: results/bler_sionna/bler_sionna.csv (frame-level bler_frame, md5 be
 Payload (Msym, report-only): {'E': 0.0, 'L': 0.024, 'F': 0.99}.
 Grid artifacts are git-excluded (data/p2/); regenerate with expand_grid_clean.py.
 
-[validate] src=dataset_validate_v3.csv md5=d357b38e802455bf3cabd3f886353991
+[validate] src=dataset_validate.csv md5=d357b38e802455bf3cabd3f886353991
     frames=1980 scenes=9 rows=43560
     out=data/p2/p2_grid_validate.csv md5=3314418d4e53ff30d0d246e1594e4bed
     oracle base-rate E/L/F = {'E': 0.007690541781450872, 'L': 0.8539256198347107, 'F': 0.1383838383838384}

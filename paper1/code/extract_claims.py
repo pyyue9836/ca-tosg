@@ -1,33 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CLAIMS ledger extractor (P1 / P1.5).
+"""CLAIMS ledger extractor (P1 / P1.5 / P2).
 
-Pulls every number-bearing sentence out of paper/main.tex and emits paper1/CLAIMS.md, an 8-column
+Pulls every number-bearing sentence out of paper/main.tex and emits paper1/CLAIMS.md, a 9-column
 ledger:
 
-  Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording
+  ID | Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording
 
-The first two columns are auto-filled (Claim = the sentence; Exact value = the numeric tokens in it,
-excluding citation/label/ref keys). The six evidence columns are back-filled BY HAND in P2-P4.
+The first three columns are auto-filled (ID = stable claim id; Claim = the sentence; Exact value = its
+numeric tokens, excluding citation/label/ref keys). The six evidence columns are back-filled by hand
+in P2-P4.
 
-MERGE-PRESERVE (P1.5): on re-run the extractor regenerates columns 1-2 but PRESERVES any hand-filled
-evidence column. Rows are matched by a number-insensitive "claim skeleton" (letters only), so a
-change in number formatting does not orphan an evidence row. The extractor therefore NEVER clears an
-evidence cell a human filled (e.g. the "evidence-orphaned" flag on the 0.801/0.688 identity-ceiling
-row). --check exits 1 if CLAIMS.md is stale vs the merged regeneration.
+STABLE IDs (P2): each claim gets a stable id = 'c'+md5(letters-only skeleton)[:6], so a claim keeps
+its id across re-runs / re-orderings / number-formatting changes.
 
-TOKENISATION (P1.5 fixes): (a) \pm/\times/\approx/\le/\ge/\to render as ±/×/≈/≤/≥/→ in the Claim, so
-"52.8\pm5.7" reads "52.8 ± 5.7"; (b) thousands separators: "1,980" is one number; (c) glued numbers:
-numbers inside \cite{...}/\ref{...}/\label{...}/\eqref{...} keys (e.g. "80211" in ieee80211bd, a cite
-year) are stripped BEFORE number extraction and before the value-token qualification.
+NUMBER-CHANGE -> STALE (P2, no silent retention): evidence is preserved on re-run ONLY while the
+claim's Exact value is unchanged. If the numbers change, the evidence is NOT silently kept -- it is
+overwritten with a "STALE" flag recording the old value, forcing re-verification. (Unchanged claims
+with hand-filled evidence, e.g. the 0.801/0.688 evidence-orphaned row, are preserved verbatim.)
 
-HEURISTIC (disclosed): a sentence qualifies iff, after stripping ref/cite/label keys, it carries a
-value token -- a decimal, an integer (with optional thousands commas) glued to a result unit, or a
-percentage. Bare section/equation/figure indices do not qualify.
+TOKENISATION: \pm/\times/... render as ±/×/...; thousands 2{,}000 -> one token; numbers inside
+\cite/\ref/\label/\eqref keys stripped before extraction; residue cleaned (LaTeX en-dash `--` split;
+trailing/leading commas stripped; empty tokens dropped).
 
-Run:  python paper1/code/extract_claims.py          # writes paper1/CLAIMS.md (merge-preserving)
+Run:  python paper1/code/extract_claims.py          # writes paper1/CLAIMS.md
       python paper1/code/extract_claims.py --check   # exit 1 if CLAIMS.md is stale
 """
+import hashlib
 import os
 import re
 import sys
@@ -38,12 +37,10 @@ TEX = os.path.join(P1, 'paper/main.tex')
 OUT = os.path.join(P1, 'CLAIMS.md')
 
 UNIT = r'(?:dB|ms|Msym(?:/frame)?|Mbit(?:/s)?|kbit|bps|Hz|MHz|QAM|-QAM|bit|bits|trees|frames|scenes)'
-# value token: decimal | integer(+thousands) glued to a unit | percentage
 VALUE_TOKEN = re.compile(r'(?<![\\A-Za-z])(?:\d[\d,]*\.\d+|\d[\d,]*\s*%|\d[\d,]*\s*[+\-]?\s*' + UNIT + r')')
-# numbers to LIST in the Exact-value column (decimals, signed, thousands separators)
 NUMBER = re.compile(r'[-+]?\d[\d,]*(?:\.\d+)?')
 REFKEY = re.compile(r'\\(?:cite[a-z]*|ref|eqref|pageref|label|autoref|Cref|cref)\*?\{[^}]*\}')
-EVIDENCE_COLS = 6                                       # Split..Allowed wording
+EVIDENCE_COLS = 6
 
 
 def _read(path):
@@ -52,10 +49,9 @@ def _read(path):
 
 
 def _strip_refs(text):
-    """Remove \\cite/\\ref/\\label/\\eqref keys so their internal digits (ieee80211bd, years) are not
-    mined as claim numbers; normalise the LaTeX thousands separator 2{,}000 -> 2,000 so a thousands
-    number is one token, not two."""
-    return REFKEY.sub(' ', text).replace('{,}', ',')
+    """Drop \\cite/\\ref/\\label keys (their digits are not claims); normalise 2{,}000 -> 2,000 and the
+    LaTeX en-dash `--` (range separator) -> space so a range does not glue into a signed number."""
+    return REFKEY.sub(' ', text).replace('{,}', ',').replace('--', ' ')
 
 
 def strip_tex(tex):
@@ -97,69 +93,83 @@ def clean_claim(sent):
 
 
 def exact_values(sent):
+    s = _strip_refs(sent)
     vals = []
-    for m in NUMBER.finditer(_strip_refs(sent)):
-        v = m.group(0)
-        if v not in vals:
+    for m in NUMBER.finditer(s):
+        v = m.group(0).strip(',')                              # drop trailing/leading comma residue
+        # a leading +/- that is really a hyphen after a letter (e.g. "rate-1/2") is not a sign
+        if v[:1] in '+-' and m.start() > 0 and s[m.start() - 1].isalpha():
+            v = v[1:]
+        if v and v not in vals:
             vals.append(v)
     return ', '.join(vals).replace('|', r'\|')
 
 
 def _skeleton(claim):
-    """Number-insensitive key for merge-preserve: letters only, lowercased."""
     return re.sub(r'[^a-zA-Z]', '', claim).lower()
 
 
+def claim_id(claim):
+    return 'c' + hashlib.md5(_skeleton(claim).encode()).hexdigest()[:6]
+
+
 def parse_existing(path):
-    """Return {skeleton -> [6 evidence cells]} for rows that have ANY non-empty evidence cell."""
+    """Return {skeleton: (exact_value, [6 evidence cells])} for every prior row (any column layout)."""
     if not os.path.exists(path):
         return {}
-    keep = {}
+    out = {}
     for line in _read(path).splitlines():
-        if not line.startswith('| ') or line.startswith('| # ') or line.startswith('|---'):
+        if not line.startswith('| ') or line.startswith('|---') or ' Claim ' in line:
             continue
         cells = [c.strip() for c in line.strip().strip('|').split('|')]
-        if len(cells) != 9:                            # # | Claim | Exact | +6 evidence
+        if len(cells) != 9:
             continue
-        claim, ev = cells[1], cells[3:9]
-        if any(ev):
-            keep[_skeleton(claim)] = ev
-    return keep
+        claim, exact, ev = cells[1], cells[2], cells[3:9]
+        out[_skeleton(claim)] = (exact, ev)
+    return out
 
 
 HEADER = (
-    "# CA-TOSG — CLAIMS LEDGER (P1.5)\n\n"
+    "# CA-TOSG — CLAIMS LEDGER (P2)\n\n"
     "Every number-bearing sentence in `paper/main.tex`, one row per claim. **Auto-generated by "
-    "`code/extract_claims.py`** (columns 1-2). The six evidence columns are back-filled by hand in "
-    "P2–P4 and are **merge-preserved** across re-runs — the extractor never clears an evidence cell "
-    "a human filled. A blank evidence cell is an open TODO, not a verified fact.\n\n"
-    "Extraction heuristic (script header): a sentence qualifies iff, after ref/cite/label keys are "
-    "stripped, it carries a value token (decimal, integer+unit, or percentage). Frozen numbers change "
-    "in P2; this ledger forces every one back to a source.\n\n"
-    "| # | Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording |\n"
+    "`code/extract_claims.py`** (ID + Claim + Exact value). Stable `ID` survives re-runs. The six "
+    "evidence columns are back-filled by hand in P2–P4; they are preserved on re-run **only while a "
+    "claim's Exact value is unchanged** — if a number changes the evidence is flagged **STALE** (never "
+    "silently retained). A blank evidence cell is an open TODO.\n\n"
+    "| ID | Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording |\n"
     "|---|---|---|---|---|---|---|---|---|\n"
 )
 
 
 def build():
     prose = strip_tex(_read(TEX))
-    preserved = parse_existing(OUT)
-    rows, n_pres = [], 0
+    prev = parse_existing(OUT)
+    rows, n_pres, n_stale = [], 0, 0
     for sent in sentences(prose):
         if len(sent) < 8 or is_index_only(sent):
             continue
         claim = clean_claim(sent)
-        ev = preserved.get(_skeleton(claim), [''] * EVIDENCE_COLS)
-        if any(ev):
-            n_pres += 1
-        rows.append((claim, exact_values(sent), ev))
+        cid = claim_id(claim)
+        exact = exact_values(sent)
+        ev = [''] * EVIDENCE_COLS
+        skel = _skeleton(claim)
+        if skel in prev:
+            old_exact, old_ev = prev[skel]
+            if any(old_ev):
+                if old_exact == exact:
+                    ev = old_ev                                # preserve verbatim
+                    n_pres += 1
+                else:                                          # number changed -> STALE, do NOT retain silently
+                    ev = [f'⚠ STALE: value changed ({old_exact} → {exact}); re-verify'] + [''] * (EVIDENCE_COLS - 1)
+                    n_stale += 1
+        rows.append((cid, claim, exact, ev))
     lines = [HEADER]
-    for i, (claim, vals, ev) in enumerate(rows, 1):
-        lines.append('| %d | %s | %s | %s |\n' % (i, claim, vals, ' | '.join(ev)))
-    filled = sum(1 for _, _, ev in rows if any(ev))
+    for cid, claim, exact, ev in rows:
+        lines.append('| %s | %s | %s | %s |\n' % (cid, claim, exact, ' | '.join(ev)))
+    filled = sum(1 for _, _, _, ev in rows if any(ev))
     lines.append(f"\n_Total: {len(rows)} number-bearing claims from `paper/main.tex`. "
-                 f"Evidence columns: {filled} filled / {len(rows) - filled} pending (P2–P4); "
-                 f"{n_pres} preserved across this re-run._\n")
+                 f"Evidence: {filled} filled / {len(rows) - filled} pending (P2–P4); "
+                 f"{n_pres} preserved, {n_stale} flagged STALE (numbers changed) this re-run._\n")
     return ''.join(lines)
 
 

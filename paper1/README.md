@@ -48,8 +48,9 @@ axis, with **codeword-level and frame-level** columns (frame = 1−(1−p_cw)^39
 The old `results/ldpc_qam_bler_table.csv` is **DEPRECATED** (40-block MC → 0.025=1/40 quantisation
 floor at 12–14 dB; codeword-level BLER wrongly consumed as frame-level) — retained for provenance
 only. The global-sort AP-vs-SNR summaries plotted in fig:ap_snr
-(learned JSCC / LDPC16 / LDPC256 / identity-upper, AWGN+Rayleigh) are checked in under
-`results/ap_vs_snr/*_summary.csv`. (The older psm `channel_codec_ap/` set was removed as
+(learned JSCC / LDPC16 / LDPC256 / identity-upper, AWGN+Rayleigh) were under
+`results/ap_vs_snr/*_summary.csv`, **removed in P1.5** (stale JSCC/LDPC summaries); P2 regenerates
+them against `bler_sionna`. (The older psm `channel_codec_ap/` set was removed as
 stale/inconsistent; OFDM enters the paper only through the F1 edge in `jscc_selector_ofdm.csv`,
 not an AP-vs-SNR curve.)
 

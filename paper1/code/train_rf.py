@@ -90,6 +90,11 @@ def fit_rf(df_tr, df_te, mode):
 
 
 def main():
+    raise SystemExit(
+        "train_rf.py is FUSED OFF (superseded by PROTOCOL.md, P2 submit-A). Use "
+        "code/p2_dataprep/train_p2_loso.py (LOSO 9-fold + budget-matched tau* + one model per "
+        "budget) and the P2 submit-B eval scripts. This legacy single-70/30-split trainer over "
+        "oracle_3way{L,C16,C256} is removed at P2 submit-D via the reference gate.")
     df = pd.read_csv(DATASET)
     ds_md5 = hashlib.md5(open(DATASET, 'rb').read()).hexdigest()
     print(f'training split: dataset_{TRAIN_SPLIT}_v3.csv  {df.shape}  md5={ds_md5}')
