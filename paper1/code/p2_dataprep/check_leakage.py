@@ -235,23 +235,33 @@ def check_manifest():
         if not os.path.exists(walk_p):
             raise Fail(f'budget {b} walk file absent: candidate_walk_{tag}.csv (no-skip)')
         walk = pd.read_csv(walk_p)
-        att = walk['attempted'].astype(str).isin(['True', 'true'])
-        passed = walk['budget_passed'].astype(str).isin(['True', 'true'])
+        att = pd.to_numeric(walk['attempted'], errors='coerce').fillna(0).astype(int) == 1
+        # R9-2a: RECOMPUTE budget_passed from frozen payload <= B_max (do NOT trust the CSV column);
+        #        the CSV column (0/1) must agree with the recompute for every attempted row.
+        fp_col = pd.to_numeric(walk['frozen_validate_payload'], errors='coerce')
+        passed = att & (fp_col <= bmax)
+        csv_passed = pd.to_numeric(walk['budget_passed'], errors='coerce') == 1
+        if bool((att & (csv_passed != passed)).any()):
+            raise Fail(f'budget {b} walk budget_passed column disagrees with recomputed (frozen<=B_max)')
         wd = bd['walk_depth']
         sel = walk[walk['rank'] == wd]
         if sel.empty or int(sel.iloc[0]['candidate_index']) != ci:
             raise Fail(f'budget {b} walk_depth {wd} row is not the selected candidate {ci}')
         if not bool(passed[walk['rank'] == wd].iloc[0]):
-            raise Fail(f'budget {b} selected walk row (rank {wd}) budget_passed != True')
-        before = walk[walk['rank'] < wd]
-        if not before.empty and (not att[walk['rank'] < wd].all()
-                                 or passed[walk['rank'] < wd].any()):
+            raise Fail(f'budget {b} selected walk row (rank {wd}) does not pass (frozen>{bmax})')
+        before = walk['rank'] < wd
+        if bool(before.any()) and (not bool(att[before].all()) or bool(passed[before].any())):
             raise Fail(f'budget {b} a walk step before rank {wd} was not attempted-and-failed')
-        first_true = walk.loc[passed & att, 'rank'].min() if (passed & att).any() else None
+        first_true = int(walk.loc[passed, 'rank'].min()) if bool(passed.any()) else None
         if first_true != wd:
-            raise Fail(f'budget {b} first budget_passed=True is at rank {first_true}, not walk_depth {wd}')
-    print(f'  (2) manifest OK [13 checks]: schema+block_md5 match, {len(man["budgets"])} budgets '
-          f'frozen_pay+OOF<=B_max, model+folds hashes verified, OOF recomputed from folds, folds={len(folds)} rows.')
+            raise Fail(f'budget {b} first passing walk row is at rank {first_true}, not walk_depth {wd}')
+        # R9-2b: the selected walk row's frozen payload/F1 must match the manifest item-by-item
+        if abs(float(sel.iloc[0]['frozen_validate_payload']) - bd['frozen_validate_payload']) > 1e-6:
+            raise Fail(f'budget {b} walk frozen_validate_payload != manifest')
+        if abs(float(sel.iloc[0]['frozen_validate_f1']) - bd['frozen_validate_f1']) > 1e-4:
+            raise Fail(f'budget {b} walk frozen_validate_f1 != manifest')
+    print(f'  (2) manifest OK [15 checks]: schema+block_md5 match, {len(man["budgets"])} budgets '
+          f'frozen_pay+OOF<=B_max, model+folds+walk hashes, OOF+walk recomputed, folds={len(folds)} rows.')
 
 
 def check_scene_manifest_crosscheck():

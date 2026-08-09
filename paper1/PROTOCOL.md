@@ -341,18 +341,32 @@ the model is frozen, provided each change is logged with a reason and a date up 
   relpath; the gate recomputes OOF metrics from the folds and cross-checks; CLAIMS stable IDs fold in
   only *explicit* mode markers (C16/C_16/16-QAM/C256/C_256/256-QAM), not plain "16 dB"/"16 %".
 
-- **R8 (2026-08-09, pre-registered before P2-B) — RF-vs-threshold decision rule (verbatim contract).**
-  The deployed selector (RF) and the SNR-threshold baseline (τ) are compared **only as frozen
-  products**, on **test and Culver** under the **same 200-realisation replay protocol** (P2-B); the
-  validate terrain is never used for the headline comparison. **Primary-claim candidate, per budget:**
-  `|F1_RF − F1_τ|` has a **95% CI containing zero** (RF not worse on F1) **AND** RF's deployed payload
-  is **significantly lower** than τ's (95% CI excludes zero in RF's favour). **If instead τ dominates
-  on both F1 and payload** (both 95% CIs exclude zero against RF), the selector is **demoted to a
-  diagnostic result** and the paper reports **τ as the main line, honestly**. The validate observation
-  that τ slightly beats RF-OOF is recorded as **background, not a conclusion**. (The audit that closes
-  the walk evidence chain — re-executing the walk, logging every attempted candidate's frozen outcome,
-  and asserting the winners match `FROZEN_MANIFEST.json` — is registered here; a mismatch fuses and
-  must not overwrite the manifest.)
+- **R8 (2026-08-09) — RF-vs-threshold decision rule. SUPERSEDED by R9** (the "95% CI containing zero"
+  wording conflated absence-of-evidence with a non-inferiority claim). The walk-evidence-chain audit it
+  also registered (re-execute the walk, log every attempted candidate's frozen outcome, assert winners
+  match `FROZEN_MANIFEST.json`, mismatch fuses without overwriting) remains in force under R9.
+- **R9 (2026-08-09, pre-registered before P2-B) — Non-inferiority margin and primary comparison
+  (replaces the R8 rule). The following paragraph is the normative contract text (verbatim):**
+
+  > R9 — Non-inferiority margin and primary comparison. Before any test or Culver-City evaluation, the
+  > absolute non-inferiority margin is fixed as δ = 0.005 F1, corresponding to a maximum tolerable loss
+  > of 0.5 percentage points in mean frame-level F1. Define ΔF = F1_RF − F1_τ and ΔB = B_RF − B_τ. RF is
+  > declared non-inferior in perception performance only if the lower bound of the paired 95% CI for ΔF
+  > is greater than −0.005. RF is declared communication-superior only if the upper bound of the paired
+  > 95% CI for ΔB is below zero, with a point-estimate payload reduction of at least 10%. The primary
+  > comparison is the test split at Bmax = 0.20; Bmax = 0.10/0.30 and all Culver-City comparisons are
+  > secondary. Confidence intervals are calculated from the 200 paired replay-level differences under
+  > identical channel draws.
+
+  Precision clauses:
+  - **(a) CI method:** paired bootstrap over the 200 replay-level differences, 10,000 resamples,
+    percentile interval.
+  - **(b) 10% definition:** `(B_τ − B_RF) / B_τ ≥ 0.10` (point estimate).
+  - **(c) Sign-off:** δ = 0.005 proposed 2026-08-09; justification = engineering tolerance (≤0.5 pp
+    overall F1 loss given substantive communication reduction); confirmed by Peiyi Yue and
+    [supervisor name] on 2026-08-09; fixed prior to any test/Culver artifact.
+  - **P2-B requirement:** P2-B must persist the 200 replay-level difference series (ΔF, ΔB) per budget
+    and split as CSV artifacts — the CI computation must be reproducible from repository contents alone.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be

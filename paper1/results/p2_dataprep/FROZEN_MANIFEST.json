@@ -1,7 +1,7 @@
 {
   "schema": "catosg-frozen-manifest/1",
-  "protocol": "CA-TOSG P2 (PROTOCOL.md), R7",
-  "freeze_timestamp": "2026-08-09T14:30:05.112046+00:00",
+  "protocol": "CA-TOSG P2 (PROTOCOL.md), R9",
+  "freeze_timestamp": "2026-08-09T15:12:53.653192+00:00",
   "seed": 0,
   "environment": {
     "python": "3.10.18",
@@ -85,15 +85,15 @@
     },
     "walk_B010": {
       "file": "results/p2_dataprep/candidate_walk_B010.csv",
-      "sha256": "9adf5504690450a133a3ce49b7ecf37e5ad03444a62761cee61d5309ccee89c9"
+      "sha256": "16287a7a6b31b3af65b0650b5e985d9d1d6253c59bc347a3e0cf8f6147eb9d29"
     },
     "walk_B020": {
       "file": "results/p2_dataprep/candidate_walk_B020.csv",
-      "sha256": "0a67fad9aeb75bad814e535885b57983336c2e752b19260c60ea2e6f0e0c34ca"
+      "sha256": "f24963e5acce8243ad7fc70372cef90fd1611cc1944d4dde3ea417d18aefb9ed"
     },
     "walk_B030": {
       "file": "results/p2_dataprep/candidate_walk_B030.csv",
-      "sha256": "cc7646b3ddd332abcef00e191fee2beb4f68cf05d29d17cc7c713d4eb34d65c5"
+      "sha256": "7d2a97a0244363bfdaf80fc81a932cbee2a53f6768c46e7c8fae82069f339cce"
     }
   },
   "budgets": {

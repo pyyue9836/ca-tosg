@@ -258,8 +258,17 @@ def main():
     assert len(scenes) == spec['loso']['folds'], 'fold count != scenes'
     agg = aggregate(fold_df)
 
-    # --- R7 FROZEN WALK: write all walk orders BEFORE any retrain, then walk each budget ---
+    # --- R7 FROZEN WALK, R9-2c ATOMIC: stage everything to .tmp; promote only after the audit confirms
+    #     the winners. A failed re-run (walk exhausted / audit mismatch) NEVER overwrites the existing
+    #     valid products -- the .tmp files are discarded and the current manifest/models are kept. ---
     freeze_ts = datetime.now(timezone.utc).isoformat()
+    tmps = []                                                         # every staged .tmp path, for cleanup
+
+    def _cleanup():
+        for t in tmps:
+            if os.path.exists(t):
+                os.remove(t)
+
     orders = {}
     for b in spec['budgets']:
         order = walk_order(cands, agg, b)
@@ -271,19 +280,21 @@ def main():
                      scene_mean_f1=round(agg[c['index']]['scene_mean_f1'], 6),
                      frame_weighted_payload=round(agg[c['index']]['frame_weighted_payload'], 6))
                 for i, c in enumerate(order)]
-        pd.DataFrame(rows).to_csv(os.path.join(OUT_PROV, f'candidate_walk_B{int(round(b*100)):03d}.csv'),
-                                  index=False)
-    print(f'walk orders written ({", ".join(f"B{int(b*100):03d}:{len(orders[b])}feasible" for b in spec["budgets"])}).')
+        wtmp = os.path.join(OUT_PROV, f'candidate_walk_B{int(round(b*100)):03d}.csv.tmp')
+        pd.DataFrame(rows).to_csv(wtmp, index=False); tmps.append(wtmp)
+    print(f'walk orders staged ({", ".join(f"B{int(b*100):03d}:{len(orders[b])}feasible" for b in spec["budgets"])}).')
 
-    budgets, violations = {}, []
+    budgets, violations, promote = {}, [], []                        # promote = [(tmp, final), ...]
     for b in spec['budgets']:
         tau = pick_tau(merged, eff, spec, b)
         tag = f'B{int(round(b*100)):03d}'
-        model_path = os.path.join(OUT_MODEL, f'selector_{tag}.pkl')
-        walk_csv = os.path.join(OUT_PROV, f'candidate_walk_{tag}.csv')
+        model_final = os.path.join(OUT_MODEL, f'selector_{tag}.pkl')
+        model_tmp = model_final + '.tmp'
+        walk_final = os.path.join(OUT_PROV, f'candidate_walk_{tag}.csv')
+        walk_tmp = walk_final + '.tmp'
         selected, attempts = None, {}                                 # rank -> (frozen_f1, frozen_pay, passed)
         for depth, cand in enumerate(orders[b]):
-            fr = freeze(cand, X, eff, bler_F, model_path, seed)       # writes model_path (overwritten until pass)
+            fr = freeze(cand, X, eff, bler_F, model_tmp, seed)        # stage model to .tmp (overwrite until pass)
             passed = fr['frozen_validate_payload'] <= b               # strict <=, no tolerance
             attempts[depth] = (fr['frozen_validate_f1'], fr['frozen_validate_payload'], passed)
             print(f'  B_max={b} walk#{depth} cand#{cand["index"]} cw={cand["class_weight"]} '
@@ -291,18 +302,18 @@ def main():
                   f'-> frozen pay={fr["frozen_validate_payload"]:.4f} passed={passed}')
             if passed:
                 selected = (cand, depth, fr, agg[cand['index']]); break
-        # close the walk evidence chain: append the actual retrain outcome to the pre-registered order
-        wdf = pd.read_csv(walk_csv)
-        wdf['attempted'] = [i in attempts for i in range(len(wdf))]
+        # close the walk evidence chain: append the actual retrain outcome to the pre-registered order.
+        # budget_passed is written as a 0/1 INTEGER (R9-2a) but the gate re-derives it, not trusts it.
+        wdf = pd.read_csv(walk_tmp)
+        wdf['attempted'] = [1 if i in attempts else 0 for i in range(len(wdf))]
         wdf['frozen_validate_f1'] = [round(attempts[i][0], 6) if i in attempts else '' for i in range(len(wdf))]
         wdf['frozen_validate_payload'] = [round(attempts[i][1], 6) if i in attempts else '' for i in range(len(wdf))]
-        wdf['budget_passed'] = [bool(attempts[i][2]) if i in attempts else '' for i in range(len(wdf))]
-        wdf.to_csv(walk_csv, index=False)
+        wdf['budget_passed'] = [int(attempts[i][2]) if i in attempts else '' for i in range(len(wdf))]
+        wdf.to_csv(walk_tmp, index=False)
         if selected is None:
             violations.append((b, len(orders[b])))
-            if os.path.exists(model_path):
-                os.remove(model_path)
             continue
+        promote += [(model_tmp, model_final), (walk_tmp, walk_final)]
         cand, depth, fr, a = selected
         budgets[f'{b:.2f}'] = dict(
             selector=f'selector_{tag}', candidate_index=cand['index'], walk_depth=depth,
@@ -314,51 +325,41 @@ def main():
             loso_scene_mean_f1=round(a['scene_mean_f1'], 4),            # robustness supplement
             loso_frame_weighted_payload=round(a['frame_weighted_payload'], 6),
             tau_star=tau['tau_star'], tau_f1=tau['tau_f1'], tau_payload=tau['tau_payload'],
-            model=os.path.relpath(model_path, P1), model_sha256=fr['sha256'],
+            model=os.path.relpath(model_final, P1), model_sha256=fr['sha256'],
             frozen_validate_f1=fr['frozen_validate_f1'], frozen_validate_payload=fr['frozen_validate_payload'],
             budget_satisfied=True, perclass=fr['perclass'], confusion_ELF=fr['confusion_ELF'])
         print(f'  B_max={b}: SELECTED cand#{cand["index"]} at walk_depth={depth} '
               f'(OOF F1={a["frame_weighted_f1"]:.4f}, frozen pay={fr["frozen_validate_payload"]:.4f} <= {b})')
 
     if violations:                                                   # walk exhausted for some budget
-        for b in spec['budgets']:                                    # do not leave frozen models behind
-            mp = os.path.join(OUT_MODEL, f'selector_B{int(round(b*100)):03d}.pkl')
-            if os.path.exists(mp):
-                os.remove(mp)
-        if os.path.exists(MANIFEST):                                 # a stale/previous manifest is now invalid
-            os.remove(MANIFEST)
+        _cleanup()                                                   # R9-2c: discard .tmp; KEEP existing products
         with open(os.path.join(OUT_PROV, 'PROVENANCE_train.txt'), 'w') as f:
-            f.write('CA-TOSG P2 submit-A (R7) -- FROZEN WALK EXHAUSTED (no manifest written)\n')
+            f.write('CA-TOSG P2 submit-A -- FROZEN WALK EXHAUSTED (no new manifest; existing kept)\n')
             f.write('=' * 72 + '\n')
             f.write(f'freeze attempt {freeze_ts}; seed={seed}; candidate_block_md5={cand_md5}\n')
-            f.write('R7 frozen walk: for each budget the OOF-feasible candidates were walked in '
-                    'frame-weighted OOF F1 order, retrained on full 1980, and hard-checked '
-                    'frozen_validate_payload <= B_max (strict). At least one budget EXHAUSTED its walk '
-                    'with none passing. NO manifest, NO models, NO test/Culver grids. The only fix is a '
-                    'NEW pre-registered Change-log entry expanding the lambda grid, then a full redo.\n\n')
+            f.write('Frozen walk EXHAUSTED for at least one budget: no OOF-feasible candidate passed the '
+                    'frozen_validate_payload <= B_max check. Per R9-2c the staged .tmp products were '
+                    'DISCARDED and the existing manifest/models are KEPT untouched. Fix = a NEW '
+                    'pre-registered Change-log entry expanding the lambda grid, then a full redo.\n\n')
             for b, n in violations:
                 f.write(f'  B_max={b}: walk EXHAUSTED ({n} OOF-feasible candidates, none frozen <= {b}).\n')
-            for b in spec['budgets']:
-                if f'{b:.2f}' in budgets:
-                    bd = budgets[f'{b:.2f}']
-                    f.write(f'  B_max={b}: passed at walk_depth={bd["walk_depth"]} cand#{bd["candidate_index"]} '
-                            f'frozen_pay={bd["frozen_validate_payload"]}\n')
-        raise SystemExit('FROZEN WALK EXHAUSTED (R7) for '
+        raise SystemExit('FROZEN WALK EXHAUSTED for '
                          + ', '.join(f'B={b} ({n} feasible, none passed)' for b, n in violations)
-                         + '. No manifest, no test/Culver grids. FUSED. '
-                         '(see results/p2_dataprep/PROVENANCE_train.txt)')
+                         + '. Staged .tmp discarded, existing products kept. FUSED.')
 
-    # AUDIT (R8): if a prior manifest exists, the re-executed (same-seed, deterministic) walk winners
-    # MUST match it exactly; a mismatch means non-determinism -- fuse, do NOT overwrite the manifest.
+    # AUDIT (R8/R9): if a prior manifest exists, the re-executed (same-seed, deterministic) walk winners
+    # MUST match it exactly; a mismatch means non-determinism -- discard the .tmp staging and KEEP the
+    # existing products (R9-2c: never overwrite on mismatch).
     if os.path.exists(MANIFEST):
         prev = json.load(open(MANIFEST))
         for b in spec['budgets']:
             key = f'{b:.2f}'; new = budgets[key]; old = prev.get('budgets', {}).get(key, {})
             for field in ('candidate_index', 'model_sha256', 'lambda_star', 'tau_star'):
                 if new.get(field) != old.get(field):
-                    raise SystemExit(f'AUDIT MISMATCH (R8) B={b} {field}: re-run {new.get(field)!r} != '
-                                     f'manifest {old.get(field)!r}. Non-deterministic walk; manifest NOT '
-                                     'overwritten.')
+                    _cleanup()
+                    raise SystemExit(f'AUDIT MISMATCH B={b} {field}: re-run {new.get(field)!r} != '
+                                     f'manifest {old.get(field)!r}. Staged .tmp discarded, existing '
+                                     'products KEPT (R9-2c).')
         print('AUDIT: re-executed walk winners match FROZEN_MANIFEST.json (candidate/sha/lambda*/tau*).')
 
     env = dict(python=platform.python_version(), sklearn=sklearn.__version__,
@@ -366,7 +367,7 @@ def main():
     walk_files = {f'B{int(round(b*100)):03d}': os.path.join(OUT_PROV, f'candidate_walk_B{int(round(b*100)):03d}.csv')
                   for b in spec['budgets']}
     manifest = dict(
-        schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md), R7',
+        schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md), R9',
         freeze_timestamp=freeze_ts, seed=seed, environment=env,
         candidate_block_md5=cand_md5, n_candidates=len(cands),
         feature_names=names, n_features=len(names),
@@ -379,14 +380,20 @@ def main():
                             note='versionless (md5 == dataset_validate_v3.csv)'),
             bler_table=dict(file='results/bler_sionna/bler_sionna.csv', md5=_md5(BLER_CSV)),
             folds_csv=dict(file=os.path.relpath(FOLDS_CSV, P1), sha256=_sha256(FOLDS_CSV)),
-            **{f'walk_{tag}': dict(file=os.path.relpath(p, P1), sha256=_sha256(p))
-               for tag, p in walk_files.items()}),
+            **{f'walk_{tag}': dict(file=os.path.relpath(p, P1), sha256=_sha256(p + '.tmp'))
+               for tag, p in walk_files.items()}),                    # sha of the STAGED (.tmp) walk file
         budgets=budgets)
-    with open(MANIFEST, 'w') as f:
+    manifest_tmp = MANIFEST + '.tmp'
+    with open(manifest_tmp, 'w') as f:
         json.dump(manifest, f, indent=2)
+    tmps.append(manifest_tmp); promote.append((manifest_tmp, MANIFEST))
+
+    # R9-2c ATOMIC PROMOTE: only now that winners are confirmed do we replace the live products.
+    for src, dst in promote:
+        os.replace(src, dst)
 
     with open(os.path.join(OUT_PROV, 'PROVENANCE_train.txt'), 'w') as f:
-        f.write('CA-TOSG P2 submit-A (R7) -- frozen-walk selection + freeze (train_p2_loso.py)\n')
+        f.write('CA-TOSG P2 submit-A (R9) -- frozen-walk selection + freeze, atomic (train_p2_loso.py)\n')
         f.write('=' * 72 + '\n')
         f.write(f'freeze_timestamp: {freeze_ts}; seed={seed}; candidate_block_md5={cand_md5}\n')
         f.write(f'env: {env}\n')
