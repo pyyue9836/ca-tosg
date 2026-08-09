@@ -363,8 +363,9 @@ the model is frozen, provided each change is logged with a reason and a date up 
     percentile interval.
   - **(b) 10% definition:** `(B_τ − B_RF) / B_τ ≥ 0.10` (point estimate).
   - **(c) Sign-off:** δ = 0.005 proposed 2026-08-09; justification = engineering tolerance (≤0.5 pp
-    overall F1 loss given substantive communication reduction); confirmed by Peiyi Yue and
-    [supervisor name] on 2026-08-09; fixed prior to any test/Culver artifact.
+    overall F1 loss given substantive communication reduction); confirmed and fixed by Peiyi Yue on
+    2026-08-09, prior to any test/Culver-City evaluation; subsequent supervisor review will not change
+    the margin after evaluation begins.
   - **P2-B requirement:** P2-B must persist the 200 replay-level difference series (ΔF, ΔB) per budget
     and split as CSV artifacts — the CI computation must be reproducible from repository contents alone.
 

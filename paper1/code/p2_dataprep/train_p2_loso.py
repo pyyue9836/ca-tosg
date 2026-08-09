@@ -290,6 +290,7 @@ def main():
         tag = f'B{int(round(b*100)):03d}'
         model_final = os.path.join(OUT_MODEL, f'selector_{tag}.pkl')
         model_tmp = model_final + '.tmp'
+        tmps.append(model_tmp)                                        # register early so a fuse path cleans it
         walk_final = os.path.join(OUT_PROV, f'candidate_walk_{tag}.csv')
         walk_tmp = walk_final + '.tmp'
         selected, attempts = None, {}                                 # rank -> (frozen_f1, frozen_pay, passed)
