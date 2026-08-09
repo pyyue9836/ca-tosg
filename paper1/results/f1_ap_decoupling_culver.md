@@ -1,5 +1,7 @@
 # Evidence: Culver late-F1 is saturation, not cache contamination
 
+_Status (R9 md cleanup): **KEPT** — provenance for the Culver late-F1 saturation finding (companion `f1_ap_decoupling_culver.csv`); re-verify against the P2 regeneration._
+
 **Question closed (P0.1):** the near-identical Fixed-L / Oracle frame-F1 between the OPV2V
 *test* and *Culver-City* splits (0.8867 both, to 4 dp) is a genuine property of the
 operating-point frame-F1 metric, **not** a contaminated cache. Companion data:

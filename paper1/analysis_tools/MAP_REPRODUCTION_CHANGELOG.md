@@ -1,5 +1,7 @@
 # Importance-Map JSCC Reproduction — Code Changelog & Logic
 
+_Status (R9 md cleanup): **KEPT** — changelog + logic record for the ImportanceMap-JSCC reproduction code in `analysis_tools/`; historical provenance._
+
 Reproduction of **Sheng et al., "Semantic Communication for Cooperative Perception
 Based on the Importance Map," WCSP 2023** on OPV2V, inside OpenCOOD.
 

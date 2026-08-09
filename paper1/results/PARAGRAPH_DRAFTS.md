@@ -1,5 +1,7 @@
 # Hand-written paragraph drafts (agent-drafted per Josh's 2026-07-15 reassignment; Josh reviews wording)
 
+_Status (R9 md cleanup): **KEPT** — a live gate data source, read by `code/verify_paragraph_insert.py` (the paragraph gate). Do not delete._
+
 Working file. Each draft here is pending Josh's wording review; only on approval does it enter main.tex
 (during the .tex pass). Numbers are CSV-direct from the committed verification artifacts. Section/figure
 cross-refs (\S, Fig.) are placeholders to resolve in the .tex pass. Target: 150-250 words, one-pass approval.

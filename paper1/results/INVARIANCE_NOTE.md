@@ -1,5 +1,7 @@
 # INVARIANCE note (highest-risk item; gates the C256 paragraph landing alongside item 12)
 
+_Status (R9 md cleanup): **KEPT** — provenance for the live C256 frontier-share claim (2.5/3.2/4.5%); re-verify against the P2 regeneration._
+
 The C256 paragraph cites the 2.5/3.2/4.5% C256 frontier share. That number lives on the payload-penalised
 (lambda>0) frontier, so it depends on the payload correction being correctly propagated INTO the utility --
 not merely into reported summaries. Three checks, all closed:

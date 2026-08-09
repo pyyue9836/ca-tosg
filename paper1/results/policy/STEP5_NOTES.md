@@ -1,5 +1,7 @@
 # Step-5 v3 notes — wording, statistics, corrections (CA-TOSG paper1)
 
+_Status (R9 md cleanup): **KEPT** — companion to `policy/PROVENANCE.txt`; carries frozen wording/statistics decisions the rewrite must keep._
+
 Companion to `PROVENANCE.txt` (auto-generated). These are the frozen wording/statistics decisions
 the paper rewrite MUST carry, plus the supervisor's on-record prediction corrections.
 
