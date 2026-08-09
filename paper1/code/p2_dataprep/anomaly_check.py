@@ -86,9 +86,14 @@ def main():
                         'substantially on test/Culver (esp. under Rayleigh, where F is infeasible and the '
                         'choice is E-vs-L). Cause: the selectors were fit on the VALIDATE grid, whose '
                         'oracle E base-rate is only 0.77%, and R9\'s frozen walk selected class_weight=None '
-                        'models (the cw=balanced candidates were walked past for exceeding the frozen '
-                        'payload budget). So E is under-represented in training and the selector collapses '
-                        'it at deployment, costing F1 on the ego-favourable frames.\n')
+                        'models. NOTE (corrected per R10): B010/B020\'s cw=balanced candidates WERE '
+                        'attempted and walked past for exceeding the frozen payload budget, but B030\'s '
+                        'cw=balanced was NEVER tested -- its cw=None winner cand#56 passed at walk rank 0, so '
+                        'the walk stopped before any balanced candidate was reached. So E is under-'
+                        'represented in training and the selector collapses it at deployment. The R10 '
+                        'post-unblinding diagnostic quantifies the cost: the strict-benefit E F1 loss is '
+                        'negligible (<0.0005/grid cell on test @B020, 0 on Culver); the collapse costs '
+                        'mostly PAYLOAD, not F1.\n')
                 for s, b, oe, re_ in ray_collapse:
                     f.write(f'    {s} B{b}: oracle_E(rayleigh)={oe:.4f}  selector_E(rayleigh)={re_:.4f}\n')
                 f.write('  This is a real selector limitation, not a plumbing bug. Resolution requires a '

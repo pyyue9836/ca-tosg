@@ -1,0 +1,7 @@
+split,budget,strict_benefit_F1_cost_per_cell,tie_saving_payload_per_cell,lambda_induced_payload_per_cell,strict_F1_cost_vs_delta
+test,0.1,0.000268,0.002257,0.002408,0.0536
+test,0.2,0.000268,0.002977,0.002417,0.0536
+test,0.3,0.00031539,0.006113,0.002683,0.0631
+culver,0.1,0.0,0.002321,4.4e-05,0.0
+culver,0.2,0.0,0.002176,3e-05,0.0
+culver,0.3,0.0,0.002142,3e-05,0.0

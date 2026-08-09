@@ -368,6 +368,20 @@ the model is frozen, provided each change is logged with a reason and a date up 
     the margin after evaluation begins.
   - **P2-B requirement:** P2-B must persist the 200 replay-level difference series (ΔF, ΔB) per budget
     and split as CSV artifacts — the CI computation must be reproducible from repository contents alone.
+- **R10 (2026-08-09, post-unblinding diagnostic) — E-usage diagnosis after the sec-8 fuse.**
+  **This is a post-unblinding diagnostic; nothing computed here is confirmatory.** No training, no
+  model/δ/τ change, no replay re-run. It only swaps the reference oracle: per budget it recomputes a
+  **budget-specific oracle** `s*_b = argmax_s (F_s − λ_b·B_s)` at that budget's frozen λ\*
+  (B010→0.05, B020→0.02, B030→0), masking F where BLER_F ≥ 0.999. Each budget-oracle E cell is
+  classified **strict-benefit** (F_E > F_L and F_E > F_F) / **tie-saving** (F_E = F_L) /
+  **λ-induced** (F_E ≤ F_L but F_E > F_L − λ_b·B_L), and the cost of the RF selector NOT picking E is
+  split into an **F1 loss** (only strict-benefit cells lose F1) and an **extra payload** (tie/λ cells).
+  The per-class table and the sec-8 selector-E check are re-adjudicated against the budget-oracle
+  (B030 unchanged at λ=0; B010/B020 recomputed). **Root-cause correction:** B010/B020's `cw=balanced`
+  candidates were attempted and walked past for exceeding the frozen budget; **B030's `cw=balanced` was
+  never tested** — its `cw=None` winner (cand#56) passed at walk rank 0, so the walk stopped first.
+  Any decision rule proposed from this diagnostic is explicitly post-unblinding and takes effect only
+  after Peiyi Yue + supervisor confirmation.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be

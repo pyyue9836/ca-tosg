@@ -1,0 +1,11 @@
+CA-TOSG R10 -- POST-UNBLINDING DIAGNOSTIC (nothing here is confirmatory)
+========================================================================
+No training / no model,delta,tau change / no replay re-run. Reference oracle swapped to the budget-specific lambda*: B010=0.05, B020=0.02, B030=0.
+E-cell taxonomy: strict-benefit (eff_E>eff_L & >eff_F) / tie-saving (eff_E==eff_L) / lambda-induced (eff_E<eff_L but eff_E>eff_L-lambda*B_L).
+
+PRIMARY lens test@B020: strict-benefit missed-E F1 cost per grid cell = 0.000268 (= 0.054 x delta).
+DECISION DRAFT (post-unblinding; pending Peiyi Yue + supervisor confirmation):
+  strict-benefit E F1 cost is NEGLIGIBLE (< 0.0005/cell, an order below delta) -> the E-collapse costs mostly PAYLOAD, not F1. Proposed: keep the frozen models, run 6d as a DESCRIPTIVE AP table, and report honestly that "E was learned mainly as a bandwidth-saving action and is under-used by the selector" -- the R9 F1 result is unaffected.
+
+sec-8 selE re-adjudication (budget-oracle): B030 unchanged (lambda=0); B010/B020 recomputed -- numbers in r10_anomaly_readjudication.csv.
+ROOT-CAUSE CORRECTION: B010/B020 balanced candidates were attempted and walked past for exceeding the frozen budget; B030 balanced was NEVER tested -- its cw=None winner cand#56 passed at walk rank 0, so the walk stopped before any balanced candidate was reached.
