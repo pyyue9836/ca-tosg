@@ -341,6 +341,19 @@ the model is frozen, provided each change is logged with a reason and a date up 
   relpath; the gate recomputes OOF metrics from the folds and cross-checks; CLAIMS stable IDs fold in
   only *explicit* mode markers (C16/C_16/16-QAM/C256/C_256/256-QAM), not plain "16 dB"/"16 %".
 
+- **R8 (2026-08-09, pre-registered before P2-B) — RF-vs-threshold decision rule (verbatim contract).**
+  The deployed selector (RF) and the SNR-threshold baseline (τ) are compared **only as frozen
+  products**, on **test and Culver** under the **same 200-realisation replay protocol** (P2-B); the
+  validate terrain is never used for the headline comparison. **Primary-claim candidate, per budget:**
+  `|F1_RF − F1_τ|` has a **95% CI containing zero** (RF not worse on F1) **AND** RF's deployed payload
+  is **significantly lower** than τ's (95% CI excludes zero in RF's favour). **If instead τ dominates
+  on both F1 and payload** (both 95% CIs exclude zero against RF), the selector is **demoted to a
+  diagnostic result** and the paper reports **τ as the main line, honestly**. The validate observation
+  that τ slightly beats RF-OOF is recorded as **background, not a conclusion**. (The audit that closes
+  the walk evidence chain — re-executing the walk, logging every attempted candidate's frozen outcome,
+  and asserting the winners match `FROZEN_MANIFEST.json` — is registered here; a mismatch fuses and
+  must not overwrite the manifest.)
+
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
 written into the paper's conclusions; the paper reports only the frozen selectors' evaluated numbers.

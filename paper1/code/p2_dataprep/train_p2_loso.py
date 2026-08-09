@@ -280,14 +280,24 @@ def main():
         tau = pick_tau(merged, eff, spec, b)
         tag = f'B{int(round(b*100)):03d}'
         model_path = os.path.join(OUT_MODEL, f'selector_{tag}.pkl')
-        selected = None
+        walk_csv = os.path.join(OUT_PROV, f'candidate_walk_{tag}.csv')
+        selected, attempts = None, {}                                 # rank -> (frozen_f1, frozen_pay, passed)
         for depth, cand in enumerate(orders[b]):
             fr = freeze(cand, X, eff, bler_F, model_path, seed)       # writes model_path (overwritten until pass)
+            passed = fr['frozen_validate_payload'] <= b               # strict <=, no tolerance
+            attempts[depth] = (fr['frozen_validate_f1'], fr['frozen_validate_payload'], passed)
             print(f'  B_max={b} walk#{depth} cand#{cand["index"]} cw={cand["class_weight"]} '
                   f'lam*={cand["lam"]} OOF_F1={agg[cand["index"]]["frame_weighted_f1"]:.4f} '
-                  f'-> frozen pay={fr["frozen_validate_payload"]:.4f}')
-            if fr['frozen_validate_payload'] <= b:                    # strict <=, no tolerance
+                  f'-> frozen pay={fr["frozen_validate_payload"]:.4f} passed={passed}')
+            if passed:
                 selected = (cand, depth, fr, agg[cand['index']]); break
+        # close the walk evidence chain: append the actual retrain outcome to the pre-registered order
+        wdf = pd.read_csv(walk_csv)
+        wdf['attempted'] = [i in attempts for i in range(len(wdf))]
+        wdf['frozen_validate_f1'] = [round(attempts[i][0], 6) if i in attempts else '' for i in range(len(wdf))]
+        wdf['frozen_validate_payload'] = [round(attempts[i][1], 6) if i in attempts else '' for i in range(len(wdf))]
+        wdf['budget_passed'] = [bool(attempts[i][2]) if i in attempts else '' for i in range(len(wdf))]
+        wdf.to_csv(walk_csv, index=False)
         if selected is None:
             violations.append((b, len(orders[b])))
             if os.path.exists(model_path):
@@ -338,8 +348,23 @@ def main():
                          + '. No manifest, no test/Culver grids. FUSED. '
                          '(see results/p2_dataprep/PROVENANCE_train.txt)')
 
+    # AUDIT (R8): if a prior manifest exists, the re-executed (same-seed, deterministic) walk winners
+    # MUST match it exactly; a mismatch means non-determinism -- fuse, do NOT overwrite the manifest.
+    if os.path.exists(MANIFEST):
+        prev = json.load(open(MANIFEST))
+        for b in spec['budgets']:
+            key = f'{b:.2f}'; new = budgets[key]; old = prev.get('budgets', {}).get(key, {})
+            for field in ('candidate_index', 'model_sha256', 'lambda_star', 'tau_star'):
+                if new.get(field) != old.get(field):
+                    raise SystemExit(f'AUDIT MISMATCH (R8) B={b} {field}: re-run {new.get(field)!r} != '
+                                     f'manifest {old.get(field)!r}. Non-deterministic walk; manifest NOT '
+                                     'overwritten.')
+        print('AUDIT: re-executed walk winners match FROZEN_MANIFEST.json (candidate/sha/lambda*/tau*).')
+
     env = dict(python=platform.python_version(), sklearn=sklearn.__version__,
                numpy=np.__version__, pandas=pd.__version__)
+    walk_files = {f'B{int(round(b*100)):03d}': os.path.join(OUT_PROV, f'candidate_walk_B{int(round(b*100)):03d}.csv')
+                  for b in spec['budgets']}
     manifest = dict(
         schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md), R7',
         freeze_timestamp=freeze_ts, seed=seed, environment=env,
@@ -353,7 +378,9 @@ def main():
             cue_source=dict(file=os.path.relpath(CUES_CSV, P1), md5=_md5(CUES_CSV),
                             note='versionless (md5 == dataset_validate_v3.csv)'),
             bler_table=dict(file='results/bler_sionna/bler_sionna.csv', md5=_md5(BLER_CSV)),
-            folds_csv=dict(file=os.path.relpath(FOLDS_CSV, P1), sha256=_sha256(FOLDS_CSV))),
+            folds_csv=dict(file=os.path.relpath(FOLDS_CSV, P1), sha256=_sha256(FOLDS_CSV)),
+            **{f'walk_{tag}': dict(file=os.path.relpath(p, P1), sha256=_sha256(p))
+               for tag, p in walk_files.items()}),
         budgets=budgets)
     with open(MANIFEST, 'w') as f:
         json.dump(manifest, f, indent=2)

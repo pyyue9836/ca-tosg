@@ -127,12 +127,17 @@ def check_validate_grid_and_folds():
         if len(folds) != n_cand * len(grid_scenes):
             raise Fail(f'validate_loso_folds.csv has {len(folds)} rows, expected {n_cand}x{len(grid_scenes)}')
         want = {i: _combo_sig(c) for i, c in enumerate(combos)}
-        have = {}
+        seen = set()                                                 # R8: check EVERY row (all 9 per cand)
         for _, r in folds.iterrows():
-            have.setdefault(int(r['candidate_index']), _row_sig(r))
-        if set(have) != set(want) or any(have[i] != want[i] for i in want):
-            bad = [i for i in want if have.get(i) != want[i]][:5]
-            raise Fail(f'folds candidate params do not match PROTOCOL block (e.g. index {bad})')
+            ci = int(r['candidate_index'])
+            if ci not in want:
+                raise Fail(f'folds candidate_index {ci} not in PROTOCOL block')
+            if _row_sig(r) != want[ci]:
+                raise Fail(f'folds row (candidate {ci}, scene {r["fold_scene"]}) params != PROTOCOL block '
+                           f'({_row_sig(r)} != {want[ci]})')
+            seen.add(ci)
+        if seen != set(want):
+            raise Fail(f'folds missing candidate indices: {sorted(set(want) - seen)}')
         n = folds['fold_scene'].nunique()
         print(f'  (1) validate grid + LOSO {n}-fold OK: {len(folds)} rows = {n_cand}x{len(grid_scenes)}, '
               f'params match block, each scene held out once; every frame has {COPIES} copies.')
@@ -162,7 +167,7 @@ def check_manifest():
     if man.get('schema') != SCHEMA:
         raise Fail(f'manifest schema {man.get("schema")!r} != {SCHEMA!r}')
     # check 6: candidate_block_md5 == the current PROTOCOL block
-    blk_md5, n_cand, _, _ = protocol_candidate_block()
+    blk_md5, n_cand, _, combos = protocol_candidate_block()
     if man.get('candidate_block_md5') != blk_md5:
         raise Fail(f'manifest candidate_block_md5 != current PROTOCOL block ({man.get("candidate_block_md5")} '
                    f'!= {blk_md5}) -- candidates changed without a re-freeze.')
@@ -212,7 +217,40 @@ def check_manifest():
             raise Fail(f'budget {b} OOF payload recomputed {oof_pay:.6f} != manifest {bd["loso_frame_weighted_payload"]}')
         if abs(oof_f1 - bd['loso_frame_weighted_f1']) > 1e-3:
             raise Fail(f'budget {b} OOF F1 recomputed {oof_f1:.4f} != manifest {bd["loso_frame_weighted_f1"]}')
-    print(f'  (2) manifest OK [10 checks]: schema+block_md5 match, {len(man["budgets"])} budgets '
+        # check R8-b: the manifest's selected candidate params match the PROTOCOL block at that index
+        ci = bd['candidate_index']
+        if not (0 <= ci < len(combos)):
+            raise Fail(f'budget {b} candidate_index {ci} out of range for the PROTOCOL block')
+        ene, emd, eml, emf, ecw, elam = combos[ci]
+        got = (bd['hyperparameters']['n_estimators'], bd['hyperparameters']['max_depth'],
+               bd['hyperparameters']['min_samples_leaf'], _norm_mf(bd['hyperparameters']['max_features']),
+               bd['class_weight'], round(float(bd['lambda_star']), 6))
+        exp = (ene, emd, eml, _norm_mf(emf), ecw, round(float(elam), 6))
+        if got != exp:
+            raise Fail(f'budget {b} manifest candidate params {got} != PROTOCOL block[{ci}] {exp}')
+        # check R8-a: the walk CSV shows the selected candidate is the FIRST budget_passed=True, and
+        # every attempted candidate before it failed (walk_depth = its rank).
+        tag = f'B{int(round(bmax*100)):03d}'
+        walk_p = os.path.join(PROV, f'candidate_walk_{tag}.csv')
+        if not os.path.exists(walk_p):
+            raise Fail(f'budget {b} walk file absent: candidate_walk_{tag}.csv (no-skip)')
+        walk = pd.read_csv(walk_p)
+        att = walk['attempted'].astype(str).isin(['True', 'true'])
+        passed = walk['budget_passed'].astype(str).isin(['True', 'true'])
+        wd = bd['walk_depth']
+        sel = walk[walk['rank'] == wd]
+        if sel.empty or int(sel.iloc[0]['candidate_index']) != ci:
+            raise Fail(f'budget {b} walk_depth {wd} row is not the selected candidate {ci}')
+        if not bool(passed[walk['rank'] == wd].iloc[0]):
+            raise Fail(f'budget {b} selected walk row (rank {wd}) budget_passed != True')
+        before = walk[walk['rank'] < wd]
+        if not before.empty and (not att[walk['rank'] < wd].all()
+                                 or passed[walk['rank'] < wd].any()):
+            raise Fail(f'budget {b} a walk step before rank {wd} was not attempted-and-failed')
+        first_true = walk.loc[passed & att, 'rank'].min() if (passed & att).any() else None
+        if first_true != wd:
+            raise Fail(f'budget {b} first budget_passed=True is at rank {first_true}, not walk_depth {wd}')
+    print(f'  (2) manifest OK [13 checks]: schema+block_md5 match, {len(man["budgets"])} budgets '
           f'frozen_pay+OOF<=B_max, model+folds hashes verified, OOF recomputed from folds, folds={len(folds)} rows.')
 
 
