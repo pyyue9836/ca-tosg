@@ -1,0 +1,275 @@
+{
+  "schema": "catosg-frozen-manifest/1",
+  "protocol": "CA-TOSG P2 (PROTOCOL.md), R7",
+  "freeze_timestamp": "2026-08-09T13:59:01.301329+00:00",
+  "seed": 0,
+  "environment": {
+    "python": "3.10.18",
+    "sklearn": "1.7.0",
+    "numpy": "1.26.4",
+    "pandas": "2.2.2"
+  },
+  "candidate_block_md5": "05d8e424b41f98e090f2d3762efe5158",
+  "n_candidates": 112,
+  "feature_names": [
+    "num_cavs",
+    "ego_num_objects",
+    "ego_origin_lidar_shape_0",
+    "ego_origin_lidar_shape_1",
+    "pcd_num_points",
+    "pcd_mean_range",
+    "pcd_max_range",
+    "pcd_std_range",
+    "pcd_near_20m",
+    "pcd_mid_20_50m",
+    "pcd_far_50_80m",
+    "pcd_very_far_80m",
+    "pcd_front_points",
+    "pcd_back_points",
+    "pcd_left_points",
+    "pcd_right_points",
+    "pcd_front_far_30m",
+    "pcd_front_far_50m",
+    "pcd_density_0_20",
+    "pcd_density_20_50",
+    "pcd_density_50_80",
+    "est_snr_db",
+    "channel_is_rayleigh"
+  ],
+  "n_features": 23,
+  "loso": {
+    "folds": 9,
+    "scenes": [
+      "2021_08_20_21_48_35",
+      "2021_08_21_17_30_41",
+      "2021_08_22_13_37_16",
+      "2021_08_22_22_01_17",
+      "2021_08_23_10_51_24",
+      "2021_08_23_13_17_21",
+      "2021_08_23_19_42_07",
+      "2021_09_09_19_27_35",
+      "2021_09_11_00_33_16"
+    ],
+    "each_scene_heldout_once": true,
+    "n_fold_rows": 1008
+  },
+  "aggregation": {
+    "performance": "frame_weighted_oof_f1",
+    "robustness": "scene_mean_realised_f1",
+    "feasibility": "frame_weighted_oof_payload"
+  },
+  "tie_break": [
+    "max_f1",
+    "min_payload",
+    "shallower_model",
+    "min_candidate_index"
+  ],
+  "selection": "frozen_walk",
+  "inputs": {
+    "train_grid": {
+      "file": "data/p2/p2_grid_validate.csv",
+      "md5": "3314418d4e53ff30d0d246e1594e4bed"
+    },
+    "cue_source": {
+      "file": "../../OpenCOOD/peiyi_work/paper1/data/dataset_validate.csv",
+      "md5": "d357b38e802455bf3cabd3f886353991",
+      "note": "versionless (md5 == dataset_validate_v3.csv)"
+    },
+    "bler_table": {
+      "file": "results/bler_sionna/bler_sionna.csv",
+      "md5": "be3f5e1278ddda6efc271281ccbf449e"
+    },
+    "folds_csv": {
+      "file": "results/p2_dataprep/validate_loso_folds.csv",
+      "sha256": "8a394d9a32e0c4e23a02d42aa0af89c02ece40785f1f8345eba884582840ef07"
+    }
+  },
+  "budgets": {
+    "0.10": {
+      "selector": "selector_B010",
+      "candidate_index": 58,
+      "walk_depth": 6,
+      "n_feasible": 90,
+      "hyperparameters": {
+        "n_estimators": 400,
+        "max_depth": null,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      },
+      "class_weight": null,
+      "lambda_star": 0.05,
+      "loso_frame_weighted_f1": 0.907,
+      "loso_scene_mean_f1": 0.907,
+      "loso_frame_weighted_payload": 0.055978,
+      "tau_star": 18.0,
+      "tau_f1": 0.9073,
+      "tau_payload": 0.0679,
+      "model": "data/p2/selector_B010.pkl",
+      "model_sha256": "d15efbe0f5b69a0bd99824b7486c222f24a231f710a961abe90fcd01516ec796",
+      "frozen_validate_f1": 0.9111,
+      "frozen_validate_payload": 0.067887,
+      "budget_satisfied": true,
+      "perclass": {
+        "E": {
+          "precision": 0.9975,
+          "recall": 1.0,
+          "f1": 0.9988,
+          "support": 401
+        },
+        "L": {
+          "precision": 0.9997,
+          "recall": 1.0,
+          "f1": 0.9998,
+          "support": 41156
+        },
+        "F": {
+          "precision": 1.0,
+          "recall": 0.993,
+          "f1": 0.9965,
+          "support": 2003
+        }
+      },
+      "confusion_ELF": [
+        [
+          401,
+          0,
+          0
+        ],
+        [
+          0,
+          41156,
+          0
+        ],
+        [
+          1,
+          13,
+          1989
+        ]
+      ]
+    },
+    "0.20": {
+      "selector": "selector_B020",
+      "candidate_index": 1,
+      "walk_depth": 2,
+      "n_feasible": 107,
+      "hyperparameters": {
+        "n_estimators": 400,
+        "max_depth": 10,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      },
+      "class_weight": null,
+      "lambda_star": 0.02,
+      "loso_frame_weighted_f1": 0.9087,
+      "loso_scene_mean_f1": 0.9082,
+      "loso_frame_weighted_payload": 0.197463,
+      "tau_star": 12.0,
+      "tau_f1": 0.909,
+      "tau_payload": 0.1996,
+      "model": "data/p2/selector_B020.pkl",
+      "model_sha256": "fc9c2c0b5661bca4d045140de3faa9bfd740c5b81ea7ebf636941fbabfc39006",
+      "frozen_validate_f1": 0.9118,
+      "frozen_validate_payload": 0.099231,
+      "budget_satisfied": true,
+      "perclass": {
+        "E": {
+          "precision": 0.9819,
+          "recall": 0.9844,
+          "f1": 0.9831,
+          "support": 385
+        },
+        "L": {
+          "precision": 0.9744,
+          "recall": 0.9974,
+          "f1": 0.9858,
+          "support": 38855
+        },
+        "F": {
+          "precision": 0.9685,
+          "recall": 0.7627,
+          "f1": 0.8534,
+          "support": 4320
+        }
+      },
+      "confusion_ELF": [
+        [
+          379,
+          0,
+          6
+        ],
+        [
+          0,
+          38754,
+          101
+        ],
+        [
+          7,
+          1018,
+          3295
+        ]
+      ]
+    },
+    "0.30": {
+      "selector": "selector_B030",
+      "candidate_index": 56,
+      "walk_depth": 0,
+      "n_feasible": 112,
+      "hyperparameters": {
+        "n_estimators": 400,
+        "max_depth": null,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      },
+      "class_weight": null,
+      "lambda_star": 0.0,
+      "loso_frame_weighted_f1": 0.9094,
+      "loso_scene_mean_f1": 0.9101,
+      "loso_frame_weighted_payload": 0.245147,
+      "tau_star": 8.0,
+      "tau_f1": 0.9102,
+      "tau_payload": 0.2875,
+      "model": "data/p2/selector_B030.pkl",
+      "model_sha256": "ed77c2c7c8fbaefdd5090cba8c925bb330b6893b0a2a8b3749084de353cf27df",
+      "frozen_validate_f1": 0.9133,
+      "frozen_validate_payload": 0.156962,
+      "budget_satisfied": true,
+      "perclass": {
+        "E": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 335
+        },
+        "L": {
+          "precision": 0.9994,
+          "recall": 1.0,
+          "f1": 0.9997,
+          "support": 37197
+        },
+        "F": {
+          "precision": 1.0,
+          "recall": 0.996,
+          "f1": 0.998,
+          "support": 6028
+        }
+      },
+      "confusion_ELF": [
+        [
+          335,
+          0,
+          0
+        ],
+        [
+          0,
+          37197,
+          0
+        ],
+        [
+          0,
+          24,
+          6004
+        ]
+      ]
+    }
+  }
+}

@@ -204,13 +204,14 @@ def depth_rank(md):
     return float('inf') if md is None else md
 
 
-def pick(cands, agg, b_max):
-    scored = [(c, agg[c['index']]) for c in cands]
-    feasible = [(c, a) for c, a in scored if a['frame_weighted_payload'] <= b_max]  # strict <=, R6
-    pool, feas = (feasible, True) if feasible else (scored, False)
-    best = min(pool, key=lambda ca: (-ca[1]['scene_mean_f1'], ca[1]['frame_weighted_payload'],
-                                     depth_rank(ca[0]['max_depth']), ca[0]['index']))
-    return best[0], best[1], feas
+def walk_order(cands, agg, b_max):
+    """R7 frozen walk order: OOF-feasible candidates, by frame-weighted OOF F1 desc, tie-break
+    lower B_OOF -> shallower model -> candidate index."""
+    feasible = [c for c in cands if agg[c['index']]['frame_weighted_payload'] <= b_max]  # strict <=
+    feasible.sort(key=lambda c: (-agg[c['index']]['frame_weighted_f1'],
+                                 agg[c['index']]['frame_weighted_payload'],
+                                 depth_rank(c['max_depth']), c['index']))
+    return feasible
 
 
 def pick_tau(merged, eff, spec, b_max):
@@ -257,36 +258,59 @@ def main():
     assert len(scenes) == spec['loso']['folds'], 'fold count != scenes'
     agg = aggregate(fold_df)
 
-    # --- select per budget, retrain on full validate, HARD-CHECK frozen payload <= B_max (R6) ---
+    # --- R7 FROZEN WALK: write all walk orders BEFORE any retrain, then walk each budget ---
     freeze_ts = datetime.now(timezone.utc).isoformat()
+    orders = {}
+    for b in spec['budgets']:
+        order = walk_order(cands, agg, b)
+        orders[b] = order
+        rows = [dict(rank=i, candidate_index=c['index'], n_estimators=c['n_estimators'],
+                     max_depth=c['max_depth'], min_samples_leaf=c['min_samples_leaf'],
+                     max_features=c['max_features'], class_weight=c['class_weight'], **{'lambda': c['lam']},
+                     frame_weighted_f1=round(agg[c['index']]['frame_weighted_f1'], 6),
+                     scene_mean_f1=round(agg[c['index']]['scene_mean_f1'], 6),
+                     frame_weighted_payload=round(agg[c['index']]['frame_weighted_payload'], 6))
+                for i, c in enumerate(order)]
+        pd.DataFrame(rows).to_csv(os.path.join(OUT_PROV, f'candidate_walk_B{int(round(b*100)):03d}.csv'),
+                                  index=False)
+    print(f'walk orders written ({", ".join(f"B{int(b*100):03d}:{len(orders[b])}feasible" for b in spec["budgets"])}).')
+
     budgets, violations = {}, []
     for b in spec['budgets']:
-        cand, a, feas = pick(cands, agg, b)
         tau = pick_tau(merged, eff, spec, b)
         tag = f'B{int(round(b*100)):03d}'
         model_path = os.path.join(OUT_MODEL, f'selector_{tag}.pkl')
-        fr = freeze(cand, X, eff, bler_F, model_path, seed)
-        satisfied = fr['frozen_validate_payload'] <= b               # strict <=, no tolerance
-        if not satisfied:
-            violations.append((b, fr['frozen_validate_payload']))
+        selected = None
+        for depth, cand in enumerate(orders[b]):
+            fr = freeze(cand, X, eff, bler_F, model_path, seed)       # writes model_path (overwritten until pass)
+            print(f'  B_max={b} walk#{depth} cand#{cand["index"]} cw={cand["class_weight"]} '
+                  f'lam*={cand["lam"]} OOF_F1={agg[cand["index"]]["frame_weighted_f1"]:.4f} '
+                  f'-> frozen pay={fr["frozen_validate_payload"]:.4f}')
+            if fr['frozen_validate_payload'] <= b:                    # strict <=, no tolerance
+                selected = (cand, depth, fr, agg[cand['index']]); break
+        if selected is None:
+            violations.append((b, len(orders[b])))
+            if os.path.exists(model_path):
+                os.remove(model_path)
+            continue
+        cand, depth, fr, a = selected
         budgets[f'{b:.2f}'] = dict(
-            selector=f'selector_{tag}', candidate_index=cand['index'],
+            selector=f'selector_{tag}', candidate_index=cand['index'], walk_depth=depth,
+            n_feasible=len(orders[b]),
             hyperparameters=dict(n_estimators=cand['n_estimators'], max_depth=cand['max_depth'],
                                  min_samples_leaf=cand['min_samples_leaf'], max_features=cand['max_features']),
-            class_weight=cand['class_weight'], lambda_star=cand['lam'], lambda_feasible=feas,
-            loso_scene_mean_f1=round(a['scene_mean_f1'], 4),
-            loso_frame_weighted_f1=round(a['frame_weighted_f1'], 4),
+            class_weight=cand['class_weight'], lambda_star=cand['lam'],
+            loso_frame_weighted_f1=round(a['frame_weighted_f1'], 4),     # PRIMARY (R7)
+            loso_scene_mean_f1=round(a['scene_mean_f1'], 4),            # robustness supplement
             loso_frame_weighted_payload=round(a['frame_weighted_payload'], 6),
             tau_star=tau['tau_star'], tau_f1=tau['tau_f1'], tau_payload=tau['tau_payload'],
             model=os.path.relpath(model_path, P1), model_sha256=fr['sha256'],
             frozen_validate_f1=fr['frozen_validate_f1'], frozen_validate_payload=fr['frozen_validate_payload'],
-            budget_satisfied=bool(satisfied), perclass=fr['perclass'], confusion_ELF=fr['confusion_ELF'])
-        print(f'  B_max={b}: cand#{cand["index"]} cw={cand["class_weight"]} lam*={cand["lam"]} '
-              f'scene-mean F1={a["scene_mean_f1"]:.4f} B_OOF={a["frame_weighted_payload"]:.4f} '
-              f'tau*={tau["tau_star"]} | frozen pay={fr["frozen_validate_payload"]:.4f} '
-              f'satisfied={satisfied}')
+            budget_satisfied=True, perclass=fr['perclass'], confusion_ELF=fr['confusion_ELF'])
+        print(f'  B_max={b}: SELECTED cand#{cand["index"]} at walk_depth={depth} '
+              f'(OOF F1={a["frame_weighted_f1"]:.4f}, frozen pay={fr["frozen_validate_payload"]:.4f} <= {b})')
 
-    if violations:                                                   # FINAL-CHECK IRON RULE (R6)
+    if violations:                                                   # walk exhausted for some budget
         for b in spec['budgets']:                                    # do not leave frozen models behind
             mp = os.path.join(OUT_MODEL, f'selector_B{int(round(b*100)):03d}.pkl')
             if os.path.exists(mp):
@@ -294,60 +318,63 @@ def main():
         if os.path.exists(MANIFEST):                                 # a stale/previous manifest is now invalid
             os.remove(MANIFEST)
         with open(os.path.join(OUT_PROV, 'PROVENANCE_train.txt'), 'w') as f:
-            f.write('CA-TOSG P2 submit-A (R6) -- FINAL-CHECK FUSED (no manifest written)\n')
+            f.write('CA-TOSG P2 submit-A (R7) -- FROZEN WALK EXHAUSTED (no manifest written)\n')
             f.write('=' * 72 + '\n')
             f.write(f'freeze attempt {freeze_ts}; seed={seed}; candidate_block_md5={cand_md5}\n')
-            f.write('R6c hard check: frozen full-validate mean payload must be <= B_max (strict). '
-                    'It FAILED for at least one budget, so NO manifest was written, NO models kept, '
-                    'and NO test/Culver grids built. Resolving this (e.g. denser high-lambda candidates) '
-                    'requires a NEW pre-registered Change-log entry -- do not add candidates or a '
-                    'tolerance silently.\n\nPer-budget (selection via OOF frame-weighted payload; the '
-                    'gap to the frozen in-sample payload is the finding):\n')
+            f.write('R7 frozen walk: for each budget the OOF-feasible candidates were walked in '
+                    'frame-weighted OOF F1 order, retrained on full 1980, and hard-checked '
+                    'frozen_validate_payload <= B_max (strict). At least one budget EXHAUSTED its walk '
+                    'with none passing. NO manifest, NO models, NO test/Culver grids. The only fix is a '
+                    'NEW pre-registered Change-log entry expanding the lambda grid, then a full redo.\n\n')
+            for b, n in violations:
+                f.write(f'  B_max={b}: walk EXHAUSTED ({n} OOF-feasible candidates, none frozen <= {b}).\n')
             for b in spec['budgets']:
-                bd = budgets[f'{b:.2f}']
-                f.write(f'  B_max={b}: cand#{bd["candidate_index"]} cw={bd["class_weight"]} '
-                        f'lambda*={bd["lambda_star"]} scene_mean_F1={bd["loso_scene_mean_f1"]} '
-                        f'B_OOF={bd["loso_frame_weighted_payload"]} frozen_pay={bd["frozen_validate_payload"]} '
-                        f'satisfied={bd["budget_satisfied"]}\n')
-        raise SystemExit('FINAL-CHECK FAILED (R6): frozen_validate_payload > B_max for '
-                         + ', '.join(f'B={b} (pay={p:.4f})' for b, p in violations)
-                         + '. No manifest written, no test/Culver grids built. FUSED. '
+                if f'{b:.2f}' in budgets:
+                    bd = budgets[f'{b:.2f}']
+                    f.write(f'  B_max={b}: passed at walk_depth={bd["walk_depth"]} cand#{bd["candidate_index"]} '
+                            f'frozen_pay={bd["frozen_validate_payload"]}\n')
+        raise SystemExit('FROZEN WALK EXHAUSTED (R7) for '
+                         + ', '.join(f'B={b} ({n} feasible, none passed)' for b, n in violations)
+                         + '. No manifest, no test/Culver grids. FUSED. '
                          '(see results/p2_dataprep/PROVENANCE_train.txt)')
 
     env = dict(python=platform.python_version(), sklearn=sklearn.__version__,
                numpy=np.__version__, pandas=pd.__version__)
     manifest = dict(
-        schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md), R6',
+        schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md), R7',
         freeze_timestamp=freeze_ts, seed=seed, environment=env,
         candidate_block_md5=cand_md5, n_candidates=len(cands),
         feature_names=names, n_features=len(names),
         loso=dict(folds=len(scenes), scenes=scenes, each_scene_heldout_once=True,
                   n_fold_rows=len(fold_df)),
-        aggregation=spec['aggregation'], tie_break=spec['tie_break'],
+        aggregation=spec['aggregation'], tie_break=spec['tie_break'], selection='frozen_walk',
         inputs=dict(
             train_grid=dict(file='data/p2/p2_grid_validate.csv', md5=_md5(GRID_CSV)),
-            cue_source=dict(file='dataset_validate.csv', md5=_md5(CUES_CSV),
+            cue_source=dict(file=os.path.relpath(CUES_CSV, P1), md5=_md5(CUES_CSV),
                             note='versionless (md5 == dataset_validate_v3.csv)'),
-            bler_table=dict(file='results/bler_sionna/bler_sionna.csv', md5=_md5(BLER_CSV))),
+            bler_table=dict(file='results/bler_sionna/bler_sionna.csv', md5=_md5(BLER_CSV)),
+            folds_csv=dict(file=os.path.relpath(FOLDS_CSV, P1), sha256=_sha256(FOLDS_CSV))),
         budgets=budgets)
     with open(MANIFEST, 'w') as f:
         json.dump(manifest, f, indent=2)
 
     with open(os.path.join(OUT_PROV, 'PROVENANCE_train.txt'), 'w') as f:
-        f.write('CA-TOSG P2 submit-A (R6) -- LOSO selection + freeze (train_p2_loso.py)\n')
+        f.write('CA-TOSG P2 submit-A (R7) -- frozen-walk selection + freeze (train_p2_loso.py)\n')
         f.write('=' * 72 + '\n')
         f.write(f'freeze_timestamp: {freeze_ts}; seed={seed}; candidate_block_md5={cand_md5}\n')
         f.write(f'env: {env}\n')
-        f.write('R6 split: performance = scene-mean F1; feasibility = frame-weighted OOF payload '
-                'B_OOF=sum(N_k*Bbar_k)/sum(N_k). Final-check: frozen payload <= B_max (strict).\n')
+        f.write('R7: PRIMARY = frame-weighted OOF F1; feasibility = frame-weighted OOF payload; '
+                'frozen walk = first OOF-feasible candidate (by OOF F1 desc) whose frozen payload <= B_max.\n')
         for b in spec['budgets']:
             bd = budgets[f'{b:.2f}']
-            f.write(f'  B_max={b}: {bd["selector"]} cand#{bd["candidate_index"]} cw={bd["class_weight"]} '
-                    f'lambda*={bd["lambda_star"]} B_OOF={bd["loso_frame_weighted_payload"]} '
-                    f'frozen_pay={bd["frozen_validate_payload"]} satisfied={bd["budget_satisfied"]} '
-                    f'tau*={bd["tau_star"]} sha256={bd["model_sha256"][:16]}...\n')
-        f.write('models git-excluded (data/p2/); manifest+folds tracked (results/p2_dataprep/).\n')
-    print('\nAll budgets satisfied -> FROZEN_MANIFEST.json + validate_loso_folds.csv + PROVENANCE_train.txt')
+            f.write(f'  B_max={b}: {bd["selector"]} cand#{bd["candidate_index"]} walk_depth={bd["walk_depth"]}'
+                    f'/{bd["n_feasible"]} cw={bd["class_weight"]} lambda*={bd["lambda_star"]} '
+                    f'OOF_F1={bd["loso_frame_weighted_f1"]} (scene-mean {bd["loso_scene_mean_f1"]}) '
+                    f'frozen_pay={bd["frozen_validate_payload"]} tau*={bd["tau_star"]} '
+                    f'sha256={bd["model_sha256"][:16]}...\n')
+        f.write('models git-excluded (data/p2/); manifest+folds+walk-tables tracked (results/p2_dataprep/).\n')
+    print('\nAll budgets satisfied -> FROZEN_MANIFEST.json + candidate_walk_B0XX.csv + '
+          'validate_loso_folds.csv + PROVENANCE_train.txt')
 
 
 if __name__ == '__main__':

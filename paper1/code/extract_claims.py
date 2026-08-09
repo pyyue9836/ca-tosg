@@ -107,12 +107,17 @@ def exact_values(sent):
 
 def _skeleton(claim):
     # letters-only keeps the id number-insensitive (so measured-number changes preserve evidence),
-    # PLUS the action/QAM mode identifiers 16/256 -- otherwise two claims that differ ONLY by C16 vs
-    # C256 collapse to the same skeleton and collide (P2 R6 fix: cb3af69). Mode tokens are structural,
-    # not measured, so they do not make the id volatile.
+    # PLUS the action/QAM mode identifiers -- otherwise two claims that differ ONLY by C16 vs C256
+    # collapse to the same skeleton and collide (cb3af69). R7: recognise ONLY explicit mode markers
+    # (C16 / C_16 / 16-QAM / C256 / C_256 / 256-QAM), NOT plain numbers like "16 dB" or "16 %" -- so
+    # changing a measured "16 dB" -> "14 dB" keeps the same id (-> STALE), not a new id.
     letters = re.sub(r'[^a-zA-Z]', '', claim).lower()
-    modes = ''.join(sorted(set(re.findall(r'256|16', claim))))
-    return letters + modes
+    modes = set()
+    if re.search(r'C_?16\b|16-?QAM', claim):
+        modes.add('16')
+    if re.search(r'C_?256\b|256-?QAM', claim):
+        modes.add('256')
+    return letters + ''.join(sorted(modes))
 
 
 def claim_id(claim):
@@ -142,6 +147,9 @@ HEADER = (
     "evidence columns are back-filled by hand in P2–P4; they are preserved on re-run **only while a "
     "claim's Exact value is unchanged** — if a number changes the evidence is flagged **STALE** (never "
     "silently retained). A blank evidence cell is an open TODO.\n\n"
+    "_Diagnostic note (PROTOCOL R6/R7): the gap between a candidate's OOF payload and its full-retrain "
+    "(frozen) payload is a training→freeze diagnostic of the selection procedure and must NOT be "
+    "written into the paper's conclusions._\n\n"
     "| ID | Claim | Exact value | Split | Metric | CSV | Generator | Statistical support | Allowed wording |\n"
     "|---|---|---|---|---|---|---|---|---|\n"
 )

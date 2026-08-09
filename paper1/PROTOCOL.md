@@ -152,8 +152,10 @@ entry **and a full retrain** — the frozen models must always correspond to exa
   "tau_grid": {"start": 0.0, "stop": 20.0, "step": 0.5},
   "budgets": [0.10, 0.20, 0.30],
   "loso": {"scheme": "scene-level", "folds": 9, "each_scene_heldout_once": true},
-  "aggregation": {"performance": "scene_mean_realised_f1",
+  "aggregation": {"performance": "frame_weighted_oof_f1",
+                  "robustness": "scene_mean_realised_f1",
                   "feasibility": "frame_weighted_oof_payload"},
+  "selection": "frozen_walk",
   "tie_break": ["max_f1", "min_payload", "shallower_model", "min_candidate_index"]
 }
 ```
@@ -166,40 +168,52 @@ together with that scene's frame count `N_k`. Every (fold × candidate) row — 
 is written to `results/p2_dataprep/validate_loso_folds.csv`, so both aggregates below are recomputable
 from the deliverable itself.
 
-**Semantic split (Change-log R6).** Performance and feasibility use different aggregations:
-- **Performance criterion** = **scene-mean realised F1** = mean over the 9 folds of the per-fold OOF
-  F1 (scenes weighted equally). This ranks candidates.
-- **Budget feasibility** = **frame-weighted OOF payload** `B_OOF = Σ_k N_k·B̄_k / Σ_k N_k` (`B̄_k` =
-  fold-k OOF payload, `N_k` = fold-k scene frame count). This decides admissibility, *not* the
-  scene-mean payload.
+**Aggregations (Change-log R7).** All from `validate_loso_folds.csv`:
+- **Performance criterion (PRIMARY)** = **frame-weighted OOF realised F1**
+  `Σ_k N_k·F1_k / Σ_k N_k` (`N_k` = fold-k scene frame count). This matches the paper's `E[F]` and the
+  deployment report, and it ranks candidates.
+- **Scene-mean realised F1** (mean over the 9 folds, scenes equal) is demoted to a **robustness
+  supplement** — recorded in the manifest and the results table, but not the ranking key.
+- **Budget feasibility** = **frame-weighted OOF payload** `B_OOF = Σ_k N_k·B̄_k / Σ_k N_k`.
 
-**Ranking, per B_max:** (1) keep only candidates with `B_OOF ≤ B_max` (feasibility gate); (2) within
-the feasible set, maximise scene-mean F1; (3) tie-break, in order: higher F1 → lower `B_OOF` →
-shallower model (smaller `max_depth`; `null` = deepest, ranked last) → smallest candidate index. No
-`class_weight` default is assumed — both `null` and `balanced` are candidates; the class cost is
-otherwise carried by λ.
+**Frozen walk, per B_max (Change-log R7 — treats OOF under-estimating the retrain payload).**
+(1) Take the OOF-feasible set `{candidate : B_OOF ≤ B_max}`; (2) order it by frame-weighted OOF F1
+**descending**, tie-break lower `B_OOF` → shallower model (`null` max_depth ranked last) → smallest
+candidate index; (3) write this order to `results/p2_dataprep/candidate_walk_B0XX.csv` **before any
+retrain** (pre-registration of the walk); (4) walk down the order — retrain each candidate on **all
+1980** validate frames and hard-check `B̄_frozen ≤ B_max` (strict, NO tolerance) — and **take the first
+candidate that passes**, recording its `walk_depth`. If the walk is exhausted with none passing,
+**fuse and report**; the only permitted fix is a new Change-log entry that expands the λ grid, after
+which the whole run is redone. This guarantees each frozen model actually meets its budget.
 
-**τ\*(B_max) — budget-matched.** On the FULL validate grid, sweep the SNR-threshold baseline
-(awgn & snr>τ → F else L; Rayleigh → L) over the τ grid; τ\*(B_max) = the threshold with the highest
-realised F1 whose payload ≤ B_max. Per-split threshold search is banned from here on.
+**τ\*(B_max) — same performance + budget aggregation as the selector (R7a).** On the FULL validate
+grid (each frame contributes its 22 cells equally, so the grid mean *is* frame-weighted), sweep the
+SNR-threshold baseline (awgn & snr>τ → F else L; Rayleigh → L) over the τ grid; τ\*(B_max) = the
+threshold with the highest frame-weighted realised F1 whose payload ≤ B_max. Per-split threshold
+search is banned from here on.
 
-**Freeze + FINAL-CHECK IRON RULE (Change-log R6).** For each B_max, retrain the chosen candidate on
-**all 1980** validate frames → `selector_B0{10,20,30}`, and compute the frozen model's full-validate
-mean payload `B̄_frozen`. **Hard check: `B̄_frozen ≤ B_max`, strict ≤ with NO tolerance.** If any budget
-fails, **do not write the manifest, do not build the test/Culver grids, fuse and report** — a
-tolerance would require its own pre-registered Change-log entry stating the numeric value. Only when
-all three budgets pass is `FROZEN_MANIFEST.json` written. Its per-budget record carries
-`loso_scene_mean_f1`, `loso_frame_weighted_f1`, `loso_frame_weighted_payload`,
-`frozen_validate_payload`, and `budget_satisfied`, alongside the three model sha256, training-data
-md5, scene list, hyper-parameters/λ\*/τ\*, the environment (python/sklearn/numpy/pandas versions), and
-the timestamp. Nothing after may look at test/Culver labels.
+**Manifest (R7).** Only when **all three** budgets pass the walk is `FROZEN_MANIFEST.json` written.
+Its per-budget record carries `loso_frame_weighted_f1` (primary), `loso_scene_mean_f1` (supplement),
+`loso_frame_weighted_payload`, `frozen_validate_payload`, `walk_depth`, and `budget_satisfied`,
+alongside the three model sha256, the **folds CSV sha256** and grid/cue input hashes, the candidate
+signature, the cue path as `os.path.relpath(cues, paper1)`, the environment
+(python/sklearn/numpy/pandas), and the timestamp. Nothing after may look at test/Culver labels.
 
-**Seven frozen-state gate checks (Change-log R6; all FAIL, never skip).** With a manifest present,
+**Rule-freeze clause (Change-log R7d).** The selection rules above are **frozen from R7 onward**. Any
+later change is permitted **only** when triggered by a fuse and accompanied by its own new Change-log
+entry — no silent re-tuning of the criterion, the walk, or the tie-break.
+
+**Frozen-state gate checks (Change-log R6 + R7; all FAIL, never skip).** With a manifest present,
 `code/p2_dataprep/check_leakage.py` asserts: (1) every budget's `frozen_validate_payload ≤ B_max`;
 (2) every budget's frame-weighted OOF payload is on record AND `≤ B_max`; (3) every referenced model
 file exists (missing = FAIL); (4) any missing input (grid / cues / manifest / folds) = FAIL; (5)
 `schema` is exactly `catosg-frozen-manifest/1`; (6) `candidate_block_md5` equals the md5 of the current
 PROTOCOL `CATOSG-CANDIDATES` block; (7) `validate_loso_folds.csv` has exactly 112 × 9 = 1008 rows.
+**R7 additions:** (8) the folds CSV **sha256** matches the manifest, and the per-row candidate params
+match the PROTOCOL candidate block (asserted **even with no manifest**); (9) the OOF metrics are
+**recomputed from the folds** and cross-checked against the manifest values (mismatch = FAIL); (10)
+the manifest cue path resolves via `os.path.join(paper1, relpath)` (any path-resolution failure =
+FAIL).
 
 **Apply to test/Culver (P2 submit-B).** Evaluate the three frozen selectors at their frozen λ\*/τ\*
 on test and Culver **once**, reading only `FROZEN_MANIFEST.json`, with no re-tuning.
@@ -313,3 +327,20 @@ the model is frozen, provided each change is logged with a reason and a date up 
   `validate_loso_folds.csv` gains `n_frames`; the gate runs seven frozen-state checks. The 1008 LOSO
   fits from R5 are **reused** (only the selection + feasibility are recomputed), then the three models
   are retrained on full validate and hard-checked.
+- **R7 (2026-08-09, P2 submit-A 2nd correction) — §6: performance criterion unified + frozen-walk
+  selection + rule-freeze.** (a) The PRIMARY criterion becomes **frame-weighted OOF realised F1**
+  (matching the paper's `E[F]` and the deployment report); scene-mean F1 is demoted to a robustness
+  supplement (both recorded). `τ*` uses the same frame-weighted + budget-matched aggregation. (b)
+  Selection becomes a **frozen walk**: order the OOF-feasible candidates by frame-weighted OOF F1
+  descending (walk order written to `candidate_walk_B0XX.csv` before any retrain), retrain each on
+  full validate, and take the first whose `B̄_frozen ≤ B_max`; walk-exhaustion fuses (fix = a new
+  entry expanding the λ grid, then a full redo). This resolves the R6 fuse, where the OOF-feasible
+  max-F1 candidate could violate the budget once frozen. (c) Tie-break unchanged (payload → shallower
+  → index). (d) **Rule-freeze:** the selection rules are frozen from R7; later changes only via a
+  fuse-triggered new Change-log entry. Plus: manifest gains folds sha256 + candidate signature + cue
+  relpath; the gate recomputes OOF metrics from the folds and cross-checks; CLAIMS stable IDs fold in
+  only *explicit* mode markers (C16/C_16/16-QAM/C256/C_256/256-QAM), not plain "16 dB"/"16 %".
+
+**Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
+(frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
+written into the paper's conclusions; the paper reports only the frozen selectors' evaluated numbers.

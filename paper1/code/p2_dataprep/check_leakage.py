@@ -59,9 +59,28 @@ def protocol_candidate_block():
         raise Fail('CATOSG-CANDIDATES block not found in PROTOCOL.md')
     spec = json.loads(m.group(1))
     hp = spec['hyperparameters']
-    n = len(list(itertools.product(hp['n_estimators'], hp['max_depth'], hp['min_samples_leaf'],
-                                   hp['max_features'], spec['class_weight'], spec['lambda_grid'])))
-    return hashlib.md5(m.group(1).encode()).hexdigest(), n, spec
+    combos = list(itertools.product(hp['n_estimators'], hp['max_depth'], hp['min_samples_leaf'],
+                                    hp['max_features'], spec['class_weight'], spec['lambda_grid']))
+    return hashlib.md5(m.group(1).encode()).hexdigest(), len(combos), spec, combos
+
+
+def _norm_mf(v):
+    try:
+        return float(v)
+    except (ValueError, TypeError):
+        return str(v)
+
+
+def _row_sig(row):
+    md = None if pd.isna(row['max_depth']) else int(row['max_depth'])
+    cw = None if (pd.isna(row['class_weight']) or row['class_weight'] == '') else row['class_weight']
+    return (int(row['n_estimators']), md, int(row['min_samples_leaf']),
+            _norm_mf(row['max_features']), cw, round(float(row['lambda']), 6))
+
+
+def _combo_sig(combo):
+    ne, md, ml, mf, cw, lam = combo
+    return (ne, md, ml, _norm_mf(mf), cw, round(float(lam), 6))
 
 COPIES = 11 * 2                                                  # 22 cells per frame
 FORBIDDEN_COLS = {'role', 'train', 'dev', 'split', 'tau', 'lambda', 'fitted', 'selected', 'threshold'}
@@ -102,9 +121,21 @@ def check_validate_grid_and_folds():
         held = folds.groupby(['candidate_index', 'fold_scene']).size()
         if (held != 1).any():
             raise Fail('some scene is held out != 1 time for some candidate (not a clean LOSO)')
+        # R7: assert 112 x 9 = 1008 rows AND per-row candidate params match the PROTOCOL block
+        # (enforced EVEN with no manifest, so the LOSO record can never silently drift).
+        _, n_cand, _, combos = protocol_candidate_block()
+        if len(folds) != n_cand * len(grid_scenes):
+            raise Fail(f'validate_loso_folds.csv has {len(folds)} rows, expected {n_cand}x{len(grid_scenes)}')
+        want = {i: _combo_sig(c) for i, c in enumerate(combos)}
+        have = {}
+        for _, r in folds.iterrows():
+            have.setdefault(int(r['candidate_index']), _row_sig(r))
+        if set(have) != set(want) or any(have[i] != want[i] for i in want):
+            bad = [i for i in want if have.get(i) != want[i]][:5]
+            raise Fail(f'folds candidate params do not match PROTOCOL block (e.g. index {bad})')
         n = folds['fold_scene'].nunique()
-        print(f'  (1) validate grid complete + LOSO {n}-fold OK: each of {len(grid_scenes)} scenes '
-              f'held out exactly once per candidate; every frame has {COPIES} copies.')
+        print(f'  (1) validate grid + LOSO {n}-fold OK: {len(folds)} rows = {n_cand}x{len(grid_scenes)}, '
+              f'params match block, each scene held out once; every frame has {COPIES} copies.')
     elif frozen:
         raise Fail('manifest present but validate_loso_folds.csv absent (LOSO record required post-freeze).')
     else:
@@ -131,7 +162,7 @@ def check_manifest():
     if man.get('schema') != SCHEMA:
         raise Fail(f'manifest schema {man.get("schema")!r} != {SCHEMA!r}')
     # check 6: candidate_block_md5 == the current PROTOCOL block
-    blk_md5, n_cand, _ = protocol_candidate_block()
+    blk_md5, n_cand, _, _ = protocol_candidate_block()
     if man.get('candidate_block_md5') != blk_md5:
         raise Fail(f'manifest candidate_block_md5 != current PROTOCOL block ({man.get("candidate_block_md5")} '
                    f'!= {blk_md5}) -- candidates changed without a re-freeze.')
@@ -140,10 +171,13 @@ def check_manifest():
         if not os.path.exists(f):
             raise Fail(f'required input absent (no-skip): {os.path.relpath(f, P1)}')
     for key, meta in man['inputs'].items():
-        fp = os.path.join(P1, meta['file'])
+        fp = os.path.join(P1, meta['file'])                       # check 10: cue relpath (../OpenCOOD/..) resolves
         if not os.path.exists(fp):
-            raise Fail(f'manifest input {key} file absent: {meta["file"]}')
-        if hashlib.md5(open(fp, 'rb').read()).hexdigest() != meta['md5']:
+            raise Fail(f'manifest input {key} path does not resolve: {meta["file"]}')
+        if 'sha256' in meta:                                     # check 8: folds_csv sha256
+            if hashlib.sha256(open(fp, 'rb').read()).hexdigest() != meta['sha256']:
+                raise Fail(f'input {key} ({meta["file"]}) sha256 mismatch vs manifest')
+        elif hashlib.md5(open(fp, 'rb').read()).hexdigest() != meta['md5']:
             raise Fail(f'input {key} ({meta["file"]}) md5 mismatch vs manifest')
     # check 7: folds CSV exactly n_candidates x folds rows
     folds = pd.read_csv(FOLDS)
@@ -169,8 +203,17 @@ def check_manifest():
             raise Fail(f'budget {b} frame-weighted OOF payload {bd.get("loso_frame_weighted_payload")} > B_max {bmax}')
         if not bd.get('budget_satisfied', False):
             raise Fail(f'budget {b} budget_satisfied is not True')
-    print(f'  (2) manifest OK [7 checks]: schema={man["schema"]}, block_md5 match, {len(man["budgets"])} '
-          f'budgets frozen_pay+OOF<=B_max, {len(man["budgets"])} model hashes verified, folds={len(folds)} rows.')
+        # check 9 (R7): recompute OOF metrics from the folds for this budget's candidate and cross-check
+        gc = folds[folds['candidate_index'] == bd['candidate_index']]
+        w = gc['n_frames'].to_numpy(dtype=float); W = w.sum()
+        oof_pay = float((w * gc['realised_payload'].to_numpy()).sum() / W)
+        oof_f1 = float((w * gc['realised_f1'].to_numpy()).sum() / W)
+        if abs(oof_pay - bd['loso_frame_weighted_payload']) > 1e-4:
+            raise Fail(f'budget {b} OOF payload recomputed {oof_pay:.6f} != manifest {bd["loso_frame_weighted_payload"]}')
+        if abs(oof_f1 - bd['loso_frame_weighted_f1']) > 1e-3:
+            raise Fail(f'budget {b} OOF F1 recomputed {oof_f1:.4f} != manifest {bd["loso_frame_weighted_f1"]}')
+    print(f'  (2) manifest OK [10 checks]: schema+block_md5 match, {len(man["budgets"])} budgets '
+          f'frozen_pay+OOF<=B_max, model+folds hashes verified, OOF recomputed from folds, folds={len(folds)} rows.')
 
 
 def check_scene_manifest_crosscheck():
