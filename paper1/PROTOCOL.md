@@ -371,13 +371,13 @@ the model is frozen, provided each change is logged with a reason and a date up 
 - **R10 (2026-08-09, post-unblinding diagnostic) — E-usage diagnosis after the sec-8 fuse.**
   **This is a post-unblinding diagnostic; nothing computed here is confirmatory.** No training, no
   model/δ/τ change, no replay re-run. It only swaps the reference oracle: per budget it recomputes a
-  **budget-specific oracle** `s*_b = argmax_s (F_s − λ_b·B_s)` at that budget's frozen λ\*
-  (B010→0.05, B020→0.02, B030→0), masking F where BLER_F ≥ 0.999. Each budget-oracle E cell is
-  classified **strict-benefit** (F_E > F_L and F_E > F_F) / **tie-saving** (F_E = F_L) /
-  **λ-induced** (F_E ≤ F_L but F_E > F_L − λ_b·B_L), and the cost of the RF selector NOT picking E is
-  split into an **F1 loss** (only strict-benefit cells lose F1) and an **extra payload** (tie/λ cells).
-  The per-class table and the sec-8 selector-E check are re-adjudicated against the budget-oracle
-  (B030 unchanged at λ=0; B010/B020 recomputed). **Root-cause correction:** B010/B020's `cw=balanced`
+  **frozen-λ clairvoyant oracle** (renamed from "budget-specific oracle"; R10d note: it is NOT
+  budget-constrained) `s*_b = argmax_s (F_s − λ_b·B_s)` at that budget's frozen λ\*
+  (B010→0.05, B020→0.02, B030→0), masking F where BLER_F ≥ 0.999. Each frozen-λ-clairvoyant E cell is
+  classified (R10 taxonomy, **later corrected in R10d**), and the cost of the RF selector NOT picking E
+  is split into an F1 loss and an extra payload.
+  The per-class table and the sec-8 selector-E check are re-adjudicated against the frozen-λ clairvoyant
+  oracle (B030 unchanged at λ=0; B010/B020 recomputed). **Root-cause correction:** B010/B020's `cw=balanced`
   candidates were attempted and walked past for exceeding the frozen budget; **B030's `cw=balanced` was
   never tested** — its `cw=None` winner (cand#56) passed at walk rank 0, so the walk stopped first.
   Any decision rule proposed from this diagnostic is explicitly post-unblinding and takes effect only
@@ -396,11 +396,32 @@ the model is frozen, provided each change is logged with a reason and a date up 
   assertions (fail = fuse): at λ=0 the cost-induced count is 0; every cost-induced row has raw
   ΔF1(E vs L) ≤ 0; and the recomputed per-realisation F1_RF/B_RF reproduce the existing replay CSVs
   (a determinism/integrity check of the original P2-B run, which **passed**). **Corrected finding:** the
-  strict-benefit missed-E F1 cost is **substantive on test** (≈0.0028 per frame-realisation at B020,
-  ≈0.57·δ) and negligible on Culver (≈0.00003) — i.e. the E-collapse **does** cost F1; the earlier
-  "payload not F1" reading is void. (`cost-induced` is empty here: the λ penalty on L, ≤0.05·0.024, is
-  too small to flip E-vs-L.) The vs-oracle account and the R9 vs-τ account are reported in **separate**
-  tables. 6d and P2-C/D stay frozen pending review.
+  strict-benefit missed-E F1 cost is **substantive on test** and negligible on Culver — i.e. the
+  E-collapse **does** cost F1; the earlier "payload not F1" reading is void. (R10c's class definitions
+  are themselves superseded by **R10d** below, which fixes the taxonomy to the supervisor's pseudocode;
+  use the R10d numbers.) The vs-oracle account and the R9 vs-τ account are reported in **separate**
+  tables.
+- **R10d (2026-08-09) — classification fixed to the supervisor pseudocode (TOL = 1e-9, pre-registered),
+  reference renamed, record hygiene.** Retraction chain: **R10 → R10c → R10d**. Taxonomy of the
+  frozen-λ-clairvoyant E cells, on the **raw feasible** utility (`raw_max` = max feasible action
+  utility; F = −∞ where BLER_F ≥ 0.999): **strict** = `isE & (eff_E > feas_L + TOL) & (eff_E > feas_F +
+  TOL)`; **tie** = `isE & (|eff_E − raw_max| ≤ TOL) & ~strict`; **cost_induced** = `isE & (eff_E <
+  raw_max − TOL)`. Every missed-E cell (all classes) is charged both `ΔF1 = eff_E − F1_{RF action}` and
+  a Δpayload; **"strict-benefit missed-E cost" and "total E-collapse F1 cost" are two different numbers
+  and must not be conflated** (CLAIMS rule). Four hard assertions (fail = fuse, all **passed**):
+  (a) `ΔF1[strict & missed] ≥ −TOL` (on the mask-consistent utility: a masked-infeasible F selected by
+  RF delivers ego, matching the oracle mask, so the BLER=0.999 boundary does not spuriously beat E);
+  (b) `strict ∪ tie ∪ cost_induced == isE` (mutually exclusive + complete, zero residual);
+  (c) λ = 0 ⇒ `cost_induced` count 0; (d) each `cost_induced` row has `eff_E − raw_max ≤ 0`. The
+  reference oracle is renamed **"budget oracle" → "frozen-λ clairvoyant oracle"** and, at its
+  definition, is flagged **NOT budget-constrained**: on test/Culver its mean payload can exceed B_max
+  (test B010 0.112, Culver B010 0.155, Culver B020 0.223) — it is a post-hoc reference only; a true
+  budget-constrained oracle is not built this round. **Corrected numbers (`r10c_diagnostic.py`):**
+  strict-benefit missed-E F1 cost, test @ B020 = **0.00266/frame** (≈0.53·δ); total E-collapse F1 cost
+  = **0.00289/frame**; both negligible on Culver (≈0.00003). Record hygiene (single-version, no
+  `retracted_r10/`): the flawed `r10_diagnostic.py` + its `r10_*.csv` are removed via the reference
+  gate; `anomaly_check.py` no longer prints the retracted conclusion and `anomaly_report.txt` is
+  regenerated in place. 6d AP and P2-C/D stay frozen pending review.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be

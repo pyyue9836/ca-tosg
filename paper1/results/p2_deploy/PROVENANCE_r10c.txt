@@ -1,7 +1,9 @@
-CA-TOSG R10c CORRIGENDUM -- POST-UNBLINDING (nothing here is confirmatory)
+CA-TOSG R10c/R10d CORRIGENDUM -- POST-UNBLINDING (nothing here is confirmatory)
 ========================================================================
-RETRACTS R10 "costs payload, not F1". Feasible utility (F->-inf if BLER_F>=0.999); raw and budget oracles separate; classes strict/tie/cost-induced (residual->fuse). All missed-E cells charged dF1 AND dpayload. Recomputed on the R9 replay distribution (seed 20260809) and asserted to reproduce the existing replay CSVs (integrity check PASSED).
+RETRACTS R10 "costs payload, not F1". Taxonomy per supervisor pseudocode (R10d), TOL=1e-9, on feasible utility; reference = FROZEN-LAMBDA CLAIRVOYANT oracle (NOT budget-constrained: its mean payload can exceed B_max on test/Culver). Recomputed on the R9 replay distribution (seed 20260809); reproduces the existing replay CSVs (integrity check PASSED). 4 hard assertions PASSED.
 
-CORRECTED: strict-benefit missed-E F1 cost, test @ B020 = 0.002839 per frame-realisation (vs the retracted R10 value that hid it). The E-collapse DOES cost F1.
-Accounts kept SEPARATE: r10c_vs_oracle_account.csv (RF vs budget-oracle) and r10c_vs_tau_account.csv (R9 RF vs threshold) -- do not cross-reference to explain.
-6d AP and P2-C/D remain FROZEN pending review of this corrigendum.
+TWO DIFFERENT NUMBERS (do not conflate):
+  strict-benefit missed-E F1 cost, test @ B020 = 0.002658 /frame (substantive; the E-collapse DOES cost F1).
+  total E-collapse F1 cost (all classes), test @ B020 = 0.002888 /frame (nets in tie ~0 and cost-induced <0 where RF picks the raw-better action).
+Accounts kept SEPARATE: r10c_vs_oracle_account.csv (RF vs frozen-lambda clairvoyant) and r10c_vs_tau_account.csv (R9 RF vs threshold) -- do not cross-reference to explain.
+Retraction chain: R10 -> R10c -> R10d (see PROTOCOL change-log). 6d AP + P2-C/D stay frozen.

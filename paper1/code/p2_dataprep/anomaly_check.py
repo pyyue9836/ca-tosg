@@ -90,10 +90,12 @@ def main():
                         'attempted and walked past for exceeding the frozen payload budget, but B030\'s '
                         'cw=balanced was NEVER tested -- its cw=None winner cand#56 passed at walk rank 0, so '
                         'the walk stopped before any balanced candidate was reached. So E is under-'
-                        'represented in training and the selector collapses it at deployment. The R10 '
-                        'post-unblinding diagnostic quantifies the cost: the strict-benefit E F1 loss is '
-                        'negligible (<0.0005/grid cell on test @B020, 0 on Culver); the collapse costs '
-                        'mostly PAYLOAD, not F1.\n')
+                        'represented in training and the selector collapses it at deployment. The R10d '
+                        'post-unblinding diagnostic (r10c_diagnostic.py) quantifies the cost against the '
+                        'frozen-lambda clairvoyant oracle: the strict-benefit missed-E F1 cost is '
+                        'SUBSTANTIVE on test (~0.00266 per frame at B020, ~0.53*delta) and negligible on '
+                        'Culver (~0.00003). The E-collapse DOES cost F1 (an earlier R10 note claiming it '
+                        'cost only payload was RETRACTED in R10c/R10d).\n')
                 for s, b, oe, re_ in ray_collapse:
                     f.write(f'    {s} B{b}: oracle_E(rayleigh)={oe:.4f}  selector_E(rayleigh)={re_:.4f}\n')
                 f.write('  This is a real selector limitation, not a plumbing bug. Resolution requires a '

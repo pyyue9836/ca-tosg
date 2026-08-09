@@ -1,4 +1,4 @@
-frame,snr_db,channel,eff_E,eff_L,eff_F,bler_F,raw_oracle,budget_oracle,rf,e_class
+frame,snr_db,channel,eff_E,eff_L,eff_F,bler_F,raw_oracle,frozen_lambda_clairvoyant,rf,e_class
 0,13.841,rayleigh,0.90909,0.97872,0.90909,1.0,L,L,L,
 1,8.224,awgn,0.93333,1.0,0.9625,0.35741,L,L,L,
 2,3.987,rayleigh,0.88889,1.0,0.88889,1.0,L,L,L,
@@ -519,7 +519,7 @@ frame,snr_db,channel,eff_E,eff_L,eff_F,bler_F,raw_oracle,budget_oracle,rf,e_clas
 517,8.719,rayleigh,0.86154,0.86154,0.86154,1.0,E,E,L,tie
 518,11.111,awgn,0.83077,0.83077,0.88571,0.0,F,F,L,
 519,4.347,rayleigh,0.78125,0.78125,0.78125,1.0,E,E,L,tie
-520,9.73,awgn,0.8254,0.8254,0.83525,0.05439,F,E,L,tie
+520,9.73,awgn,0.8254,0.8254,0.83525,0.05439,F,E,L,cost-induced
 521,8.629,awgn,0.78788,0.78788,0.86104,0.27575,F,F,L,
 522,19.148,rayleigh,0.80597,0.80597,0.80597,1.0,E,E,L,tie
 523,15.532,awgn,0.80597,0.80597,0.88889,0.0,F,F,L,

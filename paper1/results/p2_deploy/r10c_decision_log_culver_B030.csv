@@ -1,4 +1,4 @@
-frame,snr_db,channel,eff_E,eff_L,eff_F,bler_F,raw_oracle,budget_oracle,rf,e_class
+frame,snr_db,channel,eff_E,eff_L,eff_F,bler_F,raw_oracle,frozen_lambda_clairvoyant,rf,e_class
 0,13.841,rayleigh,0.90909,0.97872,0.90909,1.0,L,L,L,
 1,8.224,awgn,0.93333,1.0,0.9625,0.35741,L,L,L,
 2,3.987,rayleigh,0.88889,1.0,0.88889,1.0,L,L,L,

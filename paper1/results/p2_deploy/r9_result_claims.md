@@ -30,7 +30,7 @@ loss", "matches F1", or any phrasing implying RF's F1 equals or is not below the
 | Comparison | ΔF mean | ΔF 95% CI | Note |
 |---|---|---|---|
 | **Culver-City @ B_max=0.20** | **−0.0099** | ≈ [−0.0100, −0.0097] | **exceeds the δ = 0.005 margin** — reported honestly as secondary, not adjudicated |
-| test @ B_max=0.10 | +0.0005 | small, straddles 0 | secondary |
+| test @ B_max=0.10 | +0.0005 | small positive difference; the 95% CI [+0.00046, +0.00065] is entirely above zero | secondary — CI only, not adjudicated |
 | test @ B_max=0.30 | −0.0021 | below 0, within δ | secondary |
 | validate (all budgets) | — | — | in-sample reference only, not a generalisation claim |
 
