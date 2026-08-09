@@ -382,6 +382,25 @@ the model is frozen, provided each change is logged with a reason and a date up 
   never tested** — its `cw=None` winner (cand#56) passed at walk rank 0, so the walk stopped first.
   Any decision rule proposed from this diagnostic is explicitly post-unblinding and takes effect only
   after Peiyi Yue + supervisor confirmation.
+- **R10-corrigendum (2026-08-09) — RETRACTS the R10 conclusion "the E-collapse costs payload, not F1".**
+  That conclusion was WRONG: R10's taxonomy required `eff_E > eff_F` for strict-benefit, but on
+  Rayleigh (and any BLER_F ≥ 0.999 cell) F is infeasible and `eff_F = ego = eff_E`, so genuine
+  strict-benefit E cells (E beats the only feasible alternative L) failed that test and were mis-bucketed
+  as "lambda-induced" (claimed to cost no F1). The git history of commit 0e7446b is **not rewritten**;
+  this entry governs. The corrected diagnostic (`r10c_diagnostic.py`) recomputes on the **feasible**
+  utility (F masked to −∞ where BLER_F ≥ 0.999), separates the **raw** oracle (no penalty) from the
+  **budget** oracle (λ penalty), and uses three mutually-exclusive raw-feasible classes with an explicit
+  error on any residual: **strict** (E is the unique feasible argmax), **tie** (E is a feasible argmax,
+  tied), **cost-induced** (E is not raw-optimal but wins only under the λ penalty). Every missed-E cell
+  (all three classes) is charged `ΔF1 = F1_E − F1_{RF's actual action}` **and** a Δpayload. Hard
+  assertions (fail = fuse): at λ=0 the cost-induced count is 0; every cost-induced row has raw
+  ΔF1(E vs L) ≤ 0; and the recomputed per-realisation F1_RF/B_RF reproduce the existing replay CSVs
+  (a determinism/integrity check of the original P2-B run, which **passed**). **Corrected finding:** the
+  strict-benefit missed-E F1 cost is **substantive on test** (≈0.0028 per frame-realisation at B020,
+  ≈0.57·δ) and negligible on Culver (≈0.00003) — i.e. the E-collapse **does** cost F1; the earlier
+  "payload not F1" reading is void. (`cost-induced` is empty here: the λ penalty on L, ≤0.05·0.024, is
+  too small to flip E-vs-L.) The vs-oracle account and the R9 vs-τ account are reported in **separate**
+  tables. 6d and P2-C/D stay frozen pending review.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be

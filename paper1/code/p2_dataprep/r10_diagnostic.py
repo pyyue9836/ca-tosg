@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""R10 POST-UNBLINDING DIAGNOSTIC. Nothing computed here is confirmatory (PROTOCOL Change-log R10).
+"""SUPERSEDED by r10c_diagnostic.py (PROTOCOL R10-corrigendum). This script's taxonomy required
+eff_E > eff_F for strict-benefit, which is WRONG where F is infeasible (eff_F = ego = eff_E), so it
+mis-bucketed genuine strict-benefit E cells as lambda-induced and produced the RETRACTED conclusion
+"the E-collapse costs payload, not F1". Kept only for the audit trail; do NOT use its r10_*.csv outputs
+-- use r10c_*.csv. The corrected finding is that the E-collapse DOES cost F1 (test strict-benefit
+~0.0028/frame at B020).
+
+R10 POST-UNBLINDING DIAGNOSTIC. Nothing computed here is confirmatory (PROTOCOL Change-log R10).
 
 No training, no model / delta / tau change, no replay re-run. It only swaps the REFERENCE oracle:
 instead of the lambda=0 training oracle (oracle_ELF in the grid), it recomputes a BUDGET-SPECIFIC

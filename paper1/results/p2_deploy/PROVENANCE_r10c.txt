@@ -1,0 +1,7 @@
+CA-TOSG R10c CORRIGENDUM -- POST-UNBLINDING (nothing here is confirmatory)
+========================================================================
+RETRACTS R10 "costs payload, not F1". Feasible utility (F->-inf if BLER_F>=0.999); raw and budget oracles separate; classes strict/tie/cost-induced (residual->fuse). All missed-E cells charged dF1 AND dpayload. Recomputed on the R9 replay distribution (seed 20260809) and asserted to reproduce the existing replay CSVs (integrity check PASSED).
+
+CORRECTED: strict-benefit missed-E F1 cost, test @ B020 = 0.002839 per frame-realisation (vs the retracted R10 value that hid it). The E-collapse DOES cost F1.
+Accounts kept SEPARATE: r10c_vs_oracle_account.csv (RF vs budget-oracle) and r10c_vs_tau_account.csv (R9 RF vs threshold) -- do not cross-reference to explain.
+6d AP and P2-C/D remain FROZEN pending review of this corrigendum.
