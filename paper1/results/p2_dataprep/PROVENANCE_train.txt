@@ -1,10 +1,9 @@
-CA-TOSG P2 submit-A -- LOSO selection + freeze (train_p2_loso.py)
+CA-TOSG P2 submit-A (R6) -- FINAL-CHECK FUSED (no manifest written)
 ========================================================================
-freeze_timestamp: 2026-08-08T22:43:48.212378+00:00; seed=0; candidate_block_md5=ad11c7073e1912abed89b1374b222262
-112 candidates (from PROTOCOL.md CATOSG-CANDIDATES) x 9-fold LOSO; primary = scene-mean realised F1; tie-break F1>payload>shallower>index.
-one model per budget:
-  B_max=0.1: selector_B010 cand#28 cw=None lambda*=0.0 tau*=18.0 sha256=4a045f94fb750ad5...
-  B_max=0.2: selector_B020 cand#7 cw=balanced lambda*=0.0 tau*=12.0 sha256=093cb8f871170a41...
-  B_max=0.3: selector_B030 cand#7 cw=balanced lambda*=0.0 tau*=8.0 sha256=093cb8f871170a41...
-models git-excluded (data/p2/); manifest+folds tracked (results/p2_dataprep/).
-versionless: dataset_validate.csv md5=d357b38e802455bf3cabd3f886353991 (== dataset_validate_v3.csv).
+freeze attempt 2026-08-09T12:55:43.915711+00:00; seed=0; candidate_block_md5=c019b9728bf8fedcebe51bd839202660
+R6c hard check: frozen full-validate mean payload must be <= B_max (strict). It FAILED for at least one budget, so NO manifest was written, NO models kept, and NO test/Culver grids built. Resolving this (e.g. denser high-lambda candidates) requires a NEW pre-registered Change-log entry -- do not add candidates or a tolerance silently.
+
+Per-budget (selection via OOF frame-weighted payload; the gap to the frozen in-sample payload is the finding):
+  B_max=0.1: cand#36 cw=balanced lambda*=0.02 scene_mean_F1=0.9092 B_OOF=0.088333 frozen_pay=0.161969 satisfied=False
+  B_max=0.2: cand#7 cw=balanced lambda*=0.0 scene_mean_F1=0.9105 B_OOF=0.1312 frozen_pay=0.201124 satisfied=False
+  B_max=0.3: cand#7 cw=balanced lambda*=0.0 scene_mean_F1=0.9105 B_OOF=0.1312 frozen_pay=0.201124 satisfied=True

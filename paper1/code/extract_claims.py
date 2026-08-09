@@ -106,7 +106,13 @@ def exact_values(sent):
 
 
 def _skeleton(claim):
-    return re.sub(r'[^a-zA-Z]', '', claim).lower()
+    # letters-only keeps the id number-insensitive (so measured-number changes preserve evidence),
+    # PLUS the action/QAM mode identifiers 16/256 -- otherwise two claims that differ ONLY by C16 vs
+    # C256 collapse to the same skeleton and collide (P2 R6 fix: cb3af69). Mode tokens are structural,
+    # not measured, so they do not make the id volatile.
+    letters = re.sub(r'[^a-zA-Z]', '', claim).lower()
+    modes = ''.join(sorted(set(re.findall(r'256|16', claim))))
+    return letters + modes
 
 
 def claim_id(claim):
@@ -163,6 +169,11 @@ def build():
                     ev = [f'⚠ STALE: value changed ({old_exact} → {exact}); re-verify'] + [''] * (EVIDENCE_COLS - 1)
                     n_stale += 1
         rows.append((cid, claim, exact, ev))
+    ids = [cid for cid, _, _, _ in rows]
+    if len(set(ids)) != len(ids):
+        import collections
+        dup = [k for k, v in collections.Counter(ids).items() if v > 1]
+        raise SystemExit(f'extract_claims: duplicate stable IDs {dup} -- skeleton collision, fix _skeleton')
     lines = [HEADER]
     for cid, claim, exact, ev in rows:
         lines.append('| %s | %s | %s | %s |\n' % (cid, claim, exact, ' | '.join(ev)))

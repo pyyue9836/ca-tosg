@@ -25,8 +25,10 @@ Data-dependent: the validate grid lives in data/p2/ (git-excluded). If absent, t
 instruction to build it -- a leakage gate must never silently pass when it cannot verify.
 """
 import hashlib
+import itertools
 import json
 import os
+import re
 import sys
 
 import pandas as pd
@@ -42,6 +44,24 @@ GRID = os.path.join(P1, 'data/p2')
 PROV = os.path.join(P1, 'results/p2_dataprep')
 MANIFEST = os.path.join(PROV, 'FROZEN_MANIFEST.json')
 FOLDS = os.path.join(PROV, 'validate_loso_folds.csv')
+PROTOCOL = os.path.join(P1, 'PROTOCOL.md')
+CUES_CSV = os.path.join(DATA, 'dataset_validate.csv')
+GRID_CSV = os.path.join(GRID, 'p2_grid_validate.csv')
+BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')
+SCHEMA = 'catosg-frozen-manifest/1'
+
+
+def protocol_candidate_block():
+    """Return (md5, n_candidates) for PROTOCOL.md's CATOSG-CANDIDATES block (single source of truth)."""
+    txt = open(PROTOCOL, encoding='utf-8').read()
+    m = re.search(r'```json CATOSG-CANDIDATES\s*(\{.*?\})\s*```', txt, re.S)
+    if not m:
+        raise Fail('CATOSG-CANDIDATES block not found in PROTOCOL.md')
+    spec = json.loads(m.group(1))
+    hp = spec['hyperparameters']
+    n = len(list(itertools.product(hp['n_estimators'], hp['max_depth'], hp['min_samples_leaf'],
+                                   hp['max_features'], spec['class_weight'], spec['lambda_grid'])))
+    return hashlib.md5(m.group(1).encode()).hexdigest(), n, spec
 
 COPIES = 11 * 2                                                  # 22 cells per frame
 FORBIDDEN_COLS = {'role', 'train', 'dev', 'split', 'tau', 'lambda', 'fitted', 'selected', 'threshold'}
@@ -93,6 +113,7 @@ def check_validate_grid_and_folds():
 
 
 def check_manifest():
+    """Seven frozen-state checks (PROTOCOL sec 6, R6). All FAIL, never skip."""
     if not os.path.exists(MANIFEST):
         print('  (2) manifest: PRE-FREEZE (no FROZEN_MANIFEST.json).')
         return
@@ -106,24 +127,50 @@ def check_manifest():
     miss = MANIFEST_FIELDS - set(man)
     if miss:
         raise Fail(f'manifest missing required fields: {sorted(miss)}')
-    if not man['budgets']:
-        raise Fail('manifest has no budgets')
+    # check 5: schema exactly the expected version
+    if man.get('schema') != SCHEMA:
+        raise Fail(f'manifest schema {man.get("schema")!r} != {SCHEMA!r}')
+    # check 6: candidate_block_md5 == the current PROTOCOL block
+    blk_md5, n_cand, _ = protocol_candidate_block()
+    if man.get('candidate_block_md5') != blk_md5:
+        raise Fail(f'manifest candidate_block_md5 != current PROTOCOL block ({man.get("candidate_block_md5")} '
+                   f'!= {blk_md5}) -- candidates changed without a re-freeze.')
+    # check 4: declared inputs + grid/cues/folds must all exist (missing = FAIL, no skip)
+    for f in (GRID_CSV, CUES_CSV, FOLDS):
+        if not os.path.exists(f):
+            raise Fail(f'required input absent (no-skip): {os.path.relpath(f, P1)}')
+    for key, meta in man['inputs'].items():
+        fp = os.path.join(P1, meta['file'])
+        if not os.path.exists(fp):
+            raise Fail(f'manifest input {key} file absent: {meta["file"]}')
+        if hashlib.md5(open(fp, 'rb').read()).hexdigest() != meta['md5']:
+            raise Fail(f'input {key} ({meta["file"]}) md5 mismatch vs manifest')
+    # check 7: folds CSV exactly n_candidates x folds rows
+    folds = pd.read_csv(FOLDS)
+    expect = n_cand * man['loso']['folds']
+    if len(folds) != expect:
+        raise Fail(f'validate_loso_folds.csv has {len(folds)} rows, expected {n_cand}x{man["loso"]["folds"]}={expect}')
+    if 'n_frames' not in folds.columns:
+        raise Fail('validate_loso_folds.csv missing n_frames column (R6: weighted payload must be recomputable)')
+    # per-budget: fields, model file+hash (check 3), frozen payload (check 1), OOF payload (check 2)
     for b, bd in man['budgets'].items():
         bmiss = BUDGET_FIELDS - set(bd)
         if bmiss:
             raise Fail(f'manifest budget {b} missing fields: {sorted(bmiss)}')
+        bmax = float(b)
         mp = os.path.join(P1, bd['model'])
-        if os.path.exists(mp):
-            sha = hashlib.sha256(open(mp, 'rb').read()).hexdigest()
-            if sha != bd['model_sha256']:
-                raise Fail(f'budget {b} model sha256 mismatch (file {bd["model"]} != manifest)')
-    for key, meta in man['inputs'].items():
-        fp = os.path.join(P1, meta['file'])
-        if os.path.exists(fp) and hashlib.md5(open(fp, 'rb').read()).hexdigest() != meta['md5']:
-            raise Fail(f'input {key} ({meta["file"]}) md5 mismatch vs manifest')
-    verified = sum(1 for bd in man['budgets'].values() if os.path.exists(os.path.join(P1, bd['model'])))
-    print(f'  (2) manifest OK: schema={man["schema"]}, {len(man["budgets"])} budgets, '
-          f'{verified} model hash(es) verified, input md5s match where present.')
+        if not os.path.exists(mp):                               # check 3: model file missing = FAIL
+            raise Fail(f'budget {b} model file absent (frozen-state, no-skip): {bd["model"]}')
+        if hashlib.sha256(open(mp, 'rb').read()).hexdigest() != bd['model_sha256']:
+            raise Fail(f'budget {b} model sha256 mismatch (file != manifest)')
+        if 'frozen_validate_payload' not in bd or bd['frozen_validate_payload'] > bmax:  # check 1
+            raise Fail(f'budget {b} frozen_validate_payload {bd.get("frozen_validate_payload")} > B_max {bmax}')
+        if 'loso_frame_weighted_payload' not in bd or bd['loso_frame_weighted_payload'] > bmax:  # check 2
+            raise Fail(f'budget {b} frame-weighted OOF payload {bd.get("loso_frame_weighted_payload")} > B_max {bmax}')
+        if not bd.get('budget_satisfied', False):
+            raise Fail(f'budget {b} budget_satisfied is not True')
+    print(f'  (2) manifest OK [7 checks]: schema={man["schema"]}, block_md5 match, {len(man["budgets"])} '
+          f'budgets frozen_pay+OOF<=B_max, {len(man["budgets"])} model hashes verified, folds={len(folds)} rows.')
 
 
 def check_scene_manifest_crosscheck():

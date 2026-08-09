@@ -69,15 +69,16 @@ to select on.
   axis to the BLER table and to `code/true_e2e_global.py`.
 - **Channels:** {AWGN, Rayleigh}.
 - **P2 training substrate** = the full deterministic product **frame × 11 SNR × 2 channel**
-  (uniform over grid cells), built by `code/expand_grid_clean.py`. This is a dense, deterministic
+  (uniform over grid cells), built by `code/p2_dataprep/expand_grid_clean.py`. This is a dense, deterministic
   expansion — NOT the per-frame single random draw frozen into `dataset_*_v3.csv`, and NOT the
   200-realisation Monte-Carlo deployment eval.
 - **BLER source:** Sionna 5G-LDPC (k=500, n=1000) rate-1/2 + 16/256-QAM frame-level table
   `results/bler_sionna/bler_sionna.csv` (`bler_frame` column). Rayleigh frame BLER = 1 across
   0–20 dB (direct table lookup, no numerical averaging).
 - **Deployment eval distribution** (reported policy numbers, separate from the training substrate):
-  per-frame SNR ~ U[0,20] dB × channel ~ Bernoulli(0.5 Rayleigh), 200 realisations
-  (`code/recompute_policy_200seed.py`). The two must not be conflated.
+  per-frame SNR ~ U[0,20] dB × channel ~ Bernoulli(0.5 Rayleigh), 200 realisations, produced by the
+  **P2-B new deployment script (to be built)** reading only `FROZEN_MANIFEST.json` (the legacy
+  `recompute_policy_200seed.py` is fused off). The two distributions must not be conflated.
 
 ## 4. Action set S = {E, L, F}
 
@@ -151,32 +152,54 @@ entry **and a full retrain** — the frozen models must always correspond to exa
   "tau_grid": {"start": 0.0, "stop": 20.0, "step": 0.5},
   "budgets": [0.10, 0.20, 0.30],
   "loso": {"scheme": "scene-level", "folds": 9, "each_scene_heldout_once": true},
-  "aggregation": {"primary": "scene_mean_realised_f1"},
+  "aggregation": {"performance": "scene_mean_realised_f1",
+                  "feasibility": "frame_weighted_oof_payload"},
   "tie_break": ["max_f1", "min_payload", "shallower_model", "min_candidate_index"]
 }
 ```
 
-**LOSO procedure (Change-log R1).** Scene-level 9-fold LOSO on validate: each of the 9 scenes is held
-out **exactly once**. For each candidate, train the RF on the 8 non-held-out scenes' λ-oracle labels
-(feasibility-masked argmax of `eff_a − λ·B_a`, §4) and score **realised** F1/payload (mean `eff` /
-mean payload of the selector's OWN picks) on the held-out scene. Every (fold × candidate) realised
-F1/payload is written to `results/p2_dataprep/validate_loso_folds.csv`. The **primary criterion is the
-scene-level mean** of the 9 per-fold realised F1 (scenes weighted equally). Per B_max, pick the
-candidate whose scene-mean payload ≤ B_max with the highest scene-mean F1; **tie-break, in order:**
-higher F1 → lower scene-mean payload → shallower model (smaller `max_depth`; `null` = deepest, ranked
-last) → smallest candidate index (the enumeration order of the JSON block). No `class_weight` default
-is assumed — both `null` and `balanced` are candidates and the class cost is otherwise carried by λ.
+**LOSO procedure (Change-log R1, R6).** Scene-level 9-fold LOSO on validate: each of the 9 scenes is
+held out **exactly once**. For each candidate, train the RF on the 8 non-held-out scenes' λ-oracle
+labels (feasibility-masked argmax of `eff_a − λ·B_a`, §4) and, on the held-out scene, record the
+out-of-fold (OOF) **realised** F1 and payload (mean `eff` / mean payload of the selector's OWN picks)
+together with that scene's frame count `N_k`. Every (fold × candidate) row — including `n_frames` —
+is written to `results/p2_dataprep/validate_loso_folds.csv`, so both aggregates below are recomputable
+from the deliverable itself.
+
+**Semantic split (Change-log R6).** Performance and feasibility use different aggregations:
+- **Performance criterion** = **scene-mean realised F1** = mean over the 9 folds of the per-fold OOF
+  F1 (scenes weighted equally). This ranks candidates.
+- **Budget feasibility** = **frame-weighted OOF payload** `B_OOF = Σ_k N_k·B̄_k / Σ_k N_k` (`B̄_k` =
+  fold-k OOF payload, `N_k` = fold-k scene frame count). This decides admissibility, *not* the
+  scene-mean payload.
+
+**Ranking, per B_max:** (1) keep only candidates with `B_OOF ≤ B_max` (feasibility gate); (2) within
+the feasible set, maximise scene-mean F1; (3) tie-break, in order: higher F1 → lower `B_OOF` →
+shallower model (smaller `max_depth`; `null` = deepest, ranked last) → smallest candidate index. No
+`class_weight` default is assumed — both `null` and `balanced` are candidates; the class cost is
+otherwise carried by λ.
 
 **τ\*(B_max) — budget-matched.** On the FULL validate grid, sweep the SNR-threshold baseline
 (awgn & snr>τ → F else L; Rayleigh → L) over the τ grid; τ\*(B_max) = the threshold with the highest
 realised F1 whose payload ≤ B_max. Per-split threshold search is banned from here on.
 
-**Freeze.** For each B_max, retrain the chosen candidate on **all 1980** validate frames and freeze →
-`selector_B0{10,20,30}`. Write `FROZEN_MANIFEST.json` (schema + three model sha256 + training-data
-md5 + scene list + per-budget hyper-parameters/λ\*/τ\* + timestamp). Nothing after may look at
-test/Culver labels. `code/p2_dataprep/check_leakage.py` **parses and validates** the manifest (empty
-file / missing field / hash mismatch = FAIL) and asserts the LOSO fold structure (each scene held out
-exactly once).
+**Freeze + FINAL-CHECK IRON RULE (Change-log R6).** For each B_max, retrain the chosen candidate on
+**all 1980** validate frames → `selector_B0{10,20,30}`, and compute the frozen model's full-validate
+mean payload `B̄_frozen`. **Hard check: `B̄_frozen ≤ B_max`, strict ≤ with NO tolerance.** If any budget
+fails, **do not write the manifest, do not build the test/Culver grids, fuse and report** — a
+tolerance would require its own pre-registered Change-log entry stating the numeric value. Only when
+all three budgets pass is `FROZEN_MANIFEST.json` written. Its per-budget record carries
+`loso_scene_mean_f1`, `loso_frame_weighted_f1`, `loso_frame_weighted_payload`,
+`frozen_validate_payload`, and `budget_satisfied`, alongside the three model sha256, training-data
+md5, scene list, hyper-parameters/λ\*/τ\*, the environment (python/sklearn/numpy/pandas versions), and
+the timestamp. Nothing after may look at test/Culver labels.
+
+**Seven frozen-state gate checks (Change-log R6; all FAIL, never skip).** With a manifest present,
+`code/p2_dataprep/check_leakage.py` asserts: (1) every budget's `frozen_validate_payload ≤ B_max`;
+(2) every budget's frame-weighted OOF payload is on record AND `≤ B_max`; (3) every referenced model
+file exists (missing = FAIL); (4) any missing input (grid / cues / manifest / folds) = FAIL; (5)
+`schema` is exactly `catosg-frozen-manifest/1`; (6) `candidate_block_md5` equals the md5 of the current
+PROTOCOL `CATOSG-CANDIDATES` block; (7) `validate_loso_folds.csv` has exactly 112 × 9 = 1008 rows.
 
 **Apply to test/Culver (P2 submit-B).** Evaluate the three frozen selectors at their frozen λ\*/τ\*
 on test and Culver **once**, reading only `FROZEN_MANIFEST.json`, with no re-tuning.
@@ -278,3 +301,15 @@ the model is frozen, provided each change is logged with a reason and a date up 
   generator that disagrees is a code bug (the earlier "generator wins" sentence is removed). Legacy
   selectors `train_rf.py` and `recompute_policy_200seed.py` are fused off (hard error at entry;
   removed at P2 submit-D).
+- **R6 (2026-08-09, P2 submit-A correction) — §6: performance/feasibility semantic split + final-check
+  iron rule + manifest/gate hardening.** (a) Model-selection *performance* is scene-mean realised F1;
+  budget *feasibility* is the frame-weighted OOF payload `B_OOF = Σ N_k·B̄_k / Σ N_k` (not the
+  scene-mean payload). (b) Per-budget ranking: feasibility gate `B_OOF ≤ B_max` → max scene-mean F1 →
+  tie-break payload / shallower / index. (c) After the full-1980 retrain, a **hard** `B̄_frozen ≤ B_max`
+  check (strict, no tolerance; a tolerance needs its own pre-registered entry) — on failure no manifest
+  is written, no test/Culver grid is built, and the run fuses. (d) The manifest gains
+  `loso_scene_mean_f1 / loso_frame_weighted_f1 / loso_frame_weighted_payload / frozen_validate_payload
+  / budget_satisfied` and an environment block (python/sklearn/numpy/pandas versions);
+  `validate_loso_folds.csv` gains `n_frames`; the gate runs seven frozen-state checks. The 1008 LOSO
+  fits from R5 are **reused** (only the selection + feasibility are recomputed), then the three models
+  are retrained on full validate and hard-checked.

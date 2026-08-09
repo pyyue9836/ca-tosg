@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""P2 submit-A: scene-level 9-fold LOSO selection + freeze (ONE MODEL PER BUDGET).
+"""P2 submit-A (R6): scene-level 9-fold LOSO selection + freeze (ONE MODEL PER BUDGET).
 
-The candidate set is PARSED from PROTOCOL.md's ```json CATOSG-CANDIDATES``` block (single source of
-truth -- no candidate values are hard-coded here). A candidate = (RF hyper-parameters, class_weight,
-lambda). Procedure (PROTOCOL sec 6):
+Candidate set PARSED from PROTOCOL.md's ```json CATOSG-CANDIDATES``` block (single source of truth).
+A candidate = (RF hyper-parameters, class_weight, lambda). Procedure (PROTOCOL sec 6, R1+R6):
 
-  1. Load the validate grid (masked oracle substrate) + join the 21 ego-side cues (versionless
-     dataset_validate.csv). Features = cues + est_snr_db (cell SNR) + channel_is_rayleigh.
-  2. 9-fold scene-level LOSO: each scene held out EXACTLY ONCE. For every candidate, fit the RF on the
-     8 non-held-out scenes' lambda-oracle labels and score REALISED F1/payload (mean eff / mean
-     payload of the selector's own picks) on the held-out scene. Log every (fold x candidate) to
-     validate_loso_folds.csv.
-  3. Per B_max, pick the candidate whose scene-mean payload <= B_max with the highest scene-mean F1;
-     tie-break: F1 -> payload -> shallower max_depth (null=deepest, last) -> smallest candidate index.
+  1. Load the validate grid + join the 21 ego-side cues (versionless dataset_validate.csv; the merge
+     is validated many_to_one on a unique-sample_id cue source).
+  2. 9-fold scene-level LOSO (each scene held out EXACTLY ONCE): per candidate, fit the RF on the 8
+     non-held-out scenes' lambda-oracle labels and record OOF realised F1/payload + the held-out
+     scene's n_frames -> validate_loso_folds.csv. The 1008 (=112x9) fits are REUSED from the CSV when
+     it already matches the candidate list (only selection/feasibility are recomputed).
+  3. R6 SEMANTIC SPLIT: performance = scene-mean realised F1; feasibility = frame-weighted OOF payload
+     B_OOF = sum_k N_k*Bbar_k / sum_k N_k. Per B_max: keep B_OOF <= B_max, then max scene-mean F1,
+     tie-break B_OOF -> shallower max_depth (null=deepest) -> candidate index.
   4. tau*(B_max): budget-matched SNR-threshold baseline on the full validate grid.
-  5. Freeze one model per budget on all 1980 frames -> selector_B0{10,20,30}.pkl; write
-     FROZEN_MANIFEST.json (schema, three sha256, input md5s, scenes, per-budget hp/lambda*/tau*, ts).
+  5. Freeze one model per budget on all 1980 frames; FINAL-CHECK IRON RULE: frozen full-validate mean
+     payload <= B_max (strict, no tolerance) for ALL budgets, else NO manifest, NO test/Culver grids,
+     fuse. Manifest records loso_scene_mean_f1 / loso_frame_weighted_f1 / loso_frame_weighted_payload /
+     frozen_validate_payload / budget_satisfied + env versions + three sha256 + input md5s.
 
 CPU only, deterministic (seed from the JSON block). Run:
   /path/to/env/python paper1/code/p2_dataprep/train_p2_loso.py
@@ -26,11 +28,14 @@ import itertools
 import json
 import os
 import pickle
+import platform
 import re
+import sys
 from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 
@@ -38,7 +43,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(os.path.dirname(HERE))
 OPENCOOD = os.path.join(os.path.dirname(os.path.dirname(P1)), 'OpenCOOD')
 DATA = os.path.join(OPENCOOD, 'peiyi_work/paper1/data')
-CUES_CSV = os.path.join(DATA, 'dataset_validate.csv')            # versionless (== dataset_validate_v3.csv)
+CUES_CSV = os.path.join(DATA, 'dataset_validate.csv')
 GRID_CSV = os.path.join(P1, 'data/p2/p2_grid_validate.csv')
 BLER_CSV = os.path.join(P1, 'results/bler_sionna/bler_sionna.csv')
 PROTOCOL = os.path.join(P1, 'PROTOCOL.md')
@@ -49,9 +54,11 @@ FOLDS_CSV = os.path.join(OUT_PROV, 'validate_loso_folds.csv')
 MANIFEST_SCHEMA = 'catosg-frozen-manifest/1'
 
 ACTIONS = ['E', 'L', 'F']
-PAYLOAD = {'E': 0.0, 'L': 0.024, 'F': 0.99}                     # Msym (PROTOCOL sec 4)
+PAYLOAD = {'E': 0.0, 'L': 0.024, 'F': 0.99}
 PAYVEC = np.array([PAYLOAD[a] for a in ACTIONS])
 BLER_INFEASIBLE = 0.999
+FOLD_COLS = ['fold_scene', 'candidate_index', 'n_estimators', 'max_depth', 'min_samples_leaf',
+             'max_features', 'class_weight', 'lambda', 'n_frames', 'realised_f1', 'realised_payload']
 EXCLUDE = {
     'sample_id', 'cav_keys', 'channel_type',
     *[f'{m}_{s}' for m in ('late', 'early', 'intermediate', 'compressed')
@@ -73,24 +80,20 @@ def _sha256(p):
 
 
 def parse_candidates():
-    """Extract and parse the single-source-of-truth CATOSG-CANDIDATES JSON block from PROTOCOL.md."""
     txt = open(PROTOCOL, encoding='utf-8').read()
     m = re.search(r'```json CATOSG-CANDIDATES\s*(\{.*?\})\s*```', txt, re.S)
     if not m:
-        raise SystemExit('CATOSG-CANDIDATES block not found in PROTOCOL.md (single source of truth).')
+        raise SystemExit('CATOSG-CANDIDATES block not found in PROTOCOL.md.')
     return json.loads(m.group(1)), hashlib.md5(m.group(1).encode()).hexdigest()
 
 
 def build_candidate_list(spec):
-    """Deterministic enumeration -> list of dicts with a stable candidate index (for tie-break)."""
     hp = spec['hyperparameters']
     combos = itertools.product(hp['n_estimators'], hp['max_depth'], hp['min_samples_leaf'],
                                hp['max_features'], spec['class_weight'], spec['lambda_grid'])
-    cands = []
-    for i, (ne, md, ml, mf, cw, lam) in enumerate(combos):
-        cands.append(dict(index=i, n_estimators=ne, max_depth=md, min_samples_leaf=ml,
-                          max_features=mf, class_weight=cw, lam=float(lam)))
-    return cands
+    return [dict(index=i, n_estimators=ne, max_depth=md, min_samples_leaf=ml,
+                 max_features=mf, class_weight=cw, lam=float(lam))
+            for i, (ne, md, ml, mf, cw, lam) in enumerate(combos)]
 
 
 def lam_labels(eff, bler_F, lam):
@@ -109,8 +112,11 @@ def rf_of(cand, seed):
 def load():
     grid = pd.read_csv(GRID_CSV)
     cues = pd.read_csv(CUES_CSV)
+    if cues['sample_id'].duplicated().any():                    # merge guard: cue source must be per-frame
+        raise SystemExit('dataset_validate.csv has duplicate sample_id -- cue source not one-per-frame.')
     feat_cols = [c for c in cues.columns if c not in EXCLUDE]
-    merged = grid.merge(cues[['sample_id'] + feat_cols], on='sample_id', how='left')
+    merged = grid.merge(cues[['sample_id'] + feat_cols], on='sample_id', how='left',
+                        validate='many_to_one')
     assert not merged[feat_cols].isna().any().any(), 'cue join produced NaNs'
     X = merged[feat_cols].copy()
     X['est_snr_db'] = merged['snr_db'].to_numpy()
@@ -120,60 +126,101 @@ def load():
             merged['bler_F'].to_numpy(), merged['scene'].to_numpy())
 
 
-def loso(cands, X, eff, bler_F, scene, seed):
-    """Return per-candidate scene-mean F1/payload + append every (fold x candidate) row to FOLDS."""
+def _norm_mf(v):
+    """max_features canonicalisation: '0.5' (CSV string) and 0.5 (spec float) must compare equal;
+    'sqrt' stays a string."""
+    try:
+        return float(v)
+    except (ValueError, TypeError):
+        return str(v)
+
+
+def _cand_sig(row):
+    md = None if (pd.isna(row['max_depth'])) else int(row['max_depth'])
+    cw = None if (pd.isna(row['class_weight']) or row['class_weight'] == '') else row['class_weight']
+    return (int(row['n_estimators']), md, int(row['min_samples_leaf']),
+            _norm_mf(row['max_features']), cw, round(float(row['lambda']), 6))
+
+
+def _cand_sig_from(c):
+    return (c['n_estimators'], c['max_depth'], c['min_samples_leaf'],
+            _norm_mf(c['max_features']), c['class_weight'], round(c['lam'], 6))
+
+
+def loso_or_reuse(cands, X, eff, bler_F, scene, seed, nk):
+    """Run the 9-fold LOSO, or REUSE validate_loso_folds.csv when it already matches the candidates
+    (only adds n_frames if missing). Writes the (fold x candidate) CSV with n_frames."""
     scenes = sorted(pd.unique(scene))
-    masks = {s: (scene == s) for s in scenes}
-    label_cache = {}
-    fold_rows, summary = [], {}
-    for c in cands:
-        key = c['lam']
-        if key not in label_cache:
-            label_cache[key] = lam_labels(eff, bler_F, key)
-        y = label_cache[key]
-        per_f1, per_pay = [], []
-        for s in scenes:
-            te = masks[s]; tr = ~te
-            rf = rf_of(c, seed)
-            rf.fit(X[tr], y[tr])
-            pred = rf.predict(X[te])
-            f1 = float(eff[te][np.arange(te.sum()), pred].mean())
-            pay = float(PAYVEC[pred].mean())
-            per_f1.append(f1); per_pay.append(pay)
-            fold_rows.append(dict(fold_scene=s, candidate_index=c['index'],
-                                  n_estimators=c['n_estimators'], max_depth=c['max_depth'],
-                                  min_samples_leaf=c['min_samples_leaf'], max_features=c['max_features'],
-                                  class_weight=c['class_weight'], **{'lambda': c['lam']},
-                                  realised_f1=round(f1, 6), realised_payload=round(pay, 6)))
-        summary[c['index']] = dict(scene_mean_f1=float(np.mean(per_f1)),
-                                   scene_mean_payload=float(np.mean(per_pay)))
-    pd.DataFrame(fold_rows).to_csv(FOLDS_CSV, index=False)
-    return summary, scenes
+    reuse = False
+    if os.path.exists(FOLDS_CSV):
+        prev = pd.read_csv(FOLDS_CSV)
+        want = {c['index']: _cand_sig_from(c) for c in cands}
+        try:
+            have = {int(r.candidate_index): _cand_sig(r) for _, r in prev.iterrows()}
+            reuse = (len(prev) == len(cands) * len(scenes)
+                     and set(have) == set(want) and all(have[i] == want[i] for i in want)
+                     and set(prev['fold_scene'].unique()) == set(scenes))
+        except Exception:
+            reuse = False
+    if reuse:
+        print(f'  REUSE validate_loso_folds.csv ({len(prev)} rows) -- 1008 fits not recomputed (R6).')
+        prev['n_frames'] = prev['fold_scene'].map(nk)           # (re)attach n_frames from the grid
+        df = prev[FOLD_COLS].copy()
+    else:
+        print('  running LOSO from scratch (no reusable folds CSV) ...')
+        masks = {s: (scene == s) for s in scenes}
+        label_cache, rows = {}, []
+        for c in cands:
+            if c['lam'] not in label_cache:
+                label_cache[c['lam']] = lam_labels(eff, bler_F, c['lam'])
+            y = label_cache[c['lam']]
+            for s in scenes:
+                te = masks[s]; rf = rf_of(c, seed); rf.fit(X[~te], y[~te]); pred = rf.predict(X[te])
+                rows.append(dict(fold_scene=s, candidate_index=c['index'],
+                                 n_estimators=c['n_estimators'], max_depth=c['max_depth'],
+                                 min_samples_leaf=c['min_samples_leaf'], max_features=c['max_features'],
+                                 class_weight=c['class_weight'], **{'lambda': c['lam']},
+                                 n_frames=int(nk[s]),
+                                 realised_f1=round(float(eff[te][np.arange(te.sum()), pred].mean()), 6),
+                                 realised_payload=round(float(PAYVEC[pred].mean()), 6)))
+        df = pd.DataFrame(rows)[FOLD_COLS]
+    df.to_csv(FOLDS_CSV, index=False)
+    return df, scenes
+
+
+def aggregate(fold_df):
+    """Per candidate: scene-mean F1 (equal weight) + frame-weighted OOF F1 and payload (weight N_k)."""
+    agg = {}
+    for ci, g in fold_df.groupby('candidate_index'):
+        w = g['n_frames'].to_numpy(dtype=float); W = w.sum()
+        agg[int(ci)] = dict(
+            scene_mean_f1=float(g['realised_f1'].mean()),
+            frame_weighted_f1=float((w * g['realised_f1'].to_numpy()).sum() / W),
+            frame_weighted_payload=float((w * g['realised_payload'].to_numpy()).sum() / W))
+    return agg
 
 
 def depth_rank(md):
-    return float('inf') if md is None else md                  # null = deepest -> ranked last
+    return float('inf') if md is None else md
 
 
-def pick_candidate(cands, summary, b_max):
-    scored = [(c, summary[c['index']]) for c in cands]
-    feasible = [(c, s) for c, s in scored if s['scene_mean_payload'] <= b_max + 1e-9]
-    pool, feasible_flag = (feasible, True) if feasible else (scored, False)
-    # tie-break: max F1 -> min payload -> shallower model -> smallest index
-    best = min(pool, key=lambda cs: (-cs[1]['scene_mean_f1'], cs[1]['scene_mean_payload'],
-                                     depth_rank(cs[0]['max_depth']), cs[0]['index']))
-    return best[0], best[1], feasible_flag
+def pick(cands, agg, b_max):
+    scored = [(c, agg[c['index']]) for c in cands]
+    feasible = [(c, a) for c, a in scored if a['frame_weighted_payload'] <= b_max]  # strict <=, R6
+    pool, feas = (feasible, True) if feasible else (scored, False)
+    best = min(pool, key=lambda ca: (-ca[1]['scene_mean_f1'], ca[1]['frame_weighted_payload'],
+                                     depth_rank(ca[0]['max_depth']), ca[0]['index']))
+    return best[0], best[1], feas
 
 
 def pick_tau(merged, eff, spec, b_max):
     awgn = (merged['channel'] == 'awgn').to_numpy(); snr = merged['snr_db'].to_numpy()
-    tg = spec['tau_grid']
-    taus = np.round(np.arange(tg['start'], tg['stop'] + 1e-9, tg['step']), 3)
+    tg = spec['tau_grid']; taus = np.round(np.arange(tg['start'], tg['stop'] + 1e-9, tg['step']), 3)
     best = None
     for tau in taus:
-        pred = np.where(awgn & (snr > tau), 2, 1)              # F else L; rayleigh -> L
+        pred = np.where(awgn & (snr > tau), 2, 1)
         f1 = float(eff[np.arange(len(eff)), pred].mean()); pay = float(PAYVEC[pred].mean())
-        if pay <= b_max + 1e-9 and (best is None or f1 > best[1]):
+        if pay <= b_max and (best is None or f1 > best[1]):
             best = (float(tau), f1, pay)
     if best is None:
         pred = np.ones(len(eff), dtype=int)
@@ -191,8 +238,9 @@ def freeze(cand, X, eff, bler_F, path, seed):
     p, r, fs, sup = precision_recall_fscore_support(y, pred, labels=[0, 1, 2], zero_division=0)
     perclass = {ACTIONS[i]: dict(precision=round(float(p[i]), 4), recall=round(float(r[i]), 4),
                                  f1=round(float(fs[i]), 4), support=int(sup[i])) for i in range(3)}
-    return dict(insample_f1=round(f1, 4), insample_payload=round(pay, 4), sha256=_sha256(path),
-                perclass=perclass, confusion_ELF=confusion_matrix(y, pred, labels=[0, 1, 2]).tolist())
+    return dict(frozen_validate_f1=round(f1, 4), frozen_validate_payload=round(pay, 6),
+                sha256=_sha256(path), perclass=perclass,
+                confusion_ELF=confusion_matrix(y, pred, labels=[0, 1, 2]).tolist())
 
 
 def main():
@@ -201,41 +249,80 @@ def main():
     seed = spec['seed']
     cands = build_candidate_list(spec)
     merged, X, names, eff, bler_F, scene = load()
-    print(f'validate grid: {len(merged)} cells, {len(pd.unique(scene))} scenes, {len(names)} features; '
+    nk = merged.groupby('scene')['sample_id'].nunique().to_dict()   # frames per scene (from the grid)
+    print(f'validate grid: {len(merged)} cells, {len(nk)} scenes, {len(names)} features; '
           f'{len(cands)} candidates x {spec["loso"]["folds"]} folds')
 
-    summary, scenes = loso(cands, X, eff, bler_F, scene, seed)
+    fold_df, scenes = loso_or_reuse(cands, X, eff, bler_F, scene, seed, nk)
     assert len(scenes) == spec['loso']['folds'], 'fold count != scenes'
+    agg = aggregate(fold_df)
 
+    # --- select per budget, retrain on full validate, HARD-CHECK frozen payload <= B_max (R6) ---
     freeze_ts = datetime.now(timezone.utc).isoformat()
-    budgets = {}
+    budgets, violations = {}, []
     for b in spec['budgets']:
-        cand, sc, feas = pick_candidate(cands, summary, b)
+        cand, a, feas = pick(cands, agg, b)
         tau = pick_tau(merged, eff, spec, b)
         tag = f'B{int(round(b*100)):03d}'
         model_path = os.path.join(OUT_MODEL, f'selector_{tag}.pkl')
         fr = freeze(cand, X, eff, bler_F, model_path, seed)
+        satisfied = fr['frozen_validate_payload'] <= b               # strict <=, no tolerance
+        if not satisfied:
+            violations.append((b, fr['frozen_validate_payload']))
         budgets[f'{b:.2f}'] = dict(
             selector=f'selector_{tag}', candidate_index=cand['index'],
             hyperparameters=dict(n_estimators=cand['n_estimators'], max_depth=cand['max_depth'],
                                  min_samples_leaf=cand['min_samples_leaf'], max_features=cand['max_features']),
             class_weight=cand['class_weight'], lambda_star=cand['lam'], lambda_feasible=feas,
-            loso_scene_mean_f1=round(sc['scene_mean_f1'], 4),
-            loso_scene_mean_payload=round(sc['scene_mean_payload'], 4),
+            loso_scene_mean_f1=round(a['scene_mean_f1'], 4),
+            loso_frame_weighted_f1=round(a['frame_weighted_f1'], 4),
+            loso_frame_weighted_payload=round(a['frame_weighted_payload'], 6),
             tau_star=tau['tau_star'], tau_f1=tau['tau_f1'], tau_payload=tau['tau_payload'],
             model=os.path.relpath(model_path, P1), model_sha256=fr['sha256'],
-            insample_f1=fr['insample_f1'], insample_payload=fr['insample_payload'],
-            perclass=fr['perclass'], confusion_ELF=fr['confusion_ELF'])
+            frozen_validate_f1=fr['frozen_validate_f1'], frozen_validate_payload=fr['frozen_validate_payload'],
+            budget_satisfied=bool(satisfied), perclass=fr['perclass'], confusion_ELF=fr['confusion_ELF'])
         print(f'  B_max={b}: cand#{cand["index"]} cw={cand["class_weight"]} lam*={cand["lam"]} '
-              f'LOSO F1={sc["scene_mean_f1"]:.4f}/pay={sc["scene_mean_payload"]:.4f} '
-              f'tau*={tau["tau_star"]} | frozen in-sample F1={fr["insample_f1"]}')
+              f'scene-mean F1={a["scene_mean_f1"]:.4f} B_OOF={a["frame_weighted_payload"]:.4f} '
+              f'tau*={tau["tau_star"]} | frozen pay={fr["frozen_validate_payload"]:.4f} '
+              f'satisfied={satisfied}')
 
+    if violations:                                                   # FINAL-CHECK IRON RULE (R6)
+        for b in spec['budgets']:                                    # do not leave frozen models behind
+            mp = os.path.join(OUT_MODEL, f'selector_B{int(round(b*100)):03d}.pkl')
+            if os.path.exists(mp):
+                os.remove(mp)
+        if os.path.exists(MANIFEST):                                 # a stale/previous manifest is now invalid
+            os.remove(MANIFEST)
+        with open(os.path.join(OUT_PROV, 'PROVENANCE_train.txt'), 'w') as f:
+            f.write('CA-TOSG P2 submit-A (R6) -- FINAL-CHECK FUSED (no manifest written)\n')
+            f.write('=' * 72 + '\n')
+            f.write(f'freeze attempt {freeze_ts}; seed={seed}; candidate_block_md5={cand_md5}\n')
+            f.write('R6c hard check: frozen full-validate mean payload must be <= B_max (strict). '
+                    'It FAILED for at least one budget, so NO manifest was written, NO models kept, '
+                    'and NO test/Culver grids built. Resolving this (e.g. denser high-lambda candidates) '
+                    'requires a NEW pre-registered Change-log entry -- do not add candidates or a '
+                    'tolerance silently.\n\nPer-budget (selection via OOF frame-weighted payload; the '
+                    'gap to the frozen in-sample payload is the finding):\n')
+            for b in spec['budgets']:
+                bd = budgets[f'{b:.2f}']
+                f.write(f'  B_max={b}: cand#{bd["candidate_index"]} cw={bd["class_weight"]} '
+                        f'lambda*={bd["lambda_star"]} scene_mean_F1={bd["loso_scene_mean_f1"]} '
+                        f'B_OOF={bd["loso_frame_weighted_payload"]} frozen_pay={bd["frozen_validate_payload"]} '
+                        f'satisfied={bd["budget_satisfied"]}\n')
+        raise SystemExit('FINAL-CHECK FAILED (R6): frozen_validate_payload > B_max for '
+                         + ', '.join(f'B={b} (pay={p:.4f})' for b, p in violations)
+                         + '. No manifest written, no test/Culver grids built. FUSED. '
+                         '(see results/p2_dataprep/PROVENANCE_train.txt)')
+
+    env = dict(python=platform.python_version(), sklearn=sklearn.__version__,
+               numpy=np.__version__, pandas=pd.__version__)
     manifest = dict(
-        schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md)',
-        freeze_timestamp=freeze_ts, seed=seed,
+        schema=MANIFEST_SCHEMA, protocol='CA-TOSG P2 (PROTOCOL.md), R6',
+        freeze_timestamp=freeze_ts, seed=seed, environment=env,
         candidate_block_md5=cand_md5, n_candidates=len(cands),
         feature_names=names, n_features=len(names),
-        loso=dict(folds=len(scenes), scenes=scenes, each_scene_heldout_once=True),
+        loso=dict(folds=len(scenes), scenes=scenes, each_scene_heldout_once=True,
+                  n_fold_rows=len(fold_df)),
         aggregation=spec['aggregation'], tie_break=spec['tie_break'],
         inputs=dict(
             train_grid=dict(file='data/p2/p2_grid_validate.csv', md5=_md5(GRID_CSV)),
@@ -247,20 +334,20 @@ def main():
         json.dump(manifest, f, indent=2)
 
     with open(os.path.join(OUT_PROV, 'PROVENANCE_train.txt'), 'w') as f:
-        f.write('CA-TOSG P2 submit-A -- LOSO selection + freeze (train_p2_loso.py)\n')
+        f.write('CA-TOSG P2 submit-A (R6) -- LOSO selection + freeze (train_p2_loso.py)\n')
         f.write('=' * 72 + '\n')
         f.write(f'freeze_timestamp: {freeze_ts}; seed={seed}; candidate_block_md5={cand_md5}\n')
-        f.write(f'{len(cands)} candidates (from PROTOCOL.md CATOSG-CANDIDATES) x {len(scenes)}-fold LOSO; '
-                'primary = scene-mean realised F1; tie-break F1>payload>shallower>index.\n')
-        f.write('one model per budget:\n')
+        f.write(f'env: {env}\n')
+        f.write('R6 split: performance = scene-mean F1; feasibility = frame-weighted OOF payload '
+                'B_OOF=sum(N_k*Bbar_k)/sum(N_k). Final-check: frozen payload <= B_max (strict).\n')
         for b in spec['budgets']:
             bd = budgets[f'{b:.2f}']
-            f.write(f'  B_max={b}: {bd["selector"]} cand#{bd["candidate_index"]} '
-                    f'cw={bd["class_weight"]} lambda*={bd["lambda_star"]} tau*={bd["tau_star"]} '
-                    f'sha256={bd["model_sha256"][:16]}...\n')
+            f.write(f'  B_max={b}: {bd["selector"]} cand#{bd["candidate_index"]} cw={bd["class_weight"]} '
+                    f'lambda*={bd["lambda_star"]} B_OOF={bd["loso_frame_weighted_payload"]} '
+                    f'frozen_pay={bd["frozen_validate_payload"]} satisfied={bd["budget_satisfied"]} '
+                    f'tau*={bd["tau_star"]} sha256={bd["model_sha256"][:16]}...\n')
         f.write('models git-excluded (data/p2/); manifest+folds tracked (results/p2_dataprep/).\n')
-        f.write('versionless: dataset_validate.csv md5=%s (== dataset_validate_v3.csv).\n' % _md5(CUES_CSV))
-    print(f'\nFROZEN_MANIFEST.json + validate_loso_folds.csv + PROVENANCE_train.txt -> results/p2_dataprep/')
+    print('\nAll budgets satisfied -> FROZEN_MANIFEST.json + validate_loso_folds.csv + PROVENANCE_train.txt')
 
 
 if __name__ == '__main__':
