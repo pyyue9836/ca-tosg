@@ -205,8 +205,12 @@ def main():
         "recompute_policy_200seed.py is FUSED OFF (superseded by PROTOCOL.md, P2 submit-A). The P2 "
         "deployment eval is rebuilt as a versionless P2 submit-B script that reads only "
         "FROZEN_MANIFEST.json (frozen model/lambda*/tau* per budget). This legacy engine "
-        "(single selector, oracle_3way{L,C16,C256}, per-split tau retune) is removed at P2 submit-D "
-        "via the reference gate.")
+        "(single selector, oracle_3way{L,C16,C256}, per-split tau retune) is RETAINED as the "
+        "generator-of-record for results/policy/threshold_vs_rf.csv, which still backs main.tex "
+        "tab:headline_agg and the live payload_audit gate; it is NOT removed at P2 submit-D. Its "
+        "deletion is deferred: deleted at P5 migration batch, once main.tex is migrated to the P2 "
+        "frozen-selector numbers (PROTOCOL Appendix A / Change-log R11). The hard-error fuse above "
+        "stays in force -- retention does not make it runnable.")
     os.makedirs(OUT, exist_ok=True)
     rf = pickle.load(open(RF_PKL, 'rb'))
     rf_md5 = hashlib.md5(open(RF_PKL, 'rb').read()).hexdigest()
