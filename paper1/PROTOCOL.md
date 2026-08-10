@@ -416,12 +416,16 @@ the model is frozen, provided each change is logged with a reason and a date up 
   reference oracle is renamed **"budget oracle" → "frozen-λ clairvoyant oracle"** and, at its
   definition, is flagged **NOT budget-constrained**: on test/Culver its mean payload can exceed B_max
   (test B010 0.112, Culver B010 0.155, Culver B020 0.223) — it is a post-hoc reference only; a true
-  budget-constrained oracle is not built this round. **Corrected numbers (`r10c_diagnostic.py`):**
-  strict-benefit missed-E F1 cost, test @ B020 = **0.00266/frame** (≈0.53·δ); total E-collapse F1 cost
-  = **0.00289/frame**; both negligible on Culver (≈0.00003). Record hygiene (single-version, no
-  `retracted_r10/`): the flawed `r10_diagnostic.py` + its `r10_*.csv` are removed via the reference
-  gate; `anomaly_check.py` no longer prints the retracted conclusion and `anomaly_report.txt` is
-  regenerated in place. 6d AP and P2-C/D stay frozen pending review.
+  budget-constrained oracle is not built this round. **Report numbers are regenerated from the CSV by
+  `make_r10_report.py` (no hand-written numbers → `R10_REPORT.md` + `PROVENANCE_r10c.txt`).**
+  `cost-induced` is **non-empty for λ>0** (test B010 4809 / B020 2121 cells; the λ=0 budget B030 = 0)
+  and its F1 cost (small **positive**) is included in the TOTAL. **Two different numbers (do not
+  conflate), test three budgets:** strict-benefit missed-E F1 cost /frame = 0.002658 / 0.002658 /
+  0.002705; total E-collapse F1 cost /frame = 0.003021 / 0.002888 / 0.003030 (≈0.53·δ at B020); both
+  negligible on Culver (≈0.00003). Record hygiene (single-version, no `retracted_r10/`): the flawed
+  `r10_diagnostic.py` + its `r10_*.csv` are removed via the reference gate; `anomaly_check.py` no
+  longer prints the retracted conclusion and `anomaly_report.txt` is regenerated in place. 6d AP and
+  P2-C/D stay frozen pending review.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be

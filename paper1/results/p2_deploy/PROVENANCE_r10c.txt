@@ -1,9 +1,10 @@
 CA-TOSG R10c/R10d CORRIGENDUM -- POST-UNBLINDING (nothing here is confirmatory)
 ========================================================================
-RETRACTS R10 "costs payload, not F1". Taxonomy per supervisor pseudocode (R10d), TOL=1e-9, on feasible utility; reference = FROZEN-LAMBDA CLAIRVOYANT oracle (NOT budget-constrained: its mean payload can exceed B_max on test/Culver). Recomputed on the R9 replay distribution (seed 20260809); reproduces the existing replay CSVs (integrity check PASSED). 4 hard assertions PASSED.
+All numbers below are recomputed by make_r10_report.py from r10c_missed_e_cost.csv (no hand-written numbers). RETRACTS R10 "costs payload, not F1". Reference = FROZEN-LAMBDA CLAIRVOYANT oracle (NOT budget-constrained). 4 hard assertions in r10c_diagnostic.py PASSED; per-realisation F1_RF/B_RF reproduce the existing replay CSVs.
 
-TWO DIFFERENT NUMBERS (do not conflate):
-  strict-benefit missed-E F1 cost, test @ B020 = 0.002658 /frame (substantive; the E-collapse DOES cost F1).
-  total E-collapse F1 cost (all classes), test @ B020 = 0.002888 /frame (nets in tie ~0 and cost-induced <0 where RF picks the raw-better action).
-Accounts kept SEPARATE: r10c_vs_oracle_account.csv (RF vs frozen-lambda clairvoyant) and r10c_vs_tau_account.csv (R9 RF vs threshold) -- do not cross-reference to explain.
-Retraction chain: R10 -> R10c -> R10d (see PROTOCOL change-log). 6d AP + P2-C/D stay frozen.
+cost-induced is NON-EMPTY where lambda>0 (test B010 4788 / B020 2121 cells; lambda=0 budget B030 = 0); its F1 cost (small POSITIVE) is included in the TOTAL.
+TWO DIFFERENT NUMBERS (do not conflate), test three budgets B010/B020/B030:
+  strict-benefit missed-E F1 cost /frame = 0.002658 / 0.002658 / 0.002705
+  total E-collapse F1 cost (all classes) /frame = 0.003021 / 0.002888 / 0.003030
+Accounts kept SEPARATE: r10c_vs_oracle_account.csv (RF vs frozen-lambda clairvoyant) and r10c_vs_tau_account.csv (R9 RF vs threshold). Retraction chain R10 -> R10c -> R10d.
+NOTE: an earlier hand-written summary said "cost-induced empty" (WRONG: non-empty for lambda>0) and described cost-induced F1 cost as "<0" (WRONG: small positive). The total is 0.003021/0.002888/0.003030 (test) -- NOT 2x that; a proposed 0.006042/0.005775/0.006060 was a 2x hand-computation error, superseded by these CSV-derived values.
