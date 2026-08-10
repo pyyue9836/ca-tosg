@@ -1,0 +1,17 @@
+Rician BLER table provenance (P3 item 5, 2026-08-10) -- descriptive sensitivity only.
+
+generator: analysis_tools/build_bler_sionna.py --rician_K 0,3,10  (Sionna 1.1.0, TensorFlow CPU)
+output:    results/bler_sionna/bler_sionna_rician.csv  (SEPARATE from the frozen bler_sionna.csv;
+           the frozen awgn/rayleigh table + its behaviour are UNCHANGED).
+model:     same pipeline as the frozen table -- 5G-LDPC k=500/n=1000 rate-1/2, 16/256-QAM, adaptive MC
+           (>=100 block errors OR >=1e5 codewords), cliff band densified to 0.5 dB, N_CW=3960,
+           bler_frame = 1-(1-bler_cw)^N_CW.
+channel:   per-codeword independent Rician block-fading, |h|^2 non-central with a LOS component,
+           E[|h|^2]=1: h = sqrt(K/(K+1)) + sqrt(1/(2(K+1)))*(N(0,1)+jN(0,1)); K=0 is identical in law
+           to the frozen Rayleigh branch, K->inf approaches AWGN. Same no-diversity / no-HARQ /
+           perfect-per-block-CSI coherence model as the frozen Rayleigh table (see PROVENANCE.txt).
+K:         {0, 3, 10} (pre-registered, Change-log P3).
+observed (16-QAM, feasibility = frame-BLER < 0.999): onset K=0 none in [0,20] / K=3 ~27.5 dB /
+           K=10 ~16 dB -- only K=10 opens a feature window inside the evaluated 0-20 dB range.
+use:       descriptive replay only (results/p3_sensitivity/item5_rician.csv); frozen selector fed
+           channel_is_rayleigh=1; frozen models/oracle/delta/tau* unchanged; main.tex untouched.

@@ -541,3 +541,19 @@ limitation; the E-scarcity fix is future work needing a new independent dataset.
 - The R9 / R10 / E-limitation sentences are **not yet in main.tex**; their CLAIMS rows will be created
   by `extract_claims.py` only once the prose lands (P5), at which point the *Allowed wording* columns
   point to `r9_result_claims.md` / `R10_REPORT.md`.
+
+## Appendix B — P3 sensitivity expected behaviours (checks, not targets)
+
+Operationalises the §8 anti-forcing clause for the P3 batch (Change-log P3). Each row is a
+**falsifiable prediction**; the *Observed* column is descriptive, read from the committed CSVs in
+`results/p3_sensitivity/` (baseline reproduces `replay_summary.csv` exactly, `p3_baseline_sanity.csv`);
+a miss is **reported, not fixed**. Anchor numbers below are test @ B_max=0.20, RF.
+
+| Item | Condition | Pre-registered expectation | Observed (descriptive) | Check |
+|---|---|---|---|---|
+| 1 | channel ratio (`item1_channel_ratio.csv`) | more Rayleigh → feature-selection rate + payload ↓ toward B_L, F1 → Fixed-L | ρ_F 0.110→0.073→0.037 and payload 0.131→0.095→0.060 as AWGN:Rayleigh goes 75/25→50/50→25/75; F1 0.9064→0.9046→0.9029 | met |
+| 2 | non-uniform SNR (`item2_nonuniform_snr.csv`) | low-skew shifts toward L (payload↓, F1→Fixed-L); trunc-Gaussian intermediate | Beta(2,5): ρ_F 0.021, payload 0.044, F1 0.9021 (sharp drop); N(10,5): ρ_F 0.078, payload 0.099, F1 0.9048 (≈uniform) | met |
+| 3 | channel-type flip (`item3_misclass_flip.csv`) | graceful F1 degradation with p; fallback keeps L safe | F1 0.9046→0.9040→0.9035→0.9023 for p=0/.05/.10/.20; payload ~flat (0.0947) | met |
+| 3-var | labelled variants (`item3_variants.csv`, validate-only, NOT deployed) | cues + a channel signal needed; a monotone re-encoding ≈ binary | snr_only collapses to L (ρ_F=0, payload 0.024); cont_obs (delay/Doppler map) ≈ full_ref (F1 0.9122 vs 0.9122) | met |
+| 4 | BLER_L grid (`item4_bler_L.csv`) | small monotone F1 drop where L selected; payload unchanged | F1 0.9046→0.9039→0.9009→0.8971 for BLER_L=0/.01/.05/.10; payload 0.0947 flat | met |
+| 5 | Rician K (`item5_rician.csv`, table `bler_sionna_rician.csv`) | larger K → feature branch feasible at lower SNR → feature-selection rate ↑ | **PHYSICAL LAYER, as expected:** 16-QAM frame-BLER<0.999 onset K=0 none / K=3 ≈27.5 dB / K=10 ≈16 dB (only K=10 opens inside [0,20]). **SELECTOR, expectation NOT met (reported, not fixed):** fed `channel_is_rayleigh=1` per the pre-registration, the frozen selector defaults to L for every K (ρ_F=0, payload=B_L, F1 flat at the Fixed-L floor) — the binary channel feature cannot represent Rician K, so the K=10 feasibility is left unexploited. A limitation of the frozen binary-channel selector, not a selector success. | **partial: physics met, selector limitation surfaced** |

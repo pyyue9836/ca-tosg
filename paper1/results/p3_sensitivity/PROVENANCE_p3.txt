@@ -7,5 +7,5 @@ detection inference. Frozen selectors/delta/tau*/oracle unchanged; main.tex unto
 Baseline (uniform SNR, 50/50, BLER_L=0) uses rng(CSI_SEED=20260809) in eval_p2_deploy order
 -> reproduces replay_summary.csv EXACTLY (p3_baseline_sanity.csv).
 item1 p_rayleigh in {0.75,0.50,0.25}; item2 SNR {uniform, beta25_lowskew=Beta(2,5)x20, truncgauss_10_5=N(10,5) trunc[0,20]}; item3 flip p in {0,.05,.10,.20} (true channel unchanged, flip mask seed=20260811); item4 BLER_L in {0,.01,.05,.10} (eff_L only, actions/oracle fixed).
-item5 Rician: table ABSENT -> SKIPPED (K from table; selector fed channel_is_rayleigh=1; eff_F recomputed under Rician frame-BLER).
+item5 Rician: present -> item5_rician.csv (K from table; selector fed channel_is_rayleigh=1; eff_F recomputed under Rician frame-BLER).
 §8 anti-forcing: expected behaviours are checks, not targets; a miss is reported, not fixed.
