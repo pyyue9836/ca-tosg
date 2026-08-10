@@ -446,3 +446,61 @@ the model is frozen, provided each change is logged with a reason and a date up 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
 written into the paper's conclusions; the paper reports only the frozen selectors' evaluated numbers.
+
+## Appendix A — P2 freeze summary (P2-D)
+
+Snapshot of the frozen P2 state at R11. The authoritative source for every value is
+`results/p2_dataprep/FROZEN_MANIFEST.json` (schema `catosg-frozen-manifest/1`, freeze
+`2026-08-09T15:12:53Z`, seed 0; env python 3.10.18 / sklearn 1.7.0 / numpy 1.26.4 / pandas 2.2.2);
+the numbers below are copied from it and from the committed result CSVs — not hand-derived.
+
+**Frozen selectors (one per budget, §5/§6; sha256 in the manifest).** Selection = frozen walk over the
+112-candidate block (`candidate_block_md5 05d8e424`), 9-scene LOSO (1008 fold rows), 23 features.
+
+| B_max | model | cand# | cw | λ\* | walk depth | frozen validate payload | LOSO frame-weighted F1 | τ\* |
+|---|---|---|---|---|---|---|---|---|
+| 0.10 | `data/p2/selector_B010.pkl` | 58 | None | 0.05 | 6 | 0.067887 | 0.9070 | 18.0 |
+| 0.20 | `data/p2/selector_B020.pkl` | 1 | None | 0.02 | 2 | 0.099231 | 0.9087 | 12.0 |
+| 0.30 | `data/p2/selector_B030.pkl` | 56 | None | 0.00 | 0 | 0.156962 | 0.9094 | 8.0 |
+
+All three `cw=None` (the top-OOF-F1 `cw=balanced` candidates were walked past for exceeding the frozen
+budget — the root cause of the E-collapse, Change-log R10/R11).
+
+**Resident gates (all must pass on the committed tree).** `code/payload_audit.py` (17/17 links);
+`code/verify_paragraph_insert.py 1 2 3` (3/3); `code/extract_claims.py --check` (CLAIMS ≡ main.tex);
+block-exit grep over `results/STALE_FINGERPRINTS.md` (0 hits); `code/p2_dataprep/check_leakage.py`
+(LOSO fold-structure + 15 frozen-state manifest checks + freeze-aware test/Culver + scene anchor).
+
+**P2 deployment deliverables (all in `results/p2_deploy/` unless noted).**
+- **R9 decision (P2-B, confirmatory, decided once).** `eval_p2_deploy.py` → `replay_{split}_B0XX.csv`
+  (200 paired replay-level ΔF/ΔB, CI reproducible), `replay_summary.csv`, `r9_decision.csv`. Locked
+  result wording: `r9_result_claims.md` (PRIMARY test@B020: non-inferior in F1 within δ=0.005 AND
+  communication-superior, payload −56.3%; secondary = CI only). That file is the authority for the
+  sentence wording when it lands in main.tex at P5.
+- **6d true end-to-end AP (descriptive, Change-log R11).** `eval_p2_ap.py` → `true_e2e_ap.csv`
+  (split × budget × policy, global-sort AP@.3/.5/.7) + `PROVENANCE_ap.txt`. Descriptive only; the R9
+  decision is not revisited.
+- **R10 E-collapse account (post-unblinding diagnostic).** `r10c_diagnostic.py` → `r10c_*.csv`;
+  `make_r10_report.py` → `R10_REPORT.md` + `PROVENANCE_r10c.txt`. Two-number rule (do not conflate):
+  strict-benefit missed-E F1 cost /frame (test) 0.002658 / 0.002658 / 0.002705; total E-collapse F1
+  cost /frame (test) 0.003021 / 0.002888 / 0.003030; both ≈0 on Culver. vs-clairvoyant account is
+  separate from the R9 vs-τ account.
+- **P2-C latency (frozen selectors).** `code/rf_latency_benchmark.py` → `results/p2_latency/`
+  `latency_frozen.csv` (batch-1, WARMUP=100, 1000 trials: ≈59.7–59.9 ms mean, P95 ≈66–69 ms on this
+  host) + `e2e_timing.csv` (per-stage measured/calculated/assumed/not-included tags).
+
+**Route (Change-log R11).** Route C: frozen models retained; the E-collapse is reported as a quantified
+limitation; the E-scarcity fix is future work needing a new independent dataset.
+
+**Open P5 items (require a main.tex edit; main.tex is frozen through P2, so deferred).**
+- main.tex still carries the **legacy-pipeline** numbers (`tab:headline_agg` from
+  `results/policy/threshold_vs_rf.csv` via `recompute_policy_200seed.py`; true-e2e-AP figures from
+  `results/true_e2e_global_*.csv` via `true_e2e_global.py`). The P2 artifacts above **supersede** these
+  at P5; until the prose is migrated, those legacy generators remain the provenance-of-record and are
+  **not** removable.
+- Latency sentence (main.tex §5.x, `52.8 ± 5.7` ms / P95 `59.1` ms, 2,000 trials) was measured on the
+  **retired v2** selector; the P2-frozen remeasure is ≈59.9 ms / P95 ≈67 ms (`latency_frozen.csv`).
+  Update at P5.
+- The R9 / R10 / E-limitation sentences are **not yet in main.tex**; their CLAIMS rows will be created
+  by `extract_claims.py` only once the prose lands (P5), at which point the *Allowed wording* columns
+  point to `r9_result_claims.md` / `R10_REPORT.md`.
