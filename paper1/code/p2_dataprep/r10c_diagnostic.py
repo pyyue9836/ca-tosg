@@ -157,21 +157,18 @@ def main():
                 fuse(f'{split} B{bmax}: a strict & missed row has feasible dF1 < -TOL (a)')
 
             denom = N_REPLAY * n
-            tot_f1 = 0.0; tot_pay = 0.0
+            # ONLY the three class rows are written to the CSV. The all-classes TOTAL is NOT stored here
+            # (it lives ONLY in make_r10_report.py, computed as sum of the three classes) -- storing both
+            # the components and their sum in one table is what let a naive re-sum double-count (the 2x
+            # error caught in the R10-report review). One fact, one place.
             for name, mask in (('strict', strict), ('tie', tie), ('cost-induced', cost)):
                 mm = mask & miss
                 df1 = float((eE[mm] - eff_rf[mm]).sum()); dpay = float(PAY[rf[mm]].sum())
-                tot_f1 += df1; tot_pay += dpay
                 cost_rows.append(dict(split=split, budget=bmax, e_class=name,
                                       clairvoyant_E_cells=int(mask.sum()), missed_by_rf=int(mm.sum()),
                                       F1_cost_sum=round(df1, 4), F1_cost_per_framereal=round(df1 / denom, 8),
                                       payload_extra_sum=round(dpay, 2),
                                       payload_extra_per_framereal=round(dpay / denom, 6)))
-            cost_rows.append(dict(split=split, budget=bmax, e_class='TOTAL(all-classes)',
-                                  clairvoyant_E_cells=int(isE.sum()), missed_by_rf=int(miss.sum()),
-                                  F1_cost_sum=round(tot_f1, 4), F1_cost_per_framereal=round(tot_f1 / denom, 8),
-                                  payload_extra_sum=round(tot_pay, 2),
-                                  payload_extra_per_framereal=round(tot_pay / denom, 6)))
 
             # vs-ORACLE account (RF vs the frozen-lambda clairvoyant oracle), replay distribution
             eff_bo = np.take_along_axis(eff, clair[:, :, None], 2)[:, :, 0]
@@ -197,32 +194,28 @@ def main():
                               frozen_lambda_clairvoyant=np.array(ACTIONS)[clair[0]],
                               rf=np.array(ACTIONS)[rf[0]], e_class=cls)).to_csv(
                 os.path.join(OUT, f'r10c_decision_log_{split}_B{int(round(bmax*100)):03d}.csv'), index=False)
-            print(f'[{split} B{int(bmax*100):03d}] strict F1/frame={cost_rows[-4]["F1_cost_per_framereal"]:.6f} '
-                  f'TOTAL F1/frame={tot_f1/denom:.6f} clair_pay={B_bo.mean():.4f}(Bmax {bmax})', flush=True)
+            last3 = cost_rows[-3:]                                    # strict, tie, cost-induced (this budget)
+            print(f'[{split} B{int(bmax*100):03d}] strict F1/frame={last3[0]["F1_cost_per_framereal"]:.6f} '
+                  f'sum3 F1/frame={sum(r["F1_cost_per_framereal"] for r in last3):.6f} '
+                  f'clair_pay={B_bo.mean():.4f}(Bmax {bmax})', flush=True)
 
     pd.DataFrame(cost_rows).to_csv(os.path.join(OUT, 'r10c_missed_e_cost.csv'), index=False)
     pd.DataFrame(vsorc_rows).to_csv(os.path.join(OUT, 'r10c_vs_oracle_account.csv'), index=False)
     pd.DataFrame(vstau_rows).to_csv(os.path.join(OUT, 'r10c_vs_tau_account.csv'), index=False)
 
-    cost = pd.DataFrame(cost_rows)
-    strict20 = cost[(cost.split == 'test') & (cost.budget == 0.20) & (cost.e_class == 'strict')].iloc[0]
-    total20 = cost[(cost.split == 'test') & (cost.budget == 0.20) & (cost.e_class == 'TOTAL(all-classes)')].iloc[0]
+    # r10c writes ONLY the raw CSVs. The report + PROVENANCE narrative (including the all-classes TOTAL,
+    # computed as sum of the three class rows) are produced by make_r10_report.py -- one fact, one place.
     with open(os.path.join(OUT, 'PROVENANCE_r10c.txt'), 'w') as f:
         f.write('CA-TOSG R10c/R10d CORRIGENDUM -- POST-UNBLINDING (nothing here is confirmatory)\n' + '=' * 72 + '\n')
         f.write('RETRACTS R10 "costs payload, not F1". Taxonomy per supervisor pseudocode (R10d), TOL=1e-9, '
-                'on feasible utility; reference = FROZEN-LAMBDA CLAIRVOYANT oracle (NOT budget-constrained: '
-                'its mean payload can exceed B_max on test/Culver). Recomputed on the R9 replay distribution '
-                '(seed 20260809); reproduces the existing replay CSVs (integrity check PASSED). 4 hard '
-                'assertions PASSED.\n\n')
-        f.write('TWO DIFFERENT NUMBERS (do not conflate):\n')
-        f.write(f'  strict-benefit missed-E F1 cost, test @ B020 = {strict20["F1_cost_per_framereal"]:.6f} /frame '
-                f'(substantive; the E-collapse DOES cost F1).\n')
-        f.write(f'  total E-collapse F1 cost (all classes), test @ B020 = {total20["F1_cost_per_framereal"]:.6f} /frame '
-                '(nets in tie ~0 and cost-induced <0 where RF picks the raw-better action).\n')
-        f.write('Accounts kept SEPARATE: r10c_vs_oracle_account.csv (RF vs frozen-lambda clairvoyant) and '
-                'r10c_vs_tau_account.csv (R9 RF vs threshold) -- do not cross-reference to explain.\n')
-        f.write('Retraction chain: R10 -> R10c -> R10d (see PROTOCOL change-log). 6d AP + P2-C/D stay frozen.\n')
-    print('\nR10c/R10d written -> results/p2_deploy/r10c_*.csv + PROVENANCE_r10c.txt (assertions PASSED)')
+                'on feasible utility; reference = FROZEN-LAMBDA CLAIRVOYANT oracle (NOT budget-constrained). '
+                'Recomputed on the R9 replay distribution (seed 20260809); reproduces the existing replay CSVs '
+                '(integrity check PASSED). 4 hard assertions PASSED.\n')
+        f.write('This file is a STUB: run make_r10_report.py to regenerate the authoritative numbers '
+                '(R10_REPORT.md + this PROVENANCE) from r10c_missed_e_cost.csv. The all-classes TOTAL is NOT '
+                'stored in the CSV -- it exists only in the report, as the sum of the three class rows.\n')
+    print('\nR10c/R10d written -> results/p2_deploy/r10c_*.csv (3 class rows, no TOTAL) '
+          '(assertions PASSED); run make_r10_report.py for the report.')
 
 
 if __name__ == '__main__':
