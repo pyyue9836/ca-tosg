@@ -52,14 +52,22 @@ def esno_to_no(esno_db, bps):
     return float(ebnodb2no(float(ebno_db), num_bits_per_symbol=bps, coderate=CODERATE)), float(ebno_db)
 
 
-def bler_point(esno_db, bps, channel, enc, dec, mp, dmp, src):
-    """Adaptive-MC codeword BLER at Es/N0 (dB) over AWGN or Rayleigh block-fading. bps = bits/symbol."""
+def bler_point(esno_db, bps, channel, enc, dec, mp, dmp, src, rician_k=None):
+    """Adaptive-MC codeword BLER at Es/N0 (dB) over AWGN / Rayleigh / Rician block-fading. bps=bits/symbol.
+    Rician (rician_k = K factor): per-block |h|^2 non-central with a LOS component, E[|h|^2]=1; K=0 is
+    identical in law to the Rayleigh branch, K->inf approaches AWGN. Same per-codeword independent
+    block-fading + perfect-CSI structure as Rayleigh (frozen coherence model, see PROVENANCE)."""
     no, ebno = esno_to_no(esno_db, bps)
     n_cw = n_err = 0
     while n_cw < MAX_CW and n_err < TARGET_ERR:
         b = src([BATCH, K]); c = enc(b); x = mp(c)                      # [B, n/m] symbols
-        if channel == "rayleigh":
-            hp = tf.random.gamma([BATCH, 1], 1.0, 1.0)                  # |h|^2 ~ Exp(1)
+        if channel in ("rayleigh", "rician"):
+            if channel == "rician":
+                los = math.sqrt(rician_k / (rician_k + 1.0)); sig = math.sqrt(1.0 / (2.0 * (rician_k + 1.0)))
+                hr = los + sig * tf.random.normal([BATCH, 1]); hi = sig * tf.random.normal([BATCH, 1])
+                hp = hr * hr + hi * hi                                  # |h|^2, E[|h|^2]=1 (Rician K)
+            else:
+                hp = tf.random.gamma([BATCH, 1], 1.0, 1.0)             # |h|^2 ~ Exp(1) (Rayleigh)
             no_b = tf.cast(no, tf.float32) / tf.maximum(hp, 1e-6)       # per-block effective N0
             y = x + tf.complex(tf.random.normal(tf.shape(x)), tf.random.normal(tf.shape(x))) \
                 * tf.cast(tf.sqrt(no_b / 2.0), tf.complex64)
@@ -72,18 +80,20 @@ def bler_point(esno_db, bps, channel, enc, dec, mp, dmp, src):
     return n_err / n_cw, n_cw, n_err, ebno
 
 
-def sweep_channel(channel, m, coarse):
+def sweep_channel(channel, m, coarse, rician_k=None):
     bps = int(round(math.log2(m)))            # 16-QAM -> 4 bits/symbol, 256-QAM -> 8
     enc = LDPC5GEncoder(K, N); dec = LDPC5GDecoder(enc, num_iter=NUM_ITER)
     mp = Mapper("qam", bps); dmp = Demapper("app", "qam", bps); src = BinarySource()
     rows = {}
     def run(esno):
         if esno in rows: return rows[esno]
-        p, ncw, nerr, ebno = bler_point(esno, bps, channel, enc, dec, mp, dmp, src)
-        rows[esno] = dict(qam=m, channel=channel, esno_db=round(esno, 2), ebno_db=round(ebno, 2),
+        p, ncw, nerr, ebno = bler_point(esno, bps, channel, enc, dec, mp, dmp, src, rician_k)
+        rows[esno] = dict(qam=m, channel=channel, rician_k=(rician_k if channel == "rician" else ""),
+                          esno_db=round(esno, 2), ebno_db=round(ebno, 2),
                           bler_cw=p, n_cw=ncw, n_err=nerr,
                           bler_frame=1.0 - (1.0 - p) ** N_CW)
-        print(f"  {m:3d}QAM {channel:8s} Es/N0={esno:5.1f} Eb/N0={ebno:5.1f} "
+        ktag = f"K={rician_k}" if channel == "rician" else ""
+        print(f"  {m:3d}QAM {channel:8s}{ktag:>6s} Es/N0={esno:5.1f} Eb/N0={ebno:5.1f} "
               f"BLER_cw={p:.3e} ({nerr}/{ncw}) BLER_frame={rows[esno]['bler_frame']:.4f}", flush=True)
         return rows[esno]
     for e in coarse: run(e)                                    # coarse pass
@@ -99,8 +109,29 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--coarse_16", default="0,2,4,6,8,10,12")
     ap.add_argument("--coarse_256", default="6,8,10,12,14,16,18,20,22")
+    # Rician mode (P3 item 5): comma-separated K factors. Writes a SEPARATE bler_sionna_rician.csv and
+    # does NOT touch the frozen awgn/rayleigh bler_sionna.csv. Wider coarse grid (fading cliffs sit high).
+    ap.add_argument("--rician_K", default="")
+    ap.add_argument("--coarse_rician_16", default="0,2,4,6,8,10,12,14,16,18,20,24,28")
+    ap.add_argument("--coarse_rician_256", default="6,8,10,12,14,16,18,20,22,24,28,32")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
+
+    if a.rician_K.strip():
+        Ks = [float(x) for x in a.rician_K.split(",")]
+        rg = {16: [float(x) for x in a.coarse_rician_16.split(",")],
+              256: [float(x) for x in a.coarse_rician_256.split(",")]}
+        allrows = []
+        for k in Ks:
+            for m, coarse in rg.items():
+                t0 = time.time()
+                print(f"\n===== {m}QAM / rician K={k} =====", flush=True)
+                allrows += sweep_channel("rician", m, coarse, rician_k=k)
+                pd.DataFrame(allrows).to_csv(os.path.join(OUT, "bler_sionna_rician.csv"), index=False)
+                print(f"  [{(time.time()-t0)/60:.1f} min]", flush=True)
+        print("\n[DONE rician] ->", os.path.join(OUT, "bler_sionna_rician.csv"))
+        return
+
     grids = {16: [float(x) for x in a.coarse_16.split(",")],
              256: [float(x) for x in a.coarse_256.split(",")]}
     allrows = []
