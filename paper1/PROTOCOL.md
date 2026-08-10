@@ -442,6 +442,43 @@ the model is frozen, provided each change is logged with a reason and a date up 
   is not revisited) and P2-C/D (latency remeasure, CLAIMS backfill, freeze summary). The E-scarcity fix
   itself (e.g. `cw=balanced` under a revised budget rule, or E re-weighting) remains **future work** and
   would require its own new Change-log entry plus an independent dataset before any retrain.
+- **P3 (2026-08-10, pre-registered before running) — descriptive sensitivity batch.** No change to the
+  frozen selectors, δ, τ\*, the oracle definition, or the mainline replay; `main.tex` untouched. Every
+  item is a **descriptive** re-weighting/replay of the cached per-(frame, SNR, channel) grid
+  (`data/p2/p2_grid_{split}.csv`: `eff_E/eff_L/eff_F/bler_F/oracle_ELF`) with the frozen `predict()`; no
+  new detection inference. The §8 anti-forcing clause applies verbatim: the expected behaviours below
+  are **checks, not targets** — a miss is reported, never fixed by touching data. All params are frozen
+  here before any run.
+  - **(1) Channel-ratio sensitivity.** AWGN:Rayleigh ∈ {25/75, 50/50, 75/25}, i.e. weight the grid's
+    channel marginal at `p_rayleigh ∈ {0.75, 0.50, 0.25}` (SNR uniform over the 11-point grid). 3 split
+    × 3 budget F1/payload. *Expected:* more Rayleigh → lower feature-selection rate → payload ↓ toward
+    B_L and F1 → the Fixed-L floor (feature infeasible under Rayleigh).
+  - **(2) Non-uniform SNR (2 forms, params frozen).** Re-weight the SNR marginal (channel 50/50) by two
+    hard-coded densities discretised onto the grid points {0,2,…,20} dB (each point gets its ±1 dB bin
+    mass, renormalised): **(2a) low-skew** `Beta(2,5)` scaled to [0,20] (mean ≈ 5.71 dB, a poor-channel
+    regime); **(2b) truncated Gaussian** `N(μ=10, σ=5)` truncated to [0,20] (mid-centred). *Expected:*
+    (2a) shifts toward L (payload ↓, F1 → Fixed-L); (2b) intermediate.
+  - **(3) Channel-type misclassification + 2 labelled variants.** The selector's `channel_is_rayleigh`
+    feature is flipped with probability `p ∈ {0, 0.05, 0.10, 0.20}` (eval-time; the **true** channel used
+    for BLER is unchanged), scored analytically as `(1−p)·eff[rf_true] + p·eff[rf_flipped]` per cell,
+    frozen model, same-seed system. *Expected:* graceful F1 degradation with p; the fallback keeps L safe
+    under flips. **Two labelled comparison variants (validate-only, `labeled variant, not deployed`;
+    they do NOT touch `FROZEN_MANIFEST.json`):** **(3a) SNR-only** — a selector trained on validate over
+    `{est_snr_db}` alone; **(3b) continuous-observation** — the binary `channel_is_rayleigh` replaced by
+    two continuous observables from a frozen deterministic map: `delay_spread_ns = {awgn:30, rayleigh:300}`,
+    `doppler_hz = {awgn:20, rayleigh:600}` (a monotone re-encoding of the channel type; no new physics).
+    Both use the same RF candidate family as the deployed selector, are evaluated on validate only, and
+    are reported strictly as comparisons.
+  - **(4) BLER_L grid.** `BLER_L ∈ {0, 0.01, 0.05, 0.10}` (mainline stays `BLER_L = 0`). Eval-time only:
+    the realised L utility becomes `eff_L' = eff_L·(1−BLER_L) + eff_E·BLER_L`; the frozen selector's
+    actions and the oracle definition are **unchanged** (BLER_L is not a selector input). *Expected:*
+    small monotone F1 drop where L is selected; payload unchanged.
+  - **(5) Rician regeneration.** `K ∈ {0, 3, 10}` (K=0 ≡ Rayleigh, K→∞ → AWGN) via the existing Sionna
+    pipeline (`analysis_tools/build_bler_sionna.py`, extended with a Rician block-fading branch: per-
+    codeword `|h|²` non-central with the same rate-1/2 5G-LDPC, 16/256-QAM, `N_CW=3960`, adaptive MC).
+    The frozen selector is fed `channel_is_rayleigh = 1` (Rician is a fading channel; K changes only the
+    true BLER); descriptive replay recomputes `eff_F` under the Rician frame-BLER. *Expected:* larger K →
+    the feature branch becomes feasible at lower SNR → feature-selection rate ↑ toward the AWGN case.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
