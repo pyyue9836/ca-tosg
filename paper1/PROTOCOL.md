@@ -479,6 +479,18 @@ the model is frozen, provided each change is logged with a reason and a date up 
     The frozen selector is fed `channel_is_rayleigh = 1` (Rician is a fading channel; K changes only the
     true BLER); descriptive replay recomputes `eff_F` under the Rician frame-BLER. *Expected:* larger K →
     the feature branch becomes feasible at lower SNR → feature-selection rate ↑ toward the AWGN case.
+- **P3-C (2026-08-11, pre-registered before running) — Rician bracketing variant.** Same frozen selector,
+  same 200-realisation replay system and seed as item 5, `main.tex` untouched; the ONLY change is the
+  selector is fed `channel_is_rayleigh = 0` (all other features unchanged), so it treats the Rician link
+  as AWGN-like and *is willing to request F* on SNR/cue grounds; delivery success/failure is then
+  adjudicated by the TRUE Rician frame-BLER (the existing `K ∈ {0,3,10}` table). This is the
+  **opportunistic bound**; item 5 (`channel_is_rayleigh = 1`, always-defer) is the **conservative bound**.
+  *Expected (checks, not targets; §8 anti-forcing):* **(a) K=10** — above the ~16 dB onset, requested F
+  is delivered → ρ_F and the hard-frame gain partially recover; **(b) K=0/3** — below onset the requested
+  F fails and falls back to ego → wasted payload, and an F1 loss relative to L on L-dominant frames;
+  **(c)** the `rayleigh=1` and `rayleigh=0` results together **bracket** the potential gain of a
+  K-aware selector. Output: same columns as item 5 (F1 / payload / ρ_F) resolved by K × SNR, labelled
+  **"bracketing variant, not deployed behavior"**. No change to the frozen models / oracle / δ / τ\*.
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
@@ -557,3 +569,30 @@ a miss is **reported, not fixed**. Anchor numbers below are test @ B_max=0.20, R
 | 3-var | labelled variants (`item3_variants.csv`, validate-only, NOT deployed) | cues + a channel signal needed; a monotone re-encoding ≈ binary | snr_only collapses to L (ρ_F=0, payload 0.024); cont_obs (delay/Doppler map) ≈ full_ref (F1 0.9122 vs 0.9122) | met |
 | 4 | BLER_L grid (`item4_bler_L.csv`) | small monotone F1 drop where L selected; payload unchanged | F1 0.9046→0.9039→0.9009→0.8971 for BLER_L=0/.01/.05/.10; payload 0.0947 flat | met |
 | 5 | Rician K (`item5_rician.csv`, table `bler_sionna_rician.csv`) | larger K → feature branch feasible at lower SNR → feature-selection rate ↑ | **PHYSICAL LAYER, as expected:** 16-QAM frame-BLER<0.999 onset K=0 none / K=3 ≈27.5 dB / K=10 ≈16 dB (only K=10 opens inside [0,20]). **SELECTOR, expectation NOT met (reported, not fixed):** fed `channel_is_rayleigh=1` per the pre-registration, the frozen selector defaults to L for every K (ρ_F=0, payload=B_L, F1 flat at the Fixed-L floor) — the binary channel feature cannot represent Rician K, so the K=10 feasibility is left unexploited. A limitation of the frozen binary-channel selector, not a selector success. | **partial: physics met, selector limitation surfaced** |
+
+### Appendix B.1 — Rician two-bound bracket (Change-log P3-C)
+
+Item 5 fed the frozen selector `channel_is_rayleigh=1` (always-defer → **conservative** bound); P3-C
+feeds `channel_is_rayleigh=0` (willing to request F → **opportunistic** bound), with delivery adjudicated
+by the TRUE Rician frame-BLER. Both are **"bracketing variant, not deployed behavior"**; sources
+`item5_rician.csv` (rayleigh=1) and `item5c_rician_rayleigh0.csv` / `item5c_rician_by_snr.csv`
+(rayleigh=0). Anchors: test @ B_max=0.20, RF.
+
+| Bound | feed | K | F1 | payload | ρ_F | reading |
+|---|---|---|---|---|---|---|
+| conservative | rayleigh=1 | 0 / 3 / 10 | 0.9011 (flat) | 0.024 (=B_L) | 0.000 | never requests F; K=10 feasibility unused |
+| opportunistic | rayleigh=0 | 0 | 0.8850 | 0.166 | 0.147 | F requested (from ~10 dB) but always fails (BLER_F=1) → ego fallback → **wasted payload + F1 loss** |
+| opportunistic | rayleigh=0 | 3 | 0.8850 | 0.166 | 0.147 | same as K=0 (onset ≈27.5 dB is outside [0,20]) |
+| opportunistic | rayleigh=0 | 10 | 0.8878 | 0.166 | 0.147 | slightly higher than K=0/3: above the ~16 dB onset F is delivered |
+
+Per-SNR onset (rayleigh=0, K=10, `item5c_rician_by_snr.csv`): as SNR crosses the onset the true
+frame-BLER falls (16 dB→0.958, 18 dB→0.707, 20 dB→0.353) and realised F1 climbs back (0.873→0.884→0.899)
+while below 16 dB the requested F fails (F1 flat ≈0.871, payload ≈0.285 wasted). For K=0/3 the frame-BLER
+is 1 across [0,20], so every request above ~10 dB is wasted.
+
+**Checks (§8 anti-forcing).** (a) **met** — K=10 above onset: F delivered, F1 recovers toward 0.90 at
+high SNR. (b) **met** — K=0/3 below onset: failed F → ego fallback → wasted payload (0.166 vs 0.024) and
+F1 loss (0.885 < the conservative 0.901). (c) **met** — the two feeds bracket the potential of a K-aware
+selector: neither blind extreme wins, because the opportunistic feed pays for F across the whole SNR
+range while only the K=10 high-SNR slice returns it; the value of a genuine K-aware policy (request F
+only above the K-dependent onset) lies **between** these bounds.
