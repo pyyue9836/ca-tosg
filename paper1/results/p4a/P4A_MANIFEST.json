@@ -1,0 +1,99 @@
+{
+ "schema": "catosg-p4a-manifest/1",
+ "label": "external baseline, not deployed",
+ "p4a_block_md5": "67a0abe8978837f078b3c2925b5e2e81",
+ "algorithm": "dqn_bandit_single_step_epsilon_greedy",
+ "problem_form": "contextual_bandit_single_step",
+ "seed": 0,
+ "network": {
+  "hidden": [
+   64,
+   64
+  ],
+  "activation": "relu"
+ },
+ "train": {
+  "steps": 4000,
+  "batch": 512,
+  "lr": 0.001,
+  "optimizer": "adam",
+  "epsilon_start": 1.0,
+  "epsilon_end": 0.05,
+  "epsilon_decay_steps": 3000,
+  "target_is_immediate_reward": true
+ },
+ "reward": "eff_a - lambda*B_a",
+ "feature_names": [
+  "num_cavs",
+  "ego_num_objects",
+  "ego_origin_lidar_shape_0",
+  "ego_origin_lidar_shape_1",
+  "pcd_num_points",
+  "pcd_mean_range",
+  "pcd_max_range",
+  "pcd_std_range",
+  "pcd_near_20m",
+  "pcd_mid_20_50m",
+  "pcd_far_50_80m",
+  "pcd_very_far_80m",
+  "pcd_front_points",
+  "pcd_back_points",
+  "pcd_left_points",
+  "pcd_right_points",
+  "pcd_front_far_30m",
+  "pcd_front_far_50m",
+  "pcd_density_0_20",
+  "pcd_density_20_50",
+  "pcd_density_50_80",
+  "est_snr_db",
+  "channel_is_rayleigh"
+ ],
+ "budgets": {
+  "0.10": {
+   "tag": "B010",
+   "lam": 0.2,
+   "lambda_index": 4,
+   "walk_depth": 0,
+   "frozen_f1": 0.90678,
+   "frozen_payload": 0.02369,
+   "oof_f1": 0.9055,
+   "model": "data/p2/p4a_bandit_B010.pt",
+   "model_sha256": "9995435b92b4d41b0eafee76f3e3af6489add74061289f3a3c8d5b1c0fcc92f8"
+  },
+  "0.20": {
+   "tag": "B020",
+   "lam": 0.2,
+   "lambda_index": 4,
+   "walk_depth": 0,
+   "frozen_f1": 0.90678,
+   "frozen_payload": 0.02369,
+   "oof_f1": 0.9055,
+   "model": "data/p2/p4a_bandit_B020.pt",
+   "model_sha256": "961daffd948045ef05f3de321202b5d5c581bbc3e775d7b53c18181201915b23"
+  },
+  "0.30": {
+   "tag": "B030",
+   "lam": 0.2,
+   "lambda_index": 4,
+   "walk_depth": 0,
+   "frozen_f1": 0.90678,
+   "frozen_payload": 0.02369,
+   "oof_f1": 0.9055,
+   "model": "data/p2/p4a_bandit_B030.pt",
+   "model_sha256": "f4e5b172a5d82d595ec9fbff5c9b5cab2c01d5336b4bfb69cb4b531cc8a469de"
+  }
+ },
+ "inputs": {
+  "grid": {
+   "file": "data/p2/p2_grid_validate.csv",
+   "md5": "3314418d4e53ff30d0d246e1594e4bed"
+  },
+  "frozen_manifest_sha256": "042dccbc2634199a2fd5d6fe7effb0ffeafcc1a2cc6ad2ec6f72acb0a70a21b7"
+ },
+ "env": {
+  "python": "3.10.18",
+  "torch": "2.11.0+cu128",
+  "numpy": "1.26.4",
+  "device": "cuda"
+ }
+}

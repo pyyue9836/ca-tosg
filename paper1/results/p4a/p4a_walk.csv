@@ -1,0 +1,4 @@
+budget,walk_depth,lambda_index,lambda,frozen_f1,frozen_payload,oof_f1,passed
+0.1,0,4,0.2,0.90678,0.02369,0.9055,True
+0.2,0,4,0.2,0.90678,0.02369,0.9055,True
+0.3,0,4,0.2,0.90678,0.02369,0.9055,True

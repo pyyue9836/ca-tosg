@@ -643,3 +643,34 @@ F1 loss (0.885 < the conservative 0.901). (c) **met** — the two feeds bracket 
 selector: neither blind extreme wins, because the opportunistic feed pays for F across the whole SNR
 range while only the K=10 high-SNR slice returns it; the value of a genuine K-aware policy (request F
 only above the K-dependent onset) lies **between** these bounds.
+
+## Appendix C — P4-A external RL baseline (Change-log P4-A)
+
+**"external baseline, not deployed."** A contextual-bandit RL selector (`train_p4a_bandit.py`,
+`eval_p4a_deploy.py`) trained to the matched protocol, compared to the deployed RF and the τ rule.
+Frozen CA-TOSG models / δ / τ\* / oracle / mainline replay unchanged; `main.tex` untouched. Manifest
+`results/p4a/P4A_MANIFEST.json` (3 bandit sha256 / hyperparams / seed / per-budget frozen payload).
+Sanity: the eval's `F1_RF` / `B_RF` reproduce `replay_summary.csv` exactly (0 mismatches).
+
+**Selection outcome (validate LOSO, `p4a_loso_oof.csv` / `p4a_walk.csv`).** Ordered by frame-weighted
+OOF F1, the best λ is **λ\*=0.2** (OOF F1 0.9055, payload 0.0245) — feasible for all three budgets, so the
+walk freezes it at depth 0 for **every** B_max. The bandit therefore converges to a **conservative
+near-object-level policy** (payload ≈ B_L ≈ 0.024) at all budgets: lower-λ models that request more F
+have HIGHER in-sample F1 (λ=0 full-grid 0.9114) but LOWER held-out F1 (λ=0 OOF 0.9027; λ=0.05 collapses
+to 0.872) — reward-based F-selection **overfits** the F-vs-L boundary, so the model-selected policy
+plays L safe. (The three per-budget model files carry different sha256 — same policy, re-trained per
+budget; GPU training is not bit-reproducible, a recorded limitation for this external baseline; the
+frozen F1/payload are identical.)
+
+**Comparison (descriptive, paired bootstrap CI only — NO new decision; `p4a_summary.csv`).** Anchors
+test @ B_max=0.20: RL F1 0.8974 / payload 0.0216; RF 0.9046 / 0.0947; τ 0.9074 / 0.2168.
+- RL-vs-RF: ΔF CI [−0.0073, −0.0071] (RL F1 **below** RF, CI entirely < 0) at ΔB CI [−0.0738, −0.0725]
+  (RL much lower payload). Range over splits/budgets: ΔF from −0.004 (validate B010) to −0.026 (Culver B030).
+- RL-vs-τ: ΔF CI [−0.0101, −0.0099] (RL **below** τ) at ΔB CI [−0.196, −0.194] (RL far lower payload).
+
+**Expected behaviour (§8 anti-forcing — check, not target).** Pre-registered expectation: RL and RF in
+the same F1/payload neighbourhood. **Observed:** RL is in a similar F1 *band* on validate (0.907 vs 0.911)
+but drifts further below on test/Culver, and sits at the **Fixed-L payload corner** rather than matching
+the RF's operating points — i.e. it is **not** better than the RF; the RF's imitation of the exact
+λ-oracle labels generalises the channel-aware F-selection better than reward RL here. Reported as-is: a
+valuable **negative** comparison (a learned RL policy does not beat the interpretable imitation selector).
