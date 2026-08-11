@@ -538,6 +538,41 @@ the model is frozen, provided each change is logged with a reason and a date up 
   "eval": "descriptive_paired_ci_only"
 }
 ```
+- **P4-B (2026-08-11, PLAN pre-registered; inference NOT yet run — awaiting Peiyi's verification).**
+  Second-backbone (SECOND / VoxelNet intermediate fusion) generality arm. The **cache protocol is the
+  mainline method** (clean per-frame eff cache → grid expansion → frozen-walk evaluation), applied to a
+  second detector backbone so the CA-TOSG selector's generality is tested off the PointPillar features.
+  Nothing here changes the deployed CA-TOSG models / δ / τ\* / oracle / mainline replay; `main.tex`
+  untouched. **This entry pre-registers the PLAN only; no inference runs until the plan is verified.**
+  - **(1) Checkpoint + inference config.** Backbone config `opencood/hypes_yaml/second_intermediate_fusion.yaml`
+    (SECOND: MeanVFE → VoxelBackBone8x (8× down) → HeightCompression(256) → AttBEVBackbone → heads; voxel
+    0.1 m, range 281.6×80×4 m, feature_stride 8). The checkpoint is **NOT on disk** (296 local `.pth` are
+    all the PointPillar family) → step-1 downloads it and records its **sha256** before any use (cannot be
+    hashed now). Three per-frame inference passes, mirroring the mainline caches: **late** (`second_late_
+    fusion.yaml`), **intermediate / compressed-F** (`second_intermediate_fusion.yaml`, the F branch), and
+    **ego** (single-CAV pass). Frames per split (OPV2V, same as mainline): validate 1980 / test 2170 /
+    Culver 550 = 4700 frames × 3 passes = **14,100 forward passes**. GPU-time estimate (RTX 5070,
+    sparse-voxel SECOND ≈ a few Hz/frame): **~1.5–3 h total** (to be refined by a 20-frame micro-timing at
+    execution). Output: `ego/late/comp_{split}.npz` under a **new** dir (e.g. `gs_rerun_second/`), never
+    overwriting the PointPillar caches.
+  - **(2) Payload derivation B_F^SECOND — from THIS backbone's own tensor, first-principles, NO borrowed
+    numbers.** The transmitted intermediate feature = the HeightCompression BEV tensor fused inside
+    AttBEVBackbone: **C × H × W** with C = 256, H = round(80/0.1)/8 = 100, W = round(281.6/0.1)/8 = 352 →
+    **≈ 9.01 M elements** (config-derived; the **exact** C×H×W is confirmed by a dummy forward of the
+    architecture — no ckpt needed — at execution). Coding chain identical to the mainline transport
+    (rate-1/2 LDPC + QAM): `B_F^SECOND [Msym] = elements × bits_per_element / 0.5 / bits_per_QAM_symbol`.
+    **OPEN DECISION for Peiyi (materially changes B_F^SECOND; not fixed here, no coincidence alignment to
+    the PointPillar 1.98 Mbit / 0.99 Msym):** `bits_per_element` — SECOND has **no learned feature codec**
+    in its graph, so the F message is a **quantised raw BEV tensor**; candidate quantisations to pre-fix:
+    (i) INT8 = 8 b/elem, (ii) FP16 = 16 b/elem. Under 16-QAM (4 b/sym), INT8 → ≈ 9.01e6·8/0.5/4 = **36.0
+    Msym**; FP16 → **72.1 Msym** (illustrative, pending the exact element count + the chosen bit-depth).
+    A new `payload_audit` extension will re-derive this from the config dims + chosen bit-depth and bit-
+    compare (no literal hard-coded), added at execution — **not** referencing any existing payload number.
+  - **(3) Cache protocol = mainline (settled).** clean per-frame eff cache (ego/late/compressed F1 vs the
+    canonical union GT, same scorer) → grid expansion (frame × 11 SNR × 2 channel, same BLER table) →
+    frozen-walk selector evaluation, all reusing the existing pipeline scripts pointed at the SECOND
+    caches. **Greenlight gate:** inference + the payload_audit extension run **only after** Peiyi verifies
+    this plan (the ckpt source/sha, the transmitted-feature layer, and the `bits_per_element` decision).
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
