@@ -491,6 +491,53 @@ the model is frozen, provided each change is logged with a reason and a date up 
   **(c)** the `rayleigh=1` and `rayleigh=0` results together **bracket** the potential gain of a
   K-aware selector. Output: same columns as item 5 (F1 / payload / ρ_F) resolved by K × SNR, labelled
   **"bracketing variant, not deployed behavior"**. No change to the frozen models / oracle / δ / τ\*.
+- **P4-A (2026-08-11, pre-registered before training) — match-adaptive external RL baseline.** An
+  **external comparison baseline** trained to the SAME matched protocol as the deployed RF selector, to
+  answer "does a learned RL policy beat the imitation-trained RF / the τ rule?". It does **not** touch
+  the deployed CA-TOSG models, `FROZEN_MANIFEST.json`, δ, τ\*, or the mainline replay; `main.tex` is
+  untouched. Its params come from the machine-parseable `CATOSG-P4A` block below, which
+  `code/p2_dataprep/train_p4a_bandit.py` **parses** (no values hard-coded elsewhere; IRON RULE — any
+  change to the block after training needs a new Change-log entry + full retrain).
+  - **(a) Problem form (stated honestly).** Each frame's granularity choice is an **independent**
+    decision, so this is a **contextual bandit** (a single-step decision from context to action with an
+    immediate reward), **not** sequential RL — there is no state transition, discounting, or credit
+    assignment across frames. The algorithm is fixed to **DQN-style single-step Q(s,a) + ε-greedy**
+    (target = the immediate reward, no bootstrap); network, steps, lr, ε schedule, and seed are frozen
+    in the block. State = the 23 deployed features (z-scored on the validate grid); actions {E,L,F};
+    reward `r(s,a) = eff_a − λ·B_a` (the same Lagrangian-relaxed constrained objective as §6).
+  - **(b) Matched-protocol checklist (each binding).** Same validate grid + scene split (§2); same
+    cached per-frame `eff` (`data/p2/p2_grid_*.csv`; **zero new perception inference**); same three
+    `B_max ∈ {0.10,0.20,0.30}`; same **frame-weighted** budget aggregation; same **frozen-walk** hard
+    check `B̄_frozen ≤ B_max` (strict, temp-then-atomic-swap); same **one set of 200 paired CSI
+    samplings** replay (`CSI_SEED`, identical draws to the RF/τ replay); same metric definitions.
+    Selection/tuning happens **only on validate**, by the same **scene-level 9-fold LOSO** (each scene
+    held out once); the walk orders λ by frame-weighted OOF F1 descending and freezes the first λ whose
+    full-validate `B̄_frozen ≤ B_max`.
+  - **(c) Evaluation = descriptive + paired CI only.** Report RL-vs-RF and RL-vs-τ as paired bootstrap
+    CIs over the 200 replay-level differences (same machinery as R9's CI), **with no new decision** —
+    the confirmatory primary was spent once at R9 and is **not** re-created here. Freeze three models →
+    `results/p4a/P4A_MANIFEST.json` (3 sha256 / hyperparams / seed / per-budget frozen payload check);
+    results + PROVENANCE under `results/p4a/`, all labelled **"external baseline, not deployed"**.
+
+```json CATOSG-P4A
+{
+  "problem_form": "contextual_bandit_single_step",
+  "algorithm": "dqn_bandit_single_step_epsilon_greedy",
+  "seed": 0,
+  "network": {"hidden": [64, 64], "activation": "relu"},
+  "train": {"steps": 4000, "batch": 512, "lr": 0.001, "optimizer": "adam",
+            "epsilon_start": 1.0, "epsilon_end": 0.05, "epsilon_decay_steps": 3000, "target_is_immediate_reward": true},
+  "reward": "eff_a - lambda*B_a",
+  "feature_standardisation": "zscore_on_validate_grid",
+  "lambda_grid": [0.0, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5],
+  "budgets": [0.10, 0.20, 0.30],
+  "loso": {"scheme": "scene-level", "folds": 9, "each_scene_heldout_once": true},
+  "aggregation": {"performance": "frame_weighted_oof_f1", "feasibility": "frame_weighted_oof_payload"},
+  "selection": "frozen_walk",
+  "tie_break": ["max_f1", "min_payload", "min_lambda_index"],
+  "eval": "descriptive_paired_ci_only"
+}
+```
 
 **Diagnostic note (Change-log R6/R7).** The gap between a candidate's OOF payload and its full-retrain
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
