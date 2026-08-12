@@ -52,7 +52,7 @@ python tools/generate_figures.py      # -> paper/figures/*.pdf
 |---|---|
 | `projects/ca_tosg/` | the method: models, datasets, communication, evaluation, utils |
 | `tools/` | the only entry points you run |
-| `configs/` | generated view of the protocol, md5-pinned to it |
+| `projects/ca_tosg/configs/` | generated view of the protocol, md5-pinned to it |
 | `baselines/` | where2comm, scomcp, importance_map_jscc, contextual_bandit |
 | `results/` | every committed number; `results/README.md` says which command made each file |
 | `tests/` | the gates |

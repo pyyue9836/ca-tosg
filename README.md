@@ -92,8 +92,9 @@ python tools/verify_results.py        # all gates; exit 0 iff the tree is self-c
 ```
 
 The protocol these commands implement — split roles, candidate set, selection and freeze rules —
-is `docs/experiment_protocol.md`, and it is the only normative source: `configs/*.yaml` are
-generated from it and byte-checked against it by `tests/test_manifest.py`.
+is `docs/experiment_protocol.md`, and it is the only normative source. `projects/ca_tosg/configs/*.yaml`
+are generated from it; `tests/test_manifest.py` re-checks the md5 of every protocol block a config
+claims to come from, and byte-compares the regenerated files, so the two cannot drift.
 
 ## Citation
 

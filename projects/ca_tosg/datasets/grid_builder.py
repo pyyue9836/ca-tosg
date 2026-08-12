@@ -31,8 +31,10 @@ Run:  /path/to/env/python projects/ca_tosg/datasets/grid_builder.py
 """
 import argparse
 import hashlib
+import json
 import os
 import sys
+from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
@@ -160,8 +162,17 @@ def main():
                 f"md5 {hashlib.md5(open(BLER_CSV, 'rb').read()).hexdigest()}).\n")
         f.write(f"Payload (Msym, report-only): {PAYLOAD_MSYM}.\n")
         f.write("Grid artifacts are git-excluded (data/p2/); regenerate with grid_builder.py.\n")
+        # Durable ordering anchor for the leakage gate's post-freeze check. Recorded IN the
+        # provenance rather than left to filesystem mtime: git does not carry mtime, so an
+        # mtime-based check means nothing in a fresh clone. The gate ties these stamps to THIS
+        # grid through the `out=... md5=` line below.
+        f.write(f"grid_build_timestamp: {datetime.now(timezone.utc).isoformat()}\n")
         if split != 'validate':
+            f.write("frozen_manifest_freeze_timestamp: "
+                    f"{json.load(open(MANIFEST))['freeze_timestamp']}\n")
             f.write("POST-FREEZE artifact: built after FROZEN_MANIFEST.json (PROTOCOL sec 10).\n")
+        else:
+            f.write("frozen_manifest_freeze_timestamp: n/a (validate is the PRE-freeze split)\n")
         f.write("\n")
         f.write(f"[{r['split']}] src={DATASET_NAME[r['split']]} md5={r['src_md5']}\n")
         f.write(f"    frames={r['n_frames']} scenes={r['n_scenes']} rows={r['rows']}\n")

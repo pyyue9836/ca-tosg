@@ -318,13 +318,13 @@ FILE,,projects/ca_tosg/utils/provenance.py,NEW,2,,PLAN utils/provenance.py
 FILE,,projects/ca_tosg/utils/seed.py,NEW,2,,PLAN utils/seed.py
 FILE,,projects/ca_tosg/evaluation/metrics.py,NEW,2,,PLAN evaluation/metrics.py
 FILE,,projects/ca_tosg/communication/fallback.py,NEW,2,,PLAN communication/fallback.py: ego-only fallback rule
-FILE,,configs/catosg_b010.yaml,NEW,2,,"PLAN config, DERIVED from the PROTOCOL candidate block + md5-pinned"
-FILE,,configs/catosg_b020.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
-FILE,,configs/catosg_b030.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
-FILE,,configs/phy_ldpc_qam.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
-FILE,,configs/sensitivity.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
+FILE,,projects/ca_tosg/configs/catosg_b010.yaml,NEW,5,,"PLAN config, DERIVED from the PROTOCOL candidate block + md5-pinned; moved to the PLAN position projects/ca_tosg/configs/ in commit 5"
+FILE,,projects/ca_tosg/configs/catosg_b020.yaml,NEW,5,,"PLAN config, derived + md5-pinned; moved to the PLAN position projects/ca_tosg/configs/ in commit 5"
+FILE,,projects/ca_tosg/configs/catosg_b030.yaml,NEW,5,,"PLAN config, derived + md5-pinned; moved to the PLAN position projects/ca_tosg/configs/ in commit 5"
+FILE,,projects/ca_tosg/configs/phy_ldpc_qam.yaml,NEW,5,,"PLAN config, derived + md5-pinned; moved to the PLAN position projects/ca_tosg/configs/ in commit 5"
+FILE,,projects/ca_tosg/configs/sensitivity.yaml,NEW,5,,"PLAN config, derived + md5-pinned; moved to the PLAN position projects/ca_tosg/configs/ in commit 5"
 FILE,,figs/README.md,NEW,2,,declares figs/ca_tosg_overview.svg the SOURCE and paper/figures/*.pdf its export
-FILE,,tests/test_manifest.py,NEW,2,,PLAN tests/test_manifest.py: configs == PROTOCOL block assertion (commit 2); manifest relpath resolution added in commit 3
+FILE,,tests/test_manifest.py,NEW,2,,PLAN tests/test_manifest.py: per-block md5 assertion that configs == the PROTOCOL machine-readable blocks (commit 5) + byte compare (commit 2) + manifest relpath resolution (commit 3)
 FILE,,docs/installation.md,NEW,4,,PLAN docs 1/6
 FILE,,docs/dataset.md,NEW,4,,PLAN docs 2/6
 FILE,,docs/getting_started.md,NEW,4,,PLAN docs 3/6
@@ -1232,3 +1232,4 @@ FILE,,results/channel/,NEW,2,,BEYOND-PLAN 7th results bucket: BLER tables are an
 FILE,,results/logs/,NEW,2,,untracked run logs relocated out of results/ root (gitignored)
 FILE,,projects/ca_tosg/utils/results_index.py,NEW,4,,"THE generator of results/README.md; a file matching no rule is listed UNATTRIBUTED, never dropped"
 FILE,,docs/restructure/migrate_manifests.py,NEW,3,,the manifest relpath migration + hash re-verification
+FILE,,"results/provenance/PROVENANCE_grid{,_test,_culver}.txt",MIGRATED,5,,"grid_build_timestamp + frozen_manifest_freeze_timestamp added: the durable, content-based anchor that replaces mtime in leakage check (4)"

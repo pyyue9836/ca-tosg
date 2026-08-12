@@ -7,6 +7,8 @@ oracle_ELF = argmax over FEASIBILITY-MASKED [E,L,F] (BLER_F>=0.999 -> F=-inf, LA
 BLER source: results/channel/bler_sionna.csv (frame-level bler_frame, md5 be3f5e1278ddda6efc271281ccbf449e).
 Payload (Msym, report-only): {'E': 0.0, 'L': 0.024, 'F': 0.99}.
 Grid artifacts are git-excluded (data/p2/); regenerate with grid_builder.py.
+grid_build_timestamp: 2026-08-09T15:47:04.151212+00:00   [migrated 2026-08-12 from the artifact mtime in the working tree that produced it; later runs stamp this at build time]
+frozen_manifest_freeze_timestamp: 2026-08-09T15:12:53.653192+00:00   [from FROZEN_MANIFEST.json]
 POST-FREEZE artifact: built after FROZEN_MANIFEST.json (PROTOCOL sec 10).
 
 [culver] src=dataset_culver_v3.csv md5=746c35ac187ed3eabecb90b183a6c1b6

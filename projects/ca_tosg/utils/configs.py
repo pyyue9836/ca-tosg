@@ -21,7 +21,7 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 PROTOCOL = os.path.join(ROOT, 'docs/experiment_protocol.md')
-CONFIG_DIR = os.path.join(ROOT, 'configs')
+CONFIG_DIR = os.path.join(ROOT, 'projects/ca_tosg/configs')
 MANIFEST = os.path.join(ROOT, 'results/manifests/FROZEN_MANIFEST.json')
 
 BANNER = ('# GENERATED -- do not edit. Derived from docs/experiment_protocol.md by\n'
@@ -53,6 +53,15 @@ def section(title, txt=None):
     if not m:
         raise SystemExit('protocol section %r not found' % title)
     return m.group(1), _md5(m.group(1))
+
+
+def appendix_b(txt=None):
+    """Return (raw_text, md5) of Appendix B's prediction table, up to its first subsection."""
+    txt = txt if txt is not None else protocol_text()
+    m = re.search(r'(?ms)^## Appendix B — P3 sensitivity expected behaviours.*?(?=^### )', txt)
+    if not m:
+        raise SystemExit('protocol Appendix B not found')
+    return m.group(0), _md5(m.group(0))
 
 
 # ------------------------------------------------------------------ parsers (protocol -> values)
@@ -136,10 +145,7 @@ def build():
     cand, _, cand_md5 = json_block('CATOSG-CANDIDATES', txt)
     ch_sec, ch_md5 = section('3. Channel grid', txt)
     ac_sec, ac_md5 = section('4. Action set S = {E, L, F}', txt)
-    appb = re.search(r'(?ms)^## Appendix B — P3 sensitivity expected behaviours.*?(?=^### )', txt)
-    if not appb:
-        raise SystemExit('Appendix B not found')
-    b_sec, b_md5 = appb.group(0), _md5(appb.group(0))
+    b_sec, b_md5 = appendix_b(txt)
 
     ch = channel_grid(ch_sec)
     ac = action_set(ac_sec)

@@ -582,7 +582,7 @@ written into the paper's conclusions; the paper reports only the frozen selector
   content changed.** `paper1/` is dissolved into the root layout of `RESTRUCTURE_PLAN.md`
   (`docs/ figs/ projects/ tools/ baselines/ results/ tests/ paper/`), per `RESTRUCTURE_MAP.csv`.
   This file is `PROTOCOL.md` moved; it remains the single normative source, and `configs/*.yaml` are
-  now generated FROM it by `projects/ca_tosg/utils/configs.py` and byte-compared by
+  now generated FROM it into `projects/ca_tosg/configs/` by `projects/ca_tosg/utils/configs.py` and byte-compared by
   `tests/test_manifest.py` — a config can never become a second source.
   **Manifest migration (the only edit to a frozen product).** Manifest-internal paths are, and were,
   relative to the tree root; the tree root moved up one level, so six strings in
@@ -592,12 +592,33 @@ written into the paper's conclusions; the paper reports only the frozen selector
   `models/selector.py` now writes. **No hash, timestamp, or selection field was touched**, and all
   7 recorded md5/sha256 were re-verified against the files at their new locations before the write
   (`docs/restructure/migrate_manifests.py`). `P4A_MANIFEST.json` needed no path change.
-  The manifest's **mtime** was restored from its own `freeze_timestamp` after the rewrite: §10's
-  post-freeze check (4) compares grid mtime against manifest mtime, and a pure relabel must not be
-  able to manufacture an ordering violation. *Known limitation, recorded rather than fixed:* git does
-  not carry mtime, so that check only means anything in a working tree that produced the artefacts.
+  The manifest's mtime was restored from its own `freeze_timestamp` after the rewrite, because §10's
+  post-freeze check (4) then still compared grid mtime against manifest mtime and a pure relabel must
+  not be able to manufacture an ordering violation. **That limitation is now eliminated, not merely
+  recorded** (LAYOUT-2 below): check (4) no longer reads mtime at all.
   Gates after the migration: all five green + the new configs/manifest gate
   (`python tools/verify_results.py`).
+
+- **LAYOUT-2 (2026-08-12) — §10 post-freeze check (4) re-anchored from filesystem mtime to recorded
+  content; `configs/` moved to its planned location.** Three changes, no experimental content touched.
+  1. **The ordering anchor.** Check (4) proved "the test/Culver grid was built after the freeze" by
+     comparing `os.path.getmtime(grid)` with `os.path.getmtime(FROZEN_MANIFEST.json)`. Git does not
+     carry mtime, so in a fresh clone that comparison could only pass or fail by accident of checkout
+     order — and any rewrite of the manifest, however cosmetic, faked a violation. It now reads two
+     fields the grid's own provenance records: `frozen_manifest_freeze_timestamp` (which must equal
+     the manifest's current `freeze_timestamp`) and `grid_build_timestamp` (which must be later than
+     it), and it ties those stamps to the artifact by re-checking the grid md5 the provenance
+     recorded. A missing provenance, a missing field, or a provenance describing a different grid is
+     a FAIL, never a skip. `grid_builder.py` stamps both fields at build time from now on; the three
+     existing provenance files were migrated on 2026-08-12, each stamped value labelled with where it
+     came from (the artifact's mtime in the working tree that produced it).
+  2. **`configs/` → `projects/ca_tosg/configs/`**, the position RESTRUCTURE_PLAN.md specifies.
+  3. **The configs↔protocol assertion is now explicit and per-block.** `tests/test_manifest.py`
+     recomputes the md5 of each protocol block a config claims to derive from — CATOSG-CANDIDATES,
+     §3 Channel grid, §4 Action set, Appendix B — and names the block that drifted, in addition to
+     the byte-comparison of the regenerated files. A config pinning no protocol md5, or one this
+     repository does not generate, fails as an ungoverned second source. **This file remains the
+     single normative source; `projects/ca_tosg/configs/*.yaml` are a view of it and nothing else.**
 
 ## Appendix A — P2 freeze summary (P2-D)
 

@@ -30,6 +30,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime
 
 import pandas as pd
 
@@ -48,6 +49,7 @@ OPENCOOD = os.path.join(os.path.dirname(P1), 'OpenCOOD')
 DATA = os.path.join(OPENCOOD, 'peiyi_work/paper1/data')
 GRID = os.path.join(P1, 'data/p2')
 PROV = os.path.join(P1, 'results/manifests')
+PROVENANCE = os.path.join(P1, 'results/provenance')
 MANIFEST = os.path.join(PROV, 'FROZEN_MANIFEST.json')
 FOLDS = os.path.join(PROV, 'validate_loso_folds.csv')
 PROTOCOL = os.path.join(P1, 'docs/experiment_protocol.md')
@@ -313,16 +315,57 @@ def check_finaltest_clean():
             extra = cols - ALLOWED_GRID_COLS
             if extra:
                 raise Fail(f'{split} grid has unexpected columns: {sorted(extra)}')
-            if os.path.getmtime(p) < os.path.getmtime(MANIFEST):
-                raise Fail(f'{split} grid predates FROZEN_MANIFEST.json (built before freeze?)')
+            check_post_freeze_order(split, p)
     for fn in os.listdir(PROV):
         low = fn.lower()
         if ('test' in low or 'culver' in low) and any(k in low for k in
                                                       ('tau', 'threshold', 'tune', 'fit', 'train')):
-            raise Fail(f'test/Culver tuning artifact present in results/p2_dataprep/: {fn}')
-    stage = 'POST-FREEZE (grids optional; any present column-pure + after manifest)' if frozen \
+            raise Fail(f'test/Culver tuning artifact present in results/manifests/: {fn}')
+    stage = 'POST-FREEZE (grids optional; any present column-pure + built after the freeze)' if frozen \
         else 'PRE-FREEZE (grids correctly absent per sec 10)'
     print(f'  (4) test/Culver clean OK [{stage}].')
+
+
+def _prov_field(text, key):
+    m = re.search(r'(?m)^%s:\s*(\S+)' % re.escape(key), text)
+    return m.group(1) if m else None
+
+
+def check_post_freeze_order(split, grid_path):
+    """A test/Culver grid must have been built AFTER the freeze (PROTOCOL sec 10).
+
+    Anchored on CONTENT, not on filesystem mtime: the grid's provenance records the freeze it was
+    built against and its own build time, and is tied to this exact grid by the md5 it recorded.
+    mtime is not carried by git, so an mtime comparison is meaningless in a fresh clone -- it could
+    only ever pass or fail by accident of checkout order.
+    """
+    prov_p = os.path.join(PROVENANCE, f'PROVENANCE_grid_{split}.txt')
+    if not os.path.exists(prov_p):
+        raise Fail(f'{split} grid present but its provenance is missing ({prov_p}); the '
+                   f'post-freeze ordering cannot be established, so this is a FAIL, not a skip.')
+    prov = open(prov_p, encoding='utf-8').read()
+
+    rec_md5 = re.search(r'out=\S*p2_grid_%s\.csv md5=([0-9a-f]{32})' % split, prov)
+    if not rec_md5:
+        raise Fail(f'{split} provenance records no md5 for its grid -- it cannot be tied to '
+                   f'{os.path.basename(grid_path)}')
+    actual = hashlib.md5(open(grid_path, 'rb').read()).hexdigest()
+    if rec_md5.group(1) != actual:
+        raise Fail(f'{split} provenance describes a DIFFERENT grid (records {rec_md5.group(1)[:12]}…, '
+                   f'file is {actual[:12]}…) -- its timestamps say nothing about this artifact')
+
+    built = _prov_field(prov, 'grid_build_timestamp')
+    against = _prov_field(prov, 'frozen_manifest_freeze_timestamp')
+    if not built or not against:
+        raise Fail(f'{split} provenance lacks grid_build_timestamp / '
+                   f'frozen_manifest_freeze_timestamp; rebuild it with grid_builder.py')
+    frozen_ts = json.load(open(MANIFEST))['freeze_timestamp']
+    if against != frozen_ts:
+        raise Fail(f'{split} grid was built against freeze {against}, but the current '
+                   f'FROZEN_MANIFEST.json is {frozen_ts} -- the grid predates this freeze')
+    if datetime.fromisoformat(built) <= datetime.fromisoformat(frozen_ts):
+        raise Fail(f'{split} grid build time {built} is not after the freeze {frozen_ts} '
+                   f'(built before freeze?)')
 
 
 def main():
