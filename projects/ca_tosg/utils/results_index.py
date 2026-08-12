@@ -22,7 +22,7 @@ RULES = [
     (r'^manifests/scene_manifest_\w+\.csv$',
      'python tools/prepare_data.py --scene-manifest', 'independent frame->scene manifest'),
     (r'^manifests/P4A_MANIFEST\.json$',
-     'python tools/run_baselines.py contextual_bandit --train', 'external baseline, not deployed'),
+     'python tools/run_baselines.py contextual_bandit --train', 'internal learned-policy comparator, not deployed'),
     (r'^channel/bler_sionna\.csv$', 'python tools/build_bler_table.py', 'AWGN + Rayleigh'),
     (r'^channel/bler_sionna_ofdm\.csv$', 'python tools/build_bler_table.py --ofdm', ''),
     (r'^channel/bler_sionna_rician\.csv$',

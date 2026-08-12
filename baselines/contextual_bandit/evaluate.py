@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""P4-A evaluation: external RL bandit baseline vs RF and vs tau (Change-log P4-A (c)). DESCRIPTIVE + CI ONLY.
+"""P4-A evaluation: internal learned-policy comparator (bandit) vs RF and vs tau (Change-log P4-A (c)). DESCRIPTIVE + CI ONLY.
 
-"external baseline, not deployed". Same 200-realisation paired replay + CSI_SEED as eval_p2_deploy (the
+"internal learned-policy comparator, not deployed". Same 200-realisation paired replay + CSI_SEED as eval_p2_deploy (the
 RL, RF, and tau policies see the IDENTICAL per-frame SNR/channel draws), same eff definition, same paired
 bootstrap CI machinery as R9. Reports RL-vs-RF and RL-vs-tau as CIs only -- NO new decision (the
 confirmatory primary was spent once at R9). Frozen CA-TOSG models / delta / tau* / oracle unchanged;
@@ -29,13 +29,13 @@ for _d in ('projects/ca_tosg/evaluation', 'projects/ca_tosg/evaluation/ablations
     _s.path.insert(0, _o.path.join(_CT_ROOT, _d))
 # --- end bootstrap ---
 import deployment as D
-import train_p4a_bandit as T
+import train as T
 
 P1 = D.P1
 OUT = os.path.join(P1, 'results/baselines/contextual_bandit_runs')
 ROOT_RESULTS = os.path.join(P1, 'results')
 PROV_DIR = os.path.join(P1, 'results/provenance')
-P4A_MANIFEST = os.path.join(OUT, 'P4A_MANIFEST.json')
+P4A_MANIFEST = os.path.join(P1, 'results/manifests/P4A_MANIFEST.json')
 PAYVEC = D.PAYVEC
 SPLITS = D.SPLITS
 N_REPLAY = D.N_REPLAY
@@ -129,8 +129,8 @@ def main():
     pd.DataFrame(summ).to_csv(os.path.join(ROOT_RESULTS, 'baselines/contextual_bandit.csv'), index=False)
 
     with open(os.path.join(PROV_DIR, 'PROVENANCE_p4a.txt'), 'w') as f:
-        f.write('CA-TOSG P4-A -- external RL bandit baseline vs RF and tau (evaluate.py). '
-                'DESCRIPTIVE + CI ONLY; "external baseline, not deployed".\n' + '=' * 90 + '\n')
+        f.write('CA-TOSG P4-A -- internal learned-policy comparator (bandit) vs RF and tau (evaluate.py). '
+                'DESCRIPTIVE + CI ONLY; "internal learned-policy comparator, not deployed".\n' + '=' * 90 + '\n')
         f.write(f'P4A manifest: results/manifests/P4A_MANIFEST.json ({p4man["schema"]}, algo {p4man["algorithm"]}, '
                 f'problem_form {p4man["problem_form"]}); 3 bandits sha256-verified.\n')
         f.write(f'Same 200 paired CSI samplings/split, seed={CSI_SEED} (identical draws to eval_p2_deploy); '
@@ -139,7 +139,8 @@ def main():
                 'RL-vs-RF and RL-vs-tau reported as CIs ONLY -- NO new decision (R9 primary already spent).\n')
         f.write('Frozen CA-TOSG models / delta / tau* / oracle unchanged; main.tex untouched; no new '
                 'perception inference (cached eff + frozen predict()).\n')
-    print('wrote results/p4a/{p4a_replay_*, contextual_bandit.csv, PROVENANCE_p4a.txt}')
+    print('wrote results/baselines/{contextual_bandit.csv, contextual_bandit_runs/p4a_replay_*} '
+          '+ results/provenance/PROVENANCE_p4a.txt')
 
 
 if __name__ == '__main__':

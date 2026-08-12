@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""P4-A: match-adaptive EXTERNAL RL baseline -- contextual-bandit selector (Change-log P4-A).
+"""P4-A: match-adaptive INTERNAL learned-policy comparator -- contextual-bandit selector (Change-log P4-A).
 
-"external baseline, not deployed". Does NOT touch the deployed CA-TOSG selectors, FROZEN_MANIFEST.json,
+"internal learned-policy comparator, not deployed". Does NOT touch the deployed CA-TOSG selectors, FROZEN_MANIFEST.json,
 delta, tau*, or the mainline replay; main.tex untouched. Every parameter is PARSED from the machine-
 parseable ```json CATOSG-P4A``` block in docs/experiment_protocol.md (single source of truth; nothing hard-coded here).
 
@@ -44,6 +44,7 @@ PROTOCOL = os.path.join(P1, 'docs/experiment_protocol.md')
 GRID = os.path.join(D.GRID_DIR, 'p2_grid_validate.csv')
 MODELDIR = os.path.join(P1, 'data/p2')                 # git-excluded, like the frozen selectors
 OUT = os.path.join(P1, 'results/baselines/contextual_bandit_runs')
+MANIFEST_DIR = os.path.join(P1, 'results/manifests')   # all frozen manifests live together
 ACTIONS = D.ACTIONS                                     # ['E','L','F']
 PAY = np.array([D.PAY[a] for a in ACTIONS])            # [0, 0.024, 0.99]
 DEV = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -129,14 +130,40 @@ def fw_metrics(act, eff, scene):
     return float(e.mean()), float(b.mean())
 
 
-def oof_loso(Xz, eff, scene, lam, blk, seed):
-    """Scene-level 9-fold LOSO: train on 8 scenes, OOF F1/payload on the held-out scene; frame-weighted."""
+def fit_scaler(X):
+    """z-score statistics; a zero-variance column keeps sd=1 so it maps to a constant 0."""
+    mu = X.mean(0)
+    sd = X.std(0)
+    sd[sd == 0] = 1.0
+    return mu, sd
+
+
+def fold_scaler(X, scene, held_out):
+    """The scaler a LOSO fold is allowed to see: fitted on the TRAINING scenes only.
+
+    Exposed as its own function so tests/test_bandit_fold_scaling.py can assert it directly.
+    """
+    return fit_scaler(X[scene != held_out])
+
+
+def oof_loso(X, eff, scene, lam, blk, seed):
+    """Scene-level 9-fold LOSO: train on 8 scenes, OOF F1/payload on the held-out scene; frame-weighted.
+
+    FOLD-LOCAL STANDARDISATION (erratum P4A-1, 2026-08-12). Takes RAW X: mu/sd are fitted on the
+    fold's TRAINING scenes only and then applied to both the training rows and the held-out scene.
+    Fitting them once over the whole validate grid -- what this did before -- let the held-out
+    scene's own distribution set the scale on which its features were judged, i.e. leaked it into
+    every fold. These OOF numbers are the lambda-selection substrate, so the leak reached selection.
+    """
     scenes = sorted(np.unique(scene))
     num = den = pay_num = 0.0
     for sc in scenes:
         tr = scene != sc; te = ~tr
-        net = train_bandit(Xz[tr], eff[tr], lam, blk, seed)
-        a = greedy_actions(net, Xz[te])
+        mu_k, sd_k = fold_scaler(X, scene, sc)                          # TRAINING scenes only
+        Xtr = ((X[tr] - mu_k) / sd_k).astype(np.float32)
+        Xte = ((X[te] - mu_k) / sd_k).astype(np.float32)                # held-out, same statistics
+        net = train_bandit(Xtr, eff[tr], lam, blk, seed)
+        a = greedy_actions(net, Xte)
         f1_k, b_k = fw_metrics(a, eff[te], scene[te])
         n_k = int(te.sum())
         num += n_k * f1_k; pay_num += n_k * b_k; den += n_k
@@ -149,15 +176,20 @@ def main():
     man_frozen = json.load(open(D.MANIFEST))
     feat = man_frozen['feature_names']
     X, eff, scene, sid = load_grid(feat)
-    mu = X.mean(0); sd = X.std(0); sd[sd == 0] = 1.0
-    Xz = ((X - mu) / sd).astype(np.float32)
+    # Two scalers, on purpose (erratum P4A-1):
+    #   LOSO  -> fitted inside oof_loso on each fold's TRAINING scenes only (no held-out leakage);
+    #   FINAL -> fitted on the whole validate grid, which is legitimate: validate is the only split
+    #            any fitting may touch, and the frozen model is allowed to use all of it.
+    # test/Culver never refit anything -- evaluate.py reads mu/sd out of the checkpoint.
+    mu, sd = fit_scaler(X)
+    Xz = ((X - mu) / sd).astype(np.float32)                             # FINAL scaler only
     seed = blk['seed']; lam_grid = blk['lambda_grid']
 
     # --- LOSO OOF per lambda (selection substrate) ---
-    print('LOSO OOF per lambda...', flush=True)
+    print('LOSO OOF per lambda (fold-local scaling)...', flush=True)
     oof = []
     for li, lam in enumerate(lam_grid):
-        f1, pay = oof_loso(Xz, eff, scene, lam, blk, seed)
+        f1, pay = oof_loso(X, eff, scene, lam, blk, seed)               # RAW X -> fold-local mu/sd
         oof.append(dict(lambda_index=li, **{'lambda': lam}, oof_f1=round(f1, 5), oof_payload=round(pay, 5)))
         print(f'  lambda={lam:<5} OOF F1={f1:.5f} payload={pay:.5f}', flush=True)
     pd.DataFrame(oof).to_csv(os.path.join(OUT, 'p4a_loso_oof.csv'), index=False)
@@ -199,7 +231,13 @@ def main():
     pd.DataFrame(walk_rows).to_csv(os.path.join(OUT, 'p4a_walk.csv'), index=False)
 
     manifest = dict(
-        schema='catosg-p4a-manifest/1', label='external baseline, not deployed',
+        schema='catosg-p4a-manifest/1', label='internal learned-policy comparator',
+        feature_standardisation=dict(
+            loso='fold_local: mu/sd fitted on the fold TRAINING scenes only, applied to train + held-out',
+            final='full_validate: mu/sd refitted on the whole validate grid for the frozen model',
+            deployment='validate statistics reused unchanged at test/Culver; NO refit',
+            erratum='P4A-1 (2026-08-12): the previous manifest was produced with mu/sd fitted once '
+                    'on the full validate grid before LOSO, leaking the held-out scene into every fold'),
         p4a_block_md5=blk_md5, algorithm=blk['algorithm'], problem_form=blk['problem_form'],
         seed=seed, network=blk['network'], train=blk['train'], reward=blk['reward'],
         feature_names=feat, budgets=manifest_budgets,
@@ -207,8 +245,10 @@ def main():
                     frozen_manifest_sha256=_sha256(D.MANIFEST)),
         env=dict(python=sys.version.split()[0], torch=torch.__version__, numpy=np.__version__, device=str(DEV)),
     )
-    json.dump(manifest, open(os.path.join(OUT, 'P4A_MANIFEST.json'), 'w'), indent=1)
-    print('wrote results/p4a/{P4A_MANIFEST.json, p4a_loso_oof.csv, p4a_walk.csv} + models in data/p2/ (git-excluded)')
+    os.makedirs(MANIFEST_DIR, exist_ok=True)
+    json.dump(manifest, open(os.path.join(MANIFEST_DIR, 'P4A_MANIFEST.json'), 'w'), indent=1)
+    print('wrote results/manifests/P4A_MANIFEST.json + results/baselines/contextual_bandit_runs/{p4a_loso_oof.csv, '
+      'p4a_walk.csv} + models in data/p2/ (git-excluded)')
 
 
 if __name__ == '__main__':

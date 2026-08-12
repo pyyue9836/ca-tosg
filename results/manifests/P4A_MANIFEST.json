@@ -1,7 +1,13 @@
 {
  "schema": "catosg-p4a-manifest/1",
- "label": "external baseline, not deployed",
- "p4a_block_md5": "67a0abe8978837f078b3c2925b5e2e81",
+ "label": "internal learned-policy comparator",
+ "feature_standardisation": {
+  "loso": "fold_local: mu/sd fitted on the fold TRAINING scenes only, applied to train + held-out",
+  "final": "full_validate: mu/sd refitted on the whole validate grid for the frozen model",
+  "deployment": "validate statistics reused unchanged at test/Culver; NO refit",
+  "erratum": "P4A-1 (2026-08-12): the previous manifest was produced with mu/sd fitted once on the full validate grid before LOSO, leaking the held-out scene into every fold"
+ },
+ "p4a_block_md5": "6ceef98abd32f8606c9c3ca5e77d6b4f",
  "algorithm": "dqn_bandit_single_step_epsilon_greedy",
  "problem_form": "contextual_bandit_single_step",
  "seed": 0,
@@ -51,36 +57,36 @@
  "budgets": {
   "0.10": {
    "tag": "B010",
-   "lam": 0.2,
-   "lambda_index": 4,
+   "lam": 0.05,
+   "lambda_index": 2,
    "walk_depth": 0,
-   "frozen_f1": 0.90678,
-   "frozen_payload": 0.02369,
-   "oof_f1": 0.9055,
+   "frozen_f1": 0.90911,
+   "frozen_payload": 0.05146,
+   "oof_f1": 0.90644,
    "model": "data/p2/p4a_bandit_B010.pt",
-   "model_sha256": "9995435b92b4d41b0eafee76f3e3af6489add74061289f3a3c8d5b1c0fcc92f8"
+   "model_sha256": "38ffba95a19c12cc27efc799e9cba6af02d586803b46b2bf691fb01f522bb15f"
   },
   "0.20": {
    "tag": "B020",
-   "lam": 0.2,
-   "lambda_index": 4,
+   "lam": 0.05,
+   "lambda_index": 2,
    "walk_depth": 0,
-   "frozen_f1": 0.90678,
-   "frozen_payload": 0.02369,
-   "oof_f1": 0.9055,
+   "frozen_f1": 0.90911,
+   "frozen_payload": 0.05146,
+   "oof_f1": 0.90644,
    "model": "data/p2/p4a_bandit_B020.pt",
-   "model_sha256": "961daffd948045ef05f3de321202b5d5c581bbc3e775d7b53c18181201915b23"
+   "model_sha256": "4e6240f627f104f173e6fb93e1dcdc2eaf487b20c9c56646edac28a2be4f0bb9"
   },
   "0.30": {
    "tag": "B030",
-   "lam": 0.2,
-   "lambda_index": 4,
+   "lam": 0.05,
+   "lambda_index": 2,
    "walk_depth": 0,
-   "frozen_f1": 0.90678,
-   "frozen_payload": 0.02369,
-   "oof_f1": 0.9055,
+   "frozen_f1": 0.90911,
+   "frozen_payload": 0.05146,
+   "oof_f1": 0.90644,
    "model": "data/p2/p4a_bandit_B030.pt",
-   "model_sha256": "f4e5b172a5d82d595ec9fbff5c9b5cab2c01d5336b4bfb69cb4b531cc8a469de"
+   "model_sha256": "c14f67cbe2b363748f10871de41cdf1fd44724110114cfd334a40f4e1fe31dc8"
   }
  },
  "inputs": {
@@ -88,7 +94,7 @@
    "file": "data/p2/p2_grid_validate.csv",
    "md5": "3314418d4e53ff30d0d246e1594e4bed"
   },
-  "frozen_manifest_sha256": "042dccbc2634199a2fd5d6fe7effb0ffeafcc1a2cc6ad2ec6f72acb0a70a21b7"
+  "frozen_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc"
  },
  "env": {
   "python": "3.10.18",

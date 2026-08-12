@@ -491,7 +491,7 @@ the model is frozen, provided each change is logged with a reason and a date up 
   **(c)** the `rayleigh=1` and `rayleigh=0` results together **bracket** the potential gain of a
   K-aware selector. Output: same columns as item 5 (F1 / payload / ρ_F) resolved by K × SNR, labelled
   **"bracketing variant, not deployed behavior"**. No change to the frozen models / oracle / δ / τ\*.
-- **P4-A (2026-08-11, pre-registered before training) — match-adaptive external RL baseline.** An
+- **P4-A (2026-08-11, pre-registered before training) — match-adaptive internal learned-policy comparator.** An
   **external comparison baseline** trained to the SAME matched protocol as the deployed RF selector, to
   answer "does a learned RL policy beat the imitation-trained RF / the τ rule?". It does **not** touch
   the deployed CA-TOSG models, `FROZEN_MANIFEST.json`, δ, τ\*, or the mainline replay; `main.tex` is
@@ -517,7 +517,7 @@ the model is frozen, provided each change is logged with a reason and a date up 
     CIs over the 200 replay-level differences (same machinery as R9's CI), **with no new decision** —
     the confirmatory primary was spent once at R9 and is **not** re-created here. Freeze three models →
     `results/manifests/P4A_MANIFEST.json` (3 sha256 / hyperparams / seed / per-budget frozen payload check);
-    results + PROVENANCE under `results/baselines/contextual_bandit_runs/`, all labelled **"external baseline, not deployed"**.
+    results + PROVENANCE under `results/baselines/contextual_bandit_runs/`, all labelled **"internal learned-policy comparator, not deployed"**.
 
 ```json CATOSG-P4A
 {
@@ -528,7 +528,9 @@ the model is frozen, provided each change is logged with a reason and a date up 
   "train": {"steps": 4000, "batch": 512, "lr": 0.001, "optimizer": "adam",
             "epsilon_start": 1.0, "epsilon_end": 0.05, "epsilon_decay_steps": 3000, "target_is_immediate_reward": true},
   "reward": "eff_a - lambda*B_a",
-  "feature_standardisation": "zscore_on_validate_grid",
+  "feature_standardisation": {"loso": "fold_local_train_scenes_only",
+                              "final": "zscore_on_full_validate_grid",
+                              "deployment": "validate_statistics_reused_no_refit"},
   "lambda_grid": [0.0, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5],
   "budgets": [0.10, 0.20, 0.30],
   "loso": {"scheme": "scene-level", "folds": 9, "each_scene_heldout_once": true},
@@ -619,6 +621,44 @@ written into the paper's conclusions; the paper reports only the frozen selector
      the byte-comparison of the regenerated files. A config pinning no protocol md5, or one this
      repository does not generate, fails as an ungoverned second source. **This file remains the
      single normative source; `projects/ca_tosg/configs/*.yaml` are a view of it and nothing else.**
+
+- **ERRATUM P4A-1 (2026-08-12) — the P4-A comparator had a standardisation leak; its results are
+  WITHDRAWN and re-run.** `baselines/contextual_bandit/train.py` fitted the z-score statistics
+  (`mu = X.mean(0); sd = X.std(0)`) **once on the whole validate grid, before LOSO**, and every fold
+  then trained and scored on those statistics. The held-out scene therefore helped set the scale on
+  which its own features were judged, in all 9 folds, and the LOSO OOF numbers are the substrate λ is
+  selected on — so the leak reached selection. It never touched the deployed CA-TOSG RF (which uses
+  trees, no scaling) nor FROZEN_MANIFEST.json.
+  **Corrected rule (now also pre-registered in the `CATOSG-P4A` block).** Inside LOSO, μ/σ are fitted
+  on the fold's TRAINING scenes only and applied to both the training rows and the held-out scene.
+  After LOSO and λ selection are finished, the final model refits μ/σ on the whole validate grid and
+  retrains — legitimate, because validate is the only split any fitting may touch. test/Culver reuse
+  the validate statistics unchanged; refitting there is banned and the evaluator reads μ/σ out of the
+  checkpoint, never from the evaluation split.
+  **Re-run:** three budgets retrained → `results/manifests/P4A_MANIFEST.json` replaced in place
+  (single-version rule; no v1/v2 pair), re-evaluated on the SAME 200 paired CSI draws (seed unchanged)
+  with the CIs recomputed. Appendix C now reports the new numbers.
+  **What changed.** λ\* moved 0.2 → 0.05 and the OOF surface flattened (the old λ=0.05 OOF collapse to
+  0.872 was the leak, not the objective: it is now 0.90644). Direction of the headline comparison is
+  unchanged — **RL below RF on F1 in all 9 split×budget cells, CI entirely < 0** — with the magnitudes
+  roughly halved (validate B0.10 ΔF −0.0043 → −0.0020; test B0.20 −0.0072 → −0.0036).
+  **Two conclusions did change, and are changed here rather than defended:**
+  (i) the old blanket "RL is below τ everywhere" is FALSE under the corrected protocol — RL is now
+  above τ on validate at B_max 0.10 and 0.30 (CIs exclude 0), and below τ on test and Culver-City at
+  every budget, so the claim is narrowed to the held-out splits;
+  (ii) the comparator's budget compliance does not transfer: frozen payload 0.05146 ≤ 0.10 on validate,
+  but 0.15568 on test at the same B_max = 0.10, where the RF stays at 0.06798.
+  Guard against recurrence: `tests/test_bandit_fold_scaling.py`.
+  **Wording.** "external baseline" is replaced everywhere by "internal learned-policy comparator" —
+  it is our own construction trained to our protocol, not an external method's reported result, and
+  calling it external overstated its independence. The directory name `baselines/contextual_bandit/`
+  is unchanged.
+  **Also fixed in the same commit** (defects introduced by the LAYOUT restructure and missed by its
+  checks, which validated path constants but never import resolution or generator output paths):
+  `evaluate.py` still did `import train_p4a_bandit` and `p3_variants.py` still did
+  `import eval_p3_sensitivity` — both modules had been renamed, so neither file could run; and the
+  P4-A manifest was being written to `results/baselines/contextual_bandit_runs/` while the committed
+  copy had moved to `results/manifests/`, which would have produced two diverging manifests.
 
 ## Appendix A — P2 freeze summary (P2-D)
 
@@ -721,36 +761,47 @@ selector: neither blind extreme wins, because the opportunistic feed pays for F 
 range while only the K=10 high-SNR slice returns it; the value of a genuine K-aware policy (request F
 only above the K-dependent onset) lies **between** these bounds.
 
-## Appendix C — P4-A external RL baseline (Change-log P4-A)
+## Appendix C — P4-A internal learned-policy comparator (Change-log P4-A)
 
-**"external baseline, not deployed."** A contextual-bandit RL selector (`train.py`,
+**"internal learned-policy comparator, not deployed."** A contextual-bandit RL selector (`train.py`,
 `evaluate.py`) trained to the matched protocol, compared to the deployed RF and the τ rule.
 Frozen CA-TOSG models / δ / τ\* / oracle / mainline replay unchanged; `main.tex` untouched. Manifest
 `results/manifests/P4A_MANIFEST.json` (3 bandit sha256 / hyperparams / seed / per-budget frozen payload).
 Sanity: the eval's `F1_RF` / `B_RF` reproduce `replay_summary.csv` exactly (0 mismatches).
 
-**Selection outcome (validate LOSO, `p4a_loso_oof.csv` / `p4a_walk.csv`).** Ordered by frame-weighted
-OOF F1, the best λ is **λ\*=0.2** (OOF F1 0.9055, payload 0.0245) — feasible for all three budgets, so the
-walk freezes it at depth 0 for **every** B_max. The bandit therefore converges to a **conservative
-near-object-level policy** (payload ≈ B_L ≈ 0.024) at all budgets: lower-λ models that request more F
-have HIGHER in-sample F1 (λ=0 full-grid 0.9114) but LOWER held-out F1 (λ=0 OOF 0.9027; λ=0.05 collapses
-to 0.872) — reward-based F-selection **overfits** the F-vs-L boundary, so the model-selected policy
-plays L safe. (The three per-budget model files carry different sha256 — same policy, re-trained per
-budget; GPU training is not bit-reproducible, a recorded limitation for this external baseline; the
-frozen F1/payload are identical.)
+**Selection outcome (validate LOSO, `p4a_loso_oof.csv` / `p4a_walk.csv`; RE-RUN under erratum P4A-1).**
+Ordered by frame-weighted OOF F1 the best λ is **λ\*=0.05** (OOF F1 0.90644, OOF payload
+0.03591); it is feasible for all three budgets, so the walk freezes it at depth 0 for
+**every** B_max and the three budgets share one policy (frozen validate F1 0.90911, payload
+0.05146). The OOF surface is nearly flat in λ (0.90177–0.90644
+over the seven values); the sharp λ=0.05 collapse to 0.872 reported before the erratum was an artefact of
+the standardisation leak, not a property of the objective. (The three per-budget model files carry
+different sha256 — the same policy re-trained per budget; GPU training is not bit-reproducible, a recorded
+limitation of this comparator. Their frozen F1/payload are identical.)
 
-**Comparison (descriptive, paired bootstrap CI only — NO new decision; `contextual_bandit.csv`).** Anchors
-test @ B_max=0.20: RL F1 0.8974 / payload 0.0216; RF 0.9046 / 0.0947; τ 0.9074 / 0.2168.
-- RL-vs-RF: ΔF CI [−0.0073, −0.0071] (RL F1 **below** RF, CI entirely < 0) at ΔB CI [−0.0738, −0.0725]
-  (RL much lower payload). Range over splits/budgets: ΔF from −0.004 (validate B010) to −0.026 (Culver B030).
-- RL-vs-τ: ΔF CI [−0.0101, −0.0099] (RL **below** τ) at ΔB CI [−0.196, −0.194] (RL far lower payload).
+**Comparison (descriptive, paired bootstrap CI only — NO new decision; `contextual_bandit.csv`).**
+Anchors test @ B_max=0.20: RL F1 0.9010 / payload 0.1557; RF 0.9046 / 0.0947;
+τ 0.9074 / 0.2168.
+- **RL-vs-RF: RL is below RF on F1 in every split × budget cell**, CI entirely < 0 in all 9
+  (test B020 ΔF CI [-0.0037, -0.0035]; ΔF means range
+  -0.00198 … -0.02352). Same direction as before the
+  erratum; the magnitudes roughly halved on validate and test.
+- **RL-vs-τ: the previous blanket claim does NOT survive the re-run.** RL is now *above* τ on
+  **validate** at B_max=0.10 (ΔF CI [+0.0017, +0.0018])
+  and at B_max=0.30 (CI [+0.0003, +0.0005]), and below τ
+  on test and Culver-City at every budget. The claim is therefore narrowed to the held-out splits:
+  **on data it did not see, the learned policy beats neither the RF nor the τ rule.**
+- **Budget compliance does not transfer (new; reported, not fixed).** The frozen payload meets the
+  budget on validate (0.05146 ≤ 0.10) but the same policy spends 0.1557
+  Msym/frame on test — **above B_max = 0.10** — where the RF stays at 0.0680. Feasibility is a
+  validate-side check by construction (§6); the RF's compliance happens to transfer, this comparator's
+  does not.
 
 **Expected behaviour (§8 anti-forcing — check, not target).** Pre-registered expectation: RL and RF in
-the same F1/payload neighbourhood. **Observed:** RL is in a similar F1 *band* on validate (0.907 vs 0.911)
-but drifts further below on test/Culver, and sits at the **Fixed-L payload corner** rather than matching
-the RF's operating points — i.e. it is **not** better than the RF; the RF's imitation of the exact
-λ-oracle labels generalises the channel-aware F-selection better than reward RL here. Reported as-is: a
-valuable **negative** comparison (a learned RL policy does not beat the interpretable imitation selector).
+the same F1/payload neighbourhood. **Observed:** RL sits in a similar F1 band on validate, is below RF on
+every split, drifts further below on test/Culver, and does not hold the budget on test. Reported as-is:
+a **negative** comparison — a learned bandit policy does not beat the interpretable imitation selector,
+and the erratum re-run did not overturn that verdict.
 
 ## Appendix D — KEEP-UNTIL-P5 register (Change-log LAYOUT)
 
