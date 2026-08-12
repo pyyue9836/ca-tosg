@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """Run every gate. Exit 0 iff all pass.
 
+  Nine checks: the five original gates, the configs/manifest contract, and the three guards added
+  with the 2026-08-12 errata (P4A-1 fold-local scaling, P3-1 SNR support, and import resolution).
+
   python tools/verify_results.py
 """
 import os
@@ -21,6 +24,9 @@ GATES = [
     ('claims vs main.tex',   [PY, 'tests/test_result_consistency.py', '--check']),
     ('data leakage + freeze',[PY, 'tests/test_data_leakage.py']),
     ('manifest relpaths',    [PY, 'tests/test_manifest.py']),
+    ('bandit fold scaling',  [PY, 'tests/test_bandit_fold_scaling.py']),
+    ('P3 SNR support',       [PY, 'tests/test_p3_snr_support.py']),
+    ('intra-repo imports',   [PY, 'tests/test_intra_repo_imports.py']),
 ]
 
 

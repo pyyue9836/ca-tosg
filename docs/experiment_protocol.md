@@ -288,6 +288,21 @@ generated is the **validate** grid (`grid_builder.py --split validate`, the defa
 All entries are pre-registered **before P2 training** (legitimate: a protocol may be revised until
 the model is frozen, provided each change is logged with a reason and a date up front).
 
+**Errata register.** An erratum is a defect found *after* the fact: the affected results are
+withdrawn and regenerated, the corrected rule is written into this file, and a test is added that
+fails if the defect returns. Nothing is annotated-and-kept.
+
+| # | date | defect | corrected rule | guard |
+|---|---|---|---|---|
+| **P4A-1** | 2026-08-12 | P4-A fitted the z-score μ/σ on the whole validate grid before LOSO, so every fold judged its held-out scene on a scale that scene helped set — and those OOF numbers select λ | fold-local μ/σ inside LOSO (training scenes only, applied to train *and* held-out); full-validate μ/σ for the frozen model; validate statistics reused unchanged at test/Culver, refit banned | `tests/test_bandit_fold_scaling.py` |
+| **P3-1** | 2026-08-12 | P3 drew SNR from the continuum while §3 pre-registers the 11-point grid; the cached `eff` substrate exists only at the grid points, so declared ≠ effective | every P3 item draws from the 11 points: `uniform` = 1/11 each, shaped laws binned at the midpoints and normalised; mainline continuous protocol untouched | `tests/test_p3_snr_support.py` |
+| **LAYOUT-3** | 2026-08-12 | the restructure renamed modules and left two files importing the old names, and pointed a generator at a directory the committed artefact had left; its checks validated path constants only | every intra-repo import must resolve to exactly one existing module; frozen manifests are written where the committed copy lives (`results/manifests/`) | `tests/test_intra_repo_imports.py` |
+
+Both scientific errata were re-run end to end. **P4A-1 changed two conclusions** (RL is no longer
+below τ on validate; the comparator's budget compliance does not transfer to test) — those are
+changed in Appendix C, not defended. **P3-1 changed no conclusion**: all five expectations still
+read as before, with 4th–5th decimal shifts.
+
 - **R1 (2026-08-08) — §2/§6: selection by scene-level 9-fold LOSO, replacing the single 70/30 dev
   split.** Reason: a single scene-first 70/30 split leaves the dev set at only 2 of the 9 validate
   scenes, whose realised F1 is too high-variance to select hyper-parameters or λ\* on. LOSO uses all

@@ -89,16 +89,25 @@ copied into this repo. (`fig_*_preview.png` are gitignored previews.)
 
 ## 5. Verification (all pass on the committed tree)
 
+One command runs every gate and exits non-zero if any fails:
+
 ```
-python tests/test_payload.py                       # 15/15 links MATCH (payload chain -> tables)
-python tests/test_paragraph_insert.py 1 2 3       # GATE PASS (hand-written paragraphs verbatim)
-grep -nE -f <(grep '^RX ' tests/stale_fingerprints.md | cut -c4-) paper/main.tex   # expect 0 (block-exit)
-python tests/test_result_consistency.py --check              # docs/claims.md up to date vs main.tex
-python tests/test_data_leakage.py           # LEAKAGE GATE PASS (resident, P2 data prep)
+python tools/verify_results.py            # ALL GATES PASS
 ```
 
-The leakage gate needs the P2 validate grid + scene manifest + the freeze manifest (data/p2/ is
-git-excluded); build them with `python projects/ca_tosg/datasets/grid_builder.py`,
-`python projects/ca_tosg/datasets/scene_split.py`, then
-`python projects/ca_tosg/models/selector.py` (LOSO 9-fold + freeze; writes FROZEN_MANIFEST.json +
-validate_loso_folds.csv).
+| check | file | what it proves |
+|---|---|---|
+| payload chain | `tests/test_payload.py` | 17 links from 1.98 Mbit to the printed table values |
+| paragraph insertion | `tests/test_paragraph_insert.py` | the hand-written paragraphs went in verbatim |
+| claims vs main.tex | `tests/test_result_consistency.py` | `docs/claims.md` is current |
+| data leakage + freeze | `tests/test_data_leakage.py` | split bans, LOSO structure, every manifest hash, post-freeze ordering |
+| manifest + configs | `tests/test_manifest.py` | configs are the protocol (per-block md5 + byte compare); manifest relpaths resolve and their hashes still match |
+| bandit fold scaling | `tests/test_bandit_fold_scaling.py` | no LOSO fold's scaler sees its held-out scene (erratum P4A-1) |
+| P3 SNR support | `tests/test_p3_snr_support.py` | every P3 draw is on the 11-point grid and each law sums to 1 (erratum P3-1) |
+| intra-repo imports | `tests/test_intra_repo_imports.py` | every internal import resolves (erratum LAYOUT-3) |
+| stale-fingerprint exit | `tests/stale_fingerprints.md` | retired numbers have not crept back into `main.tex` |
+
+The leakage gate needs the git-excluded `data/p2/` grids and selectors; without them it FAILS with
+an instruction to build them rather than skipping — a gate that cannot verify must never report
+success. Build them with `python tools/prepare_data.py`, then `python tools/train_selector.py`.
+

@@ -88,7 +88,7 @@ python tools/evaluate_ap.py           # true end-to-end AP under the frozen sele
 python tools/run_sensitivity.py       # the sensitivity items
 python tools/run_baselines.py contextual_bandit --train --evaluate
 python tools/generate_figures.py      # every figure main.tex includes
-python tools/verify_results.py        # all gates; exit 0 iff the tree is self-consistent
+python tools/verify_results.py        # all nine gates; exit 0 iff the tree is self-consistent
 ```
 
 The protocol these commands implement — split roles, candidate set, selection and freeze rules —
