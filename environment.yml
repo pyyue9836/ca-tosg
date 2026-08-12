@@ -1,0 +1,24 @@
+# CA-TOSG environment. The versions below are the ones FROZEN_MANIFEST.json pins: a different
+# scikit-learn will not reproduce the frozen model_sha256 values byte-for-byte.
+#
+#   conda env create -f environment.yml && conda activate catosg
+#
+# Sionna + TensorFlow are needed only to REGENERATE the BLER tables (tools/build_bler_table.py);
+# the tables are committed, so every other command runs without them. Torch/spconv are needed only
+# for detector inference in the sibling OpenCOOD checkout -- see docs/installation.md.
+name: catosg
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.18
+  - pip
+  - pip:
+      - numpy==1.26.4
+      - pandas==2.2.2
+      - scikit-learn==1.7.0
+      - scipy
+      - matplotlib
+      - pyyaml
+      # physical layer (optional: only for tools/build_bler_table.py)
+      # - sionna
+      # - tensorflow

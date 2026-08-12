@@ -1230,3 +1230,5 @@ FILE,,projects/ca_tosg/utils/configs.py,NEW,2,,the ONLY generator of configs/; p
 FILE,,results/baselines/contextual_bandit_runs/,NEW,2,,P4-A replays; kept out of results/baselines/contextual_bandit.csv name space
 FILE,,results/channel/,NEW,2,,BEYOND-PLAN 7th results bucket: BLER tables are an input to every command
 FILE,,results/logs/,NEW,2,,untracked run logs relocated out of results/ root (gitignored)
+FILE,,projects/ca_tosg/utils/results_index.py,NEW,4,,"THE generator of results/README.md; a file matching no rule is listed UNATTRIBUTED, never dropped"
+FILE,,docs/restructure/migrate_manifests.py,NEW,3,,the manifest relpath migration + hash re-verification

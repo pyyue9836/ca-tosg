@@ -730,3 +730,99 @@ but drifts further below on test/Culver, and sits at the **Fixed-L payload corne
 the RF's operating points — i.e. it is **not** better than the RF; the RF's imitation of the exact
 λ-oracle labels generalises the channel-aware F-selection better than reward RL here. Reported as-is: a
 valuable **negative** comparison (a learned RL policy does not beat the interpretable imitation selector).
+
+## Appendix D — KEEP-UNTIL-P5 register (Change-log LAYOUT)
+
+Produced by the reference sweep of the 2026-08-12 restructure (`RESTRUCTURE_GATE_SWEEP.md`,
+which keeps the delete list and the method). Every file below is kept although nothing a
+live root reaches names it; each carries why it is alive and what would kill it. "P5" = paper 1
+accepted / camera-ready and its result tree archived. A file whose death trigger has passed is
+a candidate for the NEXT sweep, not a silent deletion.
+
+89 files are named by nothing that a live root reaches, yet are kept. "P5" below = the state in
+which paper 1 is accepted / camera-ready and its result tree is archived. A file whose 死期 has
+passed is a delete candidate for the *next* sweep, not this one.
+
+### D.1 Infrastructure — outside the sweep's remit `[tool-miss]`
+
+| 文件 | 活因 | 死期 |
+|---|---|---|
+| `.gitignore` | build infrastructure; the matcher only follows content references | never (rewritten in commit 2) |
+| `paper/refs.bib` | `main.tex` cites it as `\bibliography{refs}` — no extension, so the glob matcher cannot see it | 论文接收 |
+| `env_setup/requirements_py310_safe.txt` → `requirements.txt` | the environment contract (`python 3.10.18 / sklearn 1.7.0 / numpy 1.26.4 / pandas 2.2.2`) that `FROZEN_MANIFEST.json` pins | never |
+| `env_setup/requirements_no_torch_spconv.txt` | analysis-only install path (no torch/spconv) | 当 environment.yml 覆盖两条安装路径 |
+
+### D.2 Figure assets — become README/paper assets in commit 4 `[tool-miss]`
+
+| 文件 | 活因 | 死期 |
+|---|---|---|
+| `paper/figures/ca_tosg_method_overview.svg` → `figs/ca_tosg_overview.svg` | PLAN names it the overview **source**; the `.pdf` beside `main.tex` is its export | 论文接收 |
+| `fig_ap50_{awgn,rayleigh}.svg` → `figs/results/` | SVG sources of the AP@0.5 panels | 论文接收 |
+| `fig_{pareto_test,payload_awgn,channel_bler_frame}.png` → `figs/results/` | the README display assets (PLAN `figs/results/`) | 论文接收 |
+| `results/bler_sionna/bler_old_vs_new.svg` → `results/channel/` | evidence for the old-vs-new BLER table ruling recorded in `docs/experiment_protocol.md` | 论文接收 |
+
+### D.3 Ablation + verifier code — generates cited numbers, invoked by hand
+
+活因 for all: each writes a CSV that `CLAIMS.md` / `main.tex` / `PARAGRAPH_DRAFTS.md` cites, but
+none is wired into one of the 6 headline commands. 死期 for all: **论文接收**.
+
+| 文件 | 活因 (produces) |
+|---|---|
+| `extra_experiments/_common.py` | shared loader for a1–a9 |
+| `extra_experiments/a3_subsets.py` | `results/sensitivity/scene_subsets.csv` |
+| `extra_experiments/a4_jscc_aware.py` | JSCC-aware arm of the two-regime analysis |
+| `extra_experiments/a5_causality.py` | cue-causality check (appendix) |
+| `extra_experiments/a6_l_reliability.py` | `results/sensitivity/l_channel_reliability.csv` |
+| `extra_experiments/a9_hardening.py` | `results/sensitivity/multiseed_hardening.csv` |
+| `extra_experiments/c_channels.py` | per-channel breakdown |
+| `extra_experiments/robustness.py` | `results/sensitivity/ablation/robustness_{aging,staleness,csi_noise}.csv` |
+| `code/verify_gamma_mechanism.py` | `results/sensitivity/gamma_mechanism.csv` |
+| `code/verify_harm_stratum_structural.py` | `results/sensitivity/harm_stratum_structural.csv` |
+| `code/verify_frontier_payload_invariance.py` | `results/sensitivity/frontier_payload_invariance.csv` |
+| `code/step4_collab_harm.py` | `results/sensitivity/step4_collaboration_harm.csv` |
+| `code/step4_oracle_action_dist.py` | `results/main/step4_oracle_action_dist.csv` |
+| `code/gt_audit.py` | `results/sensitivity/gt_audit.csv`, `gt_object_stats.csv` |
+| `code/canonical_rescore.py` | `results/sensitivity/canonical_rescore.csv` (canonical-union-GT ruler) |
+| `code/true_e2e_ap_inference.py` | GPU-side true-e2e AP inference |
+| `code/plot_oracle_action_dist.py` | oracle action-distribution figure |
+| `code/paper_style.py` | IEEE figure style imported by every `plot_*` `[tool-miss: imported, not path-referenced]` |
+| `p2_dataprep/train_p3_variants.py` | `results/sensitivity/item3_variants.csv` |
+| `p2_dataprep/eval_p3c_rician_bracket.py` | `results/sensitivity/item5c_rician_*.csv` |
+| `analysis_tools/plot_bler_compare.py`, `plot_paper_figures.py` | old/new BLER comparison + batch figure driver |
+| `analysis_tools/ldpc_qam_physical_sanity_n1000_ebn0.py` | becomes `tests/test_channel.py` — **promoted to a gate in commit 2**, so its 死期 is never |
+
+### D.4 Upstream data producers — the P2 cue source depends on them
+
+死期 for all: **当 `dataset_{split}.csv` 被冻结并登记进 `docs/data_manifest.md` 之后** (they are the
+only way to rebuild the cue CSVs the frozen manifest md5-pins).
+
+| 文件 | 活因 |
+|---|---|
+| `code/test_split_pipeline/{01..05,extract_test_data,run_all}.py` | produces `OpenCOOD/peiyi_work/paper1/data/dataset_test.csv` — the cue source the P2 test grid is built from |
+| `code/regen_preds_with_scores.py`, `code/run_ego_only.py` | DATA_MANIFEST-registered regen commands for `gs_rerun/{late,comp,ego}_*.npz` (~10 GPU-min/split) — **protected by the DATA_MANIFEST rule** |
+
+### D.5 Baseline code — alive because the baselines are unfinished
+
+| 文件 | 活因 | 死期 |
+|---|---|---|
+| `scomcp_reproduction/*` (10 files) → `baselines/scomcp/` | the SComCP reproduction has **not** yet produced a result table; `results/baselines/scomcp.csv` does not exist | 当 SComCP 行进 Table III 且结果表冻结 |
+| `extra_experiments/jscc_perframe/{build_channel_codec_ap,jscc_selector_compare,plot_channel_codec_ap,score_jscc_perframe}.py` | per-frame JSCC scoring behind fig:two_regime + the JSCC selector edge | 论文接收 |
+| `analysis_tools/{stage1_*,stage2_*,run_jscc_eval,inference_subset,run_separate_coding_sweep}.py` + 8 `*.sh` | the WCSP2023 ImportanceMapJSCC reproduction: the *only* record of how the learned checkpoints on `H:` were produced | 论文接收 (checkpoints 无法重建) |
+| `analysis_tools/MAP_REPRODUCTION_CHANGELOG.md` | that reproduction's change log | 论文接收 |
+
+### D.6 Result CSVs named only in prose
+
+死期 for all: **论文接收后随 `results/` 归档**. 活因: each is the source of a number quoted in
+`CLAIMS.md` / `PARAGRAPH_DRAFTS.md` / `main.tex`, but no *script* reads it back.
+
+`canonical_rescore.csv`, `f1_ap_decoupling_culver.{csv,md}`, `gamma_mechanism.csv`,
+`gt_audit.csv`, `gt_object_stats.csv`, `harm_stratum_structural.csv`,
+`step4_collaboration_harm.csv`, `true_e2e_global_test.csv` `[tool-miss: named in
+paper/figures/README.md]`, `jscc_selector_{awgn,rayleigh}.csv`,
+`ablation/robustness_{aging,staleness}.csv`, `step4_PROVENANCE.txt`,
+`canonical_gt_PROVENANCE.txt`, `bler_sionna/PROVENANCE_rician.txt`, `policy/STEP5_NOTES.md`,
+`DATA_MANIFEST.md`, `INVARIANCE_NOTE.md`.
+
+**Two true orphans** — no reference anywhere in the tree, kept because deleting *measured* data is
+worse than carrying it: `results/ego_only_acceptance.csv`,
+`results/jscc/channel_codec_ap_test.csv`. 死期: next sweep, if still unreferenced at P5.

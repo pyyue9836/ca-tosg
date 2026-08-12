@@ -1,10 +1,15 @@
 <!-- KEEP: revision-ammo -- exempt from the zero-reference deletion rule -->
 
-# SComCP Reproduction
+# SComCP (baseline)
 
-Faithful reproduction of **Gan et al., "SComCP: Task-Oriented Semantic
-Communication for Collaborative Perception", IEEE TVT 2026** on OPV2V, built on
-top of this repo's existing importance-map-JSCC pipeline.
+| | |
+|---|---|
+| **Source paper** | Gan et al. *SComCP: Task-Oriented Semantic Communication for Collaborative Perception.* IEEE TVT 2026. |
+| **Modifications** | Built on this project's existing ImportanceMapJSCC pipeline, which already is the paper's "Baseline [35]". SComCP adds three deltas, and only those are implemented here (see below). |
+| **Checkpoint** | None yet — no stage has been trained to completion in this repository. |
+| **Data split** | OPV2V, same splits and split roles as the mainline (`docs/experiment_protocol.md` §1). |
+| **Run command** | `python baselines/scomcp/run_smoke.py` (staged smoke test), then `train_scomcp.py --hypes_yaml baselines/scomcp/configs/scomcp_stage{1,2,3}_*.yaml`. |
+| **Output** | **None yet.** `results/baselines/scomcp.csv` does not exist; this folder is code-only. It is listed as `NOT-CREATED` in `RESTRUCTURE_MAP.csv` rather than being faked with a placeholder. |
 
 ## Why this is ~70% done already
 
