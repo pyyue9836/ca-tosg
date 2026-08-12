@@ -1,0 +1,9 @@
+CA-TOSG P2 submit-A (R9) -- frozen-walk selection + freeze, atomic (selector.py)
+========================================================================
+freeze_timestamp: 2026-08-09T15:12:53.653192+00:00; seed=0; candidate_block_md5=05d8e424b41f98e090f2d3762efe5158
+env: {'python': '3.10.18', 'sklearn': '1.7.0', 'numpy': '1.26.4', 'pandas': '2.2.2'}
+R7: PRIMARY = frame-weighted OOF F1; feasibility = frame-weighted OOF payload; frozen walk = first OOF-feasible candidate (by OOF F1 desc) whose frozen payload <= B_max.
+  B_max=0.1: selector_B010 cand#58 walk_depth=6/90 cw=None lambda*=0.05 OOF_F1=0.907 (scene-mean 0.907) frozen_pay=0.067887 tau*=18.0 sha256=d15efbe0f5b69a0b...
+  B_max=0.2: selector_B020 cand#1 walk_depth=2/107 cw=None lambda*=0.02 OOF_F1=0.9087 (scene-mean 0.9082) frozen_pay=0.099231 tau*=12.0 sha256=fc9c2c0b5661bca4...
+  B_max=0.3: selector_B030 cand#56 walk_depth=0/112 cw=None lambda*=0.0 OOF_F1=0.9094 (scene-mean 0.9101) frozen_pay=0.156962 tau*=8.0 sha256=ed77c2c7c8fbaefd...
+models git-excluded (data/p2/); manifest+folds+walk-tables tracked (results/p2_dataprep/).

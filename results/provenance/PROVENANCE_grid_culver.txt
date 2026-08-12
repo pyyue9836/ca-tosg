@@ -1,0 +1,16 @@
+CA-TOSG P2 data prep -- clean-cache grid expansion (grid_builder.py --split culver)
+========================================================================
+SNR grid: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20] dB (Es/N0)  x  channels: ['awgn', 'rayleigh']
+Action set S = ['E', 'L', 'F']; F = 16-QAM rate-1/2 LDPC.
+eff_E=ego_f1 (B_E=0); eff_L=late_f1 (BLER_L=0 mainline); eff_F=compressed_f1*(1-BLER_F)+ego_f1*BLER_F (ego fallback).
+oracle_ELF = argmax over FEASIBILITY-MASKED [E,L,F] (BLER_F>=0.999 -> F=-inf, LABEL only; eff_F column keeps true utility). Ties -> E then L. NOT legacy oracle_3way.
+BLER source: results/channel/bler_sionna.csv (frame-level bler_frame, md5 be3f5e1278ddda6efc271281ccbf449e).
+Payload (Msym, report-only): {'E': 0.0, 'L': 0.024, 'F': 0.99}.
+Grid artifacts are git-excluded (data/p2/); regenerate with grid_builder.py.
+POST-FREEZE artifact: built after FROZEN_MANIFEST.json (PROTOCOL sec 10).
+
+[culver] src=dataset_culver_v3.csv md5=746c35ac187ed3eabecb90b183a6c1b6
+    frames=550 scenes=4 rows=12100
+    out=data/p2/p2_grid_culver.csv md5=c52f92c755201aa2178ad38be1abb963
+    oracle base-rate E/L/F = {'E': 0.09049586776859504, 'L': 0.6681818181818182, 'F': 0.2413223140495868}
+    scene frame-counts = [('2021_09_03_09_32_17', 90), ('2021_09_03_10_53_32', 118), ('2021_09_03_20_08_37', 135), ('2021_09_03_22_43_57', 207)]

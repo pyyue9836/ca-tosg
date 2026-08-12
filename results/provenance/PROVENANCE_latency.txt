@@ -1,0 +1,10 @@
+CA-TOSG P2-C -- frozen-selector latency + end-to-end timing (latency.py)
+================================================================================
+manifest: results/manifests/FROZEN_MANIFEST.json (schema catosg-frozen-manifest/1, freeze 2026-08-09T15:12:53.653192+00:00)
+3 frozen selectors sha256-verified before load (via eval_p2_deploy.load_manifest).
+Latency protocol = a8_models batch-1 online point: WARMUP=100 discarded, N_TRIALS=1000 per-call timings; mean/std/P50/P95/P99 ms + pickled size_kb.
+Each trial: one test frame (random), est_snr~U[0,20] dB, channel~Bernoulli(0.5); seed=0. Models fitted on unnamed numpy -> predict() on the numpy matrix directly.
+system_timing.csv: per-frame pipeline, one row per stage, tag in {measured, calculated, assumed, not-included} with an explicit source.
+  ONLY the selector-inference row is `measured` (this run, slowest frozen selector).
+  Transmission time is `not-included`: PROTOCOL sec 5 budgets are prespecified channel uses, not a physical link rate -> no wall-clock latency this round.
+LiDAR period 100 ms = `assumed` (10 Hz); 2-bit request = `calculated` (20 bps, CAM).

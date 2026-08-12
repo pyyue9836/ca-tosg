@@ -1,0 +1,11 @@
+CA-TOSG P2 submit-B -- deployment eval (deployment.py)
+========================================================================
+manifest: results/manifests/FROZEN_MANIFEST.json (schema catosg-frozen-manifest/1, freeze 2026-08-09T15:12:53.653192+00:00)
+ALL parameters read from the manifest only: 3 selectors (sha256-verified), tau* per budget.
+CSI: ONE set of 200 paired samplings per split, seed=20260809 (SNR~U[0,20], channel~Bernoulli(0.5)); RF and tau replay identical draws.
+  validate: n=1980 frames, mean SNR 9.997 dB, rayleigh frac 0.501
+  test: n=2170 frames, mean SNR 9.997 dB, rayleigh frac 0.501
+  culver: n=550 frames, mean SNR 10.002 dB, rayleigh frac 0.499
+CI: paired bootstrap, 10000 resamples, percentile, seed=12345. R9 margin delta=0.005 (fixed).
+R9 PRIMARY test@B0.20: c1(LCB dF>-0.005)=True c2(UCB dB<0)=True c3(red>=10%)=True -> non-inferior&superior=True. B010/B030/Culver secondary.
+test/Culver labels used for SCORING ONLY (no selection). Results saved/reported as-is.

@@ -1,0 +1,21 @@
+# GENERATED -- do not edit. Derived from docs/experiment_protocol.md by
+# projects/ca_tosg/utils/configs.py; verified byte-for-byte by tests/test_manifest.py.
+# The protocol is the single normative source; this file is a view of it.
+name: sensitivity
+derived_from:
+  protocol: docs/experiment_protocol.md
+  appendix_b_md5: 16fc50c0470e7586e3544dd05f8eb92d
+note: "Appendix B rows are falsifiable predictions, not targets: a miss is reported, not fixed."
+items:
+  - item: 1
+    condition: "channel ratio"
+    output: channel_ratio.csv
+  - item: 2
+    condition: "non-uniform SNR"
+    output: nonuniform_snr.csv
+  - item: 3
+    condition: "channel-type flip"
+    output: channel_misclassification.csv
+  - item: 4
+    condition: "BLER_L grid"
+    output: object_message_bler.csv

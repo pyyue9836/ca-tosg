@@ -153,7 +153,7 @@ FILE,paper1/results/ablation/a8_models.csv,results/sensitivity/ablation/a8_model
 FILE,paper1/results/ablation/robustness_aging.csv,results/sensitivity/ablation/robustness_aging.csv,MOVE,2,,
 FILE,paper1/results/ablation/robustness_csi_noise.csv,results/sensitivity/ablation/robustness_csi_noise.csv,MOVE,2,,
 FILE,paper1/results/ablation/robustness_staleness.csv,results/sensitivity/ablation/robustness_staleness.csv,MOVE,2,,
-FILE,paper1/results/bler_sionna/PROVENANCE.txt,results/provenance/PROVENANCE.txt,MOVE,2,,
+FILE,paper1/results/bler_sionna/PROVENANCE.txt,results/provenance/PROVENANCE_bler.txt,MOVE,2,,basename disambiguated: two PROVENANCE.txt collided in results/provenance/
 FILE,paper1/results/bler_sionna/PROVENANCE_ofdm.txt,results/provenance/PROVENANCE_ofdm.txt,MOVE,2,,
 FILE,paper1/results/bler_sionna/PROVENANCE_rician.txt,results/provenance/PROVENANCE_rician.txt,MOVE,2,,
 FILE,paper1/results/bler_sionna/bler_old_vs_new.svg,results/channel/bler_old_vs_new.svg,MOVE,2,,"BEYOND-PLAN 7th bucket: the BLER tables are an INPUT to every command, not one command's output"
@@ -191,9 +191,9 @@ FILE,paper1/results/p2_dataprep/PROVENANCE_grid.txt,results/provenance/PROVENANC
 FILE,paper1/results/p2_dataprep/PROVENANCE_grid_culver.txt,results/provenance/PROVENANCE_grid_culver.txt,MOVE,2,,
 FILE,paper1/results/p2_dataprep/PROVENANCE_grid_test.txt,results/provenance/PROVENANCE_grid_test.txt,MOVE,2,,
 FILE,paper1/results/p2_dataprep/PROVENANCE_train.txt,results/provenance/PROVENANCE_train.txt,MOVE,2,,
-FILE,paper1/results/p2_dataprep/candidate_walk_B010.csv,results/manifests/candidate_walk_candidate_walk_B010.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
-FILE,paper1/results/p2_dataprep/candidate_walk_B020.csv,results/manifests/candidate_walk_candidate_walk_B020.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
-FILE,paper1/results/p2_dataprep/candidate_walk_B030.csv,results/manifests/candidate_walk_candidate_walk_B030.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
+FILE,paper1/results/p2_dataprep/candidate_walk_B010.csv,results/manifests/candidate_walk_B010.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
+FILE,paper1/results/p2_dataprep/candidate_walk_B020.csv,results/manifests/candidate_walk_B020.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
+FILE,paper1/results/p2_dataprep/candidate_walk_B030.csv,results/manifests/candidate_walk_B030.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
 FILE,paper1/results/p2_dataprep/scene_manifest_validate.csv,results/manifests/scene_manifest_validate.csv,MOVE,3,,leakage-gate cross-check input
 FILE,paper1/results/p2_dataprep/validate_loso_folds.csv,results/manifests/validate_loso_folds.csv,MOVE,3,,COMMIT 3: sha256-pinned by FROZEN_MANIFEST
 FILE,paper1/results/p2_deploy/PROVENANCE_ap.txt,results/provenance/PROVENANCE_ap.txt,MOVE,2,,
@@ -243,19 +243,19 @@ FILE,paper1/results/p3_sensitivity/item5c_rician_rayleigh0.csv,results/sensitivi
 FILE,paper1/results/p3_sensitivity/p3_baseline_sanity.csv,results/sensitivity/baseline_sanity.csv,MOVE,2,,MERGE CRITERION 2: its 18 data rows must stay bit-identical across the rename
 FILE,paper1/results/p4a/P4A_MANIFEST.json,results/manifests/P4A_MANIFEST.json,MOVE,3,,COMMIT 3: internal relpaths rewritten
 FILE,paper1/results/p4a/PROVENANCE_p4a.txt,results/provenance/PROVENANCE_p4a.txt,MOVE,2,,
-FILE,paper1/results/p4a/p4a_loso_oof.csv,results/baselines/contextual_bandit/p4a_loso_oof.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_culver_B010.csv,results/baselines/contextual_bandit/p4a_replay_culver_B010.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_culver_B020.csv,results/baselines/contextual_bandit/p4a_replay_culver_B020.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_culver_B030.csv,results/baselines/contextual_bandit/p4a_replay_culver_B030.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_test_B010.csv,results/baselines/contextual_bandit/p4a_replay_test_B010.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_test_B020.csv,results/baselines/contextual_bandit/p4a_replay_test_B020.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_test_B030.csv,results/baselines/contextual_bandit/p4a_replay_test_B030.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_validate_B010.csv,results/baselines/contextual_bandit/p4a_replay_validate_B010.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_validate_B020.csv,results/baselines/contextual_bandit/p4a_replay_validate_B020.csv,MOVE,2,,
-FILE,paper1/results/p4a/p4a_replay_validate_B030.csv,results/baselines/contextual_bandit/p4a_replay_validate_B030.csv,MOVE,2,,
+FILE,paper1/results/p4a/p4a_loso_oof.csv,results/baselines/contextual_bandit_runs/p4a_loso_oof.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_culver_B010.csv,results/baselines/contextual_bandit_runs/p4a_replay_culver_B010.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_culver_B020.csv,results/baselines/contextual_bandit_runs/p4a_replay_culver_B020.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_culver_B030.csv,results/baselines/contextual_bandit_runs/p4a_replay_culver_B030.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_test_B010.csv,results/baselines/contextual_bandit_runs/p4a_replay_test_B010.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_test_B020.csv,results/baselines/contextual_bandit_runs/p4a_replay_test_B020.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_test_B030.csv,results/baselines/contextual_bandit_runs/p4a_replay_test_B030.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_validate_B010.csv,results/baselines/contextual_bandit_runs/p4a_replay_validate_B010.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_validate_B020.csv,results/baselines/contextual_bandit_runs/p4a_replay_validate_B020.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/p4a/p4a_replay_validate_B030.csv,results/baselines/contextual_bandit_runs/p4a_replay_validate_B030.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
 FILE,paper1/results/p4a/p4a_summary.csv,results/baselines/contextual_bandit.csv,MOVE,2,,PLAN name
-FILE,paper1/results/p4a/p4a_walk.csv,results/baselines/contextual_bandit/p4a_walk.csv,MOVE,2,,
-FILE,paper1/results/policy/PROVENANCE.txt,results/provenance/PROVENANCE.txt,MOVE,2,,
+FILE,paper1/results/p4a/p4a_walk.csv,results/baselines/contextual_bandit_runs/p4a_walk.csv,MOVE,2,,replays in *_runs/ so the PLAN file results/baselines/contextual_bandit.csv is not shadowed by a same-named dir
+FILE,paper1/results/policy/PROVENANCE.txt,results/provenance/PROVENANCE_policy.txt,MOVE,2,,basename disambiguated: two PROVENANCE.txt collided in results/provenance/
 FILE,paper1/results/policy/STEP5_NOTES.md,results/provenance/STEP5_NOTES.md,MOVE,2,,
 FILE,paper1/results/policy/action_dist_20dB.csv,results/main/action_dist_20dB.csv,MOVE,2,,200-realisation policy frontier
 FILE,paper1/results/policy/c256_frontier_band.csv,results/main/c256_frontier_band.csv,MOVE,2,,200-realisation policy frontier
@@ -324,7 +324,7 @@ FILE,,configs/catosg_b030.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
 FILE,,configs/phy_ldpc_qam.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
 FILE,,configs/sensitivity.yaml,NEW,2,,"PLAN config, derived + md5-pinned"
 FILE,,figs/README.md,NEW,2,,declares figs/ca_tosg_overview.svg the SOURCE and paper/figures/*.pdf its export
-FILE,,tests/test_manifest.py,NEW,3,,PLAN tests/test_manifest.py: manifest relpath resolution + configs == PROTOCOL block assertion
+FILE,,tests/test_manifest.py,NEW,2,,PLAN tests/test_manifest.py: configs == PROTOCOL block assertion (commit 2); manifest relpath resolution added in commit 3
 FILE,,docs/installation.md,NEW,4,,PLAN docs 1/6
 FILE,,docs/dataset.md,NEW,4,,PLAN docs 2/6
 FILE,,docs/getting_started.md,NEW,4,,PLAN docs 3/6
@@ -1226,3 +1226,7 @@ LITERAL,paper1/scomcp_reproduction/train_scomcp.py,baselines/scomcp/train_scomcp
 LITERAL,paper1/scomcp_reproduction/train_scomcp.py,baselines/scomcp/train_scomcp.py,REWRITE,2,L17|relpath_local|opencood/logs/scomcp_stage1_selector_xxx/net_epoch30.pth,--warm_start opencood/logs/scomcp_stage1_selector_xxx/net_epoch30.pth
 LITERAL,paper2/README.md,paper2/README.md,REWRITE,0,L1|relpath_local|code/data/results,# paper2 — not started yet. Put its code/data/results here when it begins.
 LITERAL,paper3/README.md,paper3/README.md,REWRITE,0,L26|relpath_local|code/data/results,_No code/data/results yet — to be added when the work begins._
+FILE,,projects/ca_tosg/utils/configs.py,NEW,2,,the ONLY generator of configs/; parses docs/experiment_protocol.md and emits the five yaml views
+FILE,,results/baselines/contextual_bandit_runs/,NEW,2,,P4-A replays; kept out of results/baselines/contextual_bandit.csv name space
+FILE,,results/channel/,NEW,2,,BEYOND-PLAN 7th results bucket: BLER tables are an input to every command
+FILE,,results/logs/,NEW,2,,untracked run logs relocated out of results/ root (gitignored)

@@ -1,0 +1,75 @@
+# GENERATED -- do not edit. Derived from docs/experiment_protocol.md by
+# projects/ca_tosg/utils/configs.py; verified byte-for-byte by tests/test_manifest.py.
+# The protocol is the single normative source; this file is a view of it.
+name: catosg_b010
+derived_from:
+  protocol: docs/experiment_protocol.md
+  candidate_block_md5: 05d8e424b41f98e090f2d3762efe5158
+  action_section_md5: 5dbf1be3f7326497c37c07ecf7e134e9
+  channel_section_md5: 6456b7fd4ed160f7597e6816a35be017
+budget:
+  b_max_msym: 0.1
+  tag: B010
+seed: 0
+action_set:
+  actions:
+    - E
+    - L
+    - F
+  payload_msym:
+    E: 0.0
+    L: 0.024
+    F: 0.99
+  bler_infeasible: 0.999
+search_space:
+  hyperparameters:
+    n_estimators:
+      - 400
+    max_depth:
+      - 10
+      - null
+    min_samples_leaf:
+      - 2
+      - 4
+    max_features:
+      - sqrt
+      - 0.5
+  class_weight:
+    - null
+    - balanced
+  lambda_grid:
+    - 0.0
+    - 0.02
+    - 0.05
+    - 0.1
+    - 0.2
+    - 0.35
+    - 0.5
+loso:
+  scheme: scene-level
+  folds: 9
+  each_scene_heldout_once: true
+aggregation:
+  performance: frame_weighted_oof_f1
+  robustness: scene_mean_realised_f1
+  feasibility: frame_weighted_oof_payload
+selection: frozen_walk
+tie_break:
+  - max_f1
+  - min_payload
+  - shallower_model
+  - min_candidate_index
+frozen:
+  selector: selector_B010
+  candidate_index: 58
+  walk_depth: 6
+  lambda_star: 0.05
+  tau_star: 18.0
+  class_weight: null
+  hyperparameters:
+    n_estimators: 400
+    max_depth: null
+    min_samples_leaf: 2
+    max_features: sqrt
+  model_sha256: d15efbe0f5b69a0bd99824b7486c222f24a231f710a961abe90fcd01516ec796
+  frozen_validate_payload: 0.067887

@@ -2,17 +2,34 @@
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
+
 # OS
 .DS_Store
-# Large binaries (kept out of the repo)
+
+# Large / local-only artefacts (regenerated, never committed)
+data/
+experiment_logs/
+pretrained_models/
+gs_rerun/
+results/logs/
+*.pkl
 *.pth
 *.npy
+*.npz
 *.ckpt
-# Figure previews (only .pdf ships)
+*.pt
+
+# baselines: keep code + configs, drop their data/models/logs
+baselines/scomcp/data/
+baselines/scomcp/logs/
+baselines/scomcp/runs/
+baselines/scomcp/outputs/
+
+# figures: only the .pdf/.svg ship
 *_preview.png
-# Build artifacts
-*_overleaf.zip
-# LaTeX aux
+*.png
+
+# LaTeX build artefacts
 *.aux
 *.log
 *.out
@@ -20,3 +37,6 @@ __pycache__/
 *.bbl
 *.blg
 *.toc
+*.fdb_latexmk
+*.fls
+*_overleaf.zip
