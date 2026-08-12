@@ -33,6 +33,7 @@ for _d in ('projects/ca_tosg/evaluation', 'projects/ca_tosg/evaluation/ablations
     _s.path.insert(0, _o.path.join(_CT_ROOT, _d))
 # --- end bootstrap ---
 import deployment as D
+import sensitivity as P3   # the 11-point SNR grid draw (erratum P3-1)
 
 P1 = D.P1
 OUT = os.path.join(P1, 'results/sensitivity')
@@ -81,7 +82,7 @@ def main():
 
                 # --- (A) 200-replay aggregate, SAME seed as item5, but fed channel_is_rayleigh=0 ---
                 rng = np.random.default_rng(CSI_SEED)
-                snr_2d = rng.uniform(0, 20, size=(N_REPLAY, n))
+                snr_2d = P3.draw_snr(rng, (N_REPLAY, n), 'uniform')   # 11-point grid (erratum P3-1)
                 _ = rng.random(size=(N_REPLAY, n))                      # keep draw order aligned w/ item5
                 F1 = np.empty(N_REPLAY); B = np.empty(N_REPLAY); RHO = np.empty(N_REPLAY)
                 for r in range(N_REPLAY):

@@ -4,7 +4,7 @@
 name: sensitivity
 derived_from:
   protocol: docs/experiment_protocol.md
-  appendix_b_md5: 16fc50c0470e7586e3544dd05f8eb92d
+  appendix_b_md5: 37cce05c970312d02aa342a86ea2bed6
 note: "Appendix B rows are falsifiable predictions, not targets: a miss is reported, not fixed."
 items:
   - item: 1

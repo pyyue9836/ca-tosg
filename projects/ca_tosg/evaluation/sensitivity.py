@@ -55,15 +55,47 @@ CSI_SEED = D.CSI_SEED
 FLIP_SEED = 20260811            # item-3 flip mask (separate, recorded); base draws stay byte-identical
 
 
-def draw_snr(rng, shape, dist):
+def grid_probs(dist):
+    """Probability mass of each of the 11 pre-registered SNR points, for one declared distribution.
+
+    ERRATUM P3-1 (2026-08-12). P3 used to SAMPLE these distributions on the continuum [0,20] while
+    the pre-registered support is the 11-point grid {0,2,...,20} dB (sec 3) -- the substrate the
+    selector was fitted on stores nothing between the points, so the distribution that reached the
+    model was never the one declared. Every P3 item now draws from the grid itself.
+
+    Rule, identical for the two shaped distributions: bin the continuous law onto the grid with
+    edges at the MIDPOINTS between neighbouring points (i.e. +/-1 dB, clipped to [0,20]), take the
+    CDF difference, and normalise. `uniform` is defined as equal probability 1/11 per point, not as
+    the midpoint binning of U[0,20] -- the pre-registration says uniform over the grid.
+    """
+    g = SNR_GRID
     if dist == 'uniform':
+        p = np.full(len(g), 1.0 / len(g))
+    else:
+        edges = np.concatenate(([g[0]], (g[:-1] + g[1:]) / 2.0, [g[-1]]))
+        if dist == 'beta25_lowskew':
+            cdf = stats.beta.cdf(edges / 20.0, 2, 5)
+        elif dist == 'truncgauss_10_5':
+            a, b = (0 - 10) / 5.0, (20 - 10) / 5.0
+            cdf = stats.truncnorm.cdf(edges, a, b, loc=10, scale=5)
+        else:
+            raise ValueError(dist)
+        p = np.diff(cdf)
+    p = np.asarray(p, dtype=float)
+    return p / p.sum()                                   # exact normalisation; sums to 1 by construction
+
+
+def draw_snr(rng, shape, dist, grid=True):
+    """SNR draws. grid=True (every P3 item) -> the 11 pre-registered points.
+
+    grid=False is the MAINLINE continuous protocol and is used only by baseline_sanity, which must
+    keep reproducing replay_summary.csv exactly; the mainline itself is not touched by this erratum.
+    """
+    if not grid:
+        if dist != 'uniform':
+            raise ValueError('the continuous mainline protocol is uniform-only')
         return rng.uniform(0, 20, size=shape)
-    if dist == 'beta25_lowskew':
-        return rng.beta(2, 5, size=shape) * 20.0
-    if dist == 'truncgauss_10_5':
-        a, b = (0 - 10) / 5.0, (20 - 10) / 5.0
-        return stats.truncnorm.ppf(rng.random(size=shape), a, b, loc=10, scale=5)
-    raise ValueError(dist)
+    return rng.choice(SNR_GRID, size=shape, p=grid_probs(dist))
 
 
 def eff_matrix_blerL(ego, late, comp, bF, bler_L=0.0):
@@ -72,11 +104,12 @@ def eff_matrix_blerL(ego, late, comp, bF, bler_L=0.0):
     return np.stack([ego, effL, comp * (1 - bF) + ego * bF], axis=1)
 
 
-def _draws(ds, dist, p_ray):
-    """Baseline-aligned draws: rng(CSI_SEED) -> snr_2d then is_ray_2d, SAME order as eval_p2_deploy."""
+def _draws(ds, dist, p_ray, grid=True):
+    """Draws: rng(CSI_SEED) -> snr_2d then is_ray_2d, SAME order as deployment.py. Seed unchanged by
+    the P3-1 erratum; RF and tau call this with identical arguments, so they replay the SAME samples."""
     n = len(ds)
     rng = np.random.default_rng(CSI_SEED)
-    snr_2d = draw_snr(rng, (N_REPLAY, n), dist)
+    snr_2d = draw_snr(rng, (N_REPLAY, n), dist, grid=grid)
     is_ray_2d = rng.random(size=(N_REPLAY, n)) < p_ray
     return snr_2d, is_ray_2d
 
@@ -94,10 +127,10 @@ def _metrics(ds, tbl, act_2d, snr_2d, is_ray_2d, bler_L):
     return F1.mean(), F1.std(), B.mean(), B.std(), RHO.mean()
 
 
-def replay(bd, ds, tbl, dist='uniform', p_ray=0.5, bler_L=0.0, flip_p=0.0):
+def replay(bd, ds, tbl, dist='uniform', p_ray=0.5, bler_L=0.0, flip_p=0.0, grid=True):
     """RF replay under a modified distribution. One stacked predict (200 x n). bF uses the TRUE channel;
     the selector sees channel_is_rayleigh possibly flipped w.p. flip_p (true channel for BLER unchanged)."""
-    snr_2d, is_ray_2d = _draws(ds, dist, p_ray)
+    snr_2d, is_ray_2d = _draws(ds, dist, p_ray, grid=grid)
     feat_ray = is_ray_2d
     if flip_p > 0:
         flip_2d = np.random.default_rng(FLIP_SEED).random(size=is_ray_2d.shape) < flip_p
@@ -106,9 +139,9 @@ def replay(bd, ds, tbl, dist='uniform', p_ray=0.5, bler_L=0.0, flip_p=0.0):
     return _metrics(ds, tbl, act_2d, snr_2d, is_ray_2d, bler_L)
 
 
-def replay_tau(bd, ds, tbl, dist='uniform', p_ray=0.5, bler_L=0.0):
+def replay_tau(bd, ds, tbl, dist='uniform', p_ray=0.5, bler_L=0.0, grid=True):
     """SNR-threshold baseline under the same modified distribution (tau is channel-aware by rule; no flip)."""
-    snr_2d, is_ray_2d = _draws(ds, dist, p_ray)
+    snr_2d, is_ray_2d = _draws(ds, dist, p_ray, grid=grid)
     act_2d = D.tau_actions(snr_2d, is_ray_2d, bd['tau'])
     f, fs, b, bs, _ = _metrics(ds, tbl, act_2d, snr_2d, is_ray_2d, bler_L)
     return f, fs, b, bs
@@ -127,9 +160,10 @@ def main():
         for tag in tags:
             bd = budgets[tag]; bmax = float(tag)
 
-            # sanity (baseline) -- must match mainline replay_summary
-            f, fs, b, bs, rho = replay(bd, ds, tbl)
-            tf, tfs, tb, tbs = replay_tau(bd, ds, tbl)
+            # sanity (baseline) -- MAINLINE continuous protocol, must match replay_summary exactly.
+            # Deliberately NOT on the 11-point grid: erratum P3-1 changes the P3 items, not the mainline.
+            f, fs, b, bs, rho = replay(bd, ds, tbl, grid=False)
+            tf, tfs, tb, tbs = replay_tau(bd, ds, tbl, grid=False)
             sanity.append(dict(split=sp, budget=bmax, policy='RF', F1=round(f, 5), payload=round(b, 5)))
             sanity.append(dict(split=sp, budget=bmax, policy='tau', F1=round(tf, 5), payload=round(tb, 5)))
 
@@ -194,7 +228,7 @@ def main():
                 for tag in tags:
                     bd = budgets[tag]
                     rng = np.random.default_rng(CSI_SEED)
-                    snr_2d = rng.uniform(0, 20, size=(N_REPLAY, n))
+                    snr_2d = draw_snr(rng, (N_REPLAY, n), 'uniform')   # 11-point grid (erratum P3-1)
                     _ = rng.random(size=(N_REPLAY, n))                 # keep draw order aligned; channel unused
                     F1 = np.empty(N_REPLAY); B = np.empty(N_REPLAY); RHO = np.empty(N_REPLAY)
                     for r in range(N_REPLAY):
@@ -222,10 +256,17 @@ def main():
         f.write('item1 p_rayleigh in {0.75,0.50,0.25}; item2 SNR {uniform, beta25_lowskew=Beta(2,5)x20, '
                 'truncgauss_10_5=N(10,5) trunc[0,20]}; item3 flip p in {0,.05,.10,.20} (true channel unchanged, '
                 f'flip mask seed={FLIP_SEED}); item4 BLER_L in {{0,.01,.05,.10}} (eff_L only, actions/oracle fixed).\n')
+        f.write('ERRATUM P3-1 (2026-08-12): every P3 item draws SNR from the 11-point pre-registered grid\n'
+                f'{list(SNR_GRID.astype(int))} dB, NOT from the continuum. uniform = 1/11 per point; the two\n'
+                'shaped laws are binned onto the grid at the midpoints (+/-1 dB, clipped) and normalised:\n')
+        for _d in ('uniform', 'beta25_lowskew', 'truncgauss_10_5'):
+            f.write(f'    {_d:<16} p = {[round(float(x), 5) for x in grid_probs(_d)]}\n')
+        f.write('RF and tau replay the SAME draws (identical seed + call); baseline_sanity keeps the MAINLINE\n'
+                'continuous protocol so it still reproduces replay_summary.csv exactly.\n')
         f.write(f'item5 Rician: {"present -> rician_proxy.csv" if rician_done else "table ABSENT -> SKIPPED"} '
                 '(K from table; selector fed channel_is_rayleigh=1; eff_F recomputed under Rician frame-BLER).\n')
         f.write('§8 anti-forcing: expected behaviours are checks, not targets; a miss is reported, not fixed.\n')
-    print(f'wrote results/p3_sensitivity/ item1-4 + sanity{"+item5" if rician_done else " (item5 skipped)"} + PROVENANCE_p3.txt')
+    print(f'wrote results/sensitivity/ item1-4 + sanity{"+item5" if rician_done else " (item5 skipped)"} + PROVENANCE_p3.txt')
 
 
 if __name__ == '__main__':

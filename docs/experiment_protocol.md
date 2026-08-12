@@ -660,6 +660,35 @@ written into the paper's conclusions; the paper reports only the frozen selector
   P4-A manifest was being written to `results/baselines/contextual_bandit_runs/` while the committed
   copy had moved to `results/manifests/`, which would have produced two diverging manifests.
 
+- **ERRATUM P3-1 (2026-08-12) — P3 sampled SNR off the pre-registered grid; all P3 results
+  regenerated.** `projects/ca_tosg/evaluation/sensitivity.py` drew SNR from the CONTINUUM
+  (`rng.uniform(0, 20)`, `rng.beta(2,5)*20`, `truncnorm.ppf`) while §3 pre-registers the support as
+  the 11-point grid {0,2,…,20} dB. Root cause: the cached `eff` substrate the selector was fitted on
+  exists only at those 11 points, so the distribution that reached the model was never the
+  distribution the protocol declared — **declared ≠ effective**.
+  **Corrected rule (now stated in §3's grid and in the Appendix B preamble).** Every P3 item draws
+  from the 11 points. `uniform` = equal probability 1/11 per point. The two shaped laws are binned
+  onto the grid with edges at the midpoints (±1 dB, clipped to [0,20]), CDF-differenced and
+  normalised — the probabilities are recomputed and written into `PROVENANCE_p3.txt` on every run:
+
+  | point (dB) | 0 | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 | 18 | 20 |
+  |---|---|---|---|---|---|---|---|---|---|---|---|
+  | uniform | .0909 | .0909 | .0909 | .0909 | .0909 | .0909 | .0909 | .0909 | .0909 | .0909 | .0909 |
+  | Beta(2,5)×20 | .0328 | .1907 | .2426 | .2149 | .1555 | .0944 | .0469 | .0177 | .0042 | .0004 | .0000 |
+  | trunc-N(10,5) | .0138 | .0470 | .0816 | .1211 | .1535 | .1661 | .1535 | .1211 | .0816 | .0470 | .0138 |
+
+  All five items use the grid, RF and τ replay the SAME samples (identical seed and call), and
+  `CSI_SEED` is unchanged. The P3-C Rician bracket (`rician_bracket.py`) uses the same grid draw.
+  **NOT changed:** the mainline continuous deployment protocol (SNR ~ U[0,20], §3) and therefore
+  `baseline_sanity.csv`, which must keep reproducing `replay_summary.csv` exactly — it does, byte for
+  byte, after the regeneration.
+  **Effect: none of the pre-registered expectations changed.** All five items still read "met"
+  (item 5 still "partial: physics met, selector limitation surfaced"); the shifts are in the 4th–5th
+  decimal (test @ B_max 0.20, RF: item-1 ρ_F 0.1103→0.1092 / 0.0732→0.0725 / 0.0370→0.0366; item-2
+  Beta(2,5) F1 0.90213→0.90220; item-4 F1 0.89707→0.89714 at BLER_L=0.10). Appendix B's Observed
+  cells are regenerated from the new CSVs rather than retyped. Guard against recurrence:
+  `tests/test_p3_snr_support.py`.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
@@ -720,18 +749,18 @@ limitation; the E-scarcity fix is future work needing a new independent dataset.
 
 ## Appendix B — P3 sensitivity expected behaviours (checks, not targets)
 
-Operationalises the §8 anti-forcing clause for the P3 batch (Change-log P3). Each row is a
+Operationalises the §8 anti-forcing clause for the P3 batch (Change-log P3). **SNR support (erratum P3-1): every P3 item draws SNR from the 11-point pre-registered grid of §3, not from the continuum — `uniform` is 1/11 per point, and Beta(2,5)×20 and trunc-N(10,5) are binned onto the grid at the midpoints (±1 dB, clipped) and normalised; the exact probabilities are written into `results/provenance/PROVENANCE_p3.txt` on every run.** Each row is a
 **falsifiable prediction**; the *Observed* column is descriptive, read from the committed CSVs in
 `results/sensitivity/` (baseline reproduces `replay_summary.csv` exactly, `baseline_sanity.csv`);
 a miss is **reported, not fixed**. Anchor numbers below are test @ B_max=0.20, RF.
 
 | Item | Condition | Pre-registered expectation | Observed (descriptive) | Check |
 |---|---|---|---|---|
-| 1 | channel ratio (`channel_ratio.csv`) | more Rayleigh → feature-selection rate + payload ↓ toward B_L, F1 → Fixed-L | ρ_F 0.110→0.073→0.037 and payload 0.131→0.095→0.060 as AWGN:Rayleigh goes 75/25→50/50→25/75; F1 0.9064→0.9046→0.9029 | met |
-| 2 | non-uniform SNR (`nonuniform_snr.csv`) | low-skew shifts toward L (payload↓, F1→Fixed-L); trunc-Gaussian intermediate | Beta(2,5): ρ_F 0.021, payload 0.044, F1 0.9021 (sharp drop); N(10,5): ρ_F 0.078, payload 0.099, F1 0.9048 (≈uniform) | met |
-| 3 | channel-type flip (`channel_misclassification.csv`) | graceful F1 degradation with p; fallback keeps L safe | F1 0.9046→0.9040→0.9035→0.9023 for p=0/.05/.10/.20; payload ~flat (0.0947) | met |
+| 1 | channel ratio (`channel_ratio.csv`) | more Rayleigh → feature-selection rate + payload ↓ toward B_L, F1 → Fixed-L | ρ_F 0.109→0.072→0.037 and payload 0.130→0.094→0.059 as AWGN:Rayleigh goes 75/25→50/50→25/75; F1 0.9065→0.9047→0.9029 | met |
+| 2 | non-uniform SNR (`nonuniform_snr.csv`) | low-skew shifts toward L (payload↓, F1→Fixed-L); trunc-Gaussian intermediate | Beta(2,5): ρ_F 0.021, payload 0.045, F1 0.9022 (sharp drop); N(10,5): ρ_F 0.077, payload 0.099, F1 0.9049 (≈uniform) | met |
+| 3 | channel-type flip (`channel_misclassification.csv`) | graceful F1 degradation with p; fallback keeps L safe | F1 0.9047→0.9041→0.9035→0.9024 for p=0/.05/.10/.20; payload ~flat (0.0940) | met |
 | 3-var | labelled variants (`item3_variants.csv`, validate-only, NOT deployed) | cues + a channel signal needed; a monotone re-encoding ≈ binary | snr_only collapses to L (ρ_F=0, payload 0.024); cont_obs (delay/Doppler map) ≈ full_ref (F1 0.9122 vs 0.9122) | met |
-| 4 | BLER_L grid (`object_message_bler.csv`) | small monotone F1 drop where L selected; payload unchanged | F1 0.9046→0.9039→0.9009→0.8971 for BLER_L=0/.01/.05/.10; payload 0.0947 flat | met |
+| 4 | BLER_L grid (`object_message_bler.csv`) | small monotone F1 drop where L selected; payload unchanged | F1 0.9047→0.9040→0.9009→0.8971 for BLER_L=0/.01/.05/.10; payload 0.0940 flat | met |
 | 5 | Rician K (`rician_proxy.csv`, table `bler_sionna_rician.csv`) | larger K → feature branch feasible at lower SNR → feature-selection rate ↑ | **PHYSICAL LAYER, as expected:** 16-QAM frame-BLER<0.999 onset K=0 none / K=3 ≈27.5 dB / K=10 ≈16 dB (only K=10 opens inside [0,20]). **SELECTOR, expectation NOT met (reported, not fixed):** fed `channel_is_rayleigh=1` per the pre-registration, the frozen selector defaults to L for every K (ρ_F=0, payload=B_L, F1 flat at the Fixed-L floor) — the binary channel feature cannot represent Rician K, so the K=10 feasibility is left unexploited. A limitation of the frozen binary-channel selector, not a selector success. | **partial: physics met, selector limitation surfaced** |
 
 ### Appendix B.1 — Rician two-bound bracket (Change-log P3-C)
