@@ -1,6 +1,6 @@
 {
   "schema": "catosg-frozen-manifest/1",
-  "protocol": "CA-TOSG P2 (PROTOCOL.md), R9",
+  "protocol": "CA-TOSG P2 (docs/experiment_protocol.md), R9",
   "freeze_timestamp": "2026-08-09T15:12:53.653192+00:00",
   "seed": 0,
   "environment": {
@@ -71,28 +71,28 @@
       "md5": "3314418d4e53ff30d0d246e1594e4bed"
     },
     "cue_source": {
-      "file": "../../OpenCOOD/peiyi_work/paper1/data/dataset_validate.csv",
+      "file": "../OpenCOOD/peiyi_work/paper1/data/dataset_validate.csv",
       "md5": "d357b38e802455bf3cabd3f886353991",
       "note": "versionless (md5 == dataset_validate_v3.csv)"
     },
     "bler_table": {
-      "file": "results/bler_sionna/bler_sionna.csv",
+      "file": "results/channel/bler_sionna.csv",
       "md5": "be3f5e1278ddda6efc271281ccbf449e"
     },
     "folds_csv": {
-      "file": "results/p2_dataprep/validate_loso_folds.csv",
+      "file": "results/manifests/validate_loso_folds.csv",
       "sha256": "8a394d9a32e0c4e23a02d42aa0af89c02ece40785f1f8345eba884582840ef07"
     },
     "walk_B010": {
-      "file": "results/p2_dataprep/candidate_walk_B010.csv",
+      "file": "results/manifests/candidate_walk_B010.csv",
       "sha256": "16287a7a6b31b3af65b0650b5e985d9d1d6253c59bc347a3e0cf8f6147eb9d29"
     },
     "walk_B020": {
-      "file": "results/p2_dataprep/candidate_walk_B020.csv",
+      "file": "results/manifests/candidate_walk_B020.csv",
       "sha256": "f24963e5acce8243ad7fc70372cef90fd1611cc1944d4dde3ea417d18aefb9ed"
     },
     "walk_B030": {
-      "file": "results/p2_dataprep/candidate_walk_B030.csv",
+      "file": "results/manifests/candidate_walk_B030.csv",
       "sha256": "7d2a97a0244363bfdaf80fc81a932cbee2a53f6768c46e7c8fae82069f339cce"
     }
   },

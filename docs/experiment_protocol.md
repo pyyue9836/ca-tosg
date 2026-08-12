@@ -578,6 +578,27 @@ the model is frozen, provided each change is logged with a reason and a date up 
 (frozen) payload is a **training→freeze diagnostic** of the selection procedure. It must **not** be
 written into the paper's conclusions; the paper reports only the frozen selectors' evaluated numbers.
 
+- **LAYOUT (2026-08-12) — repository restructured to the BEVFormer-style layout; NO experimental
+  content changed.** `paper1/` is dissolved into the root layout of `RESTRUCTURE_PLAN.md`
+  (`docs/ figs/ projects/ tools/ baselines/ results/ tests/ paper/`), per `RESTRUCTURE_MAP.csv`.
+  This file is `PROTOCOL.md` moved; it remains the single normative source, and `configs/*.yaml` are
+  now generated FROM it by `projects/ca_tosg/utils/configs.py` and byte-compared by
+  `tests/test_manifest.py` — a config can never become a second source.
+  **Manifest migration (the only edit to a frozen product).** Manifest-internal paths are, and were,
+  relative to the tree root; the tree root moved up one level, so six strings in
+  `FROZEN_MANIFEST.json` were relabelled:
+  `../../OpenCOOD/…` → `../OpenCOOD/…`, `results/bler_sionna/…` → `results/channel/…`, and the
+  folds/walk files → `results/manifests/…`; plus the `protocol` label, to match what
+  `models/selector.py` now writes. **No hash, timestamp, or selection field was touched**, and all
+  7 recorded md5/sha256 were re-verified against the files at their new locations before the write
+  (`docs/restructure/migrate_manifests.py`). `P4A_MANIFEST.json` needed no path change.
+  The manifest's **mtime** was restored from its own `freeze_timestamp` after the rewrite: §10's
+  post-freeze check (4) compares grid mtime against manifest mtime, and a pure relabel must not be
+  able to manufacture an ordering violation. *Known limitation, recorded rather than fixed:* git does
+  not carry mtime, so that check only means anything in a working tree that produced the artefacts.
+  Gates after the migration: all five green + the new configs/manifest gate
+  (`python tools/verify_results.py`).
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

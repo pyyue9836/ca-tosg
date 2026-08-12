@@ -2,18 +2,25 @@
 # -*- coding: utf-8 -*-
 """Manifest + config contract gate.
 
-Part 1 (this commit): configs/ == docs/experiment_protocol.md.
+Part 1: configs/ == docs/experiment_protocol.md.
   configs/*.yaml are a derived VIEW of the protocol, produced by projects/ca_tosg/utils/configs.py.
   This gate regenerates all five from the protocol and byte-compares them with the committed files,
   so the two can never drift: edit the protocol without regenerating (or hand-edit a config) and
   this FAILS. The protocol stays the single normative source; configs never become a second one.
 
-Part 2 arrives with the manifest relpath migration (commit 3/4).
+Part 2: the frozen manifests' INTERNAL relative paths.
+  ONE rule, stated once and enforced here: every path inside a manifest is relative to the
+  REPOSITORY ROOT (it used to be relative to paper1/). The gate resolves each of them and
+  recomputes each recorded md5/sha256 from the file it lands on. A manifest whose pins point at
+  nothing -- or at something whose hash has moved on -- is a decorative manifest, so this fails
+  loudly rather than skipping. The migration itself is docs/restructure/migrate_manifests.py.
 
 Exit 0 iff every check passes.
 
   python tests/test_manifest.py
 """
+import hashlib
+import json
 import os
 import sys
 
@@ -23,6 +30,8 @@ sys.path.insert(0, os.path.join(ROOT, 'projects/ca_tosg/utils'))
 import configs  # noqa: E402
 
 CONFIG_DIR = os.path.join(ROOT, 'configs')
+MANIFESTS = ['results/manifests/FROZEN_MANIFEST.json', 'results/manifests/P4A_MANIFEST.json']
+PATH_KEYS = ('file', 'model')
 
 
 def check_configs():
@@ -50,15 +59,66 @@ def check_configs():
     return fails
 
 
+def _hash(p, algo):
+    h = hashlib.new(algo)
+    h.update(open(p, 'rb').read())
+    return h.hexdigest()
+
+
+def _walk(obj, path, fails, stats):
+    if isinstance(obj, dict):
+        rel = next((obj[k] for k in PATH_KEYS if isinstance(obj.get(k), str)), None)
+        if rel is not None:
+            if os.path.isabs(rel):
+                fails.append('%s: absolute path in a manifest (%s) -- must be repo-root relative'
+                             % (path, rel))
+            p = os.path.normpath(os.path.join(ROOT, rel))
+            if not os.path.exists(p):
+                fails.append('%s: relpath does not resolve from the repo root -> %s' % (path, rel))
+            else:
+                stats['resolved'] += 1
+                for algo in ('md5', 'sha256'):
+                    if algo in obj:
+                        got = _hash(p, algo)
+                        stats['hashed'] += 1
+                        if got != obj[algo]:
+                            fails.append('%s: %s mismatch for %s (manifest %s..., file %s...)'
+                                         % (path, algo, rel, obj[algo][:12], got[:12]))
+        for k, v in obj.items():
+            _walk(v, path + '/' + str(k), fails, stats)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            _walk(v, path + '[%d]' % i, fails, stats)
+
+
+def check_manifests():
+    fails = []
+    for rel in MANIFESTS:
+        p = os.path.join(ROOT, rel)
+        if not os.path.exists(p):
+            fails.append('%s MISSING' % rel)
+            continue
+        stats = {'resolved': 0, 'hashed': 0}
+        _walk(json.load(open(p)), rel, fails, stats)
+        print('  %-40s %d relpath(s) resolve, %d recorded hash(es) re-verified'
+              % (rel, stats['resolved'], stats['hashed']))
+        if stats['resolved'] == 0:
+            fails.append('%s: no resolvable path at all -- the gate would pass vacuously' % rel)
+    return fails
+
+
 def main():
     print('configs == protocol:')
     fails = check_configs()
+    print('manifest relpaths (repo-root relative) + recorded hashes:')
+    fails += check_manifests()
     if fails:
         print('\nMANIFEST/CONFIG GATE FAIL:')
         for f in fails:
             print('  ' + f)
         return 1
-    print('MANIFEST/CONFIG GATE PASS: %d configs match the protocol.' % len(configs.build()))
+    print('MANIFEST/CONFIG GATE PASS: %d configs match the protocol; %d manifests resolve.'
+          % (len(configs.build()), len(MANIFESTS)))
     return 0
 
 
