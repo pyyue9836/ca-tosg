@@ -1,0 +1,8 @@
+CA-TOSG FA-1 -- feature ablation (feature_ablation.py). DESCRIPTIVE + CI ONLY.
+========================================================================================
+Pre-registered in the Change-log (FA-1) and Appendix E BEFORE this code existed; variant spec md5=34718a3fff1e27317994880d0a343646, candidate block md5=05d8e424b41f98e090f2d3762efe5158.
+Variants: channel_only (2 feat, trained here); task_only (21 feat, trained here); combined (23 feat, DEPLOYED, referenced not retrained)
+Pipeline for the trained variants is the mainline one, reusing its functions: same validate grid + cue join, same 112 candidates from the protocol block, scene-level 9-fold LOSO, frame-weighted OOF feasibility, frozen walk with Bbar_frozen <= B_max (strict), one model per B_max. Only the feature columns differ.
+Evaluation: the SAME 200 paired CSI draws as the mainline replay (seed=20260809), 3 splits; RF variants, the deployed combined model and the tau rule all replay the SAME draws. Paired bootstrap CI vs the deployed combined model, 10000 resamples, seed=12345.
+Every trained product is "labeled variant, not deployed"; variant sha256 live in results/manifests/FEATURE_ABLATION_MANIFEST.json, deliberately NOT in FROZEN_MANIFEST.json (sha256 6a06643aad812da9, untouched by this run).
+NO decision is taken here: the confirmatory primary was spent once at R9. sec 8 anti-forcing: the pre-registered expectations are checks, not targets.

@@ -777,6 +777,17 @@ written into the paper's conclusions; the paper reports only the frozen selector
      delivered is punished by the ego-only fallback.
   3. If either expectation misses, the miss is reported as the finding.
 
+  **RUN 2026-08-13 — outcome (full table + mechanism in Appendix E).** Expectation 2 **met, harder
+  than predicted**: `task_only` picks λ\*=0 at all three budgets and never requests F (ρ_F = 0.000 in
+  every split × budget cell), sitting on the Fixed-L floor. Expectation 1 **partially met**: at
+  B_max=0.30 `channel_only` tracks τ closely (ρ_F 0.274 vs 0.299, test F1 0.90944 vs 0.90937 at 92%
+  of τ's payload), but at 0.10/0.20 it collapses to all-L instead — τ\* is budget-matched by
+  construction while the ablation ranks λ by OOF F1 among feasible candidates. The finding that
+  matters: **neither feature group alone yields a graded policy** — only the combined model reaches
+  intermediate payloads. Reported against the deployed model rather than for it: at B_max=0.30 on
+  test `channel_only` has the higher F1 (CI [+0.0020, +0.0022]) at 1.54× the payload, so the
+  combined model's advantage is payload at comparable F1, not F1 at comparable payload.
+
   **Untouched by this entry and by the run that follows it:** `main.tex`, the deployed frozen
   selectors, δ, τ\*, `FROZEN_MANIFEST.json`, and the mainline replay.
 
@@ -1065,5 +1076,69 @@ from the deployed feature vector.
 }
 ```
 
-**Status: PRE-REGISTERED, NOT YET RUN.** Results land in `results/sensitivity/feature_ablation.csv`
-with `results/provenance/PROVENANCE_fa.txt`; this appendix gains the observed table then.
+**Status: RUN 2026-08-13.** Results `results/sensitivity/feature_ablation.csv`, provenance
+`results/provenance/PROVENANCE_fa.txt`, variant models `results/manifests/FEATURE_ABLATION_MANIFEST.json` (kept apart from `FROZEN_MANIFEST.json`, which this run did not
+touch). Table below is the **test** split; all three splits are in the CSV. ρ = action share.
+
+| B_max | variant | F1 | payload | ρ_E / ρ_L / ρ_F | ΔF1 vs combined [95% CI] |
+|---|---|---|---|---|---|
+| 0.10 | `channel_only` | 0.90113 | 0.02400 | 0.000 / 1.000 / 0.000 | -0.00213 [-0.0022, -0.0020] |
+| 0.10 | `task_only` | 0.90113 | 0.02400 | 0.000 / 1.000 / 0.000 | -0.00213 [-0.0022, -0.0020] |
+| 0.10 | **combined** (deployed) | 0.90326 | 0.06798 | 0.005 / 0.950 / 0.046 | — |
+| 0.10 | τ (reference) | 0.90271 | 0.07240 | 0.000 / 0.950 / 0.050 | -0.00055 [-0.0006, -0.0005] |
+| 0.20 | `channel_only` | 0.90113 | 0.02400 | 0.000 / 1.000 / 0.000 | -0.00349 [-0.0036, -0.0034] |
+| 0.20 | `task_only` | 0.90113 | 0.02400 | 0.000 / 1.000 / 0.000 | -0.00349 [-0.0036, -0.0034] |
+| 0.20 | **combined** (deployed) | 0.90463 | 0.09472 | 0.001 / 0.926 / 0.073 | — |
+| 0.20 | τ (reference) | 0.90740 | 0.21679 | 0.000 / 0.800 / 0.200 | +0.00277 [+0.0027, +0.0029] |
+| 0.30 | `channel_only` | 0.90944 | 0.28843 | 0.000 / 0.726 / 0.274 | +0.00209 [+0.0020, +0.0022] |
+| 0.30 | `task_only` | 0.90113 | 0.02400 | 0.000 / 1.000 / 0.000 | -0.00621 [-0.0063, -0.0061] |
+| 0.30 | **combined** (deployed) | 0.90734 | 0.18703 | 0.001 / 0.830 / 0.169 | — |
+| 0.30 | τ (reference) | 0.90937 | 0.31250 | 0.000 / 0.701 / 0.299 | +0.00203 [+0.0020, +0.0021] |
+
+**Frozen variants** (validate, one model per budget, hard check `B̄_frozen ≤ B_max` passed in
+all six cases):
+
+| variant | B_max | λ\* | walk depth | frozen validate F1 | frozen validate payload |
+|---|---|---|---|---|---|
+| `channel_only` | 0.10 | 0.0 | 0 | 0.90670 | 0.02400 |
+| `channel_only` | 0.20 | 0.0 | 0 | 0.90670 | 0.02400 |
+| `channel_only` | 0.30 | 0.1 | 0 | 0.91020 | 0.28746 |
+| `task_only` | 0.10 | 0.0 | 0 | 0.90710 | 0.02376 |
+| `task_only` | 0.20 | 0.0 | 0 | 0.90710 | 0.02376 |
+| `task_only` | 0.30 | 0.0 | 0 | 0.90710 | 0.02376 |
+
+### Against the pre-registered expectations (§8: checks, not targets)
+
+**Expectation 2 — `task_only` collapses conservative: MET, and harder than predicted.** It selects
+λ\*=0.0 at *all three* budgets and never requests F at all: ρ_F = 0.000 in every split × budget cell,
+payload pinned at B_L. It sits exactly on the Fixed-L F1 floor (test 0.90113). Without a channel
+signal the selector does not merely become cautious — it stops using the feature branch entirely, and
+B_max stops being binding on it.
+
+**Expectation 1 — `channel_only` ≈ τ: PARTIALLY MET. Met at B_max=0.30, missed at 0.10 and 0.20.**
+At 0.30 it is very close to τ: ρ_F 0.274 vs 0.299, F1 0.90944 vs 0.90937 (equal to 4 dp), at 92% of τ's
+payload. At 0.10 and 0.20 it does **not** track τ — it collapses to all-L (ρ_F 0.000, payload 0.02400)
+while τ still requests F (ρ_F 0.050 and 0.200). Mechanism, stated rather than smoothed over: τ\* is
+**budget-matched by construction** on the validate grid, whereas the ablation picks λ by OOF F1 among
+the budget-feasible candidates — the higher-F1 F-requesting candidate (index 10, λ=0.1, OOF payload
+≈0.29) is infeasible at 0.10/0.20 and only enters the walk at 0.30. Reported as a partial miss.
+
+**Neither half alone reproduces the combined operating points.** The deployed 23-feature model is the
+only policy here that reaches an *intermediate* payload (test 0.06798 / 0.09472 / 0.18703 across the three
+budgets). Both ablations are bimodal: all-L, or — for `channel_only` at 0.30 — τ-like heavy F. The two
+feature groups are jointly necessary to obtain a *graded* policy, which is the ablation's actual finding.
+
+**Counter-observation, reported not buried.** At B_max=0.30 on test, `channel_only` has HIGHER F1 than
+the deployed model: 0.90944 vs 0.90734, CI [+0.0020, +0.0022], at 0.29 vs 0.19 payload (1.54×). τ shows the same
+pattern. So "the combined model wins on F1" is **false at the loosest budget** — its advantage is
+payload at comparable F1, not F1 at comparable payload, and the table is left showing that.
+
+**Surfaced by the `over_budget` column (not a new measurement).** τ's realised replay payload exceeds
+B_max at 0.20 and 0.30 on all three splits (test 0.21679 > 0.20, 0.31250 > 0.30). τ\* is chosen on the
+deterministic validate grid, while the replay draws SNR continuously, so the grid-side guarantee does
+not transfer. These payloads are bit-identical to the already-committed `results/main/replay_summary.csv`
+— the flag only makes the property visible. The trained variants and the deployed models are all within
+budget on every split.
+
+**No decision is taken from any of this.** Descriptive + paired CI only; the confirmatory primary was
+spent once at R9. Every trained product is "labeled variant, not deployed".

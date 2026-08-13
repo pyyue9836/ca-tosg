@@ -1,0 +1,427 @@
+{
+ "schema": "catosg-feature-ablation-manifest/1",
+ "label": "labeled variant, not deployed",
+ "protocol": "CA-TOSG FA-1 (docs/experiment_protocol.md Appendix E)",
+ "note": "VARIANT models. NOT the deployed product -- the deployed selectors are in results/manifests/FROZEN_MANIFEST.json and are untouched by this run.",
+ "freeze_timestamp": "2026-08-13T13:11:24.024181+00:00",
+ "seed": 0,
+ "fa_block_md5": "34718a3fff1e27317994880d0a343646",
+ "candidate_block_md5": "05d8e424b41f98e090f2d3762efe5158",
+ "deployed_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
+ "variants": {
+  "channel_only": {
+   "features": [
+    "est_snr_db",
+    "channel_is_rayleigh"
+   ],
+   "n_features": 2,
+   "trained": true,
+   "budgets": {
+    "B010": {
+     "variant": "channel_only",
+     "tag": "B010",
+     "label": "labeled variant, not deployed",
+     "features": [
+      "est_snr_db",
+      "channel_is_rayleigh"
+     ],
+     "n_features": 2,
+     "candidate_index": 0,
+     "walk_depth": 0,
+     "n_feasible": 72,
+     "lambda_star": 0.0,
+     "class_weight": null,
+     "hyperparameters": {
+      "n_estimators": 400,
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "max_features": "sqrt"
+     },
+     "loso_frame_weighted_f1": 0.907,
+     "loso_frame_weighted_payload": 0.068841,
+     "frozen_validate_f1": 0.9067,
+     "frozen_validate_payload": 0.024,
+     "budget_satisfied": true,
+     "perclass": {
+      "E": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 335
+      },
+      "L": {
+       "precision": 0.8539,
+       "recall": 1.0,
+       "f1": 0.9212,
+       "support": 37197
+      },
+      "F": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 6028
+      }
+     },
+     "model": "data/p2/fa_channel_only_B010.pkl",
+     "model_sha256": "deefb840bcd3de2a7f2ed8f22837d430957a0be8c9c79039fea20e50a5484623"
+    },
+    "B020": {
+     "variant": "channel_only",
+     "tag": "B020",
+     "label": "labeled variant, not deployed",
+     "features": [
+      "est_snr_db",
+      "channel_is_rayleigh"
+     ],
+     "n_features": 2,
+     "candidate_index": 0,
+     "walk_depth": 0,
+     "n_feasible": 72,
+     "lambda_star": 0.0,
+     "class_weight": null,
+     "hyperparameters": {
+      "n_estimators": 400,
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "max_features": "sqrt"
+     },
+     "loso_frame_weighted_f1": 0.907,
+     "loso_frame_weighted_payload": 0.068841,
+     "frozen_validate_f1": 0.9067,
+     "frozen_validate_payload": 0.024,
+     "budget_satisfied": true,
+     "perclass": {
+      "E": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 335
+      },
+      "L": {
+       "precision": 0.8539,
+       "recall": 1.0,
+       "f1": 0.9212,
+       "support": 37197
+      },
+      "F": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 6028
+      }
+     },
+     "model": "data/p2/fa_channel_only_B020.pkl",
+     "model_sha256": "deefb840bcd3de2a7f2ed8f22837d430957a0be8c9c79039fea20e50a5484623"
+    },
+    "B030": {
+     "variant": "channel_only",
+     "tag": "B030",
+     "label": "labeled variant, not deployed",
+     "features": [
+      "est_snr_db",
+      "channel_is_rayleigh"
+     ],
+     "n_features": 2,
+     "candidate_index": 10,
+     "walk_depth": 0,
+     "n_feasible": 112,
+     "lambda_star": 0.1,
+     "class_weight": "balanced",
+     "hyperparameters": {
+      "n_estimators": 400,
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "max_features": "sqrt"
+     },
+     "loso_frame_weighted_f1": 0.9102,
+     "loso_frame_weighted_payload": 0.287455,
+     "frozen_validate_f1": 0.9102,
+     "frozen_validate_payload": 0.287455,
+     "budget_satisfied": true,
+     "perclass": {
+      "E": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 434
+      },
+      "L": {
+       "precision": 0.9898,
+       "recall": 0.7378,
+       "f1": 0.8454,
+       "support": 42499
+      },
+      "F": {
+       "precision": 0.0525,
+       "recall": 0.9952,
+       "f1": 0.0998,
+       "support": 627
+      }
+     },
+     "model": "data/p2/fa_channel_only_B030.pkl",
+     "model_sha256": "f01feb6a3a6709555877a2910f1e2f3da881d3507123ec7a454c597257f23942"
+    }
+   }
+  },
+  "task_only": {
+   "features": [
+    "num_cavs",
+    "ego_num_objects",
+    "ego_origin_lidar_shape_0",
+    "ego_origin_lidar_shape_1",
+    "pcd_num_points",
+    "pcd_mean_range",
+    "pcd_max_range",
+    "pcd_std_range",
+    "pcd_near_20m",
+    "pcd_mid_20_50m",
+    "pcd_far_50_80m",
+    "pcd_very_far_80m",
+    "pcd_front_points",
+    "pcd_back_points",
+    "pcd_left_points",
+    "pcd_right_points",
+    "pcd_front_far_30m",
+    "pcd_front_far_50m",
+    "pcd_density_0_20",
+    "pcd_density_20_50",
+    "pcd_density_50_80"
+   ],
+   "n_features": 21,
+   "trained": true,
+   "budgets": {
+    "B010": {
+     "variant": "task_only",
+     "tag": "B010",
+     "label": "labeled variant, not deployed",
+     "features": [
+      "num_cavs",
+      "ego_num_objects",
+      "ego_origin_lidar_shape_0",
+      "ego_origin_lidar_shape_1",
+      "pcd_num_points",
+      "pcd_mean_range",
+      "pcd_max_range",
+      "pcd_std_range",
+      "pcd_near_20m",
+      "pcd_mid_20_50m",
+      "pcd_far_50_80m",
+      "pcd_very_far_80m",
+      "pcd_front_points",
+      "pcd_back_points",
+      "pcd_left_points",
+      "pcd_right_points",
+      "pcd_front_far_30m",
+      "pcd_front_far_50m",
+      "pcd_density_0_20",
+      "pcd_density_20_50",
+      "pcd_density_50_80"
+     ],
+     "n_features": 21,
+     "candidate_index": 0,
+     "walk_depth": 0,
+     "n_feasible": 111,
+     "lambda_star": 0.0,
+     "class_weight": null,
+     "hyperparameters": {
+      "n_estimators": 400,
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "max_features": "sqrt"
+     },
+     "loso_frame_weighted_f1": 0.9067,
+     "loso_frame_weighted_payload": 0.024,
+     "frozen_validate_f1": 0.9071,
+     "frozen_validate_payload": 0.023758,
+     "budget_satisfied": true,
+     "perclass": {
+      "E": {
+       "precision": 0.7614,
+       "recall": 1.0,
+       "f1": 0.8645,
+       "support": 335
+      },
+      "L": {
+       "precision": 0.8626,
+       "recall": 1.0,
+       "f1": 0.9263,
+       "support": 37197
+      },
+      "F": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 6028
+      }
+     },
+     "model": "data/p2/fa_task_only_B010.pkl",
+     "model_sha256": "5366fcd2220fd26a82faf68a6c48f291c7477c795b51d25d6382099468523c09"
+    },
+    "B020": {
+     "variant": "task_only",
+     "tag": "B020",
+     "label": "labeled variant, not deployed",
+     "features": [
+      "num_cavs",
+      "ego_num_objects",
+      "ego_origin_lidar_shape_0",
+      "ego_origin_lidar_shape_1",
+      "pcd_num_points",
+      "pcd_mean_range",
+      "pcd_max_range",
+      "pcd_std_range",
+      "pcd_near_20m",
+      "pcd_mid_20_50m",
+      "pcd_far_50_80m",
+      "pcd_very_far_80m",
+      "pcd_front_points",
+      "pcd_back_points",
+      "pcd_left_points",
+      "pcd_right_points",
+      "pcd_front_far_30m",
+      "pcd_front_far_50m",
+      "pcd_density_0_20",
+      "pcd_density_20_50",
+      "pcd_density_50_80"
+     ],
+     "n_features": 21,
+     "candidate_index": 0,
+     "walk_depth": 0,
+     "n_feasible": 112,
+     "lambda_star": 0.0,
+     "class_weight": null,
+     "hyperparameters": {
+      "n_estimators": 400,
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "max_features": "sqrt"
+     },
+     "loso_frame_weighted_f1": 0.9067,
+     "loso_frame_weighted_payload": 0.024,
+     "frozen_validate_f1": 0.9071,
+     "frozen_validate_payload": 0.023758,
+     "budget_satisfied": true,
+     "perclass": {
+      "E": {
+       "precision": 0.7614,
+       "recall": 1.0,
+       "f1": 0.8645,
+       "support": 335
+      },
+      "L": {
+       "precision": 0.8626,
+       "recall": 1.0,
+       "f1": 0.9263,
+       "support": 37197
+      },
+      "F": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 6028
+      }
+     },
+     "model": "data/p2/fa_task_only_B020.pkl",
+     "model_sha256": "5366fcd2220fd26a82faf68a6c48f291c7477c795b51d25d6382099468523c09"
+    },
+    "B030": {
+     "variant": "task_only",
+     "tag": "B030",
+     "label": "labeled variant, not deployed",
+     "features": [
+      "num_cavs",
+      "ego_num_objects",
+      "ego_origin_lidar_shape_0",
+      "ego_origin_lidar_shape_1",
+      "pcd_num_points",
+      "pcd_mean_range",
+      "pcd_max_range",
+      "pcd_std_range",
+      "pcd_near_20m",
+      "pcd_mid_20_50m",
+      "pcd_far_50_80m",
+      "pcd_very_far_80m",
+      "pcd_front_points",
+      "pcd_back_points",
+      "pcd_left_points",
+      "pcd_right_points",
+      "pcd_front_far_30m",
+      "pcd_front_far_50m",
+      "pcd_density_0_20",
+      "pcd_density_20_50",
+      "pcd_density_50_80"
+     ],
+     "n_features": 21,
+     "candidate_index": 0,
+     "walk_depth": 0,
+     "n_feasible": 112,
+     "lambda_star": 0.0,
+     "class_weight": null,
+     "hyperparameters": {
+      "n_estimators": 400,
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "max_features": "sqrt"
+     },
+     "loso_frame_weighted_f1": 0.9067,
+     "loso_frame_weighted_payload": 0.024,
+     "frozen_validate_f1": 0.9071,
+     "frozen_validate_payload": 0.023758,
+     "budget_satisfied": true,
+     "perclass": {
+      "E": {
+       "precision": 0.7614,
+       "recall": 1.0,
+       "f1": 0.8645,
+       "support": 335
+      },
+      "L": {
+       "precision": 0.8626,
+       "recall": 1.0,
+       "f1": 0.9263,
+       "support": 37197
+      },
+      "F": {
+       "precision": 0.0,
+       "recall": 0.0,
+       "f1": 0.0,
+       "support": 6028
+      }
+     },
+     "model": "data/p2/fa_task_only_B030.pkl",
+     "model_sha256": "5366fcd2220fd26a82faf68a6c48f291c7477c795b51d25d6382099468523c09"
+    }
+   }
+  },
+  "combined": {
+   "features": [
+    "num_cavs",
+    "ego_num_objects",
+    "ego_origin_lidar_shape_0",
+    "ego_origin_lidar_shape_1",
+    "pcd_num_points",
+    "pcd_mean_range",
+    "pcd_max_range",
+    "pcd_std_range",
+    "pcd_near_20m",
+    "pcd_mid_20_50m",
+    "pcd_far_50_80m",
+    "pcd_very_far_80m",
+    "pcd_front_points",
+    "pcd_back_points",
+    "pcd_left_points",
+    "pcd_right_points",
+    "pcd_front_far_30m",
+    "pcd_front_far_50m",
+    "pcd_density_0_20",
+    "pcd_density_20_50",
+    "pcd_density_50_80",
+    "est_snr_db",
+    "channel_is_rayleigh"
+   ],
+   "n_features": 23,
+   "trained": false,
+   "budgets": "referenced from FROZEN_MANIFEST.json"
+  }
+ }
+}
