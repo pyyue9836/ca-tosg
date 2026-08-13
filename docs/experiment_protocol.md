@@ -741,6 +741,45 @@ written into the paper's conclusions; the paper reports only the frozen selector
   (L849) is the LiDAR-cycle **time** budget, unrelated to communication. `results/latency/
   system_timing.csv` carries that same time budget and is likewise untouched.
 
+- **FA-1 (2026-08-13, PRE-REGISTERED; nothing run at the time of this entry) — feature ablation:
+  channel-only / task-only / combined.** Asks what each half of the selector's input actually buys.
+  Three variants, specified in Appendix E's machine-readable block:
+
+  | variant | features | source |
+  |---|---|---|
+  | `channel_only` | 2: `est_snr_db`, `channel_is_rayleigh` | trained here |
+  | `task_only` | the 21 ego-side cues | trained here |
+  | `combined` | all 23 | **the deployed frozen models — referenced from `FROZEN_MANIFEST.json`, NOT retrained** |
+
+  **The two new variants run the mainline pipeline, unmodified in every respect that could flatter
+  them:** the same validate grid, the same scene-level 9-fold LOSO, the same 112-candidate table
+  parsed from the `CATOSG-CANDIDATES` block, the same frame-weighted OOF feasibility, the same
+  frozen walk with the hard check `B̄_frozen ≤ B_max`, and one model per B_max. Only the feature
+  columns differ. Everything they produce is labelled **"labeled variant, not deployed"**.
+
+  **Evaluation:** the same 200 paired CSI draws (`CSI_SEED` unchanged) across all three splits;
+  F1, mean payload and action distribution per variant; paired bootstrap CIs against the deployed
+  combined model. **Descriptive + CI only — NO decision of any kind.** The confirmatory primary was
+  spent once at R9 and is not re-created here.
+
+  **Outputs:** `results/sensitivity/feature_ablation.csv`, `results/provenance/PROVENANCE_fa.txt`,
+  and a SEPARATE `results/manifests/FEATURE_ABLATION_MANIFEST.json` recording each variant model's
+  sha256. It is kept apart from `FROZEN_MANIFEST.json` on purpose: variant models must never be
+  mistakable for the deployed product.
+
+  **Pre-registered expectations (§8 anti-forcing applies — these are checks, not targets; a miss is
+  reported, not fixed):**
+  1. `channel_only` should behave approximately like the τ rule — it has exactly the information τ
+     has, so if the deployed selector's channel-side behaviour is really just a threshold, this
+     variant should land near τ's F1/payload points.
+  2. `task_only` cannot see channel feasibility at all, so it should collapse toward the
+     conservative side (high ρ_L, payload near B_L): asking for F without knowing whether F can be
+     delivered is punished by the ego-only fallback.
+  3. If either expectation misses, the miss is reported as the finding.
+
+  **Untouched by this entry and by the run that follows it:** `main.tex`, the deployed frozen
+  selectors, δ, τ\*, `FROZEN_MANIFEST.json`, and the mainline replay.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
@@ -1000,3 +1039,31 @@ paper/figures/README.md]`, `jscc_selector_{awgn,rayleigh}.csv`,
 **Two true orphans** — no reference anywhere in the tree, kept because deleting *measured* data is
 worse than carrying it: `results/ego_only_acceptance.csv`,
 `results/jscc/channel_codec_ap_test.csv`. 死期: next sweep, if still unreferenced at P5.
+
+## Appendix E — feature ablation variants (Change-log FA-1, pre-registered)
+
+The variant definition is machine-readable and is parsed by
+`projects/ca_tosg/evaluation/feature_ablation.py`; nothing about the variants is hard-coded there.
+`base_feature_names` is read from `FROZEN_MANIFEST.json`, so the ablation cannot silently drift
+from the deployed feature vector.
+
+```json CATOSG-FEATURE-ABLATION
+{
+  "seed_source": "CATOSG-CANDIDATES.seed",
+  "candidates_source": "CATOSG-CANDIDATES",
+  "base_feature_names": "FROZEN_MANIFEST.json:feature_names",
+  "channel_features": ["est_snr_db", "channel_is_rayleigh"],
+  "variants": {
+    "channel_only": {"keep": "channel_features", "train": true},
+    "task_only": {"keep": "complement_of_channel_features", "train": true},
+    "combined": {"keep": "all", "train": false, "reference": "FROZEN_MANIFEST.json"}
+  },
+  "pipeline": "identical_to_mainline: validate grid, scene-level 9-fold LOSO, 112 candidates, frame-weighted OOF feasibility, frozen walk with Bbar_frozen <= B_max, one model per B_max",
+  "label": "labeled variant, not deployed",
+  "evaluation": "same 200 paired CSI draws (CSI_SEED), 3 splits, descriptive + paired bootstrap CI only",
+  "manifest": "results/manifests/FEATURE_ABLATION_MANIFEST.json"
+}
+```
+
+**Status: PRE-REGISTERED, NOT YET RUN.** Results land in `results/sensitivity/feature_ablation.csv`
+with `results/provenance/PROVENANCE_fa.txt`; this appendix gains the observed table then.
