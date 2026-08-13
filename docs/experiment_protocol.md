@@ -812,13 +812,38 @@ written into the paper's conclusions; the paper reports only the frozen selector
   and 72 Culver frames have **zero** collaborators and are ego-only whatever the selector decides.
   Both facts are design constraints, and any N=3 claim about Culver would be a claim about "≤2".
 
-  **STILL OPEN, and blocking the run — to be closed in this entry before any forward pass:** what
-  "delivered" means across N links. The frozen protocol defines delivery for ONE link. Option A
-  (all-or-nothing: any link fails → ego fallback) costs 4409 forwards ≈ 22 GPU-min and is a
-  conservative bound on the feature branch; option B (partial fusion: fuse whatever arrived) needs
-  every non-empty delivered subset, 27 775 forwards ≈ 2.3 GPU-hours. Recommendation for the
-  greenlight: **A as primary, plus B as a bracket on validate only** (8070 forwards ≈ 41 GPU-min).
-  The choice is recorded here BEFORE the run, never after seeing numbers.
+  **CLOSED AT GREENLIGHT (2026-08-13), before any forward pass — delivery semantics across N links.**
+  The frozen protocol defines delivery for ONE link; with N links partial delivery was undefined.
+  Fixed now:
+  - **Primary — semantics A, all-or-nothing, all three splits.** If any of the N requested links
+    fails its frame-level BLER draw, the frame falls back to ego-only, exactly as the single-link
+    protocol does. eff_F(N) therefore needs the full N-subset fusion only. 4409 new forwards.
+    A is a **conservative** reading of the feature branch: it can only understate F's value, never
+    overstate it.
+  - **Bracket — semantics B, partial fusion, `validate` ONLY.** Fuse whichever subset arrived;
+    eff is needed for every non-empty delivered subset (2^N − 1 per frame), 8070 forwards. Labelled
+    **"bracketing variant, not deployed"**, reported beside A and never merged into it. It bounds A
+    from above on the one split where fitting is permitted.
+  - Under both, the N links draw independent channel realisations from the same CSI stream as the
+    mainline replay, and the per-link BLER is the existing Sionna frame-level table.
+
+  **Also fixed at greenlight:**
+  - **Culver N=3 is annotated `identical to N=2 by construction`** — no Culver frame has 3
+    collaborators — and is **not reported as an independent data point**. If the two columns ever
+    differ numerically, that is a subset-mask bug, not a result.
+  - **Zero-collaborator frames stay in the denominator** (test 119, culver 72) and are reported as
+    their own row; they are ego-only whatever the selector decides, and removing them would
+    silently redefine the split.
+  - **N>1 budget overshoot is a TRANSFER PROPERTY, pre-declared, and is not patched.** The deployed
+    selectors were frozen under N=1 semantics; at N=2/3 the same policy costs N× per requested
+    message, so its mean payload will exceed B_max. No model is retrained, no threshold retuned, no
+    δ or τ\* touched — the overshoot is reported, in the same way τ's and P4-A's non-transfer are.
+  - **The late-branch re-merge is treated as UNVERIFIED until proven.** Before it is relied on,
+    re-merging the FULL CAV set must reproduce the committed `late_{split}.npz` bit-for-bit; if it
+    does not, the run falls back to a per-CAV re-run and both the outcome and the extra cost are
+    recorded in `PROVENANCE_p4c.txt`.
+  - **The 0.303 s/frame estimate is replaced by a 20-frame micro-timing** as the first action of the
+    run, before the full sweep is launched; the measured rate goes into the provenance.
 
   **Expected (§8 anti-forcing; finalised at greenlight):** payload scales ≈ linearly in N, so the
   frozen selectors overshoot B_max at N=2/3 on every split — a property of the transfer, not a

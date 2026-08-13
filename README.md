@@ -1,5 +1,7 @@
 # CA-TOSG (Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception)
 
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 Per-frame selection of *how much semantics to transmit* in vehicle-to-vehicle cooperative
 perception, under a prespecified average communication budget.
 
@@ -95,6 +97,11 @@ The protocol these commands implement — split roles, candidate set, selection 
 is `docs/experiment_protocol.md`, and it is the only normative source. `projects/ca_tosg/configs/*.yaml`
 are generated from it; `tests/test_manifest.py` re-checks the md5 of every protocol block a config
 claims to come from, and byte-compares the regenerated files, so the two cannot drift.
+
+## License
+
+Apache-2.0 — see [`LICENSE`](LICENSE). Copyright 2026 Peiyi Yue, University of Bristol.
+The OpenCOOD code this work builds on carries its own licence in the sibling checkout.
 
 ## Citation
 

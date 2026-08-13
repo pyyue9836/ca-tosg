@@ -1,8 +1,9 @@
 # P4-C — collaborator scale N ∈ {1, 2, 3}: PLAN
 
-**Status: PLAN ONLY. No inference has been run. No GPU has been touched by this commit.**
-Every number below is counted from the committed dataset index and the OpenCOOD loader source; none
-of it is a result. The plan is pushed for review, and the run is blocked until it is greenlit.
+**Status: GREENLIT 2026-08-13.** The plan below was written and pushed before any GPU work
+(`b0e424f`); the open decision it carried was closed in the change-log (entry P4-C) before the first
+forward pass — see "Decision taken at greenlight" at the end. Every count in sections a–c is taken
+from the committed dataset index and the OpenCOOD loader source, not from a result.
 
 Untouched by this plan and by the run that would follow: `paper/main.tex`, the deployed frozen
 selectors, δ, τ\*, `FROZEN_MANIFEST.json`, and the mainline replay.
@@ -214,7 +215,17 @@ was spent once at R9. §8 anti-forcing applies: expectations below are checks, a
 
 ---
 
-## Open decision blocking the run
+## Decision taken at greenlight (2026-08-13)
 
-**Delivery semantics: option A only, or A + B-on-validate?** The bill differs by ~40 GPU-min for the
-recommended split, or by 2 GPU-hours if B is run everywhere. Nothing else in this plan is blocked.
+**Delivery semantics: A primary on all three splits; B as a bracket on `validate` only**, labelled
+"bracketing variant, not deployed". Recorded in the change-log (entry P4-C) **before any forward
+pass**, together with: Culver N=3 annotated `identical to N=2 by construction` and not reported as
+an independent point; zero-collaborator frames kept in the denominator as their own row; the N>1
+budget overshoot pre-declared as a transfer property of models frozen under N=1 semantics, not
+patched; the late re-merge unverified until it reproduces `late_{split}.npz` bit-for-bit, with the
+per-CAV fallback and its cost recorded either way; and the 0.303 s/frame estimate replaced by a
+20-frame micro-timing before the sweep.
+
+Planned bill under that decision: intermediate A 4409 forwards (~22 GPU-min) + B-on-validate 8070
+forwards (~41 GPU-min) + one late per-CAV pass (~30 GPU-min) ≈ **1.6 GPU-hours**, to be re-estimated
+from the micro-timing.

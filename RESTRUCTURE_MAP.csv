@@ -336,7 +336,7 @@ FILE,,baselines/importance_map_jscc/README.md,NEW,4,,PLAN six elements
 FILE,,baselines/contextual_bandit/README.md,NEW,4,,PLAN six elements
 FILE,,projects/ca_tosg/README.md,NEW,4,,PLAN projects/ca_tosg/README.md
 FILE,,environment.yml,NEW,4,,PLAN root file: conda spec for the sionna310 env
-FILE,,LICENSE,NOT-CREATED,0,,"PLAN root file NOT created: choosing a licence is the author's legal decision, not a refactor step"
+FILE,,LICENSE,NEW,9,,"Apache-2.0, added 2026-08-13 on the author's instruction (was NOT-CREATED: a licence is a legal declaration, not a refactor step)"
 FILE,,figs/selector_pipeline.svg,NOT-CREATED,0,,PLAN figs file NOT created: no source asset exists and inventing a system diagram would misstate the method; needs Josh's draw.io
 FILE,,results/baselines/scomcp.csv,NOT-CREATED,0,,PLAN results file NOT created: the SComCP reproduction has not produced a result table yet (baselines/scomcp/ is code-only)
 LITERAL,README.md,README.md,REWRITE,4,L5|relpath_local|paper1/,- **paper1/** — CA-TOSG: Channel-Aware Task-Oriented Semantic Granularity Selection. Complete; self-contained (see `pape
