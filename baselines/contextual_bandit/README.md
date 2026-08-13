@@ -14,6 +14,20 @@ one action per frame from {E, L, F}, under the same budget, from the same featur
 | **Output** | `results/baselines/contextual_bandit.csv` (summary) and `results/baselines/contextual_bandit_runs/` (per-split replays, LOSO OOF, walk). Provenance: `results/provenance/PROVENANCE_p4a.txt`. |
 
 **Labelled "internal learned-policy comparator, not deployed" everywhere it appears** — it is our own
-construction trained to our protocol, not an external method's reported number. Its evaluation is
-descriptive plus paired bootstrap CIs only: the confirmatory primary was spent once at R9 and is
-not re-created here.
+construction trained to our protocol, not an external method's reported number.
+
+## What this result is, and is not
+
+After the P4A-1 leak fix, all three budgets select the **same** conservative policy (λ\*=0.05,
+walk depth 0 everywhere), so the budget is not binding on it. On the held-out splits it is **not
+better than the deployed RF** — F1 below RF in every test and Culver-City cell, CI entirely < 0 —
+and at B_max = 0.10 it spends 0.156 Msym/frame on test, **above the 0.10
+average budget it was frozen under**, where the RF stays at 0.068.
+
+Treat it as an **internal diagnostic**, not as evidence that CA-TOSG beats reinforcement learning:
+it is not a published baseline and it is not tuned as an opponent would tune it. On **validate**
+(in-sample) it does edge past the τ rule at B_max 0.10 and 0.30, CIs excluding 0 — recorded in
+Appendix C for completeness, and carrying no weight against the held-out splits.
+
+The evaluation is descriptive plus paired bootstrap CIs only: the confirmatory primary was spent
+once at R9 and is not re-created here.

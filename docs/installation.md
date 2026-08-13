@@ -23,7 +23,8 @@ The frozen manifests pin the exact versions the models were trained under, and
 A different scikit-learn will not reproduce the frozen `model_sha256` values byte-for-byte.
 
 `requirements.txt` is the pip equivalent; `requirements-no-torch-spconv.txt` is the analysis-only
-subset (no torch, no spconv) that is enough to run the selector, the replay and every gate.
+subset (no torch, no spconv): enough for the selector, the replay, and the content-tier checks
+(`python tools/verify_results.py --content-only`).
 
 ## 2. Sionna (physical layer)
 
@@ -48,9 +49,11 @@ The edits this work makes to OpenCOOD (each marked `#self+` on line 1 of the fil
 ## 4. Check the install
 
 ```bash
-python tools/verify_results.py
+python tools/verify_results.py --content-only
 ```
 
-Expected: `ALL GATES PASS`. This needs the committed results plus the git-excluded `data/p2/`
-grids and selectors; without them the leakage gate fails loudly by design rather than skipping —
-a gate that cannot verify must never report success. See `docs/dataset.md` for how to rebuild them.
+Expected on a clean clone: `ALL GATES PASS (content tier only)`. The full run
+(`python tools/verify_results.py`, no flag) additionally needs the git-excluded `data/p2/` grids and
+models and the sibling OpenCOOD checkout; without them its two artefact-tier gates fail loudly by
+design rather than skipping — a gate that cannot verify must never report success. The two tiers are
+spelled out in `docs/reproducibility.md` §5; `docs/dataset.md` says how to rebuild the artefacts.

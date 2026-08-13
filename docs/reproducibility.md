@@ -87,27 +87,49 @@ copied into this repo. (`fig_*_preview.png` are gitignored previews.)
 - **CSI-noise robustness**: selector `est_snr` perturbed with `default_rng(s+10000)`; the channel BLER
   always uses the *true* snr.
 
-## 5. Verification (all pass on the committed tree)
+## 5. Verification — two tiers, and a clean clone cannot do both
 
-One command runs every gate and exits non-zero if any fails:
+**A clean clone cannot complete the full verification.** The committed tree carries the code, the
+results and the manifests; it does not carry the per-frame grids, the frozen `.pkl`/`.pt` models, or
+the OPV2V-derived cue CSVs (all git-excluded, see `docs/dataset.md`). Say so plainly rather than
+implying a `git clone` reproduces everything.
+
+### Tier 1 — committed-content consistency (clean clone is enough)
 
 ```
-python tools/verify_results.py            # ALL GATES PASS
+python tools/verify_results.py --content-only        # 7 checks
 ```
+
+Nothing beyond the repository is required: no dataset, no GPU, no OpenCOOD checkout. It answers
+"is the committed tree internally consistent and does it still say what it claims?".
 
 | check | file | what it proves |
 |---|---|---|
 | payload chain | `tests/test_payload.py` | 17 links from 1.98 Mbit to the printed table values |
 | paragraph insertion | `tests/test_paragraph_insert.py` | the hand-written paragraphs went in verbatim |
 | claims vs main.tex | `tests/test_result_consistency.py` | `docs/claims.md` is current |
-| data leakage + freeze | `tests/test_data_leakage.py` | split bans, LOSO structure, every manifest hash, post-freeze ordering |
-| manifest + configs | `tests/test_manifest.py` | configs are the protocol (per-block md5 + byte compare); manifest relpaths resolve and their hashes still match |
 | bandit fold scaling | `tests/test_bandit_fold_scaling.py` | no LOSO fold's scaler sees its held-out scene (erratum P4A-1) |
 | P3 SNR support | `tests/test_p3_snr_support.py` | every P3 draw is on the 11-point grid and each law sums to 1 (erratum P3-1) |
 | intra-repo imports | `tests/test_intra_repo_imports.py` | every internal import resolves (erratum LAYOUT-3) |
 | stale-fingerprint exit | `tests/stale_fingerprints.md` | retired numbers have not crept back into `main.tex` |
 
-The leakage gate needs the git-excluded `data/p2/` grids and selectors; without them it FAILS with
-an instruction to build them rather than skipping — a gate that cannot verify must never report
-success. Build them with `python tools/prepare_data.py`, then `python tools/train_selector.py`.
+### Tier 2 — full experimental reproduction (needs the artefacts)
 
+```
+python tools/verify_results.py                       # all 9 checks
+```
+
+Additionally requires: the sibling **OpenCOOD** checkout (`../OpenCOOD/`, for the per-frame cue CSVs
+the manifest md5-pins), the **local grids** `data/p2/p2_grid_*.csv`, and the **frozen models**
+`data/p2/selector_B0*.pkl` + `p4a_bandit_B0*.pt`.
+
+| check | file | what it proves | needs |
+|---|---|---|---|
+| data leakage + freeze | `tests/test_data_leakage.py` | split bans, LOSO structure, every manifest hash, post-freeze ordering | grids + models + the dumping tree |
+| manifest relpaths | `tests/test_manifest.py` | manifest paths resolve and their recorded hashes still match; configs are the protocol | models + cue CSVs |
+
+Both fail **loudly** on missing data rather than skipping — a gate that cannot verify must never
+report success, so on a clean clone the full run correctly reports GATE FAILURE. Rebuild the
+artefacts with `python tools/prepare_data.py`, then `python tools/train_selector.py`.
+
+To regenerate the numbers themselves rather than check them, see `docs/getting_started.md`.

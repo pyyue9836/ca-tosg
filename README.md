@@ -1,7 +1,7 @@
 # CA-TOSG (Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception)
 
 Per-frame selection of *how much semantics to transmit* in vehicle-to-vehicle cooperative
-perception, under a hard per-frame channel-use budget.
+perception, under a prespecified average communication budget.
 
 ## Overview
 
@@ -74,7 +74,7 @@ Shortest path from raw OPV2V to the table above: `docs/getting_started.md`.
 Three frozen selectors, one per budget. sha256, hyper-parameters and the full freeze record:
 `docs/model_zoo.md`.
 
-| Budget | model | λ\* | τ\* | LOSO OOF F1 | frozen validate payload |
+| B_max (mean Msym/frame) | model | λ\* | τ\* | LOSO OOF F1 | frozen validate payload |
 |---|---|---|---|---|---|
 | 0.10 | `selector_B010` | 0.05 | 18.0 dB | 0.9070 | 0.0679 |
 | 0.20 | `selector_B020` | 0.02 | 12.0 dB | 0.9087 | 0.0992 |
@@ -88,7 +88,7 @@ python tools/evaluate_ap.py           # true end-to-end AP under the frozen sele
 python tools/run_sensitivity.py       # the sensitivity items
 python tools/run_baselines.py contextual_bandit --train --evaluate
 python tools/generate_figures.py      # every figure main.tex includes
-python tools/verify_results.py        # all nine gates; exit 0 iff the tree is self-consistent
+python tools/verify_results.py        # all 9 gates (--content-only = the 7 a clean clone can run)
 ```
 
 The protocol these commands implement — split roles, candidate set, selection and freeze rules —

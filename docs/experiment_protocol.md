@@ -105,7 +105,7 @@ to select on.
   > The same feature-level message is additionally evaluated with 256-QAM as a physical-layer
   > comparator, but it is not included in the deployed semantic action set.
 
-## 5. Bandwidth budget B_max
+## 5. Prespecified average communication budget B_max
 
 - **B_max ∈ {0.10, 0.20, 0.30} Msym/frame** — the operating budgets swept for the constrained
   problem (§6).
@@ -113,8 +113,8 @@ to select on.
   `selector_B010` / `selector_B020` / `selector_B030` — because λ\*(B_max) differs; the manifest
   records all three model hashes.
 - **Intended derivation:** available channel-uses/s ÷ LiDAR frame rate (802.11bd parameters).
-- **Status: NOT physically derived — frozen as *prespecified channel-use budgets*** (Change-log
-  R3; the earlier "normalized resource budget" wording is retired — "normalized" wrongly implied a
+- **Status: NOT physically derived — frozen as *prespecified average communication budgets***
+  (Change-log R3, term updated by WORDING-1; the earlier "normalized resource budget" wording is retired — "normalized" wrongly implied a
   unit-normalisation). The repo commits an 802.11bd 10 MHz OFDM numerology only for the *channel
   BLER model* (`projects/ca_tosg/communication/channel.py`: N_FFT=64, N_SC=52 data subcarriers,
   Δf=156.25 kHz); it commits **no** channel-uses/s → per-frame-symbol-budget mapping, and none is
@@ -122,8 +122,21 @@ to select on.
   committed, and fabricating them would put a memory-sourced number into a frozen contract). The
   three B_max values are therefore **prespecified operating points (in Msym/frame) on the
   payload–accuracy frontier**, not physical link capacities. A physical-capacity mapping is deferred
-  (P2+); until then all B_max-referenced text must say "prespecified channel-use budget", not a
-  Mbit/s link rate.
+  (P2+); until then all B_max-referenced text must say **"prespecified average communication
+  budget"** — never a Mbit/s link rate, and never a per-frame cap.
+
+- **What B_max constrains — the average, not the frame (WORDING-1).** B_max bounds the **mean
+  per-frame payload over a split**, not the payload of any single frame. The frozen model must
+  satisfy `mean over ALL 1980 validate frames of B(a_t) ≤ B_max`, checked strictly and without
+  tolerance at freeze time (§6 FINAL-CHECK IRON RULE) and re-checked by `tests/test_data_leakage.py`;
+  during selection, feasibility is the frame-weighted **OOF mean** payload. Individual frames
+  routinely exceed B_max by construction — a frame that selects F spends B_F = 0.99 Msym, which is
+  above all three budgets — and that is **not** a violation. The *check* is hard; the *quantity*
+  it checks is a mean. Text that calls B_max a "per-frame hard budget" is wrong and is corrected
+  wherever it appears; `main.tex` still carries it and is listed under P2-PENDING-MIGRATION.
+- **Compliance is a validate-side property.** The freeze proves the average on validate. Whether it
+  transfers to test/Culver is an empirical question per model, answered in the results — the P4-A
+  comparator's does not (Appendix C), the deployed selectors' does.
 
 ## 6. Selection candidates + LOSO procedure + freeze rule (ONE MODEL PER BUDGET)
 
@@ -313,7 +326,8 @@ read as before, with 4th–5th decimal shifts.
 - **R2 (2026-08-08) — §4: oracle label definition made explicit about the feasibility mask**
   (BLER_F ≥ 0.999 → F's oracle target = −∞). This was always the intended semantics
   (`opv2v.py`); it is now stated in the protocol and implemented in `grid_builder.py`.
-- **R3 (2026-08-08) — §5: "normalized resource budget" → "prespecified channel-use budget".** The
+- **R3 (2026-08-08) — §5: "normalized resource budget" → "prespecified channel-use budget".**
+  *(Term superseded by WORDING-1, 2026-08-13: "prespecified average communication budget".)* The
   budgets are still not physically mapped to a link rate; the rename drops the misleading
   "normalized" (which implied a unit-normalisation that was never performed).
 - **R4 (2026-08-08) — §10: pre-freeze stage restricted to validate-grid generation;** test/Culver
@@ -704,6 +718,29 @@ written into the paper's conclusions; the paper reports only the frozen selector
   cells are regenerated from the new CSVs rather than retyped. Guard against recurrence:
   `tests/test_p3_snr_support.py`.
 
+- **WORDING-1 (2026-08-13) — B_max is a *prespecified average communication budget*, not a
+  per-frame hard budget.** The constraint has always been on the mean per-frame payload over a
+  split — that is what §6's FINAL-CHECK IRON RULE freezes and what `tests/test_data_leakage.py`
+  re-checks — but the prose called it a "per-frame hard budget", which asserts something the method
+  does not do and could not do: B_F = 0.99 Msym exceeds every one of the three budgets, so any frame
+  that selects F is over B_max by construction. §5 now states the constraint object explicitly.
+  Replaced across `README.md`, `docs/`, and the results prose; **no number, model or result changes
+  — this is a naming correction only.**
+
+  **P2-PENDING-MIGRATION.** `main.tex` is deliberately NOT edited (three gates read it byte-exactly:
+  the stale-fingerprint block-exit, `docs/claims.md`, and the paragraph-insertion check). The
+  pending edits are registered here and land at P5:
+
+  | file | line | current wording | wording at P5 |
+  |---|---|---|---|
+  | `paper/main.tex` | 207 | "where $\bar B_{\max}$ is the per-frame bandwidth budget." | "where $\bar B_{\max}$ is the prespecified average communication budget (a bound on the mean per-frame payload, not a per-frame cap)." |
+
+  The symbol already carries the bar for a mean, so the sentence contradicts its own notation today.
+  Out of scope on purpose: "per-frame payload" (L173) and "per-frame channel use" (L146) are correct
+  as written — they describe a *frame's* payload, not the constraint — and the "$100$~ms budget"
+  (L849) is the LiDAR-cycle **time** budget, unrelated to communication. `results/latency/
+  system_timing.csv` carries that same time budget and is likewise untouched.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
@@ -841,11 +878,32 @@ Anchors test @ B_max=0.20: RL F1 0.9010 / payload 0.1557; RF 0.9046 / 0.0947;
   validate-side check by construction (§6); the RF's compliance happens to transfer, this comparator's
   does not.
 
-**Expected behaviour (§8 anti-forcing — check, not target).** Pre-registered expectation: RL and RF in
-the same F1/payload neighbourhood. **Observed:** RL sits in a similar F1 band on validate, is below RF on
-every split, drifts further below on test/Culver, and does not hold the budget on test. Reported as-is:
-a **negative** comparison — a learned bandit policy does not beat the interpretable imitation selector,
-and the erratum re-run did not overturn that verdict.
+**Positioning (what this comparator is and is not evidence for).** After the P4A-1 fix the three
+budgets all select the SAME conservative policy — λ\*=0.05 at walk depth 0 for every B_max — so
+B_max is not actually binding on it; there is one learned policy, reported three times. On the
+held-out splits it is **not better than the deployed RF**: F1 below RF in every test and Culver-City
+cell, CI entirely < 0. And its budget compliance does not transfer: at B_max = 0.10 it spends
+0.156 Msym/frame on test — **above the 0.10 average budget it was frozen
+under** — where the RF stays at 0.068 and complies.
+
+This is therefore an **internal diagnostic result, not primary evidence of any advantage of the
+deployed method**. It says something narrow and useful: on this problem, a reward-trained bandit
+over the same features, the same substrate and the same protocol converges to a near-object-level
+policy and does not recover the RF's channel-aware F-selection. It is not a published baseline, it
+is not tuned as an opponent would tune it, and it must not be cited as showing that CA-TOSG beats
+reinforcement learning.
+
+**In-distribution record, kept for completeness.** On **validate** — the split it was fitted on, so
+in-sample and not a generalisation claim — it does edge past the τ rule at two operating points:
+B_max=0.10 ΔF CI [+0.0017, +0.0018] and B_max=0.30
+CI [+0.0003, +0.0005], both excluding 0. Recorded
+because it is what the numbers say; it carries no weight against test/Culver, where it is below τ
+at every budget.
+
+**§8 anti-forcing.** Pre-registered expectation was that RL and RF land in the same F1/payload
+neighbourhood. Observed: same F1 band on validate, below RF everywhere, drifting further below on
+test/Culver, and over budget on test. Reported as found — a negative comparison, and the erratum
+re-run did not overturn it.
 
 ## Appendix D — KEEP-UNTIL-P5 register (Change-log LAYOUT)
 
