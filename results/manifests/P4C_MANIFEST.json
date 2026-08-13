@@ -1,0 +1,83 @@
+{
+ "schema": "catosg-p4c-manifest/1",
+ "label": "collaborator-scale arm, not deployed",
+ "protocol": "CA-TOSG P4-C (docs/experiment_protocol.md, docs/p4c_plan.md)",
+ "semantics": "A (all-or-nothing) -- primary, all three splits",
+ "note": "collaborator-scale arms. NOT the deployed product; the deployed selectors are in FROZEN_MANIFEST.json and were only READ by this run.",
+ "timestamp": "2026-08-13T15:42:11.904329+00:00",
+ "deployed_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
+ "caches": {
+  "N1/late_validate": {
+   "sha256": "fa5f1e8508ac049d5007ba6e7e6cfad9be5f3067f3de2f267868086f781b6174",
+   "n_new_forwards": 1247
+  },
+  "N1/intermediate_validate": {
+   "sha256": "74be7cb828a37c63958877cec56f704da5a20d46c0b264fe7f1b5172f7357820",
+   "n_new_forwards": 1247
+  },
+  "N2/late_validate": {
+   "sha256": "a59f2a9c3893c65165a3b2a49a1bf76a34ad5b6b6c462a5968c825ce1acda0e7",
+   "n_new_forwards": 899
+  },
+  "N2/intermediate_validate": {
+   "sha256": "5ffd105432898edfecc49c9fa9575e591d9b624d5d120fbf3fb50cbb0c1aeb1d",
+   "n_new_forwards": 899
+  },
+  "N3/late_validate": {
+   "sha256": "73e94f2f66a50b8171068aaaa816f56cf47b72bdb89cccc73c140bb291f06a4f",
+   "n_new_forwards": 746
+  },
+  "N3/intermediate_validate": {
+   "sha256": "d2bf321179b40098bbcd0b371c08b42dc312a86574b5955e5321179e8aa9339f",
+   "n_new_forwards": 746
+  },
+  "N1/late_test": {
+   "sha256": "fabd705dfd440c0aff10394ee3cc7108dcf8fc5908714833e0a676339a350cd1",
+   "n_new_forwards": 1081
+  },
+  "N1/intermediate_test": {
+   "sha256": "771bc2dde17a0b1594940d9f853610339575bafde269b260db3aaaa6ca9bcdcb",
+   "n_new_forwards": 1081
+  },
+  "N2/late_test": {
+   "sha256": "55dc76511e44e49a49ffc156bfce20d3616ec9eb9156e20e11132ed07815f4cc",
+   "n_new_forwards": 212
+  },
+  "N2/intermediate_test": {
+   "sha256": "30f6482de6bca2ee5ee1894d755a85244b5e4c3dea5d9b2704aa0b0bb7f8a650",
+   "n_new_forwards": 212
+  },
+  "N3/late_test": {
+   "sha256": "7bd02e810e8518cb76129b9c86446d39ae3a85a72336a83337e3c83c63af547c",
+   "n_new_forwards": 101
+  },
+  "N3/intermediate_test": {
+   "sha256": "3b554eeb72a598d797aa97635002b3d72f8b7716d187b00077392c8b18d4a82e",
+   "n_new_forwards": 101
+  },
+  "N1/late_culver": {
+   "sha256": "a141ed0d6781cfd306d67620b356516ce60b957bc8104bf869cad8354860bf9a",
+   "n_new_forwards": 123
+  },
+  "N1/intermediate_culver": {
+   "sha256": "741edc7bbd2c88f1d57380167c389594b5014441af83fb7efb824ba40c22a53d",
+   "n_new_forwards": 123
+  },
+  "N2/late_culver": {
+   "sha256": "ea7e5aaf157b8d9befe6adb7abc73d4c7cfae29c185459af81898c1b6caaedca",
+   "n_new_forwards": 0
+  },
+  "N2/intermediate_culver": {
+   "sha256": "4cf846f904b39724e432ef46d96d72ca6fc270740fbdba9584552fe2791d4e22",
+   "n_new_forwards": 0
+  },
+  "N3/late_culver": {
+   "sha256": "ae2f799ef5ee130008f7c21cf5542060df2ab7c8d09d002f6716afd3dea9d62a",
+   "n_new_forwards": 0
+  },
+  "N3/intermediate_culver": {
+   "sha256": "655f01762f1a8882fb8822f7c8f6e4be85d13b2eae9f65c6a570bff19ecb73ac",
+   "n_new_forwards": 0
+  }
+ }
+}

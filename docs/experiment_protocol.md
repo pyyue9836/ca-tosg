@@ -851,6 +851,21 @@ written into the paper's conclusions; the paper reports only the frozen selector
   rises with N where the feature branch is delivered, with diminishing returns; on Culver the N=3
   column must be identical to N=2, and a difference there is a mask bug rather than a result.
 
+  **RUN 2026-08-13, semantics A on all three splits — outcome (full table: Appendix F).** 8818
+  forwards in 73.5 min. Expectation on F1 **met** (rises with N, steeply diminishing: at B_max=0.20
+  the second collaborator buys 5–30× less than the first; every ΔF1-vs-N=1 CI excludes 0). Culver
+  invariant **met, and it did its job** — it fired on the first run and forced ruling k_eff =
+  min(N, collaborators), because a frame cannot message collaborators it does not have.
+  Payload expectation **MISSED**: realised scaling is **sub-linear** (1.65×/2.15× validate,
+  1.39×/1.44× test, 1.41×/1.41× Culver at B_max=0.20) because the collaborator supply saturates —
+  mean availability is 2.90 / 1.59 / 1.09 per split — so overshoot occurs in **5 of 27 cells**, not
+  on every split. **The first, buggy run confirmed the expectation; the corrected run refutes it.**
+  What separated them was the machine-checkable Culver invariant, written down before either run,
+  not judgement after the fact.
+  **Semantics B (validate-only partial-fusion bracket) is NOT yet run.** Measured cost at the
+  realised validate rate (~0.6 s/frame): 8070 subsets × 2 branches ≈ 2.7 GPU-hours. Command and
+  design are fixed; it is a separate run, not a pending edit to this one.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
@@ -1202,3 +1217,88 @@ budget on every split.
 
 **No decision is taken from any of this.** Descriptive + paired CI only; the confirmatory primary was
 spent once at R9. Every trained product is "labeled variant, not deployed".
+
+## Appendix F — P4-C collaborator scale, semantics A (Change-log P4-C)
+
+**Status: RUN 2026-08-13, semantics A (all-or-nothing) on all three splits. Semantics B (the
+validate-only partial-fusion bracket) is pre-registered but NOT yet run** — see the change-log.
+Results `results/sensitivity/collaborator_scale.csv`, provenance `PROVENANCE_p4c.txt`, arm caches
+`results/manifests/P4C_MANIFEST.json`. The deployed selectors were READ, never rewritten.
+
+The selector's features carry nothing about N, so its per-frame **action is N-independent**;
+what N changes is what an action costs and what it delivers.
+
+| split | B_max | N | F1 | payload | ρ_F | over budget | ΔF1 vs N=1 [95% CI] |
+|---|---|---|---|---|---|---|---|
+| validate | 0.10 | 1 | 0.85914 | 0.06857 | 0.046 | no | — |
+| validate | 0.10 | 2 | 0.89330 | 0.10748 | 0.046 | **yes** | +0.03417 [+0.0341, +0.0342] |
+| validate | 0.10 | 3 | 0.89955 | 0.13283 | 0.046 | **yes** | +0.04042 [+0.0404, +0.0404] |
+| validate | 0.20 | 1 | 0.86112 | 0.09986 | 0.079 | no | — |
+| validate | 0.20 | 2 | 0.89395 | 0.16517 | 0.079 | no | +0.03283 [+0.0328, +0.0329] |
+| validate | 0.20 | 3 | 0.90050 | 0.21509 | 0.079 | **yes** | +0.03938 [+0.0394, +0.0394] |
+| validate | 0.30 | 1 | 0.86357 | 0.15781 | 0.139 | no | — |
+| validate | 0.30 | 2 | 0.89577 | 0.26557 | 0.139 | no | +0.03220 [+0.0321, +0.0322] |
+| validate | 0.30 | 3 | 0.90238 | 0.34957 | 0.139 | **yes** | +0.03880 [+0.0388, +0.0389] |
+| test | 0.10 | 1 | 0.89304 | 0.06666 | 0.046 | no | — |
+| test | 0.10 | 2 | 0.90262 | 0.08935 | 0.046 | no | +0.00958 [+0.0096, +0.0096] |
+| test | 0.10 | 3 | 0.90343 | 0.09174 | 0.046 | no | +0.01039 [+0.0104, +0.0104] |
+| test | 0.20 | 1 | 0.89429 | 0.09328 | 0.073 | no | — |
+| test | 0.20 | 2 | 0.90395 | 0.12926 | 0.073 | no | +0.00966 [+0.0096, +0.0097] |
+| test | 0.20 | 3 | 0.90477 | 0.13433 | 0.073 | no | +0.01048 [+0.0105, +0.0105] |
+| test | 0.30 | 1 | 0.89727 | 0.18074 | 0.169 | no | — |
+| test | 0.30 | 2 | 0.90658 | 0.27656 | 0.169 | no | +0.00931 [+0.0093, +0.0094] |
+| test | 0.30 | 3 | 0.90744 | 0.30129 | 0.169 | **yes** | +0.01017 [+0.0101, +0.0102] |
+| culver | 0.10 | 1 | 0.84684 | 0.02518 | 0.004 | no | — |
+| culver | 0.10 | 2 | 0.87229 | 0.03456 | 0.004 | no | +0.02545 [+0.0254, +0.0255] |
+| culver | 0.10 | 3 *(≡ N=2)* | 0.87229 | 0.03456 | 0.004 | no | +0.02545 [+0.0254, +0.0255] |
+| culver | 0.20 | 1 | 0.84816 | 0.02835 | 0.019 | no | — |
+| culver | 0.20 | 2 | 0.87355 | 0.03984 | 0.019 | no | +0.02539 [+0.0254, +0.0254] |
+| culver | 0.20 | 3 *(≡ N=2)* | 0.87355 | 0.03984 | 0.019 | no | +0.02539 [+0.0254, +0.0254] |
+| culver | 0.30 | 1 | 0.85755 | 0.12221 | 0.141 | no | — |
+| culver | 0.30 | 2 | 0.88284 | 0.15592 | 0.141 | no | +0.02530 [+0.0253, +0.0253] |
+| culver | 0.30 | 3 *(≡ N=2)* | 0.88284 | 0.15592 | 0.141 | no | +0.02530 [+0.0253, +0.0253] |
+
+### Against the pre-registered expectations (§8: checks, not targets)
+
+**Expectation 2 — F1 rises with N, with diminishing returns: MET, and the diminution is steep.**
+At B_max=0.20 the second collaborator buys between 5× and 30× less than the first: validate
++0.0328 then +0.0065; test +0.0097 then +0.0008; Culver +0.0254 then +0.0000 (it has no third collaborator).
+All ΔF1-vs-N=1 CIs exclude 0.
+
+**Expectation 3 — Culver N=3 ≡ N=2 by construction: MET, and it did its job.** It FIRED on the
+first run (F1 identical, payload not) and forced ruling 4 below. This is the invariant catching a
+bug in the evaluator, which is what it was written for.
+
+**Expectation 1 — payload scales ≈ linearly in N so the frozen selectors overshoot everywhere:
+MISSED, and the pre-registered reasoning was wrong.** Realised scaling at B_max=0.20 is
+1.65× / 2.15× on validate, 1.39× / 1.44× on test, 1.41× / 1.41× on Culver — sub-linear, because
+**the collaborator supply saturates**: a frame cannot message collaborators it does not have, and
+mean availability is 2.90 / 1.59 / 1.09 per split. Overshoot therefore happens in **5 of 27 cells**
+(validate B0.10 at N=2 and N=3, validate B0.20 and B0.30 at N=3, test B0.30 at N=3) and **never on
+Culver**, not "on every split" as pre-registered.
+
+**The uncomfortable part, recorded rather than tidied away.** The FIRST run — which charged the
+nominal N instead of the available collaborators — produced exactly-linear scaling and overshoot in
+almost every cell, i.e. it *confirmed* expectation 1. The expectation was confirmed by a bug and
+refuted once the bug was fixed. What separated the two was not judgement but the Culver invariant,
+which is machine-checkable and was written down before either run.
+
+### Rulings taken during the run (all recorded in PROVENANCE_p4c.txt)
+
+1. **One canonical GT for every N.** Restricting the CAV set also shrinks the post-processor union
+   GT; per-N GT would score each arm on a different ruler. The GT is held at the full-set canonical
+   union GT — the rule `true_e2e_global.py` already applies across branches.
+2. **Delivery (semantics A):** eff_F = comp_N·(1−b)^k + ego·(1−(1−b)^k), reducing to the mainline
+   expression at k=1. BLER_L = 0 as in the mainline.
+3. **Payload:** one message per collaborator actually addressed.
+4. **k_eff = min(N, collaborators in the frame)** — forced by the Culver invariant, see above.
+
+### Cost
+
+The 0.303 s/frame plan estimate was replaced by a 20-frame two-point micro-timing before the sweep
+(0.387 s/frame late, 0.359 intermediate, after separating ~10 s of process startup). Realised:
+**8818 forwards in 73.5 min**, 0.21–0.71 s/frame — the validate cells are the slow ones because they
+carry the most CAVs per frame. The planned late-branch per-CAV re-merge optimisation was **not**
+used: with frame filtering, a direct re-run of only the frames whose subset differs (4409) is
+cheaper than one full per-CAV pass over all 4700 frames, and it avoids the re-merge verification
+risk entirely. Recorded as a plan deviation with its measured justification.

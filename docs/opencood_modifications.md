@@ -40,3 +40,20 @@ If at some point the user wants to fully relocate the namespace-resident code ou
 3. For the 3 modified files, hold a separate `*.patch` next to the original; the upstream copy stays unchanged.
 
 This is documented here for the user's future reference; **at present, the cleaner state is to leave the files in `../../opencood/` and rely on the `#self+` headers for discoverability.**
+
+## P4-C collaborator-subset mask (2026-08-13)
+
+| file | edit |
+|---|---|
+| `opencood/utils/catosg_collab_subset.py` | **new** `#self+` module: ego + the N nearest collaborators by `lidar_pose[0:2]` distance, ties by ascending CAV id. Off unless `CATOSG_MAX_COLLAB` (or `CATOSG_KEEP_CAVS`) is set. |
+| `opencood/data_utils/datasets/late_fusion_dataset.py` | one call in `get_item_test`, after the ego pose is found and **before** the CAV loop. |
+| `opencood/data_utils/datasets/intermediate_fusion_dataset.py` | one call in `__getitem__`, **before** `get_pairwise_transformation` (which is built from the CAV set). |
+
+Verified both ways before use, on 20 validate frames:
+- variable **unset** → output bit-identical to the pre-patch code (0/20 frames differ in boxes,
+  scores and gts), and two identical runs also agree, so the pipeline is deterministic;
+- `CATOSG_MAX_COLLAB=1` → output differs on **exactly** the frames whose collaborator count exceeds
+  1, and on no others.
+
+`max_cav` is deliberately not used for this: its selection order is a loader-internal detail this
+project has not pinned, and an experimental arm must not depend on unverified behaviour.

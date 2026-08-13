@@ -1,0 +1,23 @@
+CA-TOSG P4-C -- collaborator scale N in {1,2,3}, semantics A. DESCRIPTIVE + CI ONLY.
+==========================================================================================
+Pre-registered (Change-log P4-C, docs/p4c_plan.md) BEFORE any forward pass; delivery
+semantics fixed at greenlight: A all-or-nothing primary on all three splits.
+RULING 1 -- one canonical GT for every N: restricting the CAV set also shrinks the
+  post-processor union GT, which would score each arm on a different ruler. The GT is
+  held at the FULL-set canonical union GT for all arms (the rule true_e2e_global.py
+  already applies across branches).
+RULING 2 -- delivery: eff_F(N) = comp_N*(1-b)^N + ego*(1-(1-b)^N); reduces to the
+  mainline expression at N=1. BLER_L = 0 as in the mainline.
+RULING 3 -- payload: one message per collaborator actually addressed (sec 5: the budget
+  bounds the MEAN, so this scales the mean, not a per-frame cap).
+RULING 4 -- k_eff = min(N, collaborators in the frame). A frame cannot message
+  collaborators it does not have. FORCED BY THE PRE-REGISTERED INVARIANT: the first run
+  charged the nominal N, which made Culver N=3 differ from N=2 in payload while F1 was
+  identical -- exactly the discrepancy the invariant exists to catch. Fixed, re-run.
+The selector features carry nothing about N, so its per-frame ACTION is N-independent;
+N changes what an action costs and what it delivers, not what is chosen.
+Same 200 paired CSI draws as the mainline replay (seed=20260809); CI = paired bootstrap vs the
+SAME policy at N=1, 10000 resamples, seed=12345.
+Culver N=3 is identical to N=2 BY CONSTRUCTION (no Culver frame has 3 collaborators) and
+is not an independent data point. Zero-collaborator frames stay in the denominator.
+Deployed FROZEN_MANIFEST.json sha256 6a06643aad812da9 -- read only, untouched.
