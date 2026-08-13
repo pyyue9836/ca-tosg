@@ -791,6 +791,41 @@ written into the paper's conclusions; the paper reports only the frozen selector
   **Untouched by this entry and by the run that follows it:** `main.tex`, the deployed frozen
   selectors, δ, τ\*, `FROZEN_MANIFEST.json`, and the mainline replay.
 
+- **P4-C (2026-08-13, PLAN pre-registered as a DRAFT; NOTHING RUN — awaiting Peiyi's greenlight)
+  — collaborator scale N ∈ {1,2,3}.** Full plan: `docs/p4c_plan.md`. Summary of what is fixed by
+  this entry, and what is deliberately still open:
+
+  **Fixed now.** (i) Subset rule, deterministic: the N nearest collaborators by Euclidean distance
+  between `lidar_pose[0:2]` of collaborator and ego — the same distance OpenCOOD's `COM_RANGE = 70` m
+  filter uses — ties broken by ascending CAV id; `|C| ≤ N` marks the frame `subset_is_full`. Enforced
+  by an explicit mask, NOT by `max_cav`, whose ordering is loader-internal and unpinned.
+  (ii) Payload: N collaborators = N messages, so B_L(N) = N·0.024 and B_F(N) = N·0.99 Msym, derived
+  from the committed chain. Budget semantics unchanged (§5, WORDING-1): B_max bounds the MEAN.
+  (iii) One decision per frame, broadcast to all N — the frozen selector has no per-collaborator
+  action and none is invented. (iv) Descriptive + paired CI only, no decision of any kind.
+  (v) Deployed models, δ, τ\*, `FROZEN_MANIFEST.json`, the mainline replay and `main.tex` untouched;
+  new caches go to `gs_rerun/p4c_*` and never overwrite the registered ones.
+
+  **Counted now (from the committed dataset index, not estimated):** frames with ≥1 / ≥2 / ≥3
+  collaborators are validate 1980 / 1247 / 899, test 2051 / 1081 / 212, culver 478 / 123 / **0**.
+  Culver-City therefore **cannot support N=3 at all** and supports N=2 on 123 of 550 frames; 119 test
+  and 72 Culver frames have **zero** collaborators and are ego-only whatever the selector decides.
+  Both facts are design constraints, and any N=3 claim about Culver would be a claim about "≤2".
+
+  **STILL OPEN, and blocking the run — to be closed in this entry before any forward pass:** what
+  "delivered" means across N links. The frozen protocol defines delivery for ONE link. Option A
+  (all-or-nothing: any link fails → ego fallback) costs 4409 forwards ≈ 22 GPU-min and is a
+  conservative bound on the feature branch; option B (partial fusion: fuse whatever arrived) needs
+  every non-empty delivered subset, 27 775 forwards ≈ 2.3 GPU-hours. Recommendation for the
+  greenlight: **A as primary, plus B as a bracket on validate only** (8070 forwards ≈ 41 GPU-min).
+  The choice is recorded here BEFORE the run, never after seeing numbers.
+
+  **Expected (§8 anti-forcing; finalised at greenlight):** payload scales ≈ linearly in N, so the
+  frozen selectors overshoot B_max at N=2/3 on every split — a property of the transfer, not a
+  violation to patch, and the same class of non-transfer already recorded for τ and for P4-A; F1
+  rises with N where the feature branch is delivered, with diminishing returns; on Culver the N=3
+  column must be identical to N=2, and a difference there is a mask bug rather than a result.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
