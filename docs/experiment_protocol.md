@@ -1142,6 +1142,67 @@ written into the paper's conclusions; the paper reports only the frozen selector
     /grid-expansion batch of P4-B(1)–(3) is *not* run in this round, and `B_F^SECOND` stays open
     pending the `bits_per_element` ruling.
 
+- **P4-B-c RESULT (2026-08-14) — the conversion is established. The SECOND checkpoint loads, and
+  with it OpenCOOD reproduces the model zoo's own published AP. P4-B's load blocker is closed; the
+  cache batch was NOT run and `B_F^SECOND` is still open.**
+  - **E1 met.** Exactly **12** tensors disagreed, all `backbone_3d` sparse-conv kernels, all 5-D,
+    all reconciled by `permute(4,0,1,2,3)`, **0 unexplained**. (Tensor counts: the `_compression`
+    variant has **232** state-dict entries, the uncompressed one **160** — P4-B-b's "160 keys" was
+    the uncompressed variant's count. Both have the same 12 mismatches.)
+  - **E2 met.** After conversion, `load_state_dict(strict=True)` returns *all keys matched* —
+    0 missing, 0 unexpected, 0 shape mismatch — for both variants.
+  - **E3 met.** Per tensor: key set unchanged, element multiset unchanged, dtype unchanged, and the
+    permutation round-trips bit-identically. 12 permuted, 220 (resp. 148) copied unchanged.
+  - **E4 met — the decisive one.** Official `intermediate` inference with the converted
+    `_compression` weights, no-global-sort AP (the zoo's convention):
+    **test (Default Towns) AP@0.7 = 0.78384 vs the published 0.783 (Δ +0.00084)**;
+    **Culver City AP@0.7 = 0.76188 vs the published 0.760 (Δ +0.00188)**. Both an order of
+    magnitude inside the ±0.005 tolerance. Targets are parsed out of OpenCOOD's own README table at
+    run time, not hard-coded. Global-sort AP is recorded separately (0.9118 / 0.8250) and is **not**
+    comparable to the zoo row. Record: `results/manifests/P4B_VERIFICATION_compression.json`.
+  - **Two defects found and fixed while doing this, both of the silent-wrong-number kind.**
+    (i) spconv 2.3.8's own `SPCONV_SAVED_WEIGHT_LAYOUT=RSCK` migration hook applies the permutation
+    **twice** (`ALL_WEIGHT_IS_KRSC` re-enters the same branch), producing `[4,16,3,3,3]` where
+    `[16,3,3,3,4]` is wanted — the load still raises. Demonstrated from the library, not asserted;
+    the script applies the permutation once. (ii) `opencood.utils.eval_utils.calculate_ap` cumsums
+    `result_stat`'s `tp`/`fp` lists **in place**, so it is not idempotent: the first verification
+    run scored both AP conventions off one `result_stat` and the global-sort column came out as
+    ~16,000. The pass/fail column was computed first and was correct, but the run was **re-done
+    from scratch with a deep copy** rather than patched in the manifest.
+  - **Run-to-run drift.** The two independent runs differ by ~1e-4 in AP (GPU non-determinism);
+    both PASS by a wide margin. Both figures are recorded in the conversion manifest.
+  - **Step 4 (dummy forward) — the pre-registered payload estimate was WRONG, and this is the
+    finding.** P4-B item (2) assumed the transmitted tensor is the HeightCompression BEV output,
+    C×H×W = 256×100×352 = **9,011,200** elements/CAV. That element count is confirmed exactly by the
+    forward — but it is **not what the `_compression` variant transmits**. `AttBEVBackbone` has
+    **two** branches, each with its own `AutoEncoder`, and each branch is fused across CAVs after
+    its own compression, so **both bottlenecks** go on the wire:
+    | branch | pre-compression | transmitted bottleneck | ratio |
+    |---|---|---|---|
+    | 0 | 128 × 100 × 352 = 4,505,600 | **32 × 25 × 88 = 70,400** | 64× |
+    | 1 | 256 × 50 × 176 = 2,252,800 | **128 × 25 × 88 = 281,600** | 8× |
+    Transmitted total **352,000 elements/CAV/frame**, i.e. **25.6× smaller** than the plan's
+    9.01 M. The bottleneck is not a named tensor anywhere — `AutoEncoder.forward` runs encoder and
+    decoder back to back and returns only the reconstruction — so it was captured with a forward
+    hook on the last encoder stage, not inferred from the config.
+    **Consequence for `B_F^SECOND`, still NOT decided here:** the plan's illustrative 36.0 Msym
+    (INT8) / 72.1 Msym (FP16) were computed off the wrong element count. On the transmitted count
+    they would be ≈1.41 / 2.82 Msym. But the *mainline* accounting does not use a bottleneck count
+    at all — it applies a fixed 1.98 Mbit source budget (≈0.92 bit/element) to the **uncompressed**
+    2.16e6-element PointPillar tensor. Two self-consistent accountings are therefore available and
+    they differ by more than an order of magnitude. **The choice is Peiyi's; nothing is fixed here,
+    and no number is aligned to the PointPillar figure by coincidence.**
+    Record: `results/manifests/P4B_DUMMY_FORWARD_compression.json`.
+  - **Scope kept.** Converted checkpoints live outside the repo
+    (`pretrained_models/second_attentive_fusion_spconv2/`, sha256 both sides in
+    `P4B_CONVERSION_MANIFEST.json`); `P4B_MANIFEST.json` was left as the input-only record. **No
+    eff cache, no grid expansion, no frozen-walk evaluation was run** — P4-B items (1) and (3)
+    remain unstarted, and only the `_compression` variant carries a verified label.
+  - **Caution recorded for the results index.** `projects/ca_tosg/utils/results_index.py` enumerates
+    with `git ls-files results`, so an **untracked** result file is invisible to it and its
+    "N files indexed, 0 unattributed" line is a statement about *tracked* files only. Regenerating
+    it before `git add` silently under-reports; the three new P4-B manifests had to be staged first.
+
 - **P5-4 (2026-08-14) — migration batch 3, part 1: the legacy-engine inventory. `main.tex` NOT
   edited, not one character; no result regenerated, no figure rebuilt, no ledger cell changed.**
   Batch 2 left `sec:difficulty` standing as "the" remaining legacy subsection. Before editing it,

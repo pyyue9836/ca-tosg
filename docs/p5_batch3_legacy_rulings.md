@@ -190,9 +190,10 @@ edited, `main.tex` untouched. Awaiting the ruling.
 
 The audit classifies the remaining 93 claims too. Two counts are worth recording now:
 
-* **55 claims still have blank ledger evidence**, of which **36 carry no distinctive number to
-  locate** (structural/definitional constants: `2`-bit request, `802.11bd`, `16`-QAM, IoU `0.5`) and
-  **19 carry distinctive numbers that no committed result file holds**. The second group is the one
+* **54 claims still have blank ledger evidence and no located source**, of which **36 carry no
+  distinctive number to locate** (structural/definitional constants: `2`-bit request, `802.11bd`,
+  `16`-QAM, IoU `0.5`) and **18 carry distinctive numbers that no committed result file holds**.
+  The second group is the one
   to work through next — e.g. `c556938` (feature importance `34.9` / `27.5` / `62.4`%), `c2aa3e2`
   (`55`–`70`% of oracle headroom, `+0.031` F1), `ce065fb` (transfer shares `99.4` / `99.3` / `99.8` /
   `25.3` / `16.0`%), and the recurring `6.9`–`18.9`% channel-use headline, which appears twice
@@ -202,3 +203,10 @@ The audit classifies the remaining 93 claims too. Two counts are worth recording
   check first: it is a headline number in both the abstract and the Conclusion.
 * **16 claims resolve to a FROZEN generator by value search but still have blank ledger cells.**
   Those are pure back-fill: the evidence exists and only needs writing down.
+* **Read the `[k/n]` match strength before trusting a located row.** The audit prints how many of a
+  claim's distinctive literals the winning file actually carries. Two rows are weak enough to need a
+  human check rather than a copy-paste: `c95b6b7` ("detection range x $[-140.8, 140.8]$ m and
+  y $[-38.4, 38.4]$ m") resolves at **2/4** purely because `±140.8` also appears in an unrelated
+  SECOND config echo — the y-range does not match and the attribution is almost certainly spurious;
+  `c5930a4` resolves at **4/9** against `true_e2e_ap.csv`, which is genuine (the CSV holds the four
+  AP values and the remaining five literals are the differences computed in the sentence itself).

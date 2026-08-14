@@ -15,7 +15,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/channel/` | 4 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 49 |
-| | `results/manifests/` | 9 |
+| | `results/manifests/` | 13 |
 | | `results/provenance/` | 23 |
 | | `results/sensitivity/` | 28 |
 | | `results/sensitivity/ablation/` | 8 |
@@ -136,6 +136,10 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `FEATURE_ABLATION_MANIFEST.json` | `python projects/ca_tosg/evaluation/feature_ablation.py` | FA-1 variant models -- "labeled variant, not deployed", kept apart from FROZEN_MANIFEST |
 | `FROZEN_MANIFEST.json` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `P4A_MANIFEST.json` | `python tools/run_baselines.py contextual_bandit --train` | internal learned-policy comparator, not deployed |
+| `P4B_CONVERSION_MANIFEST.json` | `python tools/convert_second_checkpoint.py` | P4-B-c spconv 1.x->2.x kernel-layout conversion of the zoo SECOND weights (lossless axis reorder; established by the verification below, not by the conversion itself) |
+| `P4B_DUMMY_FORWARD_compression.json` | `python tools/second_dummy_forward.py` | P4-B-c step 4: transmitted BEV tensor shapes before/after the AutoEncoder bottleneck |
+| `P4B_MANIFEST.json` | `(hand-recorded; the checkpoint is an EXTERNAL INPUT, fetched manually)` | P4-B SECOND intermediate-fusion checkpoint -- input only, no inference run |
+| `P4B_VERIFICATION_compression.json` | `python tools/verify_second_zoo_ap.py` | P4-B-c expectation E4: reproduces the model zoo's own published AP@0.7 with the converted weights (no-global-sort, the zoo's own convention) |
 | `P4C_MANIFEST.json` | `python projects/ca_tosg/evaluation/collaborator_scale.py` | P4-C arm caches -- "collaborator-scale arm, not deployed" |
 | `candidate_walk_B010.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B020.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
@@ -232,4 +236,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-154 files indexed, 0 unattributed.
+158 files indexed, 0 unattributed.

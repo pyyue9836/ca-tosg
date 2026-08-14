@@ -4,7 +4,8 @@ Written 2026-08-14. Everything below is checkable from the repo; nothing here is
 
 ```
 repo    /home/josh/cooperative_semantic_perception/ca-tosg   (remote: github.com/pyyue9836/ca-tosg)
-branch  p1-phy-rebuild        HEAD 6136c3d        working tree clean
+branch  p1-phy-rebuild        working tree clean   (HEAD: see `git log -1`; this file is not the
+                                                    place to keep a hash in sync)
 tag     pre-bevformer-style-restructure = 59a3d1c  (pre-restructure snapshot, keep)
 env     conda activate sionna310   (python 3.10.18 / sklearn 1.7.0 / numpy 1.26.4 / pandas 2.2.2
                                     -- these exact versions are pinned by FROZEN_MANIFEST.json)
@@ -15,23 +16,38 @@ gates   python tools/verify_results.py              all 9, needs data/p2/ + ../O
 **Everything is currently green: `ALL GATES PASS` (9/9).** If that is not true when you start,
 stop and find out why before doing anything else.
 
-## The two things actually blocked, waiting on Josh
+## The two things waiting on Josh
 
-1. **P4-B (second backbone) — the SECOND checkpoint will not load.** All 160 keys match (0 missing,
-   0 unexpected); 12 `backbone_3d` sparse-conv kernels have the wrong axis order, because the
-   weights were saved under spconv 1.x `(kD,kH,kW,C_in,C_out)` and the environment has spconv 2.3.8,
-   which wants `(C_out,kD,kH,kW,C_in)`. `model_shape == permute(ckpt_shape,(4,0,1,2,3))` exactly.
-   **Nothing was patched, deliberately.** The ruling needed: is a layout-converted checkpoint
-   acceptable for a generality arm whose point is that the weights are the official ones? Until
-   that is answered, the dummy forward and the payload_audit extension items cannot be produced.
-   Full record: `results/manifests/P4B_MANIFEST.json`, change-log `P4-B-b`.
-   *Settled already:* main variant = `second_attentive_fusion_compression` (its
+1. **P4-B — the load blocker is CLOSED; what is open now is the payload accounting.**
+   The checkpoint was converted (`permute(4,0,1,2,3)` on the 12 `backbone_3d` sparse-conv kernels —
+   spconv's own RSCK→KRSC migration, applied *once*, because spconv 2.3.8's convenience hook applies
+   it twice and still fails to load), and the conversion was then **earned empirically**: official
+   `intermediate` inference reproduces the model zoo's own published AP@0.7 —
+   **test 0.78384 vs 0.783, Culver 0.76188 vs 0.760**, both far inside ±0.005, on the zoo's own
+   no-global-sort convention. Change-log `P4-B-c`; records in
+   `results/manifests/P4B_{CONVERSION,VERIFICATION_compression,DUMMY_FORWARD_compression}.json`.
+   **Now open, and it needs Josh:** the dummy forward showed the pre-registered payload estimate was
+   wrong. The `_compression` variant does **not** transmit the 9.01 M-element HeightCompression
+   tensor; `AttBEVBackbone` has two branches, each with its own `AutoEncoder`, and both bottlenecks
+   go on the wire — **352,000 elements/CAV/frame** (32×25×88 + 128×25×88), 25.6× smaller. So
+   `B_F^SECOND` has two self-consistent derivations differing by more than an order of magnitude:
+   bit-depth × the transmitted bottleneck count, or the mainline's fixed 1.98 Mbit source budget
+   (≈0.92 bit/element) applied to the uncompressed tensor. **Nothing was chosen.**
+   Still unstarted by design: the eff-cache / grid-expansion batch, P4-B items (1) and (3). Only the
+   `_compression` variant carries a verified label.
+   *Settled earlier:* main variant = `second_attentive_fusion_compression` (its
    `base_bev_backbone.compression: 2` matches the deployed mainline F branch).
-2. **`sec:difficulty` is still legacy-engine.** It reports `+0.090` on hard frames with its own
-   figure, produced by `ablations/a2_difficulty.py` (the v3 200-realisation engine), not by the
-   frozen selectors. P5 batch 2 deleted the *restatements* of that number elsewhere but left the
-   subsection standing, because editing its prose alone would leave the figure contradicting the
-   text. It needs its own migration round.
+2. **The legacy-engine clean-up is inventoried and the rulings are drafted — `main.tex` untouched.**
+   `sec:difficulty` was **not** the only legacy subsection. A mechanical sweep
+   (`tools/audit_claims_evidence.py` → `docs/claims_evidence_audit.md`) found **14 of 107 claims
+   across 10 sections** resting on a retired engine, including two nobody had flagged:
+   **`sec:generalisation`'s entire per-SNR AP-knee narrative** (3 claims, scored by the v3
+   global-sort scorer `true_e2e_global.py`) and a **`+0.090` survivor in the Conclusion**
+   (`main.tex:904`) that batch 2's record says was deleted. The `+0.090` family lives in three
+   places: `main.tex` 662 (prose), 678 (figure caption), 904 (Conclusion).
+   Per-section rulings — recompute / demote-to-appendix / delete, each with its compute cost and
+   dependency — are in **`docs/p5_batch3_legacy_rulings.md`**, **proposed only**.
+   **Awaiting Josh's ruling before any prose moves.** Change-log `P5-4`.
 
 ## Where the work stands
 
@@ -41,12 +57,19 @@ stop and find out why before doing anything else.
   it changed two conclusions) and P3-1 (SNR sampled off the pre-registered grid — regenerated, no
   conclusion changed). Both have guards in `tests/`.
 - **Experiments finished**: FA-1 feature ablation; P4-C collaborator scale N∈{1,2,3} semantics A
-  (all splits) and semantics B (validate bracket, N=2 — the bracket is tight, ~4th decimal).
+  (all splits) and semantics B (validate bracket, N=2 — the bracket is tight, ~4th decimal);
+  **P4-B-c**, the SECOND checkpoint conversion + zoo-AP reproduction (item 1 above).
 - **P5 main-text migration**: batches 1 and 2 done. `main.tex` is unfrozen and edited; the claims
-  ledger is regenerated (107 rows, 0 STALE, 17 filled / 90 pending, 0 dangling).
-- **Deferred, not forgotten**: the `sec:difficulty` round above; re-verifying the remaining 24
-  modulation-context `C_{16}` mentions if the notation table is not judged sufficient; the
-  evidence back-fill for the 90 pending ledger rows.
+  ledger is regenerated (107 rows, 0 STALE, 17 filled / 90 pending, 0 dangling). **Batch 3 part 1
+  (inventory) is done and `main.tex` was not touched** — see item 2 above.
+- **Ledger back-fill, as the audit now measures it**: 14 claims LEGACY-ENGINE, 16 FROZEN,
+  23 ANALYTIC, 54 still without a located source (36 of those carry no distinctive number —
+  `802.11bd`, `16`-QAM, IoU `0.5` — and 18 carry numbers no committed result file holds; the
+  `6.9`–`18.9\%` channel-use headline is in that second group and appears in both the abstract and
+  the Conclusion). Read the `[k/n]` match strength before trusting a located row.
+- **Deferred, not forgotten**: executing the batch-3 rulings once Josh decides; re-verifying the
+  remaining 24 modulation-context `C_{16}` mentions if the notation table is not judged sufficient;
+  writing the located evidence into the ledger's own cells.
 
 ## Working rules that are not obvious from the code
 

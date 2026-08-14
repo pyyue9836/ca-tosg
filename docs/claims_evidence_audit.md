@@ -7,15 +7,32 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | engine | claims |
 |---|---|
 | PENDING (no distinctive number to locate) | 36 |
-| PENDING (unlocated) | 19 |
+| PENDING (unlocated) | 18 |
 | ANALYTIC | 12 |
-| FROZEN (located, ledger cell still blank) | 11 |
-| LEGACY-ENGINE (located; weaker candidates disagree) | 8 |
-| ANALYTIC (located, ledger cell still blank) | 6 |
-| FROZEN (located; weaker candidates disagree) | 5 |
+| FROZEN [2/2] (located, ledger cell still blank) | 4 |
 | LEGACY-ENGINE | 4 |
-| ANALYTIC (located; weaker candidates disagree) | 4 |
-| LEGACY-ENGINE (located, ledger cell still blank) | 2 |
+| ANALYTIC [2/2] (located, ledger cell still blank) | 3 |
+| ANALYTIC [3/3] (located, ledger cell still blank) | 3 |
+| FROZEN [4/4] (located; weaker candidates disagree) | 3 |
+| LEGACY-ENGINE [2/2] (located; weaker candidates disagree) | 3 |
+| ANALYTIC [3/3] (located; weaker candidates disagree) | 2 |
+| FROZEN [2/3] (located, ledger cell still blank) | 2 |
+| FROZEN [3/4] (located; weaker candidates disagree) | 2 |
+| ANALYTIC [1/1] (located; weaker candidates disagree) | 1 |
+| ANALYTIC [2/2] (located; weaker candidates disagree) | 1 |
+| ANALYTIC [2/4] (located, ledger cell still blank) | 1 |
+| FROZEN [12/12] (located, ledger cell still blank) | 1 |
+| FROZEN [3/3] (located, ledger cell still blank) | 1 |
+| FROZEN [4/9] (located, ledger cell still blank) | 1 |
+| FROZEN [5/5] (located, ledger cell still blank) | 1 |
+| FROZEN [6/6] (located, ledger cell still blank) | 1 |
+| LEGACY-ENGINE [2/3] (located; weaker candidates disagree) | 1 |
+| LEGACY-ENGINE [3/3] (located; weaker candidates disagree) | 1 |
+| LEGACY-ENGINE [5/5] (located, ledger cell still blank) | 1 |
+| LEGACY-ENGINE [5/5] (located; weaker candidates disagree) | 1 |
+| LEGACY-ENGINE [5/6] (located, ledger cell still blank) | 1 |
+| LEGACY-ENGINE [5/6] (located; weaker candidates disagree) | 1 |
+| LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | 1 |
 
 Total: **107** claims across **34** (sub)sections.
 
@@ -98,7 +115,7 @@ Total: **107** claims across **34** (sub)sections.
 |---|---|---|---|
 | `c730257` | PENDING (unlocated) | 2, 802.11 | We propose Channel-Aware Task-Oriented Semantic Granularity Selection (CA-TOSG), a receiver-driven framework in which the ego vehi… |
 | `c4342f0` | PENDING (no distinctive number to locate) | 2, 0.5, 0.10, 0.20, 0.30 | Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channel… |
-| `c6fcc17` | FROZEN (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | 0.0267 on validate, 0.0027 on test and 0.0892 on Culver-City. |
+| `c6fcc17` | FROZEN [2/3] (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | 0.0267 on validate, 0.0027 on test and 0.0892 on Culver-City. |
 | `c4ac1dc` | PENDING (unlocated) | 6.9, 18.9, 1, 2, 16 | What the selector does buy is channel use: averaged over all channel states it spends 6.9--18.9\% of the per-frame channel use of … |
 | `c39002e` | PENDING (unlocated) | 59.9, 100, 10 | The deployed selector incurs 59.9 ms per frame on a single CPU core (the slowest of the three frozen selectors), fitting the 100 m… |
 
@@ -141,7 +158,7 @@ Total: **107** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c7104a5` | PENDING (unlocated) | 802.11, 5 | The channel quality may be obtained from pilot-based estimation, link-layer feedback, or reference-signal-received-power reports a… |
-| `c6a0f0e` | ANALYTIC (located, ledger cell still blank) | 46.2, 3, 37.885, 2.01, 1 | The third is a frequency-selective OFDM link over a tapped-delay-line channel with an exponential power-delay profile at _rms=46.2… |
+| `c6a0f0e` | ANALYTIC [3/3] (located, ledger cell still blank) | 46.2, 3, 37.885, 2.01, 1 | The third is a frequency-selective OFDM link over a tapped-delay-line channel with an exponential power-delay profile at _rms=46.2… |
 | `c351473` | LEGACY-ENGINE | 0.024 | We treat the object-level message L as a low-rate robust message in the evaluated SNR range, motivated by its small payload (appro… |
 | `c6263f5` | PENDING (no distinctive number to locate) | 16, 256 | Fig. [ref] plots the resulting BLER_q() for the LDPC + 16/256-QAM configurations under both channels, making explicit the threshol… |
 
@@ -183,14 +200,14 @@ Total: **107** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c870c12` | FROZEN (located, ledger cell still blank) | 59.9, 5.3, 95, 69.3, 1,000, 1, 100, 10 | Third, its per-frame inference cost on a single CPU core is 59.9 ± 5.3 ms (P95 = 69.3 ms), measured over 1,000 batch-1 trials per … |
+| `c870c12` | FROZEN [2/2] (located, ledger cell still blank) | 59.9, 5.3, 95, 69.3, 1,000, 1, 100, 10 | Third, its per-frame inference cost on a single CPU core is 59.9 ± 5.3 ms (P95 = 69.3 ms), measured over 1,000 batch-1 trials per … |
 | `c020074` | PENDING (no distinctive number to locate) | 0.999 | Before taking the argmax in Eq. [eqref], the oracle applies a feasibility mask: any mode whose frame-level block-error rate exceed… |
 
 ### Experimental Setup [sec:exp] → Dataset and Implementation
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c95b6b7` | PENDING (unlocated) | -140.8, 140.8, -38.4, 38.4 | The perception model is a PointPillars BEV backbone [cite] with detection range x [-140.8, 140.8] m and y [-38.4, 38.4] m. |
+| `c95b6b7` | ANALYTIC [2/4] (located, ledger cell still blank) | -140.8, 140.8, -38.4, 38.4 | The perception model is a PointPillars BEV backbone [cite] with detection range x [-140.8, 140.8] m and y [-38.4, 38.4] m. |
 
 ### Experimental Setup [sec:exp] → Message Construction and Payload Accounting
 
@@ -205,7 +222,7 @@ Total: **107** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c3a3ba2` | ANALYTIC (located, ledger cell still blank) | 46.2, 2.01 | Training and the headline evaluation use two channel models, AWGN and Rayleigh fading; the frequency-selective OFDM link of Sectio… |
+| `c3a3ba2` | ANALYTIC [2/2] (located, ledger cell still blank) | 46.2, 2.01 | Training and the headline evaluation use two channel models, AWGN and Rayleigh fading; the frequency-selective OFDM link of Sectio… |
 | `c625b48` | PENDING (unlocated) | 5, 3, 37.885 | The BLER functions BLER_q(,ch) are tabulated from a separate LDPC + QAM simulation; we instantiate this transport with the 5G NR L… |
 | `c1c7e4f` | PENDING (no distinctive number to locate) | 1, 2, 16, 256 | This transport configuration---rate-1/2 LDPC with 16-/256-QAM, compared at matched channel uses---matches the conventional digital… |
 
@@ -235,12 +252,12 @@ Total: **107** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cf76623` | PENDING (no distinctive number to locate) | 0.024, 14 | We therefore report the true end-to-end detection AP in the two regimes that define the policy: the fallback regime (fading or low… |
-| `cac1fb0` | FROZEN (located, ledger cell still blank) | 0.5, 0.10, 0.20, 0.30, 0.8937, 0.8959, 0.8971, 0.9181, 0.918 | Three observations follow. (i) The realised true end-to-end AP@0.5 of the frozen selectors, reported descriptively for B_=0.10/0.2… |
-| `c5930a4` | FROZEN (located, ledger cell still blank) | 0.9169, -0.8902, 0.0267, 0.9216, -0.9189, 0.0027, 0.8720, -0 | 0.9169-0.8902=0.0267 AP on validate, 0.9216-0.9189=0.0027 AP on the scene-disjoint test split and 0.8720-0.7828=0.0892 AP on the C… |
-| `c1a099a` | LEGACY-ENGINE (located; weaker candidates disagree) | 0.0027, 16, 256, 21, 41, 0.158, 0.251, 25 | On test that headroom is 0.0027 AP, i.e.\ object-level detection is already at the ceiling and there is no room for a granularity … |
-| `cfebd55` | FROZEN (located, ledger cell still blank) | 0.10, 1, +0.00055, 95, +0.00046, +0.00065 | At B_=0.10 the selector's realised F1 is above the budget-matched threshold's by +0.00055 (frame-level paired bootstrap 95\% CI [+… |
-| `ce256b8` | FROZEN (located; weaker candidates disagree) | 0.20, 0.30, 1, 0.90740, 0.90937, 0.90463, 0.90734, 2.3, 1.7 | At B_=0.20 and 0.30 the threshold rule attains the higher F1---0.90740 and 0.90937 against 0.90463 and 0.90734---while transmittin… |
-| `ccb057c` | ANALYTIC (located, ledger cell still blank) | 0.20, 1, 0.0028, 95, 0.005, 56.3 | The claim that survives is the pre-registered one, on the single confirmatory comparison (test at B_=0.20): the selector's F1 is s… |
+| `cac1fb0` | FROZEN [12/12] (located, ledger cell still blank) | 0.5, 0.10, 0.20, 0.30, 0.8937, 0.8959, 0.8971, 0.9181, 0.918 | Three observations follow. (i) The realised true end-to-end AP@0.5 of the frozen selectors, reported descriptively for B_=0.10/0.2… |
+| `c5930a4` | FROZEN [4/9] (located, ledger cell still blank) | 0.9169, -0.8902, 0.0267, 0.9216, -0.9189, 0.0027, 0.8720, -0 | 0.9169-0.8902=0.0267 AP on validate, 0.9216-0.9189=0.0027 AP on the scene-disjoint test split and 0.8720-0.7828=0.0892 AP on the C… |
+| `c1a099a` | LEGACY-ENGINE [2/3] (located; weaker candidates disagree) | 0.0027, 16, 256, 21, 41, 0.158, 0.251, 25 | On test that headroom is 0.0027 AP, i.e.\ object-level detection is already at the ceiling and there is no room for a granularity … |
+| `cfebd55` | FROZEN [3/3] (located, ledger cell still blank) | 0.10, 1, +0.00055, 95, +0.00046, +0.00065 | At B_=0.10 the selector's realised F1 is above the budget-matched threshold's by +0.00055 (frame-level paired bootstrap 95\% CI [+… |
+| `ce256b8` | FROZEN [4/4] (located; weaker candidates disagree) | 0.20, 0.30, 1, 0.90740, 0.90937, 0.90463, 0.90734, 2.3, 1.7 | At B_=0.20 and 0.30 the threshold rule attains the higher F1---0.90740 and 0.90937 against 0.90463 and 0.90734---while transmittin… |
+| `ccb057c` | ANALYTIC [2/2] (located, ledger cell still blank) | 0.20, 1, 0.0028, 95, 0.005, 56.3 | The claim that survives is the pre-registered one, on the single confirmatory comparison (test at B_=0.20): the selector's F1 is s… |
 | `c3db418` | PENDING (no distinctive number to locate) | 1, 0.67, 0.95 | On this frame, the object-level branch over-produces boxes---including several false positives away from any ground-truth vehicle … |
 
 ### Results and Analysis → Detection Performance versus SNR
@@ -248,7 +265,7 @@ Total: **107** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c65a7cc` | PENDING (no distinctive number to locate) | 0.5, 16, 256 | Fig. [ref] reports AP@0.5 under AWGN and Rayleigh, comparing with the fixed object-level baseline, ImportanceMapJSCC [cite], LDPC … |
-| `c8060e2` | FROZEN (located; weaker candidates disagree) | 0.890, 0.5, 8, 0.916, 12, 0.001, 0.917 | Under AWGN, sits on the Fixed L line (0.890 AP@0.5) for SNR ≤ 8 dB and rises to 0.916 AP@0.5 for SNR ≥ 12 dB, within 0.001 AP of t… |
+| `c8060e2` | FROZEN [3/4] (located; weaker candidates disagree) | 0.890, 0.5, 8, 0.916, 12, 0.001, 0.917 | Under AWGN, sits on the Fixed L line (0.890 AP@0.5) for SNR ≤ 8 dB and rises to 0.916 AP@0.5 for SNR ≥ 12 dB, within 0.001 AP of t… |
 | `c2f838d` | PENDING (unlocated) | 0.71, 0.5, 0.61, 16, 0.917, 12 | The ImportanceMapJSCC baseline saturates near 0.71 AP@0.5, well below Fixed L at every SNR; the LDPC + QAM baselines sit at the eg… |
 
 ### Results and Analysis → Payload versus SNR [sec:payload_snr]
@@ -275,41 +292,41 @@ Total: **107** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cbbe03d` | FROZEN (located; weaker candidates disagree) | 0.20, 2, 21, 0.000, 1, 0.9011, 0.9046, 0.095 | First, neither half of the input is sufficient on its own, and the failure mode is the same in both directions: run through the id… |
+| `cbbe03d` | FROZEN [4/4] (located; weaker candidates disagree) | 0.20, 2, 21, 0.000, 1, 0.9011, 0.9046, 0.095 | First, neither half of the input is sufficient on its own, and the failure mode is the same in both directions: run through the id… |
 | `cd4cb25` | PENDING (no distinctive number to locate) | 0.07, 0.16, 24 | These extra F requests are channel-blind---the same 0.07\! → \!0.16 request share on every channel, since _t carries no channel ty… |
-| `c75df0f` | LEGACY-ENGINE (located; weaker candidates disagree) | 1, 0.240, 0.271 | Second, adding c_t enables a channel-conditional policy---under Rayleigh the selector becomes L-dominant while under AWGN it activ… |
+| `c75df0f` | LEGACY-ENGINE [2/2] (located; weaker candidates disagree) | 1, 0.240, 0.271 | Second, adding c_t enables a channel-conditional policy---under Rayleigh the selector becomes L-dominant while under AWGN it activ… |
 
 ### Results and Analysis → True End-to-end AP Verification [sec:true_e2e]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cf11128` | PENDING (no distinctive number to locate) | 1, 2, 0.3, 0.5, 0.7, 5 | To confirm that this analytical F1 proxy translates to actual end-to-end detection AP under a deployed pipeline, we run a true end… |
-| `ced8192` | FROZEN (located; weaker candidates disagree) | 14, 0.916, 0.5, 0.857, 0.7, 0.001, 0.917 | First, the true end-to-end AP at AWGN 14 dB reaches 0.916 at IoU 0.5 and 0.857 at IoU 0.7, sitting within 0.001 AP of the perfect-… |
-| `cacc6ee` | FROZEN (located, ledger cell still blank) | 0.632, 0.990 | The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, w… |
+| `ced8192` | FROZEN [3/4] (located; weaker candidates disagree) | 14, 0.916, 0.5, 0.857, 0.7, 0.001, 0.917 | First, the true end-to-end AP at AWGN 14 dB reaches 0.916 at IoU 0.5 and 0.857 at IoU 0.7, sitting within 0.001 AP of the perfect-… |
+| `cacc6ee` | FROZEN [2/2] (located, ledger cell still blank) | 0.632, 0.990 | The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, w… |
 
 ### Results and Analysis → Generalisation to OPV2V Test and Culver-City Splits [sec:generalisation]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `ce065fb` | PENDING (unlocated) | 99.4, 99.3, 1, 99.8, 25.3, 16.0 | The meaningful evidence of transfer is that the policy ordering is identical to validate on both splits: the fixed feature-level p… |
-| `c79fed4` | ANALYTIC (located; weaker candidates disagree) | 1, 0.5, 0.919, 0.890, 0.783 | The absolute F1 values differ across splits because the object-level detection baseline itself differs---Fixed-L AP@0.5 is 0.919 o… |
-| `c274409` | LEGACY-ENGINE (located; weaker candidates disagree) | 8, 12, 0.13, 0.5, 0.919, 0.921, 0.7, 0.869, 0.866, 0.002, 0. | On test, the selector remains at Fixed L up to 8 dB and begins activating F at 12 dB (_L=0.13), lifting AP@0.5 from 0.919 to 0.921… |
-| `ce03afe` | LEGACY-ENGINE (located; weaker candidates disagree) | 12, 14, 1.00, 0.44, 0.5, 0.783, 0.857, +7.4, 0.7, 0.698, 0.7 | On Culver-City the knee appears at 12--14 dB (_L: 1.00 → 0.44), lifting AP@0.5 from 0.783 to 0.857 (+7.4 points) and AP@0.7 from 0… |
-| `caf41ce` | LEGACY-ENGINE (located; weaker candidates disagree) | 16, 20, 0.857, 0.840, 0.5, 0.44, 0.57 | A single deviation from a clean monotone appears at the top of the AWGN range: the Culver-City AP peaks near 16 dB and dips mildly… |
+| `c79fed4` | ANALYTIC [3/3] (located; weaker candidates disagree) | 1, 0.5, 0.919, 0.890, 0.783 | The absolute F1 values differ across splits because the object-level detection baseline itself differs---Fixed-L AP@0.5 is 0.919 o… |
+| `c274409` | LEGACY-ENGINE [5/6] (located; weaker candidates disagree) | 8, 12, 0.13, 0.5, 0.919, 0.921, 0.7, 0.869, 0.866, 0.002, 0. | On test, the selector remains at Fixed L up to 8 dB and begins activating F at 12 dB (_L=0.13), lifting AP@0.5 from 0.919 to 0.921… |
+| `ce03afe` | LEGACY-ENGINE [5/5] (located; weaker candidates disagree) | 12, 14, 1.00, 0.44, 0.5, 0.783, 0.857, +7.4, 0.7, 0.698, 0.7 | On Culver-City the knee appears at 12--14 dB (_L: 1.00 → 0.44), lifting AP@0.5 from 0.783 to 0.857 (+7.4 points) and AP@0.7 from 0… |
+| `caf41ce` | LEGACY-ENGINE [2/2] (located; weaker candidates disagree) | 16, 20, 0.857, 0.840, 0.5, 0.44, 0.57 | A single deviation from a clean monotone appears at the top of the AWGN range: the Culver-City AP peaks near 16 dB and dips mildly… |
 
 ### Results and Analysis → Communication--Perception Pareto Frontier [sec:pareto]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `ca661e5` | FROZEN (located, ledger cell still blank) | 2, 1, 0.90326, 0.90463, 0.90734, 0.068, 0.095, 0.187, 0.10,  | The P2 product is three frozen selectors, one per budget, so the operating point is budget-indexed: on test they realise F1 0.9032… |
+| `ca661e5` | FROZEN [6/6] (located, ledger cell still blank) | 2, 1, 0.90326, 0.90463, 0.90734, 0.068, 0.095, 0.187, 0.10,  | The P2 product is three frozen selectors, one per budget, so the operating point is budget-indexed: on test they realise F1 0.9032… |
 | `c5b6b36` | PENDING (no distinctive number to locate) | 0.20, 9.6 | At B_=0.20 that payload is 9.6\% of the feature-level payload B_F. |
 
 ### Results and Analysis → Where the Gain Concentrates: Difficulty Stratification [sec:difficulty]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c21021c` | LEGACY-ENGINE (located, ledger cell still blank) | -0.004, +0.024, 16, +0.090, +0.106, 95, +0.097, +0.116, +0.0 | Averaged over all channels the CA-TOSG-over-Fixed-L gain is small and rises with difficulty (-0.004/+0.024 easy/hard on test); but… |
-| `cca1a7d` | ANALYTIC (located; weaker candidates disagree) | -0.0147, 1, 0 | The value of is therefore two-dimensional: it materialises where a hard frame meets a reliable channel, and the channel-averaged h… |
+| `c21021c` | LEGACY-ENGINE [5/6] (located, ledger cell still blank) | -0.004, +0.024, 16, +0.090, +0.106, 95, +0.097, +0.116, +0.0 | Averaged over all channels the CA-TOSG-over-Fixed-L gain is small and rises with difficulty (-0.004/+0.024 easy/hard on test); but… |
+| `cca1a7d` | ANALYTIC [1/1] (located; weaker candidates disagree) | -0.0147, 1, 0 | The value of is therefore two-dimensional: it materialises where a hard frame meets a reliable channel, and the channel-averaged h… |
 
 ### Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold]
 
@@ -319,8 +336,8 @@ Total: **107** claims across **34** (sub)sections.
 | `c213dc2` | PENDING (unlocated) | 0.005, 56.3 | What is pre-registered and survives is non-inferiority within a 0.005 margin at a 56.3\% payload reduction. |
 | `cec993e` | PENDING (unlocated) | 0, 0.30, 1, 1.54 | Neither half of the input is sufficient on its own, and the shape of the failure is the informative part: given only the channel s… |
 | `cdffce3` | PENDING (unlocated) | 1, 0.001 | Dropping the range, density, or object-count cue groups changes F1 by <0.001; the channel-averaged payloads are in Table [ref]. |
-| `c393d15` | ANALYTIC (located, ledger cell still blank) | 0.20, 1, 0.0028, 95, 0.005, 56.3 | Against the re-tuned SNR-threshold rule on test at B_=0.20, the selector's F1 is significantly lower than the threshold rule by ≈ … |
-| `cfe4f9d` | FROZEN (located; weaker candidates disagree) | 0.20, 0.30, 1, 0.90740, 0.90937, 0.90463, 0.90734, 2.3, 1.7 | At B_=0.20 and 0.30 the threshold rule attains the higher realised F1 (0.90740 and 0.90937 versus 0.90463 and 0.90734), at 2.3 × a… |
+| `c393d15` | ANALYTIC [2/2] (located, ledger cell still blank) | 0.20, 1, 0.0028, 95, 0.005, 56.3 | Against the re-tuned SNR-threshold rule on test at B_=0.20, the selector's F1 is significantly lower than the threshold rule by ≈ … |
+| `cfe4f9d` | FROZEN [4/4] (located; weaker candidates disagree) | 0.20, 0.30, 1, 0.90740, 0.90937, 0.90463, 0.90734, 2.3, 1.7 | At B_=0.20 and 0.30 the threshold rule attains the higher realised F1 (0.90740 and 0.90937 versus 0.90463 and 0.90734), at 2.3 × a… |
 
 ### Results and Analysis → When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware]
 
@@ -328,44 +345,44 @@ Total: **107** claims across **34** (sub)sections.
 |---|---|---|---|
 | `c9ba5de` | PENDING (no distinctive number to locate) | 1, 8, 12, 8.0 | The LDPC + QAM feature F1 has a sharp cliff over the 8--12 dB decoding transition (onset 8.0 dB, Section [ref]), so SNR is highly … |
 | `c0e68a9` | PENDING (no distinctive number to locate) | 1, 0.89, 0, 20 | The learned JSCC feature F1, by contrast, is essentially flat at ≈ 0.89 across the entire 0--20 dB range (real per-frame data): th… |
-| `c077f78` | FROZEN (located, ledger cell still blank) | +0.002, 1, 95, +0.001, +0.003, -0.0002, +0.0005 | (a) In-distribution. Under LDPC + QAM the AWGN edge over the best SNR threshold is only +0.002 F1 (95\% CI [+0.001,+0.003]): small… |
-| `ce386fe` | LEGACY-ENGINE (located; weaker candidates disagree) | -0.0002, +0.0005, +0.002, +0.022, 1, +0.020, +0.025, +0.018, | The three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively; the ordering -0.0002 < +0.… |
+| `c077f78` | FROZEN [5/5] (located, ledger cell still blank) | +0.002, 1, 95, +0.001, +0.003, -0.0002, +0.0005 | (a) In-distribution. Under LDPC + QAM the AWGN edge over the best SNR threshold is only +0.002 F1 (95\% CI [+0.001,+0.003]): small… |
+| `ce386fe` | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | -0.0002, +0.0005, +0.002, +0.022, 1, +0.020, +0.025, +0.018, | The three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively; the ordering -0.0002 < +0.… |
 | `c2aa3e2` | PENDING (unlocated) | 55, 70, +0.031, 1 | The selector recovers 55--70\% of the clairvoyant oracle headroom (e.g.\ +0.031 F1 on AWGN test): the graceful-channel decision is… |
-| `c14c429` | LEGACY-ENGINE (located; weaker candidates disagree) | 0.14, 0.42, 1, -0.004, -0.008, -0.005, 0 | Deployed on test it over-selects the feature action (JSCC C-request rate 0.14\! → \!0.42) and its realised F1 falls just below Fix… |
+| `c14c429` | LEGACY-ENGINE [2/2] (located; weaker candidates disagree) | 0.14, 0.42, 1, -0.004, -0.008, -0.005, 0 | Deployed on test it over-selects the feature action (JSCC C-request rate 0.14\! → \!0.42) and its realised F1 falls just below Fix… |
 
 ### Results and Analysis → Collaboration Is Not Always Beneficial [sec:harm]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cea5465` | PENDING (no distinctive number to locate) | 0.999 | When the channel cannot carry a feature message, requesting one spends the collaborator's transmission budget for nothing and coll… |
-| `c2f3e1b` | LEGACY-ENGINE (located, ledger cell still blank) | 1, 16, 0, 8.0, 0.9719, 0.9866, -0.0147, 95, -0.0179, -0.0115 | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output … |
+| `c2f3e1b` | LEGACY-ENGINE [5/5] (located, ledger cell still blank) | 1, 16, 0, 8.0, 0.9719, 0.9866, -0.0147, 95, -0.0179, -0.0115 | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output … |
 | `c4453b5` | PENDING (no distinctive number to locate) | 0.9, 7.4, 0.2, 256, 1, 1.0, 5.8 | Two CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the object-level fused outpu… |
-| `c00d772` | ANALYTIC (located, ledger cell still blank) | 15.2, 27.8, 41.0 | Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean 15.2 ground-truth objects on test … |
+| `c00d772` | ANALYTIC [3/3] (located, ledger cell still blank) | 15.2, 27.8, 41.0 | Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean 15.2 ground-truth objects on test … |
 | `c6abce3` | PENDING (no distinctive number to locate) | 11, 2 | A remedy adds no signalling overhead: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request (ego-only) a… |
 
 ### Results and Analysis → Comparison with Where2comm [sec:where2comm]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cfe7baf` | ANALYTIC (located; weaker candidates disagree) | 2, 0.5, 0.871, 0.7, 0.790 | Under perfect channel (lossless feature-level transmission), Where2comm achieves AP@0.5 = 0.871 and AP@0.7 = 0.790. |
-| `c290127` | ANALYTIC (located; weaker candidates disagree) | 0.917, 0.5, 0.890, 0.836, 2 | This is a solid feature-level result---but it is neither the strongest feature branch nor, notably, above the object-level baselin… |
+| `cfe7baf` | ANALYTIC [2/2] (located; weaker candidates disagree) | 2, 0.5, 0.871, 0.7, 0.790 | Under perfect channel (lossless feature-level transmission), Where2comm achieves AP@0.5 = 0.871 and AP@0.7 = 0.790. |
+| `c290127` | ANALYTIC [3/3] (located; weaker candidates disagree) | 0.917, 0.5, 0.890, 0.836, 2 | This is a solid feature-level result---but it is neither the strongest feature branch nor, notably, above the object-level baselin… |
 
 ### Results and Analysis → Deployment Robustness and Cost [sec:robustness]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `ca250e3` | ANALYTIC (located, ledger cell still blank) | 1, 0.0003, 60, 10, -0.004, -0.019 | Under AWGN the selector tolerates SNR-estimation noise up to ≈ 1 dB with ≤ 0.0003 F1 loss; under a Jakes model at 60 km/h the SNR … |
+| `ca250e3` | ANALYTIC [3/3] (located, ledger cell still blank) | 1, 0.0003, 60, 10, -0.004, -0.019 | Under AWGN the selector tolerates SNR-estimation noise up to ≈ 1 dB with ≤ 0.0003 F1 loss; under a Jakes model at 60 km/h the SNR … |
 | `ca2f1c7` | PENDING (unlocated) | +0.020, 1 | The framework also spans the full fading-severity range: replacing the AWGN/Rayleigh limits with Rician fading moves the feature-a… |
-| `c4e6116` | FROZEN (located, ledger cell still blank) | 59.9, 5.3, 95, 69.3, 40, 100, 10 | Finally, the deployed Random Forest runs in 59.9 ± 5.3 ms per frame (P95=69.3 ms) on a single CPU core, leaving a 40 ms margin wit… |
+| `c4e6116` | FROZEN [2/2] (located, ledger cell still blank) | 59.9, 5.3, 95, 69.3, 40, 100, 10 | Finally, the deployed Random Forest runs in 59.9 ± 5.3 ms per frame (P95=69.3 ms) on a single CPU core, leaving a 40 ms margin wit… |
 
 ### Conclusion
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cdfd48a` | PENDING (no distinctive number to locate) | 16, 256 | The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs… |
-| `c6c5144` | FROZEN (located, ledger cell still blank) | 59.9, 5.3, 95, 69.3, 100, 10 | It runs in 59.9 ± 5.3 ms (P95 = 69.3 ms) per frame on a single CPU core---the slowest of the three frozen selectors, since the dep… |
-| `c612cba` | FROZEN (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state jus… |
+| `c6c5144` | FROZEN [2/2] (located, ledger cell still blank) | 59.9, 5.3, 95, 69.3, 100, 10 | It runs in 59.9 ± 5.3 ms (P95 = 69.3 ms) per frame on a single CPU core---the slowest of the three frozen selectors, since the dep… |
+| `c612cba` | FROZEN [2/3] (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state jus… |
 | `cacf21e` | PENDING (unlocated) | 6.9, 18.9 | 6.9--18.9\% of the channel use of fixed feature-level transmission across the three budgets on test. |
 | `c02d47f` | PENDING (unlocated) | 1, 0.005, 56.3 | Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the… |
-| `ccf7f57` | LEGACY-ENGINE (located; weaker candidates disagree) | +0.090, 1, 95, +0.083, +0.096 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.090 F1 (95\% CI [+0.083,+0.09… |
+| `ccf7f57` | LEGACY-ENGINE [3/3] (located; weaker candidates disagree) | +0.090, 1, 95, +0.083, +0.096 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.090 F1 (95\% CI [+0.083,+0.09… |
 

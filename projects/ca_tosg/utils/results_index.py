@@ -24,6 +24,17 @@ RULES = [
     (r'^manifests/P4B_MANIFEST\.json$',
      '(hand-recorded; the checkpoint is an EXTERNAL INPUT, fetched manually)',
      'P4-B SECOND intermediate-fusion checkpoint -- input only, no inference run'),
+    (r'^manifests/P4B_CONVERSION_MANIFEST\.json$',
+     'python tools/convert_second_checkpoint.py',
+     'P4-B-c spconv 1.x->2.x kernel-layout conversion of the zoo SECOND weights (lossless axis '
+     'reorder; established by the verification below, not by the conversion itself)'),
+    (r'^manifests/P4B_VERIFICATION_\w+\.json$',
+     'python tools/verify_second_zoo_ap.py',
+     "P4-B-c expectation E4: reproduces the model zoo's own published AP@0.7 with the converted "
+     "weights (no-global-sort, the zoo's own convention)"),
+    (r'^manifests/P4B_DUMMY_FORWARD_\w+\.json$',
+     'python tools/second_dummy_forward.py',
+     'P4-B-c step 4: transmitted BEV tensor shapes before/after the AutoEncoder bottleneck'),
     (r'^manifests/P4C_MANIFEST\.json$',
      'python projects/ca_tosg/evaluation/collaborator_scale.py',
      'P4-C arm caches -- "collaborator-scale arm, not deployed"'),

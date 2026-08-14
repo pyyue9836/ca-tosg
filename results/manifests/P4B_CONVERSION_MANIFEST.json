@@ -1,0 +1,695 @@
+{
+ "schema": "catosg-p4b-conversion-manifest/1",
+ "label": "PRODUCT of this repository: layout-converted copies of an external input",
+ "protocol": "CA-TOSG P4-B-c (docs/experiment_protocol.md Change-log P4-B-c)",
+ "generated_by": "python tools/convert_second_checkpoint.py",
+ "generated": "2026-08-14T14:41:46.369606+00:00",
+ "input_manifest": "results/manifests/P4B_MANIFEST.json",
+ "reason": "The zoo weights were saved under spconv 1.2.1 (RSCK = kD,kH,kW,C_in,C_out); this environment has spconv 2.3.8, which stores kernels as KRSC = C_out,kD,kH,kW,C_in. Lossless axis reorder of the sparse-conv kernels only; every other tensor is copied unchanged. Same permutation as spconv's own RSCK migration branch, applied once (spconv 2.3.8's convenience hook applies it twice and still fails to load).",
+ "conversion": {
+  "permutation": [
+   4,
+   0,
+   1,
+   2,
+   3
+  ],
+  "applies_to": "5-D *.weight tensors under backbone_3d (sparse-conv kernels)",
+  "all_other_tensors": "copied byte-identically"
+ },
+ "spconv_hook_check": {
+  "spconv_version": "2.3.8",
+  "all_weight_is_krsc": true,
+  "rsck_branches_in_hook": 2,
+  "reference_permutation_from_spconv_source": [
+   4,
+   0,
+   1,
+   2,
+   3
+  ],
+  "permutation_used_here": [
+   4,
+   0,
+   1,
+   2,
+   3
+  ],
+  "conv_input_kernel_shape_applied_once": [
+   16,
+   3,
+   3,
+   3,
+   4
+  ],
+  "conv_input_kernel_shape_applied_twice": [
+   4,
+   16,
+   3,
+   3,
+   3
+  ],
+  "note": "ALL_WEIGHT_IS_KRSC is True, so the hook's second RSCK branch runs after the first: the permutation is applied twice and the resulting shape is wrong. The single application is the intended conversion."
+ },
+ "environment": {
+  "torch": "2.11.0+cu128"
+ },
+ "variants": {
+  "second_attentive_fusion": {
+   "source": {
+    "path": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion/second_attentive_fusion/latest.pth",
+    "sha256": "59a9df0900d1f2c47e9ec18082bbced363808c686f1221e9f95d95ad209a8248",
+    "bytes": 21274703
+   },
+   "converted": {
+    "path": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/second_attentive_fusion/latest.pth",
+    "sha256": "9684a887377197bf7b6283ebebaefd8b5e6677cc23dd35d99638f12a255d700d",
+    "bytes": 21258841
+   },
+   "config_yaml_sha256": "7f34e9f9517f8f1c49d46a059134b3ed680c8e487810e1b4a3f9b7c98e42eb90",
+   "tensors_total": 160,
+   "tensors_permuted": 12,
+   "tensors_copied_unchanged": 148,
+   "per_key_rules": [
+    {
+     "key": "backbone_3d.conv_input.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      4,
+      16
+     ],
+     "to_shape": [
+      16,
+      3,
+      3,
+      3,
+      4
+     ]
+    },
+    {
+     "key": "backbone_3d.conv1.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      16,
+      16
+     ],
+     "to_shape": [
+      16,
+      3,
+      3,
+      3,
+      16
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      16,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      16
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv_out.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      1,
+      1,
+      64,
+      128
+     ],
+     "to_shape": [
+      128,
+      3,
+      1,
+      1,
+      64
+     ]
+    }
+   ]
+  },
+  "second_attentive_fusion_compression": {
+   "source": {
+    "path": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion/second_attentive_fusion_compression/latest.pth",
+    "sha256": "a37e1df2e0874d3db64ff2f1519280f75e1eb3e51e8c430f03678424e4e7811c",
+    "bytes": 29753905
+   },
+   "converted": {
+    "path": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/second_attentive_fusion_compression/latest.pth",
+    "sha256": "869c88dfdb2feb224aec4a68250acaaa3ecdfaa7fe1b05167713e9668408b307",
+    "bytes": 29737153
+   },
+   "config_yaml_sha256": "d36b8e7b9a262fa8c2ffac5e95d26b6095f3ea0a3a7a0b9c85928c97339a5982",
+   "tensors_total": 232,
+   "tensors_permuted": 12,
+   "tensors_copied_unchanged": 220,
+   "per_key_rules": [
+    {
+     "key": "backbone_3d.conv_input.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      4,
+      16
+     ],
+     "to_shape": [
+      16,
+      3,
+      3,
+      3,
+      4
+     ]
+    },
+    {
+     "key": "backbone_3d.conv1.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      16,
+      16
+     ],
+     "to_shape": [
+      16,
+      3,
+      3,
+      3,
+      16
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      16,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      16
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv_out.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      1,
+      1,
+      64,
+      128
+     ],
+     "to_shape": [
+      128,
+      3,
+      1,
+      1,
+      64
+     ]
+    }
+   ]
+  }
+ },
+ "verification": {
+  "status": "PASS",
+  "record": "results/manifests/P4B_VERIFICATION_compression.json",
+  "variant_verified": "second_attentive_fusion_compression",
+  "convention": "no_global_sort (the zoo's own convention)",
+  "tolerance": 0.005,
+  "splits": {
+   "test": {
+    "zoo_target_ap_70": 0.783,
+    "observed_ap_70": 0.7838390501517385,
+    "delta": 0.000839050151738463,
+    "frames": 2170
+   },
+   "test_culver_city": {
+    "zoo_target_ap_70": 0.76,
+    "observed_ap_70": 0.7618846385820125,
+    "delta": 0.0018846385820124878,
+    "frames": 550
+   }
+  },
+  "label": "official weights, lossless axis reorder, verified below",
+  "scope_note": "only the _compression variant was verified against the zoo; the uncompressed variant was converted by the same rule but its AP was not reproduced, so it carries no verified label",
+  "reproducibility_note": "two independent runs of the same command gave AP@0.7 0.7838278 / 0.7838391 on test and 0.7619790 / 0.7618846 on Culver -- run-to-run drift ~1e-4 from GPU non-determinism, an order of magnitude inside the +-0.005 tolerance. The second run is the one recorded."
+ }
+}

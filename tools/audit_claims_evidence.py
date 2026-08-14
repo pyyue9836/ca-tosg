@@ -378,9 +378,13 @@ def build():
                 mark = ' **<- most specific**' if i == 0 else ''
                 detail.append(f'{path} [{len(hit)}/{len(lits)}] <- {gen} = {eng}{mark}')
             if top_engine:
-                engine = top_engine + (' (located, ledger cell still blank)'
-                                       if len(set(engines)) == 1
-                                       else ' (located; weaker candidates disagree)')
+                # carry the match strength into the label: a 2-of-4 hit is a hint, not an
+                # attribution (e.g. a claim's "+-140.8 m" range matching an unrelated config echo),
+                # and hiding the fraction would let the weak ones read as settled
+                strength = f' [{len(found[0][2])}/{len(lits)}]'
+                engine = top_engine + strength + (' (located, ledger cell still blank)'
+                                                  if len(set(engines)) == 1
+                                                  else ' (located; weaker candidates disagree)')
                 script = top_script
                 why = 'value search: ' + ' | '.join(detail)
             elif not lits:
@@ -404,7 +408,7 @@ def build():
            "number and a frozen-replay number are different quantities and may not appear in the "
            "same sentence (PROTOCOL, \"never blend engines\").", "",
            "| engine | claims |", "|---|---|"]
-    for k in sorted(tally, key=lambda k: -tally[k]):
+    for k in sorted(tally, key=lambda k: (-tally[k], k)):
         out.append(f"| {k} | {tally[k]} |")
     out += ["", f"Total: **{sum(tally.values())}** claims across "
                 f"**{len(per_section)}** (sub)sections.", ""]

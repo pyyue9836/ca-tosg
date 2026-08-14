@@ -1,0 +1,109 @@
+{
+ "schema": "catosg-p4b-dummy-forward/1",
+ "protocol": "CA-TOSG P4-B-c step 4 (docs/experiment_protocol.md)",
+ "generated_by": "python tools/second_dummy_forward.py",
+ "generated": "2026-08-14T15:05:02.235565+00:00",
+ "ckpt_dir": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/second_attentive_fusion_compression",
+ "split_sampled": "test",
+ "frames_in_forward": 1,
+ "cavs_in_this_frame": 2,
+ "config": {
+  "compression_layers": 2,
+  "voxel_size": [
+   0.1,
+   0.1,
+   0.1
+  ],
+  "lidar_range": [
+   -140.8,
+   -40,
+   -3,
+   140.8,
+   40,
+   1
+  ],
+  "height_compression_feature_num": 256
+ },
+ "tensors": {
+  "spatial_features": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    256,
+    100,
+    352
+   ],
+   "elements": 18022400,
+   "dtype": "torch.float32"
+  },
+  "pre_compression_0": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    128,
+    100,
+    352
+   ],
+   "elements": 9011200,
+   "dtype": "torch.float32"
+  },
+  "bottleneck_0": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    32,
+    25,
+    88
+   ],
+   "elements": 140800,
+   "dtype": "torch.float32"
+  },
+  "post_compression_0": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    128,
+    100,
+    352
+   ],
+   "elements": 9011200,
+   "dtype": "torch.float32"
+  },
+  "pre_compression_1": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    256,
+    50,
+    176
+   ],
+   "elements": 4505600,
+   "dtype": "torch.float32"
+  },
+  "bottleneck_1": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    128,
+    25,
+    88
+   ],
+   "elements": 563200,
+   "dtype": "torch.float32"
+  },
+  "post_compression_1": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    256,
+    50,
+    176
+   ],
+   "elements": 4505600,
+   "dtype": "torch.float32"
+  }
+ },
+ "transmitted_tensor": "bottleneck_0 -- the AutoEncoder ENCODER output. Note this is a per-CAV tensor: the forward runs all CAVs of the frame in one batch, so the leading dimension is the CAV count, and the per-message element count is elements / cavs.",
+ "bits_per_element": "NOT DECIDED -- B_F^SECOND is not derived here (Change-log P4-B item 2)",
+ "compression_ratio_elements": 64.0
+}
