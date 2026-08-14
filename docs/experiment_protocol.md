@@ -1013,6 +1013,28 @@ written into the paper's conclusions; the paper reports only the frozen selector
     by the new τ rows — those compare at *different* payloads — but it has not been re-verified
     against the frozen replay and should be, in batch 2.
 
+- **P4-B-a (2026-08-14) — the SECOND intermediate-fusion checkpoint is on disk and recorded.
+  NO inference has been run; P4-B remains PLAN-only.**
+  Source: OpenCOOD official model zoo, row *"Attentive | 1.2.1 | SECOND | Intermediate"*, Box file
+  **1621121166914**, archive `second_attentive_fusion.zip`. **Programmatic download from the official
+  share is disabled server-side** — HTTP 403 *"This user is not allowed to use direct links"* on the
+  Box shared-file download endpoint (with and without browser headers), HTTP 401 on
+  `api.box.com/2.0/shared_items` without a token — so the archive was **fetched manually by the
+  author**. No alternative or mirror source was used, and none may be: a second-backbone claim must
+  rest on the official weights.
+  Installed at `pretrained_models/second_attentive_fusion/`, **51.0 MB** across four files, sha256 of
+  each recorded in `results/manifests/P4B_MANIFEST.json`:
+  `second_attentive_fusion/latest.pth` 21 274 703 B (`59a9df09…`),
+  `second_attentive_fusion_compression/latest.pth` 29 753 905 B (`a37e1df2…`), plus the two
+  `config.yaml` (2 400 B `7f34e9f9…`, 2 505 B `d36b8e7b…`).
+  Both configs confirm the backbone: `model.core_method: second_intermediate`,
+  `name: second_intermediate_fusion`, `IntermediateFusionDataset`; the `_compression` variant differs
+  only by `base_bev_backbone.compression = 2`.
+  Dependency check: `import spconv` → **2.3.8** (clean). SECOND uses sparse convolutions, so this is
+  the dependency that would gate a P4-B run.
+  The manifest is labelled **"EXTERNAL INPUT, not a product of this repository"** and kept separate
+  from every product manifest. `inference_status: NOT RUN`.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

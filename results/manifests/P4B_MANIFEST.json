@@ -1,0 +1,48 @@
+{
+ "schema": "catosg-p4b-manifest/1",
+ "label": "EXTERNAL INPUT, not a product of this repository -- no inference has been run",
+ "protocol": "CA-TOSG P4-B (docs/experiment_protocol.md Change-log P4-B); PLAN pre-registered, inference NOT run",
+ "recorded": "2026-08-14T14:08:27.913127+00:00",
+ "source": {
+  "zoo": "OpenCOOD official model zoo, row \"Attentive | 1.2.1 | SECOND | Intermediate\"",
+  "box_file_number": "1621121166914",
+  "url": "https://ucla.app.box.com/v/UCLA-MobilityLab-OPV2V/file/1621121166914",
+  "archive_name": "second_attentive_fusion.zip",
+  "acquisition": "fetched MANUALLY by the author on 2026-08-14. Programmatic download from the official share is disabled server-side: HTTP 403 \"This user is not allowed to use direct links\" on the Box shared-file download endpoint (with and without browser headers), HTTP 401 on api.box.com/2.0/shared_items without a token. No alternative source was used."
+ },
+ "install_path": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion/ (= OpenCOOD/peiyi_work/paper1/pretrained_models/second_attentive_fusion, symlinked)",
+ "model": {
+  "core_method": "second_intermediate",
+  "name": "second_intermediate_fusion",
+  "dataset": "IntermediateFusionDataset",
+  "variants": {
+   "second_attentive_fusion": "no feature compression",
+   "second_attentive_fusion_compression": "base_bev_backbone.compression = 2"
+  }
+ },
+ "files": {
+  "second_attentive_fusion/config.yaml": {
+   "sha256": "7f34e9f9517f8f1c49d46a059134b3ed680c8e487810e1b4a3f9b7c98e42eb90",
+   "bytes": 2400
+  },
+  "second_attentive_fusion/latest.pth": {
+   "sha256": "59a9df0900d1f2c47e9ec18082bbced363808c686f1221e9f95d95ad209a8248",
+   "bytes": 21274703
+  },
+  "second_attentive_fusion_compression/config.yaml": {
+   "sha256": "d36b8e7b9a262fa8c2ffac5e95d26b6095f3ea0a3a7a0b9c85928c97339a5982",
+   "bytes": 2505
+  },
+  "second_attentive_fusion_compression/latest.pth": {
+   "sha256": "a37e1df2e0874d3db64ff2f1519280f75e1eb3e51e8c430f03678424e4e7811c",
+   "bytes": 29753905
+  }
+ },
+ "total_bytes": 51033513,
+ "environment": {
+  "spconv": "2.3.8",
+  "torch": "2.11.0+cu128",
+  "note": "spconv imports cleanly; SECOND uses sparse convolutions, so this is the dependency that would block the P4-B inference batch"
+ },
+ "inference_status": "NOT RUN. This manifest records an input only; no forward pass, no cache, no result."
+}
