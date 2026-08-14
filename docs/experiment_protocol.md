@@ -1362,6 +1362,50 @@ written into the paper's conclusions; the paper reports only the frozen selector
     of `end_to_end_ap.py` (the frozen engine draws SNR ~ U[0,20] and has no per-SNR mode at all).
     **Awaiting Peiyi's ruling before any prose moves.**
 
+- **P5-5 (2026-08-14, PRE-REGISTERED before any prose was edited and before any new number was
+  produced) — migration batch 4: execute the batch-3 rulings in `main.tex`.**
+  Peiyi's rulings on `docs/p5_batch3_legacy_rulings.md` are taken as given. This entry records what
+  each item is allowed to change and what would stop it. Frozen selectors, δ, τ\*,
+  `FROZEN_MANIFEST.json`, the mainline replay and every committed result CSV stay read-only; new
+  products get new files.
+  - **(5) `B_L` family — re-attribution only, no number moves.** The four ledger rows citing the v3
+    `threshold_vs_rf.csv` are re-pointed at the quantity's real source (the dataset's own
+    `late_num_pred` + the ETSI-CPM container size), which `tests/test_payload.py (0b)` already
+    derives. **`(0b)` stops being skippable**: it currently prints `SKIP` and passes when the
+    OpenCOOD runtime dataset is absent, which is precisely the "a gate that cannot verify must never
+    report success" failure. It becomes a hard failure in the artefact tier. No prose change.
+  - **(6) `sec:headline` re-attribution; `sec:ablation` recomputed from FA-1.** `c1a099a`'s headroom
+    is re-pointed at the frozen `true_e2e_ap.csv`. `sec:ablation`'s channel-conditional payload pair
+    is recomputed from the frozen FA-1 artefacts. **Expectation E-6: the FA-1 numbers will differ
+    from the retired arm's `0.240 / 0.271`** — they are different engines — so the prose changes with
+    them. If FA-1 carries no channel-split payload at all, the sentence drops to ruling (c) and is
+    deleted rather than approximated.
+  - **(7) `sec:difficulty` / `sec:harm` / Conclusion.** The **reliable-channel conditional** view is
+    recomputed under the frozen protocol: difficulty = tertiles of the frame's own object-level
+    effective F1 (`eff_L`), conditioned on one (channel, SNR) grid point, with the frozen selectors
+    replayed on `data/p2/p2_grid_{split}.csv`. The **channel-averaged 200-realisation** view is
+    **deleted, not reproduced** — it is the retired engine's own quantity. `fig_difficulty.pdf` is
+    rebuilt in the same batch from the same recomputation, so the figure and the text are never
+    momentarily inconsistent. The `+0.090` at `main.tex` 904 (the family's third site) goes.
+    **Expectation E-7: the recomputed hard-frame gain will NOT be +0.090.** Whatever it is, is what
+    is printed; if the gain does not rise with difficulty at all, that is the result and the
+    subsection is rewritten to say so rather than dropped.
+  - **(8) `sec:generalisation` — a reproduction gate BEFORE any new number.** A new SNR-pinned
+    variant of the frozen `end_to_end_ap.py` is written with the SNR draw as the *only* difference.
+    **Expectation E-8, and the batch's hardest stop: run in its `uniform` mode the variant must
+    reproduce every committed row of `results/main/true_e2e_ap.csv` exactly.** Until that passes,
+    **no pinned-SNR number may be produced, quoted or written into `main.tex`.** If it fails, the
+    variant is wrong and `sec:generalisation` falls back to ruling (b) — appendix, labelled
+    prior-protocol. Scope (splits, channels, budgets) is fixed by a **measured** per-condition cost
+    and whatever is not covered is stated in the prose, never silently dropped.
+  - **(9) `sec:jscc_aware` → appendix**, with an explicit sentence marking it a prior-protocol arm
+    (its own selector, `v3_eval`'s BLER lookup and 200-seed CSI convention, neither the v3 nor the
+    frozen selector). No number changes.
+  - **(10) Ledger back-fill, LAST.** Only after every prose edit lands, so no cell is written against
+    a number that then moves. `docs/claims.md` is regenerated and the STALE / blank / dangling counts
+    are reported as they come out.
+  - **(11) Push, then stop for verification.**
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
