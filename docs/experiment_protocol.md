@@ -1406,6 +1406,71 @@ written into the paper's conclusions; the paper reports only the frozen selector
     are reported as they come out.
   - **(11) Push, then stop for verification.**
 
+- **P5-5 RESULT (2026-08-14) — migration batch 4 executed. `main.tex` edited. Both pre-registered
+  expectations that could fail did fail in the predicted direction, and one section's *content*,
+  not just its numbers, did not survive the frozen protocol.**
+  - **(5) `B_L` family + the skippable gate.** `tests/test_payload.py (0b)` no longer prints `SKIP`
+    and passes when the dataset is absent; it records a hard failure. No prose changed. The four
+    `B_L` rows were re-attributed by the mechanical back-fill of item 10.
+  - **(6) `sec:ablation` — FA-1 *reverses* the retired arm's sentence.** The old text claimed the
+    full selector "spends $0.240$ Msym versus $0.271$ for channel state alone". Under FA-1 the
+    direction is budget-dependent and at the two tighter budgets it is the other way round: at
+    $B_{\max}=0.10/0.20$ channel-only collapses to always-$L$ (payload $0.024$), and only at
+    $B_{\max}=0.30$ does it activate $F$ — reaching a **higher** F1 than the full selector
+    (0.90944 vs 0.90734 on test) at **1.54×** the channel use (0.28843 vs 0.18703). Rewritten to
+    that reading. **Also deleted:** two sentences discussing a cues-plus-$\hat\gamma$ variant
+    ("the same $0.07\!\to\!0.16$ request share on every channel") that the table's own caption says
+    "was not re-run under the corrected protocol and is therefore not listed" — prose was still
+    analysing a variant that no longer exists.
+  - **(7) `sec:difficulty` / `sec:harm` / Conclusion — E-7 confirmed, and the effect is 2.3× smaller
+    than published.** Recomputed from `data/p2/p2_grid_{split}.csv` + the frozen selectors at AWGN
+    16 dB, $B_{\max}=0.20$ (`difficulty_frozen.py` → `results/sensitivity/difficulty_frozen.csv`):
+    hard-frame gain **+0.0400** (95% CI [+0.0339, +0.0465]) on test, not +0.090; validate +0.0402;
+    **Culver +0.0136**, not +0.106. The shape survives (gain rises monotonically with difficulty);
+    the magnitude does not. `sec:harm`'s easy-stratum footnote: **−0.0040** [−0.0064, −0.0018], not
+    −0.0147 — same stratum, same **n = 713**, same Fixed-$L$ baseline 0.9866, so *only* the
+    selector's realised F1 moved, which is exactly the engine difference and nothing else. The
+    channel-averaged view is deleted, not reproduced. `fig_difficulty.pdf` rebuilt in the same
+    commit from the same CSV (now single-panel — the deleted view was its left panel). `+0.090` is
+    gone from all three sites (prose, caption, Conclusion): `grep -c` on `main.tex` returns **0**.
+    The `sec:harm` footnote edit is declared to the paragraph-insertion gate as ruling **P5-5-7**
+    rather than absorbed silently; that gate caught the edit and now passes with the ruling recorded.
+  - **(8) `sec:generalisation` — E-8 gate PASSED, and then the section's story did not survive.**
+    `end_to_end_ap_snr.py --verify` reproduced **27/27** committed rows of `true_e2e_ap.csv`
+    exactly, which is what licensed producing any pinned number. Coverage produced: test +
+    Culver-City × AWGN + Rayleigh × 11 SNR points × all three frozen budgets, 200 paired
+    realisations (264 rows). At $B_{\max}=0.20$:
+    - the knee is at **10 dB**, not 12–14 dB, and it is a **policy** knee, not an AP knee
+      ($\rho_F$ 0 → 0.256 test, 0 → 0.064 Culver) sitting exactly where the 16-QAM frame-error
+      cliff clears;
+    - AP is flat across it and on test slightly **negative**: AP@0.5 0.9189 → 0.9168, AP@0.7
+      0.8687 → 0.8636. The published "lifting 0.919 → 0.921" does not reproduce;
+    - Culver-City gains **+0.7** AP@0.5 points (0.7828 → 0.7897), not **+7.4**;
+    - the "mild non-monotonic dip at the 20 dB training-grid edge" **does not exist** under the
+      frozen selector — AP is flat above 10 dB — so that explanation is withdrawn;
+    - the flat Rayleigh curve is the one part of the earlier account that reproduces unchanged.
+    Both per-SNR tables and the paragraph were rewritten from the frozen data.
+    **NOT fixed, out of this batch's scope, needs a ruling:** `tab:true_e2e` in `sec:true_e2e` is
+    the *validate* per-SNR table and has the identical provenance defect (v3 scorer). The engine to
+    redo it now exists; validate was deliberately not re-run because the ruling covered
+    `sec:generalisation`.
+  - **(9) `sec:jscc_aware` → Appendix A**, with a protocol note marking it a prior-protocol arm
+    whose selector is neither the frozen nor the retired one. 107 lines moved under `\appendices`;
+    8 `Section~\ref` cross-references rewritten to `Appendix~\ref`. No number changed.
+  - **(10) Ledger, last.** `docs/claims.md`: **108 rows** (11 claims removed and 12 added by this
+    batch's edits), **0 STALE**, **39 filled / 69 pending**, 0 dangling. The mechanical back-fill
+    (`tools/backfill_claims_evidence.py`) writes only `CSV` and `Generator`, and only where every
+    distinctive literal of a claim is carried by one committed file resolving to one generator:
+    22 rows newly filled, **14 left blank as partial matches** and **55 as unlocated**, because a
+    2-of-4 literal hit is a hint, not an attribution. **Defect found while doing it:** a generator
+    command containing a literal `|` (`--train|--evaluate`) breaks the row's 9-cell parse, and the
+    ledger generator *silently drops* an unparseable row's evidence on the next rebuild — the cell
+    reads as filled and comes back blank. A backslash escape does not help (the parser does a plain
+    `str.split('|')`); the entity `&#124;` does.
+  - **Not verified here:** there is no LaTeX toolchain on this host, so `main.tex` has **not been
+    compiled**. The appendix move, the `\appendices` placement and the table rewrites are checked by
+    the repository's three main.tex gates only.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

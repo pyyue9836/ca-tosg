@@ -99,7 +99,17 @@ RULES = [
     (r'^sensitivity/item5c_\w+\.csv$',
      'python projects/ca_tosg/evaluation/rician_bracket.py', 'bracketing variant, not deployed'),
     (r'^sensitivity/ablation/a2_difficulty\w*\.csv$',
-     'python projects/ca_tosg/evaluation/ablations/a2_difficulty.py', ''),
+     'python projects/ca_tosg/evaluation/ablations/a2_difficulty.py',
+     'RETIRED v3 engine (v3 selector + v3_eval); superseded in main.tex by '
+     'sensitivity/difficulty_frozen.csv -- kept as a record, cited by nothing'),
+    (r'^sensitivity/difficulty_frozen\.csv$',
+     'python projects/ca_tosg/evaluation/difficulty_frozen.py',
+     'P5-5 item 7: difficulty stratification under the FROZEN protocol, reliable-channel view '
+     'only (the all-channel view is deliberately not reproduced)'),
+    (r'^main/true_e2e_ap_by_snr\.csv$',
+     'python projects/ca_tosg/evaluation/end_to_end_ap_snr.py',
+     'P5-5 item 8: true end-to-end AP at pinned SNR; only valid after --verify (the E-8 '
+     'uniform-mode reproduction gate) has passed'),
     (r'^sensitivity/ablation/a7_\w+\.csv$',
      'python projects/ca_tosg/evaluation/ablations/a7_ablation.py', ''),
     (r'^sensitivity/ablation/a8_models\.csv$',

@@ -107,6 +107,26 @@ PARAS = {
             ("identity and CSV as the C256 analysis (\\S\\ref{sec:method})",
              "identity and CSV as the C256 analysis (\\S\\ref{sec:candidates})"),
         ],
+        rulings=[
+            # P5-5 item 7 (Peiyi, 2026-08-14): the easy-stratum footnote quoted the retired
+            # 200-realisation engine's selector. Recomputed under the frozen protocol
+            # (results/sensitivity/difficulty_frozen.csv; test / B_max=0.20 / AWGN 16 dB).
+            # Same stratum, same n=713, same Fixed-L baseline 0.9866 -- only the SELECTOR's
+            # realised F1 moves, which is exactly the engine difference and nothing else.
+            ("the selector's realised F1 is $0.9719$ vs the Fixed-$L$ baseline $0.9866$ -- a "
+             "gain of $-0.0147$ (frame-level paired $95\\%$ CI $[-0.0179,-0.0115]$; $n=713$ "
+             "frames). The selector requests $C_{16}$ on $635$ of these $713$ frames; on the "
+             "remaining $78$, where it requests $L$, its output is frame-identical to "
+             "Fixed-$L$, so the paired difference arises entirely on the $C_{16}$-request "
+             "frames (verified programmatically from the per-frame account) -- the loss",
+             "the frozen selector's realised F1 at $B_{\\max}=0.20$ is $0.9826$ vs the "
+             "Fixed-$L$ baseline $0.9866$ -- a gain of $-0.0040$ (frame-level paired $95\\%$ "
+             "CI $[-0.0064,-0.0018]$; $n=713$ frames). The selector requests $F$ on $184$ of "
+             "these $713$ frames; on the remaining $529$, where it requests $L$, its output is "
+             "frame-identical to Fixed-$L$, so the paired difference arises entirely on the "
+             "$F$-request frames -- the loss",
+             'P5-5-7'),
+        ],
     ),
 }
 

@@ -100,6 +100,9 @@ def upstream_source_budgets():
             'config dims + declared 1.98/2.16 convention', tol=6e-3)
     else:
         print(f'(0a) SKIP: JSCC config absent (OpenCOOD runtime not present) -> {JSCC_CFG}')
+    # (0b) is NOT skippable (P5-5 item 5). Four main.tex claims are attributed to this derivation
+    # as their sole evidence, so a run that cannot perform it must FAIL, not pass with a printed
+    # note -- "a gate that cannot verify must never report success".
     if os.path.exists(DATASET):
         import pandas as pd
         nobj = float(pd.read_csv(DATASET)['late_num_pred'].mean())
@@ -107,7 +110,8 @@ def upstream_source_budgets():
         chk(f'(0b) B_L = mean objects({nobj:.2f}) x 110 B x 8 = {bl:.5f} Mbit',
             bl, 0.024, 'dataset late_num_pred x ETSI-CPM 110 B', tol=5e-4)
     else:
-        print(f'(0b) SKIP: dataset absent (OpenCOOD runtime not present) -> {DATASET}')
+        rows.append(('(0b) B_L from the dataset (REQUIRED, not skippable)', 'UNAVAILABLE',
+                     'derivable', f'dataset absent -> {DATASET}', False))
 
 
 def deployed_averages(pay):
