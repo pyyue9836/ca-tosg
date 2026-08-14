@@ -4,7 +4,7 @@
  "protocol": "CA-TOSG P4-C (docs/experiment_protocol.md, docs/p4c_plan.md)",
  "semantics": "A (all-or-nothing) -- primary, all three splits",
  "note": "collaborator-scale arms. NOT the deployed product; the deployed selectors are in FROZEN_MANIFEST.json and were only READ by this run.",
- "timestamp": "2026-08-13T15:42:11.904329+00:00",
+ "timestamp": "2026-08-14T13:20:57.305305+00:00",
  "deployed_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
  "caches": {
   "N1/late_validate": {

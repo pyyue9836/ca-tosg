@@ -57,6 +57,9 @@ MANIFEST = os.path.join(ROOT, 'results/manifests/P4C_MANIFEST.json')
 FROZEN = os.path.join(ROOT, 'results/manifests/FROZEN_MANIFEST.json')
 NS = (1, 2, 3)
 LABEL = 'collaborator-scale arm, not deployed'
+LABEL_B = 'bracketing variant, validate only, N=2, not deployed'
+B_SPLIT, B_N = 'validate', 2
+B_SECOND = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')  # placeholder
 sys.path.insert(0, OPENCOOD)
 from opencood.utils import eval_utils                                     # noqa: E402
 
@@ -78,6 +81,18 @@ def f1_from_boxes(pred, gt, iou=0.5):
     return 2 * p * r / (p + r) if p + r > 0 else 0.0
 
 
+def second_only_f1(split, gts):
+    """Per-frame F1 of the {second-nearest alone} delivered subset (semantics-B bracket)."""
+    out = {}
+    for branch, key in (('late', 'L'), ('intermediate', 'F')):
+        p = os.path.join(GS, 'p4c_B_second', '%s_%s.npz' % (branch, split))
+        if not os.path.exists(p):
+            return None
+        z = np.load(p, allow_pickle=True)
+        out[key] = np.array([f1_from_boxes(z['boxes'][i], gts[i]) for i in range(len(gts))])
+    return out
+
+
 def per_frame_f1(split):
     """{(branch, N): array of per-frame F1} scored against ONE canonical GT (ruling 1)."""
     comp_full = np.load(os.path.join(GS, 'comp_%s.npz' % split), allow_pickle=True)
@@ -93,6 +108,22 @@ def per_frame_f1(split):
             z = np.load(p, allow_pickle=True)
             out[(key, n)] = np.array([f1_from_boxes(z['boxes'][i], gts[i]) for i in range(len(gts))])
     return out, len(gts)
+
+
+def in_scope_frames(split, ds, kcol, bud):
+    """Frames that can distinguish semantics A from B: some frozen selector picks F somewhere on the
+    deterministic grid AND the frame has >= 2 collaborators (pre-registered, P4-C-b)."""
+    grid = pd.read_csv(os.path.join(D.GRID_DIR, 'p2_grid_%s.csv' % split))
+    n = len(ds)
+    picked = np.zeros(n, bool)
+    for tag in sorted(bud):
+        for ch in (False, True):
+            for s in sorted(grid['snr_db'].unique()):
+                a = D.rf_actions_stacked(bud[tag]['model'], bud[tag]['feat'], ds,
+                                         np.full((1, n), float(s)),
+                                         np.full((1, n), ch, dtype=bool))[0]
+                picked |= (a == 2)
+    return picked & (kcol >= 2), picked
 
 
 def paired_bootstrap(delta, n_boot, seed):
@@ -113,6 +144,9 @@ def main():
         kcol = ds['num_cavs'].to_numpy() - 1                              # collaborators, ego excluded
         f1, n_gt = per_frame_f1(split)
         assert n_gt == n, 'cache/frame mismatch %d vs %d' % (n_gt, n)
+        comp_full = np.load(os.path.join(GS, 'comp_%s.npz' % split), allow_pickle=True)
+        sec = second_only_f1(split, comp_full['gts']) if split == B_SPLIT else None
+        scope, _picked = in_scope_frames(split, ds, kcol, bud) if split == B_SPLIT else (None, None)
         rng = np.random.default_rng(D.CSI_SEED)
         snr_2d = rng.uniform(0, 20, size=(D.N_REPLAY, n))
         is_ray_2d = rng.random(size=(D.N_REPLAY, n)) < 0.5
@@ -138,7 +172,7 @@ def main():
                     rho += np.bincount(a, minlength=3) / (n * D.N_REPLAY)
                 F1[N], B[N], RHO[N] = f, pay, rho
             for N in NS:
-                row = dict(split=split, budget=b, N=N, label=LABEL,
+                row = dict(split=split, budget=b, N=N, semantics='A', label=LABEL,
                            F1=round(float(F1[N].mean()), 5), F1_std=round(float(F1[N].std()), 5),
                            payload=round(float(B[N].mean()), 5),
                            rho_E=round(float(RHO[N][0]), 4), rho_L=round(float(RHO[N][1]), 4),
@@ -157,6 +191,40 @@ def main():
             print('[%s B%s] ' % (split, tag) + '  '.join(
                 'N=%d F1=%.4f B=%.4f%s' % (N, F1[N].mean(), B[N].mean(),
                                            ' OVER' if B[N].mean() > b else '') for N in NS), flush=True)
+
+            # ---- semantics B bracket: validate, N=2, in-scope frames only (pre-registered P4-C-b)
+            if split == B_SPLIT and sec is not None:
+                N = B_N
+                eff_E = f1[('E', 0)]
+                c_both, c_near, c_sec = f1[('F', 2)], f1[('F', 1)], sec['F']
+                fB = np.empty(D.N_REPLAY); payB = np.empty(D.N_REPLAY)
+                for r in range(D.N_REPLAY):
+                    b_l = bF_2d[r]
+                    k_eff = np.minimum(N, kcol).astype(float)
+                    effF = c_both * (1 - b_l) ** k_eff + eff_E * (1 - (1 - b_l) ** k_eff)   # = A
+                    # in scope: partial fusion replaces the all-or-nothing collapse to ego
+                    p2 = (1 - b_l) ** 2
+                    partial = p2 * c_both + b_l * (1 - b_l) * (c_near + c_sec) + b_l ** 2 * eff_E
+                    effF = np.where(scope, partial, effF)
+                    E = np.stack([eff_E, f1[('L', N)], effF], axis=1)
+                    a = act[r]
+                    fB[r] = E[np.arange(n), a].mean()
+                    payB[r] = (PAYVEC[a] * k_eff).mean()          # payload is charged on REQUEST,
+                    #                                               so it is identical under A and B
+                m, lo, hi = paired_bootstrap(fB - F1[N], D.N_BOOT, D.BOOT_SEED)
+                rows.append(dict(split=split, budget=b, N=N, semantics='B', label=LABEL_B,
+                                 F1=round(float(fB.mean()), 5), F1_std=round(float(fB.std()), 5),
+                                 payload=round(float(payB.mean()), 5),
+                                 rho_E=round(float(RHO[N][0]), 4), rho_L=round(float(RHO[N][1]), 4),
+                                 rho_F=round(float(RHO[N][2]), 4),
+                                 over_budget=bool(float(payB.mean()) > b),
+                                 frames_subset_is_full=int((kcol <= N).sum()),
+                                 frames_zero_collaborator=int((kcol == 0).sum()),
+                                 arm_distinct=True, frames_in_scope=int(scope.sum()),
+                                 dF_vs_A_mean=round(m, 5), dF_vs_A_lcb95=round(lo, 5),
+                                 dF_vs_A_ucb95=round(hi, 5)))
+                print('           B(bracket) N=2 F1=%.4f (A %.4f, dF %+.5f [%+.4f,%+.4f]) on %d in-scope frames'
+                      % (fB.mean(), F1[N].mean(), m, lo, hi, scope.sum()), flush=True)
         for N in NS:
             for branch in ('late', 'intermediate'):
                 p = os.path.join(GS, 'p4c_N%d' % N, '%s_%s.npz' % (branch, split))

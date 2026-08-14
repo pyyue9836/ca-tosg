@@ -906,6 +906,16 @@ written into the paper's conclusions; the paper reports only the frozen selector
   **1380 forwards ≈ 0.23–0.27 GPU-hours** at the realised validate rate — against the 8070-subset,
   2.7-hour figure the original plan carried, an 11.7× reduction with no approximation.
 
+  **RUN 2026-08-14 — outcome (table in Appendix F).** 1380 forwards in 11.9 min (0.20 GPU-hours,
+  inside the 0.23–0.27 estimate). B ≥ A at all three budgets with every CI excluding 0, but the gap is
+  **+0.00010 / +0.00018 / +0.00032 F1** — the fourth decimal. The conservative all-or-nothing reading
+  therefore costs essentially nothing at N=2, and the delivery-semantics ambiguity that blocked the
+  P4-C run is **immaterial at this operating point** rather than an open degree of freedom. Mechanism:
+  the partial-delivery mass is 2·b(1−b) and the selector requests F almost only where b is small.
+  Payload is identical under A and B by construction (channel use is charged on request, not on
+  delivery); the CSV agreeing on it is an implementation check, not a result. B at N=3 and B on
+  test/Culver were not pre-registered and were not run.
+
   **Delivery expression under B (N=2, independent links, per-link frame BLER b):**
   `eff_F^B = (1−b)²·c_both + b(1−b)·(c_nearest + c_second) + b²·ego`, against
   `eff_F^A = (1−b)²·c_both + (1−(1−b)²)·ego`. B ≥ A whenever a partial fusion beats ego-only, which
@@ -1352,3 +1362,37 @@ carry the most CAVs per frame. The planned late-branch per-CAV re-merge optimisa
 used: with frame filtering, a direct re-run of only the frames whose subset differs (4409) is
 cheaper than one full per-CAV pass over all 4700 frames, and it avoids the re-merge verification
 risk entirely. Recorded as a plan deviation with its measured justification.
+
+### Semantics B — partial-fusion bracket (validate, N=2; Change-log P4-C-b)
+
+Labelled **"bracketing variant, validate only, N=2, not deployed"**. Scope-reduced by an exact
+equivalence: only the **690** validate frames that both request F somewhere on the grid and have
+≥2 collaborators can distinguish A from B (E frames send nothing; L frames have BLER_L = 0 so
+every message is delivered; a single link cannot deliver "partially"). Verified before running:
+the frames that ever choose F in the 200-realisation replay are a subset of the grid-based scope
+with **0 frames outside it**. Only the {second-nearest alone} subset was new — {nearest} and
+{both} are the cached N=1 and N=2 arms — so the bracket cost **1380 forwards, 11.9 min**, against
+the 8070 subsets / 2.7 GPU-hours the original plan carried.
+
+| B_max | A (all-or-nothing) | B (partial fusion) | ΔF1 [95% CI] | payload A / B |
+|---|---|---|---|---|
+| 0.10 | 0.89330 | 0.89340 | +0.00010 [+0.00009, +0.00010] | 0.10748 / 0.10748 (identical) |
+| 0.20 | 0.89395 | 0.89413 | +0.00018 [+0.00017, +0.00019] | 0.16517 / 0.16517 (identical) |
+| 0.30 | 0.89577 | 0.89609 | +0.00032 [+0.00031, +0.00034] | 0.26557 / 0.26557 (identical) |
+
+**The bracket is tight, and that is the finding.** B ≥ A everywhere, as the algebra requires (a
+partial fusion can only beat the ego-only collapse), and every CI excludes 0 — but the gap is
+**+0.0001 to +0.0003 F1**, i.e. the fourth decimal. Choosing the conservative all-or-nothing
+reading costs essentially nothing at N=2, so the delivery-semantics ambiguity that blocked the run
+is **immaterial at this operating point** rather than a live degree of freedom.
+
+**Why it is so small, mechanically:** the partial-delivery mass is 2·b(1−b) per frame, and the
+selector requests F almost only where the channel is good (small b). The frames that could benefit
+are exactly the frames where the benefit is least likely to be needed.
+
+**Payload is identical under A and B by construction** — channel use is charged when the request is
+made, not when it lands, so a failed link is not refunded. The CSV shows the two payload columns
+agreeing to all printed digits, which is a check on the implementation rather than a result.
+
+**Not run:** B at N=3, and B on test/Culver. Neither is needed to read the A column now that the
+bracket is known to be this tight at N=2, and neither was pre-registered.

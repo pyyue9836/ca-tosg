@@ -15,9 +15,9 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/channel/` | 4 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 49 |
-| | `results/manifests/` | 8 |
-| | `results/provenance/` | 22 |
-| | `results/sensitivity/` | 27 |
+| | `results/manifests/` | 9 |
+| | `results/provenance/` | 23 |
+| | `results/sensitivity/` | 28 |
 | | `results/sensitivity/ablation/` | 8 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
 
@@ -136,6 +136,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `FEATURE_ABLATION_MANIFEST.json` | `python projects/ca_tosg/evaluation/feature_ablation.py` | FA-1 variant models -- "labeled variant, not deployed", kept apart from FROZEN_MANIFEST |
 | `FROZEN_MANIFEST.json` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `P4A_MANIFEST.json` | `python tools/run_baselines.py contextual_bandit --train` | internal learned-policy comparator, not deployed |
+| `P4C_MANIFEST.json` | `python projects/ca_tosg/evaluation/collaborator_scale.py` | P4-C arm caches -- "collaborator-scale arm, not deployed" |
 | `candidate_walk_B010.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B020.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B030.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
@@ -157,6 +158,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `PROVENANCE_ofdm.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_p3.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_p4a.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_p4c.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_policy.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_r10c.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_rician.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
@@ -179,6 +181,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `canonical_rescore.csv` | `python projects/ca_tosg/evaluation/canonical_rescore.py` | canonical union-GT ruler |
 | `channel_misclassification.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `channel_ratio.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
+| `collaborator_scale.csv` | `python projects/ca_tosg/evaluation/collaborator_scale.py` | P4-C semantics A; caches built by projects/ca_tosg/datasets/p4c_sweep.py |
 | `f1_ap_decoupling_culver.csv` | `python projects/ca_tosg/evaluation/true_e2e_global.py` | Culver F1-vs-AP decoupling note |
 | `f1_ap_decoupling_culver.md` | `python projects/ca_tosg/evaluation/true_e2e_global.py` | Culver F1-vs-AP decoupling note |
 | `feature_ablation.csv` | `python projects/ca_tosg/evaluation/feature_ablation.py` | FA-1 comparison table |
@@ -229,4 +232,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-151 files indexed, 0 unattributed.
+154 files indexed, 0 unattributed.
