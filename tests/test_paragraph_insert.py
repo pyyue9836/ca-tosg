@@ -107,7 +107,18 @@ PARAS = {
             ("identity and CSV as the C256 analysis (\\S\\ref{sec:method})",
              "identity and CSV as the C256 analysis (\\S\\ref{sec:candidates})"),
         ],
+        inserted_body_last=("not a message-format one."),
         rulings=[
+            # P5-7 item 10 (Peiyi, 2026-08-14): E is a DEPLOYED action, so the closing sentence
+            # can no longer offer an ego-only action as future work.
+            ("A remedy adds no signalling overhead: the `11' codeword of the 2-bit request is "
+             "unused, so an explicit do-not-request (ego-only) action can be added without any "
+             "change to the two-bit message format.",
+             "No new signalling is needed to act on this: $E$ (ego-only, issue no request) is "
+             "already a deployed action of $\\mathcal{S}$ with its own codepoint, so the remedy is "
+             "a selection-policy question---the frozen selectors almost never choose it "
+             "(Section~\\ref{sec:pareto})---not a message-format one.",
+             'P5-7-10'),
             # P5-5 item 7 (Peiyi, 2026-08-14): the easy-stratum footnote quoted the retired
             # 200-realisation engine's selector. Recomputed under the frozen protocol
             # (results/sensitivity/difficulty_frozen.csv; test / B_max=0.20 / AWGN 16 dB).
@@ -167,6 +178,10 @@ def _inline_footnotes(body, fns):
     return re.sub(r'\[\^([A-Za-z0-9]+)\]', repl, body)
 
 
+def _norm_ws(text):
+    return ' '.join(text.split())
+
+
 def _apply_subs(text, subs):
     for a, b in subs:
         if a not in text:
@@ -176,15 +191,19 @@ def _apply_subs(text, subs):
 
 
 def _apply_rulings(text, rulings):
+    """Apply the ruling-authorised rewrites.
+
+    Matching is whitespace-normalised: the draft is hard-wrapped, so a ruling that spans a line
+    break would otherwise fail to find its own source and the gate would abort with a confusing
+    'source not found'. Normalisation is safe because the final comparison normalises anyway.
+    """
+    text = _norm_ws(text)
     for a, b, tag in rulings:
+        a, b = _norm_ws(a), _norm_ws(b)
         if a not in text:
             sys.exit('ruling %s: source not found in draft:\n  %r' % (tag, a))
         text = text.replace(a, b)
     return text
-
-
-def _norm_ws(text):
-    return ' '.join(text.split())
 
 
 def _canon(text):
@@ -200,7 +219,15 @@ def _inserted_block(tex, cfg):
     # subsection's closing sentence to sit after paragraph #3) that is not part of the draft.
     i = tex.index(cfg['start_anchor'])
     rest = tex[i:]
-    j = rest.index(cfg['body_last']) + len(cfg['body_last'])
+    # When a ruling rewrites the paragraph's LAST sentence, the draft's body_last no longer exists
+    # in main.tex. `inserted_body_last` names the replacement so the block is still bounded by a
+    # sentence rather than by the next sectioning command.
+    last = cfg.get('inserted_body_last', cfg['body_last'])
+    if last not in rest:
+        raise SystemExit(
+            f'para bound not found in main.tex: {last[:60]!r}. If a ruling rewrote the closing '
+            f'sentence, declare it in PARAS[n]["inserted_body_last"] and add the ruling.')
+    j = rest.index(last) + len(last)
     return rest[:j].strip()
 
 

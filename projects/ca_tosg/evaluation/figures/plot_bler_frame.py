@@ -6,8 +6,9 @@ Four curves = {16,256}-QAM x {AWGN,Rayleigh}, plotted from the FRAME-level colum
 (bler_frame), not the codeword column. Frame BLER runs 1.0 -> 0, so the y-axis is LINEAR
 [0,1] (a log axis cannot show the exact 0 of the delivered regime). AWGN gives two steep
 cliffs (onset where frame BLER first drops below 0.999: 8.0 dB for 16-QAM, 16.5 dB for
-256-QAM); under Rayleigh both curves stay flat at 1.0 across the range. The 12--14 dB
-grey band marks the selector knee.
+256-QAM); under Rayleigh both curves stay flat at 1.0 across the range. The grey band marks
+the MEASURED selector knee at 10 dB (P5-7 item 12: the frozen selectors' rho_F steps from 0
+to its plateau there on all three splits), not the 12--14 dB band an earlier version drew.
 """
 import os
 import csv
@@ -33,9 +34,10 @@ def main():
     os.makedirs(FIG, exist_ok=True)
     fig, ax = plt.subplots(figsize=(5.5, 3.6))
 
-    # selector-knee shaded band (12--14 dB), behind the curves
-    ax.axvspan(12, 14, color='0.85', alpha=0.7, zorder=0,
-               label='selector knee (12–14 dB)')
+    # selector-knee marker at the MEASURED knee (10 dB), behind the curves. The band is drawn
+    # narrow around the single grid point rather than spanning 12-14 dB, which was never measured.
+    ax.axvspan(9.5, 10.5, color='0.85', alpha=0.7, zorder=0,
+               label='selector knee (10 dB)')
 
     styles = [
         ('16',  'awgn',     dict(color='tab:blue', ls='-',  marker='o', label='LDPC + 16-QAM, AWGN')),

@@ -1,0 +1,10 @@
+CA-TOSG P5-7 (A) -- fixed-policy references under the FROZEN replay draw.
+==============================================================================
+CSI: 200 samplings/split, seed=20260809, SNR~U[0,20], channel~Bernoulli(0.5 Rayleigh) -- the SAME generator/seed/order as deployment.py
+eff: deployment.eff_matrix (imported). Mask: BLER_F >= 0.999 removes F from the oracle argmax (PROTOCOL sec 4), ties -> E then L.
+C256: bler_q(qam=256) on the same committed BLER table; bler_q(qam=16) asserted equal to deployment.bler16 on every realisation.
+NOT PRODUCED: the clairvoyant upper bound. Its legacy definition sampled the per-frame block outcome post hoc under the retired engine; there is no frozen
+  definition, and inventing one here is exactly the substitution this batch removes.
+  validate: 1980 frames
+  test: 2170 frames
+  culver: 550 frames

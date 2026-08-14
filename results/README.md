@@ -14,9 +14,9 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/baselines/importance_map_jscc/` | 10 |
 | | `results/channel/` | 8 |
 | | `results/latency/` | 2 |
-| | `results/main/` | 50 |
+| | `results/main/` | 52 |
 | | `results/manifests/` | 15 |
-| | `results/provenance/` | 24 |
+| | `results/provenance/` | 27 |
 | | `results/sensitivity/` | 29 |
 | | `results/sensitivity/ablation/` | 8 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
@@ -88,9 +88,11 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `c256_frontier_band.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `ego_only_acceptance.csv` | `python projects/ca_tosg/datasets/run_ego_only.py` |  |
 | `feature_importance.csv` | `python projects/ca_tosg/evaluation/figures/plot_feature_importance.py` | RF feature_importances_ of the deployed selector |
+| `fixed_references.csv` | `python projects/ca_tosg/evaluation/fixed_references.py` | P5-7 (A): Fixed L / F / C256 / masked-oracle references under the FROZEN replay draw (no clairvoyant row -- it has no frozen definition) |
 | `frontier_culver.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `frontier_test.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `frontier_validate.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
+| `frozen_curves.csv` | `python projects/ca_tosg/evaluation/frozen_curves.py` | P5-7 (D): the single frozen SNR-indexed source for Figs. 4/5/6/8 |
 | `generalisation_culver.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `generalisation_test.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `generalisation_validate.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
@@ -163,6 +165,9 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `PROVENANCE_deploy.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_difficulty_frozen.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_fa.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_figures.json` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_fixed_references.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_frozen_curves.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_grid.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_grid_culver.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_grid_test.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
@@ -245,4 +250,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-167 files indexed, 0 unattributed.
+172 files indexed, 0 unattributed.

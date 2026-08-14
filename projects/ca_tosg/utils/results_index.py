@@ -106,6 +106,13 @@ RULES = [
      'python projects/ca_tosg/evaluation/difficulty_frozen.py',
      'P5-5 item 7: difficulty stratification under the FROZEN protocol, reliable-channel view '
      'only (the all-channel view is deliberately not reproduced)'),
+    (r'^main/fixed_references\.csv$',
+     'python projects/ca_tosg/evaluation/fixed_references.py',
+     'P5-7 (A): Fixed L / F / C256 / masked-oracle references under the FROZEN replay draw '
+     '(no clairvoyant row -- it has no frozen definition)'),
+    (r'^main/frozen_curves\.csv$',
+     'python projects/ca_tosg/evaluation/frozen_curves.py',
+     'P5-7 (D): the single frozen SNR-indexed source for Figs. 4/5/6/8'),
     (r'^main/true_e2e_ap_by_snr\.csv$',
      'python projects/ca_tosg/evaluation/end_to_end_ap_snr.py',
      'P5-5 item 8: true end-to-end AP at pinned SNR; only valid after --verify (the E-8 '

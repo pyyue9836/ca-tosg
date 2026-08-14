@@ -1569,6 +1569,74 @@ written into the paper's conclusions; the paper reports only the frozen selector
   - **Standing stop:** any number that cannot be read from a frozen product is reported as missing,
     never estimated, and never carried over from the retired engine.
 
+- **P5-7 RESULT (2026-08-14) — batch 6 executed. Three tables, the protocol prose, the action set
+  and every SNR-indexed figure now come from frozen products. No frozen artefact was modified.**
+  - **(A) Tables.** `tab:headline_agg` is budget-indexed (three frozen points, each against the
+    **budget-matched** τ\*: 18 / 12 / 8 dB); the `τ=8.5 / 0.910 / 0.303 / 0.251` family is gone.
+    `tab:gen_headline` re-emitted the same way for test and Culver-City. Both tables' fixed
+    references now come from the new `fixed_references.py`, computed under the frozen replay's own
+    CSI draw (test: Fixed-L 0.9011/0.024, Fixed-F 0.8516/0.990, C₂₅₆ 0.8264/0.495, masked oracle
+    0.9165/0.1706), so neither table mixes engines. **E-A1 held: the clairvoyant row is dropped, not
+    re-invented** — it had no frozen definition. **E-A2 held:** `bler_q(qam=16)` was asserted equal
+    to `deployment.bler16` on every realisation.
+    Payload share is now one convention everywhere: `B_RF / B_F`. The abstract's **6.9–18.9 %** is
+    the test split's three budgets exactly, and `tests/test_payload.py` now *parses that range out
+    of the abstract and bit-compares it against `replay_summary.csv`* (30/30 links). The
+    `recovers 99.3–99.8 % of the oracle` / `16–25 %` family is withdrawn — the frozen figures are
+    98.6–99.0 % (test) and 98.1–99.3 % (Culver), and the old single number conflated three budgets.
+  - **(B) Prose.** §VI-B/C/D rewritten on the frozen grid: the knee is a **policy** knee at 10 dB,
+    F1 steps 0.9067 → 0.9243 on validate and is flat above, the perfect-channel ceiling is 0.9193
+    and the masked oracle 0.9294 — so the "≥12 dB → 0.916, within 0.001 of the ceiling" claim is
+    gone, and the payload step is to **0.297 Msym (≈30 % of Fixed F)**, not "near-F".
+    §V-C now states Rayleigh is a **direct Sionna link-level simulation** (per-codeword flat block
+    fading, `|h|²∼Exp(1)`, perfect CSI) — the previous "average the AWGN table over the exponential
+    instantaneous-SNR distribution" description was simply wrong — and the training substrate is the
+    full 1,980 × 11 SNR × 2 channel grid (43,560 rows), not one sampled draw per frame.
+    §V-D rewritten: 112-candidate block, scene-level 9-fold LOSO (1,008 fold rows), budget walk,
+    λ\* = 0.05/0.02/0.00 with τ\* = 18/12/8 dB, final refit on all 1,980 frames.
+    **`class_weight=balanced` deleted: all three frozen selectors are `cw=None`**, the `balanced`
+    candidates having been walked past for exceeding budget — the manifest is cited as the
+    authority. §V-E now says the JSCC baseline is **our reproduction**, with no code, checkpoint or
+    selector from the original authors. Abstract → "prescribed average communication budgets";
+    "the sender selects" → "the ego receiver selects and requests" (two sites). Table V names its
+    source selector (`selector_B020.pkl`).
+  - **(C) Action set.** `\mathcal{S}=\{E,L,F\}` in §IV-A, the overview caption, the decision-ratio
+    caption and the introduction; the 2-bit codepoint map is now E/L/F with C₂₅₆ marked a
+    physical-layer comparator; §VI-L no longer offers ego-only as future work — **E is already
+    deployed**, so the gap is a selection-policy one. `\{L,F\}` appears zero times. The two prose
+    `C_{16}` action-context sites (lines 117, 246) are `F`.
+  - **(D) Figures.** One new source, `frozen_curves.py` → `results/main/frozen_curves.csv`
+    (1,188 rows: split × budget × channel × SNR × policy, including that budget's **λ-penalised**
+    oracle, which sees the BLER and **not** the block outcome — it is not clairvoyant). One
+    generator, `plot_frozen_figs.py`, draws Figs. 4/5/6/8 plus the three-budget appendix figure and
+    writes `PROVENANCE_figures.json` with **31 numbers it actually plotted**. Fig. 2's knee band
+    moved from the never-measured 12–14 dB to the measured 10 dB. Fig. 8's x-axis now reaches 1.08
+    so Fixed F (0.99) is visible. Fig. 6's caption states ρ_E ≈ 0.001/0.000 for the selector against
+    the oracle's **0.172 (test) / 0.133 (Culver)** and cross-references the E-collapse limitation.
+    Fig. 9 confirmed single-panel with **+0.0400** in-figure. The retired per-figure scripts are no
+    longer invoked by `tools/generate_figures.py`.
+    **Two figures could not be regenerated and are reported, not faked:** `fig:overview` — the SVG
+    text was updated to `{E,L,F}` with C₂₅₆ marked not-deployed, but **there is no SVG→PDF tool on
+    this host, so the committed PDF still shows the old labels**; and `fig:qualitative` — a BEV
+    render with **no generator anywhere in the repository**, so its `C_{16}` panel titles could not
+    be touched at all.
+  - **(E) Checks.** `tools/check_figure_consistency.py` compares every drawn number against the
+    caption side and the body side of `main.tex` and **reports without arbitrating**. Current state:
+    15 numbers stated on both sides, 12 on one side only, **6 drawn but stated nowhere** — the
+    largest being `f1_catosg_awgn_high = 0.9244` (the 20 dB endpoint) where the text quotes
+    **0.9243** (the 10 dB knee). Both are correct at different SNR points; which one the paper
+    should print is not this tool's call and is left open.
+    **Three checker defects were found and fixed while building it**, each of which had produced a
+    wrong verdict: the matcher degraded a value to one decimal, so `0.9244` "matched" the ubiquitous
+    `0.9`; the tightened rule then refused any literal under three significant digits, hiding
+    genuine hits like `0.99`; and the claims-evidence classifier matched marker names inside **prose
+    string literals**, so `difficulty_frozen.py`'s own provenance note — which names `v3_eval` in
+    order to say it is *not* used — tagged the frozen replacement LEGACY. Only path/module-shaped
+    literals count now, and the legacy roster fell from 12 claims to **8**.
+  - **Ledger:** 109 rows, **0 STALE**, **50 filled / 59 pending**, 0 dangling. Audit: 24 FROZEN,
+    26 ANALYTIC, 8 LEGACY-ENGINE, 51 with no located source.
+  - **Still not verified:** no LaTeX toolchain on this host — `main.tex` has **not been compiled**.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

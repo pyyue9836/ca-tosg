@@ -34,16 +34,16 @@
   <!-- collaborator branches -->
   <path class="line" d="M365 242v34M365 276H220v30M365 276h145v30"/>
   <rect class="green box" x="75" y="306" width="290" height="105" rx="12"/>
-  <text class="t b" x="220" y="336" text-anchor="middle">Object-level message L</text>
+  <text class="t b" x="220" y="336" text-anchor="middle">Object-level message L</text><text class="t b" x="220" y="360" text-anchor="middle">Action set S = {E, L, F}; E = ego-only, no request</text>
   <text class="t" x="220" y="365" text-anchor="middle">{b, c, p}<tspan baseline-shift="sub" font-size="13">k</tspan></text>
   <text class="s b" x="220" y="393" text-anchor="middle">≈0.024 Msym/frame</text>
 
   <rect class="orange box" x="395" y="306" width="270" height="105" rx="12"/>
   <text class="t b" x="530" y="336" text-anchor="middle">Feature codec</text>
-  <text class="t b" x="530" y="367" text-anchor="middle">C16: 16-QAM</text>
+  <text class="t b" x="530" y="367" text-anchor="middle">Feature-level message F (16-QAM)</text>
   <text class="s b" x="530" y="393" text-anchor="middle">≈0.99 Msym/frame</text>
   <rect class="gray box" x="395" y="423" width="270" height="81" rx="10"/>
-  <text class="xs degraded b" x="530" y="450" text-anchor="middle">C256: 256-QAM, ≈0.495 Msym/frame</text>
+  <text class="xs degraded b" x="530" y="450" text-anchor="middle">C256: 256-QAM comparator (not deployed), ≈0.495 Msym/frame</text>
   <text class="xs degraded" x="530" y="475" text-anchor="middle">dominated; excluded from deployment</text>
   <text class="xs degraded" x="530" y="493" text-anchor="middle">(§III-B)</text>
 

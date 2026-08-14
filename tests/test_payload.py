@@ -22,7 +22,8 @@ import os, re, sys, csv
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(HERE)                                   # paper1
-THRVRF = os.path.join(P1, 'results/main/threshold_vs_rf.csv')
+THRVRF = os.path.join(P1, 'results/main/threshold_vs_rf.csv')   # RETIRED engine; not read
+REPLAY = os.path.join(P1, 'results/main/replay_summary.csv')     # frozen 200-realisation replay
 MAIN = os.path.join(P1, 'paper/main.tex')
 # external OpenCOOD-runtime inputs for the two UPSTREAM links (sibling checkout; skipped if absent)
 OPENCOOD = os.path.join(os.path.dirname(P1), 'OpenCOOD')
@@ -72,7 +73,7 @@ def parse_paper_eq7():
     return out
 
 
-def parse_paper_headline_agg():
+def _retired_parse_paper_headline_agg():
     """Read tab:headline_agg RF payload (0.251) and best-tau payload (0.303) from main.tex."""
     tex = open(MAIN).read()
     rf = re.search(r'RF\s*\$?([0-9.]+)\$?\s*versus the \$?\\tau\{?=?\}?8\.5\$?\s*\n?\s*threshold\'s\s*\$?([0-9.]+)\$?', tex)
@@ -115,20 +116,43 @@ def upstream_source_budgets():
 
 
 def deployed_averages(pay):
-    """Read per-split deployed CA-TOSG / threshold payloads and verify they are built from B_L / B_C16."""
-    with open(THRVRF) as f:
-        for r in csv.DictReader(f):
-            sp = r['split']; rf_pay = float(r['rf_payload']); thr_pay = float(r['bestF1_tau_payload'])
-            # CA-TOSG deployed mean must be a rho-weighted mix of L and C16 (C256 never deployed):
-            # rho_L implied by the payload, must lie in [0,1] and reconstruct rf_pay exactly.
-            rho_L = (pay['C16'] - rf_pay) / (pay['C16'] - pay['L'])
-            recon = rho_L * pay['L'] + (1 - rho_L) * pay['C16']
-            chk(f'[{sp}] CA-TOSG deployed pay = rho_L*B_L+(1-rho_L)*B_C16 (rho_L={rho_L:.3f})',
-                recon, rf_pay, 'threshold_vs_rf.csv', tol=1e-9)
-            frac = rf_pay / pay['C16'] * 100
-            # paper states "16--25%" in rounded pp; accept anything that rounds into [16,25]
-            rows.append((f'[{sp}] CA-TOSG payload as % of Fixed C16', round(frac, 1),
-                         '16-25', 'threshold_vs_rf.csv', 15.5 <= frac < 25.5))
+    """(3) FROZEN deployed channel use, and the ONE payload-share convention the paper now uses.
+
+    Reads `results/main/replay_summary.csv` (the frozen 200-realisation replay), not the retired
+    `threshold_vs_rf.csv`. The share is B_RF / B_F with B_F derived above, and the abstract's
+    printed range must be exactly the min/max of the test split's three budgets -- parsed from
+    main.tex, not typed in. A missing parse is a FAILURE, never a skip.
+    """
+    import pandas as pd
+    if not os.path.exists(REPLAY):
+        rows.append(('(3) frozen replay summary (REQUIRED)', 'MISSING', 'present',
+                     f'absent -> {REPLAY}', False))
+        return
+    df = pd.read_csv(REPLAY)
+    df = df[df['split'] != 'split']
+    for c in ('budget', 'F1_RF', 'F1_tau', 'B_RF', 'B_tau'):
+        df[c] = df[c].astype(float)
+    shares = {}
+    for sp, g in df.groupby('split'):
+        sh = (g['B_RF'] / pay['C16'] * 100).round(1)
+        shares[sp] = (float(sh.min()), float(sh.max()))
+        for _, r in g.sort_values('budget').iterrows():
+            rows.append((f'[{sp} B{r.budget:.2f}] frozen CA-TOSG channel use as % of Fixed F',
+                         round(r.B_RF / pay['C16'] * 100, 1), '0-100',
+                         'replay_summary.csv', 0.0 <= r.B_RF / pay['C16'] * 100 <= 100.0))
+    tex = open(MAIN).read()
+    m = re.search(r'\$([0-9.]+)\$--\$([0-9.]+)\\%\$ of the per-frame channel use of fixed '
+                  r'feature-level transmission', tex)
+    if not m:
+        rows.append(('(3b) abstract payload-share range parsed from main.tex', 'NOT FOUND',
+                     'a "$x$--$y\\%$" range', 'main.tex abstract', False))
+        return
+    lo_paper, hi_paper = float(m.group(1)), float(m.group(2))
+    lo_csv, hi_csv = shares['test']
+    chk('(3b) abstract share range == frozen test min/max (low)', lo_csv, lo_paper,
+        'main.tex abstract vs replay_summary.csv', tol=0.05)
+    chk('(3b) abstract share range == frozen test min/max (high)', hi_csv, hi_paper,
+        'main.tex abstract vs replay_summary.csv', tol=0.05)
 
 
 def second_backbone_chain():
@@ -210,15 +234,6 @@ def main():
             chk(f'Eq.(7) B_{k} printed in paper == derived', pay[k], eq7[k], 'main.tex Eq.(7)', tol=TOL)
     print('=== 3) deployed averages (results/main/threshold_vs_rf.csv) ===')
     deployed_averages(pay)
-    print('=== 4) tab:headline_agg payloads (main.tex vs CSV) ===')
-    rf_paper, thr_paper = parse_paper_headline_agg()
-    if rf_paper is not None:
-        with open(THRVRF) as f:
-            trow = next(r for r in csv.DictReader(f) if r['split'] == 'test')
-        chk('tab:headline_agg RF payload: paper == CSV(test) rounded', round(float(trow['rf_payload']), 3),
-            rf_paper, 'main.tex vs threshold_vs_rf.csv', tol=TOL)
-        chk('tab:headline_agg best-tau payload: paper == CSV(test) rounded',
-            round(float(trow['bestF1_tau_payload']), 3), thr_paper, 'main.tex vs threshold_vs_rf.csv', tol=TOL)
     print('=== 5) P4-B-d: B_F^SECOND chain (declared bits-per-element convention) ===')
     second_backbone_chain()
 

@@ -215,9 +215,13 @@ def classify_generator(gen_cmd, note, by_mod):
         docstrings = {ast.get_docstring(n, clean=False) for n in ast.walk(tree)
                       if isinstance(n, (ast.Module, ast.ClassDef, ast.FunctionDef,
                                         ast.AsyncFunctionDef))}
+        # Only PATH/MODULE-shaped literals count. A real dependency appears as `v3_eval` or
+        # `data/p2/...`, never inside an English sentence -- and a provenance string that names
+        # the retired engine in order to say it is NOT used would otherwise tag its replacement
+        # LEGACY, which is exactly what happened to difficulty_frozen.py.
         blob_parts += [n.value for n in ast.walk(tree)
                        if isinstance(n, ast.Constant) and isinstance(n.value, str)
-                       and n.value not in docstrings]
+                       and n.value not in docstrings and not any(c.isspace() for c in n.value)]
     blob = '\n'.join(blob_parts)
     legacy = sorted({k for k in LEGACY_MARKERS if k in blob})
     frozen = sorted({k for k in FROZEN_MARKERS if k in blob})

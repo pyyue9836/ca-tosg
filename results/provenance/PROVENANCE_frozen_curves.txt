@@ -1,0 +1,8 @@
+CA-TOSG P5-7 (D) -- frozen SNR-indexed curves, ONE source for Figs. 4/5/6/8.
+==============================================================================
+manifest: results/manifests/FROZEN_MANIFEST.json (freeze 2026-08-09T15:12:53.653192+00:00)
+substrate: data/p2/p2_grid_{split}.csv -- the DETERMINISTIC frame x 11 SNR x 2 channel grid.
+selector: frozen data/p2/selector_B0XX.pkl via deployment.rf_actions_stacked (imported).
+oracle_masked: argmax over eff with BLER_F >= 0.999 removing F (PROTOCOL sec 4), ties -> E then L.
+oracle_lambda: the same masked argmax minus lambda_star * payload, lambda_star read per budget from the manifest. It sees the BLER, NOT the per-frame block outcome -- it is not clairvoyant.
+DIFFERENT QUANTITY from results/main/replay_summary.csv (200-realisation replay, SNR and channel marginalised away). Do not mix the two in one sentence.

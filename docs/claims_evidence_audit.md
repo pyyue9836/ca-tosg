@@ -6,13 +6,14 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| PENDING (no distinctive number to locate) | 37 |
-| ANALYTIC | 21 |
-| PENDING (unlocated) | 18 |
-| FROZEN | 16 |
-| LEGACY-ENGINE | 9 |
+| PENDING (no distinctive number to locate) | 34 |
+| ANALYTIC | 24 |
+| FROZEN | 20 |
+| PENDING (unlocated) | 17 |
+| LEGACY-ENGINE | 5 |
 | FROZEN [2/3] (located, ledger cell still blank) | 2 |
 | ANALYTIC [2/4] (located, ledger cell still blank) | 1 |
+| FROZEN [3/6] (located, ledger cell still blank) | 1 |
 | FROZEN [4/9] (located, ledger cell still blank) | 1 |
 | FROZEN [6/7] (located, ledger cell still blank) | 1 |
 | LEGACY-ENGINE [1/1] (located; weaker candidates disagree) | 1 |
@@ -53,25 +54,11 @@ Total: **109** claims across **34** (sub)sections.
 |---|---|---|---|
 | `c1a099a` | On test that headroom is 0.0027 AP, i.e.\ object-level detection is already at the ceiling and there is no roo… | `projects/ca_tosg/evaluation/policy_200seed.py` | value search: results/main/threshold_vs_rf.csv [2/3] <- python projects/ca_tosg/evaluation/policy_200seed.py = LEGACY-ENGINE **<- most specific** | results/main/pareto_points.csv [ |
 
-**Results and Analysis → Where the Gain Concentrates: Difficulty Stratification [sec:difficulty]** — 3/3 claims
+**Results and Analysis → Where the Gain Concentrates: Difficulty Stratification [sec:difficulty]** — 1/3 claims
 
 | ID | claim (truncated) | generator | why LEGACY |
 |---|---|---|---|
-| `c57f021` | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
-| `c6487af` | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 … | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
 | `ce6183a` | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-pena… | `baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` | value search: results/baselines/importance_map_jscc/two_regime_edge_clean.csv [1/1] <- python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py = LEGACY-ENGINE  |
-
-**Results and Analysis → Collaboration Is Not Always Beneficial [sec:harm]** — 1/5 claims
-
-| ID | claim (truncated) | generator | why LEGACY |
-|---|---|---|---|
-| `c4786c8` | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selecto… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
-
-**Conclusion** — 1/6 claims
-
-| ID | claim (truncated) | generator | why LEGACY |
-|---|---|---|---|
-| `cb91cd2` | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
 
 **When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware]** — 2/6 claims
 
@@ -87,7 +74,7 @@ Total: **109** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c730257` | PENDING (unlocated) | 2, 802.11 | We propose Channel-Aware Task-Oriented Semantic Granularity Selection (CA-TOSG), a receiver-driven framework in which the ego vehi… |
-| `c4342f0` | PENDING (no distinctive number to locate) | 2, 0.5, 0.10, 0.20, 0.30 | Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channel… |
+| `c912365` | PENDING (no distinctive number to locate) | 2, 0.5, 0.10, 0.20, 0.30 | Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channel… |
 | `c6fcc17` | FROZEN [2/3] (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | 0.0267 on validate, 0.0027 on test and 0.0892 on Culver-City. |
 | `c4ac1dc` | PENDING (unlocated) | 6.9, 18.9, 1, 2, 16 | What the selector does buy is channel use: averaged over all channel states it spends 6.9--18.9\% of the per-frame channel use of … |
 | `c39002e` | PENDING (unlocated) | 59.9, 100, 10 | The deployed selector incurs 59.9 ms per frame on a single CPU core (the slowest of the three frozen selectors), fitting the 100 m… |
@@ -96,7 +83,7 @@ Total: **109** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cf33f5b` | PENDING (no distinctive number to locate) | 256 | In the considered implementation, the selector chooses between a compact object-level message and a compressed feature-level messa… |
+| `c7bbd1c` | PENDING (no distinctive number to locate) | 256 | In the considered implementation, the selector chooses between ego-only operation, a compact object-level message and a compressed… |
 | `c21407d` | PENDING (no distinctive number to locate) | 16, 256 | We provide a communication-aware evaluation protocol under AWGN and Rayleigh channels, comparing fixed object-level transmission, … |
 
 ### Related Work → Semantic and Channel-Aware Communication for Vehicular Perception
@@ -116,7 +103,7 @@ Total: **109** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c298aff` | PENDING (no distinctive number to locate) | 16, 1, 2 | [label] At each frame, the sender selects one communication mode from the deployed action set where E denotes ego-only operation, … |
+| `c48c60a` | PENDING (no distinctive number to locate) | 16, 1, 2 | [label] At each frame, the ego receiver selects one communication mode from the deployed action set and requests it where E denote… |
 | `c880a97` | PENDING (no distinctive number to locate) | 256, 1, 2 | The same feature-level message is additionally evaluated with 256-QAM (C_256, same rate-1/2 LDPC) as a physical-layer comparator, … |
 | `cd89397` | ANALYTIC | 1.98, 16, 256 | The two feature-level modes carry the same perception payload of approximately 1.98 Mbit but require different numbers of channel … |
 | `cf5b914` | ANALYTIC | 256, 16, 0.495, 0.99, 1.98, 1, 2, 3.96, 8, 4 | Of the two feature-level modes, the 256-QAM variant (C256) halves the per-frame channel use of the 16-QAM feature message (0.495 v… |
@@ -154,7 +141,7 @@ Total: **109** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c120ea9` | PENDING (unlocated) | 802.11, 5 | Meanwhile, the current channel quality is represented by the estimated SNR _t and the channel type c_t, both produced by the ego's… |
-| `cafbe40` | PENDING (no distinctive number to locate) | 16 | The collaborator transmits the requested message: if s_t=L, compact object-level detections; if s_t=C_16, a compressed feature-lev… |
+| `cceb261` | PENDING (no distinctive number to locate) | 16 | The collaborator transmits the requested message: if s_t=L, compact object-level detections; if s_t=F, a compressed feature-level … |
 
 ### Proposed Method [sec:method] → Channel Quality Cue
 
@@ -203,7 +190,8 @@ Total: **109** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c3bdb8b` | PENDING (no distinctive number to locate) | 400, 10, 4, 0.89, 0.11 | The selector is a Random Forest classifier [cite] with N_T=400 trees, D_=10, minimum samples per leaf of 4, and class\_weight=bala… |
+| `ccdfce2` | PENDING (no distinctive number to locate) | 112, 9, 1,008, 0.10, 0.20, 0.30, 1 | Selection is budget-indexed and pre-registered rather than hand-tuned: a fixed block of 112 candidates (hyperparameter settings × … |
+| `c7b4d01` | PENDING (no distinctive number to locate) | 0.05, 0.02, 0.00, 18, 12, 8, 0.10, 0.20, 0.30 | The three frozen selectors are ^ = 0.05/0.02/0.00 with ^ = 18/12/8 dB at B_=0.10/0.20/0.30; all three carry class\_weight=None---t… |
 | `c12100b` | PENDING (no distinctive number to locate) | 1, 200, 0,20, 0.5 | Run-to-run variance is exposed not by a within-validate resplit but by averaging all realised-F1 and payload metrics over 200 Mont… |
 
 ### Experimental Setup [sec:exp] → Baselines
@@ -237,22 +225,22 @@ Total: **109** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c65a7cc` | PENDING (no distinctive number to locate) | 0.5, 16, 256 | Fig. [ref] reports AP@0.5 under AWGN and Rayleigh, comparing with the fixed object-level baseline, ImportanceMapJSCC [cite], LDPC … |
-| `c8060e2` | FROZEN | 0.890, 0.5, 8, 0.916, 12, 0.001, 0.917 | Under AWGN, sits on the Fixed L line (0.890 AP@0.5) for SNR ≤ 8 dB and rises to 0.916 AP@0.5 for SNR ≥ 12 dB, within 0.001 AP of t… |
-| `c2f838d` | PENDING (unlocated) | 0.71, 0.5, 0.61, 16, 0.917, 12 | The ImportanceMapJSCC baseline saturates near 0.71 AP@0.5, well below Fixed L at every SNR; the LDPC + QAM baselines sit at the eg… |
+| `c9997fa` | PENDING (no distinctive number to locate) | 16, 256 | Every curve is read from the same frozen grid product (frozen\_curves.csv); the codec-comparison baselines (importance-map JSCC an… |
+| `c1ba4b1` | FROZEN | 0.20, 0.9067, 8, 0.9243, 10, 20 | Under AWGN at B_=0.20 the selector sits on the Fixed L line (0.9067 on validate) for SNR ≤ 8 dB and steps to 0.9243 at 10 dB, wher… |
+| `cf8aa83` | ANALYTIC | 0.9193, 0.9294 | And it does not reach the ceiling: the perfect-channel feature reference is 0.9193 on validate and the masked oracle reaches 0.929… |
 
 ### Results and Analysis → Payload versus SNR [sec:payload_snr]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cc0671b` | PENDING (no distinctive number to locate) | 0.024, 12 | uses the L-payload of 0.024 Msym/frame across all SNRs under Rayleigh, and switches from L-payload to a near-F-payload at SNR ≈ 12… |
+| `ce636f0` | ANALYTIC | 0.20, 0.0238, 8, 10, 0.297 | At B_=0.20 holds the L-payload (0.0238 Msym/frame on validate, the E/L mix) at every SNR under Rayleigh and for AWGN SNR ≤ 8 dB, t… |
 
 ### Results and Analysis → Selector Decision Ratios [sec:decision_ratio]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cb921a6` | PENDING (no distinctive number to locate) | 1.0, 0.33, 12 | _L drops from 1.0 to about 0.33 as SNR crosses 12 dB, and _F rises correspondingly. |
-| `c62bada` | PENDING (no distinctive number to locate) | 1.0 | Under Rayleigh, _L stays close to 1.0 across the entire SNR range, consistent with the AP and payload curves and with the deep-fad… |
+| `c057ee6` | ANALYTIC | 0, 0.283, 0.256, 0.064 | _F steps from 0 to 0.283 on validate (0.256 on test, 0.064 on Culver-City) and is flat above it, with _L falling correspondingly. |
+| `c0399a2` | ANALYTIC | 0.172, 0.133, 0.001, 0.000 | The panel also makes the E-collapse of Section [ref] visible: under Rayleigh the oracle spends a substantial share on the ego-only… |
 
 ### Results and Analysis → Feature Importance [sec:feat_imp]
 
@@ -282,8 +270,8 @@ Total: **109** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `ce065fb` | PENDING (unlocated) | 99.4, 99.3, 1, 99.8, 25.3, 16.0 | The meaningful evidence of transfer is that the policy ordering is identical to validate on both splits: the fixed feature-level p… |
-| `c79fed4` | ANALYTIC | 1, 0.5, 0.919, 0.890, 0.783 | The absolute F1 values differ across splits because the object-level detection baseline itself differs---Fixed-L AP@0.5 is 0.919 o… |
+| `c3cfdfa` | FROZEN [3/6] (located, ledger cell still blank) | 1, 6.9, 18.9, 2.9, 16.2, 1.9, 98.6, 99.0, 98.1, 99.3 | Quantitatively the transfer is in the channel use, not the F1: across the three budgets spends 6.9--18.9\% of the Fixed-F channel … |
+| `cdc39e3` | PENDING (unlocated) | 99.3, 99.8 | Both intervals are budget-indexed and are read from replay\_summary.csv and fixed\_references.csv; the single-number recovers 99.3… |
 | `ce9d9f5` | PENDING (no distinctive number to locate) | 0.20, 11, 200 | Tables [ref] and [ref] report the true end-to-end AP on the test and Culver-City splits, evaluated with the frozen selector at B_=… |
 | `c3d4e93` | FROZEN | 0, 0.256, 0.064 | _F jumps from 0 to 0.256 on test and from 0 to 0.064 on Culver-City, and it is flat thereafter. |
 | `c163084` | FROZEN | 0.5, 0.9189, 0.9168, 0.7, 0.8687, 0.8636, 0.7828, 0.7897, 0. | AP@0.5 moves 0.9189\! → \!0.9168 and AP@0.7 0.8687\! → \!0.8636 on test, while on Culver-City it moves 0.7828\! → \!0.7897 and 0.6… |
@@ -299,8 +287,8 @@ Total: **109** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c57f021` | LEGACY-ENGINE | 0.20, -0.0040, 95, -0.0064, -0.0018, +0.0018, -0.0005, +0.00 | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [-0.0064,-0.0018]) on… |
-| `c6487af` | LEGACY-ENGINE | +0.0007, +0.0120, +0.0402, 0.0000, +0.0011, +0.0136 | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 / +0.0136). |
+| `c57f021` | FROZEN | 0.20, -0.0040, 95, -0.0064, -0.0018, +0.0018, -0.0005, +0.00 | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [-0.0064,-0.0018]) on… |
+| `c6487af` | FROZEN | +0.0007, +0.0120, +0.0402, 0.0000, +0.0011, +0.0136 | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 / +0.0136). |
 | `ce6183a` | LEGACY-ENGINE [1/1] (located; weaker candidates disagree) | -0.0040, 1, 0, 200 | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-penalised (>0) operating… |
 
 ### Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold]
@@ -319,10 +307,9 @@ Total: **109** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cea5465` | PENDING (no distinctive number to locate) | 0.999 | When the channel cannot carry a feature message, requesting one spends the collaborator's transmission budget for nothing and coll… |
-| `c4786c8` | LEGACY-ENGINE | 1, 16, 0, 8.0, 0.20, 0.9826, 0.9866, -0.0040, 95, -0.0064, - | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output … |
+| `c4786c8` | FROZEN | 1, 16, 0, 8.0, 0.20, 0.9826, 0.9866, -0.0040, 95, -0.0064, - | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output … |
 | `c4453b5` | PENDING (no distinctive number to locate) | 0.9, 7.4, 0.2, 256, 1, 1.0, 5.8 | Two CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the object-level fused outpu… |
 | `c00d772` | ANALYTIC | 15.2, 27.8, 41.0 | Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean 15.2 ground-truth objects on test … |
-| `c6abce3` | PENDING (no distinctive number to locate) | 11, 2 | A remedy adds no signalling overhead: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request (ego-only) a… |
 
 ### Results and Analysis → Comparison with Where2comm [sec:where2comm]
 
@@ -348,7 +335,7 @@ Total: **109** claims across **34** (sub)sections.
 | `c612cba` | FROZEN [2/3] (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state jus… |
 | `cacf21e` | PENDING (unlocated) | 6.9, 18.9 | 6.9--18.9\% of the channel use of fixed feature-level transmission across the three budgets on test. |
 | `c02d47f` | PENDING (unlocated) | 1, 0.005, 56.3 | Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the… |
-| `cb91cd2` | LEGACY-ENGINE | +0.0400, 1, 95, +0.0339, +0.0465 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (95\% CI [+0.0339,+0.… |
+| `cb91cd2` | FROZEN | +0.0400, 1, 95, +0.0339, +0.0465 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (95\% CI [+0.0339,+0.… |
 
 ### When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware]
 
