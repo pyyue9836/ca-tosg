@@ -1035,6 +1035,29 @@ written into the paper's conclusions; the paper reports only the frozen selector
   The manifest is labelled **"EXTERNAL INPUT, not a product of this repository"** and kept separate
   from every product manifest. `inference_status: NOT RUN`.
 
+- **P4-B-b (2026-08-14) — the SECOND checkpoint does NOT load in this environment. P4-B stays
+  blocked; no inference, no dummy forward, no code changed.**
+  - **Load test: FAILED, both variants.** It is **not** a key-name incompatibility: all 160 tensors
+    match by name (**0 missing, 0 unexpected**). The blocker is **12 shape mismatches**, every one a
+    `backbone_3d` sparse-convolution kernel. spconv 1.x stores kernels as `(kD,kH,kW,C_in,C_out)`;
+    spconv 2.x expects `(C_out,kD,kH,kW,C_in)`. Element counts are identical and
+    `model_shape == permute(ckpt_shape, (4,0,1,2,3))` holds exactly — the right weights in the wrong
+    axis order. Example: `backbone_3d.conv1.0.0.weight` ckpt `(3,3,3,16,16)` vs model `(16,3,3,3,16)`.
+    (`load_state_dict` raises on a size mismatch even with `strict=False`, so the missing/unexpected
+    counts were obtained by comparing key sets separately.) **Nothing was fixed:** no permutation
+    shim, no spconv downgrade, no edit to OpenCOOD — a ruling is needed on whether converting the
+    layout is acceptable for a generality arm, since a converted checkpoint is no longer bit-wise the
+    published one.
+  - **Variant ruling (independent of the load failure).** The **`_compression` variant is the P4-B
+    main variant**, by the rule "match the deployed mainline feature branch":
+    `pointpillar_attentive_fusion_compression/config.yaml` → `base_bev_backbone.compression: 2`, and
+    that is the directory the mainline F caches are built from; `second_attentive_fusion_compression`
+    → `compression: 2` **matches**, while `second_attentive_fusion` has no such key (uncompressed).
+    Recorded caution: both SECOND configs carry a `height_compression` block, which is SECOND's
+    3D→BEV height squeeze and **not** the feature-compression knob — using it to pick the variant
+    would select the wrong model.
+  - **Dummy forward: NOT RUN**, gated on the load test passing.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

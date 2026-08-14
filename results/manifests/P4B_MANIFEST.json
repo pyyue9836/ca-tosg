@@ -44,5 +44,35 @@
   "torch": "2.11.0+cu128",
   "note": "spconv imports cleanly; SECOND uses sparse convolutions, so this is the dependency that would block the P4-B inference batch"
  },
- "inference_status": "NOT RUN. This manifest records an input only; no forward pass, no cache, no result."
+ "inference_status": "NOT RUN. This manifest records an input only; no forward pass, no cache, no result.",
+ "load_test": {
+  "date": "2026-08-14",
+  "result": "FAILED -- checkpoint cannot be loaded in this environment",
+  "method": "train_utils.create_model(config) + torch.load(latest.pth) + load_state_dict",
+  "ckpt_tensors": 160,
+  "model_params": 160,
+  "missing_keys": 0,
+  "unexpected_keys": 0,
+  "shape_mismatches": 12,
+  "note": "NOT a key-name incompatibility: every key matches (0 missing, 0 unexpected). The 12 failures are all backbone_3d sparse-conv kernels whose LAYOUT differs: spconv 1.x stores (kD,kH,kW,C_in,C_out), spconv 2.x expects (C_out,kD,kH,kW,C_in). Element counts are identical and model_shape == permute(ckpt_shape, (4,0,1,2,3)) exactly, so the weights are the right weights in the wrong axis order.",
+  "example": "backbone_3d.conv1.0.0.weight: ckpt (3,3,3,16,16) vs model (16,3,3,3,16)",
+  "raised_by": "torch.nn.Module.load_state_dict -- a size mismatch raises even with strict=False, so the missing/unexpected accounting above was obtained by comparing key sets separately",
+  "both_variants": true,
+  "action_taken": "NONE. Reported as-is; no permutation shim, no spconv change, no code edit -- awaiting a ruling."
+ },
+ "variant_ruling": {
+  "main_variant": "second_attentive_fusion_compression",
+  "rule": "the SECOND variant whose base_bev_backbone.compression matches the deployed mainline feature branch",
+  "evidence": {
+   "mainline deployed F branch": "pretrained_models/pointpillar_attentive_fusion/pointpillar_attentive_fusion_compression/config.yaml -> base_bev_backbone.compression: 2 (this is the dir the mainline intermediate/comp caches are built from)",
+   "pointpillar_attentive_fusion (uncompressed)": "base_bev_backbone.compression: 0 -- not the deployed branch",
+   "second_attentive_fusion_compression": "base_bev_backbone.compression: 2 -> MATCHES the mainline",
+   "second_attentive_fusion": "no base_bev_backbone.compression key -> uncompressed, does not match"
+  },
+  "caution": "both SECOND configs contain a height_compression block; that is SECOND's 3D->BEV height squeeze, NOT the feature-compression knob, and must not be used to pick the variant."
+ },
+ "dummy_forward": {
+  "status": "NOT RUN",
+  "reason": "gated on the load test passing; it did not pass."
+ }
 }
