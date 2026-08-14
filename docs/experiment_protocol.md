@@ -926,6 +926,44 @@ written into the paper's conclusions; the paper reports only the frozen selector
   Descriptive + paired CI against the A row at the same (split, B_max, N); **no decision**. Deployed
   models, δ, τ\*, `FROZEN_MANIFEST.json`, the mainline replay and `main.tex` remain untouched.
 
+- **P5-1 (2026-08-14) — migration INVENTORY for the main-text unfreeze. Nothing edited.**
+  Full list: `docs/p5_migration_list.md`. `main.tex` is not touched by this round, so the three
+  gates that read it byte-exactly still pass unchanged.
+
+  **Counted, with the search scope stated:** 9 `P2-PENDING-MIGRATION` rows in `docs/claims.md`
+  (2 further occurrences are the register itself in this file, not edits); 97 claim rows, of which
+  27 evidence-filled and 70 evidence-empty; **0 STALE**; **0 dangling** evidence citations (every
+  cited CSV/generator was resolved against the tree); `C_{16}` 52 occurrences on 42 lines,
+  `C_{256}` 21 on 18 lines.
+
+  **The 9 rows are three families, and two of them change a headline, not a wording:**
+  - *Latency* (4 rows): 52.8 ± 5.7 ms / P95 59.1 / 2000 trials is the **retired v2** selector; the
+    P2 frozen selectors measure 59.9 ± 5.3 / P95 69.3 / 1000 trials. Conclusion survives (still
+    inside 100 ms) with a narrower margin; the "10× lower latency" variant claim is not re-measured
+    on P2 products and must be re-measured or dropped.
+  - *True end-to-end AP* (3 rows): the paper's "+0.074 (Culver) / +0.026 (validate) / +0.001 (test)"
+    becomes, under the 200-realisation descriptive AP, **+0.0173 / +0.0069 / −0.0002…−0.0008** —
+    roughly 4× smaller on both positive splits and **sign-flipped on test**. "Lifts AP by up to
+    +0.074" cannot survive in that form; the surviving claim is about payload, not AP lift.
+  - *Policy engine* (2 rows): the single operating point "F1 0.909 at 0.251 Msym, 25% of C₁₆" becomes
+    three budget-indexed frozen points (test: 0.90326/0.06798, 0.90463/0.09472, 0.90734/0.18703);
+    "25% of C₁₆" becomes 9.6% of B_F at B_max=0.20. **τ now beats RF on F1 at B_max 0.20 and 0.30 on
+    test**, at 2.3× and 1.7× the payload — the paper currently frames τ as weaker on both axes.
+
+  **Two further pending edits registered outside `claims.md`:** WORDING-1 (`main.tex:207`,
+  per-frame → prespecified average communication budget) and **FA-1 supersedes the paper's
+  channel-only/full ablation table** (`main.tex:494–512`) — a chain the brief did not list.
+
+  **Terminology `C_{16}` → F is three migrations, not one rename:** the *action* (which must also
+  gain **E**, absent from the paper's action set today — a structural edit, not a symbol swap), the
+  *payload constant* `B_{C_{16}}` → `B_F` (value unchanged, pinned by `tests/test_payload.py`), and
+  the *256-QAM comparator*, which keeps its symbol but must stop reading as a deployed action (§4
+  already fixes that wording). A blanket substitution would silently promote C₂₅₆ to an action.
+
+  **Second backbone:** `main.tex` has no such section; P5 creates an **empty placeholder** at
+  `sec:second_backbone` between the Where2comm comparison and Deployment Robustness, marked
+  **pending P4-B**, and nothing may be written in it or cited from it until P4-B has run.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
