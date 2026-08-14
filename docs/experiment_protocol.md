@@ -1637,6 +1637,48 @@ written into the paper's conclusions; the paper reports only the frozen selector
     26 ANALYTIC, 8 LEGACY-ENGINE, 51 with no located source.
   - **Still not verified:** no LaTeX toolchain on this host — `main.tex` has **not been compiled**.
 
+- **P4-B-e (2026-08-14, PRE-REGISTERED before the first forward pass) — the SECOND cache batch,
+  under an equal-budget controlled payload, plus the batch-6 leftovers.**
+  - **BLOCKER, established before any compute and reported rather than worked around.** The eff
+    matrix is `[E, L, F]`. The `F` and `E` branches come from the verified
+    `second_attentive_fusion_compression` checkpoint (P4-B-c). The **`L` branch needs the SECOND
+    *late-fusion* checkpoint, and it is not on disk**: the P4-B acquisition fetched only
+    `second_attentive_fusion.zip`. Re-probed today, the zoo's Box direct link for the SECOND/Late
+    row (file `1621113752957`) still returns **HTTP 403**, the same server-side block recorded in
+    `P4B_MANIFEST.json`, so it cannot be fetched programmatically.
+    **Consequences, fixed in advance:** (i) the `E` and `F` caches ARE built, for all three splits —
+    they are the expensive part and they make the arm resumable the moment the checkpoint arrives;
+    (ii) grid expansion, LOSO, the budget walk and the 200-CSI replay are **NOT run**, because every
+    one of them consumes `eff_L`; (iii) the mainline PointPillar `L` branch is **NOT** substituted
+    in. A SECOND-`F`-against-PointPillar-`L` arm would answer a different question than the one
+    P4-B asks, and silently mixing backbones inside one eff matrix is the exact defect the P5
+    batches have been removing. This is the fuse of item 4, taken before spending the compute.
+  - **Payload convention (equal-budget controlled).** `B_F^SECOND ≡ 0.99 Msym`, identical to the
+    mainline, with the mainline `N_cw = 3,960` and the committed BLER table. This is a **controlled
+    comparison at equal channel budget**; it does **not** claim SECOND's feature tensor compresses
+    to the same size and it declares **no codec**. The two measured sizes — 6,758,400 pre-compression
+    and 352,000 at the bottleneck (P4-B-d) — are recorded in the payload audit as measurements only
+    and are **not** the operative payload.
+  - **What is produced.** `ego_{split}.npz` and `comp_{split}.npz` for validate / test / Culver-City
+    under the verified converted weights, in a **new directory** (`gs_rerun_second/`) that does not
+    touch the PointPillar caches; per-frame F1 against the same canonical union GT and the same
+    scorer as the mainline; `ego_num_objects` recomputed from SECOND's own ego detections (the only
+    one of the 21 cues that is detector-dependent — the other 20 are LiDAR geometry and scene
+    metadata, so they are reused unchanged). Recorded in a **separate** `P4B_CACHE_MANIFEST.json`
+    carrying the deployed `FROZEN_MANIFEST.json` sha256 as evidence that nothing frozen was touched.
+  - **Pre-registered expectation E-P4Be.** SECOND's compressed branch should land in the same
+    neighbourhood as PointPillar's, not orders away; a per-split mean `compressed_f1` outside
+    `[0.5, 1.0]`, or an `ego_f1` above `compressed_f1` on every split, is a fuse — report, do not
+    retrain and do not adjust the data.
+  - **(B) Batch-6 leftovers, no prose edits.** `fig:overview` re-exported from the corrected SVG
+    with a real converter, the command wired into `tools/generate_figures.py`; if no converter can
+    be installed, that is an error to report, not something to hand-trace. `fig:qualitative`: locate
+    the frames it used from provenance/caches and attempt a generator with `F` panel titles; if the
+    frames are not recoverable, report that and change nothing. The figure-consistency checker gains
+    `(split, budget, channel, snr_db)` labels on both sides so values at different conditions can no
+    longer collide — `0.9244` at 20 dB and `0.9243` at 10 dB must stop being reported as a conflict.
+    The one-sided / never-stated lists move to `docs/` marked **POST-EXPERIMENT**.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
