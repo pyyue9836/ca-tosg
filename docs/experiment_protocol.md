@@ -1095,6 +1095,53 @@ written into the paper's conclusions; the paper reports only the frozen selector
   - **Ledger regenerated:** 104 → **107** rows, **0 STALE**, evidence 18 → **17 filled**, 86 → **90
     pending**, 0 dangling.
 
+- **P4-B-c (2026-08-14, PRE-REGISTERED before the conversion was written and before the first
+  forward pass) — convert the SECOND checkpoint's sparse-conv kernel layout, then *prove* the
+  conversion by reproducing the model zoo's own published AP. No cache batch is run.**
+  Scope: the layout blocker of P4-B-b only. Deployed CA-TOSG models, δ, τ\*, `FROZEN_MANIFEST.json`,
+  the mainline replay, every committed result CSV and `main.tex` are untouched.
+  - **The conversion.** One-off script `tools/convert_second_checkpoint.py`: for every 5-D
+    `backbone_3d` sparse-conv kernel, `permute(4,0,1,2,3)`; every other tensor byte-identical. This
+    is spconv's **own** documented spconv-1.x→2.x migration, `RSCK`→`KRSC`
+    (`spconv.pytorch.conv.SparseConvolution._load_weight_different_layout`, selected by
+    `SPCONV_SAVED_WEIGHT_LAYOUT=RSCK`). The library's convenience hook is **not** used because in
+    spconv 2.3.8 it applies that permutation **twice** — verified, not read: with the env var set,
+    `conv_input.0.weight` arrives as `[4,16,3,3,3]` instead of `[16,3,3,3,4]` and the load still
+    raises. The script applies it exactly once, which is that hook's intended single conversion.
+  - **Pre-registered expectations (a miss is the finding; nothing is tuned to hit them).**
+    - **E1** Exactly **12** tensors disagree in shape; all are `backbone_3d` sparse-conv kernels; all
+      are 5-D; all are reconciled by `permute(4,0,1,2,3)`; **0 unexplained** mismatches.
+    - **E2** After conversion, `load_state_dict(strict=True)` returns *all keys matched* — 0 missing,
+      0 unexpected, 0 shape mismatch — for **both** variants.
+    - **E3** The conversion is **lossless**: identical key set, identical per-tensor element
+      multiset, identical dtype, and `permute` is invertible (round-trip is bit-identical to the
+      original file's tensors).
+    - **E4 (decisive).** Official OpenCOOD `intermediate` inference with the converted
+      `_compression` weights reproduces the zoo row *"Attentive | 1.2.1 | SECOND | Intermediate"*,
+      **compression column**: **AP@0.7 = 0.783 on Default Towns (`test`)** and **0.760 on Culver
+      City (`test_culver_city`)**, tolerance **±0.005**. The zoo's convention is
+      `global_sort_detections=False` (README: *"OPV2V paper does not perform the global sort"*), so
+      the pass/fail number is the no-global-sort AP. The global-sort AP is recorded alongside as a
+      **separate quantity** — CA-TOSG's own AP pipeline is global-sort (Change-log, global-sort
+      unification) and the two may not be blended in one sentence.
+    - **E5 (stop rule).** If E4 misses on either split, the run **stops** and reports the numbers as
+      they came out. No retuning of NMS/score thresholds, no substitution of a different IoU or a
+      different AP convention, no switch to the uncompressed variant to make a number fit. A miss
+      means the conversion is not established and P4-B stays blocked.
+  - **Why the reproduction is required at all.** The whole force of a second-backbone arm is that the
+    weights are the *published* ones. A layout-converted file is no longer bit-wise the published
+    file, so the claim has to be re-earned empirically: matching the zoo's own AP to ±0.005 is what
+    licenses the label *"official weights, lossless axis reorder, verified"*.
+  - **Artefacts.** Converted checkpoints are written **outside** this repo, beside the originals
+    (`pretrained_models/second_attentive_fusion_spconv2/`), and are recorded in a **new product
+    manifest** `results/manifests/P4B_CONVERSION_MANIFEST.json` (original sha256, converted sha256,
+    per-key permutation rule, reason, and the verification result). `P4B_MANIFEST.json` stays an
+    **input-only** record and is not rewritten.
+  - **Only after E4 passes:** a dummy forward records the transmitted BEV tensor's exact shape
+    before and after `base_bev_backbone.compression = 2`. Then the batch **stops** — the eff-cache
+    /grid-expansion batch of P4-B(1)–(3) is *not* run in this round, and `B_F^SECOND` stays open
+    pending the `bits_per_element` ruling.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
