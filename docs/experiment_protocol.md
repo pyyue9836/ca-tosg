@@ -964,6 +964,55 @@ written into the paper's conclusions; the paper reports only the frozen selector
   `sec:second_backbone` between the Where2comm comparison and Deployment Robustness, marked
   **pending P4-B**, and nothing may be written in it or cited from it until P4-B has run.
 
+- **P5-2 (2026-08-14) — migration batch 1 EXECUTED in `main.tex`.** No frozen product, model, δ,
+  τ\*, manifest or result CSV was touched; only `paper/main.tex`, the regenerated `docs/claims.md`
+  and one fingerprint pattern changed.
+  - **A (latency, 4 sites):** 52.8 ± 5.7 ms / P95 59.1 / 2000 trials (retired v2) → **59.9 ± 5.3 ms /
+    P95 69.3 / 1000 batch-1 trials**, quoted for the **slowest of the three frozen selectors** with
+    that reason stated in the text, margin now 40 ms. The "decision tree or logistic regression
+    reaches the same F1 at >10× lower latency" sentence is **deleted** in both places; it was never
+    re-measured on the P2 products.
+  - **B (AP, 3 sites):** the +0.074 / +0.026 / +0.001 family is **gone**. Replaced by the descriptive
+    AP@0.5 grid (3 splits × 3 budgets, read from `results/main/true_e2e_ap.csv`) plus the
+    space-normalisation sentence: headroom = Feature-ceiling − Fixed-L = **0.0267 / 0.0027 / 0.0892**
+    (validate / test / Culver), with the text stating outright that test has effectively no headroom
+    and that **no AP advantage is claimed on any split**.
+  - **C (policy, 2 sites):** one operating point → **three budget-indexed frozen points** (test
+    0.90326/0.068, 0.90463/0.095, 0.90734/0.187); "25% of C₁₆" → **9.6% of B_F at B_max=0.20**; τ
+    rewritten to the **locked R9 wording** ("significantly lower by ≈0.0028, CI entirely below zero,
+    within the 0.005 non-inferiority margin, payload −56.3%") plus the explicit statement that τ
+    attains the higher F1 at B_max 0.20 and 0.30 (0.90740 / 0.90937) at 2.3× and 1.7× the payload.
+    The BANNED wordings from `r9_result_claims.md` ("same F1", "matches F1", …) are absent — checked.
+  - **W1:** `main.tex:207` per-frame bandwidth budget → prespecified average communication budget.
+  - **W2:** the feature-ablation table and its findings paragraph are replaced by **FA-1**: both
+    single-half variants collapse to always-L at B_max=0.20 (ρ_F = 0.000, F1 at the fixed-L floor
+    0.9011) and only the full 23-feature selector reaches an intermediate point (0.9046 at 0.095).
+    The not-re-run cues+γ̂ cut is dropped and said to be dropped.
+  - **C₁₆ → F, three usage classes, no blanket substitution:** the ACTION (`\mathcal{S} = \{L, F\}`
+    and its definition; **E is deliberately NOT added here** — its formal definition paragraph is
+    batch 2, and a symbol without a definition would be worse than the current omission); the
+    PAYLOAD CONSTANT (`B_{C_{16}}` → `B_F`, value unchanged and still pinned by
+    `tests/test_payload.py`); the FIXED-POLICY baseline name (9 sites, `Fixed $C_{16}$` → `Fixed $F$`).
+    C₂₅₆ keeps its symbol and is repositioned with the §4 locked wording as a **physical-layer
+    comparator, not a deployed action**. 30 `C_{16}` mentions remain in modulation-comparison
+    contexts, where the symbol is correct; the glossary that retires the dual naming is batch 2.
+  - **Second backbone:** a `TODO(P4-B)` comment token only, at the intended position between the
+    Where2comm comparison and Deployment Robustness. **No empty section was created.**
+  - **Fingerprint precision fix, not a weakening:** `RX 0\.895` → `RX 0\.895[^9]`, following this
+    file's own `0\.888[^6]` convention. Bare `0.895` and `0.8950` are still caught; the legitimate
+    new value `0.8959` (validate AP@0.5 at B_max=0.20) is allowed. Without it the block-exit gate
+    would have failed on a *correct* number.
+  - **Ledger regenerated after the edits:** 97 → **104** claim rows, evidence 27 → **18 filled**,
+    70 → **86 pending**, **0 STALE**. The drop in filled rows is not evidence loss: the edited
+    sentences are new claims with new stable IDs, so their hand-filled evidence does not carry over
+    and must be re-attached in the back-fill pass. One edit had to be reworded because two of the new
+    sentences produced the same letters-only skeleton and collided on stable ID — caught by the
+    generator, fixed in the prose rather than in the ID machinery.
+  - **Flagged, NOT edited (out of scope for this batch):** the headline "the learned selector
+    Pareto-dominates the re-tuned threshold at matched channel use" (~line 390) is not contradicted
+    by the new τ rows — those compare at *different* payloads — but it has not been re-verified
+    against the frozen replay and should be, in batch 2.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

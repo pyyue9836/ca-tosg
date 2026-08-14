@@ -62,7 +62,7 @@ RX eas(y|ier)[a-z -]{0,25}(test|scene|split)
 RX \+0\.017.{0,15}(under|F1|jscc|AWGN)
 RX 1\{?,?\}?000 validate frames
 RX 0\.844
-RX 0\.895
+RX 0\.895[^9]
 RX \$\\approx 0\.86
 RX (cut|save)[a-z' ]{0,28}channel use by
 RX 0\.081
