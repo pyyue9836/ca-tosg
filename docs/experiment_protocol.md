@@ -1257,6 +1257,66 @@ written into the paper's conclusions; the paper reports only the frozen selector
   - **(4) Stop.** The eff-cache / grid-expansion / frozen-walk batch stays unstarted. Nothing in
     `main.tex`, no frozen artefact, no deployed model is touched by this entry.
 
+- **P4-B-d RESULT (2026-08-14) — `B_F^SECOND` fixed on the declared convention; both pre-registered
+  expectations met, and the paper's insensitivity claim is now measured rather than asserted — and
+  as literally worded it does not hold.**
+  - **E1 met. `B_F^SECOND = 3.09375 Msym/frame`** (16-QAM, rate-1/2). Chain, every link derived:
+    6,758,400 pre-compression elements/CAV × **0.915527** bit/element (= 1.98 Mbit ÷ 2,162,688, the
+    declared pair) = **6.1875 Mbit** info → 12.375 Mbit coded → ÷4 → **3.09375 Msym**.
+    `N_CW^SECOND = ceil(6,187,500 / 500) = 12,375`. Budgets
+    `B_max^SECOND = 0.309375 / 0.61875 / 0.928125 Msym` at 10/20/30 %.
+    Peiyi's quoted ≈6.22 Mbit → ≈3.11 Msym is the same chain with bits/element rounded to 0.92; the
+    gap is **0.4885 %**, inside the pre-registered 1 % stop. Audited as `tests/test_payload.py`
+    section (5), **25/25 links match**.
+  - **E2 confirmed, exactly as pre-registered.** `AttBEVBackbone` compresses branch `idx` only while
+    `compression - idx > 0`:
+
+    | backbone | branches | pre-compression /CAV | transmitted /CAV | note |
+    |---|---|---|---|---|
+    | PointPillar (mainline) | 3 (2 compressed) | 2,252,800 + 1,126,400 + 563,200 = **3,942,400** | 35,200 + 140,800 + **563,200** = 739,200 | branch 2 is **NOT compressed** and is 76.2 % of everything it sends |
+    | SECOND | 2 (both compressed) | 4,505,600 + 2,252,800 = **6,758,400** | 70,400 + 281,600 = **352,000** | |
+
+    **The two backbones invert under the two conventions**: SECOND's pre-compression tensor is
+    1.71× the mainline's, but its transmitted bottleneck is 0.48× — so which backbone is "cheaper"
+    is decided entirely by the accounting choice, not by the model. That is the concrete reason a
+    bottleneck-based `B_F^SECOND` was the wrong call.
+  - **The declared anchor does not describe the deployed model.** `main.tex` anchors the budget to a
+    "$256\times48\times176 \approx 2.16\times10^{6}$" tensor, which is the **JSCC baseline's**
+    geometry (y ∈ [-38.4, 38.4] m, stride 4, 256 ch). The deployed
+    `pointpillar_attentive_fusion_compression` checkpoint has y ∈ [-40, 40] m and a three-branch
+    pyramid totalling **3,942,400** pre-compression elements — **1.8229×** the declared anchor.
+    Reported, not reconciled, per the pre-registration.
+  - **"Conclusions are insensitive to this constant" — measured, and false as written.** The paper
+    says re-anchoring "would rescale the feature cost of all policies equally". It does not: a
+    deployed policy pays `ρ_L·B_L + ρ_F·B_F`, and `B_L` is anchored **independently**, so only the
+    pure-F term rescales. Using the frozen decision logs' own action mix, the headline quantity
+    (CA-TOSG channel use as a fraction of Fixed-F) moves by **−0.90 % to −7.75 %** under the paper's
+    own named counterfactual (1.98 → 2.16 Mbit) and by **−4.86 % to −41.99 %** under the
+    declared→deployed re-anchor, worst on Culver at B_max = 0.10. The *ordering* survives; the
+    *fraction* does not. `results/channel/payload_anchor_sensitivity.csv`.
+  - **E3 met. Frame BLER and mask re-derived at `N_CW = 12,375`,** from the committed `bler_cw`
+    column — no new Sionna run, the mainline table untouched. Sanity: the committed `bler_frame`
+    column is reproduced from `bler_cw` at `N_CW = 3,960` to **2.1e-15**, which is what licenses
+    re-deriving it at the new count. Onsets (frame BLER first < 0.999):
+
+    | channel | QAM | onset @3,960 | onset @12,375 | move |
+    |---|---|---|---|---|
+    | AWGN | 16 | 8.0 dB | **8.0 dB** | unchanged |
+    | AWGN | 256 | 16.5 dB | **17.0 dB** | +0.5 dB |
+    | Rayleigh | 16 / 256 | none in table | none in table | unchanged — the frame BLER never falls below the mask threshold at either count |
+
+    No onset left the evaluated [0, 20] dB window, and no onset landed on a point whose codeword
+    BLER is only an upper bound. Outputs: `results/channel/bler_frame_second.csv`,
+    `bler_onset_second.csv`, `payload_conventions.csv`, `payload_anchor_sensitivity.csv`.
+  - **Two audit defects found and fixed en route.** (i) `tests/test_payload.py`'s Eq.(7) `C16`
+    pattern stopped matching when P5 batch 2 renamed `C_{16}` → `F`, so that link had been
+    **silently dropped** from the audit rather than failing; both spellings are now accepted and the
+    link is back (24 → 25 links). (ii) The frozen decision logs store the action as the **label**
+    `'E'/'L'/'F'`, not an index; comparing against `0/1/2` returned all-zero shares silently. The
+    label set is now asserted, so a future encoding change fails loudly.
+  - **Stop.** No eff cache, no grid expansion, no frozen walk; `main.tex` untouched by this entry;
+    the mainline BLER table, the frozen selectors and every deployed artefact unchanged.
+
 - **P5-4 (2026-08-14) — migration batch 3, part 1: the legacy-engine inventory. `main.tex` NOT
   edited, not one character; no result regenerated, no figure rebuilt, no ledger cell changed.**
   Batch 2 left `sec:difficulty` standing as "the" remaining legacy subsection. Before editing it,

@@ -1,0 +1,163 @@
+{
+ "schema": "catosg-bev-tensor-probe/1",
+ "protocol": "CA-TOSG P4-B-d item 2 (docs/experiment_protocol.md)",
+ "generated_by": "python tools/bev_tensor_probe.py",
+ "generated": "2026-08-14T15:19:51.974307+00:00",
+ "ckpt_dir": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/second_attentive_fusion_compression",
+ "model_core_method": "second_intermediate",
+ "backbone_attribute": "backbone_2d",
+ "split_sampled": "test",
+ "frames_in_forward": 1,
+ "cavs_in_this_frame": 2,
+ "config": {
+  "compression": 2,
+  "num_filters": [
+   128,
+   256
+  ],
+  "layer_nums": [
+   5,
+   5
+  ],
+  "voxel_size": [
+   0.1,
+   0.1,
+   0.1
+  ],
+  "cav_lidar_range": [
+   -140.8,
+   -40,
+   -3,
+   140.8,
+   40,
+   1
+  ]
+ },
+ "branches_total": 2,
+ "branches_compressed": 2,
+ "branches_uncompressed": 0,
+ "branches": [
+  {
+   "branch": 0,
+   "compressed": true,
+   "pre_compression_shape_per_cav": [
+    128,
+    100,
+    352
+   ],
+   "pre_compression_elements_per_cav": 4505600,
+   "transmitted_shape_per_cav": [
+    32,
+    25,
+    88
+   ],
+   "transmitted_elements_per_cav": 70400,
+   "ratio": 64.0,
+   "what_is_transmitted": "AutoEncoder encoder output (bottleneck)"
+  },
+  {
+   "branch": 1,
+   "compressed": true,
+   "pre_compression_shape_per_cav": [
+    256,
+    50,
+    176
+   ],
+   "pre_compression_elements_per_cav": 2252800,
+   "transmitted_shape_per_cav": [
+    128,
+    25,
+    88
+   ],
+   "transmitted_elements_per_cav": 281600,
+   "ratio": 8.0,
+   "what_is_transmitted": "AutoEncoder encoder output (bottleneck)"
+  }
+ ],
+ "totals_per_cav": {
+  "spatial_features_elements": 9011200,
+  "pre_compression_elements": 6758400,
+  "transmitted_elements": 352000,
+  "overall_ratio": 19.2
+ },
+ "raw_tensors_as_hooked_all_cavs": {
+  "spatial_features": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    256,
+    100,
+    352
+   ],
+   "elements": 18022400,
+   "dtype": "torch.float32"
+  },
+  "pre_compression_0": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    128,
+    100,
+    352
+   ],
+   "elements": 9011200,
+   "dtype": "torch.float32"
+  },
+  "bottleneck_0": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    32,
+    25,
+    88
+   ],
+   "elements": 140800,
+   "dtype": "torch.float32"
+  },
+  "fusion_input_0": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    128,
+    100,
+    352
+   ],
+   "elements": 9011200,
+   "dtype": "torch.float32"
+  },
+  "pre_compression_1": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    256,
+    50,
+    176
+   ],
+   "elements": 4505600,
+   "dtype": "torch.float32"
+  },
+  "bottleneck_1": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    128,
+    25,
+    88
+   ],
+   "elements": 563200,
+   "dtype": "torch.float32"
+  },
+  "fusion_input_1": {
+   "type": "Tensor",
+   "shape": [
+    2,
+    256,
+    50,
+    176
+   ],
+   "elements": 4505600,
+   "dtype": "torch.float32"
+  }
+ },
+ "note": "elements are PER CAV: the forward runs all CAVs of the frame in one batch, so the hooked leading dimension is the CAV count and every count above is divided by it. No bit-depth is chosen here and no payload is derived."
+}

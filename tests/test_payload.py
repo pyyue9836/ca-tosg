@@ -58,11 +58,16 @@ def analytic_chain():
 
 
 def parse_paper_eq7():
-    """Read Eq.(7) B_L / B_C16 / B_C256 values printed in main.tex (derive expected from the paper)."""
+    """Read Eq.(7) B_L / B_C16 / B_C256 values printed in main.tex (derive expected from the paper).
+
+    P5 batch 2 renamed C_16 -> F in policy context, which silently broke the old C16 pattern and
+    dropped that link from the audit without failing. Both spellings are accepted, and a missing
+    match is reported by the caller rather than skipped.
+    """
     tex = open(MAIN).read()
     out = {}
     m = re.search(r'B_L\s*=\s*([0-9.]+)', tex);                       out['L'] = float(m.group(1)) if m else None
-    m = re.search(r'B_\{C_\{16\}\}\s*=\s*3\.96/4\s*\\approx\s*([0-9.]+)', tex);  out['C16'] = float(m.group(1)) if m else None
+    m = re.search(r'B_\{(?:F|C_\{16\})\}\s*=\s*3\.96/4\s*\\approx\s*([0-9.]+)', tex);  out['C16'] = float(m.group(1)) if m else None
     m = re.search(r'B_\{C_\{256\}\}\s*=\s*3\.96/8\s*\\approx\s*([0-9.]+)', tex); out['C256'] = float(m.group(1)) if m else None
     return out
 
@@ -122,6 +127,73 @@ def deployed_averages(pay):
                          '16-25', 'threshold_vs_rf.csv', 15.5 <= frac < 25.5))
 
 
+def second_backbone_chain():
+    """(5) P4-B-d: the whole B_F^SECOND chain, re-derived here and bit-compared to the committed CSV.
+
+    Nothing in this section is typed in. The bits-per-element constant is DERIVED from the mainline
+    pair (declared budget / declared element count); the element counts come from the forward-hook
+    probe manifests; K comes from the module that generated the BLER table. The committed
+    `payload_conventions.csv` must agree link for link -- if the generator ever hard-codes a value,
+    this independent re-derivation stops matching.
+    """
+    probe = os.path.join(P1, 'results/manifests/P4B_PROBE_second_compression.json')
+    conv_csv = os.path.join(P1, 'results/channel/payload_conventions.csv')
+    ldpc = os.path.join(P1, 'projects/ca_tosg/communication/ldpc_qam.py')
+    if not (os.path.exists(probe) and os.path.exists(conv_csv)):
+        rows.append(('(5) P4-B-d SECOND chain', 'MISSING', 'present', 'P4B_PROBE / '
+                     'payload_conventions.csv absent -- artefact-tier input', False))
+        return
+    import json
+    import math
+
+    import pandas as pd
+
+    # bits/element: DERIVED from the declared pair, never typed in
+    if not os.path.exists(JSCC_CFG):
+        rows.append(('(5) P4-B-d SECOND chain', 'SKIPPED', 'derivable',
+                     'JSCC config absent -> declared element count cannot be rebuilt', False))
+        return
+    t = open(JSCC_CFG).read()
+    rng = [float(x) for x in re.search(r'cav_lidar_range:\s*&?\w*\s*\[([^\]]+)\]', t).group(1).split(',')]
+    vox = float(re.search(r'voxel_size:\s*&?\w*\s*\[([^\]]+)\]', t).group(1).split(',')[0])
+    stride = int(re.search(r'feature_stride:\s*(\d+)', t).group(1))
+    ch = int(re.search(r'head_dim:\s*(\d+)', t).group(1))
+    elems_declared = ch * round(round((rng[4] - rng[1]) / vox) / stride) \
+        * round(round((rng[3] - rng[0]) / vox) / stride)
+    bit_per_elem = B_FEAT_INFO * 1e6 / elems_declared
+
+    k_info = int(re.search(r'^K,\s*N\s*=\s*(\d+),', open(ldpc).read(), re.M).group(1))
+    elems_second = json.load(open(probe))['totals_per_cav']['pre_compression_elements']
+
+    info_bits = elems_second * bit_per_elem
+    coded = info_bits / CODE_RATE
+    msym = coded / BITS_PER_SYM['C16'] / 1e6
+    n_cw = math.ceil(info_bits / k_info)
+    n_cw_mainline = math.ceil(B_FEAT_INFO * 1e6 / k_info)
+
+    tab = pd.read_csv(conv_csv)
+    row = tab[(tab.backbone == 'second') & (tab.convention == 'pre_compression')].iloc[0]
+    chk(f'(5a) bits/element derived from the declared pair ({B_FEAT_INFO} Mbit / {elems_declared:,})',
+        bit_per_elem, float(row.bit_per_element_derived), 'payload_conventions.csv', tol=1e-12)
+    chk(f'(5b) B_F^SECOND info = {elems_second:,} elem x bits/elem = {info_bits / 1e6:.6f} Mbit',
+        info_bits / 1e6, float(row.info_mbit), 'payload_conventions.csv', tol=1e-9)
+    chk('(5c) coded bits = info / rate-1/2', coded / 1e6, float(row.coded_mbit),
+        'payload_conventions.csv', tol=1e-9)
+    chk('(5d) B_F^SECOND = coded / 4 (16-QAM) Msym', msym, float(row.B_F_msym_16qam),
+        'payload_conventions.csv', tol=1e-9)
+    chk(f'(5e) N_cw^SECOND = ceil(info bits / K={k_info})', n_cw, float(row.N_cw),
+        'payload_conventions.csv', tol=0)
+    rows.append((f'(5f) N_cw^SECOND ({n_cw}) is NOT inherited from the mainline ({n_cw_mainline})',
+                 n_cw, f'!= {n_cw_mainline}', 'P4-B-d item 3', n_cw != n_cw_mainline))
+    for frac in (0.10, 0.20, 0.30):
+        chk(f'(5g) B_max^SECOND at {int(frac * 100)}% = {frac} x B_F^SECOND Msym', frac * msym,
+            float(row[f'B_max_{int(frac * 100)}pct_msym']), 'payload_conventions.csv', tol=1e-9)
+    # the rounded 0.92 the paper prints must stay within the pre-registered 1% of the derived chain
+    gap = abs(float(row.rounding_gap_pct))
+    rows.append(('(5h) rounded-0.92 vs derived bits/element gap < 1% (pre-registered E1)',
+                 round(gap, 4), '< 1.0', 'P4-B-d E1', gap < 1.0))
+
+
 def main():
     print('=== 0) upstream source budgets (declared 1.98 Mbit convention + object format) ===')
     upstream_source_budgets()
@@ -143,6 +215,8 @@ def main():
             rf_paper, 'main.tex vs threshold_vs_rf.csv', tol=TOL)
         chk('tab:headline_agg best-tau payload: paper == CSV(test) rounded',
             round(float(trow['bestF1_tau_payload']), 3), thr_paper, 'main.tex vs threshold_vs_rf.csv', tol=TOL)
+    print('=== 5) P4-B-d: B_F^SECOND chain (declared bits-per-element convention) ===')
+    second_backbone_chain()
 
     # ---- report ----
     w = max(len(r[0]) for r in rows)

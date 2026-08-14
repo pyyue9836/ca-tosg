@@ -1,0 +1,5 @@
+channel,qam,onset_mainline,in_evaluated_window_main,onset_is_upper_bound_point_main,onset_second,in_evaluated_window_second,onset_is_upper_bound_point_second,moved_db
+awgn,16,8.0,True,False,8.0,True,False,0.0
+awgn,256,16.5,True,False,17.0,True,False,0.5
+rayleigh,16,,False,False,,False,False,
+rayleigh,256,,False,False,,False,False,

@@ -1,0 +1,5 @@
+backbone,core_method,branches_total,branches_uncompressed,convention,elements_per_cav,bit_per_element_derived,info_mbit,coded_mbit,B_F_msym_16qam,N_cw,info_mbit_at_rounded_0p92,B_F_msym_at_rounded_0p92,rounding_gap_pct,B_max_10pct_msym,B_max_20pct_msym,B_max_30pct_msym
+pointpillar,point_pillar_intermediate,3,1,pre_compression,3942400,0.91552734375,3.609375,7.21875,1.8046875,7219,3.627008,1.813504,0.4885333333333336,0.18046875,0.3609375,0.54140625
+pointpillar,point_pillar_intermediate,3,1,transmitted_bottleneck,739200,0.91552734375,0.6767578125,1.353515625,0.33837890625,1354,0.680064,0.340032,0.4885333333333336,0.033837890625,0.06767578125,0.101513671875
+second,second_intermediate,2,0,pre_compression,6758400,0.91552734375,6.1875,12.375,3.09375,12375,6.217728,3.108864,0.48853333333333565,0.309375,0.61875,0.928125
+second,second_intermediate,2,0,transmitted_bottleneck,352000,0.91552734375,0.322265625,0.64453125,0.1611328125,645,0.32384,0.16192,0.48853333333333854,0.01611328125,0.0322265625,0.04833984375
