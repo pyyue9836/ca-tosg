@@ -1519,6 +1519,56 @@ written into the paper's conclusions; the paper reports only the frozen selector
     (9 newly back-filled; 7 partial and 55 unlocated deliberately left blank).
   - **Still not verified:** no LaTeX toolchain on this host, so `main.tex` has **not been compiled**.
 
+- **P5-7 (2026-08-14, PRE-REGISTERED before any table, sentence or figure was touched) —
+  migration batch 6: three stale tables, the protocol/结论 prose, the action set, and every figure,
+  onto the frozen products.** Frozen selectors, δ, τ\*, `FROZEN_MANIFEST.json`, the deployed models
+  and every committed frozen CSV stay **read-only**; everything produced here is a new file.
+  - **(A) Tables from frozen CSVs.** `tab:headline_agg` becomes budget-indexed (three frozen points
+    + the **budget-matched** τ at each), read from `results/main/replay_summary.csv`; the
+    `τ=8.5 / 0.910 / 0.303 / 0.251` family goes. `tab:gen_headline` is re-emitted from the same
+    replay. The fixed references in both tables (`Fixed L`, `Fixed F`, `Fixed C₂₅₆`, oracle) are
+    **recomputed under the frozen replay's own CSI draw** by a new
+    `projects/ca_tosg/evaluation/fixed_references.py`, so no table mixes engines.
+    - **Expectation E-A1.** The clairvoyant row has **no frozen definition** (the legacy one sampled
+      the block outcome post hoc under the retired engine). It is **dropped, not re-invented**; if a
+      clairvoyant bound is wanted it needs its own pre-registration.
+    - **Expectation E-A2.** `fixed_references.py` generalises `deployment.bler16` to any QAM order.
+      It must reproduce `deployment.bler16` **exactly** at qam=16 — asserted in the tool — otherwise
+      the C₂₅₆ row is not comparable to the F row and the run stops.
+    - Payload-share wording is unified to one source; `16–25\%` (Table III context) is replaced by
+      the same quantity the abstract's `6.9–18.9\%` comes from.
+  - **(B) Prose.** §VI-B/C/D rewritten on the frozen numbers (policy knee at **10 dB**, explicitly
+    *not* an AP knee; ρ from the frozen tables); the "≥12 dB → AP 0.916, within 0.001 of the
+    ceiling" claim goes. §V-C: Rayleigh described as a **direct Sionna Rayleigh link-level
+    simulation** (the "average the AWGN table over an exponential distribution" description is
+    wrong); training data described as the full frame × 11 SNR × {AWGN, Rayleigh} grid. §V-D + §IV-E
+    rewritten: scene-level 9-fold LOSO, candidate block, budget walk freeze, per-budget λ\*/τ\*,
+    final full-1980 refit; **`class_weight=balanced` deleted — all three frozen selectors are
+    `cw=None`, the manifest is the authority.** §V-E: the JSCC baseline is *our* reproduction, not
+    "the authors' selector and codec". Abstract and contribution wording per the ruling. Table V
+    states which frozen selector it comes from.
+  - **(C) Action set.** `\mathcal{S}=\{E,L,F\}` everywhere it is currently `\{L,F\}`; the 2-bit
+    codepoint map becomes E/L/F with C₂₅₆ marked not-deployed; §VI-L's "a future ego-only action
+    could be added" is removed — **E is a deployed action already**. The two prose `C_{16}`
+    action-context sites flagged in batch 5 (lines 117, 246) become `F`.
+  - **(D) Figures, all from frozen CSVs, one entry point (`tools/generate_figures.py`), each with a
+    PROVENANCE file.** Fig.6 action set E/L/F, main panel at `B_max=0.20` (AWGN/Rayleigh), stacked
+    ρ_E/ρ_L/ρ_F plus that budget's λ-penalised oracle (caption must say **not clairvoyant**), knee
+    marked at 10 dB, three-budget version to the appendix; its caption states ρ_E≈0 while the
+    oracle uses E under Rayleigh and cross-references the E-collapse limitation. Fig.2 knee shading
+    12–14 → 10 dB (BLER curves unchanged). Fig.4/5 from `true_e2e_ap_by_snr.csv` + the frozen
+    payloads, point-for-point consistent with the §VI-H tables. Fig.8 x-axis must reach ≥1.0 so
+    Fixed F (0.99) is visible; three budget-indexed frozen points + budget-matched τ; oracle and
+    clairvoyant on different markers. Fig.3 panel titles `C_{16}`→`F`. Fig.1 overview action set
+    `{E,L,F}`, C₂₅₆ labelled a physical-layer comparator. Fig.9 confirmed single-panel with
+    **+0.0400** in-figure.
+  - **(E) Then the ledger, then a tri-consistency self-check.** Every figure's PROVENANCE records
+    the numbers it actually drew; a checker compares **in-figure vs caption vs body text** and
+    **reports every disagreement without resolving any of them**. Ledger regenerated last with
+    legacy / blank / dangling counts.
+  - **Standing stop:** any number that cannot be read from a frozen product is reported as missing,
+    never estimated, and never carried over from the retired engine.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
