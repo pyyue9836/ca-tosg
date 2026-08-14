@@ -1142,6 +1142,51 @@ written into the paper's conclusions; the paper reports only the frozen selector
     /grid-expansion batch of P4-B(1)–(3) is *not* run in this round, and `B_F^SECOND` stays open
     pending the `bits_per_element` ruling.
 
+- **P5-4 (2026-08-14) — migration batch 3, part 1: the legacy-engine inventory. `main.tex` NOT
+  edited, not one character; no result regenerated, no figure rebuilt, no ledger cell changed.**
+  Batch 2 left `sec:difficulty` standing as "the" remaining legacy subsection. Before editing it,
+  the whole paper was swept for the same defect, mechanically rather than from memory.
+  - **New tool `tools/audit_claims_evidence.py`.** Re-walks `main.tex` with the ledger generator's
+    own sentence splitter while tracking `\section`/`\subsection` headers (the ledger is flat and has
+    no section column), joins the result to `docs/claims.md` and to `results/README.md`, and
+    classifies each claim's evidence by the **generator's intra-repo import closure** — so
+    `LEGACY-ENGINE` is *derived* from what the code reads, never asserted. Rows whose ledger cell is
+    blank are attributed by searching every committed result file for the claim's distinctive
+    numeric literals, ranked by literals-matched and then by file size (a 20-row verifier CSV
+    matching 3/3 is evidence; a 200k-value replay dump matching 3/3 is mostly chance). Output:
+    `docs/claims_evidence_audit.md`, regenerable, with `--check` for staleness.
+  - **Three classifier defects were found and fixed while building it, each of which would have
+    produced a wrong verdict silently:** (i) marker matching over raw source text tagged
+    `end_to_end_ap.py` LEGACY because a *docstring* says "identical to true_e2e_global.py" — now
+    matched against module names and non-docstring string literals only (`ast.get_docstring(...,
+    clean=False)`, since the cleaned form does not compare equal to the raw constant); (ii) a memo
+    on the import closure returned a cached set without merging it into the caller's, truncating
+    `tools/evaluate_selector.py` to 1 module and mislabelling the **frozen replay generator**
+    ANALYTIC — the memo is gone; (iii) `results/README.md` rows whose generator cell contains a
+    literal `|` (`--train|--evaluate`) over-split, so the whole `contextual_bandit_runs/` family
+    read as "not indexed".
+  - **Result: 14 of 107 claims rest on a retired engine, across 10 sections — not 1.** Two were not
+    previously known. **`sec:generalisation` carries three claims** scored by the v3 global-sort
+    scorer `true_e2e_global.py` (the entire per-SNR AP-knee narrative on test and Culver-City), and
+    the `+0.090` hard-frame family survives in **three** places, not one: `main.tex` 662 (prose),
+    678 (figure caption) and **904 (the Conclusion)** — batch 2 recorded deleting the Conclusion
+    restatement, but the surviving sentence is worded differently and was missed.
+  - **"Legacy engine" resolved into three distinct dependencies**, which the rulings must not treat
+    alike: **L1** the v3 policy engine / v3 deployed selector (`policy_200seed`, and
+    `a2_difficulty.py` → `C.load_rf()` → `data/selector_rf.pkl`); **L2** the v3 global-sort scorer;
+    **L3** a self-contained prior-protocol arm that borrows only `v3_eval`'s BLER lookup, its
+    `N_SEED = 200` CSI convention and its bootstrap helper, and reads neither the v3 nor the frozen
+    selector (the JSCC two-regime comparison).
+  - **Per-section rulings are PROPOSED, not applied:** `docs/p5_batch3_legacy_rulings.md`, one of
+    recompute / demote-to-appendix / delete per section, each with its compute cost and its
+    dependency. Headlines: the `B_L = 0.024` family is engine-independent and needs only
+    re-attribution (`tests/test_payload.py (0b)` already re-derives it from the dataset);
+    `sec:difficulty`'s **reliable-channel** view is fully recomputable from `data/p2/p2_grid_*.csv`
+    + the frozen selectors with no new inference, while its **channel-averaged 200-realisation**
+    view must be deleted rather than reproduced; `sec:generalisation` needs a new SNR-pinned variant
+    of `end_to_end_ap.py` (the frozen engine draws SNR ~ U[0,20] and has no per-SNR mode at all).
+    **Awaiting Peiyi's ruling before any prose moves.**
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
