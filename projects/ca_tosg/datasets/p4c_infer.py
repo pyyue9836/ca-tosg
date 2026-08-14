@@ -53,9 +53,14 @@ def main():
     ap.add_argument('--base_cache', required=True, help='full-set cache to splice into')
     ap.add_argument('--out', required=True)
     ap.add_argument('--limit', type=int, default=0, help='debug: only the first K needed frames')
+    ap.add_argument('--frames_npy', default='', help='explicit frame indices (semantics-B bracket)')
+    ap.add_argument('--nth', type=int, default=0, help='keep EXACTLY the j-th nearest collaborator')
     opt = ap.parse_args()
 
     todo, n_frames, kcol = frames_needing_forward(opt.split, opt.n)
+    if opt.frames_npy:
+        todo = np.load(opt.frames_npy)
+        print('explicit frame list: %d frames' % len(todo), flush=True)
     if opt.limit:
         todo = todo[:opt.limit]
     base = np.load(opt.base_cache, allow_pickle=True)
@@ -69,7 +74,11 @@ def main():
         print('  nothing to run -- the arm equals the full set on this split; wrote a copy', flush=True)
         return 0
 
-    os.environ['CATOSG_MAX_COLLAB'] = str(opt.n)                 # the subset mask, on for this run
+    if opt.nth:
+        os.environ['CATOSG_NTH_COLLAB'] = str(opt.nth)           # exactly the j-th nearest collaborator
+        os.environ.pop('CATOSG_MAX_COLLAB', None)
+    else:
+        os.environ['CATOSG_MAX_COLLAB'] = str(opt.n)             # the subset mask, on for this run
 
     class O:
         model_dir = opt.model_dir

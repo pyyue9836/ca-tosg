@@ -866,6 +866,56 @@ written into the paper's conclusions; the paper reports only the frozen selector
   realised validate rate (~0.6 s/frame): 8070 subsets × 2 branches ≈ 2.7 GPU-hours. Command and
   design are fixed; it is a separate run, not a pending edit to this one.
 
+- **P4-C-b (2026-08-14) — (a) the "N>1 always overshoots" expectation is marked WRONG; (b) the
+  semantics-B bracket is scope-reduced by an EXACT equivalence and pre-registered before running.**
+
+  **(a) Expectation 1 of P4-C was WRONG.** Its original text stays in this change-log unedited —
+  *"payload scales ≈ linearly in N, so the frozen selectors overshoot B_max at N=2/3 on every
+  split"* — and is hereby marked **WRONG**. Measured mechanism: payload scales with the collaborators
+  a frame actually **has**, not with the nominal N, and the supply saturates (mean availability
+  2.90 / 1.59 / 1.09 per split). Realised scaling at B_max=0.20 is 1.65×/2.15× on validate,
+  1.39×/1.44× on test, 1.41×/1.41× on Culver, and overshoot occurs in **5 of 27 cells** — never on
+  Culver. The reasoning behind the expectation ("near-arithmetic; a non-linear result is visibly a
+  bug") was itself the error: non-linearity here is the collaborator supply, not a bug.
+
+  **(b) Semantics B — scope reduction, EXACT, not an approximation.** B is computed only for frames
+  that are **in scope**, where in scope means:
+
+  > a frame is in scope iff **some frozen selector chooses F for it at some cell of the
+  > deterministic validate grid** (frame × 11 SNR × 2 channels) **and** the frame has **≥2
+  > collaborators**. B is run at **N=2 only**.
+
+  Why the frames left out are *identical* under A and B, by construction rather than by
+  approximation:
+  - **E frames**: no message is sent, so there is nothing to deliver partially.
+  - **L frames**: BLER_L = 0 in the mainline, so every object-level message is delivered; "partial"
+    and "all-or-nothing" coincide.
+  - **frames with ≤1 collaborator**: one link (or none) — partial delivery of a single link *is*
+    all-or-nothing.
+  Only a frame that both requests F and has ≥2 links can distinguish the two semantics.
+
+  **Counted before running** (and the scope rule verified, not assumed): on validate, 984 frames
+  ever have F chosen on the grid; the set of frames that ever have F chosen in the 200-realisation
+  **replay** is also 984 and is a **subset of the grid set with 0 frames outside it**, so the
+  grid-based rule cannot exclude a frame the replay would have needed. Intersecting with ≥2
+  collaborators gives **690 in-scope frames**.
+
+  **Only ONE new subset per in-scope frame.** At N=2 the non-empty delivered subsets are
+  {nearest}, {second}, {both}; {nearest} is already the cached N=1 arm and {both} is already the
+  cached N=2 arm, so only **{second-nearest alone}** is new. 690 frames × 2 branches =
+  **1380 forwards ≈ 0.23–0.27 GPU-hours** at the realised validate rate — against the 8070-subset,
+  2.7-hour figure the original plan carried, an 11.7× reduction with no approximation.
+
+  **Delivery expression under B (N=2, independent links, per-link frame BLER b):**
+  `eff_F^B = (1−b)²·c_both + b(1−b)·(c_nearest + c_second) + b²·ego`, against
+  `eff_F^A = (1−b)²·c_both + (1−(1−b)²)·ego`. B ≥ A whenever a partial fusion beats ego-only, which
+  is the expected direction; the two coincide exactly where the scope rule says they must.
+
+  **Labelling and outputs:** rows join the existing `results/sensitivity/collaborator_scale.csv`
+  under `semantics=B`, labelled **"bracketing variant, validate only, N=2, not deployed"**.
+  Descriptive + paired CI against the A row at the same (split, B_max, N); **no decision**. Deployed
+  models, δ, τ\*, `FROZEN_MANIFEST.json`, the mainline replay and `main.tex` remain untouched.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
