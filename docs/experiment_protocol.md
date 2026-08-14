@@ -1203,6 +1203,60 @@ written into the paper's conclusions; the paper reports only the frozen selector
     "N files indexed, 0 unattributed" line is a statement about *tracked* files only. Regenerating
     it before `git add` silently under-reports; the three new P4-B manifests had to be staged first.
 
+- **P4-B-d (2026-08-14, PRE-REGISTERED before the probe was generalised and before any number was
+  computed) — fix `B_F^SECOND` on the mainline's own declared convention; measure both backbones
+  under both accounting conventions; re-derive `N_CW` and the feasibility mask from the new payload.
+  The INT8/FP16 bit-depth option of P4-B item (2) is WITHDRAWN.**
+  Ruling taken (Peiyi, 2026-08-14): `B_F^SECOND` follows `main.tex` §"Message Construction and
+  Payload Accounting" — a **declared bits-per-element budget applied to the pre-compression
+  cross-link BEV tensor** — not a bit-depth on the transmitted bottleneck. The P4-B-c dummy forward
+  stands as measurement; only its *interpretation* as an INT8/FP16 wire format is withdrawn.
+  - **(1) `B_F^SECOND`, whole chain in the payload audit, no hand-written constant.**
+    `elements_SECOND` = Σ over branches of the **pre-compression** cross-link tensor, per CAV, read
+    from the probe manifest (branch 0 4,505,600 + branch 1 2,252,800 = 6,758,400). Bits-per-element
+    is **derived from the mainline pair**, `B_C / elements_mainline_declared`, not typed in; the
+    paper prints it rounded as ≈0.92. `K` (LDPC info bits/codeword), the code rate and the
+    bits/symbol come from the existing sources, not from new literals. Chain:
+    elements → info Mbit → ÷ rate-1/2 → ÷4 (16-QAM) → Msym. Added as a `payload_audit` extension in
+    `tests/test_payload.py` that recomputes and bit-compares every link.
+    - **Pre-registered expectation E1.** Peiyi's ruling quotes ≈6.22 Mbit → ≈3.11 Msym, which is the
+      rounded 0.92 bit/element. The **derived** ratio is `1.98e6 / 2,162,688 = 0.91553`, which gives
+      ≈6.19 Mbit → ≈3.09 Msym. Both are reported; the derived one is primary because the constant
+      may not be typed in. A ~0.5 % gap between them is expected and is *itself* a datum for the
+      paper's "conclusions are insensitive to this constant" claim. If the gap is larger than 1 %,
+      stop — it means the mainline anchor is not what the audit thinks it is.
+  - **(2) Same hook, both backbones, both conventions.** The P4-B-c probe is generalised to any
+    OpenCOOD model with an `AttBEVBackbone`, and run on the deployed mainline
+    `pointpillar_attentive_fusion_compression` as well. Per branch it records the **pre-compression**
+    block output and the **transmitted** tensor (the AutoEncoder *encoder* output where a branch is
+    compressed, the block output itself where it is not). Output: a 2 backbones × 2 conventions
+    table, so "the conclusions are insensitive to the source-budget constant" stops being an
+    assertion and becomes a measurement.
+    - **Pre-registered expectation E2, stated before the run.** `AttBEVBackbone` compresses branch
+      `idx` only while `compression - idx > 0`. The mainline has **three** branches
+      (`layer_nums 3/5/8`, `num_filters 64/128/256`) with `compression: 2`, so its **third branch is
+      transmitted UNCOMPRESSED**, whereas SECOND has two branches and compresses both. The two
+      backbones are therefore *not* structurally comparable at the bottleneck, and I expect the
+      mainline's pre-compression sum to differ from the paper's declared 2,162,688
+      (`256×48×176`) — the declared figure describes one 256-channel tensor at y ∈ [-38.4, 38.4] m,
+      while the deployed checkpoint's config has y ∈ [-40, 40] m. **If the declared anchor and the
+      deployed tensor disagree, that disagreement is the finding and is reported, not reconciled.**
+  - **(3) Budgets, `N_CW`, frame BLER and mask re-derived from the new `B_F^SECOND`.**
+    `B_max^SECOND ∈ {10, 20, 30}% × B_F^SECOND`. `N_CW^SECOND = ceil(B_F^SECOND_bits / K)` with `K`
+    read from `projects/ca_tosg/communication/ldpc_qam.py`; **inheriting the mainline's 3,960 is
+    forbidden** and the audit asserts the two differ. Frame BLER is recomputed as
+    `1-(1-bler_cw)^N_CW^SECOND` from the **committed codeword-BLER column** of
+    `results/channel/bler_sionna.csv` — no new Sionna run — into a **new** file; the mainline table
+    is not touched. The feasibility mask (`BLER_INFEASIBLE = 0.999`) is re-evaluated and the onset
+    (lowest Es/N0 at which frame BLER first falls below it) reported per (modulation, channel).
+    - **Pre-registered expectation E3.** A larger `N_CW` can only move an onset **right** or leave
+      it unchanged. **If an onset leaves the evaluated [0, 20] dB window, it is reported as such —
+      no grid extension, no re-fit, no substitution.** Where the committed table reports a
+      codeword BLER as an upper bound (deep-tail points with 0 errors in `MAX_CW`), the derived
+      frame BLER is a bound too and is labelled as one rather than printed as a value.
+  - **(4) Stop.** The eff-cache / grid-expansion / frozen-walk batch stays unstarted. Nothing in
+    `main.tex`, no frozen artefact, no deployed model is touched by this entry.
+
 - **P5-4 (2026-08-14) — migration batch 3, part 1: the legacy-engine inventory. `main.tex` NOT
   edited, not one character; no result regenerated, no figure rebuilt, no ledger cell changed.**
   Batch 2 left `sec:difficulty` standing as "the" remaining legacy subsection. Before editing it,
