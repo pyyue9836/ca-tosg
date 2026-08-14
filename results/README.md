@@ -15,8 +15,8 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/channel/` | 8 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 52 |
-| | `results/manifests/` | 15 |
-| | `results/provenance/` | 27 |
+| | `results/manifests/` | 16 |
+| | `results/provenance/` | 28 |
 | | `results/sensitivity/` | 29 |
 | | `results/sensitivity/ablation/` | 8 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
@@ -143,6 +143,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `FEATURE_ABLATION_MANIFEST.json` | `python projects/ca_tosg/evaluation/feature_ablation.py` | FA-1 variant models -- "labeled variant, not deployed", kept apart from FROZEN_MANIFEST |
 | `FROZEN_MANIFEST.json` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `P4A_MANIFEST.json` | `python tools/run_baselines.py contextual_bandit --train` | internal learned-policy comparator, not deployed |
+| `P4B_CACHE_MANIFEST.json` | `python projects/ca_tosg/datasets/build_second_caches.py` | P4-B-e: SECOND E/F per-frame caches (3 splits); L branch NOT built -- checkpoint absent |
 | `P4B_CONVERSION_MANIFEST.json` | `python tools/convert_second_checkpoint.py` | P4-B-c spconv 1.x->2.x kernel-layout conversion of the zoo SECOND weights (lossless axis reorder; established by the verification below, not by the conversion itself) |
 | `P4B_DUMMY_FORWARD_compression.json` | `python tools/bev_tensor_probe.py` | P4-B-c step 4: transmitted BEV tensor shapes before/after the AutoEncoder bottleneck (superseded by the P4B_PROBE_* files, which cover both backbones and both conventions) |
 | `P4B_MANIFEST.json` | `(hand-recorded; the checkpoint is an EXTERNAL INPUT, fetched manually)` | P4-B SECOND intermediate-fusion checkpoint -- input only, no inference run |
@@ -165,7 +166,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `PROVENANCE_deploy.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_difficulty_frozen.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_fa.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
-| `PROVENANCE_figures.json` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_figures.json` | `python projects/ca_tosg/evaluation/figures/plot_frozen_figs.py` | condition-tagged list of every number the frozen figures draw |
 | `PROVENANCE_fixed_references.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_frozen_curves.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_grid.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
@@ -177,6 +178,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `PROVENANCE_p4a.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_p4c.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_policy.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_qualitative.json` | `python projects/ca_tosg/evaluation/figures/plot_qualitative_bev.py` | fig:qualitative frame recovery + panel numbers |
 | `PROVENANCE_r10c.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_rician.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_train.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
@@ -250,4 +252,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-172 files indexed, 0 unattributed.
+174 files indexed, 0 unattributed.

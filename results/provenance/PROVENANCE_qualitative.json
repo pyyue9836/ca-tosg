@@ -1,0 +1,23 @@
+{
+ "schema": "catosg-qualitative-provenance/1",
+ "generated_by": "python projects/ca_tosg/evaluation/figures/plot_qualitative_bev.py",
+ "frame": {
+  "split": "test",
+  "sample_id": 1436
+ },
+ "recovered_how": "unique match of the caption's printed F1 pair (0.67, 0.95) against the committed per-frame datasets",
+ "sources": [
+  "gs_rerun/late_test.npz",
+  "gs_rerun/comp_test.npz",
+  "data/dataset_test_v3.csv"
+ ],
+ "numbers_drawn": {
+  "qualitative_f1_L": 0.6667,
+  "qualitative_f1_F": 0.9524
+ },
+ "panel_titles": [
+  "Object-level message L",
+  "Feature-level message F"
+ ],
+ "note": "panel titles use the deployed action names; the retired C_16 label is gone. GT boxes shaded, predictions outlined."
+}

@@ -1679,6 +1679,54 @@ written into the paper's conclusions; the paper reports only the frozen selector
     longer collide — `0.9244` at 20 dB and `0.9243` at 10 dB must stop being reported as a conflict.
     The one-sided / never-stated lists move to `docs/` marked **POST-EXPERIMENT**.
 
+- **P4-B-e RESULT (2026-08-14) — the SECOND E and F caches are built for all three splits and no
+  fuse triggered. The L branch is blocked and the arm stops there, as pre-registered.**
+  - **Caches built** (`gs_rerun_second/`, a new directory; the PointPillar caches untouched):
+
+    | split | frames | `compressed_f1` (F) | `ego_f1` (E) | `ego_num_objects` |
+    |---|---|---|---|---|
+    | validate | 1,980 | **0.89673** | 0.75559 | 26.46 |
+    | test | 2,170 | **0.90377** | 0.83793 | 15.93 |
+    | Culver-City | 550 | **0.93935** | 0.83726 | 35.49 |
+
+    9,400 forward passes. Scored with the mainline scorer, the mainline canonical union GT and the
+    same IoU-0.5 unit-score convention; `ego` is the identical model on the identical frame with the
+    collaborators removed via the P4-C subsetting hook, not a different network.
+    **Pre-registered fuse E-P4Be: none triggered** — every `compressed_f1` is inside [0.5, 1.0] and
+    `compressed_f1 > ego_f1` on all three splits.
+  - **Payload: equal-budget controlled, and the audit now enforces it.** `B_F^SECOND ≡ 0.99 Msym`
+    with the mainline `N_cw = 3,960` and the committed BLER table. `tests/test_payload.py` gained
+    links (5i)–(5k): the operative SECOND payload must equal the mainline `B_F`, its `N_cw` must
+    equal the mainline count, and the two measured sizes (6,758,400 pre-compression / 352,000
+    bottleneck) are asserted to be recorded as measurements only. **33/33 links match.** The
+    manifest states in terms that this claims no compressibility and declares no codec.
+  - **STOPPED HERE, as pre-registered.** No grid expansion, no LOSO, no budget walk, no replay, no
+    table — all four consume `eff_L`, and the SECOND late-fusion checkpoint is absent (zoo Box
+    direct link re-probed today: **HTTP 403**). The mainline PointPillar `L` branch was **not**
+    substituted in. `P4B_CACHE_MANIFEST.json` records the deployed `FROZEN_MANIFEST.json` sha256 as
+    evidence the freeze was untouched. **What unblocks the rest: one file** —
+    `second_late_fusion` from the zoo's *"Naive Late | 1.2.1 | SECOND | Late"* row (Box
+    `1621113752957`), fetched by hand as the intermediate checkpoint was.
+  - **(B) Batch-6 leftovers, closed.**
+    - `fig:overview`: `cairosvg` 2.9.0 installed; new `export_overview_svg.py` re-exports the
+      corrected SVG to PDF and is wired into `tools/generate_figures.py` as the `overview` target,
+      so the SVG and the PDF cannot drift again. The committed PDF now carries `S = {E, L, F}` and
+      the C₂₅₆-not-deployed label.
+    - `fig:qualitative`: **the frame was recovered, so the figure is reproducible after all.** The
+      caption prints frame F1 `0.67` / `0.95`, and exactly one frame in the three committed
+      per-frame datasets matches both at 2 dp — **test, `sample_id` 1436** (`late_f1` 0.666667,
+      `compressed_f1` 0.952381). New `plot_qualitative_bev.py` draws both panels from the committed
+      caches with `F` panel titles, re-derives the frame at run time and refuses to draw if the
+      match ever stops being unique. 20 `L` boxes vs 10 GT — the false positives the caption
+      describes — against 11 `F` boxes.
+    - **Checker is condition-aware.** Every drawn number now carries `(split, budget, channel,
+      snr_db)`, and a value counts as quoted only inside a sentence whose stated conditions do not
+      contradict it. **`0.9244` at 20 dB and `0.9243` at 10 dB are no longer reported as a
+      conflict**; `0.9244` is now correctly listed as *drawn but never stated*, which is true — the
+      text quotes the knee, not the endpoint. Current state: 8 quoted on both sides, 16 one-sided,
+      8 drawn but never stated, 5 same-value-different-condition — all written to
+      `docs/figure_text_consistency.md` marked **POST-EXPERIMENT**, with no prose edited.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

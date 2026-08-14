@@ -13,3 +13,4 @@ tensorboardX
 shapely==2.0.0
 einops
 timm
+cairosvg>=2.7          # SVG->PDF export for figs/ca_tosg_overview.svg (P4-B-e)

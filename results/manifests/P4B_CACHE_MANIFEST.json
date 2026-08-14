@@ -1,0 +1,52 @@
+{
+ "schema": "catosg-p4b-cache-manifest/1",
+ "protocol": "CA-TOSG P4-B-e (docs/experiment_protocol.md)",
+ "generated_by": "python projects/ca_tosg/datasets/build_second_caches.py",
+ "generated": "2026-08-14T18:07:32.348690+00:00",
+ "checkpoint": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/second_attentive_fusion_compression",
+ "checkpoint_sha256": "869c88dfdb2feb224aec4a68250acaaa3ecdfaa7fe1b05167713e9668408b307",
+ "checkpoint_status": "converted + verified against the model zoo AP (P4-B-c)",
+ "payload_convention": {
+  "B_F_SECOND_msym": 0.99,
+  "N_cw": 3960,
+  "bler_table": "results/channel/bler_sionna.csv (mainline, unchanged)",
+  "note": "EQUAL-BUDGET CONTROLLED comparison: the SECOND F message is charged the mainline per-frame channel budget so the two backbones are compared at the same channel cost. This does NOT claim the SECOND feature tensor compresses to that size, and it declares NO codec. Measured sizes (P4-B-d, recorded only, not the operative payload): pre-compression 6,758,400 elements/CAV, bottleneck 352,000 elements/CAV."
+ },
+ "branches_built": [
+  "E (ego-only)",
+  "F (intermediate/compressed)"
+ ],
+ "branch_L": "NOT BUILT -- the SECOND late-fusion checkpoint is absent and the zoo Box direct link returns HTTP 403. eff_L is therefore unavailable and no grid expansion, LOSO, budget walk or replay was run. The mainline PointPillar L branch was deliberately NOT substituted.",
+ "frozen_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
+ "frozen_manifest_note": "recorded as evidence that the deployed freeze was not touched",
+ "splits": {
+  "validate": {
+   "frames": 1980,
+   "gt_boxes_total": 55190,
+   "compressed_f1_mean": 0.89673,
+   "ego_f1_mean": 0.75559,
+   "ego_num_objects_mean": 26.459,
+   "comp_npz_sha256": "0bce7c872f4ca45b611255db1b881414f254a97de6b48026b7ea81b2026cc2d9",
+   "ego_npz_sha256": "ffc4c4ca7fca91c50532ea8254479bb7350310451ea00d3f0344f516beb5b4a9"
+  },
+  "test": {
+   "frames": 2170,
+   "gt_boxes_total": 32604,
+   "compressed_f1_mean": 0.90377,
+   "ego_f1_mean": 0.83793,
+   "ego_num_objects_mean": 15.929,
+   "comp_npz_sha256": "428f7810877c69a1f10447b56b5acb8aa23fc747bc15703c00d4a961c102dac7",
+   "ego_npz_sha256": "13fd74514e80081ee23bbced43e2995b81d53d5ee767b30441ac87179f94fb8b"
+  },
+  "culver": {
+   "frames": 550,
+   "gt_boxes_total": 23452,
+   "compressed_f1_mean": 0.93935,
+   "ego_f1_mean": 0.83726,
+   "ego_num_objects_mean": 35.493,
+   "comp_npz_sha256": "8b2ac17b85b0ce99479fa9f97f9be3fedaeaec5dcf0689bd9743bb6155649847",
+   "ego_npz_sha256": "d8786b0c2996bae80c7dcb04be266ac53d0ea774016a145bda1ad26b3786c169"
+  }
+ },
+ "fuse_conditions_E_P4Be": "none triggered"
+}

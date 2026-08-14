@@ -155,7 +155,7 @@ def deployed_averages(pay):
         'main.tex abstract vs replay_summary.csv', tol=0.05)
 
 
-def second_backbone_chain():
+def second_backbone_chain(pay):
     """(5) P4-B-d: the whole B_F^SECOND chain, re-derived here and bit-compared to the committed CSV.
 
     Nothing in this section is typed in. The bits-per-element constant is DERIVED from the mainline
@@ -213,6 +213,19 @@ def second_backbone_chain():
         'payload_conventions.csv', tol=0)
     rows.append((f'(5f) N_cw^SECOND ({n_cw}) is NOT inherited from the mainline ({n_cw_mainline})',
                  n_cw, f'!= {n_cw_mainline}', 'P4-B-d item 3', n_cw != n_cw_mainline))
+    # P4-B-e: the OPERATIVE SECOND payload is the equal-budget controlled one (B_F = mainline
+    # 0.99 Msym, mainline N_cw). The measured sizes below are recorded as measurements only.
+    cache = os.path.join(P1, 'results/manifests/P4B_CACHE_MANIFEST.json')
+    if os.path.exists(cache):
+        cm = json.loads(open(cache).read())
+        pc = cm['payload_convention']
+        chk('(5i) P4-B-e operative B_F^SECOND == the mainline B_F (equal-budget controlled)',
+            pc['B_F_SECOND_msym'], pay['C16'], 'P4B_CACHE_MANIFEST.json', tol=1e-9)
+        chk('(5j) P4-B-e operative N_cw == the mainline N_cw (BLER table reused)',
+            pc['N_cw'], n_cw_mainline, 'P4B_CACHE_MANIFEST.json', tol=0)
+        rows.append(('(5k) measured SECOND sizes recorded, NOT used as the payload',
+                     f"{elems_second:,} pre-comp / 352,000 bottleneck", 'recorded only',
+                     'P4-B-d probe; P4-B-e convention', 'EQUAL-BUDGET' in pc['note'].upper()))
     for frac in (0.10, 0.20, 0.30):
         chk(f'(5g) B_max^SECOND at {int(frac * 100)}% = {frac} x B_F^SECOND Msym', frac * msym,
             float(row[f'B_max_{int(frac * 100)}pct_msym']), 'payload_conventions.csv', tol=1e-9)
@@ -235,7 +248,7 @@ def main():
     print('=== 3) deployed averages (results/main/threshold_vs_rf.csv) ===')
     deployed_averages(pay)
     print('=== 5) P4-B-d: B_F^SECOND chain (declared bits-per-element convention) ===')
-    second_backbone_chain()
+    second_backbone_chain(pay)
 
     # ---- report ----
     w = max(len(r[0]) for r in rows)

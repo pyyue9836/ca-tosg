@@ -39,11 +39,15 @@ PROVDIR = os.path.join(ROOT, 'results/provenance')
 MAIN_BUDGET = 0.20
 MAIN_SPLIT = 'validate'
 KNEE_DB = 10.0
-drawn: dict[str, float] = {}          # every number this module puts on paper
+# every number this module puts on paper, each TAGGED with the condition it was drawn at.
+# Untagged numbers were the source of a false conflict report: 0.9244 (20 dB) and 0.9243 (10 dB)
+# are the same curve at different SNR, not a disagreement.
+drawn: dict[str, dict] = {}
 
 
-def note(key, value):
-    drawn[key] = round(float(value), 4)
+def note(key, value, split=None, budget=None, channel=None, snr_db=None):
+    drawn[key] = {'value': round(float(value), 4), 'split': split, 'budget': budget,
+                  'channel': channel, 'snr_db': (None if snr_db is None else float(snr_db))}
     return value
 
 
@@ -80,13 +84,19 @@ def fig_f1_vs_snr(cv):
         fig.savefig(os.path.join(FIGDIR, f'fig_ap50_{ch}.pdf'))
         plt.close(fig)
         c = d[d.policy == 'catosg'].sort_values('snr_db')
-        note(f'f1_catosg_{ch}_low', c[c.snr_db < KNEE_DB].f1.iloc[0])
-        note(f'f1_catosg_{ch}_high', c[c.snr_db >= KNEE_DB].f1.iloc[-1])
+        lo = c[c.snr_db < KNEE_DB].iloc[0]
+        hi = c[c.snr_db >= KNEE_DB].iloc[-1]
+        knee = c[c.snr_db == KNEE_DB].iloc[0]
+        note(f'f1_catosg_{ch}_low', lo.f1, MAIN_SPLIT, MAIN_BUDGET, ch, lo.snr_db)
+        note(f'f1_catosg_{ch}_at_knee', knee.f1, MAIN_SPLIT, MAIN_BUDGET, ch, KNEE_DB)
+        note(f'f1_catosg_{ch}_high', hi.f1, MAIN_SPLIT, MAIN_BUDGET, ch, hi.snr_db)
     d = cv[(cv.channel == 'awgn') & (cv.split == MAIN_SPLIT) & (cv.budget == MAIN_BUDGET)]
-    note('f1_fixedL_validate', d[d.policy == 'fixed_L'].f1.iloc[0])
-    note('f1_ceiling_validate', d[d.policy == 'feature_ceiling'].f1.iloc[0])
+    note('f1_fixedL_validate', d[d.policy == 'fixed_L'].f1.iloc[0], MAIN_SPLIT, MAIN_BUDGET, 'awgn')
+    note('f1_ceiling_validate', d[d.policy == 'feature_ceiling'].f1.iloc[0], MAIN_SPLIT,
+         MAIN_BUDGET, 'awgn')
     note('f1_oracle_masked_validate_high',
-         d[(d.policy == 'oracle_masked') & (d.snr_db >= KNEE_DB)].f1.iloc[-1])
+         d[(d.policy == 'oracle_masked') & (d.snr_db >= KNEE_DB)].f1.iloc[-1],
+         MAIN_SPLIT, MAIN_BUDGET, 'awgn')
 
 
 def fig_payload_vs_snr(cv):
@@ -107,8 +117,10 @@ def fig_payload_vs_snr(cv):
     fig.savefig(os.path.join(FIGDIR, 'fig_payload_awgn.pdf'))
     plt.close(fig)
     c = d[d.policy == 'catosg'].sort_values('snr_db')
-    note('payload_catosg_awgn_low', c[c.snr_db < KNEE_DB].payload_msym.iloc[0])
-    note('payload_catosg_awgn_high', c[c.snr_db >= KNEE_DB].payload_msym.iloc[0])
+    lo = c[c.snr_db < KNEE_DB].iloc[0]
+    knee = c[c.snr_db == KNEE_DB].iloc[0]
+    note('payload_catosg_awgn_low', lo.payload_msym, MAIN_SPLIT, MAIN_BUDGET, 'awgn', lo.snr_db)
+    note('payload_catosg_awgn_at_knee', knee.payload_msym, MAIN_SPLIT, MAIN_BUDGET, 'awgn', KNEE_DB)
 
 
 def fig_decisions(cv):
@@ -154,12 +166,14 @@ def fig_stacked(cv):
     for sp in ('test', 'culver'):
         r = cv[(cv.split == sp) & (cv.budget == MAIN_BUDGET) & (cv.channel == 'rayleigh') &
                (cv.snr_db == KNEE_DB)]
-        note(f'rho_E_oracle_rayleigh_{sp}', r[r.policy == 'oracle_masked'].rho_E.iloc[0])
-        note(f'rho_E_catosg_rayleigh_{sp}', r[r.policy == 'catosg'].rho_E.iloc[0])
+        note(f'rho_E_oracle_rayleigh_{sp}', r[r.policy == 'oracle_masked'].rho_E.iloc[0],
+             sp, MAIN_BUDGET, 'rayleigh', KNEE_DB)
+        note(f'rho_E_catosg_rayleigh_{sp}', r[r.policy == 'catosg'].rho_E.iloc[0],
+             sp, MAIN_BUDGET, 'rayleigh', KNEE_DB)
     for sp in ('validate', 'test', 'culver'):
         g = cv[(cv.split == sp) & (cv.budget == MAIN_BUDGET) & (cv.channel == 'awgn') &
                (cv.policy == 'catosg') & (cv.snr_db == KNEE_DB)]
-        note(f'rho_F_at_knee_{sp}', g.rho_F.iloc[0])
+        note(f'rho_F_at_knee_{sp}', g.rho_F.iloc[0], sp, MAIN_BUDGET, 'awgn', KNEE_DB)
 
 
 def fig_budgets_appendix(cv):
@@ -194,12 +208,12 @@ def fig_pareto():
                            ('Fixed-F', r'Fixed $F$', 'D', 'tab:red')):
         ax.scatter(fx.loc[pol].payload_msym, fx.loc[pol].F1, marker=m, c=c, s=42, label=lab,
                    zorder=3)
-        note(f'pareto_{pol}_payload', fx.loc[pol].payload_msym)
-        note(f'pareto_{pol}_f1', fx.loc[pol].F1)
+        note(f'pareto_{pol}_payload', fx.loc[pol].payload_msym, 'test')
+        note(f'pareto_{pol}_f1', fx.loc[pol].F1, 'test')
     ax.scatter(fx.loc['oracle'].payload_msym, fx.loc['oracle'].F1, marker='*', s=130,
                c='tab:purple', label='Masked oracle', zorder=4)
-    note('pareto_oracle_payload', fx.loc['oracle'].payload_msym)
-    note('pareto_oracle_f1', fx.loc['oracle'].F1)
+    note('pareto_oracle_payload', fx.loc['oracle'].payload_msym, 'test')
+    note('pareto_oracle_f1', fx.loc['oracle'].F1, 'test')
     ax.scatter(rep.B_RF, rep.F1_RF, marker='o', s=48, c='tab:blue', label='CA-TOSG (frozen)',
                zorder=5)
     ax.scatter(rep.B_tau, rep.F1_tau, marker='^', s=44, facecolors='none',
@@ -207,8 +221,8 @@ def fig_pareto():
     for _, r in rep.iterrows():
         ax.annotate(f'{r.budget:.2f}', (r.B_RF, r.F1_RF), xytext=(3, 4),
                     textcoords='offset points', fontsize=6, color='tab:blue')
-        note(f'pareto_catosg_B{int(r.budget*100):03d}_payload', r.B_RF)
-        note(f'pareto_catosg_B{int(r.budget*100):03d}_f1', r.F1_RF)
+        note(f'pareto_catosg_B{int(r.budget*100):03d}_payload', r.B_RF, 'test', r.budget)
+        note(f'pareto_catosg_B{int(r.budget*100):03d}_f1', r.F1_RF, 'test', r.budget)
     ax.set_xlim(0, 1.08)                      # Fixed F at 0.99 MUST be inside the axes
     _style(ax, 'Channel use (Msym/frame)', 'Mean realised F1',
            'OPV2V test, frozen replay (200 realisations)')
@@ -228,9 +242,8 @@ def main():
     fig_stacked(cv)
     fig_budgets_appendix(cv)
     fig_pareto()
-    drawn['knee_db'] = KNEE_DB
-    drawn['_source'] = 0                                    # placeholder, kept numeric-free below
-    prov = {k: v for k, v in drawn.items() if not k.startswith('_')}
+    note('knee_db', KNEE_DB, None, MAIN_BUDGET, 'awgn', KNEE_DB)
+    prov = dict(drawn)
     with open(os.path.join(PROVDIR, 'PROVENANCE_figures.json'), 'w') as f:
         json.dump({'schema': 'catosg-figure-provenance/1',
                    'generated_by': 'python projects/ca_tosg/evaluation/figures/plot_frozen_figs.py',
@@ -241,7 +254,9 @@ def main():
                    'numbers_drawn': prov}, f, indent=1)
         f.write('\n')
     for k, v in sorted(prov.items()):
-        print(f'  {k:38s} {v}')
+        tags = ' '.join(f'{t}={v[t]}' for t in ('split', 'budget', 'channel', 'snr_db')
+                        if v[t] is not None)
+        print(f'  {k:38s} {v["value"]:>9}   [{tags}]')
     print(f'\nwrote {len(prov)} drawn numbers -> results/provenance/PROVENANCE_figures.json')
     return 0
 

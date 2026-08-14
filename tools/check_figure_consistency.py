@@ -69,6 +69,58 @@ def appears(value, text):
     return None
 
 
+SENT_SPLIT = re.compile(r'(?<=[.;:])\s+')
+
+
+def sentences_with(text, lit):
+    """Every sentence-ish window of `text` in which the literal appears."""
+    out = []
+    for m in re.finditer(r'(?<![\d.])' + re.escape(lit) + r'(?![\d])', text):
+        a = text.rfind('.', max(0, m.start() - 700), m.start())
+        b = text.find('.', m.end())
+        out.append(text[(a + 1 if a >= 0 else max(0, m.start() - 700)):
+                        (b if b >= 0 else min(len(text), m.end() + 700))])
+    return out
+
+
+def conditions_of(window):
+    """Condition markers a sentence pins down. Absent == unconstrained, not 'wrong'."""
+    c = {}
+    if re.search(r'\bvalidate\b', window, re.I):
+        c['split'] = 'validate'
+    elif re.search(r'Culver', window, re.I):
+        c['split'] = 'culver'
+    elif re.search(r'\btest\b', window, re.I):
+        c['split'] = 'test'
+    m = re.search(r'B_\{?\\max\}?\s*\{?=?\}?\s*([0-9.]+)', window)
+    if m:
+        c['budget'] = float(m.group(1))
+    if re.search(r'Rayleigh', window, re.I):
+        c['channel'] = 'rayleigh'
+    elif re.search(r'AWGN', window, re.I):
+        c['channel'] = 'awgn'
+    snrs = {float(x) for x in re.findall(r'\$?([0-9]{1,2})\$?~?\s*dB', window)}
+    if len(snrs) == 1:
+        c['snr_db'] = snrs.pop()
+    return c
+
+
+def compatible(tags, window):
+    """True unless the sentence pins a condition to something DIFFERENT from the drawn one."""
+    got = conditions_of(window)
+    for k, v in got.items():
+        t = tags.get(k)
+        if t is None:
+            continue
+        if k == 'snr_db':
+            # an SNR named in the sentence must be the one the number was drawn at
+            if abs(float(t) - float(v)) > 1e-9:
+                return False
+        elif str(t) != str(v):
+            return False
+    return True
+
+
 def main() -> int:
     if not os.path.exists(PROV):
         print(f'{PROV} absent -- run tools/generate_figures.py first')
@@ -77,12 +129,27 @@ def main() -> int:
     tex = open(MAIN, encoding='utf-8').read()
     caption, body = split_caption_body(tex)
 
-    rows, missing_both, one_sided = [], [], []
-    for key, val in sorted(prov['numbers_drawn'].items()):
+    rows, missing_both, one_sided, wrong_condition = [], [], [], []
+    for key, item in sorted(prov['numbers_drawn'].items()):
         if key in SKIP_KEYS:
             continue
-        c = appears(val, caption)
-        b = appears(val, body)
+        val = item['value'] if isinstance(item, dict) else item
+        tags = {k: item.get(k) for k in ('split', 'budget', 'channel', 'snr_db')} \
+            if isinstance(item, dict) else {}
+        c = b = None
+        for side, text in (('c', caption), ('b', body)):
+            lit = appears(val, text)
+            if lit is None:
+                continue
+            wins = sentences_with(text, lit)
+            ok = [w for w in wins if compatible(tags, w)]
+            if ok:
+                if side == 'c':
+                    c = lit
+                else:
+                    b = lit
+            elif wins:
+                wrong_condition.append((key, val, tags, 'caption' if side == 'c' else 'body'))
         rows.append((key, val, c, b))
         if c is None and b is None:
             missing_both.append((key, val))
@@ -98,6 +165,7 @@ def main() -> int:
     print('=' * (w + 46))
 
     print(f'\ndrawn and quoted on BOTH sides   : {sum(1 for _k,_v,c,b in rows if c and b)}')
+    print(f'value present but at a DIFFERENT condition: {len(wrong_condition)}')
     print(f'drawn and quoted on ONE side     : {len(one_sided)}')
     print(f'drawn but quoted NOWHERE         : {len(missing_both)}')
     if one_sided:
@@ -109,7 +177,47 @@ def main() -> int:
         print('\nDRAWN BUT NEVER STATED (the figure shows it; no caption or sentence does).')
         for key, val in missing_both:
             print(f'  {key:38s} {val:>9}')
-    print('\nThis tool REPORTS. It does not decide which of figure / caption / body is right.')
+    if wrong_condition:
+        print('\nSAME VALUE, DIFFERENT CONDITION (the literal occurs, but only in a sentence that '
+              'pins a different split/budget/channel/SNR -- not counted as a match):')
+        for key, val, tags, side in wrong_condition:
+            t = ' '.join(f'{k}={v}' for k, v in tags.items() if v is not None)
+            print(f'  {key:38s} {val:>9}  drawn at [{t}]  ({side})')
+    print('\nMatching is CONDITION-AWARE: a number counts as quoted only in a sentence whose '
+          'stated split / budget / channel / SNR does not contradict the one it was drawn at, so '
+          '0.9244 at 20 dB and 0.9243 at 10 dB are no longer a conflict.')
+    print('This tool REPORTS. It does not decide which of figure / caption / body is right.')
+
+    out = os.path.join(ROOT, 'docs', 'figure_text_consistency.md')
+    with open(out, 'w', encoding='utf-8') as f:
+        f.write('# Figure / caption / body consistency — POST-EXPERIMENT list\n\n')
+        f.write('**POST-EXPERIMENT.** Generated by `python tools/check_figure_consistency.py` from '
+                '`results/provenance/PROVENANCE_figures.json`. Nothing here has been acted on: the '
+                'prose was deliberately not edited in the batch that produced this list. Each row '
+                'is a decision for Peiyi, not a defect the tool resolved.\n\n')
+        f.write('Matching is condition-aware: a drawn number counts as quoted only inside a '
+                'sentence whose stated split / budget / channel / SNR does not contradict the '
+                'condition it was drawn at.\n\n')
+        f.write(f'| state | count |\n|---|---|\n'
+                f'| quoted on both sides | {sum(1 for _k,_v,c,b in rows if c and b)} |\n'
+                f'| quoted on one side only | {len(one_sided)} |\n'
+                f'| drawn but never stated | {len(missing_both)} |\n'
+                f'| same value, different condition | {len(wrong_condition)} |\n\n')
+        f.write('## Quoted on one side only\n\n| drawn number | value | where |\n|---|---|---|\n')
+        for key, val, where in one_sided:
+            f.write(f'| `{key}` | {val} | {where} |\n')
+        f.write('\n## Drawn but never stated\n\n| drawn number | value | condition |\n|---|---|---|\n')
+        for key, val in missing_both:
+            it = prov['numbers_drawn'][key]
+            t = ' '.join(f'{k}={it[k]}' for k in ('split','budget','channel','snr_db')
+                         if isinstance(it, dict) and it.get(k) is not None)
+            f.write(f'| `{key}` | {val} | {t} |\n')
+        f.write('\n## Same value, different condition\n\n'
+                '| drawn number | value | drawn at | side |\n|---|---|---|---|\n')
+        for key, val, tags, side in wrong_condition:
+            t = ' '.join(f'{k}={v}' for k, v in tags.items() if v is not None)
+            f.write(f'| `{key}` | {val} | {t} | {side} |\n')
+    print(f'\nwrote {os.path.relpath(out, ROOT)} (POST-EXPERIMENT, not acted on)')
     return 0
 
 

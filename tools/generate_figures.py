@@ -22,6 +22,7 @@ FIGDIR = os.path.join(ROOT, 'projects/ca_tosg/evaluation/figures')
 # (plot_ap_snr.py, plot_pareto_payload.py, snr_decision_plot.py, plot_stacked_area.py)
 # drew from the v3 products and are no longer invoked.
 GENERATORS = [
+    ('overview',  'export_overview_svg.py',    'ca_tosg_method_overview.pdf (from figs/*.svg)'),
     ('bler',      'plot_bler_frame.py',        'fig_channel_bler_frame.pdf'),
     ('frozen',    'plot_frozen_figs.py',       'fig_ap50_*, fig_payload_awgn, '
                                                'fig_decisions_*, fig_stacked_area, '
@@ -40,8 +41,7 @@ if __name__ == '__main__':
         sys.argv = [os.path.join(FIGDIR, script)]
         runpy.run_path(os.path.join(FIGDIR, script), run_name='__main__')
     print('\nNOT regenerated here, and each is a KNOWN GAP rather than an omission:')
-    print('  fig:overview     figs/ca_tosg_overview.svg -> PDF by hand; no SVG->PDF tool on this')
-    print('                   host, so its action-set label is edited in the SVG only.')
-    print('  fig:qualitative  a BEV render with no generator in the repository at all.')
+    print('  fig:qualitative  a BEV render; see projects/ca_tosg/evaluation/figures/'
+          'plot_qualitative_bev.py')
     print('  fig:difficulty   projects/ca_tosg/evaluation/difficulty_frozen.py (frozen, P5-5).')
     print('  fig:two_regime   the JSCC prior-protocol arm (Appendix).')
