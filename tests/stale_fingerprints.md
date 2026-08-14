@@ -89,3 +89,5 @@ RX \{L, ?C_\{16\}, ?C_\{256\}\}
 RX s_t ?= ?C_\{256\}
 RX three-way
 RX 3-way
+RX Pareto-dominat
+RX Pareto-optimal

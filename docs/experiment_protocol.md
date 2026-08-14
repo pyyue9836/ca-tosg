@@ -1058,6 +1058,43 @@ written into the paper's conclusions; the paper reports only the frozen selector
     would select the wrong model.
   - **Dummy forward: NOT RUN**, gated on the load test passing.
 
+- **P5-3 (2026-08-14) — migration batch 2 executed in `main.tex`.** Frozen products, models, δ,
+  τ\*, manifests and result CSVs untouched; only `main.tex`, the regenerated `docs/claims.md` and
+  `tests/stale_fingerprints.md` changed.
+  - **P0, the Pareto-dominance family: every dominance expression is gone** (`Pareto-dominates`,
+    `Pareto-optimal`, and the caption's "at matched channel use its realised F1 is higher"), replaced
+    by a budget-indexed account: **ahead at B_max=0.10** (+0.00055, CI [+0.00046, +0.00065], reported
+    as a **secondary CI with no decision attached**), **behind at 0.20 and 0.30** (τ 0.90740 / 0.90937
+    vs 0.90463 / 0.90734) **at 2.3× and 1.7× the payload**; the only surviving claim is the R9 locked
+    one — non-inferior within 0.005 at a 56.3% payload reduction. `RX Pareto-dominat` and
+    `RX Pareto-optimal` are now **retired fingerprints**, so the phrasing cannot come back.
+  - **v2 leftovers in the same paragraph, both deleted rather than restated.** "+0.090 F1 on hard
+    frames" and "≈12% lower channel use at matched F1" **cannot be recomputed against the frozen
+    replay**: the difficulty stratification and the τ sweep are both products of the legacy
+    200-realisation engine (`policy_200seed.py`, `ablations/a2_difficulty.py`), not of the frozen
+    selectors, so a "matched-F1" recomputation would splice two engines. Deleted from the abstract,
+    the contribution list, the headline paragraph, the threshold section and the conclusion. The
+    "cues add no significant F1 over channel state" reading is replaced by the FA-1 policy-shape
+    result: channel-only collapses to always-L at B_max 0.10/0.20, and at 0.30 reaches a higher F1
+    than the full selector only by spending **1.54×** the channel use.
+    *(Left standing, out of this batch's scope: §sec:difficulty still reports +0.090 as its own
+    result with its own figure — that whole subsection is legacy-engine and needs its own round.)*
+  - **E is now a defined action.** `\mathcal{S} = \{E, L, F\}`, with a paragraph stating that $E$ is
+    a first-class action (B_E = 0, chosen *before* transmission when the ego is already sufficient or
+    the channel is hopeless) **and** the delivery-failure fallback (what remains *after* a lost F),
+    and that the two roles share a quantity but are decided at different times. A notation table
+    (`tab:notation`) fixes $F \equiv C_{16}$ and marks $C_{256}$ a physical-layer comparator, not a
+    deployed action.
+  - **C₁₆ residue:** 14 policy-context occurrences migrated to $F$; **24 remain on 20 lines**, all
+    modulation-context or the glossary itself, where the $C_q$ form is the correct symbol.
+  - **§VI-N unanchored sentence deleted.** The "ImportanceMapJSCC reference of $0.801/0.688$ (learned
+    importance-map identity ceiling)" is anchored to **nothing** in `results/`: the committed JSCC
+    tables top out at AP@0.5 $0.7328$ / AP@0.7 $0.6181$ on validate, and no identity-channel row
+    exists. Recomputing it would need new inference, so the clause is removed rather than re-derived
+    from memory.
+  - **Ledger regenerated:** 104 → **107** rows, **0 STALE**, evidence 18 → **17 filled**, 86 → **90
+    pending**, 0 dangling.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
