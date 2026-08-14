@@ -9,23 +9,17 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | PENDING (no distinctive number to locate) | 37 |
 | ANALYTIC | 21 |
 | PENDING (unlocated) | 18 |
-| FROZEN | 12 |
-| LEGACY-ENGINE | 5 |
+| FROZEN | 16 |
+| LEGACY-ENGINE | 9 |
 | FROZEN [2/3] (located, ledger cell still blank) | 2 |
-| FROZEN [3/4] (located; weaker candidates disagree) | 2 |
 | ANALYTIC [2/4] (located, ledger cell still blank) | 1 |
 | FROZEN [4/9] (located, ledger cell still blank) | 1 |
 | FROZEN [6/7] (located, ledger cell still blank) | 1 |
-| FROZEN [8/8] (located, ledger cell still blank) | 1 |
 | LEGACY-ENGINE [1/1] (located; weaker candidates disagree) | 1 |
 | LEGACY-ENGINE [2/3] (located; weaker candidates disagree) | 1 |
-| LEGACY-ENGINE [3/3] (located, ledger cell still blank) | 1 |
-| LEGACY-ENGINE [5/5] (located, ledger cell still blank) | 1 |
-| LEGACY-ENGINE [6/6] (located, ledger cell still blank) | 1 |
 | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | 1 |
-| LEGACY-ENGINE [9/9] (located, ledger cell still blank) | 1 |
 
-Total: **108** claims across **34** (sub)sections.
+Total: **109** claims across **34** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -63,21 +57,21 @@ Total: **108** claims across **34** (sub)sections.
 
 | ID | claim (truncated) | generator | why LEGACY |
 |---|---|---|---|
-| `c57f021` | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | value search: results/sensitivity/difficulty_frozen.csv [9/9] <- python projects/ca_tosg/evaluation/difficulty_frozen.py = LEGACY-ENGINE **<- most specific** |
-| `c6487af` | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 … | `projects/ca_tosg/evaluation/difficulty_frozen.py` | value search: results/sensitivity/difficulty_frozen.csv [6/6] <- python projects/ca_tosg/evaluation/difficulty_frozen.py = LEGACY-ENGINE **<- most specific** |
+| `c57f021` | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
+| `c6487af` | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 … | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
 | `ce6183a` | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-pena… | `baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` | value search: results/baselines/importance_map_jscc/two_regime_edge_clean.csv [1/1] <- python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py = LEGACY-ENGINE  |
 
 **Results and Analysis → Collaboration Is Not Always Beneficial [sec:harm]** — 1/5 claims
 
 | ID | claim (truncated) | generator | why LEGACY |
 |---|---|---|---|
-| `c4786c8` | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selecto… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | value search: results/sensitivity/difficulty_frozen.csv [5/5] <- python projects/ca_tosg/evaluation/difficulty_frozen.py = LEGACY-ENGINE **<- most specific** |
+| `c4786c8` | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selecto… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
 
 **Conclusion** — 1/6 claims
 
 | ID | claim (truncated) | generator | why LEGACY |
 |---|---|---|---|
-| `cb91cd2` | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | value search: results/sensitivity/difficulty_frozen.csv [3/3] <- python projects/ca_tosg/evaluation/difficulty_frozen.py = LEGACY-ENGINE **<- most specific** |
+| `cb91cd2` | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (… | `projects/ca_tosg/evaluation/difficulty_frozen.py` | difficulty_frozen.csv <- python projects/ca_tosg/evaluation/difficulty_frozen.py: closure (2 modules) reads v3_eval |
 
 **When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware]** — 2/6 claims
 
@@ -230,7 +224,7 @@ Total: **108** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cf76623` | PENDING (no distinctive number to locate) | 0.024, 14 | We therefore report the true end-to-end detection AP in the two regimes that define the policy: the fallback regime (fading or low… |
+| `c0142a9` | PENDING (no distinctive number to locate) | 0.024, 10 | We therefore report the true end-to-end detection AP in the two regimes that define the policy: the fallback regime (fading or low… |
 | `cac1fb0` | FROZEN | 0.5, 0.10, 0.20, 0.30, 0.8937, 0.8959, 0.8971, 0.9181, 0.918 | Three observations follow. (i) The realised true end-to-end AP@0.5 of the frozen selectors, reported descriptively for B_=0.10/0.2… |
 | `c5930a4` | FROZEN [4/9] (located, ledger cell still blank) | 0.9169, -0.8902, 0.0267, 0.9216, -0.9189, 0.0027, 0.8720, -0 | 0.9169-0.8902=0.0267 AP on validate, 0.9216-0.9189=0.0027 AP on the scene-disjoint test split and 0.8720-0.7828=0.0892 AP on the C… |
 | `c1a099a` | LEGACY-ENGINE [2/3] (located; weaker candidates disagree) | 0.0027, 16, 256, 21, 41, 0.158, 0.251, 25 | On test that headroom is 0.0027 AP, i.e.\ object-level detection is already at the ceiling and there is no room for a granularity … |
@@ -244,7 +238,7 @@ Total: **108** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c65a7cc` | PENDING (no distinctive number to locate) | 0.5, 16, 256 | Fig. [ref] reports AP@0.5 under AWGN and Rayleigh, comparing with the fixed object-level baseline, ImportanceMapJSCC [cite], LDPC … |
-| `c8060e2` | FROZEN [3/4] (located; weaker candidates disagree) | 0.890, 0.5, 8, 0.916, 12, 0.001, 0.917 | Under AWGN, sits on the Fixed L line (0.890 AP@0.5) for SNR ≤ 8 dB and rises to 0.916 AP@0.5 for SNR ≥ 12 dB, within 0.001 AP of t… |
+| `c8060e2` | FROZEN | 0.890, 0.5, 8, 0.916, 12, 0.001, 0.917 | Under AWGN, sits on the Fixed L line (0.890 AP@0.5) for SNR ≤ 8 dB and rises to 0.916 AP@0.5 for SNR ≥ 12 dB, within 0.001 AP of t… |
 | `c2f838d` | PENDING (unlocated) | 0.71, 0.5, 0.61, 16, 0.917, 12 | The ImportanceMapJSCC baseline saturates near 0.71 AP@0.5, well below Fixed L at every SNR; the LDPC + QAM baselines sit at the eg… |
 
 ### Results and Analysis → Payload versus SNR [sec:payload_snr]
@@ -280,8 +274,9 @@ Total: **108** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cf11128` | PENDING (no distinctive number to locate) | 1, 2, 0.3, 0.5, 0.7, 5 | To confirm that this analytical F1 proxy translates to actual end-to-end detection AP under a deployed pipeline, we run a true end… |
-| `ced8192` | FROZEN [3/4] (located; weaker candidates disagree) | 14, 0.916, 0.5, 0.857, 0.7, 0.001, 0.917 | First, the true end-to-end AP at AWGN 14 dB reaches 0.916 at IoU 0.5 and 0.857 at IoU 0.7, sitting within 0.001 AP of the perfect-… |
-| `cacc6ee` | FROZEN | 0.632, 0.990 | The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, w… |
+| `c42777d` | FROZEN | 8, 10, 0.286, 0.256, 0.064, 16, 0.4, 0, 1, 0.402 | First, the boundary of the feature-active regime is measured, not stipulated: reading the frozen selector's feature-request rate o… |
+| `ce48067` | FROZEN | 14, 0.9138, 0.5, 0.8532, 0.7 | Earlier versions of this section stipulated ≥ 14 dB; that threshold was not derived from any measurement and is withdrawn. At that… |
+| `c9667cf` | FROZEN | 0.300, 0.990, 70, 0.917 | The selector reaches this while paying 0.300 Msym/frame averaged over the feature-active regime instead of the 0.990 of always-on … |
 
 ### Results and Analysis → Generalisation to OPV2V Test and Culver-City Splits [sec:generalisation]
 
@@ -291,7 +286,7 @@ Total: **108** claims across **34** (sub)sections.
 | `c79fed4` | ANALYTIC | 1, 0.5, 0.919, 0.890, 0.783 | The absolute F1 values differ across splits because the object-level detection baseline itself differs---Fixed-L AP@0.5 is 0.919 o… |
 | `ce9d9f5` | PENDING (no distinctive number to locate) | 0.20, 11, 200 | Tables [ref] and [ref] report the true end-to-end AP on the test and Culver-City splits, evaluated with the frozen selector at B_=… |
 | `c3d4e93` | FROZEN | 0, 0.256, 0.064 | _F jumps from 0 to 0.256 on test and from 0 to 0.064 on Culver-City, and it is flat thereafter. |
-| `c163084` | FROZEN [8/8] (located, ledger cell still blank) | 0.5, 0.9189, 0.9168, 0.7, 0.8687, 0.8636, 0.7828, 0.7897, 0. | AP@0.5 moves 0.9189\! → \!0.9168 and AP@0.7 0.8687\! → \!0.8636 on test, while on Culver-City it moves 0.7828\! → \!0.7897 and 0.6… |
+| `c163084` | FROZEN | 0.5, 0.9189, 0.9168, 0.7, 0.8687, 0.8636, 0.7828, 0.7897, 0. | AP@0.5 moves 0.9189\! → \!0.9168 and AP@0.7 0.8687\! → \!0.8636 on test, while on Culver-City it moves 0.7828\! → \!0.7897 and 0.6… |
 
 ### Results and Analysis → Communication--Perception Pareto Frontier [sec:pareto]
 
@@ -304,8 +299,8 @@ Total: **108** claims across **34** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c57f021` | LEGACY-ENGINE [9/9] (located, ledger cell still blank) | 0.20, -0.0040, 95, -0.0064, -0.0018, +0.0018, -0.0005, +0.00 | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [-0.0064,-0.0018]) on… |
-| `c6487af` | LEGACY-ENGINE [6/6] (located, ledger cell still blank) | +0.0007, +0.0120, +0.0402, 0.0000, +0.0011, +0.0136 | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 / +0.0136). |
+| `c57f021` | LEGACY-ENGINE | 0.20, -0.0040, 95, -0.0064, -0.0018, +0.0018, -0.0005, +0.00 | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [-0.0064,-0.0018]) on… |
+| `c6487af` | LEGACY-ENGINE | +0.0007, +0.0120, +0.0402, 0.0000, +0.0011, +0.0136 | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 / +0.0136). |
 | `ce6183a` | LEGACY-ENGINE [1/1] (located; weaker candidates disagree) | -0.0040, 1, 0, 200 | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-penalised (>0) operating… |
 
 ### Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold]
@@ -324,7 +319,7 @@ Total: **108** claims across **34** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cea5465` | PENDING (no distinctive number to locate) | 0.999 | When the channel cannot carry a feature message, requesting one spends the collaborator's transmission budget for nothing and coll… |
-| `c4786c8` | LEGACY-ENGINE [5/5] (located, ledger cell still blank) | 1, 16, 0, 8.0, 0.20, 0.9826, 0.9866, -0.0040, 95, -0.0064, - | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output … |
+| `c4786c8` | LEGACY-ENGINE | 1, 16, 0, 8.0, 0.20, 0.9826, 0.9866, -0.0040, 95, -0.0064, - | When the channel can carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output … |
 | `c4453b5` | PENDING (no distinctive number to locate) | 0.9, 7.4, 0.2, 256, 1, 1.0, 5.8 | Two CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the object-level fused outpu… |
 | `c00d772` | ANALYTIC | 15.2, 27.8, 41.0 | Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean 15.2 ground-truth objects on test … |
 | `c6abce3` | PENDING (no distinctive number to locate) | 11, 2 | A remedy adds no signalling overhead: the `11' codeword of the 2-bit request is unused, so an explicit do-not-request (ego-only) a… |
@@ -353,7 +348,7 @@ Total: **108** claims across **34** (sub)sections.
 | `c612cba` | FROZEN [2/3] (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state jus… |
 | `cacf21e` | PENDING (unlocated) | 6.9, 18.9 | 6.9--18.9\% of the channel use of fixed feature-level transmission across the three budgets on test. |
 | `c02d47f` | PENDING (unlocated) | 1, 0.005, 56.3 | Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the… |
-| `cb91cd2` | LEGACY-ENGINE [3/3] (located, ledger cell still blank) | +0.0400, 1, 95, +0.0339, +0.0465 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (95\% CI [+0.0339,+0.… |
+| `cb91cd2` | LEGACY-ENGINE | +0.0400, 1, 95, +0.0339, +0.0465 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0400 F1 (95\% CI [+0.0339,+0.… |
 
 ### When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware]
 

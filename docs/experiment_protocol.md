@@ -1471,6 +1471,54 @@ written into the paper's conclusions; the paper reports only the frozen selector
     compiled**. The appendix move, the `\appendices` placement and the table rewrites are checked by
     the repository's three main.tex gates only.
 
+- **P5-6 (2026-08-14) — migration batch 5: the cross-section contradictions batch 4 left behind.
+  No frozen artefact touched.**
+  - **(1) `tab:true_e2e` (validate per-SNR) rebuilt on the frozen engine.** The E-8 reproduction
+    gate was re-run on the *current* code first — `end_to_end_ap_snr.py --verify` again reproduced
+    **27/27** committed rows of `true_e2e_ap.csv` exactly — before any validate number was produced.
+    Coverage is now all three splits × AWGN + Rayleigh × 11 SNR points × three budgets
+    (`true_e2e_ap_by_snr.csv`, 396 rows).
+  - **(2) The regime boundary is now derived, and the stipulated `≥14 dB` is gone.** Reading the
+    frozen selector's `ρ_F` off the pre-registered grid at `B_max=0.20`, AWGN: `ρ_F = 0` at every
+    point up to 8 dB and steps to its plateau at **10 dB on all three splits** — **0.286** validate,
+    **0.256** test, **0.064** Culver-City — which is exactly where the 16-QAM frame-error cliff
+    clears. Validate shows a **0.4 % toe at 8 dB**, the one grid point where the frame BLER is
+    neither ≈0 nor ≈1 (0.402); it is reported, not smoothed away. `≥14 dB` was never derived from a
+    measurement and is withdrawn; the only surviving mention is the sentence recording the
+    withdrawal.
+    **This exposed a third stale table.** `tab:headline`'s feature-active rows were v3-scored too,
+    and its payload column was badly wrong because the retired selector requested `F` far more
+    often. Rebuilt from the frozen engine (mean over the six grid points at and above the knee;
+    payload = `ρ_L·B_L + ρ_F·B_F` from Eq.(7)):
+    | split | AP@0.5 | AP@0.7 | payload (Msym) |
+    |---|---|---|---|
+    | validate | 0.916 → **0.9140** | 0.857 → **0.8534** | 0.632 → **0.300** |
+    | test | 0.920 → **0.9169** | 0.865 → **0.8637** | 0.874 → **0.283** |
+    | Culver-City | 0.855 → **0.7901** | 0.754 → **0.7020** | 0.565 → **0.089** |
+    The fallback (`L`) rows already matched the frozen data to 3 dp — they are deterministic
+    Fixed-`L`, so nothing there depended on the engine. Two claims in §true_e2e were also overstated
+    and are now corrected: the selector recovers only *part* of the perfect-channel reference on
+    validate (0.9140 vs 0.917), not "essentially all of the benefit".
+  - **(3) Action-context `C_{16}` cleared from every caption and table title** — 5 rewrites:
+    `fig:overview` (`s_t ∈ {L,F}`), `tab:headline` ("requests `F`"), `tab:headline_agg`
+    (`B_F = 0.990`), `fig:payload_snr` (the L457 one named in the ruling), `fig:decision_ratio`
+    (action set + legend). `tab:notation` keeps `C_{16}` — it is the glossary that *defines*
+    `F ≡ C_{16}`. 16 `C_{16}` remain in the file, all prose in modulation or `C_{16}`-vs-`C_{256}`
+    comparison context. **Two prose borderlines flagged, not edited** (outside the ruling's
+    caption/table-title scope): line 117 "the instance evaluated here uses two ($L$ and $C_{16}$)"
+    and line 246 "if $s_t=C_{16}$" are action-context but sit in prose.
+  - **(4) Ledger parsing hardened — this was a gate-level hazard, now closed at both ends.**
+    `parse_existing` **aborts** on any row that does not split into exactly 9 cells, naming the line
+    and cell count, instead of `continue`-ing past it; a new `assert_round_trips` refuses to *write*
+    a ledger containing such a row. The writer (`clean_claim`, `exact_values`, and the back-fill
+    tool) now emits `&#124;` for a literal pipe: a backslash escape does **not** work because the
+    parser does a plain `str.split('|')`. Verified by negative test: injecting a raw `|` into one
+    Generator cell makes the run exit 1 with `line 9: 10 cells: ...`, and the ledger is restored
+    byte-identical afterwards.
+  - **Ledger after this batch:** 109 rows, **0 STALE**, **47 filled / 62 pending**, 0 dangling
+    (9 newly back-filled; 7 partial and 55 unlocated deliberately left blank).
+  - **Still not verified:** no LaTeX toolchain on this host, so `main.tex` has **not been compiled**.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

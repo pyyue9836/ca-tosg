@@ -55,7 +55,7 @@ Motivated by this observation, this paper proposes \emph{Channel-Aware Task-Orie
 \begin{figure*}[t]
     \centering
     \includegraphics[width=\textwidth]{ca_tosg_method_overview.pdf}
-    \caption{Overview of the proposed \method{} framework. The ego vehicle extracts online task cues $z_t$ and estimated channel quality $(\gamma_t,\text{ch}_t)$, then selects one communication mode $s_t \in \{L,C_{16}\}$ (the dominated $C_{256}$ mode is excluded from the deployed action set, Section~\ref{sec:candidates}). Only the selected message is transmitted through the V2V link and fused with the local ego feature $F_{\mathrm{ego},t}$ for 3D object detection.}
+    \caption{Overview of the proposed \method{} framework. The ego vehicle extracts online task cues $z_t$ and estimated channel quality $(\gamma_t,\text{ch}_t)$, then selects one communication mode $s_t \in \{L,F\}$ (the dominated $C_{256}$ mode is excluded from the deployed action set, Section~\ref{sec:candidates}). Only the selected message is transmitted through the V2V link and fused with the local ego feature $F_{\mathrm{ego},t}$ for 3D object detection.}
     \label{fig:overview}
 \end{figure*}
 
@@ -374,27 +374,27 @@ We report AP@0.5 and AP@0.7 for end-to-end detection performance, mean realised 
 
 \subsection{Headline Results}\label{sec:headline}
 
-Because the value of feature-level cooperation is realised only when the channel can deliver it, a single channel-averaged number understates the effect: under Rayleigh fading and low-SNR AWGN the selector deliberately holds the object-level message $L$, so averaging over all channel states dilutes the gain. We therefore report the \emph{true end-to-end} detection AP in the two regimes that define the policy: the fallback regime (fading or low-SNR AWGN), where \method{} holds $L$ at $0.024$~Msym/frame, and the feature-active regime (AWGN $\hat\gamma_t \ge 14$~dB), where the selector requests $F$. AP is computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth (full protocol in Section~\ref{sec:true_e2e}); the per-SNR breakdown and the Rayleigh curves are in Tables~\ref{tab:true_e2e}--\ref{tab:gen_true_e2e_culver}.
+Because the value of feature-level cooperation is realised only when the channel can deliver it, a single channel-averaged number understates the effect: under Rayleigh fading and low-SNR AWGN the selector deliberately holds the object-level message $L$, so averaging over all channel states dilutes the gain. We therefore report the \emph{true end-to-end} detection AP in the two regimes that define the policy: the fallback regime (fading or low-SNR AWGN), where \method{} holds $L$ at $0.024$~Msym/frame, and the feature-active regime (AWGN $\hat\gamma_t \ge 10$~dB, the measured $\rho_F$ knee of Section~\ref{sec:true_e2e} rather than a stipulated threshold), where the selector requests $F$. AP is computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth (full protocol in Section~\ref{sec:true_e2e}); the per-SNR breakdown and the Rayleigh curves are in Tables~\ref{tab:true_e2e}--\ref{tab:gen_true_e2e_culver}.
 
 \begin{table}[t]
 \centering
-\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge14$~dB feature-active regime (selector requests $C_{16}$). When the channel can carry features, \method{} lifts AP toward the feature-level ceiling on validate and Culver-City and remains comparable to object-level on the sparser test split; when the channel cannot, it safely retains the $L$ operating point. Payload is per-frame channel use (Msym, at rate-1/2); channel-\emph{averaged} \method{} payload is $0.158$--$0.251$~Msym/frame across splits, i.e.\ $16$--$25\%$ of Fixed $F$ ($0.990$).}
+\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge10$~dB feature-active regime (selector requests $F$), the boundary being the measured $\rho_F$ knee of Section~\ref{sec:true_e2e}, averaged over the six grid points at and above it. When the channel can carry features, \method{} lifts AP toward the feature-level ceiling on validate and Culver-City and remains comparable to object-level on the sparser test split; when the channel cannot, it safely retains the $L$ operating point. Payload is per-frame channel use (Msym, at rate-1/2); channel-\emph{averaged} \method{} payload is $0.158$--$0.251$~Msym/frame across splits, i.e.\ $16$--$25\%$ of Fixed $F$ ($0.990$).}
 \label{tab:headline}
 \begin{tabular}{llccc}
 \toprule
 Split & Regime & AP@0.5 & AP@0.7 & Payload \\
 \midrule
 \multirow{2}{*}{Validate ($1{,}980$)}
-  & Fallback ($L$)  & 0.890 & 0.836 & 0.024 \\
-  & AWGN $\ge14$~dB & \textbf{0.916} & \textbf{0.857} & 0.632 \\
+  & Fallback ($L$)  & 0.8899 & 0.8356 & 0.024 \\
+  & AWGN $\ge10$~dB & \textbf{0.9140} & \textbf{0.8534} & 0.300 \\
 \midrule
 \multirow{2}{*}{Test ($2{,}170$)}
-  & Fallback ($L$)  & 0.919 & 0.869 & 0.024 \\
-  & AWGN $\ge14$~dB & 0.920 & 0.865 & 0.874 \\
+  & Fallback ($L$)  & 0.9189 & 0.8687 & 0.024 \\
+  & AWGN $\ge10$~dB & 0.9169 & 0.8637 & 0.283 \\
 \midrule
 \multirow{2}{*}{Culver-City ($550$)}
-  & Fallback ($L$)  & 0.783 & 0.698 & 0.024 \\
-  & AWGN $\ge14$~dB & \textbf{0.855} & \textbf{0.754} & 0.565 \\
+  & Fallback ($L$)  & 0.7828 & 0.6975 & 0.024 \\
+  & AWGN $\ge10$~dB & \textbf{0.7901} & \textbf{0.7020} & 0.089 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -407,7 +407,7 @@ Because a one-line SNR-threshold rule is the natural challenger to any learned s
 
 \begin{table}[t]
 \centering
-\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames). Mean realised frame F1 and per-frame channel use (Msym, at rate-1/2; $C_{16}=0.990$) over $200$ random draws of per-frame SNR ($\mathcal{U}[0,20]$~dB) and channel type ($50/50$ AWGN/Rayleigh); F1 CI half-widths $<0.0011$ for the learned policies. The selector-versus-threshold comparison is budget-indexed and two-sided: see the text for the per-budget figures and for the single pre-registered confirmatory comparison. The clairvoyant upper bound samples the per-frame block outcome post hoc and is not achievable online.}
+\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames). Mean realised frame F1 and per-frame channel use (Msym, at rate-1/2; $B_F=0.990$) over $200$ random draws of per-frame SNR ($\mathcal{U}[0,20]$~dB) and channel type ($50/50$ AWGN/Rayleigh); F1 CI half-widths $<0.0011$ for the learned policies. The selector-versus-threshold comparison is budget-indexed and two-sided: see the text for the per-budget figures and for the single pre-registered confirmatory comparison. The clairvoyant upper bound samples the per-frame block outcome post hoc and is not achievable online.}
 \label{tab:headline_agg}
 \begin{tabular}{lcc}
 \toprule
@@ -454,7 +454,7 @@ Fig.~\ref{fig:payload_snr} reports the average payload of each policy as a funct
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.72\linewidth]{fig_payload_awgn.pdf}
-    \caption{Average channel-use-equivalent payload versus SNR under AWGN. \method{} spends bandwidth proportionally to channel quality, holding $L$ below the LDPC threshold and activating $C_{16}$ above it; under Rayleigh the selector holds $L$ throughout, pinning the payload at $B_L=0.024$ (Table~\ref{tab:true_e2e}).}
+    \caption{Average channel-use-equivalent payload versus SNR under AWGN. \method{} spends bandwidth proportionally to channel quality, holding $L$ below the LDPC threshold and activating $F$ above it; under Rayleigh the selector holds $L$ throughout, pinning the payload at $B_L=0.024$ (Table~\ref{tab:true_e2e}).}
     \label{fig:payload_snr}
 \end{figure}
 
@@ -467,7 +467,7 @@ Fig.~\ref{fig:decision_ratio} shows the per-mode selection ratios $\rho_s$ as a 
     \includegraphics[width=0.48\textwidth]{fig_decisions_awgn.pdf}\hfill
     \includegraphics[width=0.48\textwidth]{fig_decisions_rayleigh.pdf}\\
     \includegraphics[width=\linewidth]{fig_stacked_area.pdf}
-    \caption{Per-mode selection ratios versus SNR. \emph{Top:} line overlay comparing the selector (solid) against the channel-aware oracle (dashed). \emph{Bottom:} stacked-area view of the selector's action distribution over the deployed action set $\mathcal{S}=\{L,C_{16}\}$: green is $L$, blue is $C_{16}$ (the dominated $C_{256}$ is excluded from $\mathcal{S}$, Section~\ref{sec:candidates}). Under AWGN the selector exhibits a clean adaptation knee near the LDPC threshold; under Rayleigh, both selector and oracle remain $L$-dominant.}
+    \caption{Per-mode selection ratios versus SNR. \emph{Top:} line overlay comparing the selector (solid) against the channel-aware oracle (dashed). \emph{Bottom:} stacked-area view of the selector's action distribution over the deployed action set $\mathcal{S}=\{L,F\}$: green is $L$, blue is $F$ (the dominated $C_{256}$ is excluded from $\mathcal{S}$, Section~\ref{sec:candidates}). Under AWGN the selector exhibits a clean adaptation knee near the LDPC threshold; under Rayleigh, both selector and oracle remain $L$-dominant.}
     \label{fig:decision_ratio}
 \end{figure*}
 
@@ -533,25 +533,25 @@ The realised frame F1 reported so far is computed under the analytical block-los
 
 \begin{table}[t]
 \centering
-\caption{True end-to-end AP under the deployed selector on OPV2V validate ($T=1{,}980$ frames), computed by concatenating cached per-frame predictions according to the selector's choice and scoring against OPV2V ground truth at $5$ stochastic channel realisations per operating point. The AP@$0.5$ knee at AWGN $\ge 12$~dB matches the policy transition observed in Fig.~\ref{fig:decision_ratio}; under Rayleigh the selector stays at the Fixed-$L$ point across the full $0$--$20$~dB range, consistent with the deep-fade regime.}\label{tab:true_e2e}
+\caption{True end-to-end AP under the \emph{frozen} selector on OPV2V validate ($T=1{,}980$ frames) at $B_{\max}=0.20$, on the pre-registered SNR grid with $200$ paired realisations per point, scored by the same engine as Tables~\ref{tab:gen_true_e2e} and~\ref{tab:gen_true_e2e_culver}. The feature-active regime begins at the measured $\rho_F$ knee ($10$~dB, Section~\ref{sec:true_e2e}), not at a stipulated threshold.}\label{tab:true_e2e}
 \begin{tabular}{lcccc}
 \toprule
 Channel & SNR (dB) & $\rho_L$ & AP@0.5 & AP@0.7 \\
 \midrule
-AWGN     & 0.0  & 1.000 & 0.890 & 0.836 \\
-AWGN     & 8.0  & 0.984 & 0.890 & 0.835 \\
-AWGN     & 12.0 & 0.385 & 0.916 & 0.857 \\
-AWGN     & 14.0 & 0.370 & \textbf{0.916} & \textbf{0.857} \\
-AWGN     & 16.0 & 0.372 & 0.916 & 0.858 \\
-AWGN     & 20.0 & 0.439 & 0.917 & 0.857 \\
-Rayleigh & 0.0  & 1.000 & 0.890 & 0.836 \\
-Rayleigh & 10.0 & 1.000 & 0.890 & 0.836 \\
-Rayleigh & 20.0 & 1.000 & 0.890 & 0.836 \\
+AWGN     &  0.0 & 0.990 & 0.8899 & 0.8356 \\
+AWGN     &  8.0 & 0.986 & 0.8900 & 0.8357 \\
+AWGN     & 10.0 & 0.712 & \textbf{0.9138} & \textbf{0.8532} \\
+AWGN     & 12.0 & 0.709 & 0.9140 & 0.8534 \\
+AWGN     & 16.0 & 0.708 & 0.9140 & 0.8534 \\
+AWGN     & 20.0 & 0.708 & 0.9140 & 0.8534 \\
+Rayleigh &  0.0 & 0.990 & 0.8899 & 0.8356 \\
+Rayleigh & 10.0 & 0.990 & 0.8899 & 0.8356 \\
+Rayleigh & 20.0 & 0.990 & 0.8899 & 0.8356 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two observations support the central claim. First, the true end-to-end AP at AWGN $14$~dB reaches $0.916$ at IoU $0.5$ and $0.857$ at IoU $0.7$, sitting within $0.001$ AP of the perfect-channel reference of the underlying attentive-compression model ($0.917$, see Section~\ref{sec:headline}). The selector therefore captures essentially all of the benefit of feature-level transmission once the LDPC threshold is crossed, while paying only $0.632$~Msym/frame at this operating point instead of the $0.990$ of always-on Fixed $F$. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
+Two observations support the central claim. First, the boundary of the feature-active regime is \emph{measured}, not stipulated: reading the frozen selector's feature-request rate off the pre-registered SNR grid, $\rho_F$ is zero at every AWGN point up to $8$~dB and steps to its plateau at $10$~dB on all three splits---$0.286$ on validate, $0.256$ on test and $0.064$ on Culver-City---which is exactly where the $16$-QAM frame-error cliff clears (Section~\ref{sec:channel}).\footnote{Validate shows a $0.4\%$ toe at $8$~dB, the single grid point at which the frame BLER is neither ${\approx}0$ nor ${\approx}1$ ($0.402$); test and Culver-City are exactly zero there. We therefore take $10$~dB as the regime boundary on all three splits and report the toe rather than smoothing it away. Earlier versions of this section stipulated $\ge14$~dB; that threshold was not derived from any measurement and is withdrawn.} At that boundary the true end-to-end AP on validate is $0.9138$ at IoU $0.5$ and $0.8532$ at IoU $0.7$, and it is flat above it. The selector reaches this while paying $0.300$~Msym/frame averaged over the feature-active regime instead of the $0.990$ of always-on Fixed $F$---a $70\%$ saving---though on validate it recovers only part of the perfect-channel reference of the underlying attentive-compression model ($0.917$, Section~\ref{sec:headline}) rather than essentially all of it, as an earlier version of this section claimed. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
 
 \subsection{Generalisation to OPV2V Test and Culver-City Splits}\label{sec:generalisation}
 

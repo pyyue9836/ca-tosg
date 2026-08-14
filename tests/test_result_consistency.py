@@ -89,7 +89,9 @@ def clean_claim(sent):
     s = re.sub(r'\\[a-zA-Z]+\*?', '', s)
     s = s.replace('{', '').replace('}', '').replace('~', ' ').replace('$', '')
     s = re.sub(r'\s+', ' ', s).strip()
-    return s.replace('|', r'\|')
+    # a literal pipe must be the HTML entity, not a backslash escape: parse_existing splits on
+    # a raw '|' and a backslash does not shield it (see its docstring)
+    return s.replace('|', '&#124;')
 
 
 def exact_values(sent):
@@ -102,7 +104,7 @@ def exact_values(sent):
             v = v[1:]
         if v and v not in vals:
             vals.append(v)
-    return ', '.join(vals).replace('|', r'\|')
+    return ', '.join(vals).replace('|', '&#124;')
 
 
 def _skeleton(claim):
@@ -125,18 +127,35 @@ def claim_id(claim):
 
 
 def parse_existing(path):
-    """Return {skeleton: (exact_value, [6 evidence cells])} for every prior row (any column layout)."""
+    """Return {skeleton: (exact_value, [6 evidence cells])} for every prior row.
+
+    A row that does not parse to exactly 9 cells is a HARD FAILURE, not a skip. It used to be a
+    `continue`, which is a gate-level hazard: a cell containing a literal `|` (e.g. a generator
+    command `... --train|--evaluate`) over-splits the row, the row is skipped here, and the next
+    rebuild re-emits it with EMPTY evidence. The ledger then reads as filled when it is written and
+    comes back blank, with nothing anywhere saying so. Escaping does not help either -- the split is
+    a plain `str.split('|')` -- so a literal pipe must be written as the entity `&#124;`.
+    """
     if not os.path.exists(path):
         return {}
-    out = {}
-    for line in _read(path).splitlines():
+    out, broken = {}, []
+    for lineno, line in enumerate(_read(path).splitlines(), 1):
         if not line.startswith('| ') or line.startswith('|---') or ' Claim ' in line:
             continue
         cells = [c.strip() for c in line.strip().strip('|').split('|')]
         if len(cells) != 9:
+            broken.append((lineno, len(cells), line[:90]))
             continue
         claim, exact, ev = cells[1], cells[2], cells[3:9]
         out[_skeleton(claim)] = (exact, ev)
+    if broken:
+        sys.stderr.write(
+            f'\n{path}: {len(broken)} row(s) do NOT parse to 9 cells. Their evidence would be '
+            f'silently dropped on this rebuild, so the run is aborted instead.\n'
+            f'A literal "|" inside a cell is the usual cause -- write it as &#124;.\n')
+        for lineno, n, head in broken:
+            sys.stderr.write(f'  line {lineno}: {n} cells: {head}...\n')
+        sys.exit(1)
     return out
 
 
@@ -192,8 +211,27 @@ def build():
     return ''.join(lines)
 
 
+def assert_round_trips(content):
+    """Every row the writer emits must parse back to 9 cells. Closes the loop on the pipe hazard:
+    the writer can no longer produce a ledger the reader would silently blank."""
+    bad = []
+    for lineno, line in enumerate(content.splitlines(), 1):
+        if not line.startswith('| ') or line.startswith('|---') or ' Claim ' in line:
+            continue
+        n = len([c for c in line.strip().strip('|').split('|')])
+        if n != 9:
+            bad.append((lineno, n, line[:90]))
+    if bad:
+        sys.stderr.write('\nREFUSING TO WRITE: %d generated row(s) do not round-trip to 9 cells.\n'
+                         % len(bad))
+        for lineno, n, head in bad:
+            sys.stderr.write(f'  line {lineno}: {n} cells: {head}...\n')
+        sys.exit(1)
+
+
 def main():
     content = build()
+    assert_round_trips(content)
     if '--check' in sys.argv:
         cur = _read(OUT) if os.path.exists(OUT) else ''
         if cur != content:
