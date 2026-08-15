@@ -1727,6 +1727,34 @@ written into the paper's conclusions; the paper reports only the frozen selector
       8 drawn but never stated, 5 same-value-different-condition — all written to
       `docs/figure_text_consistency.md` marked **POST-EXPERIMENT**, with no prose edited.
 
+- **P4-B-f (2026-08-15) — the continuation was attempted and is still blocked: the SECOND
+  late-fusion checkpoint is not on this machine. Nothing was run, nothing was substituted.**
+  The continuation (steps 1–5: verify the `L` checkpoint → build `eff_L` → grid expansion → LOSO →
+  budget walk → 200-CSI replay) is gated entirely on step 1, and step 1's input is absent.
+  **Search scope, so this is a checkable claim and not an impression:**
+  - `/mnt/h/opencood_project/pretrained_models/` contains seven model directories — the three
+    PointPillar families, the two PointPillar late-eval copies, `second_attentive_fusion` and the
+    converted `second_attentive_fusion_spconv2`. **No SECOND late or early model.**
+  - Every `*.pth` under `/mnt/h/opencood_project` and `OpenCOOD/peiyi_work` was enumerated: the only
+    hits outside the PointPillar / SECOND-attentive families are the JSCC per-frame training runs
+    (`net_epoch1.pth`) and one Where2comm run. None is a SECOND late-fusion checkpoint.
+  - No `*.pth`, and no archive named for `second`/`late`, anywhere under `/mnt/h` or
+    `/mnt/c/Users` (depth 4) with a modification time after the 2026-08-14 P4-B fetch;
+    `Downloads` and `Desktop` hold nothing relevant.
+  - `OpenCOOD/opencood/hypes_yaml/second_late_fusion.yaml` **does** exist — it is the upstream
+    OpenCOOD *config*, shipped with the repository, and carries no weights. It is not the
+    checkpoint and must not be mistaken for evidence that the model is present.
+  - The zoo Box direct link for the SECOND/Late row (file `1621113752957`) was re-probed today and
+    still returns **HTTP 403**, unchanged since P4-B-a.
+  **Nothing downstream was faked or approximated:** no `eff_L`, no grid, no LOSO, no walk, no
+  replay, no table. The mainline PointPillar `L` branch was again **not** substituted in. The
+  E/F caches and the equal-budget payload convention of P4-B-e stand and are untouched, so the arm
+  resumes from exactly where it stopped the moment the file lands.
+  **What is needed: one file.** `second_late_fusion` from the OpenCOOD zoo row *"Naive Late |
+  1.2.1 | SECOND | Late"*, Box file `1621113752957`, fetched by hand as the intermediate
+  checkpoint was on 2026-08-14, and dropped into
+  `/mnt/h/opencood_project/pretrained_models/second_late_fusion/`.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
