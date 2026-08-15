@@ -1942,6 +1942,51 @@ written into the paper's conclusions; the paper reports only the frozen selector
     the `Fixed L` reference, or per-frame F1 is flat in SNR, the run stops and reports — that is a
     scaffold-does-not-train finding, not a finding about SComCP, and the two may not be conflated.
 
+- **SC-2 (2026-08-15, PRE-REGISTERED before the first training step) — SComCP baseline run, as
+  ruled by Peiyi on the SC-1 plan.** Descriptive baseline; no decision, no δ, no frozen product
+  touched.
+  - **Training split = `validate` (1,980 frames).** Disclosure sentence to accompany every reported
+    SComCP number: *"SComCP is reproduced in-repository under this paper's training-data discipline
+    — the SComCP-specific stages are trained on the OPV2V validate split (1,980 frames), not the
+    6,764-frame train split the source paper uses — so its absolute AP is not comparable to the
+    published figures and is reported only as a descriptive baseline on the same per-frame ruler as
+    the other arms."*
+  - **Warm-start data consistency — checked, and the reason recorded rather than assumed.** The
+    warm start is the registered Rayleigh JSCC stage-2 checkpoint
+    (`stage2_rayleigh_learned_v3/stage2_whole_map_4000steps.pth`, md5 `c5a02fd77154`), and that
+    checkpoint's own config trains on **`opv2v_data_dumping/train`**. That is *consistent* with the
+    discipline rather than a breach of it: `train` is the split every representation in this paper
+    is learned on — the frozen PointPillars backbone and detection head included — while the rule
+    "training uses `validate` only" governs the **arm-specific / selector-level** learning so that
+    **`test` and Culver-City stay held out**. No held-out split is touched at any point here. The
+    md5 and this rationale go into the manifest so the next reader does not have to re-derive them.
+  - **Step budget, pre-registered: 4,000 / 4,000 / 2,000** for stages 1 / 2 / 3 (10,000 total; on
+    1,980 frames at batch 1 that is ≈2.02 / 2.02 / 1.01 epochs), matching the JSCC arm's 4,000-step
+    budget so the two learned baselines are trained comparably. `train_scomcp.py` is epoch-based
+    with no step cap, so a `--max-steps` flag is added to it; the cap is a hard stop on the global
+    step counter and the reached count is written into the provenance. **No tuning after seeing
+    results.**
+  - **Coverage = option B:** AWGN + Rayleigh × the pre-registered 11-point SNR grid {0,2,…,20} dB ×
+    {validate, test}. Culver-City is not covered and that is stated in the output, not left implicit.
+  - **Payload convention: inherit the ImportanceMapJSCC arm's, which — checked — registers none.**
+    `results/baselines/importance_map_jscc/jscc_ap_f1.csv` carries
+    `channel, split, snr_db, n, jscc_f1, ap30, ap50, ap70` and **no payload column**; the
+    `rf_payload` in the `two_regime_*` files is the *selector's* L/feature mix under the mainline
+    `PAYVEC`, not a codec-level accounting; and `main.tex` makes no bandwidth claim for the JSCC
+    codec beyond saying the LDPC+QAM arms carry "the same feature-level payload". Therefore SComCP
+    reports **F1 and AP, plus `com_rate` as a standalone column**, and **no Msym/Mbit conversion is
+    invented**. `com_rate` is the codec's own communication-rate figure, already logged by the JSCC
+    stage-2 training (`communication_rate`, `paper_cr_actual`, `remote_payload_*`) but never
+    promoted to a registered result — it stays uncoverted here too.
+  - **Output:** `results/baselines/scomcp.csv` in the JSCC arm's schema plus a `com_rate` column,
+    and `results/provenance/PROVENANCE_scomcp.txt`, both labelled **descriptive baseline, no
+    decision**. Per-frame F1 uses the **same scorer, same canonical union GT, same IoU-0.5
+    unit-score convention** as `late_f1` / `compressed_f1` / `jscc_f1`.
+  - **Fuse conditions (from SC-1, unchanged):** if validate AP@0.5 at 20 dB AWGN falls below the
+    `Fixed L` reference, or per-frame F1 is flat in SNR (no codec response), the run **stops and
+    reports**. That would be a *scaffold-does-not-train* finding, not a finding about SComCP, and
+    the two may not be conflated in any write-up.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
