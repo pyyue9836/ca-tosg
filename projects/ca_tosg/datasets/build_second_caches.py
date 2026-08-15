@@ -37,6 +37,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 OPENCOOD = os.path.join(os.path.dirname(ROOT), 'OpenCOOD')
 CKPT = ('/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/'
         'second_attentive_fusion_compression')
+CKPT_LATE = '/mnt/h/opencood_project/pretrained_models/second_late_fusion_spconv2'
 DATA_ROOT = '/mnt/h/opencood_project/datasets/opv2v_data_dumping'
 OUT_DIR = os.path.join(OPENCOOD, 'peiyi_work/paper1/gs_rerun_second')
 SPLIT_DIR = {'validate': 'validate', 'test': 'test', 'culver': 'test_culver_city'}
@@ -68,6 +69,44 @@ def f1_per_frame(boxes, gts, iou=0.5):
         r = tp / g if g else 0.0
         out.append((2 * p * r / (p + r)) if p + r else 0.0)
     return np.asarray(out, dtype=np.float32)
+
+
+def run_late(split):
+    """The L branch: SECOND late fusion, its own checkpoint and its own LateFusionDataset.
+
+    Scored later against the SAME canonical union GT as E and F (the comp cache's `gts`), so the
+    three branches sit on one ruler exactly as the mainline's do.
+    """
+    import copy
+
+    import torch
+    from torch.utils.data import DataLoader
+    from tqdm import tqdm
+
+    import opencood.hypes_yaml.yaml_utils as yaml_utils
+    from opencood.data_utils.datasets import build_dataset
+    from opencood.tools import inference_utils, train_utils
+
+    os.environ.pop('CATOSG_MAX_COLLAB', None)
+    hypes = copy.deepcopy(yaml_utils.load_yaml(os.path.join(CKPT_LATE, 'config.yaml'), None))
+    hypes['validate_dir'] = os.path.join(DATA_ROOT, SPLIT_DIR[split])
+    ds = build_dataset(hypes, visualize=False, train=False)
+    loader = DataLoader(ds, batch_size=1, num_workers=8, collate_fn=ds.collate_batch_test,
+                        shuffle=False, pin_memory=False, drop_last=False)
+    model = train_utils.create_model(hypes)
+    dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.to(dev)
+    _, model = train_utils.load_saved_model(CKPT_LATE, model)
+    model.eval()
+
+    boxes, scores = [], []
+    with torch.no_grad():
+        for batch in tqdm(loader, desc=f'{split}/late'):
+            batch = train_utils.to_device(batch, dev)
+            pb, ps, _ = inference_utils.inference_late_fusion(batch, model, ds)
+            boxes.append(pb.cpu().numpy() if pb is not None else np.zeros((0, 8, 3), np.float32))
+            scores.append(ps.cpu().numpy() if ps is not None else np.zeros((0,), np.float32))
+    return boxes, scores
 
 
 def run_branch(split, ego_only):
@@ -112,6 +151,8 @@ def run_branch(split, ego_only):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--splits', nargs='+', default=['validate', 'test', 'culver'])
+    ap.add_argument('--branches', nargs='+', default=['ego', 'comp'],
+                    choices=['ego', 'comp', 'late'])
     args = ap.parse_args()
     sys.path.insert(0, OPENCOOD)
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -144,6 +185,39 @@ def main() -> int:
         'frozen_manifest_note': 'recorded as evidence that the deployed freeze was not touched',
         'splits': {},
     }
+
+    if args.branches == ['late']:
+        # L-only pass: reuse the committed canonical GT from the existing comp cache so the three
+        # branches are scored on one ruler; nothing already built is recomputed or overwritten.
+        record['branches_built'] = ['L (late fusion)']
+        record['branch_L'] = 'BUILT'
+        record['checkpoint_late'] = CKPT_LATE
+        record['checkpoint_late_sha256'] = sha256(os.path.join(CKPT_LATE, 'latest.pth'))
+        for split in args.splits:
+            comp = np.load(os.path.join(OUT_DIR, f'comp_{split}.npz'), allow_pickle=True)
+            cg = list(comp['gts'])
+            lb, ls = run_late(split)
+            assert len(lb) == len(cg), f'{split}: late {len(lb)} vs canonical GT {len(cg)} frames'
+            late_f1 = f1_per_frame(lb, cg)
+            np.savez_compressed(os.path.join(OUT_DIR, f'late_{split}.npz'),
+                                boxes=np.array(lb, dtype=object),
+                                scores=np.array(ls, dtype=object), f1=late_f1)
+            record['splits'][split] = {
+                'frames': len(lb),
+                'late_f1_mean': round(float(late_f1.mean()), 5),
+                'late_npz_sha256': sha256(os.path.join(OUT_DIR, f'late_{split}.npz')),
+            }
+            print(f'[{split}] frames={len(lb)}  late_f1={late_f1.mean():.5f}', flush=True)
+        record['zoo_bandwidth_crosscheck'] = (
+            'the zoo row for this model lists bandwidth 0.024/0.024 Mbit, identical to the '
+            'mainline B_L = 0.024 Mbit used throughout. Recorded as independent corroboration of '
+            'the object-level payload convention; reported, not adjudicated.')
+        out = os.path.join(ROOT, 'results/manifests/P4B_CACHE_LATE_MANIFEST.json')
+        with open(out, 'w') as f:
+            json.dump(record, f, indent=1)
+            f.write('\n')
+        print(f'\nwrote {out}')
+        return 0
 
     for split in args.splits:
         cb, cs, cg = run_branch(split, ego_only=False)

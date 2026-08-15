@@ -22,6 +22,8 @@ Usage:
 """
 from __future__ import annotations
 
+FUSION = 'intermediate'   # set from --fusion in main()
+
 import argparse
 import copy
 import json
@@ -33,8 +35,8 @@ from datetime import datetime, timezone
 import torch
 
 
-def zoo_targets_from_readme(opencood_root: str) -> dict:
-    """Parse the SECOND/Intermediate row out of OpenCOOD's own README benchmark table."""
+def zoo_targets_from_readme(opencood_root: str, fusion: str = 'Intermediate') -> dict:
+    """Parse the SECOND row for the given fusion strategy out of OpenCOOD's own README table."""
     path = os.path.join(opencood_root, "README.md")
     with open(path, encoding="utf-8") as f:
         lines = f.read().splitlines()
@@ -44,11 +46,11 @@ def zoo_targets_from_readme(opencood_root: str) -> dict:
         cells = [c.strip() for c in line.split("|")]
         if len(cells) < 8:
             continue
-        if cells[3] == "SECOND" and cells[4] == "Intermediate":
-            assert row is None, "more than one SECOND/Intermediate row in the README table"
+        if cells[3] == "SECOND" and cells[4] == fusion:
+            assert row is None, f"more than one SECOND/{fusion} row in the README table"
             row = cells
 
-    assert row is not None, f"SECOND/Intermediate row not found in {path}"
+    assert row is not None, f"SECOND/{fusion} row not found in {path}"
 
     def pair(cell: str) -> tuple[float, float]:
         nums = re.findall(r"\d+\.\d+", cell)
@@ -57,12 +59,17 @@ def zoo_targets_from_readme(opencood_root: str) -> dict:
 
     towns_nocomp, towns_comp = pair(row[6])
     culver_nocomp, culver_comp = pair(row[7])
-    return {
-        "source": f"{path} (benchmark table, row 'Attentive | 1.2.1 | SECOND | Intermediate')",
+    out = {
+        "source": f"{path} (benchmark table, SECOND / {fusion} row)",
         "column_meaning": "AP@0.7 for no-compression/compression",
+        "bandwidth_mbit_before_after": row[5],
         "second_attentive_fusion": {"test": towns_nocomp, "test_culver_city": culver_nocomp},
         "second_attentive_fusion_compression": {"test": towns_comp, "test_culver_city": culver_comp},
     }
+    if fusion == 'Late':
+        # the Late row has no compression variant: both columns are the same model
+        out["second_late_fusion"] = {"test": towns_nocomp, "test_culver_city": culver_nocomp}
+    return out
 
 
 def load_check(hypes, ckpt_dir, original_ckpt_dir):
@@ -136,9 +143,10 @@ def run_split(hypes_base, ckpt_dir, split_dir, num_workers):
     with torch.no_grad():
         for batch_data in tqdm(loader, desc=os.path.basename(split_dir)):
             batch_data = train_utils.to_device(batch_data, device)
-            pred_box, pred_score, gt_box = inference_utils.inference_intermediate_fusion(
-                batch_data, model, dataset
-            )
+            infer = {'intermediate': inference_utils.inference_intermediate_fusion,
+                     'late': inference_utils.inference_late_fusion,
+                     'early': inference_utils.inference_early_fusion}[FUSION]
+            pred_box, pred_score, gt_box = infer(batch_data, model, dataset)
             for t in (0.3, 0.5, 0.7):
                 eval_utils.caluclate_tp_fp(pred_box, pred_score, gt_box, result_stat, t)
 
@@ -166,14 +174,20 @@ def main() -> int:
     ap.add_argument("--splits", nargs="+", default=["test", "test_culver_city"])
     ap.add_argument("--tolerance", type=float, default=0.005)
     ap.add_argument("--num-workers", type=int, default=8)
+    ap.add_argument("--fusion", default="intermediate", choices=["intermediate", "late", "early"])
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
+    global FUSION
+    FUSION = args.fusion
 
     sys.path.insert(0, args.opencood)
     import opencood.hypes_yaml.yaml_utils as yaml_utils
 
+    # a converted copy lives in a *_spconv2 directory; the zoo row is keyed on the original name
     variant = os.path.basename(os.path.normpath(args.ckpt_dir))
-    targets = zoo_targets_from_readme(args.opencood)
+    targets = zoo_targets_from_readme(args.opencood, args.fusion.capitalize())
+    if variant not in targets and variant.endswith('_spconv2'):
+        variant = variant[: -len('_spconv2')]
     assert variant in targets, f"no zoo target for variant {variant!r}"
     variant_targets = targets[variant]
 
@@ -186,7 +200,7 @@ def main() -> int:
         "generated": datetime.now(timezone.utc).isoformat(),
         "variant": variant,
         "ckpt_dir": args.ckpt_dir,
-        "fusion_method": "intermediate",
+        "fusion_method": args.fusion,
         "ap_convention_for_pass_fail": "no_global_sort (the zoo's own convention)",
         "tolerance": args.tolerance,
         "zoo_targets": targets,

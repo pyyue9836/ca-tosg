@@ -1,0 +1,149 @@
+{
+ "schema": "catosg-p4b-arm/1",
+ "label": "second-backbone arm, NOT DEPLOYED",
+ "protocol": "CA-TOSG P4-B-g (docs/experiment_protocol.md)",
+ "generated_by": "python projects/ca_tosg/evaluation/second_arm_pipeline.py --stage {grid,selector,replay}",
+ "backbone": "SECOND (VoxelNet sparse 3D) -- zoo Attentive/Intermediate for E and F, zoo Naive Late for L",
+ "checkpoints": {
+  "intermediate_compression": {
+   "sha256_converted": "869c88dfdb2feb224aec4a68250acaaa3ecdfaa7fe1b05167713e9668408b307",
+   "zoo_ap_reproduced": "0.78384/0.76188 vs 0.783/0.760 (P4-B-c)"
+  },
+  "late": {
+   "sha256_original": "5304439ee5ae2a984ee31a85d0bb21faa68b63b35ffd2021a23dd8b4c0d881d8",
+   "sha256_converted": "3bc2b714dfd7db45a04d09269e237f74683efb44e47074140da5265ff77cadf1",
+   "source": "OpenCOOD zoo row \"Naive Late | 1.2.1 | SECOND | Late\", Box file 1621113752957",
+   "zoo_ap_reproduced": "0.7752/0.6822 vs 0.775/0.682 (P4-B-g E-Lg1)"
+  }
+ },
+ "payload_convention": {
+  "B_F_SECOND_msym": 0.99,
+  "N_cw": 3960,
+  "note": "EQUAL-BUDGET CONTROLLED: the SECOND F message is charged the mainline per-frame channel budget. No claim that the SECOND feature tensor compresses to that size; no codec declared."
+ },
+ "pipeline_gate_E_Lg2": {
+  "grid": "BIT-IDENTICAL to the committed mainline p2_grid_{validate,test,culver}.csv",
+  "selector": "BIT-IDENTICAL folds CSV + all three candidate_walk CSVs, manifest fields MATCH, with the 1,008 LOSO fits genuinely recomputed (not reused)",
+  "replay": "replay_summary.csv IDENTICAL on all 9 rows"
+ },
+ "frozen_selectors": {
+  "0.10": {
+   "candidate_index": 66,
+   "class_weight": "balanced",
+   "lambda_star": 0.1,
+   "tau_star": 18.0,
+   "walk_depth": 6,
+   "frozen_validate_f1": 0.8761,
+   "frozen_validate_payload": 0.046377
+  },
+  "0.20": {
+   "candidate_index": 78,
+   "class_weight": "balanced",
+   "lambda_star": 0.02,
+   "tau_star": 12.0,
+   "walk_depth": 0,
+   "frozen_validate_f1": 0.8842,
+   "frozen_validate_payload": 0.183464
+  },
+  "0.30": {
+   "candidate_index": 78,
+   "class_weight": "balanced",
+   "lambda_star": 0.02,
+   "tau_star": 8.0,
+   "walk_depth": 0,
+   "frozen_validate_f1": 0.8842,
+   "frozen_validate_payload": 0.183464
+  }
+ },
+ "deployed_freeze_untouched": {
+  "FROZEN_MANIFEST.json_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
+  "note": "recorded as evidence the deployed P2 freeze was not written to by this arm; the arm writes only data/p4b/, results/p4b/ and P4B_* manifests"
+ },
+ "adjudication": "NONE. This arm is DESCRIPTIVE with paired CIs only. results/p4b/r9_decision.csv is emitted as a side effect of reusing the mainline deployment script unmodified; it is NOT a decision for this arm and delta was neither used nor changed here.",
+ "anomaly_checklist": "results/p4b/P4B_ANOMALY_REPORT.md -- 3 of 7 expectations NOT met (fuses), reported as-is per PROTOCOL section 8 handling rule 3.",
+ "replay": {
+  "validate_B010": {
+   "F1_RF": 0.87605,
+   "F1_tau": 0.87025,
+   "B_RF": 0.04654,
+   "B_tau": 0.07215,
+   "dF_mean": 0.0058,
+   "dF_lcb95": 0.00573,
+   "dF_ucb95": 0.00587
+  },
+  "validate_B020": {
+   "F1_RF": 0.88389,
+   "F1_tau": 0.87439,
+   "B_RF": 0.18537,
+   "B_tau": 0.21663,
+   "dF_mean": 0.00949,
+   "dF_lcb95": 0.00942,
+   "dF_ucb95": 0.00957
+  },
+  "validate_B030": {
+   "F1_RF": 0.88389,
+   "F1_tau": 0.87577,
+   "B_RF": 0.18537,
+   "B_tau": 0.31267,
+   "dF_mean": 0.00811,
+   "dF_lcb95": 0.00805,
+   "dF_ucb95": 0.00818
+  },
+  "test_B010": {
+   "F1_RF": 0.87912,
+   "F1_tau": 0.88051,
+   "B_RF": 0.02387,
+   "B_tau": 0.0724,
+   "dF_mean": -0.00139,
+   "dF_lcb95": -0.00145,
+   "dF_ucb95": -0.00134
+  },
+  "test_B020": {
+   "F1_RF": 0.87944,
+   "F1_tau": 0.88417,
+   "B_RF": 0.03807,
+   "B_tau": 0.21679,
+   "dF_mean": -0.00473,
+   "dF_lcb95": -0.00483,
+   "dF_ucb95": -0.00464
+  },
+  "test_B030": {
+   "F1_RF": 0.87944,
+   "F1_tau": 0.88603,
+   "B_RF": 0.03807,
+   "B_tau": 0.3125,
+   "dF_mean": -0.00659,
+   "dF_lcb95": -0.0067,
+   "dF_ucb95": -0.00648
+  },
+  "culver_B010": {
+   "F1_RF": 0.87942,
+   "F1_tau": 0.88235,
+   "B_RF": 0.024,
+   "B_tau": 0.07176,
+   "dF_mean": -0.00293,
+   "dF_lcb95": -0.00303,
+   "dF_ucb95": -0.00283
+  },
+  "culver_B020": {
+   "F1_RF": 0.87978,
+   "F1_tau": 0.89147,
+   "B_RF": 0.03194,
+   "B_tau": 0.2174,
+   "dF_mean": -0.0117,
+   "dF_lcb95": -0.01189,
+   "dF_ucb95": -0.0115
+  },
+  "culver_B030": {
+   "F1_RF": 0.87978,
+   "F1_tau": 0.89648,
+   "B_RF": 0.03194,
+   "B_tau": 0.31463,
+   "dF_mean": -0.01671,
+   "dF_lcb95": -0.01692,
+   "dF_ucb95": -0.01649
+  }
+ },
+ "arm_freeze": "results/p4b/manifests/P4B_FROZEN_MANIFEST.json",
+ "containment_defect_found": "The arm was first pointed at results/manifests/ for its provenance output, so selector.main() overwrote the DEPLOYED candidate_walk_B0XX.csv. Caught by the manifest-relpath and data-leakage gates (sha256 mismatch vs FROZEN_MANIFEST), restored from git, and the arm now writes to its own results/p4b/manifests/ with an assertion refusing the deployed directory."
+}

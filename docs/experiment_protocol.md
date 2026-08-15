@@ -1794,6 +1794,75 @@ written into the paper's conclusions; the paper reports only the frozen selector
     retrain, do not adjust the data, do not touch δ. Where expectation and measurement disagree,
     the conclusion changes, not the experiment.**
 
+- **P4-B-g RESULT (2026-08-15) — the second-backbone arm is complete end to end. Both stops passed;
+  three of seven §8 expectations did not, and are reported as the finding.**
+  - **(1)(2) The `L` checkpoint is verified.** `latest.pth` sha256 `5304439e…`, Box `1621113752957`,
+    recorded as EXTERNAL INPUT. Load test: 160 tensors, 0 missing, 0 unexpected, **12 shape
+    mismatches — the same spconv 1.x→2.x axis order**, all reconciled by `permute(4,0,1,2,3)`,
+    0 unexplained. The already-verified converter was reused unchanged. **E-Lg1 PASS:** official
+    `late` inference reproduces the zoo row **AP@0.7 = 0.7752 vs 0.775 (Δ +0.0002)** on Default
+    Towns and **0.6822 vs 0.682 (Δ +0.0002)** on Culver City — an order of magnitude inside ±0.005.
+  - **(3) `eff_L` built** for all three splits into `gs_rerun_second/`, same scorer, same canonical
+    union GT, same IoU-0.5 unit-score convention as the E/F caches: mean `late_f1` **0.86886**
+    (validate) / **0.87928** (test) / **0.87942** (Culver). **Bandwidth cross-check, reported not
+    adjudicated:** the zoo row lists this model at **0.024/0.024** Mbit, identical to the mainline
+    `B_L = 0.024` — independent corroboration of the object-level payload convention, parsed from
+    the README at run time.
+  - **(4) The parameterised pipeline, and the defect it caught in itself.** All four stages run the
+    **unmodified** mainline modules with their path constants redirected. Each was gated on
+    reproducing its committed mainline product first: **grid — bit-identical on all three splits;
+    selector — bit-identical folds CSV and all three walk CSVs with the 1,008 LOSO fits genuinely
+    recomputed, manifest fields matching; replay — `replay_summary.csv` identical on all 9 rows.**
+    **A false PASS was found and fixed before it could contaminate anything.** The first driver
+    patched `feature_encoder`, but `selector` imports it as
+    `projects.ca_tosg.models.feature_encoder` — a *different object in `sys.modules`*. The redirect
+    was inert, the "SECOND" run silently trained on the **mainline** inputs, and the gate passed
+    **because** the redirect did nothing: reproducing the mainline is exactly what an ignored
+    override produces. Caught by the output being byte-identical to the mainline, which for a
+    different backbone is impossible. The driver now patches **every alias** in `sys.modules` and
+    asserts, before running, that each one reports the intended paths. The contaminated
+    `P4B_FROZEN_MANIFEST.json`, `P4B_validate_loso_folds.csv` and staged models were deleted and the
+    stage re-run from scratch. The deployed freeze was verified unmodified throughout.
+  - **A second containment defect, caught by the resident gates and repaired.** The arm's
+    provenance output was first pointed at `results/manifests/`, so `selector.main()` wrote
+    `candidate_walk_B010/020/030.csv` **straight over the deployed frozen products**. The
+    manifest-relpath and data-leakage gates both failed on the sha256 mismatch against
+    `FROZEN_MANIFEST.json` — which is exactly what they exist for. The three files were restored
+    from git, the gates verified green again, and the arm now writes to its own
+    `results/p4b/manifests/` behind an assertion that refuses the deployed directory. Recorded in
+    `P4B_ARM_MANIFEST.json` under `containment_defect_found`.
+  - **(5) Frozen SECOND selectors** (`results/p4b/manifests/P4B_FROZEN_MANIFEST.json`, `data/p4b/`), all
+    **`class_weight=balanced`** — unlike the mainline's `cw=None`:
+    B 0.10 → cand#66, λ\*=0.10, τ\*=18, depth 6, validate F1 0.8761, payload 0.0464;
+    B 0.20 → cand#78, λ\*=0.02, τ\*=12, depth 0, F1 0.8842, payload 0.1835;
+    B 0.30 → cand#78 (same candidate), τ\*=8.
+    200-CSI paired replay, mainline format, in `results/p4b/`:
+
+    | split | B_max | F1 (RF) | F1 (τ\*) | payload RF | payload τ\* | ΔF1 [95 % CI] |
+    |---|---|---|---|---|---|---|
+    | validate | 0.10 / 0.20 / 0.30 | 0.87605 / 0.88389 / 0.88389 | 0.87025 / 0.87439 / 0.87577 | 0.0465 / 0.1854 / 0.1854 | 0.0722 / 0.2166 / 0.3127 | +0.0058 / +0.0095 / +0.0081 |
+    | test | 0.10 / 0.20 / 0.30 | 0.87912 / 0.87944 / 0.87944 | 0.88051 / 0.88417 / 0.88603 | 0.0239 / 0.0381 / 0.0381 | 0.0724 / 0.2168 / 0.3125 | −0.0014 / −0.0047 / −0.0066 |
+    | Culver | 0.10 / 0.20 / 0.30 | 0.87942 / 0.87978 / 0.87978 | 0.88235 / 0.89147 / 0.89648 | 0.0240 / 0.0319 / 0.0319 | 0.0718 / 0.2174 / 0.3146 | −0.0029 / −0.0117 / −0.0167 |
+
+    Everything is labelled **"second-backbone arm, not deployed"**. **No adjudication:**
+    `results/p4b/r9_decision.csv` is emitted as a side effect of reusing the deployment script
+    unmodified and is **not** a decision for this arm; δ was neither used nor changed.
+  - **(6) §8 checklist: 3 of 7 expectations NOT met** (`results/p4b/P4B_ANOMALY_REPORT.md`).
+    Reported, not repaired — no retrain, no data adjustment, no δ.
+    - **Rayleigh must show both E and L: FAILS off validate.** The selector's `ρ_E` is 0.000
+      (Culver) and 0.004–0.016 (test) while the **oracle** spends 0.302 / 0.353 there. On validate
+      it tracks the oracle (0.142 vs 0.142). This is the mainline's E-collapse, **worse** on a
+      second backbone.
+    - **Selector-vs-oracle agreement collapses off validate:** 0.833 (validate) → **0.578** (test)
+      → **0.534** (Culver). Per-class on test: E recall 0.027, F recall 0.071; on Culver E recall
+      0.000. The frozen SECOND selector degenerates to near-always-`L` off its training split.
+    - **Paired ΔF1 vs τ\* is negative on every off-validate point** (−0.0014 to −0.0167, all CIs
+      excluding zero), while positive on validate (+0.0058 to +0.0095). The arm's large payload
+      reductions (0.67–0.90) are a consequence of that collapse to `L`, not of good selection.
+    **Reading, per §8 rule 3:** on the SECOND backbone the frozen selector does not transfer; the
+    conclusion changes, the experiment does not. Whether this belongs in the paper, and how, is
+    Peiyi's call — nothing was written into `main.tex`.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

@@ -1,0 +1,41 @@
+{
+ "schema": "catosg-p4b-cache-manifest/1",
+ "protocol": "CA-TOSG P4-B-e (docs/experiment_protocol.md)",
+ "generated_by": "python projects/ca_tosg/datasets/build_second_caches.py",
+ "generated": "2026-08-15T03:24:37.079031+00:00",
+ "checkpoint": "/mnt/h/opencood_project/pretrained_models/second_attentive_fusion_spconv2/second_attentive_fusion_compression",
+ "checkpoint_sha256": "869c88dfdb2feb224aec4a68250acaaa3ecdfaa7fe1b05167713e9668408b307",
+ "checkpoint_status": "converted + verified against the model zoo AP (P4-B-c)",
+ "payload_convention": {
+  "B_F_SECOND_msym": 0.99,
+  "N_cw": 3960,
+  "bler_table": "results/channel/bler_sionna.csv (mainline, unchanged)",
+  "note": "EQUAL-BUDGET CONTROLLED comparison: the SECOND F message is charged the mainline per-frame channel budget so the two backbones are compared at the same channel cost. This does NOT claim the SECOND feature tensor compresses to that size, and it declares NO codec. Measured sizes (P4-B-d, recorded only, not the operative payload): pre-compression 6,758,400 elements/CAV, bottleneck 352,000 elements/CAV."
+ },
+ "branches_built": [
+  "L (late fusion)"
+ ],
+ "branch_L": "BUILT",
+ "frozen_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
+ "frozen_manifest_note": "recorded as evidence that the deployed freeze was not touched",
+ "splits": {
+  "validate": {
+   "frames": 1980,
+   "late_f1_mean": 0.86886,
+   "late_npz_sha256": "ba9c4792b5fe98a8f227e4a185b0dd2bc6f88bc1d5a6c74184779129779a6ff3"
+  },
+  "test": {
+   "frames": 2170,
+   "late_f1_mean": 0.87928,
+   "late_npz_sha256": "7bc859a8ccb242dc2a6290e279b7935758be632451dd44d5a0815042c4f28114"
+  },
+  "culver": {
+   "frames": 550,
+   "late_f1_mean": 0.87942,
+   "late_npz_sha256": "46d20f36b8054048492eb74e421a714327c9d8b0115d3adfc41e71be1891df0a"
+  }
+ },
+ "checkpoint_late": "/mnt/h/opencood_project/pretrained_models/second_late_fusion_spconv2",
+ "checkpoint_late_sha256": "3bc2b714dfd7db45a04d09269e237f74683efb44e47074140da5265ff77cadf1",
+ "zoo_bandwidth_crosscheck": "the zoo row for this model lists bandwidth 0.024/0.024 Mbit, identical to the mainline B_L = 0.024 Mbit used throughout. Recorded as independent corroboration of the object-level payload convention; reported, not adjudicated."
+}

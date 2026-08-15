@@ -1,0 +1,114 @@
+{
+ "schema": "catosg-p4b-verification/1",
+ "protocol": "CA-TOSG P4-B-c expectation E4 (docs/experiment_protocol.md)",
+ "generated_by": "python tools/verify_second_zoo_ap.py",
+ "generated": "2026-08-15T03:13:53.439091+00:00",
+ "variant": "second_late_fusion",
+ "ckpt_dir": "/mnt/h/opencood_project/pretrained_models/second_late_fusion_spconv2",
+ "fusion_method": "late",
+ "ap_convention_for_pass_fail": "no_global_sort (the zoo's own convention)",
+ "tolerance": 0.005,
+ "zoo_targets": {
+  "source": "/home/josh/cooperative_semantic_perception/OpenCOOD/README.md (benchmark table, SECOND / Late row)",
+  "column_meaning": "AP@0.7 for no-compression/compression",
+  "bandwidth_mbit_before_after": "**0.024**/**0.024**",
+  "second_attentive_fusion": {
+   "test": 0.775,
+   "test_culver_city": 0.682
+  },
+  "second_attentive_fusion_compression": {
+   "test": 0.775,
+   "test_culver_city": 0.682
+  },
+  "second_late_fusion": {
+   "test": 0.775,
+   "test_culver_city": 0.682
+  }
+ },
+ "environment": {
+  "torch": "2.11.0+cu128",
+  "cuda": true
+ },
+ "load_check": {
+  "original": {
+   "tensors": 160,
+   "missing_keys": 0,
+   "unexpected_keys": 0,
+   "shape_mismatches": 12,
+   "explained_by_permute_4_0_1_2_3": 12,
+   "unexplained": 0,
+   "mismatched_keys": [
+    "backbone_3d.conv1.0.0.weight",
+    "backbone_3d.conv2.0.0.weight",
+    "backbone_3d.conv2.1.0.weight",
+    "backbone_3d.conv2.2.0.weight",
+    "backbone_3d.conv3.0.0.weight",
+    "backbone_3d.conv3.1.0.weight",
+    "backbone_3d.conv3.2.0.weight",
+    "backbone_3d.conv4.0.0.weight",
+    "backbone_3d.conv4.1.0.weight",
+    "backbone_3d.conv4.2.0.weight",
+    "backbone_3d.conv_input.0.weight",
+    "backbone_3d.conv_out.0.weight"
+   ]
+  },
+  "converted": {
+   "tensors": 160,
+   "missing_keys": 0,
+   "unexpected_keys": 0,
+   "shape_mismatches": 0,
+   "explained_by_permute_4_0_1_2_3": 0,
+   "unexplained": 0,
+   "mismatched_keys": []
+  },
+  "strict_load": "OK -- all keys matched"
+ },
+ "splits": {
+  "test": {
+   "frames": 2170,
+   "gt_boxes": {
+    "0.3": 33089,
+    "0.5": 33089,
+    "0.7": 33089
+   },
+   "no_global_sort": {
+    "ap_30": 0.8522687342586308,
+    "ap_50": 0.8465176098853529,
+    "ap_70": 0.7751900843199854
+   },
+   "global_sort": {
+    "ap_30": 0.9192863567296723,
+    "ap_50": 0.9158972236643919,
+    "ap_70": 0.8703348167403693
+   },
+   "zoo_target_ap_70": 0.775,
+   "observed_ap_70_no_global_sort": 0.7751900843199854,
+   "delta": 0.0001900843199853508,
+   "within_tolerance": true
+  },
+  "test_culver_city": {
+   "frames": 550,
+   "gt_boxes": {
+    "0.3": 22542,
+    "0.5": 22542,
+    "0.7": 22542
+   },
+   "no_global_sort": {
+    "ap_30": 0.8314628021796933,
+    "ap_50": 0.8081280786698041,
+    "ap_70": 0.6822435533835222
+   },
+   "global_sort": {
+    "ap_30": 0.8399879815383178,
+    "ap_50": 0.8271589969304374,
+    "ap_70": 0.7426665221896115
+   },
+   "zoo_target_ap_70": 0.682,
+   "observed_ap_70_no_global_sort": 0.6822435533835222,
+   "delta": 0.00024355338352211042,
+   "within_tolerance": true
+  }
+ },
+ "verdict": "PASS",
+ "meaning": "PASS: the layout-converted checkpoint reproduces the published AP within tolerance, so it is the official weights losslessly reordered. FAIL: the conversion is NOT established and P4-B stays blocked -- nothing is retuned to make a number fit (E5)."
+}

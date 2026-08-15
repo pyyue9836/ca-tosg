@@ -1,0 +1,38 @@
+{
+ "schema": "catosg-p4b-dataset/1",
+ "label": "second-backbone arm, not deployed",
+ "generated_by": "python projects/ca_tosg/evaluation/second_arm_pipeline.py --build-dataset",
+ "cues": "20 of 21 task cues are detector-independent (LiDAR geometry / scene metadata) and are reused verbatim from the mainline dataset; ego_num_objects is the one detector-dependent cue and comes from SECOND's own ego cache",
+ "splits": [
+  {
+   "split": "validate",
+   "frames": 1980,
+   "path": "/home/josh/cooperative_semantic_perception/ca-tosg/data/p4b/dataset_validate_second.csv",
+   "md5": "777da0e9a548d7e078e4f0b8dbf59999",
+   "ego_f1": 0.75559,
+   "late_f1": 0.86886,
+   "compressed_f1": 0.89673,
+   "ego_num_objects": 26.459
+  },
+  {
+   "split": "test",
+   "frames": 2170,
+   "path": "/home/josh/cooperative_semantic_perception/ca-tosg/data/p4b/dataset_test_second.csv",
+   "md5": "2b61504245ca63697d6c46294591c05d",
+   "ego_f1": 0.83793,
+   "late_f1": 0.87928,
+   "compressed_f1": 0.90377,
+   "ego_num_objects": 15.929
+  },
+  {
+   "split": "culver",
+   "frames": 550,
+   "path": "/home/josh/cooperative_semantic_perception/ca-tosg/data/p4b/dataset_culver_second.csv",
+   "md5": "ea006a76f36cf68d88d66cc29b45e050",
+   "ego_f1": 0.83726,
+   "late_f1": 0.87942,
+   "compressed_f1": 0.93935,
+   "ego_num_objects": 35.493
+  }
+ ]
+}

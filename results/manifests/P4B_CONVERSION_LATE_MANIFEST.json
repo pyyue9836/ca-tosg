@@ -1,0 +1,369 @@
+{
+ "schema": "catosg-p4b-conversion-manifest/1",
+ "label": "PRODUCT of this repository: layout-converted copies of an external input",
+ "protocol": "CA-TOSG P4-B-c (docs/experiment_protocol.md Change-log P4-B-c)",
+ "generated_by": "python tools/convert_second_checkpoint.py",
+ "generated": "2026-08-15T03:12:23.977436+00:00",
+ "input_manifest": "results/manifests/P4B_MANIFEST.json",
+ "reason": "The zoo weights were saved under spconv 1.2.1 (RSCK = kD,kH,kW,C_in,C_out); this environment has spconv 2.3.8, which stores kernels as KRSC = C_out,kD,kH,kW,C_in. Lossless axis reorder of the sparse-conv kernels only; every other tensor is copied unchanged. Same permutation as spconv's own RSCK migration branch, applied once (spconv 2.3.8's convenience hook applies it twice and still fails to load).",
+ "conversion": {
+  "permutation": [
+   4,
+   0,
+   1,
+   2,
+   3
+  ],
+  "applies_to": "5-D *.weight tensors under backbone_3d (sparse-conv kernels)",
+  "all_other_tensors": "copied byte-identically"
+ },
+ "spconv_hook_check": {
+  "spconv_version": "2.3.8",
+  "all_weight_is_krsc": true,
+  "rsck_branches_in_hook": 2,
+  "reference_permutation_from_spconv_source": [
+   4,
+   0,
+   1,
+   2,
+   3
+  ],
+  "permutation_used_here": [
+   4,
+   0,
+   1,
+   2,
+   3
+  ],
+  "conv_input_kernel_shape_applied_once": [
+   16,
+   3,
+   3,
+   3,
+   4
+  ],
+  "conv_input_kernel_shape_applied_twice": [
+   4,
+   16,
+   3,
+   3,
+   3
+  ],
+  "note": "ALL_WEIGHT_IS_KRSC is True, so the hook's second RSCK branch runs after the first: the permutation is applied twice and the resulting shape is wrong. The single application is the intended conversion."
+ },
+ "environment": {
+  "torch": "2.11.0+cu128"
+ },
+ "variants": {
+  "second_late_fusion": {
+   "source": {
+    "path": "/mnt/h/opencood_project/pretrained_models/second_late_fusion/latest.pth",
+    "sha256": "5304439ee5ae2a984ee31a85d0bb21faa68b63b35ffd2021a23dd8b4c0d881d8",
+    "bytes": 21274447
+   },
+   "converted": {
+    "path": "/mnt/h/opencood_project/pretrained_models/second_late_fusion_spconv2_tmp/second_late_fusion/latest.pth",
+    "sha256": "3bc2b714dfd7db45a04d09269e237f74683efb44e47074140da5265ff77cadf1",
+    "bytes": 21258841
+   },
+   "config_yaml_sha256": "575b5fce2c02039ed1fcad44312de1ffdceb89eba39ec57415f500cff47a6393",
+   "tensors_total": 160,
+   "tensors_permuted": 12,
+   "tensors_copied_unchanged": 148,
+   "per_key_rules": [
+    {
+     "key": "backbone_3d.conv_input.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      4,
+      16
+     ],
+     "to_shape": [
+      16,
+      3,
+      3,
+      3,
+      4
+     ]
+    },
+    {
+     "key": "backbone_3d.conv1.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      16,
+      16
+     ],
+     "to_shape": [
+      16,
+      3,
+      3,
+      3,
+      16
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      16,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      16
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv2.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      32
+     ],
+     "to_shape": [
+      32,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      32,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      32
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv3.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.0.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.1.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv4.2.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      3,
+      3,
+      64,
+      64
+     ],
+     "to_shape": [
+      64,
+      3,
+      3,
+      3,
+      64
+     ]
+    },
+    {
+     "key": "backbone_3d.conv_out.0.weight",
+     "permute": [
+      4,
+      0,
+      1,
+      2,
+      3
+     ],
+     "from_shape": [
+      3,
+      1,
+      1,
+      64,
+      128
+     ],
+     "to_shape": [
+      128,
+      3,
+      1,
+      1,
+      64
+     ]
+    }
+   ]
+  }
+ },
+ "verification": {
+  "status": "PENDING",
+  "note": "filled in by tools/verify_second_zoo_ap.py; until then this checkpoint is NOT established and may not be used for any result"
+ }
+}

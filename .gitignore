@@ -40,3 +40,4 @@ baselines/scomcp/outputs/
 *.fdb_latexmk
 *.fls
 *_overleaf.zip
+data/p4b/
