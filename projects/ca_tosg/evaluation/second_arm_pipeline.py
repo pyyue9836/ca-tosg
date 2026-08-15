@@ -246,6 +246,15 @@ def run_replay(data_dir, dataset_names, grid_dir, manifest, out_dir, prov_dir):
     os.makedirs(prov_dir, exist_ok=True)
     try:
         D.main()
+        # deployment.py always writes r9_decision.csv. For THIS arm that file is a side effect of
+        # reusing the mainline script unmodified, not a decision: the arm is descriptive with
+        # paired CIs and delta is neither used nor changed here. Publishing it would leave a second
+        # file that reads like an R9 adjudication, so it is removed on every run rather than
+        # explained away in a footnote nobody reads next to the CSV.
+        stray = os.path.join(out_dir, 'r9_decision.csv')
+        if os.path.exists(stray):
+            os.remove(stray)
+            print(f'removed {stray} -- this arm takes no decision (P4-B-f)')
     finally:
         _patch(D, **old)
 

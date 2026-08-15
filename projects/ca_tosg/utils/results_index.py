@@ -36,10 +36,10 @@ RULES = [
      'python tools/bev_tensor_probe.py',
      'P4-B-c step 4: transmitted BEV tensor shapes before/after the AutoEncoder bottleneck '
      '(superseded by the P4B_PROBE_* files, which cover both backbones and both conventions)'),
-    (r'^p4b/(replay_\w+|replay_summary|action_distribution|perclass_ELF|r9_decision)\.csv$',
+    (r'^p4b/(replay_\w+|replay_summary|action_distribution|perclass_ELF)\.csv$',
      'python projects/ca_tosg/evaluation/second_arm_pipeline.py --stage replay',
-     'second-backbone arm, NOT DEPLOYED; r9_decision.csv is a side effect of reusing the mainline '
-     'script and is NOT a decision for this arm'),
+     'second-backbone arm, NOT DEPLOYED (descriptive + paired CI only; the arm publishes no '
+     'decision file -- see second_arm_pipeline.run_replay)'),
     (r'^p4b/P4B_ANOMALY_REPORT\.md$',
      'python projects/ca_tosg/evaluation/p4b_anomaly_report.py',
      'PROTOCOL section 8 checklist on the second-backbone arm (3 of 7 expectations not met)'),

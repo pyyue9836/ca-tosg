@@ -91,3 +91,15 @@ RX three-way
 RX 3-way
 RX Pareto-dominat
 RX Pareto-optimal
+
+# 19 E-P4Bf (2026-08-15): the second-backbone arm FUSED -- the frozen selector does NOT transfer to
+#    SECOND under the equal-budget protocol (rho_E 0.000/0.004-0.016 vs oracle 0.302/0.353;
+#    selector-vs-oracle agreement 0.833 -> 0.578 -> 0.534; paired dF1 negative at every
+#    off-validate point). Any claim that the second backbone validates, confirms or demonstrates
+#    generalisation is therefore contradicted by the measurement and is locked out. The ALLOWED
+#    wording is "in-sample effective, does not transfer under the equal-budget protocol".
+RX second backbone validates
+RX validates generalization
+RX validates generalisation
+RX backbone-independence
+RX confirms backbone

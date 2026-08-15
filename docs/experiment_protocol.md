@@ -1844,9 +1844,8 @@ written into the paper's conclusions; the paper reports only the frozen selector
     | test | 0.10 / 0.20 / 0.30 | 0.87912 / 0.87944 / 0.87944 | 0.88051 / 0.88417 / 0.88603 | 0.0239 / 0.0381 / 0.0381 | 0.0724 / 0.2168 / 0.3125 | −0.0014 / −0.0047 / −0.0066 |
     | Culver | 0.10 / 0.20 / 0.30 | 0.87942 / 0.87978 / 0.87978 | 0.88235 / 0.89147 / 0.89648 | 0.0240 / 0.0319 / 0.0319 | 0.0718 / 0.2174 / 0.3146 | −0.0029 / −0.0117 / −0.0167 |
 
-    Everything is labelled **"second-backbone arm, not deployed"**. **No adjudication:**
-    `results/p4b/r9_decision.csv` is emitted as a side effect of reusing the deployment script
-    unmodified and is **not** a decision for this arm; δ was neither used nor changed.
+    Everything is labelled **"second-backbone arm, not deployed"**. **No adjudication:** δ was
+    neither used nor changed, and the arm publishes **no decision file** — see E-P4Bf below.
   - **(6) §8 checklist: 3 of 7 expectations NOT met** (`results/p4b/P4B_ANOMALY_REPORT.md`).
     Reported, not repaired — no retrain, no data adjustment, no δ.
     - **Rayleigh must show both E and L: FAILS off validate.** The selector's `ρ_E` is 0.000
@@ -1862,6 +1861,45 @@ written into the paper's conclusions; the paper reports only the frozen selector
     **Reading, per §8 rule 3:** on the SECOND backbone the frozen selector does not transfer; the
     conclusion changes, the experiment does not. Whether this belongs in the paper, and how, is
     Peiyi's call — nothing was written into `main.tex`.
+
+- **E-P4Bf (2026-08-15) — FUSE EVENT, second-backbone arm: three §8 expectations not met. The
+  frozen selector does not transfer to the SECOND backbone. Recorded as an erratum-grade finding,
+  with the wording locked.**
+  Registered as a fuse, not a footnote: §8 handling rule 1 is *stop and report as-is*, rule 2
+  forbids annotating it away as an artefact, and rule 3 says the finding changes, not the data.
+  Nothing was retrained, no data was adjusted, δ was not touched, and `main.tex` was not edited.
+  Evidence: `results/p4b/P4B_ANOMALY_REPORT.md`, `results/p4b/replay_summary.csv`,
+  `results/p4b/perclass_ELF.csv`, `results/p4b/action_distribution.csv`.
+  - **Fuse 1 — Rayleigh must show both E and L.** The frozen SECOND selector's `ρ_E` is **0.000**
+    on Culver-City and **0.004–0.016** on test, while the oracle spends **0.302 / 0.353** there. On
+    validate it tracks the oracle (0.142 vs 0.142). This is the mainline's E-collapse, **worse** on
+    a second backbone.
+  - **Fuse 2 — selector-vs-oracle agreement collapses off validate:** **0.833 → 0.578 (test) →
+    0.534 (Culver)**. Per class on test, E recall **0.027** and F recall **0.071**; on Culver E
+    recall **0.000**. The selector degenerates to near-always-`L` outside its training split.
+  - **Fuse 3 — paired ΔF1 versus the budget-matched τ\* is negative at every off-validate point**
+    (−0.0014 to −0.0167, all 95 % CIs excluding zero) while positive on validate (+0.0058 to
+    +0.0095). The arm's large payload reductions (0.67–0.90) are a **consequence** of the collapse
+    to `L`, not evidence of good selection, and must never be quoted as a saving on their own.
+  - **Locked wording for this arm.**
+    - **FORBIDDEN:** *"the second backbone validates generalization"* — and every paraphrase of it
+      (*"generalises across backbones"*, *"confirms backbone-independence"*, *"transfers to
+      SECOND"*). The measurement is the opposite. Also forbidden: quoting the 0.67–0.90 payload
+      reductions as a communication saving without Fuse 3 attached.
+    - **ALLOWED:** *"in-sample effective, does not transfer under the equal-budget protocol"*, and
+      statements of the three fuses with their own numbers and CIs.
+    - Both strings are added to `tests/stale_fingerprints.md` so the forbidden phrasing cannot
+      re-enter `main.tex` unnoticed.
+  - **Scope of the claim.** This is one backbone under one equal-budget controlled protocol
+    (`B_F^SECOND ≡ 0.99 Msym`, mainline `N_cw` and BLER table). It says the *frozen mainline
+    selection procedure* does not transfer to SECOND as run here; it does not establish that no
+    selector could, and it does not revisit any P2 decision.
+  - **Housekeeping tied to this fuse.** `results/p4b/r9_decision.csv` is **deleted and no longer
+    published**. It was a side effect of reusing `deployment.py` unmodified, never a decision for
+    this arm; left in place it would eventually be read as a second R9 adjudication regardless of
+    the surrounding prose. Reference-gated before deletion — nothing consumes it as data; the only
+    mentions were this protocol, the results-index rule and the arm manifest, all updated. The arm
+    driver now removes the file after every run so it cannot silently return.
 
 ## Appendix A — P2 freeze summary (P2-D)
 

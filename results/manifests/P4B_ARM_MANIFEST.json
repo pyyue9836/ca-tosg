@@ -59,7 +59,7 @@
   "FROZEN_MANIFEST.json_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc",
   "note": "recorded as evidence the deployed P2 freeze was not written to by this arm; the arm writes only data/p4b/, results/p4b/ and P4B_* manifests"
  },
- "adjudication": "NONE. This arm is DESCRIPTIVE with paired CIs only. results/p4b/r9_decision.csv is emitted as a side effect of reusing the mainline deployment script unmodified; it is NOT a decision for this arm and delta was neither used nor changed here.",
+ "adjudication": "NONE. This arm is DESCRIPTIVE with paired CIs only; delta was neither used nor changed. deployment.py emits r9_decision.csv unconditionally, so the arm driver DELETES it after every run (P4-B-f): a published decision file would eventually be read as a second R9 adjudication no matter what the surrounding prose said.",
  "anomaly_checklist": "results/p4b/P4B_ANOMALY_REPORT.md -- 3 of 7 expectations NOT met (fuses), reported as-is per PROTOCOL section 8 handling rule 3.",
  "replay": {
   "validate_B010": {
