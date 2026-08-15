@@ -34,6 +34,9 @@ def parse():
     p = argparse.ArgumentParser()
     p.add_argument('--hypes_yaml', required=True)
     p.add_argument('--model_dir', default='', help='resume from this run dir')
+    p.add_argument('--max-steps', dest='max_steps', type=int, default=0,
+                   help='SC-2: hard cap on global optimiser steps (0 = use epoches). The budget is '
+                        'pre-registered; the reached count is written to the run directory.')
     p.add_argument('--warm_start', default='',
                    help='checkpoint .pth to initialise weights from (epoch reset to 0)')
     return p.parse_args()
@@ -91,9 +94,19 @@ def main():
     writer = SummaryWriter(saved_path)
 
     epoches = hypes['train_params']['epoches']
+    max_steps = int(getattr(opt, 'max_steps', 0) or 0)
+    if max_steps:
+        # SC-2: run to a pre-registered STEP budget, not an epoch count, so this arm is trained on
+        # the same footing as the JSCC arm (4,000 steps). Hard stop on the global counter.
+        epoches = max(1, -(-max_steps // max(1, num_steps)))
+        print(f'[SC-2] step budget {max_steps} -> at most {epoches} epoch(s) of {num_steps} steps')
     print('Training start (stage config: %s)' % hypes['name'])
+    gstep = 0
+    stop = False
 
     for epoch in range(init_epoch, max(epoches, init_epoch)):
+        if stop:
+            break
         if hypes['lr_scheduler']['core_method'] != 'cosineannealwarm':
             scheduler.step(epoch)
         else:
@@ -103,6 +116,10 @@ def main():
 
         pbar = tqdm.tqdm(total=len(train_loader), leave=True)
         for i, batch_data in enumerate(train_loader):
+            if max_steps and gstep >= max_steps:
+                stop = True
+                break
+            gstep += 1
             model.train()
             optimizer.zero_grad()
             batch_data = train_utils.to_device(batch_data, device)
@@ -127,6 +144,13 @@ def main():
             optimizer.step()
             if hypes['lr_scheduler']['core_method'] == 'cosineannealwarm':
                 scheduler.step_update(epoch * num_steps + i)
+
+        if stop:
+            torch.save(model.state_dict(), os.path.join(saved_path, 'net_final.pth'))
+            with open(os.path.join(saved_path, 'STEPS.txt'), 'w') as fh:
+                fh.write(f'{gstep}\n')
+            print(f'[SC-2] step budget reached: {gstep} steps -> net_final.pth')
+            break
 
         if epoch % hypes['train_params']['save_freq'] == 0:
             torch.save(model.state_dict(),
