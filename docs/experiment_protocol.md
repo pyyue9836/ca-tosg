@@ -1755,6 +1755,45 @@ written into the paper's conclusions; the paper reports only the frozen selector
   checkpoint was on 2026-08-14, and dropped into
   `/mnt/h/opencood_project/pretrained_models/second_late_fusion/`.
 
+- **P4-B-g (2026-08-15, PRE-REGISTERED before the load test and before any forward pass) — the
+  SECOND late checkpoint is on disk; run the continuation end to end.**
+  Input recorded first: `/mnt/h/opencood_project/pretrained_models/second_late_fusion/`,
+  `latest.pth` sha256 `5304439e…` (21,274,447 B), `config.yaml` sha256 `575b5fce…` (2,389 B),
+  `core_method: second`, `name: second_late_fusion_low_res`, `LateFusionDataset`. Source: OpenCOOD
+  zoo row *"Naive Late | 1.2.1 | SECOND | Late"*, Box file `1621113752957`, fetched manually.
+  Labelled **EXTERNAL INPUT** in `P4B_MANIFEST.json`, as the intermediate checkpoint was.
+  - **(2) Load test, then a decisive AP reproduction before any use.** If the failure is again the
+    spconv 1.x→2.x kernel axis order, the **already-verified** converter is reused unchanged, with
+    its per-tensor assertions (key set, element multiset, dtype, invertibility). **Expectation
+    E-Lg1, the stop:** official `late` inference with the resulting weights must reproduce that
+    zoo row — **AP@0.7 = 0.775 (Default Towns) / 0.682 (Culver City)**, tolerance **±0.005**, on the
+    zoo's own no-global-sort convention, targets parsed from OpenCOOD's README at run time. A miss
+    stops the batch and is reported as measured: **no retuning, no metric substitution, no
+    alternative weight source.**
+  - **(3) `eff_L` caches** for the three splits: per-frame object-level fused F1 under the same
+    scorer, the same canonical union GT and the same IoU-0.5 unit-score convention as the P4-B-e
+    E/F caches, into `gs_rerun_second/`, PointPillar caches untouched, with a PROVENANCE record.
+    **Sanity cross-check, reported not adjudicated:** the zoo row lists this model's bandwidth as
+    **0.024** Mbit, identical to the mainline `B_L`; that agreement is recorded in the manifest as
+    independent corroboration of the object-level payload convention.
+  - **(4) The remaining four steps.** **Correction to the brief, stated plainly: the parameterised
+    pipeline does not exist yet.** It was offered at the end of P4-B-f and not greenlit, so it is
+    built here, and it is held to the same standard as the P5-5 E-8 gate: **each parameterised stage
+    must first reproduce the committed mainline product bit-for-bit when pointed at the mainline
+    inputs**, and only then may it be pointed at SECOND. **Expectation E-Lg2, the second stop:**
+    grid expansion, LOSO, the budget walk and the replay must each reproduce their committed
+    mainline counterpart exactly; any stage that does not is wrong and the SECOND numbers from it
+    are not produced. Equal-budget convention unchanged: `B_F^SECOND ≡ 0.99 Msym`, `N_cw = 3,960`,
+    mainline BLER table, with `tests/test_payload.py` links (5i)–(5k) still enforcing it.
+  - **(5) Outputs** in the mainline format — three budgets × three splits with F1, payload, action
+    distribution, and per-class E/L/F precision/recall/confusion — plus an independent
+    `P4B_MANIFEST` carrying the deployed `FROZEN_MANIFEST.json` sha256 as untouched-evidence.
+    Everything labelled **"second-backbone arm, not deployed"**. Descriptive with paired CIs;
+    **no decision, no adjudication, δ untouched.**
+  - **(6) §8 anomaly checklist runs as written. Any item off expectation is a fuse: report, do not
+    retrain, do not adjust the data, do not touch δ. Where expectation and measurement disagree,
+    the conclusion changes, not the experiment.**
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
