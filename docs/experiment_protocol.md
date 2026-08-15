@@ -1901,6 +1901,47 @@ written into the paper's conclusions; the paper reports only the frozen selector
     mentions were this protocol, the results-index rule and the arm manifest, all updated. The arm
     driver now removes the file after every run so it cannot silently return.
 
+- **SC-1 (2026-08-15, PLAN ONLY — nothing trained, nothing evaluated, no GPU used) — SComCP
+  baseline: inventory and pre-registration proposal.** Full plan: `docs/scomcp_plan.md`.
+  Phase-1 item 3 (producing `results/baselines/scomcp.csv`) does **not** begin until this is
+  approved.
+  - **Inventory.** `baselines/scomcp/` is a code-only scaffold: 11 files, 72 KB, three stage
+    configs, a 3-stage trainer and a per-SNR sweep. The two model modules it needs
+    (`scomcp_fuse.py`, and the `variant: scomcp` dispatch in
+    `point_pillar_importance_map_jscc.py`) **do exist**. No new dependency.
+  - **What blocks real numbers: there is no checkpoint and none can be downloaded.** No stage has
+    been trained to completion; there is no `scomcp*` run directory on the H: drive; and SComCP
+    (TVT 2026) publishes no weights, so unlike the SECOND arm there is nothing to hash and record
+    as an EXTERNAL INPUT. **Training is the only route to a real number.** `results/baselines/
+    scomcp.csv` is correctly absent rather than stubbed (`NOT-CREATED` in `RESTRUCTURE_MAP.csv`),
+    and `run_scomcp.sh` still carries pre-restructure paths and an unedited `BASE_CKPT`.
+  - **Three decisions that change the numbers, raised before any compute, each needing a ruling:**
+    (a) **training split** — the configs use `train` (6,764 frames) as the paper does, while this
+    repository's standing rule is *training may use `validate` only*. Proposed: train on
+    `validate` and disclose that the arm is a controlled in-repository reproduction whose absolute
+    AP is expected **below** the paper's ≈0.88, never a reproduction of the paper's numbers. The
+    two properties cannot both be had.
+    (b) **step budget** — the configs ask 30+30+20 epochs ≈ **158,400 steps** (~17 h); the JSCC arm
+    that SComCP must be comparable to was trained for **4,000 steps**. Proposed
+    **4,000/4,000/2,000**, pre-registered, no post-hoc tuning.
+    (c) **warm start** — proposed: the registered Rayleigh JSCC stage-2 checkpoint (md5
+    `c5a02fd77154`), i.e. SComCP starts from the baseline it is meant to improve on.
+  - **Proposed scope: isomorphic to the Appendix-A JSCC arm** — per-SNR config template →
+    `--save_npy` inference → per-frame F1 through the **same scorer, same canonical union GT, same
+    IoU-0.5 unit-score convention** as `late_f1`/`compressed_f1`/`jscc_f1` → same-table, same-figure
+    descriptive comparison against `L`, `F` and ImportanceMapJSCC, AWGN + Rayleigh, on the
+    pre-registered 11-point SNR grid. The 200-realisation replay is **CPU-only** and adds no GPU.
+  - **Flagged now rather than discovered later:** a same-table comparison needs a **payload
+    convention for SComCP** (its sweep reports `com_rate`; the mainline axis is Msym/frame at
+    rate-1/2 + 16-QAM). This is the SECOND arm's question again; the equal-budget answer is
+    available but is **not** being picked silently.
+  - **GPU estimate, anchored on measured cost** (the JSCC sweep: ~10 GPU-h for 36 runs ⇒ ≈0.28 h per
+    channel×SNR×split): **A** full 3 splits ≈20 h · **B** validate+test ≈14 h (**recommended**) ·
+    **C** JSCC-parity 6 SNR ≈8.5 h.
+  - **Fuse conditions to be registered with the run:** if validate AP@0.5 at 20 dB AWGN falls below
+    the `Fixed L` reference, or per-frame F1 is flat in SNR, the run stops and reports — that is a
+    scaffold-does-not-train finding, not a finding about SComCP, and the two may not be conflated.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is
