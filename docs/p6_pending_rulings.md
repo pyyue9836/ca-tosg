@@ -7,7 +7,7 @@
 | list | rows |
 |---|---|
 | A — figure / caption / body | 33 |
-| B — ledger claims with no located evidence | 8 |
+| B — ledger claims with no located evidence | 4 |
 
 ## List A — figure numbers vs caption vs body (33)
 
@@ -56,7 +56,7 @@ State is condition-aware: a value counts as quoted only in a sentence whose stat
 - caption only: 5
 - nowhere: 1
 
-## List B — ledger claims with no located evidence (8)
+## List B — ledger claims with no located evidence (4)
 
 `no distinctive number` = the claim carries only structural constants, so it needs a citation, not an experiment. `unlocated` = it carries real numbers that no committed result file holds.
 
@@ -65,31 +65,11 @@ State is condition-aware: a value counts as quoted only in a sentence whose stat
 | B1 | `c48c60a` | System Model and Problem Formulation [sec:system] → Message Candidates [sec:candidates] | 121 | 16, 1, 2 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
 | B2 | `c998f7d` | System Model and Problem Formulation [sec:system] → Communication Cost | 189 | 3.96, 1.98, 1, 2, 4, 8, 16, 256 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
 | B3 | `c499e2c` | Experimental Setup [sec:exp] → Evaluation Metrics | 367 | 0.5, 0.7, 1 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B4 | `cdc39e3` | Results and Analysis → Generalisation to OPV2V Test and Culver-City Splits [sec:generalisation] | 561 | 99.3, 99.8 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go |
-| B5 | `cec993e` | Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold] | 700 | 0, 0.30, 1, 1.54 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/main/r10c_decision_log_validate_B030.csv` — not enough to attribute) |
-| B6 | `cdffce3` | Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold] | 710 | 1, 0.001 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/sensitivity/scene_subsets.csv` — not enough to attribute) |
-| B7 | `c314995` | Results and Analysis → Deployment Robustness and Cost [sec:robustness] | 799 | +0.020, 1 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/sensitivity/nonuniform_snr.csv` — not enough to attribute) |
-| B8 | `c2aa3e2` | When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware] | 900 | 55, 70, +0.031, 1 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/sensitivity/scene_subsets.csv` — not enough to attribute) |
+| B4 | `c2aa3e2` | When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware] | 895 | 55, 70, +0.031, 1 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/sensitivity/scene_subsets.csv` — not enough to attribute) |
 
 ### B — full claim text for the rows proposed for deletion or recompute
 
-**B4 `cdc39e3` — Results and Analysis → Generalisation to OPV2V Test and Culver-City Splits [sec:generalisation], line 561**
-
-> Both intervals are budget-indexed and are read from replay\_summary.csv and fixed\_references.csv; the single-number recovers 99.3--99.8\% of the oracle claim of an earlier version conflated the three budgets and is withdrawn.
-
-**B5 `cec993e` — Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold], line 700**
-
-> Neither half of the input is sufficient on its own, and the shape of the failure is the informative part: given only the channel state the selector stops requesting features altogether at the two tighter budgets (feature-request rate 0, payload pinned at B_L), and at B_=0.30 it does reach a higher F1 than the full selector but only by spending 1.54 × the channel use (Section [ref]).
-
-**B6 `cdffce3` — Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold], line 710**
-
-> Dropping the range, density, or object-count cue groups changes F1 by <0.001; the channel-averaged payloads are in Table [ref].
-
-**B7 `c314995` — Results and Analysis → Deployment Robustness and Cost [sec:robustness], line 799**
-
-> The framework also spans the full fading-severity range: replacing the AWGN/Rayleigh limits with Rician fading moves the feature-activation knee smoothly between them as the line-of-sight component strengthens, and the two-regime result of Appendix [ref] reproduces under OFDM (in-distribution +0.020 F1 edge).
-
-**B8 `c2aa3e2` — When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware], line 900**
+**B4 `c2aa3e2` — When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware], line 895**
 
 > The selector recovers 55--70\% of the clairvoyant oracle headroom (e.g.\ +0.031 F1 on AWGN test): the graceful-channel decision is genuinely content-bound and carried by the ego-side cues, a gain no SNR threshold can reach.
 

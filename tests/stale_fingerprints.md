@@ -29,6 +29,12 @@
 # 15 transitive-verb evasion (TG-10)       RX: (cut|save)[a-z' ]{0,28}channel use by  (retired "cut/save
 # 16 acc-vs-oracle escape (TG-22)          RX: reproduces \$[0-9] ; decision agreement ; base rate ; selection accuracy (item-6 killed the metric; generalisation prose kept it via "reproduces X%")
 #    channel use by X%"; fixed to "lower ... deployed channel use"; narrow enough to skip "reduce payload")
+# 17 v3-selector importances (R17-C)      RX: 34\.9 ; 27\.5 ; 62\.4 ; 0\.349 ; 0\.275 ; "62\%" IN AN IMPORTANCE CONTEXT
+#    (the deployed selector_B020's are 24.8 / 22.3 / 47.1; the retired v3 model's are the ones
+#     above. The abstract survived the first errata pass because it printed the ROUNDED 62\%,
+#     which no pattern covered -- hence the context-bound rounded form here. Same construction
+#     as #9: a payload/importance word must appear on the line, so a bare 62\% elsewhere is
+#     untouched. NEGATIVE-TESTED: the pre-R17 abstract sentence trips it, the current one does not.)
 
 ## MACHINE-READABLE PATTERNS (lines beginning "RX "; the exit grep extracts col-4-onward)
 RX 0\.2475
@@ -118,3 +124,9 @@ RX confirms backbone
 RX matched payload
 RX matched channel use
 RX budget-matched
+RX 34\.9
+RX 27\.5
+RX 62\.4
+RX 0\.349
+RX 0\.275
+RX (6[23]\\%[^\n]{0,140}(importance|ego-side cues)|(importance|ego-side cues)[^\n]{0,140}6[23]\\%)

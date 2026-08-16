@@ -38,6 +38,7 @@ GATES = [
     ('content',   'bandit fold scaling',  [PY, 'tests/test_bandit_fold_scaling.py']),
     ('content',   'P3 SNR support',       [PY, 'tests/test_p3_snr_support.py']),
     ('content',   'intra-repo imports',   [PY, 'tests/test_intra_repo_imports.py']),
+    ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
 ]
 
 

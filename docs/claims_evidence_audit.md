@@ -6,20 +6,20 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| ANALYTIC | 74 |
-| FROZEN | 31 |
-| PENDING (unlocated) | 5 |
-| FROZEN [2/2] (located, ledger cell still blank) | 3 |
+| ANALYTIC | 72 |
+| FROZEN | 38 |
 | ANALYTIC [2/4] (located, ledger cell still blank) | 1 |
 | ANALYTIC [5/6] (located, ledger cell still blank) | 1 |
+| FROZEN [2/2] (located, ledger cell still blank) | 1 |
 | FROZEN [2/3] (located, ledger cell still blank) | 1 |
 | FROZEN [2/4] (located, ledger cell still blank) | 1 |
 | FROZEN [4/9] (located, ledger cell still blank) | 1 |
 | FROZEN [6/7] (located, ledger cell still blank) | 1 |
 | LEGACY-ENGINE | 1 |
 | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | 1 |
+| PENDING (unlocated) | 1 |
 
-Total: **121** claims across **37** (sub)sections.
+Total: **120** claims across **37** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -40,6 +40,7 @@ Total: **121** claims across **37** (sub)sections.
 | `c912365` | ANALYTIC | 2, 0.5, 0.10, 0.20, 0.30 | Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channel… |
 | `c6fcc17` | FROZEN | 0.0267, 0.0027, 0.0892 | 0.0267 on validate, 0.0027 on test and 0.0892 on Culver-City. |
 | `c4ac1dc` | FROZEN | 6.9, 18.9, 1, 2, 16 | What the selector does buy is channel use: averaged over all channel states it spends 6.9--18.9\% of the per-frame channel use of … |
+| `c4e035a` | FROZEN | 47.1, 52.9, 21 | The channel-type and estimated SNR features are the two individually strongest cues, jointly accounting for 47.1\% of the selector… |
 | `c39002e` | FROZEN | 59.9, 100, 10 | The deployed selector incurs 59.9 ms per frame on a single CPU core (the slowest of the three frozen selectors), fitting the 100 m… |
 
 ### Introduction
@@ -130,7 +131,7 @@ Total: **121** claims across **37** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c870c12` | FROZEN [2/2] (located, ledger cell still blank) | 59.9, 5.3, 95, 66.6, 1,000, 1, 100, 10 | Third, its per-frame inference cost on a single CPU core is 59.9 ± 5.3 ms (P95 = 66.6 ms), measured over 1,000 batch-1 trials per … |
+| `c870c12` | FROZEN | 59.9, 5.3, 95, 66.6, 1,000, 1, 100, 10 | Third, its per-frame inference cost on a single CPU core is 59.9 ± 5.3 ms (P95 = 66.6 ms), measured over 1,000 batch-1 trials per … |
 | `c020074` | ANALYTIC | 0.999 | Before taking the argmax in Eq. [eqref], the oracle applies a feasibility mask: any mode whose frame-level block-error rate exceed… |
 
 ### Experimental Setup [sec:exp] → Dataset and Implementation
@@ -216,8 +217,9 @@ Total: **121** claims across **37** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c556938` | FROZEN | 24.8, 22.3, 47.1 | The two channel-side features dominate: the channel-type indicator c_t contributes 24.8\% of importance and the estimated SNR _t a… |
-| `cb85b60` | ANALYTIC | 3.9, 4 | The next strongest scene-side cue, pcd\_mean\_range, contributes only 3.9\%, and no individual perception-side cue exceeds 4\%. |
+| `c74b952` | FROZEN [2/2] (located, ledger cell still blank) | 24.8, 22.3 | The two channel-side features are the two individually strongest cues: the channel-type indicator c_t contributes 24.8\% of import… |
+| `c6a6d66` | FROZEN | 3.9, 4 | The next strongest cue, the scene-side pcd\_mean\_range, contributes only 3.9\%, and no individual perception-side cue exceeds 4\%… |
+| `cdb7a58` | FROZEN | 21, 52.9, 47.1 | In aggregate, however, the 21 perception-side cues carry the larger share---52.9\% against 47.1\% for the two channel-side feature… |
 
 ### Results and Analysis → Ablation: Effect of Channel-State Features [sec:ablation]
 
@@ -241,7 +243,6 @@ Total: **121** claims across **37** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c3cfdfa` | FROZEN | 1, 6.9, 18.9, 2.9, 16.2, 1.9, 98.6, 99.0, 98.1, 99.3 | Quantitatively the transfer is in the channel use, not the F1: across the three budgets spends 6.9--18.9\% of the Fixed-F channel … |
-| `cdc39e3` | PENDING (unlocated) | 99.3, 99.8 | Both intervals are budget-indexed and are read from replay\_summary.csv and fixed\_references.csv; the single-number recovers 99.3… |
 | `ce9d9f5` | ANALYTIC | 0.20, 11, 200 | Tables [ref] and [ref] report the true end-to-end AP on the test and Culver-City splits, evaluated with the frozen selector at B_=… |
 | `c3d4e93` | FROZEN | 0, 0.256, 0.064 | _F jumps from 0 to 0.256 on test and from 0 to 0.064 on Culver-City, and it is flat thereafter. |
 | `c163084` | FROZEN | 0.5, 0.9189, 0.9168, 0.7, 0.8687, 0.8636, 0.7828, 0.7897, 0. | AP@0.5 moves 0.9189\! → \!0.9168 and AP@0.7 0.8687\! → \!0.8636 on test, while on Culver-City it moves 0.7828\! → \!0.7897 and 0.6… |
@@ -259,7 +260,7 @@ Total: **121** claims across **37** (sub)sections.
 |---|---|---|---|
 | `c57f021` | FROZEN | 0.20, -0.0040, 95, -0.0064, -0.0018, +0.0018, -0.0005, +0.00 | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0040 (95\% CI [-0.0064,-0.0018]) on… |
 | `c6487af` | FROZEN | +0.0007, +0.0120, +0.0402, 0.0000, +0.0011, +0.0136 | Validate has the same shape (+0.0007 / +0.0120 / +0.0402); Culver-City is weaker throughout (0.0000 / +0.0011 / +0.0136). |
-| `ce6183a` | ANALYTIC | -0.0040, 1, 0, 200 | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-penalised (>0) operating… |
+| `ce6183a` | FROZEN | -0.0040, 1, 0, 200 | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-penalised (>0) operating… |
 
 ### Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold]
 
@@ -267,8 +268,7 @@ Total: **121** claims across **37** (sub)sections.
 |---|---|---|---|
 | `ca3afd3` | ANALYTIC | 0.10, 0.20, 0.30, 2.3, 1.7 | As established in Section [ref], the selector's edge there is budget-dependent rather than uniform: it is ahead of a threshold tun… |
 | `c213dc2` | FROZEN | 0.005, 56.3 | What is pre-registered and survives is non-inferiority within a 0.005 margin at a 56.3\% payload reduction. |
-| `cec993e` | PENDING (unlocated) | 0, 0.30, 1, 1.54 | Neither half of the input is sufficient on its own, and the shape of the failure is the informative part: given only the channel s… |
-| `cdffce3` | PENDING (unlocated) | 1, 0.001 | Dropping the range, density, or object-count cue groups changes F1 by <0.001; the channel-averaged payloads are in Table [ref]. |
+| `cec993e` | FROZEN | 0, 0.30, 1, 1.54 | Neither half of the input is sufficient on its own, and the shape of the failure is the informative part: given only the channel s… |
 | `c393d15` | ANALYTIC | 0.20, 1, 0.0028, 95, 0.005, 56.3 | Against the re-tuned SNR-threshold rule on test at B_=0.20, the selector's F1 is significantly lower than the threshold rule by ≈ … |
 | `cfe4f9d` | FROZEN | 0.20, 0.30, 1, 0.90740, 0.90937, 0.90463, 0.90734, 2.3, 1.7 | At B_=0.20 and 0.30 the threshold rule attains the higher realised F1 (0.90740 and 0.90937 versus 0.90463 and 0.90734), at 2.3 × a… |
 
@@ -302,15 +302,14 @@ Total: **121** claims across **37** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `ca250e3` | ANALYTIC | 1, 0.0003, 60, 10, -0.004, -0.019 | Under AWGN the selector tolerates SNR-estimation noise up to ≈ 1 dB with ≤ 0.0003 F1 loss; under a Jakes model at 60 km/h the SNR … |
-| `c314995` | PENDING (unlocated) | +0.020, 1 | The framework also spans the full fading-severity range: replacing the AWGN/Rayleigh limits with Rician fading moves the feature-a… |
-| `c4e6116` | FROZEN [2/2] (located, ledger cell still blank) | 59.9, 5.3, 95, 66.6, 40, 100, 10 | Finally, the deployed Random Forest runs in 59.9 ± 5.3 ms per frame (P95=66.6 ms) on a single CPU core, leaving a 40 ms margin wit… |
+| `c4e6116` | FROZEN | 59.9, 5.3, 95, 66.6, 40, 100, 10 | Finally, the deployed Random Forest runs in 59.9 ± 5.3 ms per frame (P95=66.6 ms) on a single CPU core, leaving a 40 ms margin wit… |
 
 ### Conclusion
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cdfd48a` | ANALYTIC | 16, 256 | The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs… |
-| `c6c5144` | FROZEN [2/2] (located, ledger cell still blank) | 59.9, 5.3, 95, 66.6, 100, 10 | It runs in 59.9 ± 5.3 ms (P95 = 66.6 ms) per frame on a single CPU core---the slowest of the three frozen selectors, since the dep… |
+| `c6c5144` | FROZEN | 59.9, 5.3, 95, 66.6, 100, 10 | It runs in 59.9 ± 5.3 ms (P95 = 66.6 ms) per frame on a single CPU core---the slowest of the three frozen selectors, since the dep… |
 | `c612cba` | FROZEN [2/3] (located, ledger cell still blank) | 0.0267, 0.0027, 0.0892 | Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state jus… |
 | `cacf21e` | FROZEN | 6.9, 18.9 | 6.9--18.9\% of the channel use of fixed feature-level transmission across the three budgets on test. |
 | `c02d47f` | FROZEN | 1, 0.005, 56.3 | Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the… |

@@ -2621,3 +2621,105 @@ Ledger: 121 claims, **109 filled / 12 pending**, 0 STALE.
   orphaned tail paragraphs (§II-C, §IV-G) were joined into the paragraphs they belong to. Main text
   carries mainline frozen results + FA-1 + collaborator scale + limitations; the second-backbone
   arm and the JSCC codec comparison remain appendices.
+
+---
+
+## Change-log R17-C (2026-08-16) — landing batch and the P6 four gates
+
+**Nothing trained, no frozen product touched, δ / λ\* / τ\* / the selectors untouched.** Rulings
+B4/B5/B6/B7 landed; **B8 is held** (see below); items 6–9 done.
+
+### Rulings applied
+
+- **B4 delete.** The withdrawal notice ("the single-number *recovers 99.3--99.8% of the oracle* claim
+  … is withdrawn") is gone from §VI-F. The interval values it referred to are stated earlier in the
+  same paragraph and keep their own evidence; the withdrawal itself lives here, in the change-log.
+- **B5 evidence.** The FA-1 core sentence is bound to `results/sensitivity/feature_ablation.csv`:
+  `channel_only` ρ_F = 0 at B=0.10/0.20 with payload pinned at B_L, and at B=0.30 F1 0.90944 /
+  payload 0.28843 against combined 0.90734 / 0.18703. The `1.54×` is registered as a **derived**
+  quantity (0.28843 / 0.18703 = 1.5422) in `docs/canonical_quantities.md`.
+- **B6 delete.** The group-wise cue ablation ("dropping range, density or object-count changes F1 by
+  <0.001") is a legacy-engine product never re-run under the frozen protocol; FA-1 carries the
+  ablation conclusion. The table pointer in the same sentence is not part of the retired claim and
+  was kept as "The channel-averaged payloads are in Table~\ref{tab:headline_agg}."
+- **B7 delete.** The Rician-interpolation sentence is contradicted by P3-C's frozen result (the
+  binary channel feature collapses across all K, so there is no smooth knee to move), and its OFDM
+  half leaned on the demoted appendix.
+
+### §VI-E reframed, and a third instance of the retired importance value
+
+The "dominate / dominant signal" framing is replaced by the individually-strongest framing, in the
+body, in **both** captions, and — newly found — **in the abstract**, which still printed the retired
+v3 selector's value in rounded form: *"jointly account for 62% of the selector's feature importance,
+dominating 21 ego-side cues"*. The first errata pass searched for `62.4` and never saw `62`. It now
+reads: the two channel-side features are the two individually strongest cues, **47.1%** against
+**52.9%** spread over 21 ego-side cues. Retired fingerprint **#17** covers the whole family,
+including the rounded form bound to an importance context; negative-tested against the pre-R17
+abstract sentence (trips) and the current text (clean).
+
+### Canonical quantity registry (new)
+
+`docs/canonical_quantities.md` + `tests/test_canonical_quantities.py`, registered as the tenth repo
+gate. Every entry is **re-derived from its committed product at gate time**; nothing is hardcoded,
+because a hardcoded reference turns a data change into a silent PASS. Entries: channel/perception
+importance split, selector latency, the FA-1 ratio, the payload-reduction figure, and the two ratio
+families (payload share of Fixed-F, F1 share of the masked oracle).
+
+The latency entry asserts **same-row** provenance: mean, std and P95 must come from one row of
+`selector_latency.csv`, and that row must be the slowest selector. Both numbers in the old splice
+existed in the file, so any "does this value appear somewhere?" check passed it. Negative-tested:
+restoring `P95 = 69.3`, restoring the v3 importances, or restoring the dominance wording each makes
+the gate fail.
+
+### P6 four gates — results
+
+| gate | result |
+|---|---|
+| 1. numbers ↔ CSV (`tools/p6_numbers_vs_csv.py`, new) | **MISS 0.** 143 bound literals found in the file they are bound to (8 of them as the percent form of a stored fraction), 17 derived, 71 claims with no bound file or no distinctive literal. Self-test passes. |
+| 2. claims ↔ evidence (`tools/audit_claims_evidence.py`) | 74 ANALYTIC / 43 FROZEN / **2 LEGACY-ENGINE, both in Appendix `sec:jscc_aware`** / 1 PENDING = B8. Main text: 0 LEGACY, 0 UNRESOLVED. |
+| 3. cross-section entity scan (`tools/p6_cross_section_scan.py`, new) | **0 ENTITY-VALUE, 0 ORDERING, 0 EXISTENCE.** All three positive controls fire. |
+| 4. leakage, full (`tests/test_data_leakage.py`) | **0 violations** across all four checks. |
+| ten repo gates | all PASS |
+
+**Two things gate 3 cost before it was trustworthy, recorded because "0 conflicts" is worthless
+otherwise.** A first version read entities out of the prose (nearest subject / nearest metric): it
+held **zero** `(F1, CA-TOSG)` records and attributed the budget literal `0.20` as an F1 value, so
+its silence meant nothing — it was deleted, not shipped. The rewrite's ORDERING check then produced
+**nine** findings by bounding an AP@0.5 value with F1 numbers from a different table, and after the
+first fix still used the perfect-channel ceiling where the paper's sentence says masked oracle. The
+metric and both bounds must come from the same table; with that corrected the count is 0 and the
+injected-fault control still fires.
+
+**Cross-metric observation (not a conflict, no action taken).** On test the selector's realised
+**AP@0.5** (0.9183) sits marginally *below* Fixed-L's (0.9189), while in **F1** it sits above
+(0.90326--0.90734 against 0.9011). Both are stated in the paper under their own metrics, and
+§`sec:true_e2e` already says the test split is informative about payload rather than AP gain.
+
+### B8 held — not derivable, and the ruling requires confirmation before deleting
+
+`c2aa3e2` (Appendix A): *"The selector recovers 55--70% of the clairvoyant oracle headroom (e.g.
++0.031 F1 on AWGN test)."* Every committed route was checked:
+
+| route | recovery fraction | comment |
+|---|---|---|
+| 200-realisation `jscc_selector_{awgn,rayleigh,ofdm}.csv` | **56.1 / 57.5 / 62.1%** | point estimates; range is 56--62%, not 55--70% |
+| k-fold in-distribution `two_regime_kfold_diag.csv` (JSCC rows) | 36.7--74.9% | AWGN/test row is 71.6%; spread does not give 55--70% either |
+| frozen cross-split `two_regime_edge_clean.csv` | **negative on test** (−0.13) | the known clean cross-split negative |
+| CI-spanned | 16--151% | not a statable range |
+
+And **+0.031 is not a recovered gain anywhere**: the AWGN/JSCC/test *headroom* is 0.0313 while the
+recovered gain on that row is **+0.0224**. The sentence reads the headroom as if it were the gain.
+No new GPU inference is needed — the numbers exist — so this is not a "recompute", it is a choice
+between two rewrites, which is Peiyi's call:
+
+1. **delete** the sentence, or
+2. **restate** it from the committed point estimates: "recovers 56--62% of the oracle headroom
+   (AWGN test headroom 0.029, recovered +0.018)".
+
+Nothing was deleted or rewritten pending that ruling; the claim stays the single PENDING row.
+
+### List-A conflicts — original ruling maintained
+
+`pareto_catosg_B010_f1` (0.9033, already in the body as 0.90326) and `rho_F_at_knee_culver` (0.0636,
+already in the body as 0.064, below the matcher's 3-significant-digit collision floor) stay flagged
+and unedited, as ruled.

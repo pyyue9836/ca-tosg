@@ -258,7 +258,8 @@ def evidence_engine(cells, index, by_mod):
     if csv_cell.startswith('⚠ STALE') or gen_cell.startswith('⚠ STALE'):
         return ('STALE', '', 'flagged STALE by the ledger generator')
 
-    files = re.findall(r'[\w./-]+\.(?:csv|json|md|txt)', csv_cell + ' ' + gen_cell)
+    files = [f for f in re.findall(r'[\w./-]+\.(?:csv|json|md|txt)', csv_cell + ' ' + gen_cell)
+             if not f.startswith(('docs/', 'tests/', 'paper/'))]
     engines, scripts, whys = set(), set(), []
     for f in files:
         gen, note = index.get(os.path.basename(f), (None, ''))
