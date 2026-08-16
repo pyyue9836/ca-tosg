@@ -61,6 +61,45 @@ def md5(p):
     return hashlib.md5(open(p, 'rb').read()).hexdigest()
 
 
+DEPLOYED = ('results/main', 'results/manifests', 'results/sensitivity', 'results/baselines',
+            'results/channel', 'results/latency', 'data/p2')
+
+
+def _snapshot():
+    """{relpath: md5} over every deployed product."""
+    out = {}
+    for d in DEPLOYED:
+        for dirpath, _dirs, files in os.walk(os.path.join(ROOT, d)):
+            for f in files:
+                full = os.path.join(dirpath, f)
+                out[os.path.relpath(full, ROOT)] = md5(full)
+    return out
+
+
+def guarded(fn, *a, **kw):
+    """Run a stage and REFUSE to leave a deployed product modified.
+
+    The first FA-1 run patched four of the five FA output constants; the fifth (`RUNS`) still
+    pointed at `results/sensitivity/feature_ablation_runs/`, so the arm silently overwrote four
+    committed products and the overwrite reached a commit. Redirect assertions are per-constant and
+    only catch what you remember to list -- this catches what you forgot.
+    """
+    before = _snapshot()
+    try:
+        return fn(*a, **kw)
+    finally:
+        after = _snapshot()
+        changed = sorted(k for k in before if k in after and before[k] != after[k])
+        gone = sorted(set(before) - set(after))
+        if changed or gone:
+            print('\n*** DEPLOYED PRODUCTS TOUCHED -- this stage wrote outside the arm ***')
+            for k in changed + gone:
+                print('   ', k)
+            raise SystemExit('refusing to continue: restore with `git checkout -- <paths>` and fix '
+                             'the redirect before re-running')
+        print(f'[guard] {len(before)} deployed products unchanged')
+
+
 def f1_from_boxes(pred, gt, iou=0.5):
     """The shared scorer: IoU 0.5, unit scores, canonical union GT."""
     import torch
@@ -206,12 +245,20 @@ def stage_fa1():
     out = os.path.join(ARM_OUT, 'sensitivity')
     os.makedirs(out, exist_ok=True)
     os.makedirs(os.path.join(ARM_DATA, 'fa'), exist_ok=True)
+    runs = os.path.join(out, 'feature_ablation_runs')
+    os.makedirs(runs, exist_ok=True)
     old = S._patch(FA, OUT_CSV=os.path.join(out, 'feature_ablation.csv'),
+                   RUNS=runs,                       # <-- missed on the first run: the LOSO-fold and
+                   #     candidate-walk CSVs went to the DEPLOYED results/sensitivity/
+                   #     feature_ablation_runs/ and overwrote four committed products
                    MODELDIR=os.path.join(ARM_DATA, 'fa'),
                    MANIFEST=os.path.join(ARM_PROV, 'N1_FEATURE_ABLATION_MANIFEST.json'),
                    PROV=os.path.join(ARM_PROV, 'PROVENANCE_fa_n1.txt'))
     fe = S._patch_all('feature_encoder', CUES_CSV=os.path.join(ARM_DATA, ARM_DATASET['validate']),
                       GRID_CSV=os.path.join(ARM_DATA, 'p2_grid_validate.csv'))
+    for name in ('OUT_CSV', 'RUNS', 'MODELDIR', 'MANIFEST', 'PROV'):
+        v = getattr(FA, name)
+        assert 'p0_n1' in v, f'FA-1 {name} is not arm-private: {v}'
     try:
         FA.main()
     finally:
@@ -298,20 +345,20 @@ def main() -> int:
         build_dataset()
         return 0
     if a.stage == 'grid':
-        stage_grid()
+        guarded(stage_grid)
     elif a.stage == 'selector':
-        stage_selector()
+        guarded(stage_selector)
         report_stop_point()
     elif a.stage == 'replay':
-        stage_replay()
+        guarded(stage_replay)
     elif a.stage == 'decision':
-        stage_decision()
+        guarded(stage_decision)
     elif a.stage == 'p3':
-        stage_p3()
+        guarded(stage_p3)
     elif a.stage == 'fa1':
-        stage_fa1()
+        guarded(stage_fa1)
     elif a.stage == 'p4a':
-        stage_p4a()
+        guarded(stage_p4a)
     elif a.stage == 'report':
         report_stop_point()
     return 0
