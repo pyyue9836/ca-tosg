@@ -2960,3 +2960,29 @@ in response — the anti-goal clause held.
 
 The two families the paper leans on hardest are the two that move most. Every retired absolute
 number stays withdrawn; nothing is written into the paper until the rewrite batch (P0-5).
+
+---
+
+## Change-log P0-4 (2026-08-17) — downstream arms on the corrected baseline
+
+All five arms re-run or re-checked; tables in `docs/p0_corrigendum.md` §5. Every stage ran behind
+`guarded()`, which hashes all 171 deployed products before and after the stage and aborts on any
+change — each arm reports `171 deployed products unchanged`.
+
+**A real incident, recorded because the guard exists because of it.** The first FA-1 run patched
+four of the five FA output constants and missed `RUNS`, so the arm's LOSO-fold and candidate-walk
+CSVs overwrote four committed products under `results/sensitivity/feature_ablation_runs/`, and the
+overwrite reached commit `71d240a`. The files were restored from `9ec8aaa`, `RUNS` was made
+arm-private, and the per-constant assertions were supplemented by the whole-tree guard — per-constant
+checks only catch what you remember to list. That FA-1 run was killed and produced no numbers; the
+arm was re-run from scratch.
+
+| arm | verdict |
+|---|---|
+| **P3** | shape unchanged: `snr_only` still collapses to always-`L` (ρ_F = 0), `full_ref` and `cont_obs` within 0.0001 of each other |
+| **FA-1** | shape conclusion survives and sharpens: `channel_only` and `task_only` both sit at ρ_F = 0 at B = 0.10 / 0.20 on every split; **the 1.54× figure is retired** — on test at B = 0.30 the corrected ratio is 1.36× |
+| **P4-A** | direction unchanged: the bandit trails the frozen selector everywhere except test @ B = 0.10, where the interval straddles zero while it spends **4.2×** the channel use |
+| **P4-C** | re-anchored, N=1 = main experiment, N=2/3 = incremental arm. Its N=1 column differs from the P0 replay by −0.00156…+0.00328 **by construction** (deployed policy replayed vs re-frozen policy) — that gap is the value of re-freezing, +0.00262 at the primary cell |
+| **SECOND** | no re-run needed: `B_F` is a declared constant. The narration changes — on test the arm now sits *below* the mainline share at every budget rather than near it |
+
+No arm fired a fuse condition. Nothing was retrained or retuned in response to any result.

@@ -83,3 +83,103 @@ So E3 splits: the **price** of the collapse falls (test 0.58–0.61δ → 0.44�
 ## 4. What this means for the retired numbers
 
 Every absolute mainline number in `paper/main.tex` is still withdrawn. The corrected values above are the candidates to replace them, and the two families that move most are the ones the paper leans on hardest: the payload-reduction headline (56.3% → 34.8%) and the "% of B_F" family (6.9–18.9% → 3.7–21.4% on test). Nothing is written into the paper in this batch.
+
+## 5. P0-4 — downstream arms on the new baseline
+
+Each arm re-runs through the same redirect machinery with arm-private outputs under `results/p0_n1/`, and each stage runs behind `guarded()`, which hashes all 171 deployed products before and after and aborts if any changed. Every arm below reports `[guard] 171 deployed products unchanged`.
+
+### P3 variant re-weighting
+
+| variant | features | F1 old | F1 new | payload old | payload new | ρ_F old | ρ_F new |
+|---|---|---|---|---|---|---|---|
+| `full_ref` | 23 | 0.91216 | 0.86529 | 0.13087 | 0.18832 | 0.1108 | 0.1703 |
+| `snr_only` | 1 | 0.90673 | 0.85538 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| `cont_obs` | 24 | 0.91225 | 0.86537 | 0.13708 | 0.19731 | 0.1173 | 0.1796 |
+
+The P3 finding keeps its shape: `snr_only` still collapses to always-`L` (ρ_F = 0, payload pinned at B_L), and `full_ref` and `cont_obs` stay within a thousandth of each other.
+
+### FA-1 — all three variants retrained on the N=1 substrate
+
+| split | B_max | variant | F1 old | F1 new | payload old | payload new | ρ_F old | ρ_F new |
+|---|---|---|---|---|---|---|---|---|
+| validate | 0.10 | `channel_only` | 0.90673 | 0.85538 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| validate | 0.10 | `task_only` | 0.90715 | 0.85585 | 0.02376 | 0.02365 | 0.0000 | 0.0000 |
+| validate | 0.10 | `combined` | 0.91108 | 0.86101 | 0.06857 | 0.08102 | 0.0464 | 0.0593 |
+| validate | 0.20 | `channel_only` | 0.90673 | 0.85538 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| validate | 0.20 | `task_only` | 0.90715 | 0.85585 | 0.02376 | 0.02365 | 0.0000 | 0.0000 |
+| validate | 0.20 | `combined` | 0.91172 | 0.86440 | 0.09986 | 0.15106 | 0.0787 | 0.1318 |
+| validate | 0.30 | `channel_only` | 0.90975 | 0.85693 | 0.28874 | 0.28752 | 0.2741 | 0.2741 |
+| validate | 0.30 | `task_only` | 0.90715 | 0.85585 | 0.02376 | 0.02365 | 0.0000 | 0.0000 |
+| validate | 0.30 | `combined` | 0.91307 | 0.86583 | 0.15781 | 0.20361 | 0.1387 | 0.1862 |
+| test | 0.10 | `channel_only` | 0.90113 | 0.89095 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| test | 0.10 | `task_only` | 0.90113 | 0.89092 | 0.02400 | 0.02392 | 0.0000 | 0.0000 |
+| test | 0.10 | `combined` | 0.90326 | 0.89148 | 0.06798 | 0.03680 | 0.0456 | 0.0133 |
+| test | 0.20 | `channel_only` | 0.90113 | 0.89095 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| test | 0.20 | `task_only` | 0.90113 | 0.89092 | 0.02400 | 0.02392 | 0.0000 | 0.0000 |
+| test | 0.20 | `combined` | 0.90463 | 0.89691 | 0.09472 | 0.14141 | 0.0732 | 0.1216 |
+| test | 0.30 | `channel_only` | 0.90944 | 0.89529 | 0.28843 | 0.28722 | 0.2737 | 0.2737 |
+| test | 0.30 | `task_only` | 0.90113 | 0.89092 | 0.02400 | 0.02392 | 0.0000 | 0.0000 |
+| test | 0.30 | `combined` | 0.90734 | 0.89783 | 0.18703 | 0.21197 | 0.1688 | 0.1946 |
+| culver | 0.10 | `channel_only` | 0.87216 | 0.84664 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| culver | 0.10 | `task_only` | 0.87216 | 0.84664 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| culver | 0.10 | `combined` | 0.87230 | 0.84667 | 0.02832 | 0.02437 | 0.0045 | 0.0004 |
+| culver | 0.20 | `channel_only` | 0.87216 | 0.84664 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| culver | 0.20 | `task_only` | 0.87216 | 0.84664 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| culver | 0.20 | `combined` | 0.87355 | 0.84975 | 0.04228 | 0.06751 | 0.0189 | 0.0450 |
+| culver | 0.30 | `channel_only` | 0.88719 | 0.85878 | 0.29013 | 0.28892 | 0.2755 | 0.2755 |
+| culver | 0.30 | `task_only` | 0.87216 | 0.84664 | 0.02400 | 0.02400 | 0.0000 | 0.0000 |
+| culver | 0.30 | `combined` | 0.88286 | 0.85932 | 0.16008 | 0.18226 | 0.1409 | 0.1638 |
+
+**The FA-1 shape conclusion survives and sharpens.** Neither half of the input is sufficient: `channel_only` and `task_only` both sit at ρ_F = 0 with the payload pinned at B_L across every split at B_max = 0.10 and 0.20, and `combined` is the only variant that requests features at all. The one case where a half-input variant spends more than the full selector is still validate at B = 0.30 (`channel_only` 0.28752 against `combined` 0.20361). **The 1.54× figure the paper quotes is retired**: on test at B = 0.30 the corrected ratio is **1.36×** (0.28722 / 0.21197).
+
+### P4-A contextual-bandit comparator
+
+Replayed under the same N=1 convention, same 200 paired draws. dF is bandit − CA-TOSG, so a negative interval means the bandit is behind the frozen selector.
+
+| split | B_max | bandit F1 | CA-TOSG F1 | τ F1 | bandit payload | CA-TOSG payload | dF 95% CI |
+|---|---|---|---|---|---|---|---|
+| validate | 0.10 | 0.8572 | 0.8610 | 0.8568 | 0.0516 | 0.0810 | [-0.0039, -0.0037] |
+| validate | 0.20 | 0.8572 | 0.8644 | 0.8612 | 0.0516 | 0.1511 | [-0.0073, -0.0071] |
+| validate | 0.30 | 0.8572 | 0.8658 | 0.8626 | 0.0516 | 0.2036 | [-0.0087, -0.0086] |
+| test | 0.10 | 0.8914 | 0.8915 | 0.8925 | 0.1557 | 0.0368 | [-0.0001, 0.0001] |
+| test | 0.20 | 0.8914 | 0.8969 | 0.8970 | 0.1557 | 0.1414 | [-0.0056, -0.0054] |
+| test | 0.30 | 0.8914 | 0.8978 | 0.8990 | 0.1557 | 0.2120 | [-0.0065, -0.0063] |
+| culver | 0.10 | 0.8387 | 0.8467 | 0.8496 | 0.0365 | 0.0244 | [-0.0081, -0.0079] |
+| culver | 0.20 | 0.8387 | 0.8497 | 0.8586 | 0.0365 | 0.0675 | [-0.0112, -0.0109] |
+| culver | 0.30 | 0.8387 | 0.8593 | 0.8632 | 0.0365 | 0.1823 | [-0.0209, -0.0204] |
+
+The comparator conclusion is unchanged in direction: the bandit is behind the frozen selector everywhere except test at B = 0.10, where the interval [−0.0001, +0.0001] straddles zero — and it gets there while spending 4.2× the channel use (0.1557 against 0.0368).
+
+### P4-C — re-anchored: N=1 is the main experiment, N=2/3 the incremental arm
+
+| split | B_max | N=1 F1 (main) | +N2 | +N3 | N=1 payload | +N2 | +N3 |
+|---|---|---|---|---|---|---|---|
+| validate | 0.10 | 0.85914 | +0.03416 | +0.00625 | 0.06857 | +0.03891 | +0.02535 |
+| validate | 0.20 | 0.86112 | +0.03283 | +0.00655 | 0.09986 | +0.06531 | +0.04992 |
+| validate | 0.30 | 0.86357 | +0.03220 | +0.00661 | 0.15781 | +0.10776 | +0.08400 |
+| test | 0.10 | 0.89304 | +0.00958 | +0.00081 | 0.06666 | +0.02269 | +0.00239 |
+| test | 0.20 | 0.89429 | +0.00966 | +0.00082 | 0.09328 | +0.03598 | +0.00507 |
+| test | 0.30 | 0.89727 | +0.00931 | +0.00086 | 0.18074 | +0.09582 | +0.02473 |
+| culver | 0.10 | 0.84684 | +0.02545 | +0.00000 | 0.02518 | +0.00938 | +0.00000 |
+| culver | 0.20 | 0.84816 | +0.02539 | +0.00000 | 0.02835 | +0.01149 | +0.00000 |
+| culver | 0.30 | 0.85755 | +0.02529 | +0.00000 | 0.12221 | +0.03371 | +0.00000 |
+
+**A difference that must not be read as a discrepancy.** P4-C's N=1 column and the P0 main replay share a convention but not a policy: P4-C replays the *deployed* selectors (trained on full-collaborator utilities) over N=1 utilities, while P0 re-trains and re-freezes on the N=1 substrate. The gap is therefore the value of re-freezing — **+0.00262 at the primary cell**, −0.00156 to +0.00328 across the nine cells. Both are correct answers to different questions.
+
+### SECOND arm — convention checked, weights and results untouched
+
+`B_F = 0.99` Msym is a declared constant, so the equal-budget protocol itself is unaffected. What moved is the mainline share the arm is narrated against:
+
+| split | B_max | SECOND % of B_F | mainline % of B_F (new) | (old) |
+|---|---|---|---|---|
+| validate | 0.10 | 4.7% | 8.2% | 6.9% |
+| validate | 0.20 | 18.7% | 15.3% | 10.1% |
+| validate | 0.30 | 18.7% | 20.6% | 15.9% |
+| test | 0.10 | 2.4% | 3.7% | 6.9% |
+| test | 0.20 | 3.8% | 14.3% | 9.6% |
+| test | 0.30 | 3.8% | 21.4% | 18.9% |
+| culver | 0.10 | 2.4% | 2.5% | 2.9% |
+| culver | 0.20 | 3.2% | 6.8% | 4.3% |
+| culver | 0.30 | 3.2% | 18.4% | 16.2% |
+
+The arm's payload reductions (14–90%) and its "in-sample effective, does not transfer" conclusion are unchanged. Only the sentence comparing its channel use to the mainline needs restating: on test it now sits **below** the mainline at every budget rather than near it.

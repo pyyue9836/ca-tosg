@@ -1,0 +1,6 @@
+CA-TOSG P4-A -- internal learned-policy comparator (bandit) vs RF and tau (evaluate.py). DESCRIPTIVE + CI ONLY; "internal learned-policy comparator, not deployed".
+==========================================================================================
+P4A manifest: results/manifests/P4A_MANIFEST.json (catosg-p4a-manifest/1, algo dqn_bandit_single_step_epsilon_greedy, problem_form contextual_bandit_single_step); 3 bandits sha256-verified.
+Same 200 paired CSI samplings/split, seed=20260809 (identical draws to eval_p2_deploy); RL, RF and tau replay the SAME draws. eff identical to the mainline (F1_RF here == replay_summary).
+Paired bootstrap CI, 10000 resamples, seed=12345, percentile. RL-vs-RF and RL-vs-tau reported as CIs ONLY -- NO new decision (R9 primary already spent).
+Frozen CA-TOSG models / delta / tau* / oracle unchanged; main.tex untouched; no new perception inference (cached eff + frozen predict()).
