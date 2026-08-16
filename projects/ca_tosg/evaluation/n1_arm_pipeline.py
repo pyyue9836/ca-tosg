@@ -171,6 +171,72 @@ def stage_decision():
         S._patch(DL, **old)
 
 
+def _redirect_deployment():
+    """Point the shared `deployment` constants at the N=1 arm, on EVERY alias.
+
+    Downstream arms read their inputs off this module (`D.GRID_DIR`, `D.DATA`, `D.MANIFEST`), and
+    several of them capture those values at IMPORT time -- so the arm module is patched too, after
+    it is imported, rather than trusting the redirect to reach it.
+    """
+    import deployment  # noqa: F401
+    return S._patch_all('deployment', DATA=ARM_DATA, DATASET=dict(ARM_DATASET),
+                        GRID_DIR=ARM_DATA, MANIFEST=ARM_MANIFEST, OUT=ARM_OUT, PROV_DIR=ARM_PROV)
+
+
+def stage_p3():
+    """P3 variant re-weighting on the N=1 grid and the N=1 freeze."""
+    dep = _redirect_deployment()
+    import p3_variants as P3V
+    out = os.path.join(ARM_OUT, 'sensitivity')
+    os.makedirs(out, exist_ok=True)
+    old = S._patch(P3V, OUT=out, GRID=os.path.join(ARM_DATA, 'p2_grid_validate.csv'))
+    assert P3V.GRID.startswith(ARM_DATA), 'P3 grid redirect did not take'
+    try:
+        P3V.main()
+    finally:
+        S._patch(P3V, **old)
+        for m, o in dep:
+            S._patch(m, **o)
+
+
+def stage_fa1():
+    """FA-1: the three pre-registered variants retrained and replayed on the N=1 substrate."""
+    dep = _redirect_deployment()
+    import feature_ablation as FA
+    out = os.path.join(ARM_OUT, 'sensitivity')
+    os.makedirs(out, exist_ok=True)
+    os.makedirs(os.path.join(ARM_DATA, 'fa'), exist_ok=True)
+    old = S._patch(FA, OUT_CSV=os.path.join(out, 'feature_ablation.csv'),
+                   MODELDIR=os.path.join(ARM_DATA, 'fa'),
+                   MANIFEST=os.path.join(ARM_PROV, 'N1_FEATURE_ABLATION_MANIFEST.json'),
+                   PROV=os.path.join(ARM_PROV, 'PROVENANCE_fa_n1.txt'))
+    fe = S._patch_all('feature_encoder', CUES_CSV=os.path.join(ARM_DATA, ARM_DATASET['validate']),
+                      GRID_CSV=os.path.join(ARM_DATA, 'p2_grid_validate.csv'))
+    try:
+        FA.main()
+    finally:
+        S._patch(FA, **old)
+        for m, o in fe + dep:
+            S._patch(m, **o)
+
+
+def stage_p4a():
+    """P4-A contextual-bandit comparator, replayed under the same N=1 convention."""
+    dep = _redirect_deployment()
+    sys.path.insert(0, os.path.join(ROOT, 'baselines/contextual_bandit'))
+    import evaluate as BE
+    out = os.path.join(ARM_OUT, 'baselines/contextual_bandit_runs')
+    os.makedirs(out, exist_ok=True)
+    old = S._patch(BE, OUT=out, ROOT_RESULTS=ARM_OUT, PROV_DIR=ARM_PROV,
+                   P4A_MANIFEST=os.path.join(ROOT, 'results/manifests/P4A_MANIFEST.json'))
+    try:
+        BE.main()
+    finally:
+        S._patch(BE, **old)
+        for m, o in dep:
+            S._patch(m, **o)
+
+
 def report_stop_point():
     """The pre-registered stop point: lambda*, tau* and payload, before any replay."""
     m = json.load(open(ARM_MANIFEST))
@@ -211,7 +277,7 @@ def main() -> int:
                     help='with --verify: recompute the 1,008 LOSO fits instead of reusing them')
     ap.add_argument('--build-dataset', action='store_true')
     ap.add_argument('--stage', choices=('grid', 'selector', 'replay', 'decision',
-                                        'report'))
+                                        'p3', 'fa1', 'p4a', 'report'))
     a = ap.parse_args()
     if a.verify_replay:
         print('E-Lg2 self-check (replay stage): re-running the MAINLINE 200-CSI replay into scratch')
@@ -240,6 +306,12 @@ def main() -> int:
         stage_replay()
     elif a.stage == 'decision':
         stage_decision()
+    elif a.stage == 'p3':
+        stage_p3()
+    elif a.stage == 'fa1':
+        stage_fa1()
+    elif a.stage == 'p4a':
+        stage_p4a()
     elif a.stage == 'report':
         report_stop_point()
     return 0

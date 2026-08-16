@@ -1,2 +1,2 @@
 rank,candidate_index,lambda,oof_f1,oof_payload,frozen_validate_f1,frozen_validate_payload,budget_passed
-0,10,0.1,0.910156,0.287455,0.9102,0.287455,1
+0,11,0.2,0.862809,0.287294,0.8578,0.286364,1
