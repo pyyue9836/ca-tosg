@@ -13,7 +13,13 @@
 # 6  v2 robustness five-tuple             RX: -0\.025 ; -0\.070 ; -0\.057 ; \ge -0\.003 ; +0\.015~F1 edge
 # 7  GT count 43                          RX: 28/43 ; vs \$?43
 # 8  tab:ablation_threshold label         RX: tab:ablation_threshold
-# 9  payload uncoded (numeric double)     RX: 0\.2475 ; 1\.98/4 ; 1\.98/8 ; 0\.248[^0-9] ; divisors being the bits-per-symbol
+# 9  payload uncoded (numeric double)     RX: 0\.2475 ; 1\.98/4 ; 1\.98/8 ; 0\.248 IN A PAYLOAD CONTEXT ; divisors being the bits-per-symbol
+#    (R17-C narrowing, 2026-08-16: the bare 0\.248 pattern collided with a legitimate NEW number --
+#     channel_is_rayleigh's Gini importance 0.248 in tab:feature_importance, read from the frozen
+#     selector. The retired value is the C_256 CHANNEL-USE PAYLOAD, so the pattern now requires a
+#     payload word (Msym|Mbit|payload|C_{256}) on the same line, either side. NEGATIVE-TESTED against
+#     the retired text at 6cc6d3b: 6/6 retired occurrences still blocked, 0 hits on the current text.
+#     Coverage was narrowed in CONTEXT, never in VALUE -- a payload sentence quoting 0.248 still fails.)
 # 10 robustness split label (test->valid) RX: (handled by caption audit; no safe text pattern -- manual)
 # 11 gamma-improves (narrative)           RX: improves F1 by ; alone improves F1 ; 5\.3 percentage
 # 13 review-side ~10% payload             RX: 10\\%.{0,30}(payload|channel use) ; (payload|channel use).{0,30}10\\%
@@ -28,7 +34,7 @@
 RX 0\.2475
 RX 1\.98/4
 RX 1\.98/8
-RX 0\.248[^0-9]
+RX (0\.248[^0-9][^\n]*(Msym|Mbit|payload|C_\{256\})|(C_\{256\}|Msym|Mbit|payload)[^\n]*0\.248[^0-9])
 RX divisors being the bits-per-symbol
 RX always dominated
 RX unconditional dominance
@@ -103,3 +109,12 @@ RX validates generalization
 RX validates generalisation
 RX backbone-independence
 RX confirms backbone
+
+# 20 R17 A6 (2026-08-16): the "matched payload / matched channel use / budget-matched" family
+#    overstated comparability -- the selector and the threshold rule are compared per BUDGET, not at
+#    a matched payload. Approved replacement: "a threshold tuned on validate for the same target
+#    budget". The section V-C transport sentence (C16 vs C256 at equal coded bits) was reworded to
+#    "at the same coded-bit count" so this lock is unambiguous; that usage was never the objection.
+RX matched payload
+RX matched channel use
+RX budget-matched

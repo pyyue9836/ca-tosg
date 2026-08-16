@@ -2521,3 +2521,103 @@ agreeing to all printed digits, which is a check on the implementation rather th
 
 **Not run:** B at N=3, and B on test/Culver. Neither is needed to read the A column now that the
 bracket is known to be this tight at N=2, and neither was pre-registered.
+
+---
+
+## Change-log R17 (2026-08-16) — supervisor items, list rulings, and two corrected published numbers
+
+**Nothing was trained, no frozen product was touched, δ / λ\* / τ\* / the selectors are untouched.**
+This entry closes R17 items A1–A10, the list-A rulings, list-B family binding, and the D wrap-up.
+
+### Two published numbers were WRONG and are corrected (errata)
+
+1. **Feature importances.** The paper printed `34.9% / 27.5% / 62.4%`. Those are the **retired v3
+   selector's** importances (`results/main/feature_importance.csv`). The deployed model is
+   `data/p2/selector_B020.pkl`, whose Gini importances are **24.8% (`channel_is_rayleigh`) /
+   22.3% (`est_snr_db`) / 47.1% total**, with the leading perception cue `pcd_mean_range` at 3.9%
+   (the text said 3.6%). New generator `projects/ca_tosg/evaluation/feature_importance_frozen.py`
+   reads them straight from the frozen pickle into `results/main/feature_importance_frozen.csv`;
+   body, both captions, the 7-row table and `plot_feature_importance.py` were all repointed. The
+   old CSV is now marked RETIRED in `results/README.md`.
+2. **Selector latency P95.** The paper reported `59.9 ± 5.3 ms` (mean/std of `selector_B030`, the
+   slowest of the three) alongside `P95 = 69.3 ms`, which is **`selector_B010`'s** P95 — a
+   cross-model splice. `selector_B030`'s own P95 is **66.6 ms**; all three mentions were repointed.
+   The conclusion (fits the 100 ms budget of a 10 Hz cycle) is unchanged.
+
+### Gate and tool defects found while regenerating (all fixed, all negative-tested)
+
+- **Stale fingerprint #9 collided with a real new number.** The bare pattern `0\.248[^0-9]` blocked
+  the retired *C_256 channel-use payload*, but `channel_is_rayleigh`'s Gini importance is also
+  0.248. The pattern now requires a payload word (`Msym|Mbit|payload|C_{256}`) on the same line.
+  Negative-tested against the retired text at `6cc6d3b`: **6/6 retired occurrences still blocked**,
+  0 hits on the current text. Coverage was narrowed in CONTEXT, never in VALUE.
+- **The audit and the ledger disagreed about four claim IDs.** `audit_claims_evidence.py` derived
+  its own ID; for four claims whose ledger text carries a section-name prefix the two hashes
+  differ, so those rows were reported PENDING and then value-searched — which is how a claim with
+  committed evidence in the ledger came out labelled LEGACY-ENGINE. Lookup now falls back to
+  normalised claim text, then to containment on ≥60 characters.
+- **`conditions_of()` resolved a two-channel sentence to Rayleigh alone.** "…under Rayleigh and for
+  AWGN SNR ≤ 8 dB" pins neither channel; the `elif` chain silently chose one and reported an
+  AWGN-drawn payload as a condition mismatch. Channel and split now use the **set semantics the SNR
+  axis already used**. Exactly 3 rows moved, all in the "sentence names both → unconstrained"
+  direction.
+- **`appears()` never looked in the finer direction.** The provenance file stores 4 dp while the
+  tables print 5, so 0.9033 read as "nowhere" although the body states 0.90326. A finer literal now
+  counts only if it **rounds back** to the stored value at the stored precision — strictly stronger
+  than an exact match, never a coarser one.
+- **`STANDARD_IDS` was defined in one tool only.** `802.11` / `37.885` are names, not measurements;
+  the audit lacked the rule the ruling list already applied, so six citation sentences read as
+  "numbers with no evidence". The definition now lives in `audit_claims_evidence.py` and is
+  imported by `build_pending_rulings.py`.
+
+### List-A rulings (33 rows) — applied as ruled
+
+both-sides / body-only / caption-only: left as they are. Two active verbs:
+
+- **nowhere → canonical quantities into captions.** The deployed selector's own realised F1 was
+  stated nowhere: `fig:ap_snr`'s caption now carries **0.9071** (its level below the cliff, and its
+  flat Rayleigh level) and **0.9244** (AWGN 20 dB), against the Fixed-L line at 0.9067.
+- **different condition → condition label.** `payload_catosg_awgn_low` (0.0238) is now labelled
+  "measured at AWGN 0 dB and identical at every Rayleigh SNR".
+
+**Two rows conflict with the rule and were NOT edited, per "report any item conflicting":**
+`pareto_catosg_B010_f1` (0.9033) is already in the body as **0.90326** — same number, printed
+finer, so adding it to a caption would duplicate it; the matcher fix now recognises it.
+`rho_F_at_knee_culver` (0.0636) is already in the body as **0.064**, which is 2 significant digits
+and therefore below the collision floor the matcher refuses to go under. Loosening that floor is
+the change that previously made 0.9244 "match" 0.9, so it stays refused and the row stays flagged.
+
+### List-B binding (52 → 5)
+
+The four families the ruling requires bound are bound: the abstract payload range
+(`tests/test_payload.py` §3b chain), the feature importances (above), the latency
+(`results/latency/selector_latency.csv`) and the payload reduction
+(`results/main/replay_summary.csv`). Main-text claims that the value search had mis-attributed to
+legacy files were repointed to their mainline sources — the AP headroom triple
+(0.0267 / 0.0027 / 0.0892 = Feature-ceiling − Fixed-L in `results/main/true_e2e_ap.csv`), the easy-
+stratum effect (−0.004001, n=713, CI [−0.006383, −0.001841] in
+`results/sensitivity/difficulty_frozen.csv`), and the four `B_L = 0.024` structural constants
+(Eq.(7) + `tab:notation`, gated by `tests/test_payload.py`).
+
+### D wrap-up — where the targets landed
+
+| target | result |
+|---|---|
+| 0 UNRESOLVED | **met** (was 1) |
+| 0 numeric-unlocated | **5 remain** — exactly the deletion candidates, which is the ruling's stop point |
+| 0 LEGACY-ENGINE | **0 in the main text** (was 8). **2 remain, both in Appendix `sec:jscc_aware`** — that appendix *is* the declared prior-protocol JSCC arm, so LEGACY-ENGINE is the truthful label and relabelling it would be a lie |
+| nine gates | **all PASS** |
+
+Ledger: 121 claims, **109 filled / 12 pending**, 0 STALE.
+
+### A7 / A10
+
+- **A7 — SComCP residue: none as a baseline.** What remains is what ruling (c) preserved: three
+  related-work citations, and the §V-C sentence citing SComCP's transmission convention (a
+  configuration reference, not a comparison). Artefacts stay under `results/baselines/` as the
+  archived negative reproduction, not in the paper.
+- **A10 — compaction.** The stale `% TODO(P4-B)` placeholder ("no section is created until it has
+  results") was deleted — the arm has results and lives in Appendix `sec:second_backbone`. Two
+  orphaned tail paragraphs (§II-C, §IV-G) were joined into the paragraphs they belong to. Main text
+  carries mainline frozen results + FA-1 + collaborator scale + limitations; the second-backbone
+  arm and the JSCC codec comparison remain appendices.

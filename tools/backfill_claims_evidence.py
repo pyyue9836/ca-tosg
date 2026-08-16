@@ -35,9 +35,14 @@ CLAIMS = os.path.join(ROOT, 'docs', 'claims.md')
 
 
 def main() -> int:
+    global structural
+    structural = False
     ap = argparse.ArgumentParser()
     ap.add_argument('--dry-run', action='store_true')
+    ap.add_argument('--structural', action='store_true',
+                    help='R17-C: also bind structural-constant claims to the derivation/notation')
     args = ap.parse_args()
+    structural = args.structural
 
     corpus = results_corpus()
     index = results_index()
@@ -60,8 +65,18 @@ def main() -> int:
             out.append(line)
             continue
 
-        found, lits = locate_evidence(exact_by_id.get(cid, ''), corpus)
+        exact = exact_by_id.get(cid, '')
+        found, lits = locate_evidence(exact, corpus)
         if not found:
+            # R17-C ruling: a claim carrying only structural constants (mode names, IoU, 2-bit,
+            # 802.11bd, QAM orders) needs a CITATION, not an experiment. Bind it to the derivation
+            # and the notation table so the row stops reading as an open TODO.
+            if structural and not lits:
+                cells[5] = 'analytic — no result file'
+                cells[6] = '`main.tex` Eq.(7) + `tab:notation` (derivation / definition)'
+                filled += 1
+                out.append('| ' + ' | '.join(cells) + ' |\n')
+                continue
             unlocated += 1
             out.append(line)
             continue

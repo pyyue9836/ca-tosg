@@ -6,20 +6,25 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 
 | state | count |
 |---|---|
-| quoted on both sides | 8 |
-| quoted on one side only | 16 |
-| drawn but never stated | 8 |
-| same value, different condition | 5 |
+| quoted on both sides | 11 |
+| quoted on one side only | 20 |
+| drawn but never stated | 1 |
+| same value, different condition | 2 |
 
 ## Quoted on one side only
 
 | drawn number | value | where |
 |---|---|---|
+| `f1_catosg_awgn_high` | 0.9244 | caption only |
+| `f1_catosg_awgn_low` | 0.9071 | caption only |
+| `f1_catosg_rayleigh_at_knee` | 0.9071 | caption only |
+| `f1_catosg_rayleigh_high` | 0.9071 | caption only |
+| `f1_catosg_rayleigh_low` | 0.9071 | caption only |
 | `pareto_Fixed-C256_f1` | 0.8264 | body only |
 | `pareto_Fixed-C256_payload` | 0.495 | body only |
 | `pareto_Fixed-F_f1` | 0.8516 | body only |
 | `pareto_Fixed-L_f1` | 0.9011 | body only |
-| `pareto_Fixed-L_payload` | 0.024 | body only |
+| `pareto_catosg_B010_f1` | 0.9033 | body only |
 | `pareto_catosg_B010_payload` | 0.068 | body only |
 | `pareto_catosg_B020_f1` | 0.9046 | body only |
 | `pareto_catosg_B020_payload` | 0.0947 | body only |
@@ -27,30 +32,19 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 | `pareto_catosg_B030_payload` | 0.187 | body only |
 | `pareto_oracle_f1` | 0.9165 | body only |
 | `pareto_oracle_payload` | 0.1706 | body only |
-| `payload_catosg_awgn_at_knee` | 0.2971 | caption only |
+| `payload_catosg_awgn_low` | 0.0238 | body only |
 | `rho_E_catosg_rayleigh_test` | 0.0005 | body only |
 | `rho_E_oracle_rayleigh_test` | 0.1724 | body only |
-| `rho_F_at_knee_validate` | 0.2828 | body only |
 
 ## Drawn but never stated
 
 | drawn number | value | condition |
 |---|---|---|
-| `f1_catosg_awgn_high` | 0.9244 | split=validate budget=0.2 channel=awgn snr_db=20.0 |
-| `f1_catosg_awgn_low` | 0.9071 | split=validate budget=0.2 channel=awgn snr_db=0.0 |
-| `f1_catosg_rayleigh_at_knee` | 0.9071 | split=validate budget=0.2 channel=rayleigh snr_db=10.0 |
-| `f1_catosg_rayleigh_high` | 0.9071 | split=validate budget=0.2 channel=rayleigh snr_db=20.0 |
-| `f1_catosg_rayleigh_low` | 0.9071 | split=validate budget=0.2 channel=rayleigh snr_db=0.0 |
-| `pareto_catosg_B010_f1` | 0.9033 | split=test budget=0.1 |
-| `payload_catosg_awgn_low` | 0.0238 | split=validate budget=0.2 channel=awgn snr_db=0.0 |
 | `rho_F_at_knee_culver` | 0.0636 | split=culver budget=0.2 channel=awgn snr_db=10.0 |
 
 ## Same value, different condition
 
 | drawn number | value | drawn at | side |
 |---|---|---|---|
-| `payload_catosg_awgn_at_knee` | 0.2971 | split=validate budget=0.2 channel=awgn snr_db=10.0 | body |
 | `payload_catosg_awgn_low` | 0.0238 | split=validate budget=0.2 channel=awgn snr_db=0.0 | caption |
-| `payload_catosg_awgn_low` | 0.0238 | split=validate budget=0.2 channel=awgn snr_db=0.0 | body |
 | `rho_E_oracle_rayleigh_test` | 0.1724 | split=test budget=0.2 channel=rayleigh snr_db=10.0 | caption |
-| `rho_F_at_knee_validate` | 0.2828 | split=validate budget=0.2 channel=awgn snr_db=10.0 | caption |

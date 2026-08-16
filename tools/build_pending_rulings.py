@@ -23,7 +23,8 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 sys.path.insert(0, os.path.join(ROOT, 'tests'))
 
 from audit_claims_evidence import (  # noqa: E402
-    claims_by_section, distinctive, ledger_rows, locate_evidence, results_corpus, results_index,
+    STANDARD_IDS, claims_by_section, distinctive, ledger_rows, locate_evidence, results_corpus,
+    results_index,
 )
 from check_figure_consistency import appears, compatible, sentences_with, split_caption_body  # noqa: E402
 
@@ -53,10 +54,8 @@ def line_of(tex_lines, literal):
     return None
 
 
-# Standards identifiers are NAMES, not measurements: "802.11bd" and "TR 37.885" must never be
-# treated as numbers needing experimental evidence. Without this, the abstract's IEEE 802.11
-# citation was proposed for deletion-or-recompute.
-STANDARD_IDS = {'802.11', '37.885', '2.11', '11.0'}
+# STANDARD_IDS lives in audit_claims_evidence.py so both tools apply one definition (see the note
+# there). Without it, the abstract's IEEE 802.11 citation was proposed for deletion-or-recompute.
 
 
 def claim_line(tex_lines, claim):

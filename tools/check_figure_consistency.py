@@ -66,6 +66,14 @@ def appears(value, text):
     for lit in lits:
         if re.search(r'(?<![\d.])' + re.escape(lit) + r'(?![\d])', text):
             return lit
+    # FINER direction: the provenance file stores 4 dp while the tables print 5, so 0.9033 was
+    # reported as "nowhere" although the body states 0.90326 -- the same number, printed more
+    # precisely. A finer literal counts only if it ROUNDS BACK to the stored value at the stored
+    # precision, which cannot make a coarser (collision-prone) match, only a stricter one.
+    if dec >= 1:
+        for m in re.finditer(r'(?<![\d.])(-?\d+\.\d{%d,})(?![\d])' % (dec + 1), text):
+            if f'{float(m.group(1)):.{dec}f}' == f'{value:.{dec}f}':
+                return m.group(1)
     return None
 
 
@@ -86,19 +94,22 @@ def sentences_with(text, lit):
 def conditions_of(window):
     """Condition markers a sentence pins down. Absent == unconstrained, not 'wrong'."""
     c = {}
-    if re.search(r'\bvalidate\b', window, re.I):
-        c['split'] = 'validate'
-    elif re.search(r'Culver', window, re.I):
-        c['split'] = 'culver'
-    elif re.search(r'\btest\b', window, re.I):
-        c['split'] = 'test'
+    # SET semantics, as already used for SNR below: a sentence that names TWO splits (or two
+    # channels) does not pin either one -- it is unconstrained on that axis. The previous elif chain
+    # silently resolved "under Rayleigh and for AWGN SNR <= 8 dB" to Rayleigh alone and reported the
+    # AWGN-drawn payload as a condition mismatch. Naming more conditions must never make a sentence
+    # match a NARROWER set than naming none, so this only ever relaxes ambiguous sentences.
+    splits = {k for k, rx in (('validate', r'\bvalidate\b'), ('culver', r'Culver'),
+                              ('test', r'\btest\b')) if re.search(rx, window, re.I)}
+    if len(splits) == 1:
+        c['split'] = splits.pop()
     m = re.search(r'B_\{?\\max\}?\s*\{?=?\}?\s*([0-9.]+)', window)
     if m:
         c['budget'] = float(m.group(1))
-    if re.search(r'Rayleigh', window, re.I):
-        c['channel'] = 'rayleigh'
-    elif re.search(r'AWGN', window, re.I):
-        c['channel'] = 'awgn'
+    chans = {k for k, rx in (('rayleigh', r'Rayleigh'), ('awgn', r'AWGN'))
+             if re.search(rx, window, re.I)}
+    if len(chans) == 1:
+        c['channel'] = chans.pop()
     snrs = {float(x) for x in re.findall(r'\$?([0-9]{1,2})\$?~?\s*dB', window)}
     if len(snrs) == 1:
         c['snr_db'] = snrs.pop()

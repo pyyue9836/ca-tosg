@@ -23,13 +23,17 @@ import paper_style as _ps; _ps.apply()
 import pandas as pd
 
 P1 = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))
-IN = os.path.join(P1, 'results/main/feature_importance.csv')      # v3: c_t (channel_is_rayleigh) 0.349 dominant
+# R17-C: read the FROZEN B_max=0.20 selector's own Gini importances, not the retired v3 CSV.
+# The two differ materially (channel side 47.1% frozen vs 62.4% v3), so the figure must come from
+# the deployed artefact or it contradicts the table beside it.
+IN = os.path.join(P1, 'results/main/feature_importance_frozen.csv')
 OUT_DIR = os.path.join(P1, 'paper/figures')
 
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    df = pd.read_csv(IN).sort_values('importance', ascending=False).head(12)
+    df = pd.read_csv(IN).rename(columns={'gini_importance': 'importance'})
+    df = df.sort_values('importance', ascending=False).head(12)
     df = df.iloc[::-1]  # bar chart bottom-to-top
     comm_keys = {'est_snr_db', 'channel_is_rayleigh'}
     colours = ['tab:red' if f in comm_keys else 'tab:blue' for f in df['feature']]

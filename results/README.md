@@ -92,7 +92,8 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `action_distribution.csv` | `python tools/evaluate_selector.py` | 200-realisation deployment replay |
 | `c256_frontier_band.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `ego_only_acceptance.csv` | `python projects/ca_tosg/datasets/run_ego_only.py` |  |
-| `feature_importance.csv` | `python projects/ca_tosg/evaluation/figures/plot_feature_importance.py` | RF feature_importances_ of the deployed selector |
+| `feature_importance.csv` | `python projects/ca_tosg/evaluation/figures/plot_feature_importance.py` | RETIRED v3 selector's importances; superseded in main.tex by feature_importance_frozen.csv (R17-C) |
+| `feature_importance_frozen.csv` | `python projects/ca_tosg/evaluation/feature_importance_frozen.py` | R17-C: Gini importances read directly from the FROZEN selector data/p2/selector_B020.pkl -- the source of the values in tab:feature_importance and fig:feature_importance |
 | `fixed_references.csv` | `python projects/ca_tosg/evaluation/fixed_references.py` | P5-7 (A): Fixed L / F / C256 / masked-oracle references under the FROZEN replay draw (no clairvoyant row -- it has no frozen definition) |
 | `frontier_culver.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `frontier_test.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |

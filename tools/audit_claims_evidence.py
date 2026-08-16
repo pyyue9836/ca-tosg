@@ -111,8 +111,21 @@ def claims_by_section():
 
 
 # ---------------------------------------------------------------- ledger + results index
-def ledger_rows():
-    """{claim_id: [6 evidence cells]} from docs/claims.md."""
+def text_key(claim):
+    """Normalised claim text, for matching a ledger row whose ID was derived differently."""
+    return re.sub(r'[^a-z0-9]+', '', claim.lower())
+
+
+def ledger_rows(by_text=False):
+    """{claim_id: [6 evidence cells]} from docs/claims.md.
+
+    `by_text=True` additionally keys each row by its normalised claim text. The two parsers do not
+    always agree on a claim's ID -- four claims whose ledger text carries a section-name prefix
+    ("Message Candidates[label] At each frame ...") hash differently here -- and an ID-only lookup
+    silently reported those rows as PENDING and then value-searched them, which is how a claim with
+    committed evidence in the ledger came out labelled LEGACY-ENGINE. ID match still wins; the text
+    key is only a fallback.
+    """
     rows = {}
     for line in read(CLAIMS).splitlines():
         if not line.startswith('| ') or line.startswith('|---') or ' Claim ' in line:
@@ -121,6 +134,8 @@ def ledger_rows():
         if len(cells) != 9:
             continue
         rows[cells[0]] = cells[3:9]
+        if by_text:
+            rows.setdefault('TXT:' + text_key(cells[1]), cells[3:9])
     return rows
 
 
@@ -278,12 +293,21 @@ BORING = {'0', '1', '2', '3', '4', '5', '8', '10', '16', '20', '100', '256', '40
           '0.024', '1.98', '0.99', '0.495', '3.96', '0.005'}
 
 
+# Standards identifiers are NAMES, not measurements: "802.11bd" and "TR 37.885" can never be
+# located in a result file because nothing measured them. tools/build_pending_rulings.py already
+# ruled them out of its list; keeping the definition in one place stops the two tools disagreeing
+# about whether six citation sentences are "numbers with no evidence".
+STANDARD_IDS = {'802.11', '37.885', '2.11', '11.0'}
+
+
 def distinctive(exact: str):
     """The literals in a claim that could identify the file it came from."""
     out = []
     for tok in [t.strip() for t in exact.split(',') if t.strip()]:
         t = tok.replace(',', '')
         if t.lstrip('+-') in BORING or t in BORING:
+            continue
+        if t.lstrip('+-') in STANDARD_IDS:
             continue
         if '.' not in t:
             continue                                   # bare integers attribute nothing
@@ -355,7 +379,7 @@ def locate_evidence(exact, corpus, top=3):  # noqa: D401
 # ---------------------------------------------------------------- report
 def build():
     rows = claims_by_section()
-    ledger = ledger_rows()
+    ledger = ledger_rows(by_text=True)
     index = results_index()
     by_mod = module_index()
 
@@ -363,7 +387,16 @@ def build():
 
     per_section, tally = {}, {}
     for section, subsection, cid, claim, exact in rows:
-        cells = ledger.get(cid, [''] * 6)
+        cells = ledger.get(cid) or ledger.get('TXT:' + text_key(claim))
+        if cells is None:
+            # last fallback: one text is a prefix/suffix of the other (the ledger keeps a
+            # section-name prefix on three claims). Containment on >=60 normalised characters is
+            # specific enough that no two distinct claims in the paper collide -- asserted below.
+            k = text_key(claim)
+            cand = [v for t, v in ledger.items()
+                    if t.startswith('TXT:') and len(k) >= 60
+                    and (k in t[4:] or t[4:] in k)]
+            cells = cand[0] if len(cand) == 1 else [''] * 6
         engine, script, why = evidence_engine(cells, index, by_mod)
         found, lits = ([], [])
         if engine == 'PENDING':
