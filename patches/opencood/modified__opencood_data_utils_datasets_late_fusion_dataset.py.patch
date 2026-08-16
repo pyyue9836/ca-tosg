@@ -1,0 +1,23 @@
+diff --git a/opencood/data_utils/datasets/late_fusion_dataset.py b/opencood/data_utils/datasets/late_fusion_dataset.py
+index 1644a0d..2ca3965 100644
+--- a/opencood/data_utils/datasets/late_fusion_dataset.py
++++ b/opencood/data_utils/datasets/late_fusion_dataset.py
+@@ -19,6 +19,7 @@ from opencood.data_utils.datasets import basedataset
+ from opencood.data_utils.pre_processor import build_preprocessor
+ from opencood.hypes_yaml.yaml_utils import load_yaml
+ from opencood.utils import box_utils
++from opencood.utils import catosg_collab_subset  #self+ CA-TOSG P4-C
+ from opencood.utils.pcd_utils import \
+     mask_points_by_range, mask_ego_points, shuffle_points, \
+     downsample_lidar_minimum
+@@ -136,6 +137,10 @@ class LateFusionDataset(basedataset.BaseDataset):
+         assert ego_id != -1
+         assert len(ego_lidar_pose) > 0
+ 
++        #self+ CA-TOSG P4-C: ego + N nearest collaborators (no-op unless CATOSG_MAX_COLLAB /
++        # CATOSG_KEEP_CAVS is set). Must precede the CAV loop.
++        base_data_dict = catosg_collab_subset.subset_of(base_data_dict, ego_lidar_pose)
++
+         # loop over all CAVs to process information
+         for cav_id, selected_cav_base in base_data_dict.items():
+             distance = \

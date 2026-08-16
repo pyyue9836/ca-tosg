@@ -1,6 +1,6 @@
 # OpenCOOD Namespace Modifications
 
-The upstream OpenCOOD package at `../../opencood/` is mostly untouched. The exceptions are listed below: **9 newly added files** and **3 modified files**, all marked with a `#self+ ...` header on line 1.
+The upstream OpenCOOD package at `../../opencood/` is mostly untouched. The exceptions are listed below: **11 newly added files** and **5 modified files**, all marked with a `#self+ ...` header on line 1.
 
 These files **physically live in `../../opencood/`** rather than in this directory, because they participate in the `opencood` Python namespace (e.g., `from opencood.models.point_pillar_importance_map_jscc import ...`) and the OpenCOOD codebase resolves model and fusion modules by string name from `hypes_yaml/` configs. Moving them out would require updating dozens of import sites and config strings, breaking compatibility with the upstream training and inference pipelines.
 
@@ -57,3 +57,18 @@ Verified both ways before use, on 20 validate frames:
 
 `max_cav` is deliberately not used for this: its selection order is a loader-internal detail this
 project has not pinned, and an experimental arm must not depend on unverified behaviour.
+
+## Inventory correction (P0-4, 2026-08-16)
+
+This page said "9 added / 3 modified". The tree has **11 added / 5 modified**. The files it did not list are:
+
+| file | state | note |
+|---|---|---|
+| `opencood/models/fuse_modules/scomcp_fuse.py` | added | SComCP reproduction; the arm is archived as a negative reproduction and is not in the paper |
+| `opencood/utils/catosg_collab_subset.py` | added | restricts the fused CAV set — the mechanism behind the P4-C arms and the P0 N=1 correction |
+| `opencood/data_utils/datasets/intermediate_fusion_dataset.py` | modified | collaborator-subset hook |
+| `opencood/data_utils/datasets/late_fusion_dataset.py` | modified | collaborator-subset hook |
+
+**Two modified files carry no `#self+` marker on line 1**, so the documented way to spot a user-modified file does not find them: `opencood/data_utils/datasets/intermediate_fusion_dataset.py`, `opencood/data_utils/datasets/late_fusion_dataset.py`. They are listed here instead; the marker convention is the thing that is unreliable, not the inventory.
+
+The whole set is now exported as portable patches in `patches/opencood/` and applied or checked with `python tools/apply_opencood_patches.py --check|--apply`, so a fresh OpenCOOD checkout can be brought to this state without copying a working tree.

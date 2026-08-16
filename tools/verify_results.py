@@ -26,19 +26,31 @@ import re
 import subprocess
 
 PY = sys.executable
-# tier: 'content'   -- runs on a clean clone, nothing but the committed tree
-#       'artifacts' -- additionally needs the git-excluded data/p2/ grids + frozen models, and the
-#                      sibling OpenCOOD checkout for the cue CSVs the manifest md5-pins
+# Tier, re-derived from MEASURED dependencies (P0-4), not from how each gate was labelled when it
+# was written. A gate was run with `torch`, `spconv` and `sionna` replaced by import-raising stubs;
+# the local-artefact column was read off each file's own references.
+#
+#   'content'   -- no torch/spconv AND no git-excluded artefact: runs on a clean clone
+#   'artifacts' -- needs torch (frozen .pt/.pkl models) or the git-excluded data/p2 + OpenCOOD caches
+#
+# What moved and why:
+#   bandit fold scaling   content -> artifacts   loads data/p2/p4a_bandit_B0XX.pt, so it needs torch
+#   payload chain         content -> artifacts   no torch, but it reads the sibling OpenCOOD
+#                                                checkout (dataset_validate_v3.csv + a hypes yaml)
+#   data leakage, manifest  stay artifacts       both read data/p2 + the OpenCOOD cue CSVs
+#   assumptions ledger    content                its artefact references are STRINGS it scans for,
+#                                                not files it opens
 GATES = [
-    ('content',   'payload chain',        [PY, 'tests/test_payload.py']),
+    ('artifacts', 'payload chain',        [PY, 'tests/test_payload.py']),
     ('content',   'paragraph insertion',  [PY, 'tests/test_paragraph_insert.py', '1', '2', '3']),
     ('content',   'claims vs main.tex',   [PY, 'tests/test_result_consistency.py', '--check']),
     ('artifacts', 'data leakage + freeze',[PY, 'tests/test_data_leakage.py']),
     ('artifacts', 'manifest relpaths',    [PY, 'tests/test_manifest.py']),
-    ('content',   'bandit fold scaling',  [PY, 'tests/test_bandit_fold_scaling.py']),
+    ('artifacts', 'bandit fold scaling',  [PY, 'tests/test_bandit_fold_scaling.py']),
     ('content',   'P3 SNR support',       [PY, 'tests/test_p3_snr_support.py']),
     ('content',   'intra-repo imports',   [PY, 'tests/test_intra_repo_imports.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
+    ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]
 
 
@@ -69,6 +81,7 @@ if __name__ == '__main__':
     n = block_exit()
     print('%-24s %s' % ('stale-fingerprint exit', 'PASS' if n == 0 else 'FAIL (%d)' % n))
     rc |= (1 if n else 0)
-    tier_note = ' (content tier only -- 2 artefact-tier gates not run)' if content_only else ''
+    tier_note = (' (content tier only -- %d artefact-tier gates not run)'
+                 % sum(1 for t, _n, _c in GATES if t != 'content')) if content_only else ''
     print('\n%s%s' % ('ALL GATES PASS' if rc == 0 else 'GATE FAILURE', tier_note))
     sys.exit(rc)

@@ -1,0 +1,23 @@
+diff --git a/opencood/data_utils/datasets/intermediate_fusion_dataset.py b/opencood/data_utils/datasets/intermediate_fusion_dataset.py
+index 9c90bae..00c6e8b 100644
+--- a/opencood/data_utils/datasets/intermediate_fusion_dataset.py
++++ b/opencood/data_utils/datasets/intermediate_fusion_dataset.py
+@@ -15,6 +15,7 @@ import torch
+ 
+ import opencood.data_utils.datasets
+ import opencood.data_utils.post_processor as post_processor
++from opencood.utils import catosg_collab_subset  #self+ CA-TOSG P4-C
+ from opencood.utils import box_utils
+ from opencood.data_utils.datasets import basedataset
+ from opencood.data_utils.pre_processor import build_preprocessor
+@@ -74,6 +75,10 @@ class IntermediateFusionDataset(basedataset.BaseDataset):
+         assert ego_id != -1
+         assert len(ego_lidar_pose) > 0
+ 
++        #self+ CA-TOSG P4-C: ego + N nearest collaborators (no-op unless CATOSG_MAX_COLLAB /
++        # CATOSG_KEEP_CAVS is set). Must precede get_pairwise_transformation and the CAV loop.
++        base_data_dict = catosg_collab_subset.subset_of(base_data_dict, ego_lidar_pose)
++
+         pairwise_t_matrix = \
+             self.get_pairwise_transformation(base_data_dict,
+                                              self.max_cav)

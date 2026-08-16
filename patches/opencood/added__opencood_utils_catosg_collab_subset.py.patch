@@ -1,0 +1,83 @@
+diff --git a/opencood/utils/catosg_collab_subset.py b/opencood/utils/catosg_collab_subset.py
+new file mode 100644
+index 0000000..9ad7013
+--- /dev/null
++++ b/opencood/utils/catosg_collab_subset.py
+@@ -0,0 +1,77 @@
++#self+ CA-TOSG P4-C: deterministic collaborator-subset mask (Change-log P4-C, docs/p4c_plan.md).
++"""Restrict a frame to the ego plus its N nearest collaborators.
++
++Pre-registered rule, implemented here and nowhere else:
++
++    the N nearest members of the collaborator set by Euclidean distance between lidar_pose[0:2]
++    of the collaborator and of the ego at that timestamp -- the same distance OpenCOOD already
++    uses for its COM_RANGE filter -- ties broken by ASCENDING CAV id.
++
++Deliberately NOT implemented via `max_cav`: that ordering is a loader-internal detail we have not
++pinned, and an experimental arm must not depend on behaviour nobody verified.
++
++Off unless CATOSG_MAX_COLLAB is set, so every existing run is bit-identical to before:
++
++    CATOSG_MAX_COLLAB=2  ->  ego + the 2 nearest collaborators
++    unset                ->  untouched, full CAV set
++
++CATOSG_KEEP_CAVS overrides it with an explicit id list (used for the partial-fusion bracket, where
++the delivered subset is not simply "the nearest k"):
++
++    CATOSG_KEEP_CAVS="641,650"  ->  ego + exactly those ids
++
++CATOSG_NTH_COLLAB=j keeps EXACTLY the j-th nearest collaborator (1-indexed, same ordering) -- the
++{second-nearest alone} delivered subset the P4-C semantics-B bracket needs, and nothing else.
++"""
++import math
++import os
++from collections import OrderedDict
++
++
++def _id_key(cav_id):
++    """Ascending CAV id: numerically when the id is numeric, else lexicographically."""
++    s = str(cav_id)
++    return (0, int(s), '') if s.lstrip('-').isdigit() else (1, 0, s)
++
++
++def subset_of(base_data_dict, ego_lidar_pose):
++    """Return base_data_dict trimmed to ego + the selected collaborators, order preserved.
++
++    Order matters: the intermediate-fusion dataset asserts the ego is the first key, and the
++    pairwise transformation is built from this dict, so the trim must happen before it.
++    """
++    keep_ids = os.environ.get('CATOSG_KEEP_CAVS')
++    max_collab = os.environ.get('CATOSG_MAX_COLLAB')
++    nth = os.environ.get('CATOSG_NTH_COLLAB')                  # exactly the j-th nearest (1-indexed)
++    if keep_ids is None and max_collab is None and nth is None:
++        return base_data_dict                                  # feature off: byte-identical behaviour
++
++    if keep_ids is not None:
++        wanted = {s.strip() for s in keep_ids.split(',') if s.strip()}
++        keep = {cid for cid in base_data_dict if str(cid) in wanted}
++    else:
++        n = int(max_collab) if max_collab is not None else None
++        others = []
++        for cav_id, content in base_data_dict.items():
++            if content['ego']:
++                continue
++            pose = content['params']['lidar_pose']
++            d = math.hypot(pose[0] - ego_lidar_pose[0], pose[1] - ego_lidar_pose[1])
++            others.append((d, _id_key(cav_id), cav_id))
++        others.sort(key=lambda t: (t[0], t[1]))                # nearest first; ties -> ascending id
++        if nth is not None:                                    # exactly the j-th nearest, for the
++            j = int(nth)                                       # partial-fusion bracket's {second} subset
++            keep = {others[j - 1][2]} if len(others) >= j else set()
++        else:
++            keep = {cav_id for _, _, cav_id in others[:n]}
++
++    out = OrderedDict()
++    for cav_id, content in base_data_dict.items():
++        if content['ego'] or cav_id in keep:
++            out[cav_id] = content
++    return out
++
++
++def describe(base_data_dict):
++    """'ego|641|650' -- for provenance, so a run records which CAVs it actually used."""
++    return '|'.join('ego' if c['ego'] else str(i) for i, c in base_data_dict.items())

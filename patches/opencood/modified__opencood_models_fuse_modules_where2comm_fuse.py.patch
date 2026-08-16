@@ -1,0 +1,91 @@
+diff --git a/opencood/models/fuse_modules/where2comm_fuse.py b/opencood/models/fuse_modules/where2comm_fuse.py
+index 4fd36e6..d28caa7 100644
+--- a/opencood/models/fuse_modules/where2comm_fuse.py
++++ b/opencood/models/fuse_modules/where2comm_fuse.py
+@@ -1,3 +1,4 @@
++#self+ MODIFIED: extensions for ImportanceMapJSCC compatibility (see peiyi_work/00_opencood_modifications/README.md)
+ """
+ Implementation of Where2comm fusion.
+ """
+@@ -119,6 +120,63 @@ class Where2comm(nn.Module):
+ 
+         self.naive_communication = Communication(args['communication'])
+ 
++        # Optional separate-source-channel-coding (LDPC + QAM) link-erasure
++        # baseline (EVAL ONLY, no parameters). When `link` is present in the
++        # config, the communicated remote (non-ego) tokens are erased with the
++        # calibrated block-error probability BLER(snr) at the given SNR, so the
++        # detector reaches the upper bound at high SNR and cliffs at low SNR.
++        self.link_model = None
++        self.link_snr_db = None
++        self._bler_xs = None
++        self._bler_ys = None
++        link_cfg = args.get('link', None)
++        if link_cfg is not None and str(link_cfg.get('model', 'none')).lower() != 'none':
++            self.configure_link(link_cfg)
++
++    def configure_link(self, link_cfg):
++        import csv as _csv
++        self.link_model = str(link_cfg.get('model')).lower()  # ldpc16qam / ldpc256qam
++        self.link_snr_db = float(link_cfg.get('snr_db', 10.0))
++        qam = 16 if '16' in self.link_model else 256
++        xs, ys = [], []
++        with open(link_cfg['bler_csv']) as f:
++            for row in _csv.DictReader(f):
++                if int(float(row['qam'])) == qam:
++                    xs.append(float(row['snr_db']))
++                    ys.append(float(row['bler']))
++        order = sorted(range(len(xs)), key=lambda i: xs[i])
++        self._bler_xs = [xs[i] for i in order]
++        self._bler_ys = [ys[i] for i in order]
++        print(f"[INFO] where2comm separate-coding link: {self.link_model} "
++              f"@ {self.link_snr_db} dB, BLER table pts={len(xs)}")
++
++    def _link_bler(self):
++        xs, ys = self._bler_xs, self._bler_ys
++        snr = self.link_snr_db
++        if snr <= xs[0]:
++            return ys[0]
++        if snr >= xs[-1]:
++            return ys[-1]
++        for i in range(len(xs) - 1):
++            if xs[i] <= snr <= xs[i + 1]:
++                t = (snr - xs[i]) / (xs[i + 1] - xs[i])
++                return ys[i] + t * (ys[i + 1] - ys[i])
++        return ys[-1]
++
++    def _apply_link_erasure(self, x, record_len):
++        bler = self._link_bler()
++        x = x.clone()
++        start = 0
++        for length in record_len.tolist():
++            length = int(length)
++            if length > 1:
++                rf = x[start + 1:start + length]
++                fail = (torch.rand(rf.shape[0], 1, rf.shape[2], rf.shape[3],
++                                   device=x.device) < bler).float()
++                x[start + 1:start + length] = rf * (1.0 - fail)
++            start += length
++        return x
++
+     def regroup(self, x, record_len):
+         cum_sum_len = torch.cumsum(record_len, dim=0)
+         split_x = torch.tensor_split(x, cum_sum_len[:-1].cpu())
+@@ -158,6 +216,8 @@ class Where2comm(nn.Module):
+                             communication_masks = F.interpolate(communication_masks, size=(x.shape[-2], x.shape[-1]),
+                                                                 mode='bilinear', align_corners=False)
+                         x = x * communication_masks
++                        if self.link_model is not None and not self.training:
++                            x = self._apply_link_erasure(x, record_len)
+ 
+                 # 2. Split the features
+                 # split_x: [(L1, C, H, W), (L2, C, H, W), ...]
+@@ -193,6 +253,8 @@ class Where2comm(nn.Module):
+                 batch_confidence_maps = self.regroup(psm_single, record_len)
+                 communication_masks, communication_rates = self.naive_communication(batch_confidence_maps, B)
+                 x = x * communication_masks
++                if self.link_model is not None and not self.training:
++                    x = self._apply_link_erasure(x, record_len)
+ 
+             # 2. Split the features
+             # split_x: [(L1, C, H, W), (L2, C, H, W), ...]

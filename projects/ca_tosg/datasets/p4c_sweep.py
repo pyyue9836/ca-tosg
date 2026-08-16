@@ -47,7 +47,7 @@ def main():
         for split in SPLITS:
             need, nfr, _ = frames_needing_forward(split, n)
             for branch in ('late', 'intermediate'):
-                out = os.path.join(GS, 'p4c_N%d' % n, '%s_%s.npz' % (branch, split))
+                out = os.path.join(GS, 'p4c_N%d/%s_%s.npz' % (n, branch, split))
                 jobs.append((n, split, branch, len(need), out))
                 total += len(need)
     print('%d jobs, %d forward passes total (~%.0f min at 0.37 s/frame)'

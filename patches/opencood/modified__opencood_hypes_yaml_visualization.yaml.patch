@@ -1,0 +1,16 @@
+diff --git a/opencood/hypes_yaml/visualization.yaml b/opencood/hypes_yaml/visualization.yaml
+index 394e33d..316cf58 100644
+--- a/opencood/hypes_yaml/visualization.yaml
++++ b/opencood/hypes_yaml/visualization.yaml
+@@ -1,9 +1,10 @@
++#self+ MODIFIED: local OPV2V path overrides (see peiyi_work/00_opencood_modifications/README.md)
+ # this yaml is only for visualization
+ name: visualization
+ 
+ yaml_parser: "load_voxel_params"
+ root_dir: "opv2v_data_dumping/train"
+-validate_dir: "opv2v_data_dumping/test"
++validate_dir: "opv2v_data_dumping/validate"
+ 
+ train_params:
+   batch_size: &batch_size 4

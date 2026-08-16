@@ -85,7 +85,7 @@ def second_only_f1(split, gts):
     """Per-frame F1 of the {second-nearest alone} delivered subset (semantics-B bracket)."""
     out = {}
     for branch, key in (('late', 'L'), ('intermediate', 'F')):
-        p = os.path.join(GS, 'p4c_B_second', '%s_%s.npz' % (branch, split))
+        p = os.path.join(GS, 'p4c_B_second/%s_%s.npz' % (branch, split))
         if not os.path.exists(p):
             return None
         z = np.load(p, allow_pickle=True)
@@ -102,7 +102,7 @@ def per_frame_f1(split):
     out[('E', 0)] = np.array([f1_from_boxes(ego['boxes'][i], gts[i]) for i in range(len(gts))])
     for n in NS:
         for branch, key in (('late', 'L'), ('intermediate', 'F')):
-            p = os.path.join(GS, 'p4c_N%d' % n, '%s_%s.npz' % (branch, split))
+            p = os.path.join(GS, 'p4c_N%d/%s_%s.npz' % (n, branch, split))
             if not os.path.exists(p):
                 raise SystemExit('P4-C: missing arm cache %s -- run datasets/p4c_sweep.py first' % p)
             z = np.load(p, allow_pickle=True)
@@ -227,7 +227,7 @@ def main():
                       % (fB.mean(), F1[N].mean(), m, lo, hi, scope.sum()), flush=True)
         for N in NS:
             for branch in ('late', 'intermediate'):
-                p = os.path.join(GS, 'p4c_N%d' % N, '%s_%s.npz' % (branch, split))
+                p = os.path.join(GS, 'p4c_N%d/%s_%s.npz' % (N, branch, split))
                 z = np.load(p, allow_pickle=True)
                 arms['N%d/%s_%s' % (N, branch, split)] = dict(
                     sha256=_sha256(p), n_new_forwards=int(z['n_new']) if 'n_new' in z else None)
