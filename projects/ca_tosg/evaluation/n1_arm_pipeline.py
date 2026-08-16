@@ -133,6 +133,44 @@ def stage_selector():
                    os.path.join(ARM_PROV, 'validate_loso_folds.csv'), ARM_PROV)
 
 
+def stage_replay():
+    """The same 200 paired CSI draws, the N=1 freeze. Writes replay/action/perclass/R9.
+
+    This does NOT reuse `second_arm_pipeline.run_replay`: that wrapper deletes `r9_decision.csv`
+    on every run, because the SECOND arm is descriptive and must not appear to adjudicate R9. The
+    P0 corrigendum is the opposite case -- re-judging R9 under the corrected convention is the
+    whole point -- so the redirect is done here and the decision file is kept.
+    """
+    import deployment as D
+    print('N=1 200-CSI paired replay ->', os.path.relpath(ARM_OUT, ROOT))
+    old = S._patch(D, DATA=ARM_DATA, DATASET=dict(ARM_DATASET), GRID_DIR=ARM_DATA,
+                   MANIFEST=ARM_MANIFEST, OUT=ARM_OUT, PROV_DIR=ARM_PROV)
+    # POSITIVE CONTROL: an inert redirect once let an arm run on mainline inputs and still pass
+    assert D.OUT == ARM_OUT and D.MANIFEST == ARM_MANIFEST and D.GRID_DIR == ARM_DATA, \
+        'replay redirect did not take -- refusing to run'
+    os.makedirs(ARM_OUT, exist_ok=True)
+    try:
+        D.main()
+    finally:
+        S._patch(D, **old)
+    keep = os.path.join(ARM_OUT, 'r9_decision.csv')
+    assert os.path.exists(keep), 'r9_decision.csv was not written -- the corrigendum needs it'
+    print('kept', os.path.relpath(keep, ROOT), '-- this arm DOES take the R9 decision (P0-3)')
+
+
+def stage_decision():
+    """decision_log.py (per-frame decision log + the missed-E account) on the N=1 arm."""
+    import decision_log as DL
+    old = S._patch(DL, DATA=ARM_DATA, DATASET=dict(ARM_DATASET), MANIFEST=ARM_MANIFEST,
+                   OUT=ARM_OUT, PROV_DIR=ARM_PROV)
+    if hasattr(DL, 'GRID_DIR'):
+        old.update(S._patch(DL, GRID_DIR=ARM_DATA))
+    try:
+        DL.main()
+    finally:
+        S._patch(DL, **old)
+
+
 def report_stop_point():
     """The pre-registered stop point: lambda*, tau* and payload, before any replay."""
     m = json.load(open(ARM_MANIFEST))
@@ -167,16 +205,26 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--verify', action='store_true',
                     help='bit-reproduce the committed MAINLINE products (self-check)')
+    ap.add_argument('--verify-replay', action='store_true',
+                    help='self-check the replay stage only (grid+selector already verified)')
     ap.add_argument('--fresh-loso', action='store_true',
                     help='with --verify: recompute the 1,008 LOSO fits instead of reusing them')
     ap.add_argument('--build-dataset', action='store_true')
-    ap.add_argument('--stage', choices=('grid', 'selector', 'report'))
+    ap.add_argument('--stage', choices=('grid', 'selector', 'replay', 'decision',
+                                        'report'))
     a = ap.parse_args()
+    if a.verify_replay:
+        print('E-Lg2 self-check (replay stage): re-running the MAINLINE 200-CSI replay into scratch')
+        ok = S.verify_replay()
+        print('SELF-CHECK ' + ('PASS' if ok else 'FAIL -- no N=1 replay number may be taken'))
+        return 0 if ok else 1
     if a.verify:
         print('E-Lg2 self-check, stage 1 (grid): re-expanding the MAINLINE grid into scratch')
         ok = S.verify_grid()
         print('E-Lg2 self-check, stage 2 (selector): re-running LOSO/walk/freeze on MAINLINE inputs')
         ok &= S.verify_selector(a.fresh_loso)
+        print('E-Lg2 self-check, stage 3 (replay): re-running the MAINLINE 200-CSI replay')
+        ok &= S.verify_replay()
         print('SELF-CHECK ' + ('PASS -- stages reproduce their committed products bit-for-bit'
                                if ok else 'FAIL -- no N=1 number may be taken from these stages'))
         return 0 if ok else 1
@@ -188,6 +236,10 @@ def main() -> int:
     elif a.stage == 'selector':
         stage_selector()
         report_stop_point()
+    elif a.stage == 'replay':
+        stage_replay()
+    elif a.stage == 'decision':
+        stage_decision()
     elif a.stage == 'report':
         report_stop_point()
     return 0

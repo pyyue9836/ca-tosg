@@ -2906,3 +2906,57 @@ and whether the **E-collapse limitation is milder** under the new convention. Th
 These expectations are **checks, not targets**. Nothing is retrained, no threshold is moved, no
 budget is re-walked and δ is not touched in response to any of them. An expectation that is not met
 is reported as not met, in the same words used here, and the finding changes rather than the data.
+
+---
+
+## Change-log P0-3 (2026-08-16) — the corrigendum replay, and the R9 re-judgement
+
+Pure CPU. Self-check first: the mainline replay reproduces `replay_summary.csv` exactly (9 rows,
+no differing cell) before any N=1 replay number was taken. Deployed products untouched — `git status`
+is clean under `results/main/`, `results/manifests/` and `data/p2/`. Full tables in
+`docs/p0_corrigendum.md`; hashes in `results/p0_n1/manifests/P0_REPLAY_MANIFEST.json`.
+
+### R9 survives the correction
+
+| condition | old | new | met |
+|---|---|---|---|
+| LCB95(dF) > −0.005 | −0.00286 | **−0.00018** | yes |
+| UCB95(dB) < 0 | −0.12099 | **−0.07441** | yes |
+| (B_tau − B_RF)/B_tau ≥ 0.10 | +0.56310 | **+0.34773** | yes |
+
+All three hold at the sole primary comparison (test @ B_max = 0.20), at the original δ = 0.005, by
+the original procedure, with the original multiple-comparison protection (everything else secondary,
+CI only). The non-inferiority margin *tightens* — the selector sits closer to parity with the
+re-tuned threshold than before — while the payload advantage shrinks but stays far above its floor.
+
+### E1 — met
+
+F1 falls in all nine cells (−0.008 to −0.050). Nothing was predicted about the gap, and the gap is
+what moved in the selector's favour.
+
+### E3 — half met, reported as such
+
+**A correction to P0-2b first.** That entry recorded as measured that "the oracle's E share rises",
+citing the N=1 counts alone. The comparison had not been made. Old → new oracle E cells:
+validate **335 → 529** (rises), test **6,303 → 5,696** (**falls**), Culver **1,095 → 1,095**
+(unchanged). The rise is a validate-only effect; the test claim was wrong and is withdrawn here.
+
+* **ρ_E of the deployed selector does NOT rise.** Rayleigh, mean over the SNR grid, at the primary
+  cell: 0.0008 → 0.0018 on test, against an oracle at 0.157; at B=0.10 it *falls*, 0.0064 → 0.0007;
+  Culver is 0.0000 both ways. Only validate moves (0.0101 → 0.0125–0.0162).
+* **The cost of the collapse does fall**, by roughly a quarter on test: 0.60/0.58/0.61 δ →
+  0.44/0.46/0.47 δ.
+
+So the limitation is **cheaper, not milder**: the selector still refuses the ego-only action about
+as often as before, and what changed is the price of refusing it. Nothing was retrained or retuned
+in response — the anti-goal clause held.
+
+### Headline quantities, recomputed (`paper/main.tex` NOT edited)
+
+* payload reduction at the primary cell: **56.3% → 34.8%**
+* share of B_F on test across budgets: **6.9–18.9% → 3.7–21.4%**
+* payload **rises** in seven of the nine cells and falls in two (test @ 0.10, Culver @ 0.10)
+* F1 falls in all nine
+
+The two families the paper leans on hardest are the two that move most. Every retired absolute
+number stays withdrawn; nothing is written into the paper until the rewrite batch (P0-5).

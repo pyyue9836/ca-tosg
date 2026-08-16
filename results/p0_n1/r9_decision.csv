@@ -1,0 +1,4 @@
+comparison,condition,value,result
+PRIMARY test@B0.20,LCB95(dF) > -0.005,-0.00018,True
+PRIMARY test@B0.20,UCB95(dB) < 0,-0.07441,True
+PRIMARY test@B0.20,(B_tau-B_RF)/B_tau >= 0.10,0.34773,True

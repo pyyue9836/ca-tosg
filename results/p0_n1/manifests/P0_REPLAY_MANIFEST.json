@@ -1,0 +1,160 @@
+{
+  "schema": "catosg-p0-replay/1",
+  "generated": "2026-08-16T20:24:12.809163+00:00",
+  "convention": "N=1 nearest collaborator (Change-log P0 ruling (a))",
+  "pre_registration": "Change-log P0-2b (written before the walk finished)",
+  "self_checks": {
+    "grid": "BIT-IDENTICAL",
+    "loso_folds": "BIT-IDENTICAL",
+    "candidate_walks": "BIT-IDENTICAL x3",
+    "manifest_budgets": "MATCH x3",
+    "replay_summary": "IDENTICAL (9 rows)"
+  },
+  "csi": {
+    "realisations": 200,
+    "seed": 20260809,
+    "paired": true,
+    "bootstrap_seed": 12345,
+    "n_boot": 10000
+  },
+  "delta": 0.005,
+  "primary": "test @ B_max=0.20",
+  "r9": {
+    "LCB95(dF) > -0.005": {
+      "value": -0.00018,
+      "met": true
+    },
+    "UCB95(dB) < 0": {
+      "value": -0.07441,
+      "met": true
+    },
+    "(B_tau-B_RF)/B_tau >= 0.10": {
+      "value": 0.34773,
+      "met": true
+    }
+  },
+  "nine_cell": [
+    {
+      "split": "validate",
+      "budget": 0.1,
+      "F1_old": 0.91108,
+      "F1_new": 0.86101,
+      "B_old": 0.06857,
+      "B_new": 0.08102,
+      "red_old": 0.04952,
+      "red_new": -0.12299
+    },
+    {
+      "split": "validate",
+      "budget": 0.2,
+      "F1_old": 0.91172,
+      "F1_new": 0.8644,
+      "B_old": 0.09986,
+      "B_new": 0.15106,
+      "red_old": 0.53904,
+      "red_new": 0.30268
+    },
+    {
+      "split": "validate",
+      "budget": 0.3,
+      "F1_old": 0.91307,
+      "F1_new": 0.86583,
+      "B_old": 0.15781,
+      "B_new": 0.20361,
+      "red_old": 0.49529,
+      "red_new": 0.34882
+    },
+    {
+      "split": "test",
+      "budget": 0.1,
+      "F1_old": 0.90326,
+      "F1_new": 0.89148,
+      "B_old": 0.06798,
+      "B_new": 0.0368,
+      "red_old": 0.06102,
+      "red_new": 0.49173
+    },
+    {
+      "split": "test",
+      "budget": 0.2,
+      "F1_old": 0.90463,
+      "F1_new": 0.89691,
+      "B_old": 0.09472,
+      "B_new": 0.14141,
+      "red_old": 0.5631,
+      "red_new": 0.34773
+    },
+    {
+      "split": "test",
+      "budget": 0.3,
+      "F1_old": 0.90734,
+      "F1_new": 0.89783,
+      "B_old": 0.18703,
+      "B_new": 0.21196,
+      "red_old": 0.4015,
+      "red_new": 0.32171
+    },
+    {
+      "split": "culver",
+      "budget": 0.1,
+      "F1_old": 0.8723,
+      "F1_new": 0.84667,
+      "B_old": 0.02832,
+      "B_new": 0.02437,
+      "red_old": 0.60532,
+      "red_new": 0.66039
+    },
+    {
+      "split": "culver",
+      "budget": 0.2,
+      "F1_old": 0.87355,
+      "F1_new": 0.84975,
+      "B_old": 0.04228,
+      "B_new": 0.06751,
+      "red_old": 0.8055,
+      "red_new": 0.68945
+    },
+    {
+      "split": "culver",
+      "budget": 0.3,
+      "F1_old": 0.88286,
+      "F1_new": 0.85932,
+      "B_old": 0.16008,
+      "B_new": 0.18226,
+      "red_old": 0.49119,
+      "red_new": 0.42072
+    }
+  ],
+  "deployed_untouched": [
+    "results/manifests/",
+    "data/p2/",
+    "results/main/"
+  ],
+  "outputs": {
+    "action_distribution.csv": "719c8eb5f57d88f03d3d327e83907e20",
+    "perclass_ELF.csv": "ff9a6af5b429cb91de4dfce6cb9cfc73",
+    "r10c_decision_log_culver_B010.csv": "375d419edacd57542b70f58cddfd84e1",
+    "r10c_decision_log_culver_B020.csv": "5d31f1ce2d2961ca042199390f24147a",
+    "r10c_decision_log_culver_B030.csv": "b4dd73f345025b6fe00c9f0f85b030bb",
+    "r10c_decision_log_test_B010.csv": "be5262192092269ce56df0aaf89e3da5",
+    "r10c_decision_log_test_B020.csv": "62c1ae66c3c6840ec12946fe07a28954",
+    "r10c_decision_log_test_B030.csv": "39e2ad2a2298b86216792ed6f2d6176d",
+    "r10c_decision_log_validate_B010.csv": "4377366aa6d4558075fda2a75db45c9d",
+    "r10c_decision_log_validate_B020.csv": "6857b6753098751b5135a11fd79dc7a5",
+    "r10c_decision_log_validate_B030.csv": "f047b88ac385587167b26310afc40f1b",
+    "r10c_missed_e_cost.csv": "788373ba3ead78b040c83a08fd52bd4c",
+    "r10c_vs_oracle_account.csv": "22770e9f49e46270f929ac411145c29f",
+    "r10c_vs_tau_account.csv": "889bf865ea48fae91820ab4ec0de09d4",
+    "r9_decision.csv": "455eec518d46a3cbd2a6fae6074ad51d",
+    "replay_culver_B010.csv": "32996958d1b9a3085e3542faf306bbc1",
+    "replay_culver_B020.csv": "cebf2182da2c9cc8cf9794ea2fc3cec3",
+    "replay_culver_B030.csv": "62639db8d55575290cca230981ee6ee9",
+    "replay_summary.csv": "3380f2b0b5f27fa0c0c23ce490021e3b",
+    "replay_test_B010.csv": "4da66963ef3b1a3f39964a5aeb6524da",
+    "replay_test_B020.csv": "fafead202e5d49c926a1a68b1ac73f49",
+    "replay_test_B030.csv": "bcc3f90bd20021417c6f0b70c5b63c32",
+    "replay_validate_B010.csv": "03c6810c6695ebad303d3f7796af4fb6",
+    "replay_validate_B020.csv": "45cfbe7f2faac69891752ed6793bd940",
+    "replay_validate_B030.csv": "2e54abb9803bbe716708b47618eb80c0"
+  }
+}
