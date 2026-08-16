@@ -1,5 +1,18 @@
 <!-- KEEP: revision-ammo -- exempt from the zero-reference deletion rule -->
 
+> **STATUS (2026-08-16, SC-3): NEGATIVE REPRODUCTION — NOT IN PAPER.**
+> This arm was trained and evaluated in full under the SC-2 pre-registration (validate split,
+> 4,000/4,000/2,000 steps, warm start md5 `c5a02fd77154`, AWGN+Rayleigh x 11-point grid x
+> {validate,test}). **Both pre-registered fuses fired**, and a perfect-channel diagnostic showed the
+> channel path is inert: a lossless channel and 0 dB Rayleigh give the same output to 1e-4, with
+> `com_rate` pinned at ~0.5% of tokens. Peiyi ruled **(c) drop the comparator and state why**, so
+> SComCP appears in the paper only as a related-work / transport-configuration citation, never as a
+> baseline. The artefacts are kept as an archive, not as a result:
+> `results/baselines/scomcp.csv`, `SCOMCP_FUSE_REPORT.md`,
+> `scomcp_perfect_channel_diagnostic.csv`, `results/provenance/PROVENANCE_scomcp.txt`.
+> These numbers say the **scaffold did not train into a working codec at this budget**; they say
+> nothing about SComCP as a method, and must not be quoted as its performance.
+
 # SComCP (baseline)
 
 | | |

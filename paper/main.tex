@@ -31,7 +31,7 @@ Peiyi Yue%
 \maketitle
 
 \begin{abstract}
-Connected and automated vehicles can improve perception reliability by exchanging information through vehicle-to-vehicle (V2V) links. However, cooperative perception must operate under limited bandwidth and time-varying vehicular channels. Existing communication-efficient perception methods mainly reduce redundancy within a fixed semantic representation, such as object-level detections or feature-level messages. This paper shows that fixed semantic granularity is suboptimal: feature-level messages are potentially more informative but can become unreliable or wasteful under poor channel quality, while object-level messages are compact and stable but less expressive. We propose \emph{Channel-Aware Task-Oriented Semantic Granularity Selection} (\method), a receiver-driven framework in which the ego vehicle selects the communication granularity for each frame from its own perception cues and estimated channel state, and signals the choice to the collaborator via a $2$-bit request piggy-backed on periodic V2X awareness messages, such as CAM/BSM, over 802.11bd or NR sidelink. \method{} chooses one message type from object-level communication and compressed feature-level communication modes before any high-payload transmission. We derive the selector as the Lagrangian-relaxed solution of a constrained perception-communication problem and instantiate it with a $400$-tree Random Forest. Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channels report the realised true end-to-end AP@0.5 of the frozen selectors descriptively across three prescribed average communication budgets $B_{\max}\in\{0.10,0.20,0.30\}$. How much AP any granularity policy can contest on a split is bounded by that split's headroom, the gap between the perfect-channel feature-level ceiling and fixed object-level communication: $0.0267$ on validate, $0.0027$ on test and $0.0892$ on Culver-City. On test there is therefore effectively nothing to contest, and we claim no AP advantage on any split. What the selector does buy is channel use: averaged over all channel states it spends $6.9$--$18.9\%$ of the per-frame channel use of fixed feature-level transmission under rate-1/2 LDPC + 16-QAM coding, and under fading it falls back to the robust object-level message. The channel-type and estimated SNR features jointly account for $62\%$ of the selector's feature importance, dominating $21$ ego-side cues. Crucially, the feature codec's channel response determines the \emph{currency} in which the perception cues pay: under an LDPC + QAM cliff channel state is a near-sufficient statistic---yet neither half of the input is sufficient on its own: given only the channel state the selector stops requesting features altogether at the two tighter budgets---whereas under graceful importance-map JSCC the estimated SNR becomes uninformative, so the granularity decision turns content-bound and---in-distribution---requires the task cues that an SNR threshold cannot substitute for; under deep fading the codec instead sets feasibility, the digital feature branch turning infeasible over the evaluated SNR range while the graceful JSCC branch, modelled as analog transmission, survives. The deployed selector incurs $59.9$~ms per frame on a single CPU core (the slowest of the three frozen selectors), fitting the $100$~ms budget of a 10~Hz LiDAR cycle. These results demonstrate that channel-aware semantic granularity adaptation is an effective strategy for bandwidth-constrained V2V cooperative perception.
+Connected and automated vehicles can improve perception reliability by exchanging information through vehicle-to-vehicle (V2V) links. However, cooperative perception must operate under limited bandwidth and time-varying vehicular channels. Existing communication-efficient perception methods mainly reduce redundancy within a fixed semantic representation, such as object-level detections or feature-level messages. This paper shows that fixed semantic granularity is suboptimal: feature-level messages are potentially more informative but can become unreliable or wasteful under poor channel quality, while object-level messages are compact and stable but less expressive. We propose \emph{Channel-Aware Task-Oriented Semantic Granularity Selection} (\method), a receiver-driven framework in which the ego vehicle selects the communication granularity for each frame from its own perception cues and estimated channel state, and signals the choice to the collaborator via a $2$-bit request piggy-backed on periodic V2X awareness messages, such as CAM/BSM, over 802.11bd or NR sidelink. \method{} chooses one message type from object-level communication and compressed feature-level communication modes before any high-payload transmission. We derive the selector as the Lagrangian-relaxed solution of a constrained perception-communication problem and instantiate it with a $400$-tree Random Forest. Experiments on the OPV2V dataset (validate, scene-disjoint test, and the Culver-City domain shift) under AWGN and Rayleigh channels report the realised true end-to-end AP@0.5 of the frozen selectors descriptively across three prescribed average communication budgets $B_{\max}\in\{0.10,0.20,0.30\}$. How much AP any granularity policy can contest on a split is bounded by that split's headroom, the gap between the perfect-channel feature-level ceiling and fixed object-level communication: $0.0267$ on validate, $0.0027$ on test and $0.0892$ on Culver-City. On test there is therefore effectively nothing to contest, and we claim no AP advantage on any split. What the selector does buy is channel use: averaged over all channel states it spends $6.9$--$18.9\%$ of the per-frame channel use of fixed feature-level transmission under rate-1/2 LDPC + 16-QAM coding, and under fading it falls back to the robust object-level message. The channel-type and estimated SNR features jointly account for $62\%$ of the selector's feature importance, dominating $21$ ego-side cues. Crucially, the feature codec's channel response determines the \emph{currency} in which the perception cues pay: under an LDPC + QAM cliff channel state is a near-sufficient statistic---yet neither half of the input is sufficient on its own: given only the channel state the selector stops requesting features altogether at the two tighter budgets---whereas under graceful importance-map JSCC the estimated SNR becomes uninformative, so the granularity decision turns content-bound and---in-distribution---requires the task cues that an SNR threshold cannot substitute for; under deep fading the codec instead sets feasibility, the digital feature branch turning infeasible over the evaluated SNR range while the graceful JSCC branch, modelled as analog transmission, survives. On a second detection backbone the same procedure is in-sample effective but does not transfer under the equal-budget protocol, which we report as a boundary of the method. The deployed selector incurs $59.9$~ms per frame on a single CPU core (the slowest of the three frozen selectors), fitting the $100$~ms budget of a 10~Hz LiDAR cycle. These results demonstrate that channel-aware semantic granularity adaptation is an effective strategy for bandwidth-constrained V2V cooperative perception.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -759,6 +759,105 @@ is realised only when the channel can deliver it---precisely the regime
 % TODO(P4-B): second-backbone generality arm (SECOND/VoxelNet intermediate fusion) belongs
 % here, between the Where2comm comparison and Deployment Robustness. Inference NOT run; see
 % docs/experiment_protocol.md Change-log P4-B. No section is created until it has results.
+\subsection{Generality to a Second Backbone}\label{sec:second_backbone}
+
+Every result above uses one perception backbone. To test whether the selection
+\emph{procedure}---not the particular features---is what carries the behaviour, we repeat the whole
+pipeline on a second detector, SECOND~\cite{yan2018second}, under an \emph{equal-budget controlled}
+comparison: the feature message is charged the same per-frame channel budget as the mainline
+($B_F\equiv0.99$~Msym, the same $N_{\mathrm{cw}}$ and the same BLER tables), so the two backbones are
+compared at equal channel cost. We do \emph{not} claim that SECOND's feature tensor compresses to
+that size, and we declare no codec for it.\footnote{The transmitted tensor was measured, not assumed:
+SECOND's cross-link BEV tensor is $6{,}758{,}400$ elements per collaborator before compression and
+$352{,}000$ at the auto-encoder bottleneck. Both are recorded as measurements; neither is used as
+the operative payload under the equal-budget convention.}
+
+Both SECOND checkpoints are the official OpenCOOD ones, and we verify them before use rather than
+trusting the file: after a lossless axis-order conversion required by the spconv version in our
+environment, official inference reproduces the published AP@$0.7$ to $+0.0002$ on both splits for the
+late-fusion model ($0.7752$ vs.\ $0.775$; $0.6822$ vs.\ $0.682$) and to within $+0.0019$ for the
+intermediate model. The three per-frame branches ($E$, $L$, $F$) are then re-derived with the same
+scorer, the same canonical union ground truth and the same IoU-$0.5$ convention as the mainline, and
+the entire downstream pipeline---grid expansion, scene-level $9$-fold LOSO, the budget walk, and the
+$200$-realisation paired replay---is re-run with the mainline code, each stage first verified to
+reproduce its own committed mainline product bit-for-bit.
+
+The result is that \method{} is \textbf{in-sample effective but does not transfer under the
+equal-budget protocol}. Table~\ref{tab:second_backbone} gives the paired comparison against the
+budget-matched SNR-threshold rule. On validate---the split the selector is trained on---it is ahead
+at every budget ($+0.0058$ to $+0.0095$ F1). On both held-out splits it is behind at every budget,
+with all confidence intervals excluding zero.
+
+\begin{table}[t]
+\centering
+\caption{Second backbone (SECOND), equal-budget controlled. Paired $\Delta$F1 of the frozen selector
+against the SNR-threshold rule tuned to the \emph{same} budget, over the same $200$ CSI samplings;
+$95\%$ frame-level paired bootstrap intervals. Positive favours \method{}. \emph{Second-backbone
+arm, not deployed}; descriptive, no decision is taken from this table.}
+\label{tab:second_backbone}
+\begin{tabular}{lccc}
+\toprule
+Split & $B_{\max}=0.10$ & $B_{\max}=0.20$ & $B_{\max}=0.30$ \\
+\midrule
+Validate (in-sample) & $+0.0058$ & $+0.0095$ & $+0.0081$ \\
+                     & \tiny$[+0.0057,+0.0059]$ & \tiny$[+0.0094,+0.0096]$ & \tiny$[+0.0081,+0.0082]$ \\
+OPV2V test           & $-0.0014$ & $-0.0047$ & $-0.0066$ \\
+                     & \tiny$[-0.0015,-0.0013]$ & \tiny$[-0.0048,-0.0046]$ & \tiny$[-0.0067,-0.0065]$ \\
+Culver-City          & $-0.0029$ & $-0.0117$ & $-0.0167$ \\
+                     & \tiny$[-0.0030,-0.0028]$ & \tiny$[-0.0119,-0.0115]$ & \tiny$[-0.0169,-0.0165]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two mechanisms account for the gap, and both are visible in the arm's own numbers. First, the
+\textbf{$L$--$F$ margin is narrower on this backbone}: SECOND's object-level branch scores $0.869$ /
+$0.879$ / $0.879$ mean per-frame F1 on validate / test / Culver-City against a compressed-feature
+branch at $0.897$ / $0.904$ / $0.939$, so there is simply less to gain from choosing correctly, and
+the same selection error costs proportionally more. Second, the \textbf{budget walk selects a
+different candidate family}: all three frozen SECOND selectors carry \texttt{class\_weight=balanced},
+whereas all three mainline selectors carry \texttt{class\_weight=None}. The reweighted family fits
+the in-sample class mix well---agreement with the oracle is $0.833$ on validate---but transfers
+poorly, falling to $0.578$ on test and $0.534$ on Culver-City, where the selector degenerates to
+near-always-$L$ ($E$ recall $0.027$ on test and $0.000$ on Culver-City). The $E$-collapse of
+Section~\ref{sec:pareto} is therefore \emph{worse} on this backbone, not milder: under Rayleigh the
+selector's $\rho_E$ is $0.001$ (test) and $0.000$ (Culver-City) while the oracle spends $0.172$ and
+$0.133$. The large payload reductions this arm shows ($67$--$90\%$) follow from that collapse to $L$
+and are not evidence of good selection.
+
+We report this as a boundary of the present method rather than a tuning target: nothing was
+retrained and no threshold was adjusted after seeing these numbers.
+
+\subsection{Collaborator Scale}\label{sec:collab_scale}
+
+The evaluation so far treats the collaborator set as given. To ask how the policy behaves as more
+vehicles are reachable, we sweep the number of requested collaborators $N\in\{1,2,3\}$, keeping the
+frozen selector, $\lambda^\star$ and $\tau^\star$ untouched.
+
+The first thing the sweep exposes is that $N$ is not the operative quantity. What matters is the
+\emph{effective} collaborator count $k_{\mathrm{eff}}$---how many collaborators a frame actually
+has---because requesting three cannot conjure a third. Of the $1{,}980$ validate frames, $733$ are
+already saturated at $N=1$, $1{,}081$ at $N=2$ and $1{,}234$ at $N=3$; on Culver-City the supply runs
+out entirely, so $N=2$ and $N=3$ are the \emph{same} arm and we report them as one. All comparisons
+below are therefore conditioned on the same frames rather than taken across differently-sized frame
+populations.
+
+Under that accounting, F1 rises with $k_{\mathrm{eff}}$ with sharply diminishing returns while
+channel use grows sub-linearly. At $B_{\max}=0.20$ on validate, going from $N=1$ to $N=2$ buys
+$+0.0328$ F1 for $+0.0653$~Msym, and the third collaborator adds only $+0.0066$ more F1 for a further
+$+0.0499$~Msym---about a fifth of the gain for three-quarters of the extra channel use. On test the
+pattern is the same but flatter ($+0.0097$ then $+0.0008$), because that split is thinner and
+saturates earlier. The sub-linearity in payload is a supply effect rather than a policy effect: the
+per-frame action distribution is unchanged across $N$ (the frozen selector sees the same cues), so
+the extra channel use comes only from the frames that actually gained a collaborator.
+
+Because ``request $N$'' is ambiguous when fewer than $N$ collaborators exist, we bracket the two
+delivery semantics---charging only for what is delivered, versus charging for what was requested---on
+validate at $N=2$, on the $690$ frames where the two differ. The bracket is tight: the two readings
+differ by $+0.0001$ to $+0.0003$ F1 across the three budgets, so the conclusions here do not depend
+on which convention is adopted. Finally, the budget itself transfers unchanged: $B_{\max}$ is a
+per-frame constraint, so a selector frozen at one budget remains within it as $N$ grows, and the
+observed payload growth stays inside the budget except where the table marks it otherwise.
+
 \subsection{Deployment Robustness and Cost}\label{sec:robustness}
 
 Three practical imperfections of a deployed V2X link---a noisy SNR estimate, channel-state
@@ -803,7 +902,7 @@ Request delay & $1$-frame-stale decision & $-0.019$ (pessimistic i.i.d.\ bound) 
 
 We presented \method{}, a channel-aware task-oriented semantic granularity selector for V2V cooperative perception. The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs a per-frame communication mode from the deployed action set---a compact object-level message $L$ or a compressed feature-level message under 16-QAM coding (the dominated 256-QAM mode is defined but excluded from deployment, Section~\ref{sec:candidates}). The selector is implemented as a lightweight Random Forest that adds no learnable parameters to the perception pipeline; the contribution is not the Random Forest itself but the channel-aware granularity policy, of which the forest is one interpretable implementation (a hand-tuned SNR-threshold rule captures much of the same effect, Section~\ref{sec:threshold}). It runs in $59.9 \pm 5.3$~ms ($\mathrm{P95} = 69.3$~ms) per frame on a single CPU core---the slowest of the three frozen selectors, since the deployment claim must hold for all of them---within the $100$~ms budget of a $10$~Hz LiDAR cycle (Section~\ref{sec:robustness}).
 
-The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state justify it, and its realised AP is reported descriptively rather than as an advantage: the AP a granularity policy can contest is bounded by each split's headroom between the perfect-channel feature ceiling and fixed object-level communication ($0.0267$ validate, $0.0027$ test, $0.0892$ Culver-City), and on test that headroom is effectively zero. What transfers to the scene-disjoint test split and the Culver-City domain shift under a frozen selector is the communication saving: $6.9$--$18.9\%$ of the channel use of fixed feature-level transmission across the three budgets on test. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the learned selector closely on the channel-averaged payload--F1 frontier, ahead of it at the tightest budget and behind it at the two looser ones; what the pre-registered comparison establishes is non-inferiority within a $0.005$ margin at a $56.3\%$ payload reduction, not dominance. The granularity policy's gain over object-level communication is itself frame-selective, reaching $+0.0400$ F1 ($95\%$ CI $[+0.0339,+0.0465]$) on the hardest tercile of test frames under a reliable channel; we attribute the limited marginal value of the perception cues to the sharp LDPC + QAM SNR cliff, which makes channel state a near-sufficient statistic. When the feature branch instead uses graceful importance-map JSCC, the estimated SNR becomes uninformative and the picture reverses: the best SNR threshold collapses to object-level performance, and, in-distribution, the cue-based selector beats it using the task cues alone (Appendix~\ref{sec:jscc_aware}); a selector trained on one split and frozen does not yet transfer this graceful-channel gain across domains, which we leave to future work. Whether task-oriented perception cues are needed is thus determined by the feature codec's channel response: under a cliff codec their contribution is to the \emph{shape} of the policy rather than to
+The results support three conclusions. First, under the evaluated LDPC + QAM feature-transmission setting, fixed feature-level communication is often dominated by compact object-level communication because of channel-induced cliff effects. Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state justify it, and its realised AP is reported descriptively rather than as an advantage: the AP a granularity policy can contest is bounded by each split's headroom between the perfect-channel feature ceiling and fixed object-level communication ($0.0267$ validate, $0.0027$ test, $0.0892$ Culver-City), and on test that headroom is effectively zero. What transfers to the scene-disjoint test split and the Culver-City domain shift under a frozen selector is the communication saving: $6.9$--$18.9\%$ of the channel use of fixed feature-level transmission across the three budgets on test. Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the learned selector closely on the channel-averaged payload--F1 frontier, ahead of it at the tightest budget and behind it at the two looser ones; what the pre-registered comparison establishes is non-inferiority within a $0.005$ margin at a $56.3\%$ payload reduction, not dominance. The granularity policy's gain over object-level communication is itself frame-selective, reaching $+0.0400$ F1 ($95\%$ CI $[+0.0339,+0.0465]$) on the hardest tercile of test frames under a reliable channel; we attribute the limited marginal value of the perception cues to the sharp LDPC + QAM SNR cliff, which makes channel state a near-sufficient statistic. The same boundary appears across detectors: repeated on a second backbone under an equal-budget controlled protocol, the procedure is in-sample effective but does not transfer, with the ego-only action collapsing further than on the mainline (Section~\ref{sec:second_backbone}). When the feature branch instead uses graceful importance-map JSCC, the estimated SNR becomes uninformative and the picture reverses: the best SNR threshold collapses to object-level performance, and, in-distribution, the cue-based selector beats it using the task cues alone (Appendix~\ref{sec:jscc_aware}); a selector trained on one split and frozen does not yet transfer this graceful-channel gain across domains, which we leave to future work. Whether task-oriented perception cues are needed is thus determined by the feature codec's channel response: under a cliff codec their contribution is to the \emph{shape} of the policy rather than to
 peak accuracy, while under a graceful codec they become necessary for accuracy.
 
 

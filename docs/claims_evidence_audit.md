@@ -6,13 +6,15 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| PENDING (no distinctive number to locate) | 34 |
-| ANALYTIC | 24 |
-| FROZEN | 20 |
+| PENDING (no distinctive number to locate) | 35 |
+| ANALYTIC | 26 |
+| FROZEN | 24 |
 | PENDING (unlocated) | 17 |
 | LEGACY-ENGINE | 5 |
 | FROZEN [2/3] (located, ledger cell still blank) | 2 |
 | ANALYTIC [2/4] (located, ledger cell still blank) | 1 |
+| ANALYTIC [5/6] (located, ledger cell still blank) | 1 |
+| FROZEN [2/4] (located, ledger cell still blank) | 1 |
 | FROZEN [3/6] (located, ledger cell still blank) | 1 |
 | FROZEN [4/9] (located, ledger cell still blank) | 1 |
 | FROZEN [6/7] (located, ledger cell still blank) | 1 |
@@ -20,7 +22,7 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | LEGACY-ENGINE [2/3] (located; weaker candidates disagree) | 1 |
 | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | 1 |
 
-Total: **109** claims across **34** (sub)sections.
+Total: **118** claims across **36** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -317,6 +319,25 @@ Total: **109** claims across **34** (sub)sections.
 |---|---|---|---|
 | `cfe7baf` | ANALYTIC | 2, 0.5, 0.871, 0.7, 0.790 | Under perfect channel (lossless feature-level transmission), Where2comm achieves AP@0.5 = 0.871 and AP@0.7 = 0.790. |
 | `c290127` | ANALYTIC | 0.917, 0.5, 0.890, 0.836, 2 | This is a solid feature-level result---but it is neither the strongest feature branch nor, notably, above the object-level baselin… |
+
+### Results and Analysis → Generality to a Second Backbone [sec:second_backbone]
+
+| ID | engine | exact values | claim (truncated) |
+|---|---|---|---|
+| `cc54ec1` | ANALYTIC [5/6] (located, ledger cell still blank) | 0.7, +0.0002, 0.7752, 0.775, 0.6822, 0.682, +0.0019 | Both are recorded as measurements; neither is used as the operative payload under the equal-budget convention. Both SECOND checkpo… |
+| `c9e9a5b` | PENDING (no distinctive number to locate) | 0.5, 9, 200 | The three per-frame branches (E, L, F) are then re-derived with the same scorer, the same canonical union ground truth and the sam… |
+| `c94b33f` | FROZEN | +0.0058, +0.0095, 1 | On validate---the split the selector is trained on---it is ahead at every budget (+0.0058 to +0.0095 F1). |
+| `c534138` | FROZEN | 0.869, 0.879, 1, 0.897, 0.904, 0.939 | SECOND's object-level branch scores 0.869 / 0.879 / 0.879 mean per-frame F1 on validate / test / Culver-City against a compressed-… |
+| `c6949b2` | FROZEN | 0.833, 0.578, 0.534, 0.027, 0.000 | The reweighted family fits the in-sample class mix well---agreement with the oracle is 0.833 on validate---but transfers poorly, f… |
+| `ce8b3a0` | ANALYTIC | 0.001, 0.000, 0.172, 0.133 | The E-collapse of Section [ref] is therefore worse on this backbone, not milder: under Rayleigh the selector's _E is 0.001 (test) … |
+
+### Results and Analysis → Collaborator Scale [sec:collab_scale]
+
+| ID | engine | exact values | claim (truncated) |
+|---|---|---|---|
+| `cab1262` | FROZEN [2/4] (located, ledger cell still blank) | 0.20, 1, 2, +0.0328, +0.0653, +0.0066, +0.0499 | At B_=0.20 on validate, going from N=1 to N=2 buys +0.0328 F1 for +0.0653 Msym, and the third collaborator adds only +0.0066 more … |
+| `c20edb7` | FROZEN | +0.0097, +0.0008 | On test the pattern is the same but flatter (+0.0097 then +0.0008), because that split is thinner and saturates earlier. |
+| `cf7013f` | ANALYTIC | +0.0001, +0.0003, 1 | The bracket is tight: the two readings differ by +0.0001 to +0.0003 F1 across the three budgets, so the conclusions here do not de… |
 
 ### Results and Analysis → Deployment Robustness and Cost [sec:robustness]
 

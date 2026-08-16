@@ -2025,11 +2025,31 @@ written into the paper's conclusions; the paper reports only the frozen selector
     baseline table as a trained comparator. **Allowed:** "our SComCP reproduction did not converge
     to a working codec under the pre-registered budget; the arm is reported as a negative
     reproduction result, not as a measurement of the method."
+  - **RULING (c), taken by Peiyi 2026-08-16: drop the SComCP comparator and state why.** Rationale,
+    recorded so a reviewer's "why is there no SComCP comparison?" has a one-line answer:
+    **(i)** the authors publish no weights, so the only route to a number was to train it ourselves;
+    **(ii)** trained under this paper's own discipline at a budget matched to the JSCC arm it must be
+    compared with, the reproduction fired **both** pre-registered fuses and the diagnostic showed the
+    channel path inert — a lossless channel and 0 dB Rayleigh give the same output to 1e-4;
+    **(iii)** publishing that as "SComCP" would misrepresent the method, and publishing it as a
+    beaten baseline would be worse. Reporting no comparator, with the negative result archived and
+    reachable, is the honest option.
+    **The full SC-2 artefact set stays in `results/baselines/`** — `scomcp.csv` (44 rows),
+    `SCOMCP_FUSE_REPORT.md`, `scomcp_perfect_channel_diagnostic.csv`, `PROVENANCE_scomcp.txt` —
+    labelled **"negative reproduction, not in paper"**. The truth is not deleted; it is simply not
+    presented as a measurement of somebody else's method.
+  - **`main.tex` audited against the ruling (2026-08-16).** SComCP was **never** a baseline in the
+    paper: it appears in no baseline list, no table row, no figure legend, and the string
+    "scaffold" appears **zero** times. The five `gan2026scomcp` citations are all
+    positioning/related-work, plus one §V-C sentence stating that our transport configuration
+    *matches* SComCP's conventional digital baseline — a **configuration reference, not a
+    comparison** — and the ruling keeps both classes. So this item required removals of nothing and
+    the audit is the deliverable.
   - **Nothing was repaired.** No retrain, no hyperparameter change after seeing the numbers, no data
-    adjustment, δ untouched, `main.tex` untouched. **Open for your ruling:** whether to (a) spend a
+    adjustment, δ untouched. **Superseded, for the record — the options put to Peiyi were:** whether to (a) spend a
     larger training budget (the paper's schedule on `train` would be ≈16× the data and ≈8× the
     steps), (b) report the arm as a negative reproduction result, or (c) drop the SComCP comparator
-    and state why. Phase-2 item 5 ("SComCP 真数字进基线表") **must not proceed on these numbers**.
+    and state why — **(c) was chosen**, as recorded above.
 
 ## Appendix A — P2 freeze summary (P2-D)
 
