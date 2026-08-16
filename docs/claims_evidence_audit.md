@@ -9,6 +9,7 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | ANALYTIC | 72 |
 | FROZEN | 38 |
 | ANALYTIC [2/4] (located, ledger cell still blank) | 1 |
+| ANALYTIC [3/5] (located, ledger cell still blank) | 1 |
 | ANALYTIC [5/6] (located, ledger cell still blank) | 1 |
 | FROZEN [2/2] (located, ledger cell still blank) | 1 |
 | FROZEN [2/3] (located, ledger cell still blank) | 1 |
@@ -17,7 +18,6 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | FROZEN [6/7] (located, ledger cell still blank) | 1 |
 | LEGACY-ENGINE | 1 |
 | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | 1 |
-| PENDING (unlocated) | 1 |
 
 Total: **120** claims across **37** (sub)sections.
 
@@ -27,7 +27,7 @@ Total: **120** claims across **37** (sub)sections.
 
 | ID | claim (truncated) | generator | why LEGACY |
 |---|---|---|---|
-| `ce386fe` | The three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively; the or… | `baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` | value search: results/baselines/importance_map_jscc/two_regime_kfold_diag.csv [8/10] <- python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py = LEGACY-ENGINE |
+| `cae42bc` | The three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively; the or… | `baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` | value search: results/baselines/importance_map_jscc/two_regime_kfold_diag.csv [8/10] <- python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py = LEGACY-ENGINE |
 | `c14c429` | Deployed on test it over-selects the feature action (JSCC C-request rate 0.14\! → \!0.42) and its realised F1 … | `baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` | two_regime_edge_clean.csv <- python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py: closure (6 modules) reads v3_eval |
 
 ## Full per-section inventory
@@ -322,8 +322,8 @@ Total: **120** claims across **37** (sub)sections.
 | `c9ba5de` | ANALYTIC | 1, 8, 12, 8.0 | The LDPC + QAM feature F1 has a sharp cliff over the 8--12 dB decoding transition (onset 8.0 dB, Section [ref]), so SNR is highly … |
 | `c0e68a9` | ANALYTIC | 1, 0.89, 0, 20 | The learned JSCC feature F1, by contrast, is essentially flat at ≈ 0.89 across the entire 0--20 dB range (real per-frame data): th… |
 | `c077f78` | FROZEN | +0.002, 1, 95, +0.001, +0.003, -0.0002, +0.0005 | (a) In-distribution. Under LDPC + QAM the AWGN edge over the best SNR threshold is only +0.002 F1 (95\% CI [+0.001,+0.003]): small… |
-| `ce386fe` | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | -0.0002, +0.0005, +0.002, +0.022, 1, +0.020, +0.025, +0.018, | The three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively; the ordering -0.0002 < +0.… |
-| `c2aa3e2` | PENDING (unlocated) | 55, 70, +0.031, 1 | The selector recovers 55--70\% of the clairvoyant oracle headroom (e.g.\ +0.031 F1 on AWGN test): the graceful-channel decision is… |
+| `cae42bc` | LEGACY-ENGINE [8/10] (located; weaker candidates disagree) | -0.0002, +0.0005, +0.002, +0.022, 1, +0.020, +0.025, +0.018, | The three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively; the ordering -0.0002 < +0.… |
+| `c75c31c` | ANALYTIC [3/5] (located, ledger cell still blank) | 0.0291, 1, +0.0181, 0.0275, +0.0158, 0.0281 | The two quantities are distinct and are reported separately: under AWGN the oracle headroom is 0.0291 F1 and the selector recovers… |
 | `c14c429` | LEGACY-ENGINE | 0.14, 0.42, 1, -0.004, -0.008, -0.005, 0 | Deployed on test it over-selects the feature action (JSCC C-request rate 0.14\! → \!0.42) and its realised F1 falls just below Fix… |
 
 ### Boundary of the Method: a Second Detection Backbone [sec:second_backbone]

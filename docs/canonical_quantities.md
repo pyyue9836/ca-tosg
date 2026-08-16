@@ -17,6 +17,7 @@ underlying data into a silent PASS, which is the failure this registry exists to
 | FA-1 channel-only payload ratio | `1.54\times` | `results/sensitivity/feature_ablation.csv` | `test`, `B_max=0.30`: `channel_only.payload / combined.payload` = 0.28843 / 0.18703 |
 | payload share of Fixed-F | `6.9`--`18.9\%` (test), `2.9`--`16.2\%` (Culver) | `results/main/replay_summary.csv` + `results/main/fixed_references.csv` | `B_RF` / Fixed-F `payload_msym` (0.99 Msym) × 100, per budget |
 | F1 share of the masked oracle | `98.6`--`99.0\%` (test), `98.1`--`99.3\%` (Culver) | `results/main/replay_summary.csv` + `results/main/fixed_references.csv` | `F1_RF` / oracle `F1` × 100, per budget |
+| JSCC oracle-headroom recovery | `56`--`62\%`; per channel `0.0291`/`+0.0181` (AWGN), `0.0275`/`+0.0158` (Rayleigh), `0.0281`/`+0.0158` (OFDM) | `results/baselines/importance_map_jscc/jscc_selector_{awgn,rayleigh,ofdm}.csv` | headroom = `or_f1` − `L_f1`; recovered = `rf_f1` − `L_f1`; share = recovered / headroom. **200-realisation held-out estimator on validate frames** — not the k-fold estimator used two sentences earlier, and the two are never mixed inside one sentence |
 | payload reduction | `56.3\%` | `results/main/replay_summary.csv` | `test`, `B_max=0.20`: `payload_reduction` × 100 |
 
 ## Why the latency entry is same-row
@@ -33,3 +34,7 @@ perception-side cues carry **52.9%** between them — the larger share. The gate
 refuses the wording "dominating all 21 cues", which the paper used until R17-C and which the data
 does not support. Concentration is the true reading: the channel side puts its mass in two decisive
 splits, the task side spreads comparable total mass across many weak ones.
+
+## Why the JSCC recovery entry names its estimator
+
+Three estimators exist for this appendix and they disagree, which is the point: the 200-realisation held-out comparison gives 56--62%, the in-distribution k-fold diagnostic gives 36.7--74.9% (71.6% on the AWGN/test row), and the frozen cross-split evaluation is **negative** on test. The retired sentence quoted "55--70%" -- reproducible from none of them -- and used the *headroom* 0.031 as though it were the recovered gain, which is +0.0224 on that row. The registry therefore pins the estimator, the split and both quantities separately.

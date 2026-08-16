@@ -7,7 +7,7 @@
 | list | rows |
 |---|---|
 | A — figure / caption / body | 33 |
-| B — ledger claims with no located evidence | 4 |
+| B — ledger claims with no located evidence | 3 |
 
 ## List A — figure numbers vs caption vs body (33)
 
@@ -56,7 +56,7 @@ State is condition-aware: a value counts as quoted only in a sentence whose stat
 - caption only: 5
 - nowhere: 1
 
-## List B — ledger claims with no located evidence (4)
+## List B — ledger claims with no located evidence (3)
 
 `no distinctive number` = the claim carries only structural constants, so it needs a citation, not an experiment. `unlocated` = it carries real numbers that no committed result file holds.
 
@@ -65,13 +65,8 @@ State is condition-aware: a value counts as quoted only in a sentence whose stat
 | B1 | `c48c60a` | System Model and Problem Formulation [sec:system] → Message Candidates [sec:candidates] | 121 | 16, 1, 2 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
 | B2 | `c998f7d` | System Model and Problem Formulation [sec:system] → Communication Cost | 189 | 3.96, 1.98, 1, 2, 4, 8, 16, 256 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
 | B3 | `c499e2c` | Experimental Setup [sec:exp] → Evaluation Metrics | 367 | 0.5, 0.7, 1 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B4 | `c2aa3e2` | When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware] | 895 | 55, 70, +0.031, 1 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/sensitivity/scene_subsets.csv` — not enough to attribute) |
 
 ### B — full claim text for the rows proposed for deletion or recompute
-
-**B4 `c2aa3e2` — When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware], line 895**
-
-> The selector recovers 55--70\% of the clairvoyant oracle headroom (e.g.\ +0.031 F1 on AWGN test): the graceful-channel decision is genuinely content-bound and carried by the ego-side cues, a gain no SNR threshold can reach.
 
 
 ---

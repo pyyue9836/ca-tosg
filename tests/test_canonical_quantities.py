@@ -131,6 +131,28 @@ def q_ratio_families(text):
     return rc
 
 
+def q_jscc_recovery(text):
+    """56--62% recovery, and the per-channel headroom / recovered pair, from the 200-realisation CSVs."""
+    rc, shares = 0, []
+    for ch in ('awgn', 'rayleigh', 'ofdm'):
+        d = pd.read_csv(os.path.join(
+            ROOT, f'results/baselines/importance_map_jscc/jscc_selector_{ch}.csv')).set_index('metric')['mean']
+        head, rec = d.or_f1 - d.L_f1, d.rf_f1 - d.L_f1
+        shares.append(100 * rec / head)
+        missing = [x for x in (f'{head:.4f}', f'{rec:.4f}') if not printed(x, text)]
+        rc |= check(f'JSCC headroom/recovered ({ch})', not missing,
+                    f'headroom {head:.4f}, recovered +{rec:.4f} ({100 * rec / head:.1f}%); '
+                    + ('both printed' if not missing else f'NOT printed: {missing}'))
+    lo, hi = f'{min(shares):.0f}', f'{max(shares):.0f}'
+    rc |= check('JSCC recovery range', printed(lo, text) and printed(hi, text),
+                f'derived {lo}--{hi}% across the three channels')
+    # the retired conflation must not come back: the headroom may never be called a gain
+    rc |= check('headroom is not quoted as a gain',
+                not re.search(r'recovers[^.]{0,80}\+0\.031', text),
+                '+0.031 is the AWGN/test k-fold HEADROOM; the recovered gain on that row is +0.0224')
+    return rc
+
+
 def main() -> int:
     if not os.path.exists(REGISTRY):
         print(f'FAIL: {os.path.relpath(REGISTRY, ROOT)} is missing -- the registry is the '
@@ -140,12 +162,12 @@ def main() -> int:
     print('canonical quantities (every reference re-derived from its committed product):')
     rc = 0
     for fn in (q_feature_importance, q_latency, q_fa1_ratio, q_payload_reduction,
-               q_ratio_families):
+               q_ratio_families, q_jscc_recovery):
         rc |= fn(text)
     # the registry must name every quantity this file checks, so the two cannot drift apart
     reg = open(REGISTRY, encoding='utf-8').read()
     for token in ('feature_importance_frozen.csv', 'selector_latency.csv', 'feature_ablation.csv',
-                  'replay_summary.csv'):
+                  'replay_summary.csv', 'jscc_selector_'):
         if token not in reg:
             rc |= check('registry coverage', False, f'{token} is checked here but absent from '
                                                     f'{os.path.relpath(REGISTRY, ROOT)}')
