@@ -2786,3 +2786,72 @@ share of $B_F$, edge over the threshold), the E-collapse cost expressed in units
 (**0.58--0.61$\delta$ on test** — the largest identified headroom in the method), the FA-1 shape
 finding, collaborator scale with its diminishing returns, the SECOND-backbone boundary, and latency.
 Draft for Peiyi's check before it goes to Josh.
+
+---
+
+## Change-log P0 (2026-08-16) — MAIN ERRATUM: collaborator convention in the main experiment
+
+**Severity: main experiment.** Every mainline absolute number is withdrawn pending re-derivation.
+`paper/main.tex` is untouched in this batch by ruling.
+
+### The inconsistency
+
+The perception side and the communication side of the mainline count different things:
+
+* **Perception side.** The per-frame utility caches (`late_f1`, `compressed_f1` in
+  `dataset_{split}*.csv`) come from OpenCOOD inference that fuses **every collaborator present in
+  the frame**. On OPV2V that is frequently 2–3 vehicles.
+* **Communication side.** The payload model charges **one message**: `B_L = 0.024` or
+  `B_F = 0.99` Msym/frame, with a single frame-BLER term `(1-b)` for a single link.
+
+So the mainline credits the frame with N-collaborator perception quality at 1-collaborator cost.
+The action set, the budget, the Lagrangian, the oracle labels, the walk, τ\* and the R9 decision all
+sit on that mismatch.
+
+**Measured size, not asserted.** P4-C already ran the controlled arm at the *same* delivery and
+payload semantics with N held at 1, 2 and 3, and its N=1 column is the consistent-convention
+control. On test, N=3 minus N=1 is **+0.01034 F1** (per budget: +0.01039 / +0.01048 / +0.01017 at
+B_max = 0.10 / 0.20 / 0.30; N=2 minus N=1 is +0.00952). On validate the same difference is +0.03953
+and on Culver-City +0.02538. That is the amount of F1 the mainline was getting for free — between
+two and eight times the pre-registered non-inferiority margin δ = 0.005.
+
+### Ruling (a) — the main experiment is the nearest single collaborator
+
+The main experiment is redefined as **N = 1, the nearest collaborator**, so that one message is paid
+for and one collaborator's information is received. The alternative (charge k messages on the
+perception side) would change the payload axis of every figure and the meaning of B_max, and it is
+not what the deployed selector was frozen against.
+
+**Consequence, stated plainly: every mainline absolute number is withdrawn** — F1, payload, the
+nine-cell table, the Pareto points, the difficulty strata, the ablations, and the R9 decision
+itself. They are not "approximately right pending a correction"; they are products of a convention
+that is being replaced, and they are re-derived before they are quoted again.
+
+### What is re-derived, and in what order (P0-2)
+
+The N=1 per-frame caches already exist (`gs_rerun/p4c_N1/{late,intermediate}_{split}.npz`, built for
+P4-C), so **no new perception inference is required** — this is a CPU/light-GPU batch.
+
+1. rebuild the per-frame dataset with N=1 utilities (ego cues and `ego_f1` are N-independent),
+2. grid expansion → 3 splits,
+3. scene-level 9-fold LOSO on validate,
+4. the pre-registered candidate walk → freeze one selector per budget,
+5. τ\* re-tuned under the same convention and the same procedure,
+6. the same 200 paired CSI draws → replay,
+7. R9's three conditions re-judged at the original δ by the original procedure (corrigendum).
+
+**Every stage first bit-reproduces its committed old-convention product** before being pointed at
+N=1, reusing the E-Lg2 gate built for the SECOND arm. A stage that cannot reproduce its own
+committed output is wrong, and no N=1 number is taken from it.
+
+**Stop point (pre-registered here, before any number is seen):** after step 4, λ\*/τ\*/payload are
+reported for Peiyi's check, and the replay does not run until that is cleared.
+
+### The risk, recorded before the run
+
+The real risk in this batch is not compute, it is that **R9's decision may not survive the
+correction**, and the direction is not predictable: N=1 lowers the feature branch's utility, which
+could move the selector either way against a threshold rule that is re-tuned under the same
+convention. The decision follows the data. If R9 fails under the corrected convention, it is
+recorded as a failed confirmatory decision and the paper's claim changes accordingly — the
+conditions, δ and the procedure are not adjusted after seeing the result.
