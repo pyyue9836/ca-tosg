@@ -1987,6 +1987,50 @@ written into the paper's conclusions; the paper reports only the frozen selector
     reports**. That would be a *scaffold-does-not-train* finding, not a finding about SComCP, and
     the two may not be conflated in any write-up.
 
+- **SC-3 RESULT (2026-08-16) — the SComCP arm ran to completion as pre-registered, and **both**
+  fuse conditions fired. The output is a *scaffold* finding, not a finding about SComCP as a
+  method.** Evidence: `results/baselines/scomcp.csv` (44 rows),
+  `results/baselines/SCOMCP_FUSE_REPORT.md`, `results/baselines/scomcp_perfect_channel_diagnostic.csv`,
+  `results/provenance/PROVENANCE_scomcp.txt`.
+  - **Executed exactly as registered.** Training on `validate` only; step budget hit **exactly**
+    4,000 / 4,000 / 2,000 (each stage wrote its own `STEPS.txt`); warm start md5 `c5a02fd77154`
+    (17 SComCP modules trained fresh, 8 JSCC modules replaced); coverage B = AWGN + Rayleigh ×
+    11-point grid × {validate, test} = 44 runs; per-frame F1 on the shared scorer / canonical union
+    GT / IoU-0.5 unit-score convention; `com_rate` reported as a standalone column with **no**
+    Msym/Mbit conversion invented.
+  - **Fuse F1 FIRED.** validate AWGN 20 dB **AP@0.5 = 0.7262** against the Fixed-L reference
+    **0.8902** (Δ **−0.1640**); the ego-only floor is 0.6116 and the perfect-channel ceiling 0.9169.
+  - **Fuse F2 FIRED.** Per-frame F1 span across the whole 11-point grid is **0.0001** (validate) and
+    **0.0003** (test) — flat to four decimals on both channels.
+  - **F2 alone would have been ambiguous, and was not treated as sufficient.** Near-flatness is a
+    *known, expected* property of the ImportanceMapJSCC comparison arm (graceful degradation; its
+    own span on the same split/channel is 0.0050). Two further measurements separate "graceful"
+    from "not engaged":
+    - **AWGN and Rayleigh are indistinguishable** — max |AWGN − Rayleigh| per-frame F1 across the
+      grid is 1e-4 (validate) / 3e-4 (test).
+    - **Perfect-channel diagnostic (run specifically to avoid a §8 rule-2 hand-wave):** a
+      *lossless* channel on the same net gives F1 **0.8318** / AP@0.5 **0.7261** — **identical to
+      0 dB Rayleigh (0.8318 / 0.7261) and to 20 dB AWGN (0.8319 / 0.7262)**. A perfect channel and
+      the worst modelled channel produce the same output to 1e-4, so **the channel path is inert**.
+  - **Diagnosed root cause (written, not asserted).** `com_rate` is constant at **0.004972**
+    (validate) / **0.004699** (test) across every SNR and both channels: the trained selector keeps
+    ≈**0.5 %** of tokens, so there is almost no remote content for any channel to corrupt and the
+    fused output is essentially the ego branch. Consistently, AP@0.5 0.726 sits between the
+    ego-only floor 0.612 and Fixed-L 0.890.
+  - **Reading, locked.** This says the **scaffold did not train into a working codec under the
+    pre-registered 10,000-step budget on the 1,980-frame validate split** — three stages at ~1/16 of
+    the source paper's data and a fraction of its schedule. It says **nothing about SComCP as a
+    method**, and the two may not be conflated in any write-up. **Forbidden:** presenting these
+    numbers as SComCP's performance, or as evidence that SComCP underperforms CA-TOSG, or in the
+    baseline table as a trained comparator. **Allowed:** "our SComCP reproduction did not converge
+    to a working codec under the pre-registered budget; the arm is reported as a negative
+    reproduction result, not as a measurement of the method."
+  - **Nothing was repaired.** No retrain, no hyperparameter change after seeing the numbers, no data
+    adjustment, δ untouched, `main.tex` untouched. **Open for your ruling:** whether to (a) spend a
+    larger training budget (the paper's schedule on `train` would be ≈16× the data and ≈8× the
+    steps), (b) report the arm as a negative reproduction result, or (c) drop the SComCP comparator
+    and state why. Phase-2 item 5 ("SComCP 真数字进基线表") **must not proceed on these numbers**.
+
 ## Appendix A — P2 freeze summary (P2-D)
 
 Snapshot of the frozen P2 state at R11. The authoritative source for every value is

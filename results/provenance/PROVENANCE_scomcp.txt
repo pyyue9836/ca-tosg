@@ -1,0 +1,14 @@
+CA-TOSG SC-2 -- SComCP baseline, DESCRIPTIVE, no decision.
+==============================================================================
+generated: 2026-08-16T14:04:54.981037+00:00
+checkpoint: /home/josh/cooperative_semantic_perception/OpenCOOD/opencood/logs/scomcp_stage3_joint_2026_08_15_23_31_44/net_final.pth
+  sha256 4a890a4c238eacfd02e61cfbbe413a1b51852eebdf0c73ae320e496604715be5
+config: baselines/scomcp/configs_sc2/scomcp_stage3_joint.yaml
+training split: VALIDATE (1,980 frames), NOT the 6,764-frame train split the source paper uses -- absolute AP is therefore not comparable to the published figures.
+warm start: importance_map_jscc/stage2_rayleigh_learned_v3/stage2_whole_map_4000steps.pth (md5 c5a02fd77154), itself trained on the OPV2V train split -- consistent with this paper's discipline: train is where every
+  representation here is learned (frozen PointPillars backbone included), while the validate-only rule governs arm-specific learning so test and Culver stay held out. No held-out split was read during training.
+step budget (pre-registered SC-2): 4000 / 4000 / 2000 for stages 1 / 2 / 3.
+coverage: channels=['perfect_comm'] snr=[20.0] splits=['validate'] (option B). Culver-City is NOT covered.
+per-frame F1: same helper, same canonical union GT, same IoU-0.5 unit-score convention as late_f1 / compressed_f1 / jscc_f1.
+AP: no global sort (this arm's own convention), fresh result_stat per call.
+PAYLOAD: the ImportanceMapJSCC arm registers no codec-level payload convention, so com_rate is reported as a STANDALONE column and NO Msym/Mbit conversion is invented (SC-2 ruling).
