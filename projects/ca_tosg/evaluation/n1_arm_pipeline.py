@@ -122,7 +122,7 @@ def stage_grid():
         p = os.path.join(ARM_DATA, f'p2_grid_{s}.csv')
         d = pd.read_csv(p)
         print(f'  p2_grid_{s}.csv: {len(d)} rows, md5 {md5(p)[:8]}, '
-              f'oracle mix {dict(d.oracle.value_counts())}')
+              f'oracle mix {dict(d.oracle_ELF.value_counts())}')
 
 
 def stage_selector():

@@ -1,0 +1,36 @@
+{
+  "schema": "catosg-n1-dataset/1",
+  "generated": "2026-08-16T17:15:09.461586+00:00",
+  "convention": "N=1 nearest collaborator (Change-log P0 ruling (a))",
+  "gt": "canonical union GT of the FULL collaborator set (P4-C ruling 1)",
+  "source_cache": "peiyi_work/paper1/gs_rerun/p4c_N1",
+  "splits": [
+    {
+      "split": "validate",
+      "frames": 1980,
+      "path": "data/p0_n1/dataset_validate_n1.csv",
+      "md5": "21d3052857424505131e69046dba5b1f",
+      "ego_f1": 0.73583,
+      "late_f1": 0.85538,
+      "compressed_f1": 0.88428
+    },
+    {
+      "split": "test",
+      "frames": 2170,
+      "path": "data/p0_n1/dataset_test_n1.csv",
+      "md5": "f8a67b0286debad9ae48f57aff6c752e",
+      "ego_f1": 0.81757,
+      "late_f1": 0.89095,
+      "compressed_f1": 0.92137
+    },
+    {
+      "split": "culver",
+      "frames": 550,
+      "path": "data/p0_n1/dataset_culver_n1.csv",
+      "md5": "3cf305fd8c7582557e35256e35073b88",
+      "ego_f1": 0.76902,
+      "late_f1": 0.84664,
+      "compressed_f1": 0.9059
+    }
+  ]
+}

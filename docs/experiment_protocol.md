@@ -2855,3 +2855,54 @@ could move the selector either way against a threshold rule that is re-tuned und
 convention. The decision follows the data. If R9 fails under the corrected convention, it is
 recorded as a failed confirmatory decision and the paper's claim changes accordingly — the
 conditions, δ and the procedure are not adjusted after seeing the result.
+
+---
+
+## Change-log P0-2b (2026-08-16) — replay-level pre-registration, written BEFORE the replay
+
+**Timing, stated exactly.** The instruction was to enter this after the candidate walk and before the
+replay. It is entered **before the walk has finished**: at the time of writing, the N=1 LOSO is still
+running and no λ\*, τ\*, frozen payload or replay number exists. That is strictly stronger than
+required — less was known when the expectations were fixed, not more. The E-Lg2 self-check (PASS,
+`results/p0_n1/elg2_selfcheck.log`), the N=1 dataset and the N=1 grid were complete; nothing else.
+
+### E1 — both sides fall, and for the same reason
+
+The frozen selector's and the τ-rule's absolute F1 are expected to fall relative to the retired
+full-collaborator numbers, because **both** now read the same N=1 caches. What is *not* predicted is
+the gap between them, which is what R9 actually decides.
+
+Measured inputs already in hand (branch-level means, not policy-level):
+
+| split | `late_f1` | `compressed_f1` |
+|---|---|---|
+| validate | 0.90673 → 0.85538 (−0.05134) | 0.91930 → 0.88428 (−0.03503) |
+| test | 0.90113 → 0.89095 (−0.01018) | 0.93253 → 0.92137 (−0.01116) |
+| culver | 0.87216 → 0.84664 (−0.02551) | 0.92791 → 0.90590 (−0.02201) |
+
+### E2 — R9 is re-judged with NO directional expectation
+
+The three conditions, δ = 0.005 and the procedure are exactly as originally pre-registered. This
+entry deliberately records **no** expectation about whether they hold. The correction lowers the
+feature branch's utility while the threshold rule is re-tuned under the same convention, and those
+push in opposite directions; anyone claiming to know the sign in advance would be guessing. The
+outcome is a **corrigendum** either way: if R9 fails, that is reported as a failed confirmatory
+decision and the paper's claim changes. No condition, margin or procedure is adjusted afterwards.
+
+### E3 — E-collapse: what is already observed, and what is still a prediction
+
+**No longer a prediction — already measured at the grid layer.** The oracle's `E` share rises under
+the corrected convention: on validate the N=1 grid labels **529** cells `E` (the full-collaborator
+grid essentially never did), and on test **5,696** of 47,740. This is an observation about the
+labels and is recorded as such.
+
+**Still a prediction, and the thing to check:** whether the *deployed* selector's ρ_E rises with it,
+and whether the **E-collapse limitation is milder** under the new convention. The retired numbers had
+ρ_E ≈ 0.001 (test) and 0.000 (Culver) against an oracle spending 0.172 and 0.133, at a cost of
+0.58–0.61 δ on test. Both quantities are re-measured from the N=1 replay.
+
+### Anti-goal clause (carried over, restated because this batch has a live incentive to bend it)
+
+These expectations are **checks, not targets**. Nothing is retrained, no threshold is moved, no
+budget is re-walked and δ is not touched in response to any of them. An expectation that is not met
+is reported as not met, in the same words used here, and the finding changes rather than the data.
