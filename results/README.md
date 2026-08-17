@@ -20,8 +20,8 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/manifests/` | 26 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
-| | `results/provenance/` | 34 |
-| | `results/sensitivity/` | 30 |
+| | `results/provenance/` | 35 |
+| | `results/sensitivity/` | 34 |
 | | `results/sensitivity/ablation/` | 8 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
 
@@ -262,6 +262,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `PROVENANCE_r10c.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_r21a.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_r21a2.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
+| `PROVENANCE_r23c.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_rician.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_robustness_frozen.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
 | `PROVENANCE_scomcp.txt` | `(written alongside its result by the command above)` | provenance records: seeds, hashes, env, protocol |
@@ -302,6 +303,10 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `multiseed_hardening.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
 | `nonuniform_snr.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `object_message_bler.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
+| `r23_fragmentation_bler.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
+| `r23_fragmentation_harq.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
+| `r23_object_message_bler.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
+| `r23_scene_bootstrap.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
 | `rician_proxy.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `robustness_csi_aging.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
 | `robustness_csi_noise.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
@@ -338,4 +343,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-236 files indexed, 0 unattributed.
+241 files indexed, 0 unattributed.

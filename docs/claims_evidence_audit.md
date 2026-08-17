@@ -6,11 +6,11 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| ANALYTIC | 66 |
-| FROZEN | 61 |
+| ANALYTIC | 68 |
+| FROZEN | 65 |
 | LEGACY-ENGINE | 3 |
 
-Total: **130** claims across **37** (sub)sections.
+Total: **136** claims across **37** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -68,7 +68,7 @@ Total: **130** claims across **37** (sub)sections.
 | `c1917f0` | ANALYTIC | 16, 256, 0.1, 99.0, 94.2, 99.1, 0.7, 4.2, 0.9 | All four come from one run of the dominance-verification procedure, which asserts frac\_dominated=frac(comp ≥ ego) +frac(comp<ego … |
 | `c19dd2a` | ANALYTIC | 256, 8.0, 16.5, 0, 0.999, 16 | Physically, 256-QAM right-shifts the AWGN frame-error cliff from 8.0 to 16.5 dB,Es/N0 onset at which the frame-level BLER first fa… |
 | `c02c90f` | ANALYTIC | 256, 16, 0, 20, 1 | Fig. [ref] plots this cliff directly, with the 256-QAM BLER curve sitting to the right of the 16-QAM curve. while under Rayleigh a… |
-| `c029066` | ANALYTIC | 16, 256, 2.5, 3.2, 4.5 | The deployed classifier's class set is \L, C16\ -- the imitated oracle labels carry zero C256 at this operating point -- so the co… |
+| `ce11e0a` | ANALYTIC | 256, 2.5, 3.2, 4.5 | The deployed classifier uses S=\E,L,F\; C_256 is excluded from the deployed action set -- the imitated oracle labels carry zero C2… |
 
 ### System Model and Problem Formulation [sec:system] → Channel Model [sec:channel]
 
@@ -76,6 +76,7 @@ Total: **130** claims across **37** (sub)sections.
 |---|---|---|---|
 | `c3841c8` | ANALYTIC | 802.11, 5 | The channel quality may be obtained from pilot-based estimation, link-layer feedback, or reference-signal-received-power reports a… |
 | `cdbd3a8` | ANALYTIC | 46.2, 3, 37.885, 2.01, 1 | The third is a frequency-selective OFDM link over a tapped-delay-line channel with an exponential power-delay profile at _rms=46.2… |
+| `c9c2991` | ANALYTIC | 8, 0.402400, 0.100363, 2, 0.057077, 4, 1.226954, 1.120770, 1 | We bound what that assumption costs rather than only naming it: splitting the frame into k independently coded fragments that are … |
 | `c0f35ee` | ANALYTIC | 0.024 | We treat the object-level message L as a low-rate robust message in the evaluated SNR range, motivated by its small payload (appro… |
 | `c6bf6e0` | ANALYTIC | 16, 256 | Fig. [ref] plots the resulting BLER_q() for the LDPC + 16/256-QAM configurations under both channels, making explicit the threshol… |
 
@@ -182,10 +183,12 @@ Total: **130** claims across **37** (sub)sections.
 | `c2a782f` | FROZEN | 0.0550, 0.0240, 0.0970 | Every split is read the same way: its AP headroom is the gap between the perfect-channel feature ceiling and fixed object-level co… |
 | `cd87e96` | FROZEN | 12.4, 19.5, 21.3, 2.5, 21.2, 0.0, 4.9, 21.1 | 12.4/19.5/21.3\% on validate, 2.5/21.2/21.2\% on test and 0.0/4.9/21.1\% on Culver-City. |
 | `cb06e91` | FROZEN | 0.8369, -0.7819, 0.0550, 0.8931, -0.8691, 0.0240, 0.8269, -0 | 0.8369-0.7819=0.0550 AP on validate, 0.8931-0.8691=0.0240 AP on the scene-disjoint test split and 0.8269-0.7299=0.0970 AP on the C… |
-| `cd860ae` | FROZEN | 0.0240, 16, 256, 21, 41, 0.158, 0.251, 25 | Test has the smallest headroom of the three (0.0240 AP) but it is no longer negligible, and the frozen selector converts about a f… |
+| `ca0fd7a` | FROZEN | 0.0240, 16, 256, 21, 41, 0.08102, 0.20361, 0.03680, 0.21196, | Test has the smallest headroom of the three (0.0240 AP) but it is no longer negligible, and the frozen selector converts about a f… |
 | `ce6de88` | FROZEN | 0.10, 1, -0.00099, 95, -0.00105, -0.00093 | At B_=0.10 the selector's realised F1 is now marginally below that of a threshold tuned on validate for the same target budget, by… |
 | `c3a380e` | FROZEN | 0.20, 0.30, 1, 0.89701, 0.89900, 0.89691, 0.89783, 1.53, 1.4 | At B_=0.20 and 0.30 the nominal threshold rule attains the higher F1---0.89701 and 0.89900 against 0.89691 and 0.89783---while tra… |
 | `c19a9ea` | FROZEN | 0.20, 1, 0.0001, 95, -0.00002, 0.005, 34.8, 0.2168, 26.6 | The claim that survives is the pre-registered one, on the single confirmatory comparison (test at B_=0.20): the selector's F1 is l… |
+| `c60c52c` | FROZEN | 16, 10,000, 1, 18.938, -0.001508, +0.001522, 45.177, -0.1193 | Frames within a scene are not independent, so we also resample that primary comparison at the level of the 16 test scenes (cluster… |
+| `c80e221` | ANALYTIC | 1, -0.005 | The scene-level F1 interval therefore no longer excludes zero, but it does not reach the pre-registered margin -0.005 either, and … |
 | `ca2e214` | ANALYTIC | 1, 0.67, 0.95 | On this frame, the object-level branch over-produces boxes---including several false positives away from any ground-truth vehicle … |
 
 ### Results and Analysis → Detection Performance versus SNR
@@ -251,7 +254,7 @@ Total: **130** claims across **37** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c39321f` | FROZEN | 2, 1, 0.89148, 0.89691, 0.89783, 0.037, 0.141, 0.187, 0.10,  | The P2 product is three frozen selectors, one per budget, so the operating point is budget-indexed: on test they realise F1 0.8914… |
+| `c8166a9` | FROZEN | 2, 1, 0.89148, 0.89691, 0.89783, 0.037, 0.141, 0.21196, 0.10 | The P2 product is three frozen selectors, one per budget, so the operating point is budget-indexed: on test they realise F1 0.8914… |
 | `c9e18ea` | FROZEN | 0.20, 14.3 | At B_=0.20 that payload is 14.3\% of the feature-level payload B_F. |
 
 ### Results and Analysis → Where the Gain Concentrates: Difficulty Stratification [sec:difficulty]
@@ -266,7 +269,7 @@ Total: **130** claims across **37** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c9b48dd` | ANALYTIC | 0.10, 0.20, 0.30, 2.3, 1.7 | As established in Section [ref], the selector's edge there is budget-dependent rather than uniform: it is ahead of a threshold tun… |
+| `c49cd67` | FROZEN | 0.10, 0.20, 0.30, 1.53, 1.47 | As established in Section [ref], the selector's edge there is budget-dependent rather than uniform: it is ahead of a threshold tun… |
 | `c8c9d53` | FROZEN | 0.005, 34.8, 0.2168, 0.20 | What is pre-registered and survives is non-inferiority within a 0.005 margin at a 34.8\% payload reduction --- a figure that must … |
 | `c61d014` | FROZEN | 13, 0.1927, 26.6, 1, +0.00067 | Against _feasible, the strictly budget-matched threshold of Section [ref] (=13, 0.1927 Msym), the reduction is 26.6\% and the sele… |
 | `cbf49c3` | FROZEN | 0, 0.30, 1, 1.36 | Neither half of the input is sufficient on its own, and the shape of the failure is the informative part: given only the channel s… |
@@ -304,17 +307,20 @@ Total: **130** claims across **37** (sub)sections.
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c5854ea` | ANALYTIC | 1, 0.0002, 60, 10, -0.0025, -0.0109, 18.2 | Under AWGN the selector tolerates SNR-estimation noise up to ≈ 1 dB with ≤ 0.0002 F1 loss; under a Jakes model at 60 km/h the SNR … |
-| `c53d0f4` | FROZEN | 52.1, 5.6, 95, 58.3, 40, 100, 10 | Finally, the deployed Random Forest runs in 52.1 ± 5.6 ms per frame (P95=58.3 ms) on a single CPU core, leaving a 40 ms margin wit… |
+| `cd35670` | FROZEN | 52.1, 5.6, 95, 58.3, 100, 10 | Finally, the deployed Random Forest runs in 52.1 ± 5.6 ms per frame (P95=58.3 ms) on a single CPU core, i.e.\ the selector's own i… |
+| `cb99825` | ANALYTIC | 1, 0.01, 0.05, 0.10, 0.20, 0.00634, 0.00588, 0.00734, 23 | Re-weighting the object-level utility analytically as eff_L'=late\,(1-BLER_L)+ego\,BLER_L over BLER_L\0.01,0.05,0.10\, with every … |
+| `cd8aaaf` | FROZEN | -0.00010, -0.00056, 0.20, 0.12 | The selector's margin over Fixed L therefore widens as the cheap link degrades, while its gap to the threshold rule widens against… |
+| `cf193a1` | ANALYTIC | 0.005 | We report this rather than the favourable half alone; it remains inside the pre-registered margin of 0.005 at every BLER_L evaluat… |
 
 ### Conclusion
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c27b588` | ANALYTIC | 16, 256 | The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs… |
+| `c89dc7e` | FROZEN | 16, 256 | The selector takes per-frame LiDAR-derived perception cues together with an estimated SNR and a channel-type indicator and outputs… |
 | `c5227e3` | FROZEN | 52.1, 5.6, 95, 58.3, 100, 10 | It runs in 52.1 ± 5.6 ms (P95 = 58.3 ms) per frame on a single CPU core---the slowest of the three frozen selectors, since the dep… |
 | `c4dda85` | FROZEN | 0.0550, 0.0240, 0.0970, 2.5, 21.3 | Second, channel-aware semantic granularity selection requests feature-level communication only when the channel and task state jus… |
 | `c1c1cdc` | FROZEN | 3.7, 21.4 | 3.7--21.4\% of the channel use of fixed feature-level transmission across the three budgets on test. |
-| `cfa8474` | FROZEN | 1, 0.005, 34.8, 26.6 | Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the… |
+| `cac5158` | FROZEN | 1, 0.005, 34.8, 26.6 | Third, the dominant decision signal is the channel state: a simple SNR-threshold rule tracks the learned selector closely on the c… |
 | `c22bc91` | FROZEN | +0.0660, 1, 95, +0.0591, +0.0730 | The granularity policy's gain over object-level communication is itself frame-selective, reaching +0.0660 F1 (95\% CI [+0.0591,+0.… |
 
 ### When Are Perception Cues Necessary? LDPC Cliff versus JSCC Graceful Degradation [sec:jscc_aware]

@@ -3872,3 +3872,14 @@ Run by `projects/ca_tosg/evaluation/r23_sensitivity.py`, 15 s, zero GPU.
     carry no CSV binding, and `docs/model_zoo.md`'s zoo AP values, which live in no product of this
     repo. New uncovered numbers fail; the register is the burn-down list. Generated documents are
     held to the stronger rule instead: re-running their generator must reproduce them byte for byte.
+
+### R23 addendum — a third self-inflicted incident, caught by re-running the gate twice
+
+The new literal gate's generated-document check **let the generator's write stand**. A stale
+`results/README.md` therefore failed the run that found it and passed the next one, because the
+failing run had silently repaired the file. `verify_results.py` printed `GATE FAILURE` once and
+`ALL GATES PASS` immediately afterwards with no edit in between, which is how it surfaced. The check
+now restores the original bytes in a `finally` block, so it reports the state it found and leaves the
+working tree untouched; running it twice in a row is now identical. Fourth member of the family whose
+lesson is the same: **a check that changes what it is checking cannot report on it.**
+

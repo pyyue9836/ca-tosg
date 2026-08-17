@@ -139,7 +139,13 @@ def scan(verified, wl, derived):
 
 
 def generated_intact():
-    """Each generated document must be reproduced byte-for-byte by re-running its generator."""
+    """Each generated document must be reproduced byte-for-byte by re-running its generator.
+
+    The check MUST NOT mutate the working tree. The first implementation let the generator's write
+    stand, so a stale file failed once and then passed on the next run because the failing run had
+    silently repaired it -- a check that fixes what it is checking cannot report the state it found.
+    The original bytes are therefore restored before returning, whatever the outcome.
+    """
     import hashlib
     import subprocess
     bad = []
@@ -147,17 +153,22 @@ def generated_intact():
         path = os.path.join(ROOT, rel)
         if not os.path.exists(path):
             continue
-        before = hashlib.sha256(open(path, 'rb').read()).hexdigest()
+        original = open(path, 'rb').read()
+        before = hashlib.sha256(original).hexdigest()
         cmd = [sys.executable, os.path.join(ROOT, gen)]
         if gen.endswith('results_index.py'):
             cmd.append('--write')
-        r = subprocess.run(cmd, capture_output=True, cwd=ROOT)
-        if r.returncode != 0:
-            bad.append((rel, gen, 'generator FAILED: ' + r.stderr.decode()[-200:]))
-            continue
-        after = hashlib.sha256(open(path, 'rb').read()).hexdigest()
-        if before != after:
-            bad.append((rel, gen, 'the committed file is NOT what its generator writes'))
+        try:
+            r = subprocess.run(cmd, capture_output=True, cwd=ROOT)
+            if r.returncode != 0:
+                bad.append((rel, gen, 'generator FAILED: ' + r.stderr.decode()[-200:]))
+                continue
+            after = hashlib.sha256(open(path, 'rb').read()).hexdigest()
+            if before != after:
+                bad.append((rel, gen, 'the committed file is NOT what its generator writes'))
+        finally:
+            with open(path, 'wb') as f:            # restore, always
+                f.write(original)
     return bad
 
 
