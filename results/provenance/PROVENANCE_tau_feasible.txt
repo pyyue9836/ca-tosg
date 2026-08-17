@@ -1,0 +1,7 @@
+CA-TOSG R18-3 -- tau_feasible, strictly-matched SECONDARY comparator.
+generated: 2026-08-17T15:27:33.796966+00:00
+rule (AMENDED after the pre-registered one proved degenerate): the F1-MAXIMISING grid tau whose 200-replay MEAN payload <= B_max, fitted on validate only, applied unchanged to test/culver.
+the pre-registered "largest feasible tau" selected tau=20.5 (above the 20 dB draw range) at every budget, i.e. never send F -- it reproduced Fixed-L. Recorded per budget in TAU_FEASIBLE_MANIFEST.json under degenerate_largest_tau.
+tau grid: 0.0..20.0 step 0.5; CSI_SEED=20260809, N_REPLAY=200 -- the deployed draw, reused from deployment.py.
+SECONDARY: R9 is NOT re-taken against this comparator. Nominal tau* stays in every table beside it, because that is what the pre-registered decision used.
+DISCLOSURE REQUIRED: any payload reduction quoted against nominal tau* must state in the same sentence that nominal tau* is over budget where it is.

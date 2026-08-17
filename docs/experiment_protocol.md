@@ -3130,3 +3130,39 @@ the frozen selectors are.
 No condition, margin or procedure is adjusted after seeing any of these. If expectation 2 shows the
 selector losing its payload advantage under a strictly matched comparator, that is reported as the
 finding.
+
+### R18-3 AMENDMENT (same day, written after the pre-registered rule proved degenerate)
+
+**The pre-registered rule does not work, and this is the record of that.** "The largest τ whose
+replay-mean payload fits B_max" is degenerate: payload falls monotonically in τ, so the largest τ is
+*always* feasible and spends nothing. Run as specified it selected **τ = 20.5 at all three budgets** —
+above the 20 dB draw range, i.e. "never request F" — reproducing Fixed-L exactly (payload 0.024 = B_L,
+F1 = Fixed-L's) and producing "payload reductions" of −53% to −783%. My stated reasoning ("the largest
+feasible τ is the cheapest admissible comparator") was the error: cheapest is not the same as
+comparable, and expectation 1 (τ_feasible ≥ nominal τ*) was trivially true for a rule that never
+transmits.
+
+**Amended rule:** the **F1-maximising** τ on the same grid whose replay-mean payload fits B_max. This
+keeps `pick_tau`'s own objective and changes only the constraint — from the deterministic grid to the
+replay distribution, which is the defect being fixed. It is not tuned toward an outcome: the objective
+is the incumbent one and the constraint is strictly tighter. The τ grid is also capped at 20.0, since
+20.5 is unreachable by a U[0,20] draw and silently meant "never send F". The degenerate selection is
+kept per budget in `TAU_FEASIBLE_MANIFEST.json` (`degenerate_largest_tau`), not discarded.
+
+**Results (secondary comparator; R9 not re-taken).** τ_feasible = 17.0 / 13.0 / 9.0 for
+B_max = 0.10 / 0.20 / 0.30, all within budget on validate.
+
+| split | B_max | RF F1 | τ_nom F1 | τ_feas F1 | RF pay | τ_nom pay (over) | τ_feas pay | reduction vs nom → vs feas |
+|---|---|---|---|---|---|---|---|---|
+| test | **0.20** | 0.89691 | 0.89701 | 0.89624 | 0.14141 | 0.21679 (**+0.0168**) | 0.19270 | **34.8% → 26.6%** |
+| test | 0.10 | 0.89148 | 0.89247 | 0.89322 | 0.03680 | 0.07240 (−0.0276) | 0.09663 | 49.2% → 61.9% |
+| test | 0.30 | 0.89783 | 0.89900 | 0.89901 | 0.21196 | 0.31250 (+0.0125) | 0.28843 | 32.2% → 26.5% |
+| validate | 0.20 | 0.86440 | 0.86119 | 0.86045 | 0.15106 | 0.21663 (+0.0166) | 0.19251 | 30.3% → 21.5% |
+| culver | 0.20 | 0.84975 | 0.85858 | 0.85701 | 0.06751 | 0.21740 (+0.0174) | 0.19312 | 68.9% → 65.0% |
+
+**Expectation 2 was that the selector's payload advantage would shrink and might reverse. It shrinks
+and does not reverse** — 34.8% → 26.6% at the primary cell, still a real saving. And the F1 comparison
+*improves* under the strictly matched comparator: against nominal τ* the selector is behind by
+−0.00010, against τ_feasible it is **ahead by +0.00067**. That is a better result than the retired
+comparison, arrived at by making the comparison stricter, and it is reported as a **secondary** finding
+only: R9 stays as pre-registered against nominal τ*.

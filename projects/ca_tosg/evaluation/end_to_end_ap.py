@@ -64,8 +64,15 @@ import deployment as D  # bit-identical selector + CSI machinery (single source)
 P1 = D.P1
 OPENCOOD = D.OPENCOOD
 sys.path.insert(0, OPENCOOD)                                # for `import opencood.utils.eval_utils`
-GS = os.path.join(OPENCOOD, 'peiyi_work/paper1/gs_rerun')   # ego/late/comp_{split}.npz caches
+# P0 promotion: the mainline caches are the N=1 ones -- N=1 boxes/scores with the
+# CANONICAL full-set union GT (the p4c_N1 caches' own gts are per-N and would score on a
+# different ruler). Built by tools/build_n1_cache_shim.py; see docs/assumptions_ledger.md.
+GS = os.path.join(OPENCOOD, 'peiyi_work/paper1/gs_rerun/n1_mainline')   # ego/late/comp_{split}.npz caches
 OUT = D.OUT
+# PROV_DIR was used at the bottom of main() but never defined here: the restructure (523f062)
+# dropped it, so this script has crashed AFTER computing every AP number and BEFORE writing its
+# provenance ever since -- which is why the committed true_e2e_ap.csv is a pre-restructure file.
+PROV_DIR = D.PROV_DIR
 
 ACTIONS = D.ACTIONS           # ['E','L','F']
 SPLITS = D.SPLITS

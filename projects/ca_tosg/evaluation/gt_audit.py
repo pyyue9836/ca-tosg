@@ -13,7 +13,10 @@
 import os, sys
 import numpy as np
 REPO = '/home/josh/cooperative_semantic_perception/OpenCOOD'; sys.path.insert(0, REPO)
-GS = os.path.join(REPO, 'peiyi_work/paper1/gs_rerun')
+# P0 promotion: the mainline caches are the N=1 ones -- N=1 boxes/scores with the
+# CANONICAL full-set union GT (the p4c_N1 caches' own gts are per-N and would score on a
+# different ruler). Built by tools/build_n1_cache_shim.py; see docs/assumptions_ledger.md.
+GS = os.path.join(REPO, 'peiyi_work/paper1/gs_rerun/n1_mainline')
 GT_RANGE = [-140, -40, -3, 140, 40, 1]
 R = 70.4
 import pandas as pd
@@ -65,7 +68,10 @@ def main():
         print(f"{sp:9s} GT late {lgn/n:.2f}/{lgf/n:.2f} comp {cgn/n:.2f}/{cgf/n:.2f} (near/far) overlap={ov:.3f} "
               f"| PRED far: late={lpf} comp={cpf} ego={epf} | Q4 late-far-preds={'EXIST' if lpf>0 else 'ABSENT'}")
     df = pd.DataFrame(rows)
-    df.to_csv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'results/sensitivity/gt_audit.csv'), index=False)
+    # 3 levels up = the repo root. The restructure (523f062) left this at 2, which resolved to
+    # projects/ca_tosg/results/..., so this script has been unrunnable since that commit.
+    _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    df.to_csv(os.path.join(_root, 'results/sensitivity/gt_audit.csv'), index=False)
     print(f"\nGT_RANGE = {GT_RANGE} (standard OPV2V eval range)")
     print("EVAL GT path = post_processor.generate_gt_bbx (all-CAV union, object_id dedup, GT_RANGE).")
     print("[artifact] results/sensitivity/gt_audit.csv")

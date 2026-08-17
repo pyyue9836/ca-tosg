@@ -20,4 +20,4 @@ Same 200 paired CSI draws as the mainline replay (seed=20260809); CI = paired bo
 SAME policy at N=1, 10000 resamples, seed=12345.
 Culver N=3 is identical to N=2 BY CONSTRUCTION (no Culver frame has 3 collaborators) and
 is not an independent data point. Zero-collaborator frames stay in the denominator.
-Deployed FROZEN_MANIFEST.json sha256 6a06643aad812da9 -- read only, untouched.
+Deployed FROZEN_MANIFEST.json sha256 742f5313e1c82860 -- read only, untouched.

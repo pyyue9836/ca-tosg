@@ -1,6 +1,6 @@
 CA-TOSG P5-5 item 7 -- difficulty stratification, FROZEN protocol.
 ==============================================================================
-manifest: results/manifests/FROZEN_MANIFEST.json (freeze 2026-08-09T15:12:53.653192+00:00)
+manifest: results/manifests/FROZEN_MANIFEST.json (freeze 2026-08-16T17:50:19.098008+00:00)
 condition: awgn @ 16.0 dB, one grid point (NOT a CSI draw)
 difficulty: tertiles of the frame's own eff_L (low = hard), computed per split at this condition
 selector: frozen data/p2/selector_B0XX.pkl applied via deployment.rf_actions_stacked (imported, not re-implemented)

@@ -10,7 +10,10 @@ import os, sys
 import numpy as np, torch, pandas as pd
 REPO = '/home/josh/cooperative_semantic_perception/OpenCOOD'; sys.path.insert(0, REPO)
 from opencood.utils import eval_utils
-GS = os.path.join(REPO, 'peiyi_work/paper1/gs_rerun')
+# P0 promotion: the mainline caches are the N=1 ones -- N=1 boxes/scores with the
+# CANONICAL full-set union GT (the p4c_N1 caches' own gts are per-N and would score on a
+# different ruler). Built by tools/build_n1_cache_shim.py; see docs/assumptions_ledger.md.
+GS = os.path.join(REPO, 'peiyi_work/paper1/gs_rerun/n1_mainline')
 OUT = os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')), 'results/sensitivity/canonical_rescore.csv')
 
 

@@ -1,6 +1,6 @@
 CA-TOSG P3 -- descriptive sensitivity batch (sensitivity.py). DESCRIPTIVE ONLY.
 ================================================================================
-manifest: results/manifests/FROZEN_MANIFEST.json (catosg-frozen-manifest/1, freeze 2026-08-09T15:12:53.653192+00:00)
+manifest: results/manifests/FROZEN_MANIFEST.json (catosg-frozen-manifest/1, freeze 2026-08-16T17:50:19.098008+00:00)
 Each item = the mainline 200-realisation replay (eval_p2_deploy machinery) under a modified
 channel/SNR/BLER_L distribution, reusing cached per-frame eff + frozen predict(); no new
 detection inference. Frozen selectors/delta/tau*/oracle unchanged; main.tex untouched.
