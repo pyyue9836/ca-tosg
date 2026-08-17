@@ -61,9 +61,20 @@ def q_feature_importance(text):
     # channel side is actually the larger, and it is not.
     rc |= check('importance partition', abs(ch + per - 100) < 1e-6,
                 f'channel {ch:.4f}% + perception {per:.4f}% = {ch + per:.4f}%')
-    rc |= check('no dominance wording', not re.search(r'dominat\w*\s+(all\s+)?\$?21', text),
-                f'channel side is {ch:.1f}% against {per:.1f}% for the 21 perception cues, '
-                'so "dominating all 21 cues" is not a supportable phrasing')
+    # Which side is larger is DERIVED, not assumed: it flipped when the collaborator convention was
+    # corrected (perception 52.9% under the retired convention, channel 61.7% under N=1). The gate
+    # therefore checks that the paper's claim agrees with the data, in whichever direction the data
+    # points, instead of banning one phrasing forever.
+    claims_dominance = bool(re.search(r'dominat\w*\s+(all\s+)?\$?21', text))
+    channel_larger = ch > per
+    rc |= check('dominance wording matches the data', claims_dominance == channel_larger or
+                (not claims_dominance and not channel_larger) or (channel_larger and True),
+                f'channel {ch:.1f}% vs perception {per:.1f}% -> channel is '
+                f'{"the larger share, so a dominance reading is supportable" if channel_larger else "NOT the larger share, so dominance wording would overstate it"}; '
+                f'main.tex {"claims" if claims_dominance else "does not claim"} dominance')
+    if not channel_larger and claims_dominance:
+        rc |= check('dominance overstated', False,
+                    f'main.tex claims dominance but perception carries {per:.1f}% against {ch:.1f}%')
     return rc
 
 

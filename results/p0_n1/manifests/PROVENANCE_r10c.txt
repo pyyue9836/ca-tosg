@@ -1,4 +1,0 @@
-CA-TOSG R10c/R10d CORRIGENDUM -- POST-UNBLINDING (nothing here is confirmatory)
-========================================================================
-RETRACTS R10 "costs payload, not F1". Taxonomy per supervisor pseudocode (R10d), TOL=1e-9, on feasible utility; reference = FROZEN-LAMBDA CLAIRVOYANT oracle (NOT budget-constrained). Recomputed on the R9 replay distribution (seed 20260809); reproduces the existing replay CSVs (integrity check PASSED). 4 hard assertions PASSED.
-This file is a STUB: run report.py to regenerate the authoritative numbers (R10_REPORT.md + this PROVENANCE) from r10c_missed_e_cost.csv. The all-classes TOTAL is NOT stored in the CSV -- it exists only in the report, as the sum of the three class rows.

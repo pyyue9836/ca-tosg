@@ -1,6 +1,6 @@
 CA-TOSG P2 submit-B -- deployment eval (deployment.py)
 ========================================================================
-manifest: results/manifests/FROZEN_MANIFEST.json (schema catosg-frozen-manifest/1, freeze 2026-08-15T05:33:02.706979+00:00)
+manifest: results/manifests/FROZEN_MANIFEST.json (schema catosg-frozen-manifest/1, freeze 2026-08-16T17:50:19.098008+00:00)
 ALL parameters read from the manifest only: 3 selectors (sha256-verified), tau* per budget.
 CSI: ONE set of 200 paired samplings per split, seed=20260809 (SNR~U[0,20], channel~Bernoulli(0.5)); RF and tau replay identical draws.
   validate: n=1980 frames, mean SNR 9.997 dB, rayleigh frac 0.501

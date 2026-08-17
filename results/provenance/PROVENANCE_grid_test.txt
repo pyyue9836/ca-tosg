@@ -7,12 +7,12 @@ oracle_ELF = argmax over FEASIBILITY-MASKED [E,L,F] (BLER_F>=0.999 -> F=-inf, LA
 BLER source: results/channel/bler_sionna.csv (frame-level bler_frame, md5 be3f5e1278ddda6efc271281ccbf449e).
 Payload (Msym, report-only): {'E': 0.0, 'L': 0.024, 'F': 0.99}.
 Grid artifacts are git-excluded (data/p2/); regenerate with grid_builder.py.
-grid_build_timestamp: 2026-08-09T15:47:03.771208+00:00   [migrated 2026-08-12 from the artifact mtime in the working tree that produced it; later runs stamp this at build time]
-frozen_manifest_freeze_timestamp: 2026-08-09T15:12:53.653192+00:00   [from FROZEN_MANIFEST.json]
+grid_build_timestamp: 2026-08-17T11:45:06.662325+00:00
+frozen_manifest_freeze_timestamp: 2026-08-16T17:50:19.098008+00:00
 POST-FREEZE artifact: built after FROZEN_MANIFEST.json (PROTOCOL sec 10).
 
-[test] src=dataset_test_v3.csv md5=0946c9f343eed98a337b4bd0229b9b39
+[test] src=dataset_test_n1.csv md5=f8a67b0286debad9ae48f57aff6c752e
     frames=2170 scenes=16 rows=47740
-    out=data/p2/p2_grid_test.csv md5=6b1490017b19b0f88b835b022d5e0149
-    oracle base-rate E/L/F = {'E': 0.13202764976958525, 'L': 0.7120025136154169, 'F': 0.15596983661499791}
+    out=data/p2/p2_grid_test.csv md5=3a95fd793cc9690be52c8b862d2d5be2
+    oracle base-rate E/L/F = {'E': 0.11931294511939673, 'L': 0.7199413489736071, 'F': 0.16074570590699622}
     scene frame-counts = [('2021_08_18_19_48_05', 178), ('2021_08_20_21_10_24', 98), ('2021_08_21_09_28_12', 147), ('2021_08_22_07_52_02', 167), ('2021_08_22_09_08_29', 151), ('2021_08_22_21_41_24', 71), ('2021_08_23_12_58_19', 104), ('2021_08_23_15_19_19', 167), ('2021_08_23_16_06_26', 134), ('2021_08_23_17_22_47', 102), ('2021_08_23_21_07_10', 141), ('2021_08_23_21_47_19', 77), ('2021_08_24_07_45_41', 135), ('2021_08_24_11_37_54', 104), ('2021_08_24_20_09_18', 220), ('2021_08_24_20_49_54', 174)]

@@ -2986,3 +2986,81 @@ arm was re-run from scratch.
 | **SECOND** | no re-run needed: `B_F` is a declared constant. The narration changes — on test the arm now sits *below* the mainline share at every budget rather than near it |
 
 No arm fired a fuse condition. Nothing was retrained or retuned in response to any result.
+
+---
+
+## Change-log P0-5a (2026-08-17) — the promotion, and why the rewrite cannot follow in this batch
+
+### The authorised exception
+
+`guarded()` and the frozen-products-are-read-only rule are **waived for the promotion commit only**,
+by the P0-5 ruling. Scope of the waiver: `tools/promote_p0_corrigendum.py` overwriting deployed
+products under `results/{main,manifests,provenance,sensitivity,baselines}` and `data/p2`, once. It
+does not extend to any other script, any later commit, or any re-run. Reason: the corrigendum
+products cannot become the paper's products without replacing the ones they retire, and copying
+them to a second location would leave two live answers to the same question.
+
+### The four assertions, as executed
+
+| assertion | result |
+|---|---|
+| (a) `pre-p0-corrigendum` tags the promotion-eve HEAD | tag → `05d45f5` == HEAD; pushed |
+| (b) every promoted file byte-identical to its `p0_n1` source | **73/73** sha256 matches, checked per file after copy |
+| (c) no `legacy/` or `archive/` directory | none created; retired products live only in git history under the tag |
+| (d) sources removed, references repointed | 73 sources deleted (10 logs kept); manifests, index, provenance and code defaults repointed, then re-verified |
+
+**Repointing found three defects that the promotion exposed rather than caused.**
+
+1. `FROZEN_MANIFEST.json` recorded its `train_grid` and `cue_source` from *constants*, not from the
+   files the redirected run actually read — so the N=1 freeze carried the retired grid's md5
+   (`3314418d…`) and named the retired cue table. Both were re-recorded from the files read.
+2. `grid_builder.py` writes grid provenance to `results/manifests/` while the leakage gate reads
+   `results/provenance/`. Both sides described the same retired grids, so the split-brain was
+   invisible until the grids changed. Provenance now goes where every other `PROVENANCE_*` lives,
+   and all three grids were re-derived from the promoted inputs: **byte-identical**, which is the
+   check that promotion and repointing agree.
+3. `P4A_MANIFEST.json` pins the grid its bandit **trained** on, which is the retired one — true, and
+   not fixable by re-recording. Manifest pins may now declare `retired_at: <tag>` and are verified
+   against the tagged blob; `data/p2` is git-excluded so no blob exists, so this pin additionally
+   declares `unverifiable_reason` and the gate **prints it as UNVERIFIABLE on every run**. An
+   unverifiable pin must never look like a passing one.
+
+### Products that changed under the new selectors
+
+* **Feature importance flipped side.** The deployed selector's channel side is now **61.7%**
+  (34.2% + 27.5%) against **38.3%** for the 21 perception cues. Under the retired convention it was
+  47.1% vs 52.9%, and R17 rewrote §VI-E away from "dominance" for exactly that reason. That
+  reframing was right then and is wrong now. The registry assertion no longer bans a phrasing: it
+  **derives** which side is larger and checks the paper agrees.
+* **Fingerprint #17 lost a literal.** `27\.5` is now a *true* value (est_snr_db = 27.4786%), so it
+  was removed from the retired-importance family; `34\.9` and `62\.4` stay, being wrong under every
+  convention. Same collision class as the 0.248 episode.
+* **Latency re-measured, and the slowest model changed.** 51.7 / 52.1 / 51.9 ms mean for
+  B010/B020/B030 — the slowest is now **selector_B020** (52.06 ± 5.63 ms, P95 58.30), not B030.
+
+### Why P0-5 items 3–5 are NOT done, and were not attempted
+
+`results/` still holds **61 CSVs produced under the retired convention**, and the paper's headline
+tables and figures are built from them:
+
+| still retired | what depends on it |
+|---|---|
+| `true_e2e_ap.csv`, `true_e2e_ap_by_snr.csv`, `true_e2e_global_*.csv` | §true-e2e AP table, the AP-headroom triple, Fig. 4's AP panels |
+| `fixed_references.csv` | Fixed-L / F / C256 / masked-oracle references — **and every "F1 share of the oracle" figure** |
+| `generalisation_*.csv` | the generalisation table |
+| `frontier_*.csv`, `pareto_points.csv`, `frozen_curves.csv` | Figs. 4, 5, 6, 8 |
+| `threshold_sweep_*.csv`, `threshold_vs_rf.csv` | §threshold comparison |
+| `difficulty_frozen.csv` | §difficulty stratification |
+| `collaborator_scale.csv` | §collaborator scale (its rows were produced with the *deployed* selectors) |
+| `robustness_*.csv` | `tab:robustness` |
+
+Rewriting `main.tex` now would put N=1 replay numbers next to retired-convention AP, oracle and
+frontier numbers in the same tables — the exact splice this whole erratum exists to remove. So
+**`main.tex` was not touched**, and one derived family already in the registry is flagged as
+mixed-convention and must not be quoted: **"F1 share of the masked oracle"** divides new selector F1
+by the *retired* oracle F1. ("% of B_F" is safe: B_F is a declared constant.)
+
+**Two gates are therefore red, correctly:** `payload chain` (abstract still says 6.9–18.9%, frozen
+says 3.7–21.4%) and `canonical quantities` (importances, latency, payload reduction, FA-1 ratio all
+still retired in the text). They stay red until the missing products are regenerated. Turning them
+green by editing the text first would be backwards.

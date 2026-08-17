@@ -30,6 +30,7 @@ Exit 0 iff every check passes.
 import hashlib
 import json
 import os
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -134,13 +135,48 @@ def _walk(obj, path, fails, stats):
                 fails.append('%s: relpath does not resolve from the repo root -> %s' % (path, rel))
             else:
                 stats['resolved'] += 1
+                # A pin may declare that it refers to a PRE-PROMOTION file: the P4-A bandit was
+                # trained on the retired full-collaborator grid and only replayed under the N=1
+                # convention, so pinning today's file would misstate what it learned from. Such a
+                # pin is verified against the tagged blob instead of the working tree -- stronger
+                # than skipping it, because the historical content is actually re-hashed.
+                retired = obj.get('retired_at')
                 for algo in ('md5', 'sha256'):
-                    if algo in obj:
-                        got = _hash(p, algo)
+                    if algo not in obj:
+                        continue
+                    if retired:
+                        blob = subprocess.run(['git', '-C', ROOT, 'show', f'{retired}:{rel}'],
+                                              capture_output=True)
+                        if blob.returncode != 0:
+                            # the blob is absent because the input is git-excluded (data/p2 is).
+                            # That cannot be verified from the repository at all, so it is allowed
+                            # ONLY as a declared exception and is printed every run -- an
+                            # unverifiable pin must never look like a passing one.
+                            if obj.get('unverifiable_reason'):
+                                print('  %s: %s UNVERIFIABLE (declared) -- %s'
+                                      % (path, rel, obj['unverifiable_reason']))
+                                stats.setdefault('unverifiable', 0)
+                                stats['unverifiable'] += 1
+                            else:
+                                fails.append('%s: retired_at=%s but %s is not in that tag and no '
+                                             'unverifiable_reason is declared'
+                                             % (path, retired, rel))
+                            continue
+                        got = getattr(hashlib, algo)(blob.stdout).hexdigest()
                         stats['hashed'] += 1
                         if got != obj[algo]:
-                            fails.append('%s: %s mismatch for %s (manifest %s..., file %s...)'
-                                         % (path, algo, rel, obj[algo][:12], got[:12]))
+                            fails.append('%s: %s mismatch for %s AT TAG %s (manifest %s..., '
+                                         'tagged blob %s...)'
+                                         % (path, algo, rel, retired, obj[algo][:12], got[:12]))
+                        else:
+                            print('  %s: %s verified against tag %s (pre-promotion input)'
+                                  % (path, rel, retired))
+                        continue
+                    got = _hash(p, algo)
+                    stats['hashed'] += 1
+                    if got != obj[algo]:
+                        fails.append('%s: %s mismatch for %s (manifest %s..., file %s...)'
+                                     % (path, algo, rel, obj[algo][:12], got[:12]))
         for k, v in obj.items():
             _walk(v, path + '/' + str(k), fails, stats)
     elif isinstance(obj, list):

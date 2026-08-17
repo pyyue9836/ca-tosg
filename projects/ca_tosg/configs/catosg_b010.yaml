@@ -61,15 +61,15 @@ tie_break:
   - min_candidate_index
 frozen:
   selector: selector_B010
-  candidate_index: 58
-  walk_depth: 6
+  candidate_index: 2
+  walk_depth: 7
   lambda_star: 0.05
   tau_star: 18.0
   class_weight: null
   hyperparameters:
     n_estimators: 400
-    max_depth: null
+    max_depth: 10
     min_samples_leaf: 2
     max_features: sqrt
-  model_sha256: d15efbe0f5b69a0bd99824b7486c222f24a231f710a961abe90fcd01516ec796
-  frozen_validate_payload: 0.067887
+  model_sha256: 123ad7d3bace28c1ed1ecf738bd013966f3e9e72d0b44453bff197cf52e3f70a
+  frozen_validate_payload: 0.080803

@@ -2,7 +2,7 @@ stage,value_ms,tag,source
 LiDAR frame period (10 Hz),100.0,assumed,10 Hz operating point (main.tex c1c08b6); the per-frame budget; not measured
 Ego LiDAR detection backbone (PointPillar),,not-included,not measured this round; incurred by every policy/baseline alike (not selection overhead)
 Online cue extraction (23 selector features),,not-included,not measured this round; per-frame feature computation; policy-independent
-Selector inference (RF predict; batch-1),59.886,measured,latency_frozen.csv; slowest frozen selector (mean; P95=69.31 ms); 1000 batch-1 calls; WARMUP=100
+Selector inference (RF predict; batch-1),52.062,measured,selector_latency.csv; slowest frozen selector (mean; P95=58.30 ms); 1000 batch-1 calls; WARMUP=100
 2-bit request signalling (piggy-backed on CAM),,calculated,2 bit/frame @10 Hz = 20 bps; provisioned in the standard CAM budget (main.tex c0a4e89); no extra airtime
 Message transmission (L / F payload over link),,not-included,B_max is a PRESPECIFIED channel-use budget; NOT mapped to a physical link rate (PROTOCOL sec 5); wall-clock transmission latency is not derivable this round
 Collaborator feature encode / compression,,not-included,not measured this round; sender-side; policy-dependent but out of scope for P2-C

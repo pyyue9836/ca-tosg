@@ -1,4 +1,4 @@
 variant,status,split,n_features,train_oracle_acc,F1,F1_std,payload,rho_feature
-full_ref,labeled variant / not deployed,validate,23,0.9637,0.91216,0.00038,0.13087,0.1108
-snr_only,labeled variant / not deployed,validate,1,0.8539,0.90673,0.0,0.024,0.0
-cont_obs,labeled variant / not deployed,validate,24,0.9648,0.91225,0.00039,0.13708,0.1173
+full_ref,labeled variant / not deployed,validate,23,0.9667,0.86529,0.00053,0.18832,0.1703
+snr_only,labeled variant / not deployed,validate,1,0.8032,0.85538,0.0,0.024,0.0
+cont_obs,labeled variant / not deployed,validate,24,0.9672,0.86537,0.00053,0.19731,0.1796

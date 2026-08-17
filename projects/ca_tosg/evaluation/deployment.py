@@ -36,7 +36,7 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 OPENCOOD = os.path.join(os.path.dirname(P1), 'OpenCOOD')
-DATA = os.path.join(OPENCOOD, 'peiyi_work/paper1/data')
+DATA = os.path.join(P1, 'data/p2')          # P0 promotion: N=1 tables (ruling (a))
 MANIFEST = os.path.join(P1, 'results/manifests/FROZEN_MANIFEST.json')
 BLER_CSV = os.path.join(P1, 'results/channel/bler_sionna.csv')
 GRID_DIR = os.path.join(P1, 'data/p2')
@@ -46,7 +46,8 @@ PROV_DIR = os.path.join(P1, 'results/provenance')
 ACTIONS = ['E', 'L', 'F']
 PAY = {'E': 0.0, 'L': 0.024, 'F': 0.99}
 PAYVEC = np.array([PAY[a] for a in ACTIONS])
-DATASET = {'validate': 'dataset_validate.csv', 'test': 'dataset_test_v3.csv', 'culver': 'dataset_culver_v3.csv'}
+DATASET = {'validate': 'dataset_validate_n1.csv', 'test': 'dataset_test_n1.csv',
+           'culver': 'dataset_culver_n1.csv'}       # P0 promotion (ruling (a))
 SPLITS = ['validate', 'test', 'culver']
 N_REPLAY = 200
 CSI_SEED = 20260809           # recorded in PROVENANCE

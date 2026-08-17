@@ -15,7 +15,10 @@ import pandas as pd
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 OPENCOOD = os.path.join(os.path.dirname(ROOT), 'OpenCOOD')
-CUES_CSV = os.path.join(OPENCOOD, 'peiyi_work/paper1/data', 'dataset_validate.csv')
+# P0 promotion: the cue+utility table is the N=1 one (Change-log P0 ruling (a)). The 21
+# LiDAR cues are unchanged; late_f1 / compressed_f1 are the nearest-single-collaborator
+# utilities. Pointing this back at the OpenCOOD table would splice conventions.
+CUES_CSV = os.path.join(ROOT, 'data/p2', 'dataset_validate_n1.csv')
 GRID_CSV = os.path.join(ROOT, 'data/p2/p2_grid_validate.csv')
 
 EXCLUDE = {

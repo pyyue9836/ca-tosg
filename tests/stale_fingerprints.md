@@ -19,6 +19,10 @@
 #     selector. The retired value is the C_256 CHANNEL-USE PAYLOAD, so the pattern now requires a
 #     payload word (Msym|Mbit|payload|C_{256}) on the same line, either side. NEGATIVE-TESTED against
 #     the retired text at 6cc6d3b: 6/6 retired occurrences still blocked, 0 hits on the current text.
+#    (P0 UPDATE 2026-08-17: `27\.5` REMOVED from this family. Under the corrected N=1
+#     convention the deployed selector's own est_snr_db importance is 27.4786% -> 27.5%,
+#     so the pattern now forbids a true value. 34\.9 and 62\.4 stay: those remain wrong
+#     for every convention (the N=1 values are 34.2 and 61.7).)
 #     Coverage was narrowed in CONTEXT, never in VALUE -- a payload sentence quoting 0.248 still fails.)
 # 10 robustness split label (test->valid) RX: (handled by caption audit; no safe text pattern -- manual)
 # 11 gamma-improves (narrative)           RX: improves F1 by ; alone improves F1 ; 5\.3 percentage
@@ -125,7 +129,6 @@ RX matched payload
 RX matched channel use
 RX budget-matched
 RX 34\.9
-RX 27\.5
 RX 62\.4
 RX 0\.349
 RX 0\.275

@@ -1,105 +1,108 @@
 {
- "schema": "catosg-p4a-manifest/1",
- "label": "internal learned-policy comparator",
- "feature_standardisation": {
-  "loso": "fold_local: mu/sd fitted on the fold TRAINING scenes only, applied to train + held-out",
-  "final": "full_validate: mu/sd refitted on the whole validate grid for the frozen model",
-  "deployment": "validate statistics reused unchanged at test/Culver; NO refit",
-  "erratum": "P4A-1 (2026-08-12): the previous manifest was produced with mu/sd fitted once on the full validate grid before LOSO, leaking the held-out scene into every fold"
- },
- "p4a_block_md5": "6ceef98abd32f8606c9c3ca5e77d6b4f",
- "algorithm": "dqn_bandit_single_step_epsilon_greedy",
- "problem_form": "contextual_bandit_single_step",
- "seed": 0,
- "network": {
-  "hidden": [
-   64,
-   64
+  "schema": "catosg-p4a-manifest/1",
+  "label": "internal learned-policy comparator",
+  "feature_standardisation": {
+    "loso": "fold_local: mu/sd fitted on the fold TRAINING scenes only, applied to train + held-out",
+    "final": "full_validate: mu/sd refitted on the whole validate grid for the frozen model",
+    "deployment": "validate statistics reused unchanged at test/Culver; NO refit",
+    "erratum": "P4A-1 (2026-08-12): the previous manifest was produced with mu/sd fitted once on the full validate grid before LOSO, leaking the held-out scene into every fold"
+  },
+  "p4a_block_md5": "6ceef98abd32f8606c9c3ca5e77d6b4f",
+  "algorithm": "dqn_bandit_single_step_epsilon_greedy",
+  "problem_form": "contextual_bandit_single_step",
+  "seed": 0,
+  "network": {
+    "hidden": [
+      64,
+      64
+    ],
+    "activation": "relu"
+  },
+  "train": {
+    "steps": 4000,
+    "batch": 512,
+    "lr": 0.001,
+    "optimizer": "adam",
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay_steps": 3000,
+    "target_is_immediate_reward": true
+  },
+  "reward": "eff_a - lambda*B_a",
+  "feature_names": [
+    "num_cavs",
+    "ego_num_objects",
+    "ego_origin_lidar_shape_0",
+    "ego_origin_lidar_shape_1",
+    "pcd_num_points",
+    "pcd_mean_range",
+    "pcd_max_range",
+    "pcd_std_range",
+    "pcd_near_20m",
+    "pcd_mid_20_50m",
+    "pcd_far_50_80m",
+    "pcd_very_far_80m",
+    "pcd_front_points",
+    "pcd_back_points",
+    "pcd_left_points",
+    "pcd_right_points",
+    "pcd_front_far_30m",
+    "pcd_front_far_50m",
+    "pcd_density_0_20",
+    "pcd_density_20_50",
+    "pcd_density_50_80",
+    "est_snr_db",
+    "channel_is_rayleigh"
   ],
-  "activation": "relu"
- },
- "train": {
-  "steps": 4000,
-  "batch": 512,
-  "lr": 0.001,
-  "optimizer": "adam",
-  "epsilon_start": 1.0,
-  "epsilon_end": 0.05,
-  "epsilon_decay_steps": 3000,
-  "target_is_immediate_reward": true
- },
- "reward": "eff_a - lambda*B_a",
- "feature_names": [
-  "num_cavs",
-  "ego_num_objects",
-  "ego_origin_lidar_shape_0",
-  "ego_origin_lidar_shape_1",
-  "pcd_num_points",
-  "pcd_mean_range",
-  "pcd_max_range",
-  "pcd_std_range",
-  "pcd_near_20m",
-  "pcd_mid_20_50m",
-  "pcd_far_50_80m",
-  "pcd_very_far_80m",
-  "pcd_front_points",
-  "pcd_back_points",
-  "pcd_left_points",
-  "pcd_right_points",
-  "pcd_front_far_30m",
-  "pcd_front_far_50m",
-  "pcd_density_0_20",
-  "pcd_density_20_50",
-  "pcd_density_50_80",
-  "est_snr_db",
-  "channel_is_rayleigh"
- ],
- "budgets": {
-  "0.10": {
-   "tag": "B010",
-   "lam": 0.05,
-   "lambda_index": 2,
-   "walk_depth": 0,
-   "frozen_f1": 0.90911,
-   "frozen_payload": 0.05146,
-   "oof_f1": 0.90644,
-   "model": "data/p2/p4a_bandit_B010.pt",
-   "model_sha256": "38ffba95a19c12cc27efc799e9cba6af02d586803b46b2bf691fb01f522bb15f"
+  "budgets": {
+    "0.10": {
+      "tag": "B010",
+      "lam": 0.05,
+      "lambda_index": 2,
+      "walk_depth": 0,
+      "frozen_f1": 0.90911,
+      "frozen_payload": 0.05146,
+      "oof_f1": 0.90644,
+      "model": "data/p2/p4a_bandit_B010.pt",
+      "model_sha256": "38ffba95a19c12cc27efc799e9cba6af02d586803b46b2bf691fb01f522bb15f"
+    },
+    "0.20": {
+      "tag": "B020",
+      "lam": 0.05,
+      "lambda_index": 2,
+      "walk_depth": 0,
+      "frozen_f1": 0.90911,
+      "frozen_payload": 0.05146,
+      "oof_f1": 0.90644,
+      "model": "data/p2/p4a_bandit_B020.pt",
+      "model_sha256": "4e6240f627f104f173e6fb93e1dcdc2eaf487b20c9c56646edac28a2be4f0bb9"
+    },
+    "0.30": {
+      "tag": "B030",
+      "lam": 0.05,
+      "lambda_index": 2,
+      "walk_depth": 0,
+      "frozen_f1": 0.90911,
+      "frozen_payload": 0.05146,
+      "oof_f1": 0.90644,
+      "model": "data/p2/p4a_bandit_B030.pt",
+      "model_sha256": "c14f67cbe2b363748f10871de41cdf1fd44724110114cfd334a40f4e1fe31dc8"
+    }
   },
-  "0.20": {
-   "tag": "B020",
-   "lam": 0.05,
-   "lambda_index": 2,
-   "walk_depth": 0,
-   "frozen_f1": 0.90911,
-   "frozen_payload": 0.05146,
-   "oof_f1": 0.90644,
-   "model": "data/p2/p4a_bandit_B020.pt",
-   "model_sha256": "4e6240f627f104f173e6fb93e1dcdc2eaf487b20c9c56646edac28a2be4f0bb9"
+  "inputs": {
+    "grid": {
+      "file": "data/p2/p2_grid_validate.csv",
+      "md5": "3314418d4e53ff30d0d246e1594e4bed",
+      "retired_at": "pre-p0-corrigendum",
+      "note": "the bandit was TRAINED on the pre-promotion full-collaborator grid and only REPLAYED under the N=1 convention (P0-4). The pin is verified against the tag, not the working tree.",
+      "unverifiable_reason": "data/p2/ is git-excluded, so the retired full-collaborator grid (md5 3314418d4e53) exists in no tag or blob. It is reproducible by running grid_builder.py against the retired cue table, which is still present at ../OpenCOOD/peiyi_work/paper1/data/dataset_validate.csv (md5 d357b38e8024)."
+    },
+    "frozen_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc"
   },
-  "0.30": {
-   "tag": "B030",
-   "lam": 0.05,
-   "lambda_index": 2,
-   "walk_depth": 0,
-   "frozen_f1": 0.90911,
-   "frozen_payload": 0.05146,
-   "oof_f1": 0.90644,
-   "model": "data/p2/p4a_bandit_B030.pt",
-   "model_sha256": "c14f67cbe2b363748f10871de41cdf1fd44724110114cfd334a40f4e1fe31dc8"
+  "env": {
+    "python": "3.10.18",
+    "torch": "2.11.0+cu128",
+    "numpy": "1.26.4",
+    "device": "cuda"
   }
- },
- "inputs": {
-  "grid": {
-   "file": "data/p2/p2_grid_validate.csv",
-   "md5": "3314418d4e53ff30d0d246e1594e4bed"
-  },
-  "frozen_manifest_sha256": "6a06643aad812da9f95c74201e77c7493208defc5696832a60949e005033d2fc"
- },
- "env": {
-  "python": "3.10.18",
-  "torch": "2.11.0+cu128",
-  "numpy": "1.26.4",
-  "device": "cuda"
- }
 }

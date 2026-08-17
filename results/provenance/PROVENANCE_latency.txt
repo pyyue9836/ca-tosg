@@ -1,6 +1,6 @@
 CA-TOSG P2-C -- frozen-selector latency + end-to-end timing (latency.py)
 ================================================================================
-manifest: results/manifests/FROZEN_MANIFEST.json (schema catosg-frozen-manifest/1, freeze 2026-08-09T15:12:53.653192+00:00)
+manifest: results/manifests/FROZEN_MANIFEST.json (schema catosg-frozen-manifest/1, freeze 2026-08-16T17:50:19.098008+00:00)
 3 frozen selectors sha256-verified before load (via eval_p2_deploy.load_manifest).
 Latency protocol = a8_models batch-1 online point: WARMUP=100 discarded, N_TRIALS=1000 per-call timings; mean/std/P50/P95/P99 ms + pickled size_kb.
 Each trial: one test frame (random), est_snr~U[0,20] dB, channel~Bernoulli(0.5); seed=0. Models fitted on unnamed numpy -> predict() on the numpy matrix directly.

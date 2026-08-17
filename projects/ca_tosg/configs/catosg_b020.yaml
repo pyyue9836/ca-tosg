@@ -62,7 +62,7 @@ tie_break:
 frozen:
   selector: selector_B020
   candidate_index: 1
-  walk_depth: 2
+  walk_depth: 0
   lambda_star: 0.02
   tau_star: 12.0
   class_weight: null
@@ -71,5 +71,5 @@ frozen:
     max_depth: 10
     min_samples_leaf: 2
     max_features: sqrt
-  model_sha256: fc9c2c0b5661bca4d045140de3faa9bfd740c5b81ea7ebf636941fbabfc39006
-  frozen_validate_payload: 0.099231
+  model_sha256: db2322f82c1ae50932230d115f3743cb0766dbef719e986b522dd6826c51d970
+  frozen_validate_payload: 0.150158

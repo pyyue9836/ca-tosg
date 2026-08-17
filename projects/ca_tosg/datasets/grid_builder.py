@@ -51,15 +51,18 @@ from scene_split import scene_labels  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))                       # paper1
 OPENCOOD = os.path.join(os.path.dirname(P1), 'OpenCOOD')
-DATA = os.path.join(OPENCOOD, 'peiyi_work/paper1/data')           # clean per-frame caches (v3)
+# P0 promotion: the per-frame tables are the N=1 ones, in-repo under data/p2 (ruling (a)).
+DATA = os.path.join(P1, 'data/p2')
 BLER_CSV = os.path.join(P1, 'results/channel/bler_sionna.csv')  # frame-level, Es/N0
 OUT_DATA = os.path.join(P1, 'data/p2')                            # git-excluded artifacts
-OUT_PROV = os.path.join(P1, 'results/manifests')               # tracked provenance
-MANIFEST = os.path.join(OUT_PROV, 'FROZEN_MANIFEST.json')         # P2 freeze marker (PROTOCOL sec 10)
+OUT_PROV = os.path.join(P1, 'results/provenance')   # where every other PROVENANCE_* lives
+MANIFEST_DIR = os.path.join(P1, 'results/manifests')            # freeze marker stays here
+MANIFEST = os.path.join(MANIFEST_DIR, 'FROZEN_MANIFEST.json')     # P2 freeze marker (PROTOCOL sec 10)
 
 # versionless pipeline naming (P2 submit-A migration); test/culver stay _v3 until P2 submit-B rebuild
-DATASET_NAME = {'validate': 'dataset_validate.csv',
-                'test': 'dataset_test_v3.csv', 'culver': 'dataset_culver_v3.csv'}
+DATASET_NAME = {'validate': 'dataset_validate_n1.csv',
+                'test': 'dataset_test_n1.csv',
+                'culver': 'dataset_culver_n1.csv'}
 SNR_GRID = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 CHANNELS = ['awgn', 'rayleigh']
 QAM_F = 16                                                        # F = feature-level, 16-QAM rate-1/2
