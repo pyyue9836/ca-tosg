@@ -285,7 +285,10 @@ def evidence_engine(cells, index, by_mod):
 
 # ---------------------------------------------------------------- value provenance search
 RESULTS_DIR = os.path.join(ROOT, 'results')
-NUM_IN_FILE = re.compile(r'[-+]?\d+\.\d+|[-+]?\d+')
+# R23-15: exponent notation must parse. pandas writes small CI bounds as `-2e-05`, and the old
+# pattern read that as the two numbers -2 and 05 -- so every gate built on this corpus was blind
+# to them, and `0.00002` (the primary cell's own CI upper bound) counted as unlocated.
+NUM_IN_FILE = re.compile(r'[-+]?\d+\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+(?:[eE][-+]?\d+)?')
 # literals too common to attribute anything: modes, IoUs, budgets, small counts
 BORING = {'0', '1', '2', '3', '4', '5', '8', '10', '16', '20', '100', '256', '400', '1000',
           '0.1', '0.2', '0.3', '0.5', '0.7', '0.9', '1.0', '0.10', '0.20', '0.30', '0.05',

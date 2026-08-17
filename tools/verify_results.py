@@ -50,6 +50,7 @@ GATES = [
     ('content',   'P3 SNR support',       [PY, 'tests/test_p3_snr_support.py']),
     ('content',   'intra-repo imports',   [PY, 'tests/test_intra_repo_imports.py']),
     ('content',   'action-set wording',   [PY, 'tests/test_action_set_wording.py']),
+    ('artifacts', 'numeric literals',     [PY, 'tests/test_numeric_literals.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]

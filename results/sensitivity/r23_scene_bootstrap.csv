@@ -1,0 +1,3 @@
+split,budget,quantity,unit,resampling,n_units,mean,lcb95,ucb95,published_mean,published_lcb95,published_ucb95,width_ratio,delta,crosses_minus_delta,verdict
+test,0.2,dF,F1,scene (cluster),16,-9.9e-05,-0.001508,0.001522,-0.0001,-0.00018,-2e-05,18.938,0.005,False,R9 condition 1 survives scene-level resampling
+test,0.2,dB,Msym,scene (cluster),16,-0.075385,-0.119307,-0.029856,-0.07538,-0.07639,-0.07441,45.177,,,

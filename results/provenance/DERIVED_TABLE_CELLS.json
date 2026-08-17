@@ -1,6 +1,6 @@
 {
   "schema": "catosg-derived-table-cells/1",
-  "note": "regime means over the AWGN SNR points below / at-and-above the measured knee",
+  "note": "regime means over the AWGN SNR points below / at-and-above the measured knee; and the share-of-B_F ratio column (payload / 0.99 x 100)",
   "tab:headline": [
     "0.024",
     "0.029",
@@ -19,5 +19,24 @@
     "0.8290",
     "0.8691",
     "0.8892"
+  ],
+  "tab:gen_headline_shares": [
+    "100.0",
+    "14.3",
+    "16.2",
+    "17.7",
+    "2.4",
+    "2.9",
+    "21.4",
+    "21.9",
+    "22.0",
+    "26.8",
+    "3.7",
+    "31.6",
+    "31.8",
+    "4.3",
+    "50.0",
+    "7.2",
+    "7.3"
   ]
 }

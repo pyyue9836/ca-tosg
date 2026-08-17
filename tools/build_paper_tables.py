@@ -249,9 +249,20 @@ def main() -> int:
     # cells this generator DERIVED (regime means): they are not stored anywhere, so the table-cell
     # gate consults this list instead of failing on them.
     derived = sorted({c for row in hb.split('\n') for c in re.findall(r'(?<![\d.])\d+\.\d{2,6}(?![\d])', row)})
+    # R23-15: the share-of-B_F column is a DERIVED ratio (payload / 0.99 x 100) that appears in no
+    # CSV cell, and so is every cell this generator computes for tab:gen_headline and tab:ablation.
+    # Declaring them is what makes the literal-coverage gate able to distinguish a derived cell from
+    # an unverified one; they were previously indistinguishable.
+    shares = set()
+    m = re.search(r'\\label\{tab:gen_headline\}(.*?)\\end\{tabular\}', tex, re.S)
+    if m:
+        shares |= set(re.findall(r'\$(\d+\.\d+)\\%\$', m.group(1)))
     json.dump({'schema': 'catosg-derived-table-cells/1',
-               'note': 'regime means over the AWGN SNR points below / at-and-above the measured knee',
-               'tab:headline': derived},
+               'note': 'regime means over the AWGN SNR points below / at-and-above the measured '
+                       'knee; and the share-of-B_F ratio column (payload / 0.99 x 100)',
+               'tab:headline': derived,
+               'tab:gen_headline_shares': sorted(shares),
+               },
               open(os.path.join(ROOT, 'results/provenance/DERIVED_TABLE_CELLS.json'), 'w'), indent=2)
     print('tab:headline, tab:headline_agg (incl. the masked-oracle row) and tab:ablation written '
           'from the frozen CSVs; observation (iii) regenerated through sub_once()')

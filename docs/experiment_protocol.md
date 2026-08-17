@@ -3772,3 +3772,103 @@ Frames within a scene are not independent, so the published interval — a paire
   and **does not make Rayleigh feasible** at `k in {2,4}`, because `b_cw >= 0.04` at 20 dB and
   `990` codewords per fragment already give `q_k ~ 1`. If Rayleigh does become feasible, the
   paper's Rayleigh conclusion is scoped accordingly and the change is reported prominently.
+
+---
+
+## Change-log R23 (2026-08-18) — supervisor corrections, three sensitivities executed, two gate holes closed
+
+**Zero GPU.** Corrections, generator work, three CPU-analytic sensitivities, and two structural
+defects in the verification chain itself.
+
+### A · The seven corrections
+
+1. **`0.187` -> `0.21196`** — the `B_max=0.30` test payload in `sec:pareto`. Its ledger row had been
+   bound to `true_e2e_ap.csv`, which holds AP, **not** F1 or payload; it is rebound to
+   `replay_summary.csv` (`B_RF`), where the number actually lives.
+2. **`2.3x` / `1.7x` -> `1.53x` / `1.47x`** — `sec:threshold` still quoted the retired
+   threshold-to-selector channel-use ratios while `sec:headline` already carried the corrected pair.
+   Both retired forms are fingerprinted (anchored on `\times`, so the bare 2.3 / 1.7 stay usable).
+3. **The channel-only sentence is generator-owned and its DIRECTION is derived.** The milestone
+   template said the channel-only variant "reaches a higher F1"; under the corrected convention it
+   is **lower on both axes** (0.89529 vs 0.89783 at 1.36x the channel use). The generator now
+   computes the direction word from the data, so it cannot go stale again.
+4. **The C256 footnote** described the deployed classifier as a two-element class set `{L, C16}`.
+   It is `S={E,L,F}`; C256's status is exclusion, not membership of a smaller set. Applied through
+   the paragraph-insertion gate's ruling mechanism, tagged `R23-4`.
+5. **The Conclusion's action set gains `E`**, and a new gate (below) makes the omission catchable.
+6. **`docs/canonical_quantities.md`**: the FA-1 ratio still quoted `0.28843 / 0.18703` and the
+   latency row named `selector_B030` when the slowest selector is `selector_B020`. Both corrected —
+   and the reason they survived is now fixed: the checker re-derived every number from the CSVs and
+   **never read the registry's own prose**. It does now (see C-2).
+7. **Quote-both-or-neither is enforced in code.** The milestone generator refuses to emit the
+   nominal 34.8% saving unless `tau_feasible.csv` supplies the budget-matched 26.6% beside it.
+
+### B · Two generator holes, both structural
+
+8. **`tab:ablation`, the masked-oracle rows and observation (iii) are now generator-owned.** The
+   ablation table carried a retired `0.9011` in two rows; the oracle row of `tab:gen_headline` kept
+   `0.9165 / 0.1706 / 17.2%` although the module docstring claimed **all four** fixed rows were
+   generated — the oracle was simply not in the generator's row list. Observation (iii) still read
+   `0.158`--`0.251` Msym / `16`--`25%`: the substitution meant to own it targeted a sentence form
+   `main.tex` no longer contains, so **it had been rewriting nothing on every run while reporting
+   success**. All substitutions now go through `sub_once()`, which fails when a pattern matches a
+   number of times other than one.
+9. **The cell locator accepted non-canonical sources.** It searched every `.csv/.json/.md/.txt`
+   under `results/`, so a narrative or historical file could satisfy a cell. Restricted to
+   generator-written data products. **The hole passed exactly 4 cells** — all four located only in
+   `DERIVED_TABLE_CELLS.json`, the table generator's **own declaration file**, i.e. the generator
+   was certifying its own output. They are now reported as declared-derived, which is what they are.
+
+### C · Three defects in the verification chain, found while doing the above
+
+1. **The R20-9a unbound-row check could not fail.** `tests/test_result_consistency.py` printed
+   `CLAIMS GATE FAIL` and then exited **0**, because `main()` returned 1 and `__main__` discarded it.
+   `verify_results.py` reported PASS over it. Wired to `sys.exit(main() or 0)`; eight rows this batch
+   left unbound were then found and bound.
+2. **The registry's prose could disagree with its own checker** (item 6). Every `A / B = C` in the
+   derivation column is now re-evaluated: both inputs must exist in the CSV the row names, and the
+   quotient must equal the displayed value. Both branches negative-tested.
+3. **The corpus number-reader could not parse scientific notation.** pandas writes small CI bounds as
+   `-2e-05`; the pattern read that as the two numbers `-2` and `05`, so **every gate built on the
+   corpus was blind to them** — the primary cell's own CI upper bound `0.00002` counted as
+   unlocated. Fixed at the root, in `audit_claims_evidence.NUM_IN_FILE`.
+
+### D · The three R20-item-10 sensitivities — see Change-log R23-C for the pre-registration
+
+Run by `projects/ca_tosg/evaluation/r23_sensitivity.py`, 15 s, zero GPU.
+
+* **Scene-level bootstrap.** Resampling the **16 test scenes** instead of the 200 realisations widens
+  the primary interval by **18.938x** on F1, to `[-0.001508, +0.001522]`, and by **45.177x** on
+  payload, to `[-0.119307, -0.029856]` Msym. The F1 interval **no longer excludes zero**, but it does
+  **not** reach `-delta = -0.005`, so R20's inconclusive ruling is **not triggered**; the payload
+  advantage stays strictly negative. Both intervals are published together. Expectation **S1 met**.
+* **L-link reliability.** At `BLER_L = 0.10` (test, `B_max=0.20`) the cost is `0.00634` F1 to the
+  selector, `0.00588` to the threshold rule and `0.00734` to Fixed L. **S2 is half met and half
+  refuted, and both halves are reported**: the selector's margin over Fixed L widens as predicted,
+  but its gap to the threshold rule widens *against* it (`-0.00010` -> `-0.00056`), because the
+  threshold leans harder on the feature action (`rho_F` 0.20 vs 0.12) and is less exposed to an
+  unreliable `L`. Payload is invariant by construction, so no payload claim moves.
+* **Fragmentation / HARQ.** Fragmentation alone is **algebraically inert** (asserted, not assumed).
+  With one retransmission per fragment the marginal AWGN cliff point at 8 dB falls from `0.402400`
+  to `0.100363` (`k=2`) and `0.057077` (`k=4`), at `1.226954x` and `1.120770x` the payload — and
+  **Rayleigh does not open at all**: its frame BLER stays at `1.0` across the whole evaluated
+  0--20 dB range for every `k`, at `2.0x` the payload. **S3 met.** The paper's qualifier is now
+  numerical: the Rayleigh infeasibility is a property of the link budget, not of the no-HARQ model.
+
+### E · Wording, and a gate that enumerates instead of grepping
+
+13. "runs in real time" -> the selector's inference fits within the 100 ms frame interval, with an
+    explicit statement that the **end-to-end chain is not measured**.
+14. "the dominant decision signal is channel state **rather than selector-model complexity**" — the
+    model-complexity half rested on a prior-protocol model-comparison table that was never re-run.
+    Deleted; the SNR-threshold half, which is supported, stays.
+15. **`tests/test_numeric_literals.py`** enumerates every decimal literal in the delivered text and
+    requires each to be covered by a **verified binding**. The first implementation asked only
+    "does this number exist somewhere under `results/`" — and was measured before being trusted:
+    with 202 committed products, **every single retired value this batch removed** (0.187, 2.3, 1.7,
+    0.9011, 0.9165, 0.1706, 0.2542, 0.158, 0.251) found a coincidental match and would have passed.
+    That version was discarded. The gate now ratchets against `tests/uncovered_literals.md`, which
+    opens with **101 registered debt entries (115 occurrences)** — prose CI bounds whose ledger rows
+    carry no CSV binding, and `docs/model_zoo.md`'s zoo AP values, which live in no product of this
+    repo. New uncovered numbers fail; the register is the burn-down list. Generated documents are
+    held to the stronger rule instead: re-running their generator must reproduce them byte for byte.
