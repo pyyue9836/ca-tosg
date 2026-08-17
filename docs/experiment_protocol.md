@@ -3510,3 +3510,70 @@ primary is spent; this arm may not be converted into a superiority claim in eith
 payload `0.000`, std `0` (it does not depend on the CSI draw). It is a deterministic read of a
 committed cache with no free choice, and it is the floor against which `rho_E` is interpreted.
 No paper table is edited in this batch.
+
+---
+
+## Change-log R21-A-run (2026-08-17) — the two-gate arm, as fitted and replayed
+
+**Zero GPU.** `tools/run_baselines.py two_gate --train --evaluate`; 1.7 s to fit and freeze, 14 s to
+replay. Nothing frozen was touched: the mainline `F1_RF` recomputed inside this arm is asserted equal
+to `replay_summary.csv` at every split x budget before any number is written.
+
+### What the walk selected
+
+Candidate **0** (`ego_num_objects`, `s = +1`) at all three budgets, and at all three budgets it
+selected **`tau_E = -inf` — never E**. The reliability gate is `tau_F = +inf` (**never F**) at
+`B_max = 0.10` and `0.20`, and `tau_F = 0.60` at `0.30`. The arm therefore *is* Fixed-L at the two
+tighter budgets, and a channel-only rule at the loosest one.
+
+### The three expectations
+
+* **E1 missed, at both ends.** The rule does not land between `tau` and RF. At `B_max = 0.10/0.20` it
+  lands *below* `tau`, on the Fixed-L floor; at `0.30` it lands *on* `tau` — the freely fitted
+  reliability gate rediscovers the SNR-threshold baseline almost exactly (`rho_F` 0.29853 vs `tau`'s
+  0.29883 on validate; `dF` vs `tau` is 0.00001 / 0.00000 / -0.00000 across the three splits).
+* **E2 refuted, unambiguously.** `rho_E = 0.00000` in every split x budget cell. **E is not reachable
+  by a monotone threshold on these cues.** The frozen forest reaches it — barely, and only on
+  validate (`rho_E` 0.0107 / 0.0112 / 0.0120) and essentially not at all on test (0.0004 / 0.0012 /
+  0.0010) or Culver (0.0000).
+* **E3 held in the opposite direction from the one written.** The constraint did not force the
+  payload below `tau` at `B_max = 0.30`: the fit is feasible on the *grid* (0.28745) but the
+  deployment CSI draw puts it at **0.31224 on test, +0.01224 over its own budget** — the same
+  nominal-vs-realised gap that `tau_feasible` exists to expose, now reproduced by a second rule.
+
+### Headline cells (descriptive; no decision, in either direction)
+
+| split | B_max | F1 two-gate | payload | F1 RF | payload RF | dF (2G-RF) 95% |
+|---|---|---|---|---|---|---|
+| test | 0.20 | 0.89095 | 0.02400 | 0.89691 | 0.14141 | [-0.00606, -0.00587] |
+| test | 0.30 | 0.89900 | 0.31224 | 0.89783 | 0.21197 | [+0.00112, +0.00122] |
+| culver | 0.30 | 0.86316 | 0.31439 | 0.85932 | 0.18226 | [+0.00375, +0.00393] |
+
+At `B_max = 0.30` the hand rule is **better** on F1 than the selector, by 0.0012 (test) and 0.0038
+(Culver) — and pays 47% / 72% more to get it, from outside its own budget. That is the honest shape
+of the comparison and it is reported as such: at a budget the channel ladder happens to land on, a
+two-scalar rule matches or beats the forest; at the budgets between the rungs it cannot compete
+because it cannot get there at all.
+
+### Why it cannot get there — a property of the committed BLER table, not of the fit
+
+`results/channel/bler_sionna.csv` frame BLER at 16-QAM is **effectively binary**: 1.0 for Rayleigh at
+*every* tabulated SNR, and 1.0 for AWGN below 8 dB, 0.4024 at 8 dB, 0.0 at and above 10 dB. So
+`r_t = 1 - BLER_F` takes three values on the fitting surface (0, 0.5976, 1). Any policy whose F
+decision depends on the channel **alone** can therefore realise only four mean payloads —
+0.024, ~0.27, ~0.33, 0.99 msym — and `B_max = 0.10` and `0.20` fall in the gaps. This was checked
+against a fresh continuous CSI draw (SNR ~ U[0,20], 50 realisations, seed 20260817, validate frames
+only) before it was written down: the minimum feasible payload with F ever active is **0.267**, so
+the gap is a property of the physical table and not an artefact of the 11-point SNR grid.
+
+Reaching an intermediate budget requires deciding **which frames** deserve F among the frames whose
+link can carry it — a per-frame content decision. That is the argument the selector exists to make,
+and this arm is the first evidence in the record that a channel-only rule cannot make it.
+
+### One implementation detail not fixed by the pre-registration
+
+The pre-registration fixed the *candidate-level* tie-break but not the threshold-level one. It is
+implemented as `max_f1 -> min_payload -> first in the pre-registered enumeration order`
+(`tau_E` outer, ascending from `-inf`; `tau_F` inner, ascending from 0.00 with `+inf` last). The
+order prefers **never-E** and **more-F** among exact ties, which biases the arm *against* the E2
+expectation it is testing — the conservative direction, and stated here rather than left implicit.

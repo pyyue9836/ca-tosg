@@ -1,0 +1,12 @@
+CA-TOSG R21-A -- two-gate heuristic (difficulty gate + link-reliability gate).
+DESCRIPTIVE + CI ONLY; not deployed; no decision in either direction.
+========================================================================================
+manifest: results/manifests/R21A_MANIFEST.json (schema catosg-r21a-manifest/1); all four frozen inputs md5/sha256-verified before the replay.
+policy: a=E if d<=tau_E; elif r>=tau_F: F; else L.  d=sign*cue, r=1-BLER_F (committed table)
+  B=0.10: candidate 0 ego_num_objects/+1, tau_E=None (q=None), tau_F=None, OOF f1=0.855384 pay=0.024
+  B=0.20: candidate 0 ego_num_objects/+1, tau_E=None (q=None), tau_F=None, OOF f1=0.855384 pay=0.024
+  B=0.30: candidate 0 ego_num_objects/+1, tau_E=None (q=None), tau_F=0.6, OOF f1=0.863264 pay=0.287455
+CSI: 200 paired samplings/split, seed=20260809 -- the IDENTICAL draws to deployment.py; RF reproduced from the frozen selectors and asserted equal to replay_summary.csv.
+CI: paired bootstrap, 10000 resamples, percentile, seed=12345.
+Thresholds transfer as ABSOLUTE cue values (validate quantile, NOT re-quantiled per split). test/Culver labels used for SCORING ONLY.
+Zero GPU: cached eff + the committed BLER table + frozen predict().

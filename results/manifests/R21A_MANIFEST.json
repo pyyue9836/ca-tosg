@@ -1,0 +1,147 @@
+{
+ "schema": "catosg-r21a-manifest/1",
+ "protocol": "CA-TOSG Change-log R21-A (docs/experiment_protocol.md)",
+ "arm": "two-gate heuristic (difficulty gate + link-reliability gate), DESCRIPTIVE, not deployed",
+ "policy": "a=E if d<=tau_E; elif r>=tau_F: F; else L.  d=sign*cue, r=1-BLER_F (committed table)",
+ "candidates": [
+  {
+   "index": 0,
+   "cue": "ego_num_objects",
+   "sign": 1
+  },
+  {
+   "index": 1,
+   "cue": "ego_num_objects",
+   "sign": -1
+  },
+  {
+   "index": 2,
+   "cue": "pcd_num_points",
+   "sign": 1
+  },
+  {
+   "index": 3,
+   "cue": "pcd_num_points",
+   "sign": -1
+  },
+  {
+   "index": 4,
+   "cue": "pcd_density_0_20",
+   "sign": 1
+  },
+  {
+   "index": 5,
+   "cue": "pcd_density_0_20",
+   "sign": -1
+  }
+ ],
+ "tau_E_grid": "{-inf} U quantile(d, 0.05..1.00 step 0.05)",
+ "tau_F_grid": "{0.00..1.00 step 0.05} U {+inf}",
+ "selection": {
+  "surface": "data/p2/p2_grid_validate.csv",
+  "loso_folds": 9,
+  "score": "frame_weighted_oof_f1",
+  "feasibility": "frame_weighted_oof_payload<=B_max",
+  "tie_break": [
+   "max_f1",
+   "min_payload",
+   "min_candidate_index"
+  ],
+  "dropped_tie_break_key": "shallower_model (no analogue; recorded in R21-A)"
+ },
+ "environment": {
+  "python": "3.10.18",
+  "numpy": "1.26.4",
+  "pandas": "2.2.2"
+ },
+ "inputs": {
+  "train_grid": {
+   "file": "data/p2/p2_grid_validate.csv",
+   "md5": "ba6dc291858f71fff16a4f2929f5a9d9"
+  },
+  "cue_source": {
+   "file": "data/p2/dataset_validate_n1.csv",
+   "md5": "21d3052857424505131e69046dba5b1f"
+  },
+  "bler_table": {
+   "file": "results/channel/bler_sionna.csv",
+   "md5": "be3f5e1278ddda6efc271281ccbf449e"
+  },
+  "folds_csv": {
+   "file": "results/manifests/validate_loso_folds.csv",
+   "sha256": "c706098bdb1b85684ca73df9a903d3b2f459c29039dead357991eaea2bc78dc1"
+  }
+ },
+ "budgets": {
+  "0.10": {
+   "feasible": true,
+   "candidate_index": 0,
+   "cue": "ego_num_objects",
+   "sign": 1,
+   "tau_E": null,
+   "tau_E_is_never_E": true,
+   "tau_E_quantile": null,
+   "tau_F": null,
+   "tau_F_is_never_F": true,
+   "n_candidates": 6,
+   "n_feasible": 6,
+   "loso_frame_weighted_f1": 0.855384,
+   "loso_frame_weighted_payload": 0.024,
+   "frozen_validate_f1": 0.855384,
+   "frozen_validate_payload": 0.024,
+   "budget_satisfied": true,
+   "validate_grid_rho": {
+    "E": 0.0,
+    "L": 1.0,
+    "F": 0.0
+   }
+  },
+  "0.20": {
+   "feasible": true,
+   "candidate_index": 0,
+   "cue": "ego_num_objects",
+   "sign": 1,
+   "tau_E": null,
+   "tau_E_is_never_E": true,
+   "tau_E_quantile": null,
+   "tau_F": null,
+   "tau_F_is_never_F": true,
+   "n_candidates": 6,
+   "n_feasible": 6,
+   "loso_frame_weighted_f1": 0.855384,
+   "loso_frame_weighted_payload": 0.024,
+   "frozen_validate_f1": 0.855384,
+   "frozen_validate_payload": 0.024,
+   "budget_satisfied": true,
+   "validate_grid_rho": {
+    "E": 0.0,
+    "L": 1.0,
+    "F": 0.0
+   }
+  },
+  "0.30": {
+   "feasible": true,
+   "candidate_index": 0,
+   "cue": "ego_num_objects",
+   "sign": 1,
+   "tau_E": null,
+   "tau_E_is_never_E": true,
+   "tau_E_quantile": null,
+   "tau_F": 0.6,
+   "tau_F_is_never_F": false,
+   "n_candidates": 6,
+   "n_feasible": 6,
+   "loso_frame_weighted_f1": 0.863264,
+   "loso_frame_weighted_payload": 0.287455,
+   "frozen_validate_f1": 0.863264,
+   "frozen_validate_payload": 0.287455,
+   "budget_satisfied": true,
+   "validate_grid_rho": {
+    "E": 0.0,
+    "L": 0.727273,
+    "F": 0.272727
+   }
+  }
+ },
+ "note": "test/Culver were never read by this script. Thresholds transfer as ABSOLUTE values (the tau_E quantile is a validate quantile; it is NOT re-quantiled per split)."
+}

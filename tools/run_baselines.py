@@ -5,6 +5,8 @@ modifications, checkpoint, data split, run command and output.
 
   python tools/run_baselines.py contextual_bandit --train
   python tools/run_baselines.py contextual_bandit --evaluate
+  python tools/run_baselines.py two_gate --train
+  python tools/run_baselines.py two_gate --evaluate
 """
 import os
 import sys
@@ -17,6 +19,7 @@ import argparse
 
 BASELINES = {
     'contextual_bandit': ('baselines/contextual_bandit', 'train', 'evaluate'),
+    'two_gate': ('baselines/two_gate', 'train', 'evaluate'),
 }
 
 if __name__ == '__main__':
