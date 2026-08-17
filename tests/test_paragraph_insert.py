@@ -82,6 +82,13 @@ PARAS = {
             ("Fig.~\\ref{fig:channel_codec_ap}'s coarse grid renders this cliff as the 16$\\to$20 dB AP transition.",
              "Fig.~\\ref{fig:bler} plots this cliff directly, with the 256-QAM BLER curve sitting to the right of the 16-QAM curve.",
              "B2"),
+            # R23-4 (supervisor ruling, 2026-08-17): the footnote described the deployed classifier
+            # as a TWO-element class set {L, C16}. E is a deployed action, so the set is
+            # S={E,L,F} and C256's status is exclusion, not membership of a smaller set.
+            ("The deployed classifier's class set is $\\{L, \\mathrm{C16}\\}$",
+             "The deployed classifier uses $\\mathcal{S}=\\{E,L,F\\}$; $C_{256}$ is excluded "
+             "from the deployed action set",
+             'R23-4'),
             # Q2 (supervisor ruling, 2026-08-02): reframe the paragraph's role from a "completeness
             # defence" for retaining C256 to the "exclusion basis" for it -- C256 is dominated by C16
             # and excluded from the now 2-element deployed action set S={L,C16} (Eq.~\ref{eq:action_set}).

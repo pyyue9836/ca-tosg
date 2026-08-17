@@ -178,3 +178,20 @@ RX (Msym|payload|channel use)[^\n]{0,40}0\.187(?![0-9])
 # tools/verify_results.py. `0\.888[^6]` was the last of these and is converted; the lookahead form
 # preserves the original intent (0.8886 was the legitimate value it had to avoid) and adds prefix
 # safety. Sixth instance of this collision family after 0.248, 27.5, 18.4, 0.895 and 0.081.
+
+# R23-8: retired observation (iii) channel-use range. The corrected per-split ranges are
+# 0.08102-0.20361 / 0.03680-0.21196 / 0.02437-0.18226 Msym (replay_summary.csv B_RF) = 8.2-20.6 /
+# 3.7-21.4 / 2.5-18.4 % of Fixed F. Anchored NUMBER(?![0-9]) per the R20 rule.
+RX 0\.158(?![0-9])[^\n]{0,30}0\.251(?![0-9])
+RX 16\$?--?\$?25\\%[^\n]{0,40}Fixed
+
+# R23-8: tab:ablation and the masked-oracle rows of tab:gen_headline, both retired. Corrected values
+# come from feature_ablation.csv / fixed_references.csv and are now GENERATOR-OWNED
+# (tools/build_paper_tables.py: ablation_body(), gen_headline_baselines()).
+RX 0\.9011(?![0-9])
+# The oracle values are anchored on the ROW LABEL, not written bare: 0.8891 is also a legitimate
+# per-SNR value in tab:true_e2e_snr (AWGN 12/20 dB), and a bare pattern flagged it immediately --
+# the seventh instance of the collision family recorded at the foot of this file.
+RX Channel-aware oracle \(masked\)[^\n]{0,30}0\.(9165|8891)(?![0-9])
+RX Channel-aware oracle \(masked\)[^\n]{0,50}0\.(1706|2542)(?![0-9])
+

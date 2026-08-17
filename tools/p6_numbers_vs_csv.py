@@ -95,6 +95,22 @@ def _declared_derived():
     return {v for k, vals in d.items() if k.startswith('tab:') for v in vals}
 
 
+# R23-9: which files may a table cell be located in.
+# The corpus walks every .csv/.json/.md/.txt under results/, so a cell could "locate" in a narrative
+# or historical document -- a provenance transcript, an anomaly report, the results index -- none of
+# which is a canonical product. A retired value quoted inside such a file would therefore pass the
+# gate. Binding sources are now restricted to generator-written data products (.csv/.json), minus an
+# explicit deny-list of records that exist to quote superseded states.
+CANONICAL_EXT = ('.csv', '.json')
+NON_CANONICAL = re.compile(r'(README|ANOMALY_REPORT|FUSE_REPORT|corrigendum|p0_corrigendum|'
+                           r'PROVENANCE|/logs/)', re.I)
+
+
+def canonical_corpus(corpus):
+    return {f: v for f, v in corpus.items()
+            if f.endswith(CANONICAL_EXT) and not NON_CANONICAL.search(f)}
+
+
 def table_cells(corpus):
     """R20 9b: EVERY numeric cell of EVERY table in main.tex, checked against the corpus.
 
@@ -104,18 +120,28 @@ def table_cells(corpus):
     """
     tex = open(os.path.join(ROOT, 'paper/main.tex'), encoding='utf-8').read()
     declared = _declared_derived()
-    found, missing, derived_cells = [], [], []
+    canon = canonical_corpus(corpus)
+    found, missing, derived_cells, only_narrative = [], [], [], []
     for label, body in TABLE_RE.findall(tex):
         for lit in CELL_RE.findall(body):
             if lit.lstrip('-') in STRUCTURAL:
                 continue
-            hit = [f for f, vals in corpus.items() if carries_any_unit(vals, lit.lstrip('-'))]
+            hit = [f for f, vals in canon.items() if carries_any_unit(vals, lit.lstrip('-'))]
+            if not hit:
+                wide = [f for f, vals in corpus.items() if carries_any_unit(vals, lit.lstrip('-'))]
+                if wide:
+                    only_narrative.append((label, lit, wide[0]))
             if hit:
                 found.append((label, lit, hit[0]))
             elif lit in declared:
                 derived_cells.append((label, lit, 'declared derived'))
             else:
                 missing.append((label, lit, None))
+    if only_narrative:
+        print(f'  R23-9: {len(only_narrative)} cell(s) were previously located ONLY in a '
+              f'non-canonical file (narrative/historical); they are no longer accepted:')
+        for label, lit, f in only_narrative:
+            print(f'    {label}: {lit} -- was located in {f}')
     return found, missing, derived_cells
 
 

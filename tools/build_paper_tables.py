@@ -69,7 +69,9 @@ def headline_body():
 
 
 def headline_caption_numbers():
-    """The channel-averaged payload range quoted in tab:headline's caption."""
+    """The channel-averaged payload range at B_max=0.20 (R23-8: no longer spliced into the paper --
+    the sentence it targeted does not exist; observation_iii() owns the per-split ranges instead).
+    Kept as a derivation, not called by main()."""
     r = pd.read_csv(os.path.join(ROOT, 'results/main/replay_summary.csv'))
     r = r[r.budget == 0.2]
     lo, hi = r.B_RF.min(), r.B_RF.max()
@@ -126,9 +128,14 @@ def gen_headline_baselines(tex):
         return tex
     spans = [(marks[i][0], marks[i + 1][0] if i + 1 < len(marks) else len(block), marks[i][1])
              for i in range(len(marks))]
-    ROWS = (('Fixed-L', r'(Fixed \$L\$\s*&\s*)[\d.]+(\s*&\s*)[\d.]+'),
-            ('Fixed-F', r'(Fixed \$F\$ \(LDPC \+ 16-QAM\)\s*&\s*)[\d.]+(\s*&\s*)[\d.]+'),
-            ('Fixed-C256', r'(Fixed \$C_\{256\}\$ \(LDPC \+ 256-QAM\)\s*&\s*)[\d.]+(\s*&\s*)[\d.]+'))
+    # R23-8: the masked-oracle row was NOT in this list although the module docstring claimed all
+    # four fixed rows were generated. It had kept its retired values (test 0.9165 / 0.1706) through
+    # every batch since the corrigendum.
+    TAIL = r'(\s*&\s*\$)[\d.]+(\\%\$)'          # the share-of-B_F cell, regenerated as well
+    ROWS = (('Fixed-L', r'(Fixed \$L\$\s*&\s*)[\d.]+(\s*&\s*)[\d.]+' + TAIL),
+            ('Fixed-F', r'(Fixed \$F\$ \(LDPC \+ 16-QAM\)\s*&\s*)[\d.]+(\s*&\s*)[\d.]+' + TAIL),
+            ('Fixed-C256', r'(Fixed \$C_\{256\}\$ \(LDPC \+ 256-QAM\)\s*&\s*)[\d.]+(\s*&\s*)[\d.]+' + TAIL),
+            ('oracle', r'(Channel-aware oracle \(masked\)\s*&\s*)[\d.]+(\s*&\s*)[\d.]+' + TAIL))
     out, last = [], 0
     for a, b, split in spans:
         out.append(block[last:a])
@@ -137,12 +144,79 @@ def gen_headline_baselines(tex):
         for pol, pat in ROWS:
             if pol in g.index:
                 f1, pay = float(g.loc[pol, 'F1']), float(g.loc[pol, 'payload_msym'])
-                seg = re.sub(pat, lambda mm: f'{mm.group(1)}{f1:.4f}{mm.group(2)}{pay:.3f}', seg,
-                             count=1)
+                seg, n = re.subn(pat, lambda mm: (f'{mm.group(1)}{f1:.4f}{mm.group(2)}{pay:.3f}'
+                                                  f'{mm.group(3)}{100 * pay / B_F:.1f}'
+                                                  f'{mm.group(4)}'), seg, count=1)
+                if n != 1:
+                    raise SystemExit(f'tab:gen_headline: the {pol} row of the {split} block did '
+                                     'not match -- a generator that silently rewrites nothing is '
+                                     'how the oracle row stayed retired (R23-8)')
         out.append(seg)
         last = b
     out.append(block[last:])
     return tex[:m.start(1)] + ''.join(out) + tex[m.end(1):]
+
+
+def sub_once(tex, pattern, repl, what):
+    """re.sub that REFUSES to match nothing.
+
+    R23-8: the caption substitution below targeted a sentence form that no longer existed in
+    main.tex, so it had been rewriting nothing on every run while reporting success -- which is how
+    the retired 0.158--0.251 Msym / 16--25% range survived in observation (iii).
+    """
+    out, n = re.subn(pattern, repl, tex)
+    if n != 1:
+        raise SystemExit(f'{what}: pattern matched {n} times, expected exactly 1 -- '
+                         'the generator is not writing what it claims to write (R23-8)')
+    return out
+
+
+def observation_iii(tex):
+    """Observation (iii) of sec:true_e2e: per-split channel-use range and share of Fixed F."""
+    r = pd.read_csv(os.path.join(ROOT, 'results/main/replay_summary.csv'))
+    seg = []
+    for split, label in (('validate', 'on validate'), ('test', 'on the scene-disjoint test split'),
+                         ('culver', 'on Culver-City')):
+        g = r[r.split == split]
+        seg.append((float(g.B_RF.min()), float(g.B_RF.max()), label))
+    pay = (f'${seg[0][0]:.5f}$--${seg[0][1]:.5f}$~Msym/frame {seg[0][2]}, '
+           f'${seg[1][0]:.5f}$--${seg[1][1]:.5f}$ {seg[1][2]} and '
+           f'${seg[2][0]:.5f}$--${seg[2][1]:.5f}$ {seg[2][2]} across the three budgets')
+    sh = ', '.join(f'${100 * lo / B_F:.1f}$--${100 * hi / B_F:.1f}\\%$' for lo, hi, _ in seg[:2])
+    sh += f' and ${100 * seg[2][0] / B_F:.1f}$--${100 * seg[2][1] / B_F:.1f}\\%$'
+    return sub_once(
+        tex,
+        r"\(iii\) Averaged over all channel states the selector's channel use is .*?of Fixed \$F\$,",
+        lambda _m: ("(iii) Averaged over all channel states the selector's channel use is "
+                    f'{pay}, i.e.\\ {sh} of Fixed $F$,'),
+        'observation (iii)')
+
+
+def ablation_body():
+    """tab:ablation: the feature-ablation variants on test at B_max=0.20, from the CSVs."""
+    d = pd.read_csv(os.path.join(ROOT, 'results/sensitivity/feature_ablation.csv'))
+    fx = pd.read_csv(os.path.join(ROOT, 'results/main/fixed_references.csv'))
+    g = d[(d.split == 'test') & (d.budget == 0.2)].set_index('variant')
+    fl = fx[(fx.split == 'test') & (fx.policy == 'Fixed-L')].iloc[0]
+    best = max(float(g.loc[v, 'F1']) for v in ('channel_only', 'task_only', 'combined'))
+    def cell(v):
+        f1 = float(g.loc[v, 'F1'])
+        return f'\\textbf{{{f1:.5f}}}' if abs(f1 - best) < 1e-12 else f'{f1:.5f}'
+    rows = [
+        f"Channel only ($\\hat\\gamma,c$)        & 2  & {cell('channel_only')} & "
+        f"{float(g.loc['channel_only', 'payload']):.5f} \\\\",
+        f"Perception cues only                 & 21 & {cell('task_only')} & "
+        f"{float(g.loc['task_only', 'payload']):.5f} \\\\",
+        f"Full (all features)                  & 23 & {cell('combined')} & "
+        f"{float(g.loc['combined', 'payload']):.5f} \\\\",
+        f"SNR-threshold ($\\tau^\\star$)          & -- & "
+        f"{float(g.loc['tau_reference', 'F1']):.5f} & "
+        f"{float(g.loc['tau_reference', 'payload']):.5f} \\\\",
+        '\\midrule',
+        f"Fixed $L$                            & -- & {float(fl.F1):.5f} & "
+        f"{float(fl.payload_msym):.5f} \\\\",
+    ]
+    return '\n'.join(rows) + '\n'
 
 
 def splice(tex, label, body):
@@ -165,13 +239,12 @@ def main() -> int:
         return 0
     tex = splice(tex, 'tab:headline', hb)
     tex = splice(tex, 'tab:headline_agg', ab)
+    tex = splice(tex, 'tab:ablation', ablation_body())
     tex = gen_headline_baselines(tex)
-    # caption: the channel-averaged payload range, from the same replay
-    lo, hi, plo, phi = headline_caption_numbers()
-    tex = re.sub(r'channel-\\emph\{averaged\} \\method\{\} payload is \$[\d.]+\$--\$[\d.]+\$~Msym/frame '
-                 r'across splits, i\.e\.\\ \$\d+\$--\$\d+\\%\$ of Fixed \$F\$',
-                 f'channel-\\\\emph{{averaged}} \\\\method{{}} payload is ${lo:.3f}$--${hi:.3f}$~Msym/frame '
-                 f'across splits, i.e.\\\\ ${plo:.0f}$--${phi:.0f}\\\\%$ of Fixed $F$', tex)
+    tex = observation_iii(tex)
+    # R23-8: this substitution targeted a sentence form main.tex no longer contains, so it rewrote
+    # nothing on every run. The sentence it was meant to own is observation (iii), which is now
+    # generated by observation_iii() above through sub_once(), and the dead pattern is removed.
     open(TEX, 'w', encoding='utf-8').write(tex)
     # cells this generator DERIVED (regime means): they are not stored anywhere, so the table-cell
     # gate consults this list instead of failing on them.
@@ -180,8 +253,8 @@ def main() -> int:
                'note': 'regime means over the AWGN SNR points below / at-and-above the measured knee',
                'tab:headline': derived},
               open(os.path.join(ROOT, 'results/provenance/DERIVED_TABLE_CELLS.json'), 'w'), indent=2)
-    print('tab:headline and tab:headline_agg written from the frozen CSVs; '
-          f'caption payload range {lo:.3f}-{hi:.3f} Msym ({plo:.0f}-{phi:.0f}% of B_F)')
+    print('tab:headline, tab:headline_agg (incl. the masked-oracle row) and tab:ablation written '
+          'from the frozen CSVs; observation (iii) regenerated through sub_once()')
     return 0
 
 

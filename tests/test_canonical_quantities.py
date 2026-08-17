@@ -133,8 +133,8 @@ def q_ratio_families(text):
     f = pd.read_csv(os.path.join(ROOT, 'results/main/fixed_references.csv'))
     b_f = float(f[(f.split == 'validate') & (f.policy == 'Fixed-F')].payload_msym.iloc[0])
     rc = 0
-    for split in ('test', 'culver'):
-        g = r[r.split == split]
+    for split in ('validate', 'test', 'culver'):        # R23-8: observation (iii) now prints
+        g = r[r.split == split]                          # validate's range too
         oracle = float(f[(f.split == split) & (f.policy == 'oracle')].F1.iloc[0])
         pay = [f'{100 * v / b_f:.1f}' for v in g.B_RF]
         f1s = [f'{100 * v / oracle:.1f}' for v in g.F1_RF]

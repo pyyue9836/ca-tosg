@@ -396,7 +396,7 @@ Split & Regime & AP@0.5 & AP@0.7 & Payload \\
 \end{tabular}
 \end{table}
 
-Three observations follow. (i) The realised true end-to-end AP@0.5 of the frozen selectors, reported descriptively for $B_{\max}=0.10/0.20/0.30$, is $0.7887/0.7926/0.7936$ on validate, $0.8697/0.8742/0.8742$ on test and $0.7299/0.7347/0.7504$ on Culver-City, against fixed object-level references of $0.7819$, $0.8691$ and $0.7299$. Every split is read the same way: its AP headroom is the gap between the perfect-channel feature ceiling and fixed object-level communication --- $0.0550$ on validate, $0.0240$ on test and $0.0970$ on Culver-City --- and the selector's realised share of that headroom is $(\mathrm{AP}_{\method{}}-\mathrm{AP}_{\text{Fixed }L})/\text{headroom}$: $12.4/19.5/21.3\%$ on validate, $2.5/21.2/21.2\%$ on test and $0.0/4.9/21.1\%$ on Culver-City. The headroom exists on all three splits, but the selector converts at most about a fifth of it, so what it reliably delivers is the communication saving rather than an AP gain. Under the single-collaborator convention the $L$--$F$ gap is wider than it was --- box-level fusion of one neighbour discards more than feature-level fusion of the same neighbour --- which is why the retired full-collaborator accounting showed a test headroom roughly an order of magnitude smaller: that near-zero was an artefact of fusing every collaborator into both branches. These figures are descriptive and we draw no AP advantage from them. The quantity that bounds what any granularity policy could contest is the per-split headroom between the perfect-channel feature-level ceiling and fixed $L$: $0.8369-0.7819=0.0550$ AP on validate, $0.8931-0.8691=0.0240$ AP on the scene-disjoint test split and $0.8269-0.7299=0.0970$ AP on the Culver-City domain shift. Test has the smallest headroom of the three ($0.0240$~AP) but it is no longer negligible, and the frozen selector converts about a fifth of it; the split is therefore informative about payload and about not losing accuracy, not about AP gain. (ii) Under fading or low SNR the selector holds $L$ and incurs no AP loss relative to object-level communication, so feature-level transmission is never activated where it would be wasteful; the fixed feature-level policies $C_{16}$ and $C_{256}$, by contrast, are \emph{strictly dominated}---they cost $21\text{--}41\times$ more channel use yet fall below Fixed $L$ in realised AP because of the LDPC cliff (Fig.~\ref{fig:ap_snr}). (iii) Averaged over all channel states the selector's channel use is $0.158$--$0.251$~Msym/frame across splits, i.e.\ $16$--$25\%$ of Fixed $F$, because the expensive feature-active regime occupies only the high-SNR AWGN tail.
+Three observations follow. (i) The realised true end-to-end AP@0.5 of the frozen selectors, reported descriptively for $B_{\max}=0.10/0.20/0.30$, is $0.7887/0.7926/0.7936$ on validate, $0.8697/0.8742/0.8742$ on test and $0.7299/0.7347/0.7504$ on Culver-City, against fixed object-level references of $0.7819$, $0.8691$ and $0.7299$. Every split is read the same way: its AP headroom is the gap between the perfect-channel feature ceiling and fixed object-level communication --- $0.0550$ on validate, $0.0240$ on test and $0.0970$ on Culver-City --- and the selector's realised share of that headroom is $(\mathrm{AP}_{\method{}}-\mathrm{AP}_{\text{Fixed }L})/\text{headroom}$: $12.4/19.5/21.3\%$ on validate, $2.5/21.2/21.2\%$ on test and $0.0/4.9/21.1\%$ on Culver-City. The headroom exists on all three splits, but the selector converts at most about a fifth of it, so what it reliably delivers is the communication saving rather than an AP gain. Under the single-collaborator convention the $L$--$F$ gap is wider than it was --- box-level fusion of one neighbour discards more than feature-level fusion of the same neighbour --- which is why the retired full-collaborator accounting showed a test headroom roughly an order of magnitude smaller: that near-zero was an artefact of fusing every collaborator into both branches. These figures are descriptive and we draw no AP advantage from them. The quantity that bounds what any granularity policy could contest is the per-split headroom between the perfect-channel feature-level ceiling and fixed $L$: $0.8369-0.7819=0.0550$ AP on validate, $0.8931-0.8691=0.0240$ AP on the scene-disjoint test split and $0.8269-0.7299=0.0970$ AP on the Culver-City domain shift. Test has the smallest headroom of the three ($0.0240$~AP) but it is no longer negligible, and the frozen selector converts about a fifth of it; the split is therefore informative about payload and about not losing accuracy, not about AP gain. (ii) Under fading or low SNR the selector holds $L$ and incurs no AP loss relative to object-level communication, so feature-level transmission is never activated where it would be wasteful; the fixed feature-level policies $C_{16}$ and $C_{256}$, by contrast, are \emph{strictly dominated}---they cost $21\text{--}41\times$ more channel use yet fall below Fixed $L$ in realised AP because of the LDPC cliff (Fig.~\ref{fig:ap_snr}). (iii) Averaged over all channel states the selector's channel use is $0.08102$--$0.20361$~Msym/frame on validate, $0.03680$--$0.21196$ on the scene-disjoint test split and $0.02437$--$0.18226$ on Culver-City across the three budgets, i.e.\ $8.2$--$20.6\%$, $3.7$--$21.4\%$ and $2.5$--$18.4\%$ of Fixed $F$, because the expensive feature-active regime occupies only the high-SNR AWGN tail.
 
 \method{} is not designed to raise channel-\emph{averaged} AP above Fixed $L$ on every frame: on many frames object-level communication is already sufficient, and a channel-averaged mean necessarily dilutes the gain. Its value is to activate feature-level communication \emph{only} when the expected task gain justifies the payload and channel risk. The complementary channel-averaged payload--F1 frontier (Section~\ref{sec:pareto}), the difficulty stratification that localises the gain (Section~\ref{sec:difficulty}), and the SNR-threshold comparison (Section~\ref{sec:threshold}) further characterise where and why the policy helps.
 
@@ -518,12 +518,12 @@ To isolate the contribution of the two channel-state features, we train selector
 \toprule
 Selector & \#feat & Realised F1 & Deployed payload (Msym) \\
 \midrule
-Channel only ($\hat\gamma,c$)        & 2  & 0.9011 & 0.024 \\
-Perception cues only                 & 21 & 0.8909 & 0.024 \\
-Full (all features)                  & 23 & \textbf{0.8969} & 0.141 \\
-SNR-threshold ($\tau^\star$)          & -- & 0.8970 & 0.217 \\
+Channel only ($\hat\gamma,c$)        & 2  & 0.89095 & 0.02400 \\
+Perception cues only                 & 21 & 0.89092 & 0.02392 \\
+Full (all features)                  & 23 & \textbf{0.89691} & 0.14141 \\
+SNR-threshold ($\tau^\star$)          & -- & 0.89701 & 0.21679 \\
 \midrule
-Fixed $L$                            & -- & 0.9011 & 0.024 \\
+Fixed $L$                            & -- & 0.89095 & 0.02400 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -570,21 +570,21 @@ Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
 \midrule
 \multicolumn{4}{l}{\emph{OPV2V test} ($T=2{,}170$)} \\
 Fixed $L$                       & 0.8910 & 0.024 & $2.4\%$ \\
-Fixed $F$ (LDPC + 16-QAM)       & 0.8483 & 0.990 & $100\%$ \\
+Fixed $F$ (LDPC + 16-QAM)       & 0.8483 & 0.990 & $100.0\%$ \\
 Fixed $C_{256}$ (LDPC + 256-QAM)& 0.8255 & 0.495 & $50.0\%$ \\
 \quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.89148 / 0.89247 & 0.0368 / 0.0724 & $3.7\%$ / $7.3\%$ \\
 \quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.89691 / 0.89701 & 0.1414 / 0.2168 & $14.3\%$ / $21.9\%$ \\
 \quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.89783 / 0.89900 & 0.2120 / 0.3125 & $21.4\%$ / $31.6\%$ \\
-Channel-aware oracle (masked)   & 0.9165 & 0.1706 & $17.2\%$ \\
+Channel-aware oracle (masked)   & 0.9056 & 0.175 & $17.7\%$ \\
 \midrule
 \multicolumn{4}{l}{\emph{OPV2V Culver-City} ($T=550$)} \\
 Fixed $L$                       & 0.8466 & 0.024 & $2.4\%$ \\
-Fixed $F$ (LDPC + 16-QAM)       & 0.8099 & 0.990 & $100\%$ \\
+Fixed $F$ (LDPC + 16-QAM)       & 0.8099 & 0.990 & $100.0\%$ \\
 Fixed $C_{256}$ (LDPC + 256-QAM)& 0.7793 & 0.495 & $50.0\%$ \\
 \quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.87230 / 0.87491 & 0.0283 / 0.0718 & $2.9\%$ / $7.2\%$ \\
 \quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.87355 / 0.88340 & 0.0423 / 0.2174 & $4.3\%$ / $22.0\%$ \\
 \quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.88286 / 0.88740 & 0.1601 / 0.3146 & $16.2\%$ / $31.8\%$ \\
-Channel-aware oracle (masked)   & 0.8891 & 0.2542 & $25.7\%$ \\
+Channel-aware oracle (masked)   & 0.8643 & 0.266 & $26.8\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}

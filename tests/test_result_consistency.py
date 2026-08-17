@@ -267,4 +267,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # R23-8: main() RETURNED 1 on an unbound/stale row and nothing propagated it, so the R20-9a
+    # check printed "CLAIMS GATE FAIL" while the process exited 0 and verify_results reported PASS.
+    sys.exit(main() or 0)
