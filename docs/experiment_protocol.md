@@ -3064,3 +3064,69 @@ by the *retired* oracle F1. ("% of B_F" is safe: B_F is a declared constant.)
 says 3.7–21.4%) and `canonical quantities` (importances, latency, payload reduction, FA-1 ratio all
 still retired in the text). They stay red until the missing products are regenerated. Turning them
 green by editing the text first would be backwards.
+
+---
+
+## Change-log R18-3 (2026-08-17) — τ_feasible: PRE-REGISTRATION, written before implementation
+
+**Nothing is run for this entry.** At the time of writing, `tau_feasible` does not exist in any
+script and no number derived from it exists anywhere.
+
+### The defect this addresses
+
+The SNR-threshold comparator is selected by `pick_tau`, which maximises F1 subject to
+`pay <= b_max` **on the deterministic grid**. The deployed comparison, however, reports the mean
+payload over the **200-realisation replay**, and there the same τ\* is over budget:
+
+| split | B_max | `B_tau` (replay mean) | over budget by |
+|---|---|---|---|
+| validate | 0.20 | 0.21663 | **+0.01663** |
+| validate | 0.30 | 0.31267 | **+0.01267** |
+| test | 0.20 | **0.21679** | **+0.01679** |
+| test | 0.30 | 0.31250 | **+0.01250** |
+| culver | 0.20 | 0.21740 | **+0.01740** |
+| culver | 0.30 | 0.31463 | **+0.01463** |
+
+At B_max = 0.10 it is within budget on all three splits. So at two of three budgets, on every split,
+the paper's headline payload reduction is measured **against a comparator that violates the budget
+constraint the method is held to** — and the reduction is flattered by however much the comparator
+overspends. The 34.8% figure at the primary cell is of exactly this kind.
+
+### τ_feasible, defined before it is computed
+
+For each budget, on **validate only**, choose
+
+> τ_feasible(B_max) = the **largest** τ on the existing τ grid such that the **mean payload over the
+> 200-realisation replay distribution** satisfies `mean(B_tau) <= B_max`.
+
+"Largest" because payload falls as τ rises (a higher threshold requests F less often), so the largest
+feasible τ is the cheapest admissible comparator; taking the F1-maximising τ instead would re-open
+the same violation. The τ grid, the 200 draws, `CSI_SEED`, the bootstrap seed and δ are all unchanged.
+τ_feasible is fitted on validate and then **applied unchanged** to test and Culver-City, exactly as
+the frozen selectors are.
+
+### How it is reported
+
+* τ_feasible is a **secondary, strictly-matched comparator**, reported **beside** nominal τ\*, never
+  instead of it. Nominal τ\* stays in the tables: it is what the pre-registered R9 decision used, and
+  removing it after seeing this would be rewriting history.
+* R9's decision is **not** re-taken against τ_feasible. R9 was pre-registered against nominal τ\* and
+  has already been re-judged once under the P0 correction; a second re-judgement against a
+  comparator chosen after the fact would not be a confirmatory test.
+* **Mandatory disclosure:** wherever the payload reduction against nominal τ\* is quoted (34.8% at
+  the primary cell), the sentence must also state that nominal τ\* spends 0.2168 Msym against the
+  0.20 budget, i.e. it is over budget. A reduction measured against an over-budget baseline may not
+  be quoted bare.
+
+### Expectations, recorded now (checks, not targets)
+
+1. τ_feasible ≥ nominal τ\* at B_max = 0.20 and 0.30 (it must request F less often to fit), and equal
+   at 0.10 where nominal τ\* is already feasible.
+2. The selector's payload advantage over τ_feasible will be **smaller** than over nominal τ\*, and
+   may vanish or reverse. That is the honest comparison and the number will be reported whichever way
+   it lands.
+3. τ_feasible's F1 will be **lower** than nominal τ\*'s, since it is constrained to spend less.
+
+No condition, margin or procedure is adjusted after seeing any of these. If expectation 2 shows the
+selector losing its payload advantage under a strictly matched comparator, that is reported as the
+finding.
