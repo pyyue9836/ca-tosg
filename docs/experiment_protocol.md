@@ -3700,3 +3700,75 @@ when the CSI distribution differs from the grid. It does so only for the R21-A a
 (+0.0122 test) and for the amended arm at Culver `B_max = 0.30` (+0.0144). Every other amended-arm
 cell is inside its cap. This is the same nominal-vs-realised gap `tau_feasible` exists to expose
 (R18-3), now observed in a third policy family, and it is reported rather than corrected away.
+
+---
+
+## Change-log R23-C (2026-08-18) — the three R20-item-10 sensitivities: implementation pre-registration
+
+**Zero GPU; CPU-analytic throughout.** R20 item 10 registered these three checks and their decision
+rule before anything was attempted. This entry fixes the remaining implementation choices **before
+the code exists**, because each of them could otherwise be made after seeing the numbers. Nothing
+frozen moves; all three are DESCRIPTIVE except where R20's own ruling applies.
+
+### 1 · Scene-level bootstrap (R20 item 10.1)
+
+Frames within a scene are not independent, so the published interval — a paired bootstrap over the
+**200 CSI realisations** — understates the uncertainty on the frame axis.
+
+* Unit of resampling: the **scene**. The test split has **16 scenes**, from
+  `data/p2/p2_grid_test.csv`'s own `scene` column (the same mapping the leakage gate checks).
+* Statistic: per frame, `d_i = mean_r (eff_RF - eff_tau)` over the 200 frozen realisations; the
+  cluster bootstrap draws 16 scenes with replacement and reports the **frame-weighted** mean of
+  `d_i` over the drawn scenes. 10,000 resamples, percentile, seed `12345` (the R9 seed).
+* Same procedure for the payload difference `dB`.
+* Cell: **test @ B_max = 0.20**, the sole primary cell. Both intervals are published side by side;
+  the realisation-level one is not withdrawn.
+* **R20's ruling, applied verbatim:** if the scene-level `LCB95(dF)` crosses `-delta = -0.005`, R9 is
+  reported as **inconclusive under scene-level resampling** — not as failed — and both intervals
+  appear together wherever the claim appears.
+
+### 2 · L-link reliability (R20 item 10.2)
+
+`BLER_L = 0` is an assumption, not a measurement.
+
+* `eff_L' = late * (1 - BLER_L) + ego * BLER_L` for `BLER_L in {0, 0.01, 0.05, 0.10}`; `eff_E` and
+  `eff_F` are unchanged — a failed **feature** message still falls back to ego-only, because no
+  object-level message was sent in that frame.
+* The policies are **frozen and blind to `BLER_L`**: the selector, `tau` and Fixed-L keep their
+  actions, so **payload is invariant and the payload advantage cannot move**. What the sweep can
+  move is F1, and that is what is reported: `F1_RF`, `F1_tau`, `F1_FixedL` and the paired `dF` CI
+  per budget per split, on the **deployment draw** (`CSI_SEED`, continuous SNR), not the
+  sensitivity module's grid draw.
+* Invariant asserted at run time: the `BLER_L = 0` row must reproduce `replay_summary.csv` exactly.
+  (The existing `results/sensitivity/object_message_bler.csv` was produced on the grid draw and
+  under the retired convention; it is superseded, not edited.)
+
+### 3 · Fragmentation / HARQ (R20 item 10.3)
+
+* Codeword BLER `b_cw` is read from the committed table; the mainline frame carries
+  **`N_cw = 3960`** codewords (`1.98` Mbit / `K = 500`), which is the payload chain's own number.
+* **No HARQ, `k` fragments, all required:** `b_frame = 1 - (1 - b_cw)^{N_cw}` — algebraically
+  **independent of `k`**. This is asserted, not assumed: if fragmentation alone moved the number the
+  implementation would be wrong.
+* **One retransmission per fragment:** `q_k = 1 - (1 - b_cw)^{N_cw/k}`, frame success
+  `(1 - q_k^2)^k`, and the payload is inflated by the expected transmissions `(1 + q_k)` per
+  fragment.
+* `k in {2, 4}`; the replay is re-run with the modified `BLER_F` and the inflated payload, and the
+  AWGN cliff onset (first SNR with `BLER < 0.999`) is re-derived under each.
+* Deliverable: the scope qualifier already in the paper — *under a whole-frame, no-HARQ model* —
+  becomes **numerical**: the reported Rayleigh infeasibility is restated with the worst-case
+  Rayleigh frame BLER that survives `k in {2,4}` with one retransmission over the evaluated
+  `0`--`20` dB range.
+
+### Expectations, recorded now
+
+* **S1** — the scene-level interval is **wider** than the realisation-level one, plausibly by an
+  order of magnitude, because 16 clusters is far less information than 200 paired draws. Whether it
+  crosses `-delta` is genuinely unknown and the ruling above decides it, not the author.
+* **S2** — F1 falls roughly linearly in `BLER_L` for every policy, and **Fixed-L falls fastest**
+  because it never has another action; the selector's *relative* position should therefore improve,
+  not degrade, as `BLER_L` grows. If instead the selector degrades fastest, that is the finding.
+* **S3** — fragmentation alone changes nothing (asserted); HARQ helps AWGN slightly near the cliff
+  and **does not make Rayleigh feasible** at `k in {2,4}`, because `b_cw >= 0.04` at 20 dB and
+  `990` codewords per fragment already give `q_k ~ 1`. If Rayleigh does become feasible, the
+  paper's Rayleigh conclusion is scoped accordingly and the change is reported prominently.
