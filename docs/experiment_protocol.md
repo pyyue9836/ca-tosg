@@ -3577,3 +3577,49 @@ implemented as `max_f1 -> min_payload -> first in the pre-registered enumeration
 (`tau_E` outer, ascending from `-inf`; `tau_F` inner, ascending from 0.00 with `+inf` last). The
 order prefers **never-E** and **more-F** among exact ties, which biases the arm *against* the E2
 expectation it is testing — the conservative direction, and stated here rather than left implicit.
+
+---
+
+## Change-log R21-A-2 (2026-08-17) — AMENDMENT, written after the pre-registered rule proved structurally infeasible and BEFORE the amended arm exists
+
+This is an amendment, in the R18-3 sense, and it is written as one. The R21-A rule was not merely
+beaten — at two of three budgets it was **unable to bid**, because a channel-only F decision has a
+four-rung payload ladder and both tight budgets fall between rungs. A comparison an opponent cannot
+enter is not a comparison, so the arm is strengthened rather than declared won.
+
+**What is NOT changed:** the R21-A arm stays exactly as frozen and its numbers stay in the record.
+Nothing about the mainline, the frozen selectors, `delta`, `tau*` or any deployed product moves.
+
+### The amended policy
+
+```
+a_t = E              if d_t <= tau_E
+      F              else if d_t >= tau_D and r_t >= tau_F
+      L              otherwise
+```
+
+**Three scalars, not two**, and it is labelled that way everywhere it is reported. The F gate is now
+a conjunction: the link must carry the message *and* the frame must be hard enough to be worth it.
+This is the rule a reviewer means by "surely a simple heuristic does this", and it is the strongest
+hand rule the committed cues support without fitting anything.
+
+`d_t`, `r_t`, the candidate set (six `(cue, sign)` pairs, same order), the `tau_E` and `tau_F` grids,
+the LOSO folds, the fitting surface, the hard payload constraint, the candidate tie-break and the
+descriptive-only reporting are all **unchanged** from R21-A. New: `tau_D` on the same 21-value ladder
+as `tau_E` (`{-inf} U quantile(d, 0.05..1.00)`), with pairs restricted to `tau_E <= tau_D`; the
+threshold enumeration order is `tau_E` outer, `tau_D` middle, `tau_F` inner. Frozen to
+`results/manifests/R21A2_MANIFEST.json` before any replay.
+
+### Expectations, recorded now
+
+* **A1** — the amended rule is feasible at all three budgets and beats the Fixed-L floor. The F1 gap
+  to RF at the primary cell narrows but does not close. **If it closes** (`|dF| < 0.002` at test
+  `B_max = 0.20`), that is the finding, it is reported in the paper as a limit on the learned
+  selector's advantage, and **the anti-goal clause applies with full force**: no fourth arm, no cue
+  added, no grid widened, no re-fitting to restore a gap.
+* **A2** — `rho_E` stays 0. If it does not, R21-A's refutation of E2 is retracted for the
+  three-scalar class and the retraction is written next to the original.
+* **A3** — no expectation is recorded for the winning sign of `d`; both orientations are in the
+  candidate set and the walk decides.
+
+Zero GPU; seconds of compute.
