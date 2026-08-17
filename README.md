@@ -1,5 +1,18 @@
 # CA-TOSG (Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception)
 
+> ## ⚠ P0 corrigendum in progress — manuscript numbers withdrawn
+>
+> The perception side of the pipeline fused **every** collaborator in a frame while the
+> communication side charged **one** message (Change-log **P0**). Ruling (a) redefines the main
+> experiment as the **nearest single collaborator**, and **every absolute number in `paper/main.tex`
+> is withdrawn** until the rewrite lands: F1, payload, the nine-cell table, the Pareto points, the
+> ablations and the R9 margins.
+>
+> * what is already re-derived, and what it changed: `docs/p0_corrigendum.md`
+> * the pre-promotion state, recoverable: tag `pre-p0-corrigendum`
+> * R9 itself **survives** the correction (all three conditions still hold at the primary cell),
+>   but the margins move — do not quote the retired values.
+
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 Per-frame selection of *how much semantics to transmit* in vehicle-to-vehicle cooperative

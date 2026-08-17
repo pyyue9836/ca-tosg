@@ -1,5 +1,10 @@
 # Model Zoo
 
+> **⚠ P0 corrigendum in progress.** The three frozen selectors below are the **N=1 (nearest single
+> collaborator)** models promoted by Change-log P0-5; the full-collaborator selectors they replace
+> are recoverable only under tag `pre-p0-corrigendum`. Any number quoted from a pre-P0 run of these
+> paths is withdrawn — see `docs/p0_corrigendum.md`.
+
 Three frozen selectors, one per bandwidth budget. Every field below is read from
 `results/manifests/FROZEN_MANIFEST.json`, which is the freeze record: the sha256 is verified
 before the model is loaded by every evaluation command, so a swapped or retrained `.pkl` is
