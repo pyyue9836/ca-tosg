@@ -3416,3 +3416,97 @@ is how the fifth one arrived. Instead the scan now requires the two value sets t
 order of magnitude**, plus a structural-settings filter (budgets, IoU thresholds) so a claim that
 merely mentions `B_max=0.20` no longer collides with everything else about that split. Both controls
 still fire, and the count is 0 without a single label invented to get there.
+
+---
+
+## Change-log R21-A (2026-08-17) — two-gate heuristic: PRE-REGISTRATION, written before implementation
+
+**Zero GPU.** Everything below reads the committed caches. This entry is written and committed
+*before* the arm's code exists; the run and its numbers are a separate entry.
+
+### Why this arm exists
+
+The selector is currently compared against fixed policies, a one-parameter SNR threshold `tau`, and
+a learned bandit. The question a reviewer asks next is not answered anywhere: **does a two-parameter
+hand rule already recover most of the gain?** There is a second reason. The `tau` baseline has no
+`E` action at all — it emits only L or F — so nothing in the record tests whether **E is reachable
+by an explicit rule** rather than only by a fitted forest. This arm has an explicit E gate, so its
+`rho_E` is the control for that question.
+
+### The policy, fixed before any fit
+
+Per frame `t`:
+
+* `d_t = s * x_t(cue)` — a difficulty proxy read from the committed cue table;
+* `r_t = 1 - BLER_F(gamma_hat_t, c_t)` — link reliability, read from the **committed** Sionna table
+  through `deployment.bler16`. **Zero new parameters**: no fit, no rescaling, no new constant.
+
+```
+a_t = E            if d_t <= tau_E
+      F            else if r_t >= tau_F
+      L            otherwise
+```
+
+Two free scalars per budget, and nothing else.
+
+### Candidate set (closed; no cue may be added later)
+
+`cue in (ego_num_objects, pcd_num_points, pcd_density_0_20)` x `s in (+1, -1)`, enumerated in that
+order as candidate index 0..5. The three cues are the difficulty / visibility proxies among the 21
+committed cues. Both orientations are carried **because the direction is genuinely unknown a priori**
+— more objects is harder, more points is easier sensing — and picking the orientation after seeing
+the curve is exactly the freedom this pre-registration removes. Six candidates, no more.
+
+### Threshold grids (closed)
+
+* `tau_E in {-inf} U {quantile_q(d) : q = 0.05, 0.10, ..., 1.00}` — 21 values; `-inf` = **never E**.
+* `tau_F in {0.00, 0.05, ..., 1.00} U {+inf}` — 22 values; `+inf` = **never F**, `0.00` = F whenever
+  not E.
+
+### Fitting and selection — the mainline walk discipline, with one substitution recorded
+
+* **Fitting surface**: the deterministic validate grid `data/p2/p2_grid_validate.csv` — the same
+  surface the frozen selector was trained on, *not* the 200-draw replay. Selection never touches
+  test or Culver.
+* **Candidate = (cue, sign)**; the two thresholds are its fitted parameters, exactly as the RF's
+  hyperparameters are the candidate and its trees are the fit.
+* **LOSO**: the nine frozen validate scenes (`results/manifests/validate_loso_folds.csv`). Per fold,
+  `(tau_E, tau_F)` is fitted on the eight in-fold scenes by **max frame-weighted F1 subject to
+  frame-weighted payload <= B_max**, then applied to the held-out scene -> OOF actions.
+* **Candidate score** `frame_weighted_oof_f1`; **feasibility** `frame_weighted_oof_payload <= B_max`;
+  **tie-break** `[max_f1, min_payload, min_candidate_index]`. The mainline's third key
+  `shallower_model` has no analogue here and is **dropped, not silently substituted**.
+* **Refit**: the winning candidate's deployed `(tau_E, tau_F)` is refitted on the **full** validate
+  grid under the same hard constraint — the analogue of the mainline's refit on all of validate.
+* **Infeasibility is reported, not relaxed.** If no (candidate, threshold) pair meets the payload
+  constraint at a budget, that budget is reported infeasible for this arm.
+* The result is frozen into `results/manifests/R21A_MANIFEST.json` (inputs md5/sha256, chosen
+  candidate, both thresholds, OOF numbers) **before** any replay.
+
+### How it is reported
+
+A main-table-format row per split x budget under the **same** 200 paired CSI draws
+(`CSI_SEED = 20260809`), the same `eff` definition, and the same paired bootstrap (10,000 resamples,
+`BOOT_SEED = 12345`) as `deployment.py`, plus the action distribution `rho_E / rho_L / rho_F` beside
+the RF's on the identical draws. **Descriptive only, CI only — no decision.** R9's confirmatory
+primary is spent; this arm may not be converted into a superiority claim in either direction.
+
+### Expectations, recorded now (checks, not targets)
+
+1. **E1** — the two-gate rule lands between `tau` and RF on F1 at matched payload, nearer RF than
+   Fixed-F. **If it is at parity with RF, that is the finding and it is reported as a limit on the
+   learned selector's advantage.** The anti-goal clause carries over verbatim: no cue may be added,
+   no grid widened, and no orientation re-chosen after seeing this comparison.
+2. **E2** — `rho_E > 0` at all three budgets for the selected configuration. If every selected
+   configuration lands on `tau_E = -inf` (never E), then **E is not reachable by a monotone rule on
+   these cues**, and that is reported as the result of the arm, not as a failed run.
+3. **E3** — the arm's payload sits below the nominal `tau` payload at `B_max = 0.20` because the
+   constraint forces it; payload comparisons against `tau` are therefore uninformative here and only
+   the F1-at-matched-budget comparison is reported.
+
+### Also in this batch (item 3): the Fixed-E reference row
+
+`fixed_references.py` gains a **Fixed-E** row — the ego-only floor: `F1 = mean(ego_f1)`,
+payload `0.000`, std `0` (it does not depend on the CSI draw). It is a deterministic read of a
+committed cache with no free choice, and it is the floor against which `rho_E` is interpreted.
+No paper table is edited in this batch.
