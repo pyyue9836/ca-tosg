@@ -3623,3 +3623,80 @@ threshold enumeration order is `tau_E` outer, `tau_D` middle, `tau_F` inner. Fro
   candidate set and the walk decides.
 
 Zero GPU; seconds of compute.
+
+---
+
+## Change-log R21-A-2-run (2026-08-17) — the amended arm, and the expectation that fired
+
+**Zero GPU.** `tools/run_baselines.py two_gate --train --evaluate --arm dgate`; 2 s + 14 s. The
+mainline `F1_RF` recomputed inside the arm is asserted equal to `replay_summary.csv` before any
+number is written, as in R21-A. The R21-A arm and all frozen products are untouched.
+
+### What the walk selected
+
+| B_max | candidate | `tau_E` | `tau_D` | `tau_F` |
+|---|---|---|---|---|
+| 0.10 | 2 · `pcd_num_points` `+1` | never E | 54866.75 (q0.75) | 0.60 |
+| 0.20 | 3 · `pcd_num_points` `-1` | never E | -54366.40 (q0.60) | 0.60 |
+| 0.30 | 0 · `ego_num_objects` `+1` | never E | 7.00 (q0.05) | 0.60 |
+
+`tau_F = 0.60` at every budget — the reliability gate is the same AWGN-above-8-dB partition the
+R21-A arm found, and the whole of the new behaviour comes from `tau_D`. The arm is now feasible at
+all three budgets: it hits 0.09410 / 0.19900 / 0.25418 msym on test, inside every cap.
+
+### A1 FIRED: at the primary cell the hand rule matches the selector on F1
+
+test @ `B_max = 0.20`: **0.89697 (three-scalar rule) vs 0.89691 (RF)**, `dF = +0.00005`,
+95% CI `[-0.00002, +0.00012]`. That is inside the `|dF| < 0.002` trigger written before the run, so
+the pre-registered consequence applies and is executed here: **it is reported as a limit on the
+learned selector's F1 advantage, and no fourth arm is run.** No cue was added, no grid widened, no
+threshold re-fitted after seeing this.
+
+**But the comparison is not F1-only, and on the other axis the selector wins clearly.** At that same
+cell the hand rule spends **0.19900 msym against RF's 0.14141** — `dB = +0.05760`,
+95% CI `[+0.05663, +0.05853]`, i.e. **+40.7% payload for +0.00005 F1**; read the other way, the
+selector reaches the same F1 with **28.9% less channel**. The same shape holds everywhere the hand
+rule wins on F1: test @0.10 `+0.00081` F1 for **+155.7%** payload; Culver @0.10 `+0.00461` for
+**+253.4%**; Culver @0.20 `+0.00280` for **+161.8%**. Where RF wins on F1 it also pays less
+(validate at all three budgets, test @0.30).
+
+**So the honest statement of this arm's result is: a three-scalar hand rule is F1-competitive with
+the selector, and payload-inefficient by 19–253%. The selector's advantage lives on the payload
+axis, not the F1 axis.** Any sentence in the paper that claims an F1 advantage over simple rules at
+the primary cell must go; the payload claim stands and is now better supported than before, because
+it survives a comparator that was allowed to tune three scalars against the same budget.
+
+### Why the gap sits on the payload axis — measured, not asserted
+
+Per F-frame selectivity, measured as the mean `compressed_f1 - late_f1` over the cells each policy
+actually sends F on (validate / test):
+
+| policy | `rho_F` | mean gain per F-frame |
+|---|---|---|
+| three-scalar rule | 0.179 / 0.181 | +0.0415 / +0.0366 |
+| RF | 0.132 / 0.122 | +0.0679 / +0.0502 |
+| every cell (no selection) | 1.0 | +0.0289 / +0.0304 |
+
+The difficulty gate **does** carry signal — `corr(d, gain)` is +0.35 on validate and +0.15 on test,
+and its conditional gain beats the unconditional one — but it is a blunter instrument: RF buys more
+F1 per transmitted frame and therefore needs fewer of them. That is the whole of the payload gap,
+and it is the mechanism the paper should state.
+
+### A2 held; A3 had no expectation, and the outcome is worth recording anyway
+
+* **A2 held.** `rho_E = 0.00000` in all nine cells again. Across both arms — two scalars and three,
+  six cue orientations, every budget — **no threshold rule ever selects the ego-only action.**
+  R21-A's refutation of E2 stands and is now stronger.
+* **A3.** No expectation was recorded for the sign, and the walk chose **opposite orientations of
+  the same cue at adjacent budgets** (`pcd_num_points` `+1` at 0.10, `-1` at 0.20). This is recorded
+  as a caution against reading `tau_D` as a semantic "difficulty" threshold: the third scalar is
+  doing rate control *and* discrimination at once, and at 0.20 the rate-control component evidently
+  dominated the choice of orientation.
+
+### Over-budget on the deployment draw, at three cells
+
+The fit is constrained on the validate grid; the realised replay payload can still exceed the cap
+when the CSI distribution differs from the grid. It does so only for the R21-A arm at `B_max = 0.30`
+(+0.0122 test) and for the amended arm at Culver `B_max = 0.30` (+0.0144). Every other amended-arm
+cell is inside its cap. This is the same nominal-vs-realised gap `tau_feasible` exists to expose
+(R18-3), now observed in a third policy family, and it is reported rather than corrected away.

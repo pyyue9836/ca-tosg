@@ -1,0 +1,12 @@
+CA-TOSG CA-TOSG Change-log R21-A-2 (AMENDMENT) (docs/experiment_protocol.md) -- three-scalar hand rule: difficulty gate + difficulty-conditioned link gate (R21-A-2 amendment), DESCRIPTIVE, not deployed
+3 free scalars. DESCRIPTIVE + CI ONLY; not deployed; no decision in either direction.
+========================================================================================
+manifest: schema catosg-r21a2-manifest/1; all four frozen inputs md5/sha256-verified before the replay.
+policy: a=E if d<=tau_E; F if d>=tau_D and r>=tau_F; else L.  d=sign*cue, r=1-BLER_F (committed table)
+  B=0.10: candidate 2 pcd_num_points/+1, tau_E=None (q=None), tau_D=54866.75, tau_F=0.6, OOF f1=0.856127 pay=0.099045
+  B=0.20: candidate 3 pcd_num_points/-1, tau_E=None (q=None), tau_D=-54366.4, tau_F=0.6, OOF f1=0.862091 pay=0.181141
+  B=0.30: candidate 0 ego_num_objects/+1, tau_E=None (q=None), tau_D=7.0, tau_F=0.6, OOF f1=0.863264 pay=0.287455
+CSI: 200 paired samplings/split, seed=20260809 -- the IDENTICAL draws to deployment.py; RF reproduced from the frozen selectors and asserted equal to replay_summary.csv.
+CI: paired bootstrap, 10000 resamples, percentile, seed=12345.
+Thresholds transfer as ABSOLUTE cue values (validate quantile, NOT re-quantiled per split). test/Culver labels used for SCORING ONLY.
+Zero GPU: cached eff + the committed BLER table + frozen predict().

@@ -24,12 +24,23 @@ grid, never the replay, never test/Culver):
                    same hard constraint
   infeasible     = reported, never relaxed
 
-Output: results/manifests/R21A_MANIFEST.json + results/baselines/two_gate_runs/r21a_walk_B0XX.csv
+R21-A-2 AMENDMENT (`--arm dgate`), pre-registered in the change-log of the same name after the rule
+above proved unable to bid at two of three budgets: the F gate becomes a conjunction,
 
-    python tools/run_baselines.py two_gate --train
+    a_t = E if d_t <= tau_E; F if d_t >= tau_D and r_t >= tau_F; else L
+
+-- THREE scalars, labelled as three everywhere. Everything else (candidates, grids, folds, surface,
+constraint, tie-break, descriptive-only reporting) is unchanged, and `tau_D = -inf` reduces it
+exactly to the two-gate arm, so the amended class strictly contains the pre-registered one.
+
+Output: results/manifests/R21A{,2}_MANIFEST.json + results/baselines/two_gate_runs/
+
+    python tools/run_baselines.py two_gate --train                # R21-A, as pre-registered
+    python tools/run_baselines.py two_gate --train --arm dgate    # R21-A-2 amendment
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -48,6 +59,7 @@ import deployment as D                                                          
 P1 = D.P1
 OUT_RUNS = os.path.join(P1, 'results/baselines/two_gate_runs')
 MANIFEST = os.path.join(P1, 'results/manifests/R21A_MANIFEST.json')
+MANIFEST_DGATE = os.path.join(P1, 'results/manifests/R21A2_MANIFEST.json')
 FOLDS_CSV = os.path.join(P1, 'results/manifests/validate_loso_folds.csv')
 
 # ---- the closed pre-registered candidate set and grids (Change-log R21-A) ----
@@ -131,6 +143,55 @@ def pick(f1, pay, bmax):
     return int(i), int(j), float(f1[i, j]), float(pay[i, j])
 
 
+def fit_curve3(d_fit, r_fit, effE, effL, effF, tau_vals):
+    """R21-A-2: (F1, payload) over the (tau_E, tau_D, tau_F) grid; cells with tau_E > tau_D are -inf.
+
+    Same sort-once trick: in d-order the E set is the prefix [0,k_E), the F-eligible set is the
+    suffix [k_D,n) intersected with r >= tau_F, and everything else is L.
+    """
+    order = np.argsort(d_fit, kind='stable')
+    d_sorted = d_fit[order]
+    n = len(d_fit)
+    ks = np.searchsorted(d_sorted, tau_vals, side='right')
+    cum_effE = np.concatenate([[0.0], np.cumsum(effE[order])])
+    cum_effL = np.concatenate([[0.0], np.cumsum(effL[order])])
+    nT, nF = len(tau_vals), len(TAU_F_GRID) + 1
+    f1 = np.full((nT, nT, nF), -np.inf)
+    pay = np.full((nT, nT, nF), np.inf)
+    kE = ks[:, None]
+    kD = ks[None, :]
+    ok = kE <= kD
+    for j in range(nF):
+        take_f = (r_fit >= TAU_F_GRID[j]) if j < len(TAU_F_GRID) else np.zeros(n, bool)
+        cum_x = np.concatenate([[0.0], np.cumsum(np.where(take_f, effF, effL)[order])])
+        cum_p = np.concatenate([[0.0], np.cumsum(np.where(take_f, PAY_F, PAY_L)[order])])
+        tot_f1 = cum_effE[kE] + (cum_effL[kD] - cum_effL[kE]) + (cum_x[-1] - cum_x[kD])
+        tot_pay = PAY_E * kE + PAY_L * (kD - kE) + (cum_p[-1] - cum_p[kD])
+        f1[:, :, j] = np.where(ok, tot_f1 / n, -np.inf)
+        pay[:, :, j] = np.where(ok, tot_pay / n, np.inf)
+    return f1, pay
+
+
+def pick3(f1, pay, bmax):
+    """max_f1 -> min_payload -> first in enumeration order (tau_E outer, tau_D middle, tau_F inner)."""
+    feas = pay <= bmax + 1e-12
+    if not feas.any():
+        return None
+    big = np.where(feas, f1, -np.inf)
+    best = big.max()
+    cand = np.argwhere(big >= best - 1e-12)
+    paycand = pay[cand[:, 0], cand[:, 1], cand[:, 2]]
+    keep = cand[paycand <= paycand.min() + 1e-12]
+    i, j, k = keep[0]
+    return int(i), int(j), int(k), float(f1[i, j, k]), float(pay[i, j, k])
+
+
+def apply_policy3(d, r, effE, effL, effF, tau_E, tau_D, tau_F):
+    """Realised (action index, eff, payload) for one frozen R21-A-2 threshold triple."""
+    idx = np.where(d <= tau_E, 0, np.where((d >= tau_D) & (r >= tau_F), 2, 1))
+    return idx, np.choose(idx, [effE, effL, effF]), np.choose(idx, [PAY_E, PAY_L, PAY_F])
+
+
 def apply_policy(d, r, effE, effL, effF, tau_E, tau_F):
     """Realised (action index, eff, payload) arrays for one frozen threshold pair."""
     idx = np.where(d <= tau_E, 0, np.where(r >= tau_F, 2, 1))
@@ -139,7 +200,40 @@ def apply_policy(d, r, effE, effL, effF, tau_E, tau_F):
     return idx, eff, pay
 
 
-def main():
+def fit_thresholds(arm, d, r, effE, effL, effF, bmax):
+    """Fit the arm's thresholds on the given rows. Returns (tau tuple, indices, f1, payload) or None."""
+    tvals = tau_e_values(d)
+    if arm == 'two_gate':
+        sel = pick(*fit_curve(d, r, effE, effL, effF, tvals), bmax)
+        if sel is None:
+            return None
+        i, j, f1, pay = sel
+        tF = TAU_F_GRID[j] if j < len(TAU_F_GRID) else np.inf
+        return (float(tvals[i]), float(tF)), (i, None, j), f1, pay
+    sel = pick3(*fit_curve3(d, r, effE, effL, effF, tvals), bmax)
+    if sel is None:
+        return None
+    i, j, k, f1, pay = sel
+    tF = TAU_F_GRID[k] if k < len(TAU_F_GRID) else np.inf
+    return (float(tvals[i]), float(tvals[j]), float(tF)), (i, j, k), f1, pay
+
+
+def apply_thresholds(arm, taus, d, r, effE, effL, effF):
+    if arm == 'two_gate':
+        return apply_policy(d, r, effE, effL, effF, *taus)
+    return apply_policy3(d, r, effE, effL, effF, *taus)
+
+
+def parse_arm(argv=None):
+    """--arm is read here, not only under __main__, so tools/run_baselines.py can pass it through."""
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--arm', choices=('two_gate', 'dgate'), default='two_gate',
+                    help='two_gate = R21-A as pre-registered; dgate = the R21-A-2 amendment')
+    return ap.parse_known_args(argv)[0].arm
+
+
+def main(arm=None):
+    arm = parse_arm() if arm is None else arm
     os.makedirs(OUT_RUNS, exist_ok=True)
     surf = load_surface()
     scenes = sorted(pd.read_csv(FOLDS_CSV)['fold_scene'].unique())
@@ -164,16 +258,13 @@ def main():
             for sc in scenes:
                 te = scene_arr == sc
                 tr = ~te
-                tvals = tau_e_values(d_all[tr])
-                f1, pay = fit_curve(d_all[tr], r_all[tr], effE[tr], effL[tr], effF[tr], tvals)
-                sel = pick(f1, pay, bmax)
-                if sel is None:                       # no feasible threshold pair in this fold
+                fit = fit_thresholds(arm, d_all[tr], r_all[tr], effE[tr], effL[tr], effF[tr], bmax)
+                if fit is None:                       # no feasible threshold set in this fold
                     fold_ok = False
                     break
-                i, j, _, _ = sel
-                tE = tvals[i]
-                tF = TAU_F_GRID[j] if j < len(TAU_F_GRID) else np.inf
-                _, e, p = apply_policy(d_all[te], r_all[te], effE[te], effL[te], effF[te], tE, tF)
+                taus = fit[0]
+                _, e, p = apply_thresholds(arm, taus, d_all[te], r_all[te],
+                                           effE[te], effL[te], effF[te])
                 oof_eff[te] = e
                 oof_pay[te] = p
             if not fold_ok:
@@ -199,21 +290,21 @@ def main():
 
         # refit on the FULL validate grid (the mainline's refit-on-all-of-validate analogue)
         d_all = win['sign'] * surf[win['cue']].to_numpy(float)
-        tvals = tau_e_values(d_all)
-        f1, pay = fit_curve(d_all, r_all, effE, effL, effF, tvals)
-        sel = pick(f1, pay, bmax)
-        if sel is None:
+        fit = fit_thresholds(arm, d_all, r_all, effE, effL, effF, bmax)
+        if fit is None:
             fuse(f'budget {tag}: winner {win["cue"]}/{win["sign"]:+d} infeasible on the full grid')
-        i, j, vf1, vpay = sel
-        tE = float(tvals[i])
-        tF = float(TAU_F_GRID[j]) if j < len(TAU_F_GRID) else float('inf')
-        idx, _, _ = apply_policy(d_all, r_all, effE, effL, effF, tE, tF)
+        taus, (i, jD, jF), vf1, vpay = fit
+        tE, tF = taus[0], taus[-1]
+        tD = taus[1] if arm == 'dgate' else -np.inf
+        idx, _, _ = apply_thresholds(arm, taus, d_all, r_all, effE, effL, effF)
         rho = {a: float((idx == k).mean()) for k, a in enumerate(D.ACTIONS)}
         budgets[tag] = dict(
             feasible=True, candidate_index=win['candidate_index'], cue=win['cue'], sign=win['sign'],
             tau_E=(None if np.isneginf(tE) else round(tE, 6)),
             tau_E_is_never_E=bool(np.isneginf(tE)),
             tau_E_quantile=(None if i == 0 else float(Q_GRID[i - 1])),
+            tau_D=(None if np.isneginf(tD) else round(float(tD), 6)),
+            tau_D_quantile=(None if (arm != 'dgate' or jD == 0) else float(Q_GRID[jD - 1])),
             tau_F=(None if np.isinf(tF) else round(tF, 6)), tau_F_is_never_F=bool(np.isinf(tF)),
             n_candidates=len(CANDIDATES), n_feasible=len(feas),
             loso_frame_weighted_f1=round(win['oof_f1'], 6),
@@ -222,18 +313,28 @@ def main():
             budget_satisfied=bool(vpay <= bmax + 1e-12),
             validate_grid_rho={k: round(v, 6) for k, v in rho.items()})
         print(f'[B{int(bmax*100):03d}] cand {win["candidate_index"]} '
-              f'{win["cue"]}/{win["sign"]:+d}  tau_E={tE:.4g} tau_F={tF:.4g}  '
+              f'{win["cue"]}/{win["sign"]:+d}  tau_E={tE:.4g} '
+              + (f'tau_D={tD:.4g} ' if arm == 'dgate' else '') + f'tau_F={tF:.4g}  '
               f'OOF f1={win["oof_f1"]:.5f} pay={win["oof_payload"]:.5f}  '
               f'validate f1={vf1:.5f} pay={vpay:.5f}  rho_E={rho["E"]:.4f}', flush=True)
 
-    pd.DataFrame(walk_rows).to_csv(os.path.join(OUT_RUNS, 'r21a_candidate_walk.csv'), index=False)
+    walk_csv = os.path.join(OUT_RUNS, f'{"r21a2" if arm == "dgate" else "r21a"}_candidate_walk.csv')
+    pd.DataFrame(walk_rows).to_csv(walk_csv, index=False)
     man = dict(
-        schema='catosg-r21a-manifest/1',
-        protocol='CA-TOSG Change-log R21-A (docs/experiment_protocol.md)',
-        arm='two-gate heuristic (difficulty gate + link-reliability gate), DESCRIPTIVE, not deployed',
-        policy='a=E if d<=tau_E; elif r>=tau_F: F; else L.  d=sign*cue, r=1-BLER_F (committed table)',
+        schema=f'catosg-r21a{"2" if arm == "dgate" else ""}-manifest/1',
+        protocol=f'CA-TOSG Change-log R21-A{"-2 (AMENDMENT)" if arm == "dgate" else ""} '
+                 '(docs/experiment_protocol.md)',
+        arm=('three-scalar hand rule: difficulty gate + difficulty-conditioned link gate '
+             '(R21-A-2 amendment), DESCRIPTIVE, not deployed') if arm == 'dgate' else
+            'two-gate heuristic (difficulty gate + link-reliability gate), DESCRIPTIVE, not deployed',
+        n_free_scalars=(3 if arm == 'dgate' else 2),
+        policy=('a=E if d<=tau_E; F if d>=tau_D and r>=tau_F; else L.  d=sign*cue, '
+                'r=1-BLER_F (committed table)') if arm == 'dgate' else
+               'a=E if d<=tau_E; elif r>=tau_F: F; else L.  d=sign*cue, r=1-BLER_F (committed table)',
         candidates=[dict(index=i, cue=c, sign=s) for i, (c, s) in enumerate(CANDIDATES)],
         tau_E_grid='{-inf} U quantile(d, 0.05..1.00 step 0.05)',
+        tau_D_grid=('{-inf} U quantile(d, 0.05..1.00 step 0.05), restricted to tau_E <= tau_D'
+                    if arm == 'dgate' else None),
         tau_F_grid='{0.00..1.00 step 0.05} U {+inf}',
         selection=dict(surface='data/p2/p2_grid_validate.csv', loso_folds=9,
                        score='frame_weighted_oof_f1', feasibility='frame_weighted_oof_payload<=B_max',
@@ -252,9 +353,10 @@ def main():
         budgets=budgets,
         note='test/Culver were never read by this script. Thresholds transfer as ABSOLUTE values '
              '(the tau_E quantile is a validate quantile; it is NOT re-quantiled per split).')
-    with open(MANIFEST, 'w') as f:
+    out_manifest = MANIFEST_DGATE if arm == 'dgate' else MANIFEST
+    with open(out_manifest, 'w') as f:
         json.dump(man, f, indent=1)
-    print(f'\nwrote {MANIFEST}\n      {OUT_RUNS}/r21a_candidate_walk.csv')
+    print(f'\nwrote {out_manifest}\n      {walk_csv}')
     return 0
 
 

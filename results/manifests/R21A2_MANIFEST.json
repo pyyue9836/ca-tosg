@@ -1,9 +1,9 @@
 {
- "schema": "catosg-r21a-manifest/1",
- "protocol": "CA-TOSG Change-log R21-A (docs/experiment_protocol.md)",
- "arm": "two-gate heuristic (difficulty gate + link-reliability gate), DESCRIPTIVE, not deployed",
- "n_free_scalars": 2,
- "policy": "a=E if d<=tau_E; elif r>=tau_F: F; else L.  d=sign*cue, r=1-BLER_F (committed table)",
+ "schema": "catosg-r21a2-manifest/1",
+ "protocol": "CA-TOSG Change-log R21-A-2 (AMENDMENT) (docs/experiment_protocol.md)",
+ "arm": "three-scalar hand rule: difficulty gate + difficulty-conditioned link gate (R21-A-2 amendment), DESCRIPTIVE, not deployed",
+ "n_free_scalars": 3,
+ "policy": "a=E if d<=tau_E; F if d>=tau_D and r>=tau_F; else L.  d=sign*cue, r=1-BLER_F (committed table)",
  "candidates": [
   {
    "index": 0,
@@ -37,7 +37,7 @@
   }
  ],
  "tau_E_grid": "{-inf} U quantile(d, 0.05..1.00 step 0.05)",
- "tau_D_grid": null,
+ "tau_D_grid": "{-inf} U quantile(d, 0.05..1.00 step 0.05), restricted to tau_E <= tau_D",
  "tau_F_grid": "{0.00..1.00 step 0.05} U {+inf}",
  "selection": {
   "surface": "data/p2/p2_grid_validate.csv",
@@ -77,52 +77,52 @@
  "budgets": {
   "0.10": {
    "feasible": true,
-   "candidate_index": 0,
-   "cue": "ego_num_objects",
+   "candidate_index": 2,
+   "cue": "pcd_num_points",
    "sign": 1,
    "tau_E": null,
    "tau_E_is_never_E": true,
    "tau_E_quantile": null,
-   "tau_D": null,
-   "tau_D_quantile": null,
-   "tau_F": null,
-   "tau_F_is_never_F": true,
+   "tau_D": 54866.75,
+   "tau_D_quantile": 0.75,
+   "tau_F": 0.6,
+   "tau_F_is_never_F": false,
    "n_candidates": 6,
-   "n_feasible": 6,
-   "loso_frame_weighted_f1": 0.855384,
-   "loso_frame_weighted_payload": 0.024,
-   "frozen_validate_f1": 0.855384,
-   "frozen_validate_payload": 0.024,
+   "n_feasible": 1,
+   "loso_frame_weighted_f1": 0.856127,
+   "loso_frame_weighted_payload": 0.099045,
+   "frozen_validate_f1": 0.856181,
+   "frozen_validate_payload": 0.089864,
    "budget_satisfied": true,
    "validate_grid_rho": {
     "E": 0.0,
-    "L": 1.0,
-    "F": 0.0
+    "L": 0.931818,
+    "F": 0.068182
    }
   },
   "0.20": {
    "feasible": true,
-   "candidate_index": 0,
-   "cue": "ego_num_objects",
-   "sign": 1,
+   "candidate_index": 3,
+   "cue": "pcd_num_points",
+   "sign": -1,
    "tau_E": null,
    "tau_E_is_never_E": true,
    "tau_E_quantile": null,
-   "tau_D": null,
-   "tau_D_quantile": null,
-   "tau_F": null,
-   "tau_F_is_never_F": true,
+   "tau_D": -54366.4,
+   "tau_D_quantile": 0.4,
+   "tau_F": 0.6,
+   "tau_F_is_never_F": false,
    "n_candidates": 6,
    "n_feasible": 6,
-   "loso_frame_weighted_f1": 0.855384,
-   "loso_frame_weighted_payload": 0.024,
-   "frozen_validate_f1": 0.855384,
-   "frozen_validate_payload": 0.024,
+   "loso_frame_weighted_f1": 0.862091,
+   "loso_frame_weighted_payload": 0.181141,
+   "frozen_validate_f1": 0.862141,
+   "frozen_validate_payload": 0.182073,
    "budget_satisfied": true,
    "validate_grid_rho": {
     "E": 0.0,
-    "L": 1.0,
-    "F": 0.0
+    "L": 0.836364,
+    "F": 0.163636
    }
   },
   "0.30": {
@@ -133,21 +133,21 @@
    "tau_E": null,
    "tau_E_is_never_E": true,
    "tau_E_quantile": null,
-   "tau_D": null,
-   "tau_D_quantile": null,
+   "tau_D": 7.0,
+   "tau_D_quantile": 0.1,
    "tau_F": 0.6,
    "tau_F_is_never_F": false,
    "n_candidates": 6,
    "n_feasible": 6,
    "loso_frame_weighted_f1": 0.863264,
    "loso_frame_weighted_payload": 0.287455,
-   "frozen_validate_f1": 0.863264,
-   "frozen_validate_payload": 0.287455,
+   "frozen_validate_f1": 0.863286,
+   "frozen_validate_payload": 0.260577,
    "budget_satisfied": true,
    "validate_grid_rho": {
     "E": 0.0,
-    "L": 0.727273,
-    "F": 0.272727
+    "L": 0.749449,
+    "F": 0.250551
    }
   }
  },
