@@ -27,7 +27,12 @@
 # 10 robustness split label (test->valid) RX: (handled by caption audit; no safe text pattern -- manual)
 # 11 gamma-improves (narrative)           RX: improves F1 by ; alone improves F1 ; 5\.3 percentage
 # 13 review-side ~10% payload             RX: 10\\%.{0,30}(payload|channel use) ; (payload|channel use).{0,30}10\\%
-# AP/band v2                              RX: 15\.8 ; 18\.4 ; \+0\.045 ; \+0\.017 ; \+0\.018 ; \+0\.05[^0-9]
+# AP/band v2                              RX: 15\.8 ; 18\.4 (not "18.4\%") ; \+0\.045 ; \+0\.017 ; \+0\.018 ; \+0\.05[^0-9]
+#    (P0/R18: 0\.895 narrowed from "[^9]" to "(?![0-9])". The retired value was printed at three
+#     decimals; the exclusion of a following 9 still let it match the corrected 5-decimal 0.89529,
+#     which is a TRUE value (test channel-only F1 at B=0.30). Fourth collision of this class after
+#     0.248, 27.5 and 18.4 -- retired-value patterns must be anchored against the precision they
+#     were written for.)
 # 14 two_regime panel(a) JSCC-flat level  RX: \$\\approx 0\.86 (validate flat 0.86 -> test 0.89; the near-
 #    approx form only; bare table 0.864 untouched. Anchors the $\approx$ so 0.864 F1 cells never trip it.)
 # 15 transitive-verb evasion (TG-10)       RX: (cut|save)[a-z' ]{0,28}channel use by  (retired "cut/save
@@ -85,7 +90,7 @@ RX eas(y|ier)[a-z -]{0,25}(test|scene|split)
 RX \+0\.017.{0,15}(under|F1|jscc|AWGN)
 RX 1\{?,?\}?000 validate frames
 RX 0\.844
-RX 0\.895[^9]
+RX 0\.895(?![0-9])
 RX \$\\approx 0\.86
 RX (cut|save)[a-z' ]{0,28}channel use by
 RX 0\.081

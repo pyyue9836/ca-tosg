@@ -184,12 +184,19 @@ The comparator conclusion is unchanged in direction: the bandit is behind the fr
 
 The arm's payload reductions (14–90%) and its "in-sample effective, does not transfer" conclusion are unchanged. Only the sentence comparing its channel use to the mainline needs restating: on test it now sits **below** the mainline at every budget rather than near it.
 
-## 6. Open item: tab:robustness
+## 6. tab:robustness — CLOSED (R18-final rule (c))
 
-The three robustness rows are the **only** numbers left in the paper that neither match a committed CSV nor were re-derived under the corrected convention. Two separate facts, both disclosed in the caption:
+The three rows were not covered by the P3 suite (which covers channel mix ratio, SNR distribution,
+c_t misclassification, BLER_L and Rician K) but each perturbs only the **selector's inputs**, so all
+three were re-derivable at grid level with no perception inference — rule (c). Ported to
+`projects/ca_tosg/evaluation/robustness_frozen.py`, frozen selectors on the corrected grid, with the
+CSI-noise and Jakes formulae carried over verbatim so only the selector/grid/utilities changed.
 
-1. **Prior engine.** They come from `projects/ca_tosg/evaluation/ablations/robustness.py` via `_common.py`, which is explicitly the retired v3 harness (v3 selector + v3 per-frame tables). Porting that harness to the frozen selectors was not authorised in this batch.
-2. **They do not reproduce from the prior-engine CSVs either.** The committed files (all dated 2026-08-12) give SNR-noise $\sigma\le1$: $-0.0021$ (paper: $-0.0002$), CSI aging at 10 ms: $-0.0148$ (paper: $-0.004$) and a 1-frame stale decision: $-0.0568$ (paper: $-0.019$).
+| row | retired value | re-derived (B_max = 0.20) |
+|---|---|---|
+| SNR-estimation noise, sigma <= 1 dB | −0.0002 | **−0.0002** |
+| CSI aging (Jakes, 60 km/h), ~10 ms | −0.004 | **−0.0025** |
+| 1-frame-stale decision | −0.019 | **−0.0109** (changes 18.2% of decisions) |
 
-`tools/p6_numbers_vs_csv.py` therefore reports **1 MISS**, and that MISS is left standing on purpose: it is the honest state of that table. The caption now claims direction and ordering only.
-
+The ordering and the direction survive; the magnitudes are smaller. No source-less table remains, and
+with the C256 frame fractions also removed the paper now carries **no pre-corrigendum number**.

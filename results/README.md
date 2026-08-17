@@ -255,6 +255,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `multiseed_hardening.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
 | `nonuniform_snr.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `object_message_bler.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
+| `robustness_frozen.csv` | `python projects/ca_tosg/evaluation/robustness_frozen.py` | R18-final rule (c): SNR-estimation noise, Jakes CSI aging and decision staleness, re-derived with the frozen selectors on the corrected grid (replaces the retired v3 robustness_* family) |
 | `rician_proxy.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `robustness_csi_aging.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
 | `robustness_csi_noise.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |

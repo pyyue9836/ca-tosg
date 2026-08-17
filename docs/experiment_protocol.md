@@ -3250,3 +3250,65 @@ gate green would have meant either porting an unauthorised harness or quietly re
    pre-restructure artefact. Both fixed.
 4. Three stale-fingerprint patterns collided with values the corrigendum made **true** (`18.4`,
    `0.275`, `budget-matched`); each was narrowed in context with the reason recorded, none dropped.
+
+---
+
+## Change-log R18-終 (2026-08-17) — the last two rulings; all fifteen checks green
+
+### 1 · tab:robustness → rule (c), ported
+
+**(a) What the three rows measure, against P3's coverage.** SNR-estimation noise, Jakes CSI aging,
+decision staleness. The P3 suite covers channel mix ratio, SNR distribution, c_t misclassification,
+BLER_L and Rician K — **no overlap**, so (b) does not apply. Each row perturbs only the *selector's
+inputs* and replays, so no perception-level inference is needed and (d) does not apply either.
+**Rule (c):** ported to `projects/ca_tosg/evaluation/robustness_frozen.py`, frozen selectors on the
+corrected grid, CSI-noise and Jakes formulae carried over verbatim so only the selector, grid and
+utilities changed.
+
+| row | retired | re-derived (B_max = 0.20) |
+|---|---|---|
+| SNR-estimation noise, σ ≤ 1 dB | −0.0002 | **−0.0002** |
+| CSI aging (Jakes, 60 km/h), ~10 ms | −0.004 | **−0.0025** |
+| 1-frame-stale decision | −0.019 | **−0.0109** (changes 18.2% of decisions) |
+
+Direction and ordering survive, magnitudes shrink. The "prior-engine / direction only" disclosure I
+had added one batch earlier is **deleted** — it would now be false. No source-less table remains.
+
+### 2 · C256 frame fractions → deleted
+
+The three percentages are gone. The exclusion of C256 now rests on the physical-layer ordering with a
+Fig. 2 citation: the 256-QAM cliff sits strictly right of the 16-QAM one, so by the time C256 is
+reliable the 16-QAM block is already error-free — an algebraic/physical fact, convention-independent.
+The "only quantities carried over from the pre-corrigendum tables" exception sentence is deleted with
+them, and **`main.tex` now contains no pre-corrigendum number.**
+
+### 3 · Renumbered in this batch, with three more sign changes
+
+Where2comm comparison, easy-stratum harm account (−0.0040 → −0.0047; 184 → 241 of 713 frames),
+collaborator budget breach (N=3 at 0.36842 Msym, and N=2 at 0.26937 **already** breaches 0.20), ρ_F
+knees, all three per-SNR AP tables (validate/test/Culver, rebuilt from the regenerated product),
+Fig. 4's curve levels, the payload step (0.297 → **0.4795** Msym, i.e. 48% not 30% of B_F), the
+ablation table, and both latency sites.
+
+Three claims changed sign or direction and are written as they came out:
+* **§V-D channel-only at B=0.30** no longer buys F1 for its extra spend: it is now beaten on **both**
+  axes (−0.0025 F1 at 1.36× the channel use). The retired accounting showed +0.0021 for that spend.
+* **Headline B=0.10 secondary comparison reversed**: the selector is now marginally *below* the
+  validate-tuned threshold (−0.00099, CI [−0.00105, −0.00093]) where it was above by +0.00055.
+* **Primary-cell F1 gap** shrank from ≈0.0028 to ≈0.0001 (CI upper bound −0.00002).
+
+### 4 · Two more tooling defects, both found by the gates
+
+* **The registry checked only the first latency occurrence.** Two stale copies of `59.9 ± 5.3 / P95
+  66.6` survived behind different spacing (`$59.9 \pm 5.3$` vs `$59.9\pm5.3$`) while the check passed
+  on the third. It now collects **every** occurrence and fails if they disagree.
+* **Fourth stale-fingerprint collision of the same class.** `0\.895[^9]` matched the corrected, true
+  0.89529; narrowed to `0\.895(?![0-9])` and negative-tested (bare 3-dp form still trips, 5-dp does
+  not). After 0.248, 27.5 and 18.4, the lesson is recorded in the file: a retired-value pattern must
+  be anchored to the precision it was written for.
+
+### Final state
+
+**Eleven gates: ALL PASS. P6-1: MISS 0** (68 literals located, 31 derived). **P6-2:** 70 ANALYTIC /
+47 FROZEN / 2 LEGACY-ENGINE — both in the prior-protocol appendix, 0 UNRESOLVED. **P6-3:** 0 / 0 / 0
+with all three positive controls firing. **P6-4:** 0 violations.

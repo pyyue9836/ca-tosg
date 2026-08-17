@@ -19,8 +19,11 @@ obey the identity
 $\mathrm{eff}_{\mathrm{C256}}-\mathrm{eff}_{\mathrm{C16}}=(\mathrm{comp}-\mathrm{ego})(b_{16}-b_{256})$.[^id]
 Since the denser constellation is never better protected ($b_{256}\ge b_{16}$, with equality only where both
 flatline or both deliver), the sign is set by $(\mathrm{comp}-\mathrm{ego})$. C256 is thus dominated
-($\mathrm{eff}_{\mathrm{C256}}\le\mathrm{eff}_{\mathrm{C16}}$) on 99.7 / 98.5 / 100.0\% of validation / test /
-Culver-City frames --- the \emph{identity} is algebraic and holds under any collaborator convention, but these three \emph{frame fractions} are the only quantities in this paper still carried over from the pre-corrigendum full-collaborator tables, because they need per-frame $b_{16}$ / $b_{256}$ columns the corrected tables do not yet carry (Change-log P0-5/R18);[^round] the margin over $\mathrm{frac}(\mathrm{comp}\ge\mathrm{ego})=$ 99.0 / 94.2 /
+($\mathrm{eff}_{\mathrm{C256}}\le\mathrm{eff}_{\mathrm{C16}}$) wherever $b_{16}=b_{256}$ or
+$\mathrm{comp}\ge\mathrm{ego}$, which Fig.~[fig:bler] shows is the whole operating range of interest: the
+256-QAM cliff sits strictly to the right of the 16-QAM one, so by the time C256 is reliable the 16-QAM block
+is already error-free. The exclusion of C256 from the deployed action set rests on that physical-layer
+ordering, which no collaborator convention can change;[^round] the margin over $\mathrm{frac}(\mathrm{comp}\ge\mathrm{ego})=$ 99.0 / 94.2 /
 99.1\% is the 0.7 / 4.2 / 0.9\% of frames where $\mathrm{comp}<\mathrm{ego}$ but $b_{16}=b_{256}$ -- both
 flatline, or both deliver at high SNR -- which tie rather than reverse. Dominance reverses only in the
 collaboration-harm regime ($\mathrm{comp}<\mathrm{ego}$, $b_{16}<b_{256}$; \S\ref{sec:harm}). Physically,

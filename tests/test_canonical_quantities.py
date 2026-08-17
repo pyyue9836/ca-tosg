@@ -81,10 +81,16 @@ def q_feature_importance(text):
 def q_latency(text):
     """59.9 +- 5.3 ms and P95 66.6 ms must come from ONE row of the latency CSV."""
     d = pd.read_csv(os.path.join(ROOT, 'results/latency/selector_latency.csv'))
-    m = re.search(r'\$([\d.]+)\\pm([\d.]+)\$~ms per frame \(\$\\mathrm\{P95\}=([\d.]+)\$~ms\)', text)
-    if not m:
+    # EVERY occurrence, not just the first: two stale copies survived a renumbering behind a
+    # different spacing ("$59.9 \pm 5.3$" vs "$59.9\pm5.3$") while this check passed on the third.
+    ms = re.findall(r'\$([\d.]+)\s*\\pm\s*([\d.]+)\$~ms[^(]{0,20}\(\$\\mathrm\{P95\}\s*=\s*([\d.]+)\$~ms\)',
+                    text)
+    if not ms:
         return check('latency', False, 'the latency sentence is not in main.tex in the expected form')
-    mean, std, p95 = (float(x) for x in m.groups())
+    if len({m for m in ms}) != 1:
+        return check('latency triples agree', False,
+                     f'main.tex quotes {len(set(ms))} DIFFERENT latency triples: {sorted(set(ms))}')
+    mean, std, p95 = (float(x) for x in ms[0])
     rows = d[(d.mean_ms.round(1) == round(mean, 1)) & (d.std_ms.round(1) == round(std, 1))
              & (d.p95_ms.round(1) == round(p95, 1))]
     rc = check('latency same-row provenance', len(rows) == 1,

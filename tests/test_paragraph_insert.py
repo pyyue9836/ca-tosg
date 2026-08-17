@@ -69,6 +69,10 @@ PARAS = {
             # values and the 3.96 coded-bit derivation in one place. (TG-4 removed the duplicate
             # second Eq reference that the draft carried as Eq.(11).)
             ("(Eq.~(7))", "(Eq.~\\eqref{eq:payload})"),
+            # T1: R18-final removed the three pre-corrigendum C256 frame fractions and put the
+            # qualitative physical-layer argument in their place, which cites the BLER figure. The
+            # draft carries the placeholder; this is the declared resolution.
+            ("Fig.~[fig:bler]", "Fig.~\\ref{fig:bler}"),
         ],
         rulings=[
             # B2 (supervisor ruling): the [^cliff] cross-ref pointed to fig:channel_codec_ap,
@@ -130,10 +134,13 @@ PARAS = {
              "remaining $78$, where it requests $L$, its output is frame-identical to "
              "Fixed-$L$, so the paired difference arises entirely on the $C_{16}$-request "
              "frames (verified programmatically from the per-frame account) -- the loss",
-             "the frozen selector's realised F1 at $B_{\\max}=0.20$ is $0.9826$ vs the "
-             "Fixed-$L$ baseline $0.9866$ -- a gain of $-0.0040$ (frame-level paired $95\\%$ "
-             "CI $[-0.0064,-0.0018]$; $n=713$ frames). The selector requests $F$ on $184$ of "
-             "these $713$ frames; on the remaining $529$, where it requests $L$, its output is "
+             # R18-final: re-derived under the single-collaborator convention, so the Fixed-L
+             # baseline moves too (0.9866 -> 0.9796) -- the earlier ruling could hold it fixed
+             # because only the engine had changed; the corrigendum changes the utilities.
+             "the frozen selector's realised F1 at $B_{\\max}=0.20$ is $0.9749$ vs the "
+             "Fixed-$L$ baseline $0.9796$ -- a gain of $-0.0047$ (frame-level paired $95\\%$ "
+             "CI $[-0.0074,-0.0024]$; $n=713$ frames). The selector requests $F$ on $241$ of "
+             "these $713$ frames; on the remaining $472$, where it requests $L$, its output is "
              "frame-identical to Fixed-$L$, so the paired difference arises entirely on the "
              "$F$-request frames -- the loss",
              'P5-5-7'),

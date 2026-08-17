@@ -1,0 +1,6 @@
+CA-TOSG R18-final rule (c) -- tab:robustness ported to the frozen selectors.
+generated: 2026-08-17T16:39:26.563445+00:00
+split: test; N_REPLAY=200; CSI_SEED=20260809 (deployed draw, reused from deployment.py); SNR-noise stream seed 20260817, separate so the CSI draw order stays byte-identical.
+models carried over VERBATIM from the retired harness: Jakes f_d=327 Hz at 60 km/h, sigma = sqrt(1-J0(2*pi*f_d*tau)^2)*6 dB; CSI noise est_snr = true + N(0,sigma).
+the perturbation touches only what the SELECTOR is told; the channel, the BLER and the per-frame utilities are the deployed ones.
+NOT duplicated here (already covered by the P3 suite): channel mix ratio, SNR distribution, c_t misclassification, BLER_L, Rician K.
