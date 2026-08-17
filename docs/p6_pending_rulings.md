@@ -7,7 +7,7 @@
 | list | rows |
 |---|---|
 | A — figure / caption / body | 33 |
-| B — ledger claims with no located evidence | 8 |
+| B — ledger claims with no located evidence | 3 |
 
 ## List A — figure numbers vs caption vs body (33)
 
@@ -15,75 +15,58 @@ State is condition-aware: a value counts as quoted only in a sentence whose stat
 
 | # | drawn key | value | condition | figure | main.tex line | state | suggested action | why |
 |---|---|---|---|---|---|---|---|---|
-| A1 | `f1_catosg_awgn_at_knee` | 0.8875 | split=validate budget=0.2 channel=awgn snr_db=10.0 | Fig.~4 (fig:ap_snr) | 449 | both | **no action** | figure, caption and body already agree at the same condition |
-| A2 | `f1_catosg_awgn_high` | 0.8877 | split=validate budget=0.2 channel=awgn snr_db=20.0 | Fig.~4 (fig:ap_snr) | 449 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
-| A3 | `f1_catosg_awgn_low` | 0.8558 | split=validate budget=0.2 channel=awgn snr_db=0.0 | Fig.~4 (fig:ap_snr) | 449 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
-| A4 | `f1_catosg_rayleigh_at_knee` | 0.8558 | split=validate budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~4 (fig:ap_snr) | 449 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
-| A5 | `f1_catosg_rayleigh_high` | 0.8558 | split=validate budget=0.2 channel=rayleigh snr_db=20.0 | Fig.~4 (fig:ap_snr) | 449 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
-| A6 | `f1_catosg_rayleigh_low` | 0.8558 | split=validate budget=0.2 channel=rayleigh snr_db=0.0 | Fig.~4 (fig:ap_snr) | 449 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
-| A7 | `f1_ceiling_validate` | 0.8843 | split=validate budget=0.2 channel=awgn | Fig.~4 (fig:ap_snr) | 449 | both | **no action** | figure, caption and body already agree at the same condition |
-| A8 | `f1_fixedL_validate` | 0.8554 | split=validate budget=0.2 channel=awgn | Fig.~4 (fig:ap_snr) | 449 | both | **no action** | figure, caption and body already agree at the same condition |
-| A9 | `f1_oracle_masked_validate_high` | 0.8927 | split=validate budget=0.2 channel=awgn | Fig.~4 (fig:ap_snr) | 449 | both | **no action** | figure, caption and body already agree at the same condition |
+| A1 | `f1_catosg_awgn_at_knee` | 0.8875 | split=validate budget=0.2 channel=awgn snr_db=10.0 | Fig.~4 (fig:ap_snr) | 448 | both | **no action** | figure, caption and body already agree at the same condition |
+| A2 | `f1_catosg_awgn_high` | 0.8877 | split=validate budget=0.2 channel=awgn snr_db=20.0 | Fig.~4 (fig:ap_snr) | 448 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
+| A3 | `f1_catosg_awgn_low` | 0.8558 | split=validate budget=0.2 channel=awgn snr_db=0.0 | Fig.~4 (fig:ap_snr) | 448 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
+| A4 | `f1_catosg_rayleigh_at_knee` | 0.8558 | split=validate budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~4 (fig:ap_snr) | 448 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
+| A5 | `f1_catosg_rayleigh_high` | 0.8558 | split=validate budget=0.2 channel=rayleigh snr_db=20.0 | Fig.~4 (fig:ap_snr) | 448 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
+| A6 | `f1_catosg_rayleigh_low` | 0.8558 | split=validate budget=0.2 channel=rayleigh snr_db=0.0 | Fig.~4 (fig:ap_snr) | 448 | caption only | **add to body, or leave** | stated in the caption but nowhere in the running text — fine if deliberate |
+| A7 | `f1_ceiling_validate` | 0.8843 | split=validate budget=0.2 channel=awgn | Fig.~4 (fig:ap_snr) | 448 | both | **no action** | figure, caption and body already agree at the same condition |
+| A8 | `f1_fixedL_validate` | 0.8554 | split=validate budget=0.2 channel=awgn | Fig.~4 (fig:ap_snr) | 448 | both | **no action** | figure, caption and body already agree at the same condition |
+| A9 | `f1_oracle_masked_validate_high` | 0.8927 | split=validate budget=0.2 channel=awgn | Fig.~4 (fig:ap_snr) | 448 | both | **no action** | figure, caption and body already agree at the same condition |
 | A10 | `knee_db` | 10.0 | budget=0.2 channel=awgn snr_db=10.0 | Fig.~2 (fig:bler) / Fig.~4 | 35 | both | **no action** | figure, caption and body already agree at the same condition |
-| A11 | `pareto_Fixed-C256_f1` | 0.8255 | split=test | Fig.~8 (fig:pareto) | not in main.tex | nowhere | **add to caption, or drop from the figure** | the figure plots this value but no caption or sentence states it anywhere |
+| A11 | `pareto_Fixed-C256_f1` | 0.8255 | split=test | Fig.~8 (fig:pareto) | 415 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
 | A12 | `pareto_Fixed-C256_payload` | 0.495 | split=test | Fig.~8 (fig:pareto) | 142 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A13 | `pareto_Fixed-F_f1` | 0.8483 | split=test | Fig.~8 (fig:pareto) | not in main.tex | nowhere | **add to caption, or drop from the figure** | the figure plots this value but no caption or sentence states it anywhere |
+| A13 | `pareto_Fixed-F_f1` | 0.8483 | split=test | Fig.~8 (fig:pareto) | 414 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
 | A14 | `pareto_Fixed-F_payload` | 0.99 | split=test | Fig.~8 (fig:pareto) | 141 | both | **no action** | figure, caption and body already agree at the same condition |
-| A15 | `pareto_Fixed-L_f1` | 0.891 | split=test | Fig.~8 (fig:pareto) | 419 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A15 | `pareto_Fixed-L_f1` | 0.891 | split=test | Fig.~8 (fig:pareto) | 413 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
 | A16 | `pareto_Fixed-L_payload` | 0.024 | split=test | Fig.~8 (fig:pareto) | 140 | both | **no action** | figure, caption and body already agree at the same condition |
-| A17 | `pareto_catosg_B010_f1` | 0.8915 | split=test budget=0.1 | Fig.~8 (fig:pareto) | 419 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A18 | `pareto_catosg_B010_payload` | 0.0368 | split=test budget=0.1 | Fig.~8 (fig:pareto) | 419 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A19 | `pareto_catosg_B020_f1` | 0.8969 | split=test budget=0.2 | Fig.~8 (fig:pareto) | 524 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A20 | `pareto_catosg_B020_payload` | 0.1414 | split=test budget=0.2 | Fig.~8 (fig:pareto) | 422 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A17 | `pareto_catosg_B010_f1` | 0.8915 | split=test budget=0.1 | Fig.~8 (fig:pareto) | 420 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A18 | `pareto_catosg_B010_payload` | 0.0368 | split=test budget=0.1 | Fig.~8 (fig:pareto) | 420 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A19 | `pareto_catosg_B020_f1` | 0.8969 | split=test budget=0.2 | Fig.~8 (fig:pareto) | 523 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A20 | `pareto_catosg_B020_payload` | 0.1414 | split=test budget=0.2 | Fig.~8 (fig:pareto) | 423 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
 | A21 | `pareto_catosg_B030_f1` | 0.8978 | split=test budget=0.3 | Fig.~8 (fig:pareto) | 403 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A22 | `pareto_catosg_B030_payload` | 0.212 | split=test budget=0.3 | Fig.~8 (fig:pareto) | 532 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A23 | `pareto_oracle_f1` | 0.9056 | split=test | Fig.~8 (fig:pareto) | not in main.tex | nowhere | **add to caption, or drop from the figure** | the figure plots this value but no caption or sentence states it anywhere |
-| A24 | `pareto_oracle_payload` | 0.175 | split=test | Fig.~8 (fig:pareto) | not in main.tex | nowhere | **add to caption, or drop from the figure** | the figure plots this value but no caption or sentence states it anywhere |
-| A25 | `payload_catosg_awgn_at_knee` | 0.4795 | split=validate budget=0.2 channel=awgn snr_db=10.0 | Fig.~5 (fig:payload_snr) | 456 | both | **no action** | figure, caption and body already agree at the same condition |
-| A26 | `payload_catosg_awgn_low` | 0.0237 | split=validate budget=0.2 channel=awgn snr_db=0.0 | Fig.~5 (fig:payload_snr) | 456 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A22 | `pareto_catosg_B030_payload` | 0.212 | split=test budget=0.3 | Fig.~8 (fig:pareto) | 531 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A23 | `pareto_oracle_f1` | 0.9056 | split=test | Fig.~8 (fig:pareto) | 416 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A24 | `pareto_oracle_payload` | 0.175 | split=test | Fig.~8 (fig:pareto) | 416 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A25 | `payload_catosg_awgn_at_knee` | 0.4795 | split=validate budget=0.2 channel=awgn snr_db=10.0 | Fig.~5 (fig:payload_snr) | 455 | both | **no action** | figure, caption and body already agree at the same condition |
+| A26 | `payload_catosg_awgn_low` | 0.0237 | split=validate budget=0.2 channel=awgn snr_db=0.0 | Fig.~5 (fig:payload_snr) | 455 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
 | A27 | `rho_E_catosg_rayleigh_culver` | 0.0 | split=culver budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 1 | both | **no action** | figure, caption and body already agree at the same condition |
 | A28 | `rho_E_catosg_rayleigh_test` | 0.0018 | split=test budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~6 (fig:decision_ratio) | not in main.tex | nowhere | **add to caption, or drop from the figure** | the figure plots this value but no caption or sentence states it anywhere |
-| A29 | `rho_E_oracle_rayleigh_culver` | 0.1327 | split=culver budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 466 | both | **no action** | figure, caption and body already agree at the same condition |
-| A30 | `rho_E_oracle_rayleigh_test` | 0.1571 | split=test budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 466 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
-| A31 | `rho_F_at_knee_culver` | 0.16 | split=culver budget=0.2 channel=awgn snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 378 | both | **no action** | figure, caption and body already agree at the same condition |
-| A32 | `rho_F_at_knee_test` | 0.4327 | split=test budget=0.2 channel=awgn snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 466 | both | **no action** | figure, caption and body already agree at the same condition |
-| A33 | `rho_F_at_knee_validate` | 0.4717 | split=validate budget=0.2 channel=awgn snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 466 | both | **no action** | figure, caption and body already agree at the same condition |
+| A29 | `rho_E_oracle_rayleigh_culver` | 0.1327 | split=culver budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 465 | both | **no action** | figure, caption and body already agree at the same condition |
+| A30 | `rho_E_oracle_rayleigh_test` | 0.1571 | split=test budget=0.2 channel=rayleigh snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 465 | body only | **add to caption, or leave** | the text states it but the figure caption does not — a reader of the figure alone misses it |
+| A31 | `rho_F_at_knee_culver` | 0.16 | split=culver budget=0.2 channel=awgn snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 399 | both | **no action** | figure, caption and body already agree at the same condition |
+| A32 | `rho_F_at_knee_test` | 0.4327 | split=test budget=0.2 channel=awgn snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 465 | both | **no action** | figure, caption and body already agree at the same condition |
+| A33 | `rho_F_at_knee_validate` | 0.4717 | split=validate budget=0.2 channel=awgn snr_db=10.0 | Fig.~6 (fig:decision_ratio) | 465 | both | **no action** | figure, caption and body already agree at the same condition |
 
 ### A-summary
 
+- body only: 14
 - both: 13
-- body only: 10
 - caption only: 5
-- nowhere: 5
+- nowhere: 1
 
-## List B — ledger claims with no located evidence (8)
+## List B — ledger claims with no located evidence (3)
 
 `no distinctive number` = the claim carries only structural constants, so it needs a citation, not an experiment. `unlocated` = it carries real numbers that no committed result file holds.
 
 | # | id | section | main.tex line | exact values | kind | suggested action | why |
 |---|---|---|---|---|---|---|---|
 | B1 | `c116bc6` | System Model and Problem Formulation [sec:system] → Message Candidates [sec:candidates] | 122 | 16, 1, 2 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B2 | `c6b69fc` | System Model and Problem Formulation [sec:system] → Message Candidates [sec:candidates] | 163 | 256, 16 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B3 | `c1367c5` | System Model and Problem Formulation [sec:system] → Message Candidates [sec:candidates] | 163 | 256, 0.1 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B4 | `ccc84ea` | System Model and Problem Formulation [sec:system] → Communication Cost | 190 | 3.96, 1.98, 1, 2, 4, 8, 16, 256 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B5 | `c94ca7e` | Experimental Setup [sec:exp] → Evaluation Metrics | 368 | 0.5, 0.7, 1 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
-| B6 | `c8c9d53` | Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold] | 694 | 0.005, 34.8, 0.2168, 0.20 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/2 literal appears in `results/sensitivity/feature_ablation.csv` — not enough to attribute) |
-| B7 | `c976a95` | Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold] | 709 | 1, 26.6 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/1 literal appears in `results/provenance/PROVENANCE_robustness_frozen.txt` — not enough to attribute) |
-| B8 | `cfa8474` | Conclusion | 840 | 1, 0.005, 34.8, 26.6 | unlocated | **recompute from frozen products, or delete the sentence** | no committed result file holds a sufficient combination of its literals — either it needs a run, or the sentence has no evidence and should go (weak hint only: 1/2 literal appears in `results/provenance/PROVENANCE_robustness_frozen.txt` — not enough to attribute) |
+| B2 | `ccc84ea` | System Model and Problem Formulation [sec:system] → Communication Cost | 190 | 3.96, 1.98, 1, 2, 4, 8, 16, 256 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
+| B3 | `c94ca7e` | Experimental Setup [sec:exp] → Evaluation Metrics | 368 | 0.5, 0.7, 1 | no distinctive number | **attach evidence (analytic / definitional)** | carries only structural constants (mode names, IoU, 2-bit, 802.11bd) — cite the derivation or the notation table, no experiment needed |
 
 ### B — full claim text for the rows proposed for deletion or recompute
-
-**B6 `c8c9d53` — Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold], line 694**
-
-> What is pre-registered and survives is non-inferiority within a 0.005 margin at a 34.8\% payload reduction --- a figure that must be read with the comparator's own budget in view: the re-tuned threshold spends 0.2168 Msym against the B_=0.20 cap, i.e.\ it is over budget, so part of that reduction is the comparator's overspend rather than the selector's thrift.
-
-**B7 `c976a95` — Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold], line 709**
-
-> We therefore frame as a lightweight, interpretable channel-aware selection policy whose aggregate operating point tracks a budget-matched threshold on this cliff codec closely, edging it on F1 while spending 26.6\% less; the perception cues become decisive on graceful-degradation channels, where SNR is no longer a sufficient statistic and, in-distribution, the cue-based selector beats the best SNR threshold using the task cues alone (Appendix [ref]).
-
-**B8 `cfa8474` — Conclusion, line 840**
-
-> Third, the dominant decision signal is channel state rather than selector-model complexity: a simple SNR-threshold rule tracks the learned selector closely on the channel-averaged payload--F1 frontier, ahead of it at the tightest budget and behind it at the two looser ones; what the pre-registered comparison establishes is non-inferiority within a 0.005 margin at a 34.8\% payload reduction against an over-budget nominal threshold --- 26.6\% against a budget-matched one --- not dominance.
 
 
 ---

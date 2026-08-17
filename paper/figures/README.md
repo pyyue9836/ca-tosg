@@ -1,5 +1,12 @@
 # `paper/figures/` — 插图 + 生成脚本对照 / Figures and the script that makes each
 
+> **P0/R20 note.** Figs. 4/5/6/8 are produced by ONE generator from ONE frozen source
+> (`plot_frozen_figs.py`, driven by `tools/generate_figures.py`), which also writes
+> `results/provenance/PROVENANCE_figures.json`. The `../../code/*` paths below are
+> pre-restructure and the retired per-figure scripts (`plot_ap_snr.py`,
+> `plot_pareto_payload.py`, `snr_decision_plot.py`) are no longer invoked. All figures reflect
+> the single-collaborator protocol.
+
 ## 中文
 
 论文用的全部插图（PDF）。**不要手动改这些 PDF**——它们由脚本生成，改了下次重跑会被覆盖。

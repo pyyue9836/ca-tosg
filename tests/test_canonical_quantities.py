@@ -170,6 +170,41 @@ def q_jscc_recovery(text):
     return rc
 
 
+DOC_TARGETS = ('README.md', 'docs/canonical_quantities.md', 'docs/model_zoo.md',
+               'docs/milestone_summary.md')
+
+
+def q_docs_display(_text):
+    """R20 9c: no retired headline value may survive in README or docs/.
+
+    The gate used to read `paper/main.tex` only. The registry's own "printed as" column, the README
+    results table and the model zoo all drifted to pre-corrigendum numbers behind its back.
+    """
+    # Bare numbers collide across quantities: "66.6" is a retired latency P95 *in ms* but also a
+    # legitimate payload-reduction *percentage*. Each pattern therefore carries the unit context it
+    # was retired in -- the same anchoring lesson as the 0.248 / 27.5 / 18.4 / 0.895 fingerprints.
+    retired = {r'0\.90463': 'test F1 @ B=0.20', r'0\.90326': 'test F1 @ B=0.10',
+               r'0\.90734': 'test F1 @ B=0.30',
+               r'56\.3\s*%[^|]{0,40}(reduction|less|saving)': 'payload reduction',
+               r'1\.54\s*(x|×|\\times)': 'FA-1 ratio',
+               r'59\.9\s*(±|\\pm)': 'latency mean',
+               r'(P95[^0-9]{0,6}|±\s*5\.3[^0-9]{0,12})66\.6|66\.6\s*~?ms': 'latency P95',
+               r'47\.1\s*%[^|]{0,40}importance': 'channel importance',
+               r'52\.9\s*%': 'perception importance',
+               r'24\.8\s*%': 'c_t importance', r'22\.3\s*%': 'snr importance',
+               r'0\.9181': 'test AP', r'0\.9216': 'ceiling AP'}
+    rc = 0
+    for rel in DOC_TARGETS:
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            continue
+        body = open(path, encoding='utf-8').read()
+        hits = sorted({f'{retired[v]}' for v in retired if re.search(v, body)})
+        rc |= check(f'no retired value in {rel}', not hits,
+                    'clean' if not hits else f'retired value(s) present: {hits}')
+    return rc
+
+
 def main() -> int:
     if not os.path.exists(REGISTRY):
         print(f'FAIL: {os.path.relpath(REGISTRY, ROOT)} is missing -- the registry is the '
@@ -179,7 +214,7 @@ def main() -> int:
     print('canonical quantities (every reference re-derived from its committed product):')
     rc = 0
     for fn in (q_feature_importance, q_latency, q_fa1_ratio, q_payload_reduction,
-               q_ratio_families, q_jscc_recovery):
+               q_ratio_families, q_jscc_recovery, q_docs_display):
         rc |= fn(text)
     # the registry must name every quantity this file checks, so the two cannot drift apart
     reg = open(REGISTRY, encoding='utf-8').read()

@@ -41,6 +41,10 @@ FIXED = os.path.join(ROOT, 'results/main/fixed_references.csv')
 OUT = os.path.join(ROOT, 'docs', 'p6_cross_section_conflicts.md')
 
 NUM = re.compile(r'(?<![\d.])([-+]?\d+\.\d{2,5})(?![\d])')
+# Settings, not measurements. Budgets and IoU thresholds appear in almost every claim, so leaving
+# them in made a claim that merely mentions "B_max=0.20" collide with any other claim about the same
+# (metric, split) -- two such false conflicts survived to the last verification round.
+STRUCTURAL = {0.1, 0.2, 0.3, 0.5, 0.7, 0.024, 0.495, 0.99, 0.05, 0.02, 0.005}
 
 
 def entity_records(claims=None, ledger=None):
@@ -55,12 +59,29 @@ def entity_records(claims=None, ledger=None):
         split, metric = cells[0].strip(), cells[1].strip()
         if not split or not metric or split.startswith('n/a'):
             continue
-        vals = {round(float(v), 4) for v in NUM.findall(exact)}
+        vals = {round(float(v), 4) for v in NUM.findall(exact)} - STRUCTURAL
         if not vals:
             continue
         loc = f'{section}{" / " + subsection if subsection else ""}'
         out.append((metric, split, loc, vals, claim))
     return out
+
+
+def _same_scale(va, vb, factor=10.0):
+    """Are two value sets on the same numeric scale?
+
+    A (metric, split) label as written in the ledger is often broader than a single quantity --
+    "F1 / payload vs both thresholds" legitimately covers an F1 gap of 0.0001, a payload of 0.2168
+    and a threshold of 13. Comparing across those produced a run of false conflicts, each of which
+    got "fixed" by inventing a narrower label. This removes the whole family at once: entities are
+    comparable only when their magnitudes sit within one order of magnitude, which still catches a
+    genuine same-quantity disagreement (0.89 vs 0.85) and never pairs an F1 with a payload.
+    """
+    a = [abs(x) for x in va if x]
+    b = [abs(x) for x in vb if x]
+    if not a or not b:
+        return False
+    return (max(a) / min(b) <= factor) and (max(b) / min(a) <= factor)
 
 
 def scan_entity_values(records):
@@ -72,7 +93,7 @@ def scan_entity_values(records):
     for key, items in by_key.items():
         for i, (la, va, ca) in enumerate(items):
             for lb, vb, cb in items[i + 1:]:
-                if la != lb and not (va & vb):
+                if la != lb and not (va & vb) and _same_scale(va, vb):
                     conflicts.append((key, la, sorted(va), ca, lb, sorted(vb), cb))
     return conflicts
 

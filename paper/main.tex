@@ -306,7 +306,7 @@ The feature-level branches transmit compressed BEV representations $m_t^{C_q} = 
 
 \subsection{Channel-Aware Semantic Granularity Selector}
 
-The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier with $N_T=400$ trees, depth bound $D_{\max}=10$, minimum samples per leaf of $4$, and balanced class weighting to compensate for the heavy class imbalance in the channel-aware oracle labels. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.1 \pm 5.6$~ms ($\mathrm{P95} = 58.3$~ms), measured over $1{,}000$ batch-1 trials per frozen selector and quoted for the slowest of the three (Section~\ref{sec:robustness}); this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Section~\ref{sec:robustness} together with Table~\ref{tab:headline_agg} shows lighter models and even a hand-tuned SNR-threshold rule reach the same realised F1.
+The selector implements the policy $g(z_t,\hat\gamma_t,c_t)$ of Eq.~\eqref{eq:selector} as a Random Forest classifier. The three deployed selectors are the ones the pre-registered budget walk froze (\texttt{FROZEN\_MANIFEST.json}): $N_T=400$ trees and \texttt{max\_features=sqrt} throughout, minimum samples per leaf of $2$, a depth bound of $10$ at $B_{\max}=0.10$ and $0.20$ and unbounded depth at $B_{\max}=0.30$, and \texttt{class\_weight=None} at all three budgets --- the walk selected unweighted candidates, so no class re-weighting is applied to the oracle-label imbalance. We choose Random Forest for three practical reasons. First, the selector should be \emph{training-free with respect to the perception backbone and detection head}: it should be deployable on top of any pretrained cooperative perception stack without retraining the perception model. Random Forest fits this constraint because it operates purely on tabular cues. Second, Random Forest provides \emph{interpretable feature importance} (Section~\ref{sec:feat_imp}), which is valuable for safety certification of vehicular systems. Third, its per-frame inference cost on a single CPU core is $52.1 \pm 5.6$~ms ($\mathrm{P95} = 58.3$~ms), measured over $1{,}000$ batch-1 trials per frozen selector and quoted for the slowest of the three (Section~\ref{sec:robustness}); this fits the $100$~ms budget of a $10$~Hz LiDAR cycle without requiring a GPU, dedicated accelerator, or framework-level optimisation. We emphasise that the contribution is not the Random Forest itself: it is an interpretable implementation of the channel-aware granularity policy, and Section~\ref{sec:robustness} together with Table~\ref{tab:headline_agg} shows lighter models and even a hand-tuned SNR-threshold rule reach the same realised F1.
 
 The selector is trained to imitate the channel-aware oracle defined in Eq.~\eqref{eq:oracle}. The oracle uses ground-truth detection outputs and is therefore not deployable; it is used only to generate training labels and as an upper-bound reference. Before taking the argmax in Eq.~\eqref{eq:oracle}, the oracle applies a \emph{feasibility mask}: any mode whose frame-level block-error rate exceeds $0.999$ at the operating $(\gamma_t,\mathrm{ch}_t)$ grid point is removed from $\mathcal{S}$, so that neither the oracle labels nor the deployed selector request a message the channel almost surely cannot deliver; when a requested feature block is nonetheless lost, the pipeline reverts to the ego-only output rather than a zero-utility state (Eq.~\eqref{eq:eff_C}). At deployment, the selector uses only the online cues $z_t$ and the channel state $(\hat\gamma_t,c_t)$:
 \begin{equation}
@@ -375,23 +375,23 @@ Because the value of feature-level cooperation is realised only when the channel
 
 \begin{table}[t]
 \centering
-\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge10$~dB feature-active regime (selector requests $F$), the boundary being the measured $\rho_F$ knee of Section~\ref{sec:true_e2e}, averaged over the six grid points at and above it. When the channel can carry features, \method{} lifts AP toward the feature-level ceiling on validate and Culver-City and remains comparable to object-level on the sparser test split; when the channel cannot, it safely retains the $L$ operating point. Payload is per-frame channel use (Msym, at rate-1/2); channel-\emph{averaged} \method{} payload is $0.158$--$0.251$~Msym/frame across splits, i.e.\ $16$--$25\%$ of Fixed $F$ ($0.990$).}
+\caption{Headline results: true end-to-end AP of \method{} across three OPV2V splits, in the fading/low-SNR fallback regime (selector holds $L$) and the AWGN $\hat\gamma_t\ge10$~dB feature-active regime (selector requests $F$), the boundary being the measured $\rho_F$ knee of Section~\ref{sec:true_e2e}, averaged over the six grid points at and above it. When the channel can carry features, \method{} lifts AP on all three splits ($+0.047$ validate, $+0.020$ test, $+0.018$ Culver-City at IoU $0.5$); when it cannot, the selector safely retains the $L$ operating point. Payload is per-frame channel use (Msym, at rate-1/2); channel-\emph{averaged} \method{} payload is $0.068$--$0.151$~Msym/frame across splits, i.e.\ $7$--$15\%$ of Fixed $F$ ($0.990$).}
 \label{tab:headline}
 \begin{tabular}{llccc}
 \toprule
 Split & Regime & AP@0.5 & AP@0.7 & Payload \\
 \midrule
 \multirow{2}{*}{Validate ($1{,}980$)}
-  & Fallback ($L$)  & 0.8899 & 0.8356 & 0.024 \\
-  & AWGN $\ge10$~dB & \textbf{0.9140} & \textbf{0.8534} & 0.300 \\
+  & Fallback ($L$)   & 0.7818 & 0.7038 & 0.029 \\
+  & AWGN $\ge10$~dB & \textbf{0.8290} & \textbf{0.7296} & 0.483 \\
 \midrule
 \multirow{2}{*}{Test ($2{,}170$)}
-  & Fallback ($L$)  & 0.9189 & 0.8687 & 0.024 \\
-  & AWGN $\ge10$~dB & 0.9169 & 0.8637 & 0.283 \\
+  & Fallback ($L$)   & 0.8691 & 0.8027 & 0.024 \\
+  & AWGN $\ge10$~dB & \textbf{0.8892} & \textbf{0.8177} & 0.453 \\
 \midrule
 \multirow{2}{*}{Culver-City ($550$)}
-  & Fallback ($L$)  & 0.7828 & 0.6975 & 0.024 \\
-  & AWGN $\ge10$~dB & \textbf{0.7901} & \textbf{0.7020} & 0.089 \\
+  & Fallback ($L$)   & 0.7299 & 0.6463 & 0.024 \\
+  & AWGN $\ge10$~dB & \textbf{0.7475} & \textbf{0.6553} & 0.180 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -410,21 +410,20 @@ Because a one-line SNR-threshold rule is the natural challenger to any learned s
 \toprule
 Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
 \midrule
-Fixed $L$ (object-level)       & 0.9011 & 0.024 & $2.4\%$ \\
-Fixed $F$ (LDPC+16-QAM)        & 0.8516 & 0.990 & $100\%$ \\
-Fixed $C_{256}$ (LDPC+256-QAM) & 0.8264 & 0.495 & $50.0\%$ \\
+Fixed $L$ (object-level)       & 0.8910 & 0.024 & $2.4\%$ \\
+Fixed $F$ (LDPC+16-QAM)        & 0.8483 & 0.990 & $100.0\%$ \\
+Fixed $C_{256}$ (LDPC+256-QAM) & 0.8255 & 0.495 & $50.0\%$ \\
+Masked oracle (upper bound)    & 0.9056 & 0.175 & $17.7\%$ \\
 \midrule
 \multicolumn{4}{l}{\emph{$B_{\max}=0.10$}} \\
-\quad SNR-threshold ($\tau^\star{=}18$)   & 0.90271 & 0.0724 & $7.3\%$ \\
-\quad \method{} (RF, frozen)              & \textbf{0.89148} & \textbf{0.0368} & $\mathbf{3.7\%}$ \\
+\quad SNR-threshold ($\tau^\star{=}18$)   & \textbf{0.89247} & 0.0724 & $7.3\%$ \\
+\quad \method{} (RF, frozen)              & 0.89148 & \textbf{0.0368} & $\mathbf{3.7\%}$ \\
 \multicolumn{4}{l}{\emph{$B_{\max}=0.20$}} \\
-\quad SNR-threshold ($\tau^\star{=}12$)   & \textbf{0.90740} & 0.2168 & $21.9\%$ \\
+\quad SNR-threshold ($\tau^\star{=}12$)   & \textbf{0.89701} & 0.2168 & $21.9\%$ \\
 \quad \method{} (RF, frozen)              & 0.89691 & \textbf{0.1414} & $\mathbf{14.3\%}$ \\
 \multicolumn{4}{l}{\emph{$B_{\max}=0.30$}} \\
-\quad SNR-threshold ($\tau^\star{=}8$)    & \textbf{0.90937} & 0.3125 & $31.6\%$ \\
+\quad SNR-threshold ($\tau^\star{=}8$)   & \textbf{0.89900} & 0.3125 & $31.6\%$ \\
 \quad \method{} (RF, frozen)              & 0.89783 & \textbf{0.2120} & $\mathbf{21.4\%}$ \\
-\midrule
-Channel-aware oracle (masked)   & 0.9165 & 0.1706 & $17.2\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -534,7 +533,7 @@ Under the corrected convention the cues do add accuracy on this axis ($+0.0090$ 
 
 \subsection{True End-to-end AP Verification}\label{sec:true_e2e}
 
-The realised frame F1 reported so far is computed under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, where a lost feature block falls back to the ego vehicle's own pre-fusion detection. To confirm that this analytical F1 proxy translates to actual end-to-end detection \emph{AP} under a deployed pipeline, we run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the ego-only (pre-fusion) prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over $5$ stochastic channel realisations. Table~\ref{tab:true_e2e} reports the result.
+The realised frame F1 reported so far is computed under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, where a lost feature block falls back to the ego vehicle's own pre-fusion detection. To confirm that this analytical F1 proxy translates to actual end-to-end detection \emph{AP} under a deployed pipeline, we run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the ego-only (pre-fusion) prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over the $200$ paired stochastic channel realisations of the frozen replay. Table~\ref{tab:true_e2e} reports the result.
 
 \begin{table}[t]
 \centering
@@ -570,18 +569,18 @@ Table~\ref{tab:gen_headline} reports the headline comparison on both splits, eve
 Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
 \midrule
 \multicolumn{4}{l}{\emph{OPV2V test} ($T=2{,}170$)} \\
-Fixed $L$                       & 0.9011 & 0.024 & $2.4\%$ \\
-Fixed $F$ (LDPC + 16-QAM)       & 0.8516 & 0.990 & $100\%$ \\
-Fixed $C_{256}$ (LDPC + 256-QAM)& 0.8264 & 0.495 & $50.0\%$ \\
+Fixed $L$                       & 0.8910 & 0.024 & $2.4\%$ \\
+Fixed $F$ (LDPC + 16-QAM)       & 0.8483 & 0.990 & $100\%$ \\
+Fixed $C_{256}$ (LDPC + 256-QAM)& 0.8255 & 0.495 & $50.0\%$ \\
 \quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.89148 / 0.89247 & 0.0368 / 0.0724 & $3.7\%$ / $7.3\%$ \\
 \quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.89691 / 0.89701 & 0.1414 / 0.2168 & $14.3\%$ / $21.9\%$ \\
 \quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.89783 / 0.89900 & 0.2120 / 0.3125 & $21.4\%$ / $31.6\%$ \\
 Channel-aware oracle (masked)   & 0.9165 & 0.1706 & $17.2\%$ \\
 \midrule
 \multicolumn{4}{l}{\emph{OPV2V Culver-City} ($T=550$)} \\
-Fixed $L$                       & 0.8722 & 0.024 & $2.4\%$ \\
-Fixed $F$ (LDPC + 16-QAM)       & 0.8165 & 0.990 & $100\%$ \\
-Fixed $C_{256}$ (LDPC + 256-QAM)& 0.7811 & 0.495 & $50.0\%$ \\
+Fixed $L$                       & 0.8466 & 0.024 & $2.4\%$ \\
+Fixed $F$ (LDPC + 16-QAM)       & 0.8099 & 0.990 & $100\%$ \\
+Fixed $C_{256}$ (LDPC + 256-QAM)& 0.7793 & 0.495 & $50.0\%$ \\
 \quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.87230 / 0.87491 & 0.0283 / 0.0718 & $2.9\%$ / $7.2\%$ \\
 \quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.87355 / 0.88340 & 0.0423 / 0.2174 & $4.3\%$ / $22.0\%$ \\
 \quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.88286 / 0.88740 & 0.1601 / 0.3146 & $16.2\%$ / $31.8\%$ \\
@@ -737,22 +736,19 @@ reproduction, not the authors' released model; they are measured under a
 \emph{perfect} channel, so no part of this paper's transport model applies to
 them; and they were scored by the retired global-sort scorer, which is a
 different track from the frozen AP chain that produces every headline number
-here. The comparison is therefore indicative of relative standing under ideal
-transmission and is not on the same protocol as the frozen results. Under
-perfect channel (lossless feature-level transmission), Where2comm
-achieves AP@0.5 = $0.871$ and AP@0.7 = $0.790$. This is a solid
-feature-level result---but it is neither the strongest feature branch nor,
-notably, above the object-level baseline: the attentive-compression
-branch used by \method{} reaches $0.893$ AP@0.5 on test ($0.837$ on validate), and even the
-channel-invariant Fixed $L$ value of $0.869 / 0.782$ exceeds Where2comm
-under this protocol. In other words, on OPV2V with the frozen
-PointPillars backbone, a well-engineered spatial-mask feature method does
-not outperform compact object-level late fusion even under an ideal
-channel; only the tighter attentive-compression codec clears the Fixed
-$L$ operating point. This directly reinforces the central premise of the
-paper---that fixed feature-level communication is not automatically worth
-its payload---and it holds \emph{before} any channel degradation is
-introduced. The comparison is also \emph{orthogonal} to \method{}:
+here. Our reproduction reaches AP@$0.5 = 0.871$ under a perfect channel, and we
+deliberately draw \textbf{no ranking} from it. It is not comparable to any
+number in this paper, on three independent axes at once: a different scorer
+(the retired global-sort track, not the frozen AP chain), a perfect channel
+rather than the modelled transport, and---decisively---a different
+collaborator convention, since the reproduction fuses every collaborator
+while the corrected main experiment pays for one. The direction of such a
+comparison is not even stable: under the corrected accounting the validate
+Fixed-$L$ reference is $0.7819$, \emph{below} $0.871$, which reverses the
+ordering an earlier version of this section reported. Numbers measured under
+three different conventions cannot be ordered, and we do not order them.
+
+The comparison is also \emph{orthogonal} to \method{}:
 Where2comm is a spatial-mask method that decides \emph{which feature
 regions} to send \emph{within} a fixed feature-level granularity, whereas
 \method{} decides \emph{whether} to send feature-level information at all

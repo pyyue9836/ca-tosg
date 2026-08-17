@@ -243,7 +243,23 @@ def main():
         if cur != content:
             print('docs/claims.md is STALE vs main.tex -- re-run: python tests/test_result_consistency.py')
             sys.exit(1)
-        print('docs/claims.md up to date.')
+        # R20 9a: freshness is not enough -- an unbound or stale row is a FAILURE, not a note.
+        # Both were reported as counts for months while the gate passed.
+        rows = [l for l in open(OUT, encoding='utf-8') if l.startswith('| c')]
+        stale, pend = 0, 0
+        for l in rows:
+            c = [x.strip() for x in l.strip().strip('|').split('|')]
+            if len(c) != 9:
+                continue
+            if c[3].startswith('\u26a0 STALE'):
+                stale += 1
+            elif not any(c[3:9]):
+                pend += 1
+        if stale or pend:
+            print('CLAIMS GATE FAIL: %d STALE and %d unbound row(s) in docs/claims.md -- '
+                  'rebind them or delete the sentence (R20 9a)' % (stale, pend))
+            return 1
+        print('docs/claims.md up to date; 0 STALE, 0 unbound (R20 9a).')
         return
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write(content)

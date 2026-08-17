@@ -1,0 +1,23 @@
+{
+  "schema": "catosg-derived-table-cells/1",
+  "note": "regime means over the AWGN SNR points below / at-and-above the measured knee",
+  "tab:headline": [
+    "0.024",
+    "0.029",
+    "0.180",
+    "0.453",
+    "0.483",
+    "0.6463",
+    "0.6553",
+    "0.7038",
+    "0.7296",
+    "0.7299",
+    "0.7475",
+    "0.7818",
+    "0.8027",
+    "0.8177",
+    "0.8290",
+    "0.8691",
+    "0.8892"
+  ]
+}

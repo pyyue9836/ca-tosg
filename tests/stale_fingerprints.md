@@ -94,7 +94,7 @@ RX 0\.895(?![0-9])
 RX \$\\approx 0\.86
 RX (cut|save)[a-z' ]{0,28}channel use by
 RX 0\.081
-RX 0\.888[^6]
+RX 0\.888(?![0-9])
 RX reproduces \$[0-9]
 RX decision agreement
 RX base rate
@@ -160,3 +160,11 @@ RX 6\.9\$--\$18\.9
 RX 59\.9\\pm5\.3
 RX \\mathrm\{P95\}=66\.6
 RX (beats|outperforms|defeats)[^.\n]{0,40}(bandit|reinforcement)
+
+# R20 note on pattern form: a numeric fingerprint must be written as
+#   NUMBER(?![0-9])
+# and never as NUMBER[^d]. The bracket form CONSUMES the following character, so the sweep cannot
+# tell "the retired 0.888" from "a fresh 0.8883", and it also defeats the digit-boundary rule in
+# tools/verify_results.py. `0\.888[^6]` was the last of these and is converted; the lookahead form
+# preserves the original intent (0.8886 was the legitimate value it had to avoid) and adds prefix
+# safety. Sixth instance of this collision family after 0.248, 27.5, 18.4, 0.895 and 0.081.

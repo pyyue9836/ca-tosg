@@ -7,8 +7,8 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 | state | count |
 |---|---|
 | quoted on both sides | 12 |
-| quoted on one side only | 15 |
-| drawn but never stated | 5 |
+| quoted on one side only | 19 |
+| drawn but never stated | 1 |
 | same value, different condition | 2 |
 
 ## Quoted on one side only
@@ -20,7 +20,9 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 | `f1_catosg_rayleigh_at_knee` | 0.8558 | caption only |
 | `f1_catosg_rayleigh_high` | 0.8558 | caption only |
 | `f1_catosg_rayleigh_low` | 0.8558 | caption only |
+| `pareto_Fixed-C256_f1` | 0.8255 | body only |
 | `pareto_Fixed-C256_payload` | 0.495 | body only |
+| `pareto_Fixed-F_f1` | 0.8483 | body only |
 | `pareto_Fixed-L_f1` | 0.891 | body only |
 | `pareto_catosg_B010_f1` | 0.8915 | body only |
 | `pareto_catosg_B010_payload` | 0.0368 | body only |
@@ -28,6 +30,8 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 | `pareto_catosg_B020_payload` | 0.1414 | body only |
 | `pareto_catosg_B030_f1` | 0.8978 | body only |
 | `pareto_catosg_B030_payload` | 0.212 | body only |
+| `pareto_oracle_f1` | 0.9056 | body only |
+| `pareto_oracle_payload` | 0.175 | body only |
 | `payload_catosg_awgn_low` | 0.0237 | body only |
 | `rho_E_oracle_rayleigh_test` | 0.1571 | body only |
 
@@ -35,10 +39,6 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 
 | drawn number | value | condition |
 |---|---|---|
-| `pareto_Fixed-C256_f1` | 0.8255 | split=test |
-| `pareto_Fixed-F_f1` | 0.8483 | split=test |
-| `pareto_oracle_f1` | 0.9056 | split=test |
-| `pareto_oracle_payload` | 0.175 | split=test |
 | `rho_E_catosg_rayleigh_test` | 0.0018 | split=test budget=0.2 channel=rayleigh snr_db=10.0 |
 
 ## Same value, different condition

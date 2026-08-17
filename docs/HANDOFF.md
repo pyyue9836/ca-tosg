@@ -1,5 +1,12 @@
 # HANDOFF — read this first in a new session
 
+> **HISTORICAL as of 2026-08-17 (R20).** This handoff predates the P0 corrigendum. The
+> current state is: single-collaborator protocol throughout the mainline, all fifteen checks
+> green, `docs/p0_corrigendum.md` for what changed and `docs/experiment_protocol.md`
+> (Change-logs P0 … R20) for the decision record. Read those first; treat everything below
+> as a record of where things stood before the correction.
+
+
 Written 2026-08-14. Everything below is checkable from the repo; nothing here is memory.
 
 ```

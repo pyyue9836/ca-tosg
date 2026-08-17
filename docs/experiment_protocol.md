@@ -3312,3 +3312,107 @@ Three claims changed sign or direction and are written as they came out:
 **Eleven gates: ALL PASS. P6-1: MISS 0** (68 literals located, 31 derived). **P6-2:** 70 ANALYTIC /
 47 FROZEN / 2 LEGACY-ENGINE — both in the prior-protocol appendix, 0 UNRESOLVED. **P6-3:** 0 / 0 / 0
 with all three positive controls firing. **P6-4:** 0 violations.
+
+---
+
+## Change-log R20 (2026-08-17) — generator-owned tables, doc sync, gate upgrades
+
+**Zero GPU.** Everything below is a generator re-emission, a text sync, or a gate upgrade.
+
+### 1–2 · The headline tables now belong to a generator
+
+`tools/build_paper_tables.py` writes `tab:headline`, `tab:headline_agg` and the per-split fixed
+baselines of `tab:gen_headline` directly from `true_e2e_ap_by_snr.csv`, `fixed_references.csv`,
+`replay_summary.csv` and `FROZEN_MANIFEST.json`. Nothing is transcribed, so re-running the generator is
+the only way those cells can change. This mattered: `tab:headline` was still **entirely**
+pre-corrigendum, and `tab:headline_agg` was **mixed** — CA-TOSG rows renumbered, fixed baselines and
+τ rows retired. All four fixed rows (Fixed-L / F / C256 / masked oracle) are emitted together, so a
+one-row patch is no longer possible.
+
+### 3 · §IV-E hyperparameters, strictly from the manifest
+
+`leaf = 2`, `class_weight = None` at all three budgets, depth `10 / 10 / None`, `N_T = 400`,
+`max_features = sqrt`. The claim that balanced weighting compensates for label imbalance is
+**deleted** — the walk selected unweighted candidates. §IV-E and §V-D now agree.
+
+### 4 · Where2comm: no ranking
+
+The numeric conclusion is withdrawn. Our reproduction's 0.871 is not comparable to anything here on
+three axes at once — different scorer (retired global-sort), perfect channel, and a different
+collaborator convention. And the direction is not stable: the corrected validate Fixed-L reference is
+**0.7819 < 0.871**, reversing the ordering the section used to report. The orthogonality and
+composability discussion is kept in full; only the ranking goes.
+
+### 5–8 · Text and docs
+
+"averaged over 5 realisations" → the 200 paired draws it actually was. README's results section is
+rebuilt from the registry sources with **both** saving tracks (34.8% vs nominal, 26.6% vs
+budget-matched, "quote both or neither"), and the PHY sentence now says the physical layer decides
+whether the **chosen high-payload message** lands, with the 2-bit request riding the protected
+low-rate path. `model_zoo` tables, the registry's display column, `figures/README` and `HANDOFF.md`
+(marked historical) are regenerated or annotated from the manifests. Banner, all three copies:
+*all mainline results use the single-collaborator protocol; exceptions (SECOND appendix, Where2comm
+reference) are labeled where they appear.*
+
+### 9 · Gate upgrades, and what each caught immediately
+
+* **(a) STALE / unbound rows are now failures.** `tests/test_result_consistency.py --check` fails on
+  any `⚠ STALE` or evidence-less ledger row; both had been reported as counts for months while the
+  gate passed. Cleared this batch: **130 filled / 0 pending / 0 STALE**, no sentence deleted — all 44
+  rows the rewrites had orphaned were rebindable, so there is no deletion list to send.
+* **(b) P6-1 extended to every table cell.** Claim-level checking walks sentences, so a whole table
+  body could stay retired while the prose around it was bound. The new sweep found exactly that:
+  `tab:gen_headline`'s Fixed-F / C256 baselines. Now **191/191 cells located, 0 unlocated**;
+  generator-derived cells (regime means) are declared in `DERIVED_TABLE_CELLS.json` rather than waved
+  through.
+* **(c) README and docs/ are in scope.** The fingerprint sweep and the canonical-registry check read
+  `paper/main.tex` only, so the registry's own display column had drifted to *every* retired value
+  while its derivations passed. Both now cover README, `model_zoo`, the registry and the milestone
+  summary. `p0_corrigendum.md` and the registry's explanatory prose are deliberately **excluded**:
+  quoting the retired values is their job.
+
+**A structural fix, sixth of its family.** Numeric fingerprints must be written `NUMBER(?![0-9])`,
+never `NUMBER[^d]`: the bracket form consumes the next character, so the sweep cannot separate the
+retired `0.888` from a fresh `0.8883`, and it defeats the digit-boundary rule. The last such pattern
+is converted, the boundary rule is applied once for all targets, and the lesson is recorded in
+`tests/stale_fingerprints.md` after 0.248, 27.5, 18.4, 0.895 and 0.081.
+
+### 10 · Pre-registered as future work, NOT run
+
+Three supervisor revision-level checks are registered here before any of them is attempted, so that
+whoever runs them cannot choose the analysis after seeing the data:
+
+1. **Scene-level bootstrap.** Re-derive every headline interval by resampling the nine validate
+   scenes (and the test/Culver scenes) rather than frames, since frames within a scene are not
+   independent. Expected effect: intervals widen; the non-inferiority margin call at the primary cell
+   may become inconclusive. Decision rule to fix now: if the scene-level LCB95 crosses −δ, R9 is
+   reported as **inconclusive under scene-level resampling**, not as failed, and both intervals are
+   published side by side.
+2. **L-link reliability.** The object-level message is modelled with `BLER_L = 0`. Re-run the replay
+   with `BLER_L ∈ {0.01, 0.05, 0.10}` (the existing `object_message_bler.csv` axis) and report how far
+   the payload advantage survives once the cheap message can also fail.
+3. **Fragmentation / HARQ sensitivity.** The feature message is charged as one frame with one BLER.
+   Re-run with the message split into `k ∈ {2, 4}` fragments (independent per-fragment BLER, all
+   required) and with one HARQ retransmission (payload ×(1+p_retx)), reporting the effect on the knee
+   position and on the payload advantage.
+
+None of the three is run in this batch, and no number from them appears anywhere.
+
+### R20 addendum — two self-inflicted incidents, both caught by the gates
+
+**1. `git checkout paper/main.tex` silently reverted four completed edits.** While fixing the table
+generator I reset `main.tex` twice to re-run it from a clean base, which discarded the *uncommitted*
+item-3/4/5 work (hyperparameters, the Where2comm de-ranking, the 5→200 realisation fix) and the
+`tab:headline` caption. Nothing warned; the ledger's unbound-row check (9a, added minutes earlier)
+is what surfaced it, by reporting rows whose sentences had reappeared in their retired form. All four
+were reapplied and re-verified. Lesson recorded: a generator that rewrites a tracked file must not be
+debugged by `git checkout`-ing that file while other edits to it are uncommitted.
+
+**2. Five false ENTITY-VALUE conflicts, fixed at the root rather than by relabelling.** P6-3 kept
+pairing quantities that share a ledger `(metric, split)` label but not a scale -- an F1 gap of
+0.0001 against a payload of 0.2168, the easy stratum against the hard tercile, a validate knee
+against test operating points. Each was individually "fixable" by inventing a narrower label, which
+is how the fifth one arrived. Instead the scan now requires the two value sets to sit **within one
+order of magnitude**, plus a structural-settings filter (budgets, IoU thresholds) so a claim that
+merely mentions `B_max=0.20` no longer collides with everything else about that split. Both controls
+still fire, and the count is 0 without a single label invented to get there.

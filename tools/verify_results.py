@@ -54,15 +54,39 @@ GATES = [
 ]
 
 
+# R20 9c: the fingerprint sweep covers the reader-facing docs too. It read main.tex only, so a
+# retired number could (and did) survive in README and docs/ with every gate green.
+FINGERPRINT_TARGETS = ('paper/main.tex', 'README.md', 'docs/model_zoo.md',
+                       'docs/milestone_summary.md')
+# NOT swept, by design: docs/p0_corrigendum.md and docs/canonical_quantities.md exist to record what
+# the retired values WERE (old-vs-new tables, "which side flipped"), so a retired number is correct
+# content there. Sweeping them would force the record to delete its own evidence.
+
+
 def block_exit():
-    """Retired fingerprints must not reappear in main.tex: expect 0 matches."""
+    """Retired fingerprints must not reappear in the paper or the reader-facing docs."""
     pats = [l[3:].strip() for l in open(os.path.join(ROOT, 'tests/stale_fingerprints.md'),
                                         encoding='utf-8') if l.startswith('RX ')]
-    tex = open(os.path.join(ROOT, 'paper/main.tex'), encoding='utf-8').read()
-    hits = [p for p in pats if re.search(p, tex)]
-    for h in hits:
-        print('  STALE FINGERPRINT PRESENT: %s' % h)
-    return len(hits)
+    n = 0
+    for rel in FINGERPRINT_TARGETS:
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            continue
+        body = open(path, encoding='utf-8').read()
+        for p in pats:
+            # A retired VALUE is that value, not a prefix of a longer one. Without this, patterns
+            # written for main.tex's 3-4 decimal prose fire on generated tables that print 5 --
+            # 0.888 matched a per-class F1 of 0.8883, 0.081 matched a payload of 0.08102. This is the
+            # same anchoring failure as the 0.248 / 27.5 / 18.4 / 0.895 collisions, fixed once here
+            # instead of pattern by pattern.
+            for m in re.finditer(p, body):
+                tail = body[m.end():m.end() + 1]
+                if tail.isdigit():
+                    continue
+                print('  STALE FINGERPRINT PRESENT in %s: %s' % (rel, p))
+                n += 1
+                break
+    return n
 
 
 if __name__ == '__main__':

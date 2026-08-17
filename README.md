@@ -1,6 +1,6 @@
 # CA-TOSG (Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception)
 
-_All numbers reflect the P0-corrected single-collaborator protocol (tag `pre-p0-corrigendum` marks the pre-correction state)._
+_All mainline results use the single-collaborator protocol; exceptions (SECOND appendix, Where2comm reference) are labeled where they appear. Tag `pre-p0-corrigendum` marks the pre-correction state._
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
@@ -25,28 +25,38 @@ channel state:
 
 A feature message is worth its 41× cost only when the channel will actually deliver it *and* the
 frame is one where cooperation helps. A random forest over 23 ego-side cues makes that call per
-frame; the physical layer (5G-LDPC rate-1/2 + 16/256-QAM, Sionna frame-level BLER) decides whether
-the request survives, with ego-only as the failure fallback. One model is frozen per budget.
+frame; the physical layer (5G-LDPC rate-1/2 + 16/256-QAM, Sionna frame-level BLER) decides whether the
+chosen high-payload message is delivered, with ego-only as the failure fallback; the 2-bit request
+itself rides the protected low-rate path and is not what the BLER model gates. One model is frozen per budget.
 
 ## Results
 
 Held-out **test** split, 200-realisation deployment (per frame SNR ~ U[0,20] dB, Rayleigh with
-probability 0.5), against a budget-matched SNR-threshold policy. Payload in Msym/frame.
+probability 0.5), against the nominal SNR-threshold policy tuned to the same budget. Payload in
+Msym/frame. All numbers regenerated from the frozen products by `tools/build_paper_tables.py`
+and re-derived at gate time by `tests/test_canonical_quantities.py`.
 
 | B_max | policy | F1 | payload | AP@0.5 |
 |---|---|---|---|---|
-| 0.10 | CA-TOSG | 0.9033 | **0.0680** | 0.9181 |
-| 0.10 | SNR-threshold | 0.9027 | 0.0724 | 0.9189 |
-| 0.20 | CA-TOSG | 0.9046 | **0.0947** | 0.9182 |
-| 0.20 | SNR-threshold | 0.9074 | 0.2168 | 0.9190 |
-| 0.30 | CA-TOSG | 0.9073 | **0.1870** | 0.9187 |
-| 0.30 | SNR-threshold | 0.9094 | 0.3125 | 0.9174 |
+| 0.10 | CA-TOSG | 0.8915 | **0.0368** | 0.8697 |
+| 0.10 | SNR-threshold (nominal) | 0.8925 | 0.0724 | -- |
+| 0.20 | CA-TOSG | 0.8969 | **0.1414** | 0.8742 |
+| 0.20 | SNR-threshold (nominal) | 0.8970 | 0.2168 | -- |
+| 0.30 | CA-TOSG | 0.8978 | **0.2120** | 0.8742 |
+| 0.30 | SNR-threshold (nominal) | 0.8990 | 0.3125 | -- |
 
-Reference points on the same split: Fixed-L AP@0.5 = 0.9189, feature-ceiling = 0.9216, ego-only
-= 0.7350. At B_max = 0.20 the selector spends **56% less channel use** than the budget-matched
-threshold, for a 0.003 F1 difference.
+Reference points on the same split: Fixed-L AP@0.5 = 0.8691, feature-ceiling =
+0.8931, ego-only = 0.7350 (headroom 0.0240).
 
-Sources: `results/main/replay_summary.csv`, `results/main/true_e2e_ap.csv`. Every number in the
+**Channel-use saving at B_max = 0.20, on two tracks.** Against the *nominal* threshold the
+selector spends **34.8% less** channel use -- but that
+threshold is itself over budget (0.2168 > 0.20 Msym). Against
+`tau_feasible`, the strictly budget-matched threshold, the saving is
+**26.6%** and the F1 comparison turns in the
+selector's favour (+0.00067). Quote both or neither.
+
+Sources: `results/main/replay_summary.csv`, `results/main/true_e2e_ap.csv`,
+`results/main/tau_feasible.csv`, `results/main/fixed_references.csv`. Every number in the
 manuscript is indexed by `docs/claims.md`; every result file by `results/README.md`.
 
 ## Installation
