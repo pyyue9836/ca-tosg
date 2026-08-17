@@ -205,6 +205,60 @@ def q_docs_display(_text):
     return rc
 
 
+def q_registry_arithmetic(text):
+    """R23-6: every `A / B = C` written in the REGISTRY's own derivation column must hold.
+
+    The checker re-derives each quantity from its CSV and never read the registry's prose, so the
+    prose could drift -- and it had: the FA-1 row still quoted the retired 0.28843 / 0.18703, and
+    the latency row named the wrong selector. This closes that by evaluating the registry's own
+    arithmetic: both inputs must exist in the CSV the row names, and the quotient must equal the
+    displayed value to the precision it is displayed at.
+    """
+    reg = open(REGISTRY, encoding='utf-8').read()
+    rc, n = 0, 0
+    for line in reg.split('\n'):
+        if not line.startswith('|') or line.startswith('|---'):
+            continue
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        if len(cells) != 4:
+            continue
+        quantity, printed_as, source, deriv = cells
+        m = re.search(r'([0-9]+\.[0-9]+)\s*/\s*([0-9]+\.[0-9]+)\s*=\s*([0-9]+\.[0-9]+)', deriv)
+        if not m:
+            continue
+        n += 1
+        a, b, c = (float(x) for x in m.groups())
+        prec = len(m.group(3).split('.')[1])
+        rc |= check(f'registry arithmetic [{quantity}]', abs(a / b - c) < 0.5 * 10 ** -prec,
+                    f'{m.group(1)} / {m.group(2)} = {a / b:.6f}, registry says {m.group(3)}')
+        rel = re.search(r'`(results/[^`]+\.csv)`', source)
+        if not rel:
+            rc |= check(f'registry source [{quantity}]', False,
+                        'the source column names no committed CSV')
+            continue
+        d = pd.read_csv(os.path.join(ROOT, rel.group(1)))
+        vals = set()
+        for col in d.columns:
+            if pd.api.types.is_numeric_dtype(d[col]):
+                vals.update(round(float(v), 5) for v in d[col].dropna())
+        for lit in (m.group(1), m.group(2)):
+            rc |= check(f'registry input {lit} in {os.path.basename(rel.group(1))}',
+                        round(float(lit), 5) in vals,
+                        f'{quantity}: the derivation quotes {lit}; '
+                        f'{"present" if round(float(lit), 5) in vals else "ABSENT"} in the CSV')
+        # the displayed value must also be the one the paper prints
+        pm = re.search(r'`([0-9]+\.[0-9]+)', printed_as)
+        if pm:
+            rc |= check(f'registry display [{quantity}]',
+                        abs(float(pm.group(1)) - a / b) < 0.5 * 10 ** -len(pm.group(1).split('.')[1]),
+                        f'printed as {pm.group(1)}, derivation gives {a / b:.6f}')
+    if n == 0:
+        rc |= check('registry arithmetic', False,
+                    'no derivation cell carries an `A / B = C` form -- the check cannot fail, '
+                    'which means it is not a check')
+    return rc
+
+
 def main() -> int:
     if not os.path.exists(REGISTRY):
         print(f'FAIL: {os.path.relpath(REGISTRY, ROOT)} is missing -- the registry is the '
@@ -214,7 +268,7 @@ def main() -> int:
     print('canonical quantities (every reference re-derived from its committed product):')
     rc = 0
     for fn in (q_feature_importance, q_latency, q_fa1_ratio, q_payload_reduction,
-               q_ratio_families, q_jscc_recovery, q_docs_display):
+               q_ratio_families, q_jscc_recovery, q_docs_display, q_registry_arithmetic):
         rc |= fn(text)
     # the registry must name every quantity this file checks, so the two cannot drift apart
     reg = open(REGISTRY, encoding='utf-8').read()

@@ -12,7 +12,7 @@ The confirmatory comparison was fixed before the numbers were seen: frozen selec
 | `UCB95(dB) < 0` | -0.07441 | **yes** |
 | `(B_tau-B_RF)/B_tau >= 0.10` | +0.34773 | **yes** |
 
-All 3 conditions hold: the selector is non-inferior within the margin **and** strictly cheaper, at a payload reduction of 34.8%.
+All 3 conditions hold: the selector is non-inferior within the margin **and** strictly cheaper. The payload saving is **two-track and must be quoted as both**: **34.8%** against the nominal threshold (which is itself over budget at 0.2168 > 0.20 Msym) and **26.6%** against the budget-matched $\tau_{\mathrm{feasible}}$.
 
 ## 2. Main table — three splits × three budgets
 
@@ -82,7 +82,7 @@ Feature ablation under the frozen protocol. The finding is about the *shape* of 
 | culver | 0.30 | task_only | 21 | 0.84664 | 0.02400 | 0.0000 |
 | culver | 0.30 | combined | 23 | 0.85932 | 0.18226 | 0.1638 |
 
-Channel state alone stops requesting features altogether at the two tighter budgets (feature-request rate 0, payload pinned at $B_L$); at $B_{\max}=0.30$ it does reach a higher F1 than the full selector, but only by spending **1.36×** the channel use (0.28722 against 0.21197 Msym). Cues alone never request features at all.
+Channel state alone stops requesting features altogether at the two tighter budgets (feature-request rate 0, payload pinned at $B_L$); at $B_{\max}=0.30$ it does reach a LOWER F1 than the full selector while still spending **1.36×** the channel use — 0.89529 against 0.89783 F1 (-0.00254) at 0.28722 against 0.21197 Msym. Cues alone never request features at all.
 
 ## 5. Collaborator scale
 

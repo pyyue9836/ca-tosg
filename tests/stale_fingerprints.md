@@ -160,6 +160,16 @@ RX 6\.9\$--\$18\.9
 RX 59\.9\\pm5\.3
 RX \\mathrm\{P95\}=66\.6
 RX (beats|outperforms|defeats)[^.\n]{0,40}(bandit|reinforcement)
+# R23-2: the retired threshold channel-use ratios in sec:threshold's summary paragraph. The
+# corrected pair is 1.53x / 1.47x (B_tau/B_RF on test at B_max=0.20 and 0.30, from
+# replay_summary.csv). Anchored on the \times so the bare numbers 2.3 / 1.7 stay usable.
+RX 2\.3\\times
+RX 1\.7\\times
+# R23-1: the retired B_max=0.30 test payload. Corrected value 0.21196 (replay_summary.csv,
+# split=test, budget=0.3, B_RF). Anchored NUMBER(?![0-9]) per the R20 rule, plus a payload word,
+# because 0.187 also appears as a legitimate three-decimal value elsewhere in the record.
+RX 0\.187(?![0-9])[^\n]{0,40}(Msym|payload|channel use)
+RX (Msym|payload|channel use)[^\n]{0,40}0\.187(?![0-9])
 
 # R20 note on pattern form: a numeric fingerprint must be written as
 #   NUMBER(?![0-9])

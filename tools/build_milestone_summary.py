@@ -37,6 +37,7 @@ def main() -> int:
     col = csv('results/sensitivity/collaborator_scale.csv')
     p4b = csv('results/p4b/replay_summary.csv')
     lat = csv('results/latency/selector_latency.csv')
+    tf = csv('results/main/tau_feasible.csv')
     b_f = float(fx[(fx.split == 'validate') & (fx.policy == 'Fixed-F')].payload_msym.iloc[0])
 
     L = []
@@ -60,9 +61,21 @@ def main() -> int:
     for _, r in r9.iterrows():
         w(f'| `{r.condition}` | {r.value:+.5f} | {"**yes**" if r.result else "no"} |')
     w('')
+    # R23-7: quote-both-or-neither. The nominal saving is against a threshold that is itself over
+    # budget, so it may never appear without the budget-matched one beside it. Both are READ, not
+    # typed, and the generator refuses to emit either if tau_feasible.csv cannot supply the second.
+    red_nominal = 100 * float(r9[r9.condition.str.contains('B_tau')].value.iloc[-1])
+    tfp = tf[(tf.split == 'test') & (tf.budget == 0.20)]
+    if len(tfp) != 1:
+        raise SystemExit('milestone FUSE: tau_feasible.csv has no test@B0.20 row -- the nominal '
+                         'payload saving may not be quoted without the budget-matched one (R23-7)')
+    red_feasible = 100 * float(tfp.payload_reduction_vs_feasible.iloc[0])
+    over = float(tfp.B_tau_nominal.iloc[0])
     w(f'All {len(r9)} conditions hold: the selector is non-inferior within the margin **and** '
-      'strictly cheaper, at a payload reduction of '
-      f'{100 * float(r9[r9.condition.str.contains("B_tau")].value.iloc[-1]):.1f}%.')
+      'strictly cheaper. The payload saving is **two-track and must be quoted as both**: '
+      f'**{red_nominal:.1f}%** against the nominal threshold (which is itself over budget at '
+      f'{over:.4f} > 0.20 Msym) and **{red_feasible:.1f}%** against the budget-matched '
+      '$\\tau_{\\mathrm{feasible}}$.')
     w('')
 
     w('## 2. Main table — three splits × three budgets')
@@ -110,12 +123,19 @@ def main() -> int:
           f'{"" if pd.isna(r.n_features) else int(r.n_features)} | {r.F1:.5f} | '
           f'{r.payload:.5f} | {r.rho_F:.4f} |')
     t3 = fa1[(fa1.split == 'test') & (fa1.budget == 0.3)].set_index('variant')
-    ratio = float(t3.loc['channel_only', 'payload']) / float(t3.loc['combined', 'payload'])
+    co_f1, cb_f1 = float(t3.loc['channel_only', 'F1']), float(t3.loc['combined', 'F1'])
+    co_pay, cb_pay = float(t3.loc['channel_only', 'payload']), float(t3.loc['combined', 'payload'])
+    ratio = co_pay / cb_pay
+    # R23-3: the direction of the F1 comparison is DERIVED, never typed. The retired template said
+    # "reaches a higher F1"; under the corrected convention the channel-only variant is lower on
+    # BOTH axes, and a hand-written direction word is exactly what went stale.
+    dirn = ('a higher F1 than the full selector, but only by spending' if co_f1 > cb_f1 else
+            'a LOWER F1 than the full selector while still spending')
     w('')
     w('Channel state alone stops requesting features altogether at the two tighter budgets '
-      '(feature-request rate 0, payload pinned at $B_L$); at $B_{\\max}=0.30$ it does reach a '
-      f'higher F1 than the full selector, but only by spending **{ratio:.2f}×** the channel use '
-      f'({t3.loc["channel_only", "payload"]} against {t3.loc["combined", "payload"]} Msym). Cues '
+      f'(feature-request rate 0, payload pinned at $B_L$); at $B_{{\\max}}=0.30$ it does reach '
+      f'{dirn} **{ratio:.2f}×** the channel use — {co_f1:.5f} against {cb_f1:.5f} F1 '
+      f'({co_f1 - cb_f1:+.5f}) at {co_pay:.5f} against {cb_pay:.5f} Msym. Cues '
       'alone never request features at all.')
     w('')
 
