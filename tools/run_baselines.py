@@ -19,7 +19,7 @@ import argparse
 
 BASELINES = {
     'contextual_bandit': ('baselines/contextual_bandit', 'train', 'evaluate'),
-    'two_gate': ('baselines/two_gate', 'train', 'evaluate'),
+    'two_gate': ('baselines/two_gate', 'fit_two_gate', 'replay_two_gate'),
 }
 
 if __name__ == '__main__':

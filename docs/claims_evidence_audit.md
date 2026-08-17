@@ -6,8 +6,8 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| ANALYTIC | 64 |
-| FROZEN | 63 |
+| ANALYTIC | 66 |
+| FROZEN | 61 |
 | LEGACY-ENGINE | 3 |
 
 Total: **130** claims across **37** (sub)sections.
@@ -260,7 +260,7 @@ Total: **130** claims across **37** (sub)sections.
 |---|---|---|---|
 | `cd0f888` | FROZEN | 0.20, -0.0047, 95, -0.0074, -0.0024, +0.0056, +0.0027, +0.00 | At B_=0.20 the CA-TOSG-over-Fixed-L gain rises monotonically with difficulty: on test it is -0.0047 (95\% CI [-0.0074,-0.0024]) on… |
 | `cf195ef` | FROZEN | +0.0058, +0.0441, +0.0470, +0.0011, +0.0021, +0.0310 | Validate has the same shape (+0.0058 / +0.0441 / +0.0470); Culver-City is weaker throughout (+0.0011 / +0.0021 / +0.0310). |
-| `c408d70` | FROZEN | -0.0040, 1, 0, 200 | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-penalised (>0) operating… |
+| `c408d70` | ANALYTIC | -0.0040, 1, 0, 200 | On easy frames the deployed selector slightly over-requests F on test, a -0.0040 F1 effect that a payload-penalised (>0) operating… |
 
 ### Results and Analysis → Is a Learned Selector Necessary? Comparison with an SNR-Threshold Rule [sec:threshold]
 
@@ -303,7 +303,7 @@ Total: **130** claims across **37** (sub)sections.
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c5854ea` | FROZEN | 1, 0.0002, 60, 10, -0.0025, -0.0109, 18.2 | Under AWGN the selector tolerates SNR-estimation noise up to ≈ 1 dB with ≤ 0.0002 F1 loss; under a Jakes model at 60 km/h the SNR … |
+| `c5854ea` | ANALYTIC | 1, 0.0002, 60, 10, -0.0025, -0.0109, 18.2 | Under AWGN the selector tolerates SNR-estimation noise up to ≈ 1 dB with ≤ 0.0002 F1 loss; under a Jakes model at 60 km/h the SNR … |
 | `c53d0f4` | FROZEN | 52.1, 5.6, 95, 58.3, 40, 100, 10 | Finally, the deployed Random Forest runs in 52.1 ± 5.6 ms per frame (P95=58.3 ms) on a single CPU core, leaving a 40 ms margin wit… |
 
 ### Conclusion

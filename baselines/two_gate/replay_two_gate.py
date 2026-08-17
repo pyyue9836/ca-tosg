@@ -33,7 +33,7 @@ for _d in ('projects/ca_tosg/evaluation', 'projects/ca_tosg/utils'):
     sys.path.insert(0, os.path.join(_CT_ROOT, _d))
 
 import deployment as D                                                            # noqa: E402
-import train as T                                                                 # noqa: E402
+import fit_two_gate as T                                                          # noqa: E402
 
 P1 = D.P1
 OUT_RUNS = os.path.join(P1, 'results/baselines/two_gate_runs')

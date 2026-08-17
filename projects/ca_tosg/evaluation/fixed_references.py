@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 """P5-7 (A): the fixed-policy reference rows, under the FROZEN replay's own CSI draw.
 
+R21-A item 3 adds **Fixed-E**, the ego-only floor: F1 = mean(ego_f1), payload 0.000, and no CSI
+dependence at all (its std is 0 by construction, like Fixed-L's). It is the reference against which
+`rho_E` -- the fraction of frames a policy keeps ego-only -- is read.
+
 `replay_summary.csv` carries only the two learned policies (RF and tau). The reference rows that
 sit beside them in Tables IV and VIII -- Fixed L, Fixed F, Fixed C256 and the channel-aware oracle
 -- came from the retired engine, so a table containing both was mixing engines.
@@ -70,7 +74,7 @@ def main() -> int:
         snr_2d = rng.uniform(0, 20, size=(D.N_REPLAY, n))
         is_ray_2d = rng.random(size=(D.N_REPLAY, n)) < 0.5
 
-        f1 = {k: np.empty(D.N_REPLAY) for k in ('L', 'F', 'C256', 'oracle')}
+        f1 = {k: np.empty(D.N_REPLAY) for k in ('E', 'L', 'F', 'C256', 'oracle')}
         pay = {k: np.empty(D.N_REPLAY) for k in ('oracle',)}
         for r in range(D.N_REPLAY):
             bF = D.bler16(tbl, snr_2d[r], is_ray_2d[r])
@@ -82,6 +86,7 @@ def main() -> int:
             b256 = bler_q(tbl, snr_2d[r], is_ray_2d[r], 256)
 
             eff = D.eff_matrix(ego, late, comp, bF)            # (n,3) for [E, L, F]
+            f1['E'][r] = eff[:, 0].mean()                      # ego-only floor; no CSI dependence
             f1['L'][r] = eff[:, 1].mean()
             f1['F'][r] = eff[:, 2].mean()
             f1['C256'][r] = (comp * (1 - b256) + ego * b256).mean()
@@ -92,9 +97,10 @@ def main() -> int:
             f1['oracle'][r] = eff[np.arange(n), idx].mean()
             pay['oracle'][r] = D.PAYVEC[idx].mean()
 
-        for policy, payload in (('Fixed-L', D.PAY['L']), ('Fixed-F', D.PAY['F']),
-                                ('Fixed-C256', PAY_C256), ('oracle', None)):
-            key = {'Fixed-L': 'L', 'Fixed-F': 'F', 'Fixed-C256': 'C256', 'oracle': 'oracle'}[policy]
+        for policy, payload in (('Fixed-E', D.PAY['E']), ('Fixed-L', D.PAY['L']),
+                                ('Fixed-F', D.PAY['F']), ('Fixed-C256', PAY_C256), ('oracle', None)):
+            key = {'Fixed-E': 'E', 'Fixed-L': 'L', 'Fixed-F': 'F', 'Fixed-C256': 'C256',
+                   'oracle': 'oracle'}[policy]
             p = pay['oracle'].mean() if payload is None else payload
             rows.append(dict(split=split, policy=policy,
                              F1=round(float(f1[key].mean()), 5),
