@@ -1,10 +1,78 @@
 # HANDOFF — read this first in a new session
 
-> **HISTORICAL as of 2026-08-17 (R20).** This handoff predates the P0 corrigendum. The
-> current state is: single-collaborator protocol throughout the mainline, all fifteen checks
-> green, `docs/p0_corrigendum.md` for what changed and `docs/experiment_protocol.md`
-> (Change-logs P0 … R20) for the decision record. Read those first; treat everything below
-> as a record of where things stood before the correction.
+**Branch** `p1-phy-rebuild` · **HEAD** `e6d8276` · **recovery tag** `pre-p0-corrigendum` (the
+pre-correction state; nothing before it is quotable).
+
+## Where the work stands
+
+The **P0 corrigendum is complete and pushed**. The defect: the perception caches fused *every*
+collaborator in a frame while the payload model charged *one* message. Ruling (a) redefined the main
+experiment as the **nearest single collaborator**; everything downstream was re-derived, the paper was
+rewritten from the new products, and the verification suite was hardened.
+
+**Verification state — all green as of `e6d8276`:**
+
+| check | state |
+|---|---|
+| eleven repo gates (`python tools/verify_results.py`) | ALL PASS |
+| P6-1 numbers↔CSV (`tools/p6_numbers_vs_csv.py`) | MISS 0; **191/191** table cells located |
+| P6-2 claims↔evidence (`tools/audit_claims_evidence.py`) | 0 PENDING, 0 STALE; 3 LEGACY, all in the prior-protocol appendix |
+| P6-3 cross-section scan (`tools/p6_cross_section_scan.py`) | 0/0/0, all three controls firing |
+| P6-4 leakage (`tests/test_data_leakage.py`) | 0 violations |
+| ledger (`docs/claims.md`) | 130 claims, 130 filled |
+
+**Headline numbers now (test @ B_max = 0.20, the sole primary cell):**
+F1 0.89691 vs nominal τ 0.89701; payload 0.14141 vs 0.21679 Msym.
+R9 still holds on all three conditions (LCB95(dF) > -0.005 = -0.00018, UCB95(dB) < 0 = -0.07441, (B_tau-B_RF)/B_tau >= 0.10 = +0.34773).
+Payload saving is **two-track and must be quoted as both**: 34.8% against the nominal threshold
+(which is itself over budget at 0.2168 > 0.20) and **26.6%** against `tau_feasible`, the
+budget-matched one — against which the selector is *ahead* on F1 by +0.00067.
+
+## Read these, in this order
+
+1. `docs/p0_corrigendum.md` — what changed, old vs new, per arm.
+2. `docs/experiment_protocol.md` — the decision record. Change-logs **P0 → R20** are this work;
+   read from "Change-log P0" onward.
+3. `docs/assumptions_ledger.md` — every input artefact: physical semantics vs accounting convention.
+4. `docs/canonical_quantities.md` — derived quantities and how each is re-derived at gate time.
+
+## Working rules that are load-bearing here
+
+* **Never hand-copy a number into the paper.** Tables come from `tools/build_paper_tables.py`,
+  figures from `tools/generate_figures.py`, README results from the registry sources.
+* **Pre-register before running.** Every arm in this record was pre-registered; amendments are
+  written as amendments (see R18-3, where my own rule proved degenerate and was corrected in public).
+* **A gate that cannot fail is not a gate.** Every checker here has a positive control / self-test;
+  run them with `--self-test`.
+* **Retired-value fingerprints must be written `NUMBER(?![0-9])`**, never `NUMBER[^d]` — six
+  collisions came from that (0.248, 27.5, 18.4, 0.895, 0.081, 0.888).
+* **Do not `git checkout paper/main.tex`** while other edits to it are uncommitted; that silently
+  reverted four completed edits in R20.
+* Deployed products are read-only outside an authorised promotion; arm stages run behind
+  `guarded()`, which hashes all deployed products before/after.
+
+## Open items
+
+* **Pre-registered, not run** (R20 item 10): scene-level bootstrap (with its inconclusive-verdict
+  rule), L-link reliability (`BLER_L ∈ {0.01,0.05,0.10}`), fragmentation/HARQ sensitivity.
+* Josh still owes: per-figure visual tick and a PDF read; bib author names; Fig. 1 drawio.
+* `main.tex` carries **no** pre-corrigendum number. Exceptions that are labelled in place: the
+  SECOND appendix (full-collaborator, self-consistent arm) and the Where2comm reference (not ranked).
+
+## Reproduce the verification in one go
+
+```bash
+cd ~/cooperative_semantic_perception/ca-tosg && conda activate sionna310
+python tools/verify_results.py                      # 11 gates
+python tools/p6_numbers_vs_csv.py                   # P6-1 (+ table cells)
+python tools/p6_cross_section_scan.py --self-test && python tools/p6_cross_section_scan.py
+python tests/test_data_leakage.py                   # P6-4
+```
+
+---
+
+_Everything below predates the P0 corrigendum and is kept as a record of where things stood before
+the correction. Treat it as history, not as current state._
 
 
 Written 2026-08-14. Everything below is checkable from the repo; nothing here is memory.
