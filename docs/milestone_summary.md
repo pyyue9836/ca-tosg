@@ -8,11 +8,11 @@ The confirmatory comparison was fixed before the numbers were seen: frozen selec
 
 | condition | value | met |
 |---|---|---|
-| `LCB95(dF) > -0.005` | -0.00286 | **yes** |
-| `UCB95(dB) < 0` | -0.12099 | **yes** |
-| `(B_tau-B_RF)/B_tau >= 0.10` | +0.56310 | **yes** |
+| `LCB95(dF) > -0.005` | -0.00018 | **yes** |
+| `UCB95(dB) < 0` | -0.07441 | **yes** |
+| `(B_tau-B_RF)/B_tau >= 0.10` | +0.34773 | **yes** |
 
-All 3 conditions hold: the selector is non-inferior within the margin **and** strictly cheaper, at a payload reduction of 56.3%.
+All 3 conditions hold: the selector is non-inferior within the margin **and** strictly cheaper, at a payload reduction of 34.8%.
 
 ## 2. Main table — three splits × three budgets
 
@@ -20,15 +20,15 @@ Realised F1 and channel use of the frozen selectors, from the 200-realisation re
 
 | split | $B_{\max}$ | F1 | payload (Msym) | share of $B_F$ | vs. threshold (F1) |
 |---|---|---|---|---|---|
-| validate | 0.10 | 0.91108 | 0.06857 | 6.9% | +0.00374 [+0.00369, +0.00379] |
-| validate | 0.20 | 0.91172 | 0.09986 | 10.1% | +0.00244 [+0.00240, +0.00249] |
-| validate | 0.30 | 0.91307 | 0.15781 | 15.9% | +0.00437 [+0.00433, +0.00442] |
-| test | 0.10 | 0.90326 | 0.06798 | 6.9% | +0.00055 [+0.00046, +0.00065] |
-| test | 0.20 | 0.90463 | 0.09472 | 9.6% | -0.00277 [-0.00286, -0.00268] |
-| test | 0.30 | 0.90734 | 0.18703 | 18.9% | -0.00203 [-0.00209, -0.00196] |
-| culver | 0.10 | 0.87230 | 0.02832 | 2.9% | -0.00261 [-0.00272, -0.00251] |
-| culver | 0.20 | 0.87355 | 0.04228 | 4.3% | -0.00986 [-0.01004, -0.00967] |
-| culver | 0.30 | 0.88286 | 0.16008 | 16.2% | -0.00454 [-0.00467, -0.00441] |
+| validate | 0.10 | 0.86101 | 0.08102 | 8.2% | +0.00418 [+0.00412, +0.00424] |
+| validate | 0.20 | 0.86440 | 0.15106 | 15.3% | +0.00321 [+0.00315, +0.00326] |
+| validate | 0.30 | 0.86583 | 0.20361 | 20.6% | +0.00324 [+0.00320, +0.00328] |
+| test | 0.10 | 0.89148 | 0.03680 | 3.7% | -0.00099 [-0.00105, -0.00093] |
+| test | 0.20 | 0.89691 | 0.14141 | 14.3% | -0.00010 [-0.00018, -0.00002] |
+| test | 0.30 | 0.89783 | 0.21196 | 21.4% | -0.00117 [-0.00122, -0.00112] |
+| culver | 0.10 | 0.84667 | 0.02437 | 2.5% | -0.00290 [-0.00301, -0.00279] |
+| culver | 0.20 | 0.84975 | 0.06751 | 6.8% | -0.00883 [-0.00902, -0.00865] |
+| culver | 0.30 | 0.85932 | 0.18226 | 18.4% | -0.00384 [-0.00393, -0.00375] |
 
 ## 3. E-collapse — the cost of the action the selector never takes
 
@@ -39,14 +39,14 @@ The deployed selectors essentially never choose the ego-only action $E$. Summing
 | culver | 0.10 | 0.00004 | 0.01$\delta$ |
 | culver | 0.20 | 0.00003 | 0.01$\delta$ |
 | culver | 0.30 | 0.00003 | 0.01$\delta$ |
-| test | 0.10 | 0.00302 | 0.60$\delta$ |
-| test | 0.20 | 0.00289 | 0.58$\delta$ |
-| test | 0.30 | 0.00303 | 0.61$\delta$ |
-| validate | 0.10 | -0.00000 | -0.00$\delta$ |
-| validate | 0.20 | -0.00000 | -0.00$\delta$ |
+| test | 0.10 | 0.00219 | 0.44$\delta$ |
+| test | 0.20 | 0.00232 | 0.46$\delta$ |
+| test | 0.30 | 0.00237 | 0.47$\delta$ |
+| validate | 0.10 | 0.00004 | 0.01$\delta$ |
+| validate | 0.20 | 0.00002 | 0.00$\delta$ |
 | validate | 0.30 | 0.00000 | 0.00$\delta$ |
 
-On test the cost is **0.58--0.61$\delta$** — the single largest identified headroom in the method, and the reason $E$ is reported as a limitation rather than as a working third action.
+On test the cost is **0.44--0.47$\delta$** — the single largest identified headroom in the method, and the reason $E$ is reported as a limitation rather than as a working third action.
 
 ## 4. FA-1 — neither half of the input is sufficient
 
@@ -54,35 +54,35 @@ Feature ablation under the frozen protocol. The finding is about the *shape* of 
 
 | split | $B_{\max}$ | variant | features | F1 | payload | $\rho_F$ |
 |---|---|---|---|---|---|---|
-| validate | 0.10 | channel_only | 2 | 0.90673 | 0.02400 | 0.0000 |
-| validate | 0.10 | task_only | 21 | 0.90715 | 0.02376 | 0.0000 |
-| validate | 0.10 | combined | 23 | 0.91108 | 0.06857 | 0.0464 |
-| validate | 0.20 | channel_only | 2 | 0.90673 | 0.02400 | 0.0000 |
-| validate | 0.20 | task_only | 21 | 0.90715 | 0.02376 | 0.0000 |
-| validate | 0.20 | combined | 23 | 0.91172 | 0.09986 | 0.0787 |
-| validate | 0.30 | channel_only | 2 | 0.90975 | 0.28874 | 0.2741 |
-| validate | 0.30 | task_only | 21 | 0.90715 | 0.02376 | 0.0000 |
-| validate | 0.30 | combined | 23 | 0.91307 | 0.15781 | 0.1387 |
-| test | 0.10 | channel_only | 2 | 0.90113 | 0.02400 | 0.0000 |
-| test | 0.10 | task_only | 21 | 0.90113 | 0.02400 | 0.0000 |
-| test | 0.10 | combined | 23 | 0.90326 | 0.06798 | 0.0456 |
-| test | 0.20 | channel_only | 2 | 0.90113 | 0.02400 | 0.0000 |
-| test | 0.20 | task_only | 21 | 0.90113 | 0.02400 | 0.0000 |
-| test | 0.20 | combined | 23 | 0.90463 | 0.09472 | 0.0732 |
-| test | 0.30 | channel_only | 2 | 0.90944 | 0.28843 | 0.2737 |
-| test | 0.30 | task_only | 21 | 0.90113 | 0.02400 | 0.0000 |
-| test | 0.30 | combined | 23 | 0.90734 | 0.18703 | 0.1688 |
-| culver | 0.10 | channel_only | 2 | 0.87216 | 0.02400 | 0.0000 |
-| culver | 0.10 | task_only | 21 | 0.87216 | 0.02400 | 0.0000 |
-| culver | 0.10 | combined | 23 | 0.87230 | 0.02832 | 0.0045 |
-| culver | 0.20 | channel_only | 2 | 0.87216 | 0.02400 | 0.0000 |
-| culver | 0.20 | task_only | 21 | 0.87216 | 0.02400 | 0.0000 |
-| culver | 0.20 | combined | 23 | 0.87355 | 0.04228 | 0.0189 |
-| culver | 0.30 | channel_only | 2 | 0.88719 | 0.29013 | 0.2755 |
-| culver | 0.30 | task_only | 21 | 0.87216 | 0.02400 | 0.0000 |
-| culver | 0.30 | combined | 23 | 0.88286 | 0.16008 | 0.1409 |
+| validate | 0.10 | channel_only | 2 | 0.85538 | 0.02400 | 0.0000 |
+| validate | 0.10 | task_only | 21 | 0.85585 | 0.02365 | 0.0000 |
+| validate | 0.10 | combined | 23 | 0.86101 | 0.08102 | 0.0593 |
+| validate | 0.20 | channel_only | 2 | 0.85538 | 0.02400 | 0.0000 |
+| validate | 0.20 | task_only | 21 | 0.85585 | 0.02365 | 0.0000 |
+| validate | 0.20 | combined | 23 | 0.86440 | 0.15106 | 0.1318 |
+| validate | 0.30 | channel_only | 2 | 0.85693 | 0.28752 | 0.2741 |
+| validate | 0.30 | task_only | 21 | 0.85585 | 0.02365 | 0.0000 |
+| validate | 0.30 | combined | 23 | 0.86583 | 0.20361 | 0.1862 |
+| test | 0.10 | channel_only | 2 | 0.89095 | 0.02400 | 0.0000 |
+| test | 0.10 | task_only | 21 | 0.89092 | 0.02392 | 0.0000 |
+| test | 0.10 | combined | 23 | 0.89148 | 0.03680 | 0.0133 |
+| test | 0.20 | channel_only | 2 | 0.89095 | 0.02400 | 0.0000 |
+| test | 0.20 | task_only | 21 | 0.89092 | 0.02392 | 0.0000 |
+| test | 0.20 | combined | 23 | 0.89691 | 0.14141 | 0.1216 |
+| test | 0.30 | channel_only | 2 | 0.89529 | 0.28722 | 0.2737 |
+| test | 0.30 | task_only | 21 | 0.89092 | 0.02392 | 0.0000 |
+| test | 0.30 | combined | 23 | 0.89783 | 0.21197 | 0.1946 |
+| culver | 0.10 | channel_only | 2 | 0.84664 | 0.02400 | 0.0000 |
+| culver | 0.10 | task_only | 21 | 0.84664 | 0.02400 | 0.0000 |
+| culver | 0.10 | combined | 23 | 0.84667 | 0.02437 | 0.0004 |
+| culver | 0.20 | channel_only | 2 | 0.84664 | 0.02400 | 0.0000 |
+| culver | 0.20 | task_only | 21 | 0.84664 | 0.02400 | 0.0000 |
+| culver | 0.20 | combined | 23 | 0.84975 | 0.06751 | 0.0450 |
+| culver | 0.30 | channel_only | 2 | 0.85878 | 0.28892 | 0.2755 |
+| culver | 0.30 | task_only | 21 | 0.84664 | 0.02400 | 0.0000 |
+| culver | 0.30 | combined | 23 | 0.85932 | 0.18226 | 0.1638 |
 
-Channel state alone stops requesting features altogether at the two tighter budgets (feature-request rate 0, payload pinned at $B_L$); at $B_{\max}=0.30$ it does reach a higher F1 than the full selector, but only by spending **1.54×** the channel use (0.28843 against 0.18703 Msym). Cues alone never request features at all.
+Channel state alone stops requesting features altogether at the two tighter budgets (feature-request rate 0, payload pinned at $B_L$); at $B_{\max}=0.30$ it does reach a higher F1 than the full selector, but only by spending **1.36×** the channel use (0.28722 against 0.21197 Msym). Cues alone never request features at all.
 
 ## 5. Collaborator scale
 
@@ -90,35 +90,35 @@ Requested collaborators $N\in\{1,2,3\}$ with the frozen selector, $\lambda^\star
 
 | split | $B_{\max}$ | N | F1 | payload | $\Delta$F1 vs $N{=}1$ |
 |---|---|---|---|---|---|
-| validate | 0.10 | 1 | 0.85914 | 0.06857 | — |
-| validate | 0.10 | 2 | 0.89330 | 0.10748 | +0.03417 [+0.03414, +0.03419] |
-| validate | 0.10 | 3 | 0.89955 | 0.13283 | +0.04042 [+0.04039, +0.04045] |
-| validate | 0.20 | 1 | 0.86112 | 0.09986 | — |
-| validate | 0.20 | 2 | 0.89395 | 0.16517 | +0.03283 [+0.03279, +0.03287] |
-| validate | 0.20 | 3 | 0.90050 | 0.21509 | +0.03938 [+0.03935, +0.03942] |
-| validate | 0.30 | 1 | 0.86357 | 0.15781 | — |
-| validate | 0.30 | 2 | 0.89577 | 0.26557 | +0.03220 [+0.03215, +0.03224] |
-| validate | 0.30 | 3 | 0.90238 | 0.34957 | +0.03880 [+0.03876, +0.03885] |
-| test | 0.10 | 1 | 0.89304 | 0.06666 | — |
-| test | 0.10 | 2 | 0.90262 | 0.08935 | +0.00958 [+0.00956, +0.00960] |
-| test | 0.10 | 3 | 0.90343 | 0.09174 | +0.01039 [+0.01037, +0.01041] |
-| test | 0.20 | 1 | 0.89429 | 0.09328 | — |
-| test | 0.20 | 2 | 0.90395 | 0.12926 | +0.00966 [+0.00964, +0.00968] |
-| test | 0.20 | 3 | 0.90477 | 0.13433 | +0.01048 [+0.01046, +0.01051] |
-| test | 0.30 | 1 | 0.89727 | 0.18074 | — |
-| test | 0.30 | 2 | 0.90658 | 0.27656 | +0.00931 [+0.00927, +0.00935] |
-| test | 0.30 | 3 | 0.90744 | 0.30129 | +0.01017 [+0.01013, +0.01021] |
-| culver | 0.10 | 1 | 0.84684 | 0.02518 | — |
-| culver | 0.10 | 2 | 0.87229 | 0.03456 | +0.02545 [+0.02544, +0.02546] |
-| culver | 0.10 | 3 | 0.87229 | 0.03456 | +0.02545 [+0.02544, +0.02546] |
-| culver | 0.20 | 1 | 0.84816 | 0.02835 | — |
-| culver | 0.20 | 2 | 0.87355 | 0.03984 | +0.02539 [+0.02537, +0.02540] |
-| culver | 0.20 | 3 | 0.87355 | 0.03984 | +0.02539 [+0.02537, +0.02540] |
-| culver | 0.30 | 1 | 0.85755 | 0.12221 | — |
-| culver | 0.30 | 2 | 0.88284 | 0.15592 | +0.02530 [+0.02527, +0.02533] |
-| culver | 0.30 | 3 | 0.88284 | 0.15592 | +0.02530 [+0.02527, +0.02533] |
+| validate | 0.10 | 1 | 0.86101 | 0.08102 | — |
+| validate | 0.10 | 2 | 0.89201 | 0.14979 | +0.03100 [+0.03096, +0.03104] |
+| validate | 0.10 | 3 | 0.89827 | 0.20895 | +0.03727 [+0.03723, +0.03730] |
+| validate | 0.20 | 1 | 0.86440 | 0.15106 | — |
+| validate | 0.20 | 2 | 0.89444 | 0.26937 | +0.03004 [+0.02999, +0.03009] |
+| validate | 0.20 | 3 | 0.90057 | 0.36842 | +0.03617 [+0.03612, +0.03622] |
+| validate | 0.30 | 1 | 0.86583 | 0.20361 | — |
+| validate | 0.30 | 2 | 0.89504 | 0.35707 | +0.02921 [+0.02916, +0.02926] |
+| validate | 0.30 | 3 | 0.90089 | 0.48351 | +0.03506 [+0.03500, +0.03511] |
+| test | 0.10 | 1 | 0.89148 | 0.03548 | — |
+| test | 0.10 | 2 | 0.90097 | 0.05623 | +0.00949 [+0.00948, +0.00950] |
+| test | 0.10 | 3 | 0.90178 | 0.05857 | +0.01030 [+0.01029, +0.01031] |
+| test | 0.20 | 1 | 0.89692 | 0.13283 | — |
+| test | 0.20 | 2 | 0.90656 | 0.20304 | +0.00965 [+0.00961, +0.00969] |
+| test | 0.20 | 3 | 0.90739 | 0.21812 | +0.01047 [+0.01043, +0.01051] |
+| test | 0.30 | 1 | 0.89784 | 0.20013 | — |
+| test | 0.30 | 2 | 0.90740 | 0.31453 | +0.00957 [+0.00952, +0.00962] |
+| test | 0.30 | 3 | 0.90823 | 0.34336 | +0.01040 [+0.01035, +0.01045] |
+| culver | 0.10 | 1 | 0.84667 | 0.02123 | — |
+| culver | 0.10 | 2 | 0.87217 | 0.02696 | +0.02551 [+0.02550, +0.02551] |
+| culver | 0.10 | 3 | 0.87217 | 0.02696 | +0.02551 [+0.02550, +0.02551] |
+| culver | 0.20 | 1 | 0.84976 | 0.04597 | — |
+| culver | 0.20 | 2 | 0.87527 | 0.06698 | +0.02551 [+0.02548, +0.02553] |
+| culver | 0.20 | 3 | 0.87527 | 0.06698 | +0.02551 [+0.02548, +0.02553] |
+| culver | 0.30 | 1 | 0.85935 | 0.14433 | — |
+| culver | 0.30 | 2 | 0.88441 | 0.18451 | +0.02506 [+0.02502, +0.02510] |
+| culver | 0.30 | 3 | 0.88441 | 0.18451 | +0.02506 [+0.02502, +0.02510] |
 
-Returns diminish sharply: on test at $B_{\max}=0.20$ the second collaborator is worth +0.00966 F1 and the third adds only +0.00082 more, for +0.00507 Msym of extra channel use.
+Returns diminish sharply: on test at $B_{\max}=0.20$ the second collaborator is worth +0.00965 F1 and the third adds only +0.00082 more, for +0.01508 Msym of extra channel use.
 
 ## 6. Boundary — a second detection backbone (SECOND)
 
@@ -142,9 +142,9 @@ In-sample the arm is effective; on the held-out splits every $\Delta$F1 is negat
 
 | model | mean (ms) | std | P95 | trials |
 |---|---|---|---|---|
-| selector_B010 | 59.751 | 4.762 | 69.314 | 1000 |
-| selector_B020 | 59.738 | 5.405 | 68.046 | 1000 |
-| selector_B030 | 59.886 | 5.292 | 66.597 | 1000 |
+| selector_B010 | 51.746 | 5.628 | 58.196 | 1000 |
+| selector_B020 | 52.062 | 5.629 | 58.295 | 1000 |
+| selector_B030 | 51.870 | 5.475 | 58.046 | 1000 |
 
-The slowest of the three, `selector_B030`, runs in 59.9 ± 5.3 ms per frame (P95 66.6 ms) on a single CPU core, inside the 100 ms budget of a 10 Hz LiDAR cycle. Mean and P95 are quoted from the same row by construction — the registry gate refuses a cross-model splice.
+The slowest of the three, `selector_B020`, runs in 52.1 ± 5.6 ms per frame (P95 58.3 ms) on a single CPU core, inside the 100 ms budget of a 10 Hz LiDAR cycle. Mean and P95 are quoted from the same row by construction — the registry gate refuses a cross-model splice.
 

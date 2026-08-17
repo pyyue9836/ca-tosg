@@ -20,7 +20,7 @@ $\mathrm{eff}_{\mathrm{C256}}-\mathrm{eff}_{\mathrm{C16}}=(\mathrm{comp}-\mathrm
 Since the denser constellation is never better protected ($b_{256}\ge b_{16}$, with equality only where both
 flatline or both deliver), the sign is set by $(\mathrm{comp}-\mathrm{ego})$. C256 is thus dominated
 ($\mathrm{eff}_{\mathrm{C256}}\le\mathrm{eff}_{\mathrm{C16}}$) on 99.7 / 98.5 / 100.0\% of validation / test /
-Culver-City frames;[^round] the margin over $\mathrm{frac}(\mathrm{comp}\ge\mathrm{ego})=$ 99.0 / 94.2 /
+Culver-City frames --- the \emph{identity} is algebraic and holds under any collaborator convention, but these three \emph{frame fractions} are the only quantities in this paper still carried over from the pre-corrigendum full-collaborator tables, because they need per-frame $b_{16}$ / $b_{256}$ columns the corrected tables do not yet carry (Change-log P0-5/R18);[^round] the margin over $\mathrm{frac}(\mathrm{comp}\ge\mathrm{ego})=$ 99.0 / 94.2 /
 99.1\% is the 0.7 / 4.2 / 0.9\% of frames where $\mathrm{comp}<\mathrm{ego}$ but $b_{16}=b_{256}$ -- both
 flatline, or both deliver at high SNR -- which tie rather than reverse. Dominance reverses only in the
 collaboration-harm regime ($\mathrm{comp}<\mathrm{ego}$, $b_{16}<b_{256}$; \S\ref{sec:harm}). Physically,
@@ -82,7 +82,7 @@ ego-only output rather than a phantom feature. When the channel \emph{can} carry
 can still cost accuracy: on the easy stratum the selector's realised output falls below even the
 always-object-level (Fixed-$L$) baseline.[^harm] This mode has no masking answer; its remedy is left to future work. Two
 CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the
-object-level fused output on 0.9 / 7.4 / 0.2\% of validation / test / Culver-City frames, and -- from the same
+object-level fused output on 1.5 / 5.8 / 0.2\% of validation / test / Culver-City frames, and -- from the same
 per-frame $(\mathrm{comp}-\mathrm{ego})$ identity and CSV as the C256 analysis (\S\ref{sec:method}) -- the
 compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.0 / 5.8 /
 0.9\% of frames. Test carries the harm most, consistent with fusion having the least to add in thin scenes

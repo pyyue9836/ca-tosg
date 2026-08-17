@@ -3166,3 +3166,87 @@ and does not reverse** — 34.8% → 26.6% at the primary cell, still a real sav
 −0.00010, against τ_feasible it is **ahead by +0.00067**. That is a better result than the retired
 comparison, arrived at by making the comparison stricter, and it is reported as a **secondary** finding
 only: R9 stays as pre-registered against nominal τ*.
+
+---
+
+## Change-log R18-final (2026-08-17) — product back-fill, prose rewrite, full verification
+
+### R18-1 · the two JOBS omissions, and what they turned up
+
+`c256_dominance_verify` and the collaboration-harm family had been on the work list with no job. Both
+were added; neither could simply be re-run:
+
+* `collab_harm.py` carried a **hard-coded absolute path** into the OpenCOOD tree and wrote its CSV
+  *outside the repository*, which is why re-running it changed nothing under `results/`. Repointed to
+  the repo and to the corrected tables: the ego-exceeds-fused fractions move **0.9 / 7.4 / 0.2%** →
+  **1.5 / 5.8 / 0.2%**.
+* `verify_c256_dominance.py` needs per-frame `bler_C16` / `bler_C256` / `eff_f1_C*` columns that the
+  P0-corrected tables do not carry, plus the retired v3 selector. The **identity** it verifies is
+  algebraic and convention-independent; the three **frame fractions** are not re-derivable, so they
+  remain pre-corrigendum values and `main.tex` now says exactly that in the same sentence.
+
+### R18-2 · bandit retrained → it collapses
+
+λ\* = 0.1 at all three budgets with identical frozen F1/payload (0.85613 / 0.0294 Msym): the budget
+never binds, and the comparator settles at a near-$L$ operating point. Written up as a collapse, with
+the SECOND-arm guardrail carried over — "beats/outperforms the bandit" is now a blocked phrase
+(fingerprint 18), because the outcome is a collapse in the comparator, not a win for the selector.
+The §V-D shape conclusion is upgraded accordingly: **four independently constructed variants collapse
+the same way** (channel-only, cues-only, bandit, SECOND backbone) and only the full-feature imitation
+selector produces three distinct budget-indexed operating points.
+
+### R18-3 · τ_feasible — see the amendment entry above
+
+### R18-5 · prose, and three claims that reversed
+
+* **AP section, all three splits normalised.** Headroom 0.0550 / 0.0240 / 0.0970 with the selector's
+  realised share $(\mathrm{AP}_{\text{CA}}-\mathrm{AP}_{\text{Fixed }L})/\text{headroom}$ =
+  12.4/19.5/21.3% (validate), 2.5/21.2/21.2% (test), 0.0/4.9/21.1% (Culver). The narrative follows
+  the ratio: headroom exists everywhere, the selector converts at most about a fifth, so what it
+  reliably delivers is the communication saving. **"On test the headroom is effectively zero" is
+  deleted** — it was an artefact of fusing every collaborator into both branches, and the mechanism
+  sentence now says so.
+* **Feature importance flipped back to dominance** (61.7% vs 38.3%) with an explicit
+  *importance ≠ sufficiency* guardrail and a transport-specificity caveat.
+* **The three-way footnote ordering reversed sign.** Cue axis $-0.0002 \to +0.0090$
+  (CI $[+0.0089,+0.0091]$), matched-payload margin $+0.0005 \to +0.0032$, per-frame edge $+0.002$
+  unchanged: all three now positive and the **cue axis is the largest**. Weakening the single message
+  widened the gap the cues have to close. The neighbouring "cues do not add accuracy" reading was
+  corrected with it.
+* Also renumbered: difficulty terciles (test hard $+0.0400 \to +0.0660$), ρ_F knee (0.283 → 0.472
+  validate, 0.256 → 0.433 test, 0.064 → 0.160 Culver), ρ_E pair, collaborator increments, latency
+  (B020, 52.1 ± 5.6, P95 58.3), and the abstract.
+
+### R18-4 · SECOND appendix
+
+Convention disclosure added: full-collaborator caches, internally consistent, **relative** conclusion
+stands, absolute figures not tabulated beside the single-collaborator main experiment. Not re-run.
+
+### Verification state
+
+**Eleven gates: ALL PASS.** P6-2 (claims↔evidence): 0 UNRESOLVED, 2 LEGACY-ENGINE both in the
+prior-protocol appendix. P6-3 (cross-section entity scan): **0 / 0 / 0** with all three controls
+firing — it earned its keep this batch by catching a retired 0.0027 still in §VI-A and a mislabelled
+metric that paired ρ_F with ρ_E. P6-4 (leakage): 0 violations.
+
+**P6-1 reports 1 MISS, left standing deliberately:** `tab:robustness`. Those three rows come from the
+retired v3 ablation harness *and* do not reproduce from the committed prior-engine CSVs either
+(−0.0021 / −0.0148 / −0.0568 against the paper's −0.0002 / −0.004 / −0.019). The caption now claims
+direction and ordering only, and `docs/p0_corrigendum.md` §6 records it as an open item. Forcing that
+gate green would have meant either porting an unauthorised harness or quietly restating numbers.
+
+### Tooling defects fixed while doing this
+
+1. `_skeleton` collision (`c6fcc17`) blocked every ledger regeneration: two sentences ending
+   "… on validate, … on test and … on Culver-City" hashed alike once numbers were stripped. The
+   skeleton now includes the numeric **shape** (count + decimal widths, never values), so a changed
+   measurement still keeps its id and flags STALE.
+2. `tools/generate_figures.py` regenerated **only the first figure** when run with no arguments — the
+   overview script ends in `sys.exit()`, which took the driver down with it, exiting 0. Per-generator
+   `SystemExit` is now caught and reported.
+3. `gt_audit.py` and `end_to_end_ap.py` have both been **broken since the restructure** (`523f062`):
+   the first wrote to a path two levels too shallow, the second used an undefined `PROV_DIR` and
+   crashed *after* computing every AP number — which is why the committed AP table was a
+   pre-restructure artefact. Both fixed.
+4. Three stale-fingerprint patterns collided with values the corrigendum made **true** (`18.4`,
+   `0.275`, `budget-matched`); each was narrowed in context with the reason recorded, none dropped.

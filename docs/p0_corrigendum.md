@@ -183,3 +183,13 @@ The comparator conclusion is unchanged in direction: the bandit is behind the fr
 | culver | 0.30 | 3.2% | 18.4% | 16.2% |
 
 The arm's payload reductions (14–90%) and its "in-sample effective, does not transfer" conclusion are unchanged. Only the sentence comparing its channel use to the mainline needs restating: on test it now sits **below** the mainline at every budget rather than near it.
+
+## 6. Open item: tab:robustness
+
+The three robustness rows are the **only** numbers left in the paper that neither match a committed CSV nor were re-derived under the corrected convention. Two separate facts, both disclosed in the caption:
+
+1. **Prior engine.** They come from `projects/ca_tosg/evaluation/ablations/robustness.py` via `_common.py`, which is explicitly the retired v3 harness (v3 selector + v3 per-frame tables). Porting that harness to the frozen selectors was not authorised in this batch.
+2. **They do not reproduce from the prior-engine CSVs either.** The committed files (all dated 2026-08-12) give SNR-noise $\sigma\le1$: $-0.0021$ (paper: $-0.0002$), CSI aging at 10 ms: $-0.0148$ (paper: $-0.004$) and a 1-frame stale decision: $-0.0568$ (paper: $-0.019$).
+
+`tools/p6_numbers_vs_csv.py` therefore reports **1 MISS**, and that MISS is left standing on purpose: it is the honest state of that table. The caption now claims direction and ordering only.
+

@@ -114,12 +114,18 @@ def _skeleton(claim):
     # (C16 / C_16 / 16-QAM / C256 / C_256 / 256-QAM), NOT plain numbers like "16 dB" or "16 %" -- so
     # changing a measured "16 dB" -> "14 dB" keeps the same id (-> STALE), not a new id.
     letters = re.sub(r'[^a-zA-Z]', '', claim).lower()
+    # numeric SHAPE, not values: count of numbers + the multiset of their decimal widths. Two
+    # sentences that differ only in a measured value keep the same shape (-> same id -> STALE),
+    # but 'three 4-decimal values' and 'nine percentages' no longer collide (c6fcc17).
+    nums = re.findall(r'\d+(?:\.\d+)?', claim)
+    shape = 'n%d_%s' % (len(nums), ''.join(sorted(str(len(x.split('.')[1]) if '.' in x else 0)
+                                                  for x in nums)))
     modes = set()
     if re.search(r'C_?16\b|16-?QAM', claim):
         modes.add('16')
     if re.search(r'C_?256\b|256-?QAM', claim):
         modes.add('256')
-    return letters + ''.join(sorted(modes))
+    return letters + ''.join(sorted(modes)) + '|' + shape
 
 
 def claim_id(claim):

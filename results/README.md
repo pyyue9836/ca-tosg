@@ -136,6 +136,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `threshold_sweep_test.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `threshold_sweep_validate.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
 | `threshold_vs_rf.csv` | `python projects/ca_tosg/evaluation/policy_200seed.py` | P1-v3 200-realisation policy engine |
+| `tau_feasible.csv` | `python projects/ca_tosg/evaluation/tau_feasible.py` | R18-3: the budget-matched SECONDARY threshold comparator (largest-F1 tau whose 200-replay mean payload fits B_max), reported beside nominal tau*; R9 is not re-taken against it |
 | `true_e2e_ap.csv` | `python tools/evaluate_ap.py` | global-sort true end-to-end AP |
 | `true_e2e_ap_by_snr.csv` | `python projects/ca_tosg/evaluation/end_to_end_ap_snr.py` | P5-5 item 8: true end-to-end AP at pinned SNR; only valid after --verify (the E-8 uniform-mode reproduction gate) has passed |
 | `true_e2e_global_culver.csv` | `python projects/ca_tosg/evaluation/true_e2e_global.py` | P1-v3 global-sort scorer |

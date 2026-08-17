@@ -39,6 +39,13 @@
 #     which no pattern covered -- hence the context-bound rounded form here. Same construction
 #     as #9: a payload/importance word must appear on the line, so a bare 62\% elsewhere is
 #     untouched. NEGATIVE-TESTED: the pre-R17 abstract sentence trips it, the current one does not.)
+# 18 pre-corrigendum headline family (P0)  RX: 0\.90463 ; 0\.90326 ; 0\.90734 ; 56\.3 ; 1\.54\\times ;
+#    0\.0027 test ; 6\.9--18\.9 ; 59\.9 ; 66\.6 ; 47\.1 ; 52\.9 ; "beats/outperforms the bandit"
+#    (every one of these is a full-collaborator number withdrawn by Change-log P0 ruling (a).
+#     The corrected values are 0.89148/0.89691/0.89783, 34.8%, 1.36x, headroom 0.0240 on test,
+#     3.7-21.4%, 52.1/58.3 ms and 61.7/38.3. The last pattern is a WORDING guard: the bandit
+#     comparator collapses to near-always-L, so "beats" would credit the selector with an
+#     outcome that is really a collapse in the comparator -- same guard as the SECOND arm.)
 
 ## MACHINE-READABLE PATTERNS (lines beginning "RX "; the exit grep extracts col-4-onward)
 RX 0\.2475
@@ -70,7 +77,7 @@ RX improves F1 by
 RX alone improves F1
 RX 5\.3 percentage
 RX 15\.8
-RX 18\.4
+RX 18\.4[^\\%]
 RX easier[a-z -]{0,25}(test|scene|split)
 RX easy split
 RX (stronger|weaker|better|worse)[a-z, -]{0,30}(split|scene|test|domain)
@@ -120,16 +127,31 @@ RX validates generalisation
 RX backbone-independence
 RX confirms backbone
 
-# 20 R17 A6 (2026-08-16): the "matched payload / matched channel use / budget-matched" family
+# 20 R17 A6 (2026-08-16): the "matched payload / matched channel use" family
+#    (P0/R18 UPDATE: "budget-matched" is REMOVED from this ban. It was banned as a vague equal-cost
+#     claim; R18-3 introduced tau_feasible, an actually budget-matched comparator, so the phrase is
+#     now the precise name for a real object. "matched payload"/"matched channel use" stay banned.)
+#    (18\.4 narrowed to exclude "18.4\%" -- the retired AP-band value collided with the corrected
+#     Culver payload share. 0\.275 narrowed to its gamma/subtotal context -- it is now est_snr_db's
+#     true Gini importance in tab:feat_imp.)
 #    overstated comparability -- the selector and the threshold rule are compared per BUDGET, not at
 #    a matched payload. Approved replacement: "a threshold tuned on validate for the same target
 #    budget". The section V-C transport sentence (C16 vs C256 at equal coded bits) was reworded to
 #    "at the same coded-bit count" so this lock is unambiguous; that usage was never the objection.
 RX matched payload
 RX matched channel use
-RX budget-matched
+RX (matched payload|matched channel use)
 RX 34\.9
 RX 62\.4
 RX 0\.349
-RX 0\.275
+RX 0\.275[^0-9]{0,12}(gamma|importance subtotal)
 RX (6[23]\\%[^\n]{0,140}(importance|ego-side cues)|(importance|ego-side cues)[^\n]{0,140}6[23]\\%)
+RX 0\.90463
+RX 0\.90326
+RX 0\.90734
+RX 56\.3\\%
+RX 1\.54\\times
+RX 6\.9\$--\$18\.9
+RX 59\.9\\pm5\.3
+RX \\mathrm\{P95\}=66\.6
+RX (beats|outperforms|defeats)[^.\n]{0,40}(bandit|reinforcement)

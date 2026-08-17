@@ -39,7 +39,15 @@ if __name__ == '__main__':
             continue
         print('=== %-10s %-28s -> %s' % (key, script, out), flush=True)
         sys.argv = [os.path.join(FIGDIR, script)]
-        runpy.run_path(os.path.join(FIGDIR, script), run_name='__main__')
+        # A generator that ends in sys.exit() would otherwise take this driver down with it: running
+        # `generate_figures.py` with no arguments regenerated ONLY the overview and exited 0, which
+        # looks exactly like success. Catch SystemExit per generator and keep going.
+        try:
+            runpy.run_path(os.path.join(FIGDIR, script), run_name='__main__')
+        except SystemExit as e:
+            if e.code not in (0, None):
+                raise
+            print('    (%s called sys.exit(%r); continuing)' % (script, e.code), flush=True)
     print('\nNOT regenerated here, and each is a KNOWN GAP rather than an omission:')
     print('  fig:qualitative  a BEV render; see projects/ca_tosg/evaluation/figures/'
           'plot_qualitative_bev.py')

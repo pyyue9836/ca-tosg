@@ -12,14 +12,18 @@ import os
 import numpy as np
 import pandas as pd
 
-P1 = '/home/josh/cooperative_semantic_perception/OpenCOOD/peiyi_work/paper1'
-DATA = os.path.join(P1, 'data'); RESULTS = os.path.join(P1, 'results')
+# was an absolute path into the OpenCOOD tree, so this script read the RETIRED cue tables
+# and wrote its CSV outside the repository entirely (which is why re-running it changed
+# nothing under results/). Repointed to the repo and to the P0-corrected tables.
+P1 = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))))   # 4 levels: evaluation -> ca_tosg -> projects -> root
+DATA = os.path.join(P1, 'data/p2'); RESULTS = os.path.join(P1, 'results')
 
 
 def main():
     rows = []
     for sp in ('validate', 'test', 'culver'):
-        d = pd.read_csv(os.path.join(DATA, f'dataset_{sp}_v3.csv'))
+        d = pd.read_csv(os.path.join(DATA, f'dataset_{sp}_n1.csv'))
         ego = d['ego_f1'].to_numpy(); late = d['late_f1'].to_numpy()
         harm = ego > late
         rows.append(dict(

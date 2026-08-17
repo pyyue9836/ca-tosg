@@ -51,6 +51,20 @@ JOBS = [
       'results/manifests/P4C_MANIFEST.json']),
     ('baseline_sanity', [PY, 'tools/run_sensitivity.py'],
      None),          # writes a whole family; guarded by prefix instead (see ALLOW_PREFIX)
+    # JOBS omission caught in R18-5: c256_dominance_verify and the collaboration-harm family were
+    # both on the work list and neither had a job, so L177 and L749 kept retired-convention numbers.
+    ('c256_dominance', [PY, 'projects/ca_tosg/evaluation/verifiers/verify_c256_dominance.py'],
+     ['results/sensitivity/c256_dominance_verify.csv',
+      'results/provenance/PROVENANCE_c256_dominance.txt']),
+    ('collab_harm', [PY, 'projects/ca_tosg/evaluation/collab_harm.py'],
+     ['results/main/step4_collaboration_harm.csv',
+      'results/provenance/PROVENANCE_collab_harm.txt']),
+    ('harm_stratum', [PY, 'projects/ca_tosg/evaluation/verifiers/verify_harm_stratum_structural.py'],
+     ['results/sensitivity/harm_stratum_structural.csv',
+      'results/provenance/PROVENANCE_harm_stratum.txt']),
+    ('ego_only_acceptance', [PY, 'projects/ca_tosg/datasets/run_ego_only.py'],
+     ['results/main/ego_only_acceptance.csv',
+      'results/provenance/PROVENANCE_ego_only.txt']),
 ]
 ALLOW_PREFIX = {'baseline_sanity': ('results/sensitivity/', 'results/provenance/')}
 

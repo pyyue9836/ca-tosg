@@ -10,91 +10,91 @@
  "split_for_snr_figures": "validate",
  "numbers_drawn": {
   "f1_catosg_awgn_low": {
-   "value": 0.9071,
+   "value": 0.8558,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 0.0
   },
   "f1_catosg_awgn_at_knee": {
-   "value": 0.9243,
+   "value": 0.8875,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 10.0
   },
   "f1_catosg_awgn_high": {
-   "value": 0.9244,
+   "value": 0.8877,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 20.0
   },
   "f1_catosg_rayleigh_low": {
-   "value": 0.9071,
+   "value": 0.8558,
    "split": "validate",
    "budget": 0.2,
    "channel": "rayleigh",
    "snr_db": 0.0
   },
   "f1_catosg_rayleigh_at_knee": {
-   "value": 0.9071,
+   "value": 0.8558,
    "split": "validate",
    "budget": 0.2,
    "channel": "rayleigh",
    "snr_db": 10.0
   },
   "f1_catosg_rayleigh_high": {
-   "value": 0.9071,
+   "value": 0.8558,
    "split": "validate",
    "budget": 0.2,
    "channel": "rayleigh",
    "snr_db": 20.0
   },
   "f1_fixedL_validate": {
-   "value": 0.9067,
+   "value": 0.8554,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": null
   },
   "f1_ceiling_validate": {
-   "value": 0.9193,
+   "value": 0.8843,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": null
   },
   "f1_oracle_masked_validate_high": {
-   "value": 0.9294,
+   "value": 0.8927,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": null
   },
   "payload_catosg_awgn_low": {
-   "value": 0.0238,
+   "value": 0.0237,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 0.0
   },
   "payload_catosg_awgn_at_knee": {
-   "value": 0.2971,
+   "value": 0.4795,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 10.0
   },
   "rho_E_oracle_rayleigh_test": {
-   "value": 0.1724,
+   "value": 0.1571,
    "split": "test",
    "budget": 0.2,
    "channel": "rayleigh",
    "snr_db": 10.0
   },
   "rho_E_catosg_rayleigh_test": {
-   "value": 0.0005,
+   "value": 0.0018,
    "split": "test",
    "budget": 0.2,
    "channel": "rayleigh",
@@ -115,21 +115,21 @@
    "snr_db": 10.0
   },
   "rho_F_at_knee_validate": {
-   "value": 0.2828,
+   "value": 0.4717,
    "split": "validate",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 10.0
   },
   "rho_F_at_knee_test": {
-   "value": 0.2562,
+   "value": 0.4327,
    "split": "test",
    "budget": 0.2,
    "channel": "awgn",
    "snr_db": 10.0
   },
   "rho_F_at_knee_culver": {
-   "value": 0.0636,
+   "value": 0.16,
    "split": "culver",
    "budget": 0.2,
    "channel": "awgn",
@@ -143,7 +143,7 @@
    "snr_db": null
   },
   "pareto_Fixed-L_f1": {
-   "value": 0.9011,
+   "value": 0.891,
    "split": "test",
    "budget": null,
    "channel": null,
@@ -157,7 +157,7 @@
    "snr_db": null
   },
   "pareto_Fixed-C256_f1": {
-   "value": 0.8264,
+   "value": 0.8255,
    "split": "test",
    "budget": null,
    "channel": null,
@@ -171,63 +171,63 @@
    "snr_db": null
   },
   "pareto_Fixed-F_f1": {
-   "value": 0.8516,
+   "value": 0.8483,
    "split": "test",
    "budget": null,
    "channel": null,
    "snr_db": null
   },
   "pareto_oracle_payload": {
-   "value": 0.1706,
+   "value": 0.175,
    "split": "test",
    "budget": null,
    "channel": null,
    "snr_db": null
   },
   "pareto_oracle_f1": {
-   "value": 0.9165,
+   "value": 0.9056,
    "split": "test",
    "budget": null,
    "channel": null,
    "snr_db": null
   },
   "pareto_catosg_B010_payload": {
-   "value": 0.068,
+   "value": 0.0368,
    "split": "test",
    "budget": 0.1,
    "channel": null,
    "snr_db": null
   },
   "pareto_catosg_B010_f1": {
-   "value": 0.9033,
+   "value": 0.8915,
    "split": "test",
    "budget": 0.1,
    "channel": null,
    "snr_db": null
   },
   "pareto_catosg_B020_payload": {
-   "value": 0.0947,
+   "value": 0.1414,
    "split": "test",
    "budget": 0.2,
    "channel": null,
    "snr_db": null
   },
   "pareto_catosg_B020_f1": {
-   "value": 0.9046,
+   "value": 0.8969,
    "split": "test",
    "budget": 0.2,
    "channel": null,
    "snr_db": null
   },
   "pareto_catosg_B030_payload": {
-   "value": 0.187,
+   "value": 0.212,
    "split": "test",
    "budget": 0.3,
    "channel": null,
    "snr_db": null
   },
   "pareto_catosg_B030_f1": {
-   "value": 0.9073,
+   "value": 0.8978,
    "split": "test",
    "budget": 0.3,
    "channel": null,
