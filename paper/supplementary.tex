@@ -411,6 +411,31 @@ evaluated here, and the two are different quantities that may not be placed side
 
 
 
+
+\section{Feature-ablation comparison table}\label{sec:ablation_table}
+The table the ablation section of the main paper points to.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Selector feature ablation and the SNR-threshold challenger (train: validate, eval: frozen OPV2V test at $B_{\max}=0.20$, $T=2{,}170$ frames, $200$ SNR/channel realisations). Each variant is retrained through the identical selection pipeline---same candidate set, same scene-level $9$-fold LOSO, same frozen walk under the budget---with only the feature columns changed. Neither half of the input alone produces a \emph{graded} policy: both the channel-only and the cues-only variants collapse to always transmitting $L$ at this budget (feature-request rate $\rho_F=0$), so only the full $23$-feature selector reaches an intermediate operating point. The cues-plus-$\hat\gamma$ cut of the earlier ablation was not re-run under the corrected protocol and is therefore not listed.}
+\label{tab:ablation}
+\begin{tabular}{lccc}
+\toprule
+Selector & \#feat & Realised F1 & Deployed payload (Msym) \\
+\midrule
+Channel only ($\hat\gamma,c$)        & 2  & 0.89095 & 0.02400 \\
+Perception cues only                 & 21 & 0.89092 & 0.02392 \\
+Full (all features)                  & 23 & \textbf{0.89691} & 0.14141 \\
+SNR-threshold ($\tau^\star$)          & -- & 0.89701 & 0.21679 \\
+\midrule
+Fixed $L$                            & -- & 0.89095 & 0.02400 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

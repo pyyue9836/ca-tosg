@@ -4549,3 +4549,49 @@ fallback rule, this stops here for a ruling. What is left, all of it a scope dec
   ≈ 0.45 page.
 
 Any one of the last three clears 17 pages on its own.
+
+---
+
+## Change-log R35 (2026-08-18) — the last move: 18 → 17 pages, compile gate green
+
+**Zero GPU.** One table relocated, two duplications removed. No claim, number or locked wording
+changed.
+
+### 1 · `tab:ablation` to the supplementary; the FA-1 paragraph stays
+
+The feature-ablation comparison table now lives in `paper/supplementary.tex` under its own heading;
+the FA-1 paragraph — the four-rung payload ladder and the four-variant collapse, with the numbers
+that are the table's conclusion — is untouched in the main text, which is where the reader meets it.
+Three references were re-pointed; none dangles.
+
+### 2 · Two duplications the earlier merges had created, now removed
+
+The table move alone did not clear the boundary (18 pages), so two genuine duplications were cut:
+
+* the fragmentation/HARQ figures were stated **both** in `sec:channel` and in `tab:sensitivity`,
+  which R33 created. `sec:channel` now keeps the qualifier and points at the table.
+* the channel-model introduction restated the three channel types in a paragraph that the
+  following sentences already carried.
+
+Neither removes a claim: every number is still printed once, and the qualifier sentence about the
+no-HARQ model is intact.
+
+### 3 · Result
+
+| | main | supplementary | errors | overfull |
+|---|---|---|---|---|
+| R34 end | 18 | 6 | 0 | 4 |
+| **R35 end** | **17** | **7** | **0** | **3** |
+
+**All seventeen gates pass, twice in a row on a clean tree, including the compile gate**
+(`0` LaTeX errors, `17` pages at the `17`-page limit). The three remaining overfull boxes are
+`125.4`, `17.6` and `115.0` pt — two wide table rows and one long inline expression; they are
+recorded in `docs/compile_report.md` and do not fail the build.
+
+### The state of the paper at the end of the batch series
+
+`paper/main.tex` is 17 pages and `paper/supplementary.tex` is 7, both compiling from a toolchain
+that needs no root. The supplementary carries, verbatim and by relocation only, the two
+prior-protocol appendices, the 21-cue definition table, six results subsections and two tables; the
+main text carries a 2–4 sentence summary of each, and every number the abstract or the Conclusion
+quotes is in the main text. Nothing was deleted to reach the page limit.
