@@ -444,6 +444,24 @@ The two tables the main paper points to; its prose carries their conclusions and
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
+\caption{Notation for the semantic granularity levels. $F$ and $C_{16}$ denote the same message; the $C_q$ form is used only where the modulation order is the subject.}
+\label{tab:notation}
+\begin{tabular}{llcl}
+\toprule
+Symbol & Meaning & Channel use & Role \\
+\midrule
+$E$ & ego-only, no transmission & $B_E = 0$ & deployed action; also the delivery-failure fallback \\
+$L$ & object-level message & $B_L = 0.024$ & deployed action \\
+$F \equiv C_{16}$ & feature-level, 16-QAM & $B_F = 0.99$ & deployed action \\
+$C_{256}$ & feature-level, 256-QAM & $0.495$ & physical-layer comparator, \emph{not} deployed \\
+\bottomrule
+\end{tabular}
+\end{table} 
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
 \caption{Pre-registered sensitivity analyses (test at $B_{\max}=0.20$ unless stated). Products:
 \texttt{r23\_scene\_bootstrap.csv}, \texttt{r23\_object\_message\_bler.csv},
 \texttt{r23\_fragmentation\_harq.csv}, \texttt{r25\_fragmentation\_replay.csv}.}

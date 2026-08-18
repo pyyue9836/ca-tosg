@@ -4641,3 +4641,55 @@ debt register stays **empty**. Sixteen gates pass; the compile gate fails on pag
 * the `sec:candidates` message-candidate discussion compressed ~30% — ≈ 0.35 page.
 
 Any one of the first three clears 17 pages; none touches a figure.
+
+---
+
+## Change-log R37 (2026-08-18) — the notation table moves, the symbols stay; 18 pages
+
+**Zero GPU.** One table relocated with a self-sufficiency check, plus the R37-3 fallback.
+
+### 1 · `tab:notation` to the supplementary, and the main text made self-sufficient
+
+Before moving it, every symbol it defined was checked for a textual definition at first use in the
+main text. Four were already defined in place ($E$, $L$, $F$ at Eq.~(action\_set); $B_E$ where the
+ego-only action is introduced; $B_L$ and $B_F$ in the payload chain; $C_{256}$ in the message-
+candidate discussion). Two things the table alone carried are now written into the action-set
+sentence: the **channel-use figures** ($B_E = 0$, $B_L = 0.024$, $B_F = 0.99$, $C_{256} = 0.495$
+Msym) and the **identity $F \equiv C_{16}$** with the convention that the $C_q$ form is used only
+where modulation order is the subject. The main text is therefore readable without the table, which
+is now in the supplementary with a one-line pointer.
+
+**A leftover was found while checking**: the overview figure caption still said "the *dominated*
+$C_{256}$ mode" — the last survivor of the family R31-1 withdrew. Corrected to the comparator
+wording.
+
+### 2 · The R37-3 fallback was needed
+
+The notation table is only ~0.3 page, so the count stayed at 18 and `sec:candidates` was compressed
+~30% as the batch's fallback instructs: the `E`-as-action-and-fallback paragraph, the one-of-many
+paragraph and the `C_256` comparator paragraph. Every claim survives — `E`'s two roles and their
+different decision times, the one-message design, the exclusion-by-design argument and its
+transport-parameter reason. The compression falls inside an insertion-gated paragraph, so it is
+declared as ruling `R37-compress`.
+
+### 3 · Result: still 18 pages
+
+| | main | supplementary | errors | overfull |
+|---|---|---|---|---|
+| R36 end | 18 | 8 | 0 | 2 |
+| **R37 end** | **18** | **9** | **0** | **1** |
+
+Sixteen gates pass; the compile gate fails on page count alone, and the overfull count is down to
+**one** (the `125.4` pt table row; the other two went with the tables that moved). Everything R37
+authorised is done: the table moved, the symbols are in the text, and the fallback was executed.
+
+The arithmetic is now explicit: the twelve restored images cost about two pages, and the four tables
+moved out since R35 gave back about one. Holding **both** the ten-figure floor of R36-1 and the
+17-page limit needs one of:
+
+* `tab:headline_agg` to the supplementary with its two-sentence reading kept — ≈ 0.45 page, the last
+  table that can move without leaving a claim unsupported in the main text;
+* `sec:true_e2e`'s verification prose to its two result sentences — ≈ 0.4 page;
+* dropping one panel from a paired float (e.g. the stacked-area view, whose content the two
+  decision-ratio panels already carry) — ≈ 0.25 page, but that touches a figure, which R36-4
+  forbids without your word.

@@ -56,7 +56,7 @@ Motivated by this observation, this paper proposes \emph{Channel-Aware Task-Orie
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.75\textwidth]{ca_tosg_method_overview.pdf}
-    \caption{Overview of the proposed \method{} framework. The ego vehicle extracts online task cues $z_t$ and estimated channel quality $(\gamma_t,\text{ch}_t)$, then selects one communication mode $s_t \in \mathcal{S}=\{E,L,F\}$, where $E$ is ego-only operation with no request at all (the dominated $C_{256}$ mode is a physical-layer comparator and is not in the deployed action set, Section~\ref{sec:candidates}). Only the selected message is transmitted through the V2V link and fused with the local ego feature $F_{\mathrm{ego},t}$ for 3D object detection.}
+    \caption{Overview of the proposed \method{} framework. The ego vehicle extracts online task cues $z_t$ and estimated channel quality $(\gamma_t,\text{ch}_t)$, then selects one communication mode $s_t \in \mathcal{S}=\{E,L,F\}$, where $E$ is ego-only operation with no request at all ($C_{256}$ is a physical-layer comparator, excluded from the deployed set by design, Section~\ref{sec:candidates}). Only the selected message is transmitted through the V2V link and fused with the local ego feature $F_{\mathrm{ego},t}$ for 3D object detection.}
     \label{fig:overview}
 \end{figure*}
 
@@ -124,31 +124,11 @@ At each frame, the ego receiver selects one communication mode from the deployed
 s_t \in \mathcal{S} = \{E, L, F\},
 \label{eq:action_set}
 \end{equation}
-where $E$ denotes \emph{ego-only} operation, $L$ object-level communication, and $F$ the compressed feature-level message, transmitted under 16-QAM modulation with rate-$1/2$ LDPC coding; we write $C_{16}$ for the same message where the modulation itself is the subject.
+where $E$ denotes \emph{ego-only} operation (no request, $B_E = 0$ channel uses), $L$ object-level communication ($B_L = 0.024$~Msym), and $F$ the compressed feature-level message ($B_F = 0.99$~Msym), transmitted under 16-QAM modulation with rate-$1/2$ LDPC coding. We write $F \equiv C_{16}$: the $C_q$ form is used only where the modulation order is the subject, and $C_{256}$ ($0.495$~Msym) is a physical-layer comparator that is not a deployed action. A symbol table is in the supplementary material.
 
-$E$ is a first-class action, not merely a failure mode. Choosing $E$ means the ego requests nothing and detects from its own LiDAR alone, so it costs $B_E = 0$ channel uses and cannot fail in transit. It is the right choice on two distinct kinds of frame: those where the ego's own detection is already sufficient, so any message would buy nothing, and those where the channel is so poor that a feature request would almost surely be lost and an object-level message would still cost bandwidth for little gain. $E$ also serves as the \emph{delivery-failure fallback}: when a requested $F$ message does not arrive, the receiver falls back to the ego-only detection, which is why the effective utility of $F$ in Eq.~\eqref{eq:eff_C} interpolates between the feature-level and the ego-only result according to the block-error probability. The two roles share one quantity but are decided at different times---$E$ as an action is chosen \emph{before} transmission by the selector, whereas $E$ as a fallback is what remains \emph{after} a delivery failure.
+$E$ is a first-class action, not merely a failure mode: the ego requests nothing and detects from its own LiDAR, costing nothing and unable to fail in transit. It is right on two kinds of frame---those where the ego's own detection already suffices, and those where the channel is so poor that a request would be lost or buy little. $E$ is \emph{also} the delivery-failure fallback, which is why the effective utility of $F$ in Eq.~\eqref{eq:eff_C} interpolates between the feature-level and ego-only results by the block-error probability. The two roles share a quantity but are decided at different times: as an action, \emph{before} transmission; as a fallback, \emph{after} a delivery failure.
 
-\begin{table}[t]
-\centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\caption{Notation for the semantic granularity levels. $F$ and $C_{16}$ denote the same message; the $C_q$ form is used only where the modulation order is the subject.}
-\label{tab:notation}
-\begin{tabular}{llcl}
-\toprule
-Symbol & Meaning & Channel use & Role \\
-\midrule
-$E$ & ego-only, no transmission & $B_E = 0$ & deployed action; also the delivery-failure fallback \\
-$L$ & object-level message & $B_L = 0.024$ & deployed action \\
-$F \equiv C_{16}$ & feature-level, 16-QAM & $B_F = 0.99$ & deployed action \\
-$C_{256}$ & feature-level, 256-QAM & $0.495$ & physical-layer comparator, \emph{not} deployed \\
-\bottomrule
-\end{tabular}
-\end{table} The same feature-level message is additionally evaluated with 256-QAM ($C_{256}$, same rate-$1/2$ LDPC) as a physical-layer comparator, but it is not included in the deployed semantic action set $\mathcal{S}$: modulation order is a transport parameter, not a semantic granularity (Section~\ref{sec:candidates}). The transmitted message is therefore
-\begin{equation}
-m_t = m_t^{s_t},
-\end{equation}
-where only the message corresponding to the selected mode $s_t$ is transmitted. This one-of-many design is important: the sender does not transmit both object-level and feature-level messages simultaneously, but chooses the semantic granularity that is expected to provide the best task-communication trade-off for the current frame.
+The transmitted message is therefore \begin{equation} m_t = m_t^{s_t}, \end{equation} only the message of the selected mode. This one-of-many design matters: the collaborator does not send object- and feature-level messages together, but the granularity expected to give the best task--communication trade-off for the current frame.
 
 The object-level message is defined as a compact set of local detections:
 \begin{equation}
@@ -162,7 +142,7 @@ m_t^{C_q} = \phi_q(F_{j,t}), \quad q \in \{16, 256\},
 \end{equation}
 where $\phi_q(\cdot)$ denotes a feature encoding and communication process for mode $C_q$. The two feature-level modes carry the same perception payload of approximately $1.98$~Mbit but require different numbers of channel uses because of the different spectral efficiency of 16-QAM versus 256-QAM.
 
-Of the two feature-level modes, the 256-QAM variant ($C_{256}$) carries the \emph{identical} semantic content as $C_{16}$---the same compressed feature payload of Eq.~\eqref{eq:payload}---and differs only in modulation order, which halves the per-frame channel use (0.495 vs.\ 0.99 Msym for $C_{256}$ and $C_{16}$\footnote{Feature payload 1.98 Mbit (Eq.~\eqref{eq:payload}) at LDPC rate-$1/2$ gives 3.96 Mbit of coded bits; $\div 8$ bit/sym (256-QAM) $=0.495$ Msym, $\div 4$ bit/sym (16-QAM) $=0.99$ Msym.}). It is included as a \emph{physical-layer comparator}: holding the semantic content fixed and changing only the constellation is what isolates the codec's channel response in Fig.~\ref{fig:bler}. It is \emph{not} an element of the deployed action set $\mathcal{S}=\{E,L,F\}$ (Eq.~\eqref{eq:action_set}), and it is excluded by design rather than by measurement: the selector chooses \emph{what to send}---a semantic granularity the receiver can request with the 2-bit field---whereas modulation order is a transport parameter of the link, not a granularity. Fig.~\ref{fig:bler} shows why the distinction is physically consequential: the 256-QAM frame-error cliff sits far to the right of the 16-QAM one (AWGN onset $16.5$ vs.\ $8.0$~dB\footnote{Es/N0 onset at which the frame-level BLER first falls below 0.999 -- the same 0.999 constant that defines the feasibility mask. Fig.~\ref{fig:bler} plots both cliffs directly.}), and under Rayleigh and OFDM both flatline at the ego floor across $0$--$20$~dB, so on this transport a denser constellation buys channel use at the cost of reach.
+Of the two feature-level modes, the 256-QAM variant ($C_{256}$) carries the \emph{identical} semantic content as $C_{16}$---the same compressed feature payload of Eq.~\eqref{eq:payload}---and differs only in modulation order, which halves the per-frame channel use (0.495 vs.\ 0.99 Msym for $C_{256}$ and $C_{16}$\footnote{Feature payload 1.98 Mbit (Eq.~\eqref{eq:payload}) at LDPC rate-$1/2$ gives 3.96 Mbit of coded bits; $\div 8$ bit/sym (256-QAM) $=0.495$ Msym, $\div 4$ bit/sym (16-QAM) $=0.99$ Msym.}). It is a \emph{physical-layer comparator}: holding semantic content fixed and changing only the constellation isolates the codec's channel response (Fig.~\ref{fig:bler}). It is \emph{not} in $\mathcal{S}$, and is excluded by design rather than by measurement---the selector chooses \emph{what to send}, a granularity the receiver requests with the 2-bit field, whereas modulation order is a transport parameter of the link. Fig.~\ref{fig:bler} shows why the distinction is physically consequential: the 256-QAM frame-error cliff sits far to the right of the 16-QAM one (AWGN onset $16.5$ vs.\ $8.0$~dB\footnote{Es/N0 onset at which the frame-level BLER first falls below 0.999 -- the same 0.999 constant that defines the feasibility mask. Fig.~\ref{fig:bler} plots both cliffs directly.}), and under Rayleigh and OFDM both flatline at the ego floor across $0$--$20$~dB, so on this transport a denser constellation buys channel use at the cost of reach.
 
 \subsection{Channel Model}\label{sec:channel}
 
