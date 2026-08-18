@@ -440,9 +440,18 @@ Under the corrected convention the cues do add accuracy on this axis ($+0.0090$ 
 
 \subsection{True End-to-end AP Verification}\label{sec:true_e2e}
 
-The realised frame F1 reported so far is computed under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, where a lost feature block falls back to the ego vehicle's own pre-fusion detection. To confirm that this analytical F1 proxy translates to actual end-to-end detection \emph{AP} under a deployed pipeline, we run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the ego-only (pre-fusion) prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over the $200$ paired stochastic channel realisations of the frozen replay. The per-SNR breakdown is the committed product \texttt{true\_e2e\_ap\_by\_snr.csv}.
-
-Two observations support the central claim. First, the boundary of the feature-active regime is \emph{measured}, not stipulated: reading the frozen selector's feature-request rate off the pre-registered SNR grid, $\rho_F$ is zero at every AWGN point up to $8$~dB and steps to its plateau at $10$~dB on all three splits---$0.472$ on validate, $0.433$ on test and $0.160$ on Culver-City---which is exactly where the $16$-QAM frame-error cliff clears (Section~\ref{sec:channel}).\footnote{Validate shows a $0.4\%$ toe at $8$~dB, the single grid point at which the frame BLER is neither ${\approx}0$ nor ${\approx}1$ ($0.402$); test and Culver-City are exactly zero there. We therefore take $10$~dB as the regime boundary on all three splits and report the toe rather than smoothing it away. Earlier versions of this section stipulated $\ge14$~dB; that threshold was not derived from any measurement and is withdrawn.} At that boundary the true end-to-end AP on validate is $0.8287$ at IoU $0.5$ and $0.7292$ at IoU $0.7$, and it is flat above it. The selector reaches this while paying $0.300$~Msym/frame averaged over the feature-active regime instead of the $0.990$ of always-on Fixed $F$---a $70\%$ saving---though on validate it recovers only part of the perfect-channel reference of the underlying attentive-compression model ($0.8369$ on validate, Section~\ref{sec:headline}) rather than essentially all of it, as an earlier version of this section claimed. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
+The realised frame F1 above is computed under the analytical block-loss model of
+Eq.~\eqref{eq:eff_C}; to confirm it translates to deployed detection, we re-run the pipeline
+end-to-end---the frozen selector picks $s_t$ per frame, cached per-frame predictions are
+concatenated according to that choice, each feature frame is dropped with probability
+$\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ into the ego-only fallback, and the box set is scored with
+the OpenCOOD AP computation over the same $200$ paired realisations---and report the resulting true
+end-to-end AP descriptively per budget, read against each split's headroom as in
+Section~\ref{sec:headline}. The two readings agree where it matters: the analytical replay and the
+true end-to-end AP give the same budget ordering and place the feature-active boundary at the same
+\emph{measured} $10$~dB knee, with the Rayleigh curve flat at Fixed $L$ throughout; the per-SNR
+breakdown, the regime-boundary toe and the payload accounting behind it are in the supplementary
+material (\texttt{true\_e2e\_ap\_by\_snr.csv}).
 
 \subsection{Generalisation to OPV2V Test and Culver-City Splits}\label{sec:generalisation}
 

@@ -4693,3 +4693,46 @@ moved out since R35 gave back about one. Holding **both** the ten-figure floor o
 * dropping one panel from a paired float (e.g. the stacked-area view, whose content the two
   decision-ratio panels already carry) — ≈ 0.25 page, but that touches a figure, which R36-4
   forbids without your word.
+
+---
+
+## Change-log R38 (2026-08-18) — the verification prose compressed; 18 pages, deficit measured
+
+**Zero GPU.** One subsection compressed to two sentences, its prose relocated verbatim.
+
+### 1 · `sec:true_e2e` reduced to its two result sentences
+
+The main text now says (i) what the true end-to-end AP measurement is and that it is reported
+descriptively per budget, read against each split's headroom as in `sec:headline`; and (ii) the
+verification conclusion — the analytical replay and the true end-to-end AP agree on the budget
+ordering and place the feature-active boundary at the same **measured** `10` dB knee, with the
+Rayleigh curve flat at Fixed `L` throughout. `tab:headline` stays in the main text.
+
+Everything removed — the four-step protocol, the per-split `rho_F` plateau values, the `8` dB toe
+footnote, the boundary AP values and the `70%` payload saving at the boundary — is reproduced
+verbatim in `paper/supplementary.tex` under its own heading. No number left the record, and none of
+the removed numbers is quoted by the abstract or the Conclusion.
+
+### 2 · Still 18 pages, and the deficit is now measured rather than guessed
+
+The compression removed 1,751 characters (~0.3 page) and did not tip the count. A probe settled how
+much is actually missing: deleting **2,261 characters** anywhere in the body takes the build to
+**17 pages** (the probe was reverted immediately; the committed state is the full text). So the
+deficit is **under ~2,300 characters, about a third of a page** — smaller than either option R38-3
+anticipated:
+
+| option | saving | cost |
+|---|---|---|
+| ~2.3k characters of prose anywhere (e.g. §I, §VI-A) | ≈ 0.35 page | wording only; no figure, no table, no claim |
+| `tab:headline_agg` to the supplementary | ≈ 0.45 page | a headline table leaves the main text |
+| drop one panel from a paired float | ≈ 0.25 page | touches a figure (R36-4 forbids without a ruling) |
+
+The first row is strictly cheaper than the two R38-3 named, and needs no figure or headline change;
+it is offered rather than taken, because R38 authorised exactly one prose cut and it has been made.
+
+| | main | supplementary | errors | overfull |
+|---|---|---|---|---|
+| R37 end | 18 | 9 | 0 | 1 |
+| **R38 end** | **18** | **10** | **0** | **1** |
+
+Sixteen gates pass; the compile gate fails on page count alone.
