@@ -141,8 +141,12 @@ def deployed_averages(pay):
                          round(r.B_RF / pay['C16'] * 100, 1), '0-100',
                          'replay_summary.csv', 0.0 <= r.B_RF / pay['C16'] * 100 <= 100.0))
     tex = open(MAIN).read()
-    m = re.search(r'\$([0-9.]+)\$--\$([0-9.]+)\\%\$ of the per-frame channel use of fixed '
-                  r'feature-level transmission', tex)
+    # R40-6: the abstract was compressed to 250 words; the range now reads "... $3.7$--$21.4\%$ of
+    # fixed feature-level transmission on test". Both forms are accepted so the check follows the
+    # sentence rather than one wording of it.
+    # whitespace-flexible: main.tex is hard-wrapped, so the phrase can break across lines
+    m = re.search(r'\$([0-9.]+)\$--\$([0-9.]+)\\%\$\s+of\s+(?:the\s+per-frame\s+channel\s+use\s+of\s+)?'
+                  r'fixed\s+feature-level\s+transmission', tex)
     if not m:
         rows.append(('(3b) abstract payload-share range parsed from main.tex', 'NOT FOUND',
                      'a "$x$--$y\\%$" range', 'main.tex abstract', False))

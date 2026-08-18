@@ -122,8 +122,17 @@ def abstract_in_scope(tex):
     return []
 
 
+def delivered():
+    """main.tex plus supplementary.tex (R40)."""
+    parts = [open(TEX, encoding='utf-8').read()]
+    supp = os.path.join(os.path.dirname(TEX), 'supplementary.tex')
+    if os.path.exists(supp):
+        parts.append(open(supp, encoding='utf-8').read())
+    return '\n'.join(parts)
+
+
 def main():
-    tex = open(TEX, encoding='utf-8').read()
+    tex = delivered()
     if '--self-test' in sys.argv:
         # the regression cases: the three directions this batch corrected must FAIL when flipped
         controls = [('R25 flip 1', 'RF', 'tau_nominal', '>', 'F1', 'test', 0.10),

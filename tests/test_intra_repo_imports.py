@@ -28,6 +28,7 @@ THIRD_PARTY = {
     'seaborn', 'tqdm', 'PIL', 'cv2', 'open3d', 'spconv', 'easydict', 'shapely', 'numba', 'opencood',
     'tensorboardX', 'tensorboard', 'einops', 'timm',
     'cairosvg',      # P4-B-e: SVG->PDF export of the hand-drawn overview figure
+    'pypdf',         # R40: the compile gate extracts rendered PDF text to catch a visible "??"
 
 }
 

@@ -202,16 +202,34 @@ def self_test(tex):
     rc |= 0 if fired3 else 1
 
     # R27-1: the terminology control injects the exact form that recurred three times.
-    fired4 = scan_terminology(tex + '\nwhere the sender adaptively selects the semantic level.\n')
+    # R40: the controls are this batch's own retired sentences, verbatim
+    probes = ('\nwhere the sender adaptively selects the semantic level.\n'
+              '\n(the dominated $C_{256}$ is a physical-layer comparator, not a deployed action)\n'
+              '\nAt moderate SNR, $C_{16}$ may become useful because it provides richer features '
+              'with better reliability than $C_{256}$.\n'
+              '\nmethods can be used inside the $C_{16}$ or $C_{256}$ branches, while the selector '
+              'decides when these branches should be activated.\n')
+    fired4 = scan_terminology(tex + probes)
     clean = scan_terminology(tex)
-    print(f'  TERMINOLOGY:  {"FIRES" if fired4 else "DOES NOT FIRE"} '
-          f'({len(tracked_terms())} tracked forms; {len(clean)} live match(es))')
-    rc |= 0 if (fired4 and not clean) else 1
+    n_hits = len({t[0] for t in fired4})
+    print(f'  TERMINOLOGY:  {"FIRES" if len(fired4) >= 4 else "DOES NOT FIRE"} '
+          f'({len(tracked_terms())} tracked forms; {len(fired4)} injected hits over {n_hits} '
+          f'families; {len(clean)} live match(es))')
+    rc |= 0 if (len(fired4) >= 4 and not clean) else 1
     return rc
 
 
+def _delivered():
+    """main.tex plus supplementary.tex -- R40: the supplementary is delivered text too."""
+    parts = [open(MAIN, encoding='utf-8').read()]
+    supp = os.path.join(os.path.dirname(MAIN), 'supplementary.tex')
+    if os.path.exists(supp):
+        parts.append(open(supp, encoding='utf-8').read())
+    return '\n'.join(parts)
+
+
 def main() -> int:
-    tex = open(MAIN, encoding='utf-8').read()
+    tex = _delivered()
     if '--self-test' in sys.argv:
         print('positive controls (each check must fail on an injected fault):')
         rc = self_test(tex)

@@ -109,6 +109,52 @@ def agg_body():
     return '\n'.join(out) + '\n'
 
 
+def gen_headline_policy_rows(tex):
+    """R40: the CA-TOSG and tau rows of tab:gen_headline, per split, from replay_summary.csv.
+
+    Only the FIXED rows of this table were generator-owned. The test block happened to be current;
+    the Culver block was not -- its selector and tau F1 values (0.87230/0.87491, 0.87355/0.88340,
+    0.88286/0.88740) match no committed product and came from the retired 200-realisation engine.
+    Nothing caught it because the table sat in the supplementary, which no numeric gate scanned
+    until this batch.
+    """
+    r = pd.read_csv(os.path.join(ROOT, 'results/main/replay_summary.csv'))
+    m = re.search(r'\\label\{tab:gen_headline\}(.*?)\\end\{tabular\}', tex, re.S)
+    if not m:
+        return tex
+    block = m.group(1)
+    marks = [(mm.start(), 'culver' if 'Culver' in mm.group(0) else 'test')
+             for mm in re.finditer(r'\\emph\{[^}]*(?:test|Culver-City)[^}]*\}', block)]
+    if not marks:
+        return tex
+    spans = [(marks[i][0], marks[i + 1][0] if i + 1 < len(marks) else len(block), marks[i][1])
+             for i in range(len(marks))]
+    out, last = [], 0
+    for a, b, split in spans:
+        out.append(block[last:a])
+        seg = block[a:b]
+        g = r[r.split == split]
+        for _, row in g.iterrows():
+            pat = (r'(\\quad \\method\{\} \$B_\{\\max\}\{=\}'
+                   + f'{row.budget:.2f}' + r'\$ / \$\\tau\^\\star\$\s*&\s*)'
+                   r'[\d.]+ / [\d.]+(\s*&\s*)[\d.]+ / [\d.]+\s*&\s*\$[\d.]+\\%'
+                   r'(?:\$ / \$| / )[\d.]+\\%\$')
+            def rep(mm, row=row):
+                # canonical form, so a second run matches what the first wrote
+                return (f'{mm.group(1)}{row.F1_RF:.5f} / {row.F1_tau:.5f}{mm.group(2)}'
+                        f'{row.B_RF:.4f} / {row.B_tau:.4f} & '
+                        f'${100 * row.B_RF / B_F:.1f}\\% / {100 * row.B_tau / B_F:.1f}\\%$')
+            seg, n = re.subn(pat, rep, seg, count=1)
+            if n != 1:
+                raise SystemExit(f'tab:gen_headline: the {split} B_max={row.budget:.2f} policy row '
+                                 f'did not match ({n} hits) -- the generator is not writing what it '
+                                 'claims to write (R40-4)')
+        out.append(seg)
+        last = b
+    out.append(block[last:])
+    return tex[:m.start(1)] + ''.join(out) + tex[m.end(1):]
+
+
 def gen_headline_baselines(tex):
     """tab:gen_headline carries per-split fixed baselines; regenerate each inside ITS OWN section.
 
@@ -179,16 +225,16 @@ def observation_iii(tex):
                          ('culver', 'on Culver-City')):
         g = r[r.split == split]
         seg.append((float(g.B_RF.min()), float(g.B_RF.max()), label))
-    pay = (f'${seg[0][0]:.5f}$--${seg[0][1]:.5f}$~Msym/frame {seg[0][2]}, '
-           f'${seg[1][0]:.5f}$--${seg[1][1]:.5f}$ {seg[1][2]} and '
-           f'${seg[2][0]:.5f}$--${seg[2][1]:.5f}$ {seg[2][2]} across the three budgets')
+    pay = (f'${seg[0][0]:.5f}$--${seg[0][1]:.5f}$~Msym/frame on validate, '
+           f'${seg[1][0]:.5f}$--${seg[1][1]:.5f}$ on test and '
+           f'${seg[2][0]:.5f}$--${seg[2][1]:.5f}$ on Culver-City')
     sh = ', '.join(f'${100 * lo / B_F:.1f}$--${100 * hi / B_F:.1f}\\%$' for lo, hi, _ in seg[:2])
     sh += f' and ${100 * seg[2][0] / B_F:.1f}$--${100 * seg[2][1] / B_F:.1f}\\%$'
     return sub_once(
         tex,
-        r"\(iii\) Averaged over all channel states the selector's channel use is .*?of Fixed \$F\$,",
-        lambda _m: ("(iii) Averaged over all channel states the selector's channel use is "
-                    f'{pay}, i.e.\\ {sh} of Fixed $F$,'),
+        r"\(iii\) Channel-averaged, the selector spends .*?of Fixed \$F\$---",
+        lambda _m: ('(iii) Channel-averaged, the selector spends '
+                    f'{pay}---{sh} of Fixed $F$---'),
         'observation (iii)')
 
 
@@ -239,9 +285,23 @@ def main() -> int:
         return 0
     tex = splice(tex, 'tab:headline', hb)
     tex = splice(tex, 'tab:headline_agg', ab)
-    tex = splice(tex, 'tab:ablation', ablation_body())
-    tex = gen_headline_baselines(tex)
+    # R40: tab:ablation moved to the supplementary in R35; splice it wherever it now lives
+    supp_p = os.path.join(ROOT, 'paper/supplementary.tex')
+    if 'tab:ablation' in tex:
+        tex = splice(tex, 'tab:ablation', ablation_body())
+    elif os.path.exists(supp_p):
+        _s = open(supp_p, encoding='utf-8').read()
+        open(supp_p, 'w', encoding='utf-8').write(splice(_s, 'tab:ablation', ablation_body()))
     tex = observation_iii(tex)
+    # R40: tab:gen_headline moved to the supplementary document, so its generator runs there
+    supp_path = os.path.join(ROOT, 'paper/supplementary.tex')
+    if os.path.exists(supp_path):
+        supp = open(supp_path, encoding='utf-8').read()
+        supp = gen_headline_baselines(supp)
+        supp = gen_headline_policy_rows(supp)
+        open(supp_path, 'w', encoding='utf-8').write(supp)
+    else:
+        tex = gen_headline_baselines(tex)
     # R23-8: this substitution targeted a sentence form main.tex no longer contains, so it rewrote
     # nothing on every run. The sentence it was meant to own is observation (iii), which is now
     # generated by observation_iii() above through sub_once(), and the dead pattern is removed.
@@ -253,10 +313,16 @@ def main() -> int:
     # CSV cell, and so is every cell this generator computes for tab:gen_headline and tab:ablation.
     # Declaring them is what makes the literal-coverage gate able to distinguish a derived cell from
     # an unverified one; they were previously indistinguishable.
+    # R40: the share-of-B_F column is derived wherever its table lives -- tab:headline_agg in the
+    # main file, tab:gen_headline in the supplementary since R36.
     shares = set()
-    m = re.search(r'\\label\{tab:gen_headline\}(.*?)\\end\{tabular\}', tex, re.S)
-    if m:
-        shares |= set(re.findall(r'\$(\d+\.\d+)\\%\$', m.group(1)))
+    for doc, lab in ((tex, 'tab:headline_agg'), (tex, 'tab:gen_headline'),
+                     (open(os.path.join(ROOT, 'paper/supplementary.tex'), encoding='utf-8').read()
+                      if os.path.exists(os.path.join(ROOT, 'paper/supplementary.tex')) else '',
+                      'tab:gen_headline')):
+        m = re.search(r'\\label\{' + lab + r'\}(.*?)\\end\{tabular\}', doc, re.S)
+        if m:
+            shares |= set(re.findall(r'\$?(\d+\.\d+)\\%', m.group(1)))
     json.dump({'schema': 'catosg-derived-table-cells/1',
                'note': 'regime means over the AWGN SNR points below / at-and-above the measured '
                        'knee; and the share-of-B_F ratio column (payload / 0.99 x 100)',

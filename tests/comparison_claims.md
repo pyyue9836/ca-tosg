@@ -25,6 +25,6 @@ Directions: `>` A exceeds B, `<` A is below B, `~` parity (within 0.0005).
 | handrule3-payload-B020 | hand_rule_3 | RF | > | payload | test | 0.20 | `The difference lies on the other axis` |
 | handrule2-payload-B020 | hand_rule_2 | RF | < | payload | test | 0.20 | `degenerating to Fixed $L$` |
 | abstract-handrule-F1 | hand_rule_3 | RF | ~ | F1 | test | 0.20 | `a three-scalar hand rule reach comparable F1` |
-| abstract-handrule-payload | hand_rule_3 | RF | > | payload | test | 0.20 | `they do so by sending more feature messages` |
-| abstract-threshold-F1 | RF | tau_nominal | < | F1 | test | 0.20 | `the selector is non-inferior within the pre-registered $0.005$ margin` |
+| abstract-handrule-payload | hand_rule_3 | RF | > | payload | test | 0.20 | `but send more feature messages` |
+| abstract-threshold-F1 | RF | tau_nominal | < | F1 | test | 0.20 | `non-inferior to the nominal SNR threshold within a $0.005$ margin` |
 

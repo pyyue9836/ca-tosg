@@ -18,7 +18,27 @@
 Bandwidth-Constrained V2V Cooperative Perception}
 \maketitle
 
-\noindent This document carries material moved out of the main paper for length. It is
+\noindent \noindent\emph{Products.} Every number in this document is read from the same committed products as
+the main paper: \texttt{results/main/replay\_summary.csv},
+\texttt{results/main/fixed\_references.csv}, \texttt{results/main/tau\_feasible.csv},
+\texttt{results/main/true\_e2e\_ap.csv}, \texttt{results/main/action\_distribution.csv},
+\texttt{results/main/feature\_importance\_frozen.csv},
+\texttt{results/main/step4\_collaboration\_harm.csv},
+\texttt{results/sensitivity/feature\_ablation.csv},
+\texttt{results/sensitivity/difficulty\_frozen.csv},
+\texttt{results/sensitivity/collaborator\_scale.csv},
+\texttt{results/sensitivity/delivery\_semantics\_bracket.csv},
+\texttt{results/sensitivity/robustness\_frozen.csv},
+\texttt{results/sensitivity/r23\_scene\_bootstrap.csv},
+\texttt{results/sensitivity/r23\_object\_message\_bler.csv},
+\texttt{results/sensitivity/r23\_fragmentation\_harq.csv},
+\texttt{results/baselines/two\_gate.csv}, \texttt{results/baselines/two\_gate\_dgate.csv},
+\texttt{results/baselines/importance\_map\_jscc/two\_regime\_edge\_clean.csv},
+\texttt{results/p4b/replay\_summary.csv}, \texttt{results/p4b/perclass\_ELF.csv},
+\texttt{results/manifests/FROZEN\_MANIFEST.json} and
+\texttt{results/channel/bler\_sionna.csv}.
+
+This document carries material moved out of the main paper for length. It is
 \emph{not} a second set of results: the two appendices below are the prior-protocol arms
 labelled as such in the main text, and the cue table is the definition list of the 21
 committed ego-side cues. Section and label names are preserved so that the main text's
@@ -348,7 +368,7 @@ Under the corrected single-collaborator convention this limitation became \emph{
     \includegraphics[width=0.42\textwidth]{fig_decisions_awgn.pdf}\hfill
     \includegraphics[width=0.42\textwidth]{fig_decisions_rayleigh.pdf}\\
     \includegraphics[width=0.75\linewidth]{fig_stacked_area.pdf}
-    \caption{Per-mode selection ratios versus SNR on OPV2V validate at $B_{\max}=0.20$, from the frozen grid. \emph{Top:} the frozen selector (solid) against \emph{that budget's $\lambda$-penalised oracle} (dashed) --- the oracle sees the frame BLER, \emph{not} the per-frame block outcome, so it is not clairvoyant. \emph{Bottom:} stacked-area view of the selector's action distribution over the deployed action set $\mathcal{S}=\{E,L,F\}$ under AWGN and Rayleigh (the dominated $C_{256}$ is a physical-layer comparator, not a deployed action, the main paper); the dotted line marks the measured $10$~dB policy knee. Two readings: under AWGN $\rho_F$ steps from $0$ to $0.472$ at $10$~dB and is flat above it, and under Rayleigh the selector's $\rho_E$ is $0.002$ (test) / $0.000$ (Culver-City) while the oracle spends $\rho_E=0.157$ / $0.133$ there --- the $E$-collapse limitation of Section~\ref{sec:pareto}. The three-budget version is the per-budget action distributions (repository figure product).}\label{fig:decision_ratio}
+    \caption{Per-mode selection ratios versus SNR on OPV2V validate at $B_{\max}=0.20$, from the frozen grid. \emph{Top:} the frozen selector (solid) against \emph{that budget's $\lambda$-penalised oracle} (dashed) --- the oracle sees the frame BLER, \emph{not} the per-frame block outcome, so it is not clairvoyant. \emph{Bottom:} stacked-area view of the selector's action distribution over the deployed action set $\mathcal{S}=\{E,L,F\}$ under AWGN and Rayleigh (the non-deployed $C_{256}$ physical-layer comparator); the dotted line marks the measured $10$~dB policy knee. Two readings: under AWGN $\rho_F$ steps from $0$ to $0.472$ at $10$~dB and is flat above it, and under Rayleigh the selector's $\rho_E$ is $0.002$ (test) / $0.000$ (Culver-City) while the oracle spends $\rho_E=0.157$ / $0.133$ there --- the $E$-collapse limitation of Section~\ref{sec:pareto}. The three-budget version is the per-budget action distributions (repository figure product).}\label{fig:decision_ratio}
 \end{figure*}
 
 \noindent\emph{Feature importance.}\label{sec:feat_imp}
@@ -495,18 +515,18 @@ Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
 Fixed $L$                       & 0.8910 & 0.024 & $2.4\%$ \\
 Fixed $F$ (LDPC + 16-QAM)       & 0.8483 & 0.990 & $100.0\%$ \\
 Fixed $C_{256}$ (LDPC + 256-QAM)& 0.8255 & 0.495 & $50.0\%$ \\
-\quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.89148 / 0.89247 & 0.0368 / 0.0724 & $3.7\%$ / $7.3\%$ \\
-\quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.89691 / 0.89701 & 0.1414 / 0.2168 & $14.3\%$ / $21.9\%$ \\
-\quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.89783 / 0.89900 & 0.2120 / 0.3125 & $21.4\%$ / $31.6\%$ \\
+\quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.89148 / 0.89247 & 0.0368 / 0.0724 & $3.7\% / 7.3\%$ \\
+\quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.89691 / 0.89701 & 0.1414 / 0.2168 & $14.3\% / 21.9\%$ \\
+\quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.89783 / 0.89900 & 0.2120 / 0.3125 & $21.4\% / 31.6\%$ \\
 Channel-aware oracle (masked)   & 0.9056 & 0.175 & $17.7\%$ \\
 \midrule
 \multicolumn{4}{l}{\emph{OPV2V Culver-City} ($T=550$)} \\
 Fixed $L$                       & 0.8466 & 0.024 & $2.4\%$ \\
 Fixed $F$ (LDPC + 16-QAM)       & 0.8099 & 0.990 & $100.0\%$ \\
 Fixed $C_{256}$ (LDPC + 256-QAM)& 0.7793 & 0.495 & $50.0\%$ \\
-\quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.87230 / 0.87491 & 0.0283 / 0.0718 & $2.9\%$ / $7.2\%$ \\
-\quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.87355 / 0.88340 & 0.0423 / 0.2174 & $4.3\%$ / $22.0\%$ \\
-\quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.88286 / 0.88740 & 0.1601 / 0.3146 & $16.2\%$ / $31.8\%$ \\
+\quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.84667 / 0.84956 & 0.0244 / 0.0718 & $2.5\% / 7.2\%$ \\
+\quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.84975 / 0.85858 & 0.0675 / 0.2174 & $6.8\% / 22.0\%$ \\
+\quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.85932 / 0.86316 & 0.1823 / 0.3146 & $18.4\% / 31.8\%$ \\
 Channel-aware oracle (masked)   & 0.8643 & 0.266 & $26.8\%$ \\
 \bottomrule
 \end{tabular}
@@ -519,9 +539,9 @@ The verification prose the main paper compresses to two sentences.
 
 \subsection{True End-to-end AP Verification}\label{sec:true_e2e}
 
-The realised frame F1 reported so far is computed under the analytical block-loss model of Eq.~\eqref{eq:eff_C}, where a lost feature block falls back to the ego vehicle's own pre-fusion detection. To confirm that this analytical F1 proxy translates to actual end-to-end detection \emph{AP} under a deployed pipeline, we run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the ego-only (pre-fusion) prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over the $200$ paired stochastic channel realisations of the frozen replay. The per-SNR breakdown is the committed product \texttt{true\_e2e\_ap\_by\_snr.csv}.
+The realised frame F1 reported so far is computed under the analytical block-loss model of Eq.~(4) of the main paper, where a lost feature block falls back to the ego vehicle's own pre-fusion detection. To confirm that this analytical F1 proxy translates to actual end-to-end detection \emph{AP} under a deployed pipeline, we run a true end-to-end inference in which: (i) the deployed selector picks $s_t$ per frame from $(\hat\gamma_t,c_t)$; (ii) cached per-frame predictions from the OPV2V late-fusion checkpoint (for $L$) and the attentive-compression checkpoint (for $C_q$) are concatenated according to the selector's choice; (iii) each $C_q$ frame is dropped with probability $\mathrm{BLER}_q(\gamma_t,\mathrm{ch}_t)$ and falls back to the ego-only (pre-fusion) prediction; (iv) the resulting box set is scored against ground-truth boxes with the OpenCOOD VOC-style $\mathrm{AP}$ computation at IoU thresholds $\{0.3,0.5,0.7\}$, averaged over the $200$ paired stochastic channel realisations of the frozen replay. The per-SNR breakdown is the committed product \texttt{true\_e2e\_ap\_by\_snr.csv}.
 
-Two observations support the central claim. First, the boundary of the feature-active regime is \emph{measured}, not stipulated: reading the frozen selector's feature-request rate off the pre-registered SNR grid, $\rho_F$ is zero at every AWGN point up to $8$~dB and steps to its plateau at $10$~dB on all three splits---$0.472$ on validate, $0.433$ on test and $0.160$ on Culver-City---which is exactly where the $16$-QAM frame-error cliff clears (Section~\ref{sec:channel}).\footnote{Validate shows a $0.4\%$ toe at $8$~dB, the single grid point at which the frame BLER is neither ${\approx}0$ nor ${\approx}1$ ($0.402$); test and Culver-City are exactly zero there. We therefore take $10$~dB as the regime boundary on all three splits and report the toe rather than smoothing it away. Earlier versions of this section stipulated $\ge14$~dB; that threshold was not derived from any measurement and is withdrawn.} At that boundary the true end-to-end AP on validate is $0.8287$ at IoU $0.5$ and $0.7292$ at IoU $0.7$, and it is flat above it. The selector reaches this while paying $0.300$~Msym/frame averaged over the feature-active regime instead of the $0.990$ of always-on Fixed $F$---a $70\%$ saving---though on validate it recovers only part of the perfect-channel reference of the underlying attentive-compression model ($0.8369$ on validate, Section~\ref{sec:headline}) rather than essentially all of it, as an earlier version of this section claimed. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section~\ref{sec:headline}, is not a frame-F1 artefact but a genuine end-to-end property.
+Two observations support the central claim. First, the boundary of the feature-active regime is \emph{measured}, not stipulated: reading the frozen selector's feature-request rate off the pre-registered SNR grid, $\rho_F$ is zero at every AWGN point up to $8$~dB and steps to its plateau at $10$~dB on all three splits---$0.472$ on validate, $0.433$ on test and $0.160$ on Culver-City---which is exactly where the $16$-QAM frame-error cliff clears (Section III-C of the main paper).\footnote{Validate shows a $0.4\%$ toe at $8$~dB, the single grid point at which the frame BLER is neither ${\approx}0$ nor ${\approx}1$ ($0.402$); test and Culver-City are exactly zero there. We therefore take $10$~dB as the regime boundary on all three splits and report the toe rather than smoothing it away. Earlier versions of this section stipulated $\ge14$~dB; that threshold was not derived from any measurement and is withdrawn.} At that boundary the true end-to-end AP on validate is $0.8287$ at IoU $0.5$ and $0.7292$ at IoU $0.7$, and it is flat above it. The selector reaches this while paying $0.300$~Msym/frame averaged over the feature-active regime instead of the $0.990$ of always-on Fixed $F$---a $70\%$ saving---though on validate it recovers only part of the perfect-channel reference of the underlying attentive-compression model ($0.8369$ on validate, Section VI-A of the main paper) rather than essentially all of it, as an earlier version of this section claimed. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section VI-A of the main paper, is not a frame-F1 artefact but a genuine end-to-end property.
 
 
 \bibliographystyle{IEEEtran}

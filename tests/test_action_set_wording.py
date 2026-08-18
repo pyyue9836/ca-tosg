@@ -62,8 +62,17 @@ def violations(text):
     return bad
 
 
+def delivered():
+    """main.tex plus supplementary.tex (R40: the supplementary is delivered text)."""
+    parts = [open(TEX, encoding='utf-8').read()]
+    supp = os.path.join(os.path.dirname(TEX), 'supplementary.tex')
+    if os.path.exists(supp):
+        parts.append(open(supp, encoding='utf-8').read())
+    return '\n'.join(parts)
+
+
 def main():
-    text = open(TEX, encoding='utf-8').read()
+    text = delivered()
     if '--self-test' in sys.argv:
         # the exact R23-5 regression: the Conclusion sentence with E removed again
         probe = (r'The selector outputs a per-frame communication mode from the deployed action '
@@ -79,7 +88,7 @@ def main():
         return 0 if (fires and ok) else 1
     bad = violations(text)
     n = len(sentences(text))
-    print(f'action-set wording: {n} sentences scanned in paper/main.tex')
+    print(f'action-set wording: {n} sentences scanned in main.tex + supplementary.tex')
     for ln, missing, s in bad:
         print(f'  main.tex:~{ln}: deployed action set named without {missing}: {s}')
     if bad:

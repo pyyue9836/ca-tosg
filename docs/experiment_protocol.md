@@ -4263,6 +4263,12 @@ gate rather than waiting for a reader.
 
 ### 3 · C256 exclusion restated as set domination
 
+> **SUPERSEDED BY R31-1 (2026-08-18).** The set-domination argument below was itself withdrawn: under
+> the supervisor's option-1 framing `C_256` is a physical-layer comparator excluded from the deployed
+> set **by design** (modulation order is a transport parameter, not a semantic granularity), and no
+> dominance claim of any form is made about it. The record is kept for the history of the sentence;
+> the live wording is R31-1's.
+
 The argument no longer needs frame statistics or a case analysis of strictness:
 
 * when `comp >= ego`, `C_16` delivers the identical payload at a block-error rate that is never
@@ -4783,3 +4789,75 @@ listed in `docs/compile_report.md`).
 appendices, six results subsections, five tables and the full cue list. Every number the abstract or
 the Conclusion quotes is in the main text; nothing was deleted to meet the page limit; and the
 toolchain (tectonic in its own conda env) needs no root.
+
+---
+
+## Change-log R40 (2026-08-18) — cross-document integrity, C256 claim family, gate coverage over both files
+
+**Zero GPU.** Reference repair, wording, gate expansion, abstract compression. The expansion did
+what it was expected to: the supplementary had never been scanned, and it was not clean.
+
+### 1 · Five dangling references repaired as named pointers
+
+`main.tex` pointed at `sec:pareto` and `fig:decision_budgets`, both of which had moved; the
+supplementary pointed at `eq:eff_C`, `sec:channel` and `sec:headline`, which live in the main paper.
+Now: "the $E$-collapse limitation (supplementary material)", "the three-budget version is provided in
+the supplementary material", and "Eq. (4) / Section III-C / Section VI-A of the main paper".
+**Zero dangling labels in either document, and the compile gate now proves it.**
+
+### 2 · Three C256 survivals replaced with the supervisor's wording
+
+Two figure captions -> "the non-deployed $C_{256}$ physical-layer comparator"; the method sentence
+that compared the two constellations' reliability (implying the selector chooses between them) ->
+"The deployed feature action $F \equiv C_{16}$ becomes feasible once its frame-error cliff clears.";
+the integration sentence -> "These methods can be integrated into the deployed feature-level branch
+$F$, while modulation-order adaptation remains outside the present action space." The **empirical**
+statement that Fixed-$C_{256}$ sits below Fixed-$L$ on the payload--F1 plane is a different claim and
+is kept.
+
+### 3 · TERMINOLOGY is now meaning-level
+
+Three C256 claim shapes joined `tests/tracked_terms.md`: *dominance* (anchored on C256 as the object
+of the verb, so the empirical Pareto statement stays sayable), *reliability comparison implying a
+choice*, and *branch activation* ("inside the C16 or C256 branches" puts a non-deployed mode in the
+action space). The positive control injects **this batch's own three retired sentences**, verbatim,
+alongside R27's sender-side probe; the self-test requires all four to fire.
+
+### 4 · Four gates and the compile gate now read both documents — and found three things
+
+`test_result_consistency` (via the paragraph gate), `test_numeric_literals`,
+`test_comparison_direction` and `test_action_set_wording` now cover `paper/supplementary.tex`, and
+the compile gate builds **both** files, failing on any LaTeX error, undefined reference/citation, or
+a rendered `??`. What the first full run turned up:
+
+* **The Culver block of `tab:gen_headline` was pre-corrigendum.** Its selector and $\tau$ rows
+  (`0.87230/0.87491`, `0.87355/0.88340`, `0.88286/0.88740`) match **no committed product**; only the
+  fixed rows had ever been generator-owned, and the table had sat unscanned in the supplementary
+  since R36. `gen_headline_policy_rows()` now writes those rows from `replay_summary.csv`
+  (`0.84667/0.84956`, `0.84975/0.85858`, `0.85932/0.86316`), and the generator refuses to run if a
+  row does not match.
+* **Ten supplementary literals were unbound**, because that document cited no products. It now
+  names the twenty-one products its numbers come from, and the echo rule verifies them there.
+* **A false-positive in my own new check**: grepping the PDF *byte stream* for `??` fired on both
+  files (arbitrary bytes contain `??`). It reads the **rendered text** via `pypdf` instead.
+
+### 5 · Audit and history
+
+Regenerating `docs/claims_evidence_audit.md` dropped the C256 dominance rows with the sentences they
+described. R30-3's set-domination entry is now headed **SUPERSEDED BY R31-1**, so the change-log
+reads forward correctly.
+
+### 6 · Abstract: 653 -> 270 words, and why not 250
+
+Redundant clauses are gone and every number is kept: the budget set, the headroom triple, the
+converted share, the channel-use range, both saving tracks with the over-budget label, the secondary
+`+0.00067`/`26.6%` without a non-inferiority decision, the importance split and the latency. A
+251-word version existed briefly and is **not** what was committed: it had silently dropped the claim
+that a threshold and a three-scalar hand rule reach comparable F1 at higher payload, which R40-6
+forbids. Restoring that claim costs 19 words. **270 is the floor with every claim and number intact**;
+250 is reachable only by dropping one of them, which is a ruling, not an edit.
+
+### 7 · State
+
+Seventeen gates pass, twice, on a clean tree. Main 17 pages / 1 overfull; supplementary 8 pages /
+7 overfull (its wide moved tables, recorded in `docs/compile_report.md`).

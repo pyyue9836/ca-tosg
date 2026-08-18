@@ -49,7 +49,7 @@ REGISTER = os.path.join(ROOT, 'tests', 'uncovered_literals.md')   # the R23-15 d
 # exist to quote superseded values (the corrigendum, the protocol change-log) are NOT delivered text.
 TARGETS = ('paper/main.tex',)
 # documents that may quote the paper's numbers but must not introduce new ones
-ECHO_TARGETS = ('README.md', 'docs/model_zoo.md')
+ECHO_TARGETS = ('README.md', 'docs/model_zoo.md', 'paper/supplementary.tex')
 # R23-15: generator-written documents are held to the STRONGER guarantee -- re-running the generator
 # must reproduce them byte for byte -- rather than to literal binding, because their numbers are
 # computed at build time from canonical products and legitimately include derived values that appear
