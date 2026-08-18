@@ -3956,3 +3956,77 @@ degenerating to Fixed L, and the nominal SNR threshold landing **over** budget a
 Confirmed by locating each verbatim: the scene-level pair beside the realisation-level one
 (`sec:headline`), both halves of the `BLER_L` result including the unfavourable one
 (`sec:robustness`), and the numerical HARQ qualifier (`sec:channel`). R23's report was accurate.
+
+---
+
+## Change-log R25 (2026-08-18) — three direction errors, the HARQ replay completed, and a gate that reads directions
+
+**Zero GPU.** One CPU-analytic replay (42 s), the rest prose, bindings and one new gate.
+
+### 1 · Three comparisons pointed the wrong way
+
+All three had correct numbers and a wrong direction, which is why every existing gate passed them:
+
+* `sec:threshold` claimed the selector was **ahead** of the tuned threshold at `B_max = 0.10`. On
+  test the nominal threshold is ahead **at every budget**: `0.89247 / 0.89701 / 0.89900` against
+  `0.89148 / 0.89691 / 0.89783`, at `1.97x / 1.53x / 1.47x` the channel use, and at the two looser
+  budgets from outside the cap. Against `tau_feasible` the ordering reverses at **one** budget only
+  (`+0.00067` at `B_max = 0.20`; `-0.00174` and `-0.00118` at `0.10` and `0.30`). Rewritten.
+* The **Conclusion** repeated the same error ("ahead of it at the tightest budget"). Rewritten to
+  the measured direction.
+* `sec:threshold` also said the channel-only variant "does reach a higher F1 than the full selector"
+  at `B_max = 0.30`, **contradicting `sec:ablation` two sections earlier**, which reports it beaten
+  on both axes (`0.89529` vs `0.89783` at `1.36x` the channel use). One fact may have one direction;
+  the contradicting half is rewritten to match.
+
+### 2 · Why the "lighter models" claim survived R23-14 — attribution
+
+Not a generator write-back and not a missed edit: R23-14's edit **did** land and is still in place
+(the Conclusion's "rather than selector-model complexity" is gone, `git log -S` confirms it at
+`986854d`). What survived is a **second home for the same claim** that the R23 inventory never
+located: the contribution list's "two \emph{interchangeable} realisations". The failure was an
+incomplete inventory of one claim, not a lost edit. Fixed here: the bullet now reads "two policy
+realisations with **different payload--F1 operating points**", which is what the data supports.
+
+### 3 · HARQ: an accounting error corrected, and the replay finished
+
+* **`E[N_tx] = 1 + q_first`.** The R23-C summary used the *post-HARQ* failure probability `q_eff`
+  in the payload column, understating the expected transmissions. `frag_bler` now returns both, and
+  the corrected AWGN means are **1.646338 / 1.632843 / 1.624675** for `k = 1 / 2 / 4`. The per-row
+  `payload_factor` was already `1 + q_first` and is unchanged, so the **8 dB single-point values in
+  the paper need no change** (`0.402400 -> 0.161926 / 0.100363 / 0.057077` at
+  `1.402400 / 1.226954 / 1.120770x`) — checked, not assumed.
+* **The replay, as pre-registered.** R23-C promised the modified BLER **and** the inflated payload
+  through the deployment replay; R23 delivered only the analytic table. Now complete:
+  6 configurations x 3 splits x 3 budgets x {RF, tau, Fixed-L} in
+  `results/sensitivity/r25_fragmentation_replay.csv`. One retransmission moves the selector by at
+  most `+0.00064` F1 and `+0.00803` Msym, and moves the threshold rule **not at all** at
+  `B_max = 0.20` — its feature requests already sit above the cliff. No conclusion changes.
+* **A convention mismatch the invariant caught.** The first implementation interpolated the
+  *codeword* BLER and exponentiated; the mainline interpolates the *frame* BLER. Off-grid the two
+  differ, and the pre-registered `(k=1, no HARQ) == replay_summary.csv` check failed at `2e-5` on
+  validate. The modified table is now built at the tabulated points and interpolated by exactly
+  `deployment.bler16`'s rule.
+
+### 4 · The hand rules are baselines, in the baselines list
+
+`sec:baselines` now defines the SNR-threshold rule (nominal and budget-matched) and the two- and
+three-scalar hand rules. Their results stay in `sec:handrule`; nothing is duplicated.
+
+### 5 · The canonical framing sentence
+
+Settled in `sec:threshold`, and the ledger row carries it as the allowed wording:
+*\method{} does not win by raising average F1. A one-line SNR threshold and a three-scalar hand rule
+reach comparable F1, but they do so by sending more feature messages. What the task cues buy is
+knowing which of the frames the channel can carry are actually worth sending, so that perception
+stays non-inferior at lower communication.*
+
+### 6 · New gate: comparison direction
+
+`tests/test_comparison_direction.py` reads `(A, B, direction, metric, split, budget, probe)` tuples
+from `tests/comparison_claims.md`, looks both quantities up in the canonical product that owns them,
+and fails when the claimed direction disagrees with the data. **14 comparisons are registered.** The
+three errors above are the regression cases: the self-test asserts that each, written the wrong way,
+**fires**. Each row also carries a verbatim `probe` from the sentence that makes the claim, so the
+table cannot drift away from the text — that control fired immediately, on a probe of mine that said
+`Fixed L` where the paper writes `Fixed $L$`.

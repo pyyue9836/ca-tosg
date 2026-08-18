@@ -180,37 +180,43 @@ def object_message_bler(rows, prov):
 
 # ---------------------------------------------------------------- 3. fragmentation / HARQ
 def frag_bler(b_cw, k, harq):
-    """Frame BLER for k fragments of N_cw/k codewords, all required, with 0 or 1 retransmission."""
-    q = 1.0 - np.power(1.0 - b_cw, N_CW / k)            # one fragment fails
-    if harq:
-        q = q ** 2                                       # ... and fails again on the retransmission
-    return 1.0 - np.power(1.0 - q, k), q
+    """Frame BLER for k fragments of N_cw/k codewords, all required, with 0 or 1 retransmission.
+
+    Returns (frame BLER, q_first, q_eff). R25-3: the two q's must not be confused. `q_first` is the
+    FIRST-transmission failure probability of a fragment and is what the payload costs
+    (E[N_tx] = 1 + q_first); `q_eff` is the probability the fragment is still undelivered after the
+    allowed retransmission, and is what the frame BLER is built from. The R23-C summary used q_eff
+    in the payload column, understating E[N_tx].
+    """
+    q_first = 1.0 - np.power(1.0 - b_cw, N_CW / k)       # one fragment fails on its first send
+    q_eff = q_first ** 2 if harq else q_first            # ... and again on the retransmission
+    return 1.0 - np.power(1.0 - q_eff, k), q_first, q_eff
 
 
 def fragmentation(rows_b, rows, prov):
     tbl = pd.read_csv(D.BLER_CSV)
     t16 = tbl[tbl.qam == 16].copy()
     # invariant (a): k=1, no HARQ must reproduce the committed bler_frame column
-    b1, _ = frag_bler(t16.bler_cw.to_numpy(), 1, False)
+    b1, _, _ = frag_bler(t16.bler_cw.to_numpy(), 1, False)
     if not np.allclose(b1, t16.bler_frame.to_numpy(), atol=1e-6):
         fuse('k=1 no-HARQ frame BLER does not reproduce the committed bler_frame column')
     # invariant (b): fragmentation WITHOUT HARQ is independent of k
     for k in K_FRAGS:
-        bk, _ = frag_bler(t16.bler_cw.to_numpy(), k, False)
+        bk, _, _ = frag_bler(t16.bler_cw.to_numpy(), k, False)
         if not np.allclose(bk, b1, atol=1e-9):
             fuse(f'no-HARQ frame BLER changed with k={k}; it is algebraically independent of k')
 
     for _, r in t16.iterrows():
         for k in K_FRAGS:
             for harq in (False, True):
-                b, q = frag_bler(np.array([r.bler_cw]), k, harq)
+                b, q1, qe = frag_bler(np.array([r.bler_cw]), k, harq)
                 rows_b.append(dict(qam=16, channel=r.channel, esno_db=r.esno_db,
                                    bler_cw=r.bler_cw, k=k, harq=int(harq),
                                    n_cw_per_fragment=int(N_CW / k),
-                                   q_fragment=round(float(q[0]), 6),
+                                   q_first=round(float(q1[0]), 6),
+                                   q_effective=round(float(qe[0]), 6),
                                    bler_frame=round(float(b[0]), 6),
-                                   payload_factor=round(float(1 + (1 - (1 - r.bler_cw)
-                                                                   ** (N_CW / k)) if harq else 1.0), 6),
+                                   payload_factor=round(float(1 + q1[0]) if harq else 1.0, 6),
                                    feasible=bool(b[0] < BLER_INFEASIBLE)))
 
     # what the paper's Rayleigh conclusion has to survive
@@ -218,7 +224,7 @@ def fragmentation(rows_b, rows, prov):
         for harq in (False, True):
             for ch in ('awgn', 'rayleigh'):
                 s = t16[t16.channel == ch].sort_values('esno_db')
-                b, q = frag_bler(s.bler_cw.to_numpy(), k, harq)
+                b, q1, _qe = frag_bler(s.bler_cw.to_numpy(), k, harq)
                 ok = np.flatnonzero(b < BLER_INFEASIBLE)
                 onset = float(s.esno_db.to_numpy()[ok[0]]) if len(ok) else float('nan')
                 in_range = s.esno_db.between(0, 20)
@@ -228,8 +234,8 @@ def fragmentation(rows_b, rows, prov):
                                  min_bler_frame_0_20db=round(float(b[in_range.to_numpy()].min()), 6),
                                  feasible_points_0_20db=int((b[in_range.to_numpy()]
                                                              < BLER_INFEASIBLE).sum()),
-                                 mean_payload_factor=round(float(np.mean(1 + q if harq else
-                                                                         np.ones_like(q))), 6)))
+                                 mean_payload_factor=round(float(np.mean(1 + q1 if harq else
+                                                                         np.ones_like(q1))), 6)))
     ray = [r for r in rows if r['channel'] == 'rayleigh' and r['harq'] == 1]
     worst = min(r['min_bler_frame_0_20db'] for r in ray)
     prov.append(f'3. fragmentation/HARQ: N_cw={N_CW}; no-HARQ frame BLER asserted independent of k '
@@ -240,17 +246,113 @@ def fragmentation(rows_b, rows, prov):
     return worst
 
 
+# ------------------------------------------------- 3b. the full fragmentation/HARQ replay (R25-3)
+def frag_tables(tbl, k, harq):
+    """The modified (frame BLER, q_first) TABLES at the tabulated SNR points, per channel.
+
+    R25-3: the mainline interpolates the FRAME BLER between tabulated points (deployment.bler16).
+    Interpolating the codeword BLER and exponentiating instead gives a different off-grid value --
+    the (k=1, no HARQ) invariant caught it at 2e-5 on validate -- so the modified table is built at
+    the tabulated points and then interpolated by exactly the same rule.
+    """
+    t = tbl[tbl['qam'] == 16].copy()
+    b, q1, _qe = frag_bler(t['bler_cw'].to_numpy(), k, harq)
+    t['bler_frame_mod'] = b
+    t['q_first'] = q1
+    return t
+
+
+def _interp_like_bler16(t, col, snr, channel):
+    """deployment.bler16's interpolation, applied to an arbitrary column of the modified table."""
+    out = np.empty_like(snr, dtype=float)
+    for ch, name in ((True, 'rayleigh'), (False, 'awgn')):
+        m = channel == ch
+        if m.any():
+            s = t[t['channel'] == name].sort_values('esno_db')
+            out[m] = np.clip(np.interp(snr[m], s['esno_db'], s[col],
+                                       left=1.0 if col == 'bler_frame_mod' else float(s[col].iloc[0]),
+                                       right=float(s[col].iloc[-1])), 0, 1)
+    return out
+
+
+def fragmentation_replay(rows, prov):
+    """R23-C item 3, completed (R25-3): the deployment replay under the modified BLER and payload.
+
+    The policies are frozen and blind to (k, HARQ) -- they observe only the estimated SNR and the
+    channel type -- so what moves is the realised utility and the channel use, not the decisions.
+    Payload: an F action costs B_F x (1 + q_first) when a retransmission is allowed; E and L are
+    unchanged. The (k=1, no HARQ) configuration must reproduce `replay_summary.csv` exactly.
+    """
+    _, budgets = D.load_manifest()
+    tbl = pd.read_csv(D.BLER_CSV)
+    ref = pd.read_csv(REPLAY_SUMM)
+    configs = [(1, False), (2, False), (4, False), (1, True), (2, True), (4, True)]
+    for split in D.SPLITS:
+        ds = pd.read_csv(os.path.join(D.DATA, D.DATASET[split]))
+        n = len(ds)
+        ego = ds['ego_f1'].to_numpy(); late = ds['late_f1'].to_numpy()
+        comp = ds['compressed_f1'].to_numpy()
+        snr_2d, is_ray_2d = draws(ds)
+        pass
+        for tag in sorted(budgets):
+            bd = budgets[tag]; bmax = float(tag)
+            rf_idx = D.rf_actions_stacked(bd['model'], bd['feat'], ds, snr_2d, is_ray_2d)
+            ta_idx = D.tau_actions(snr_2d, is_ray_2d, bd['tau'])
+            base = {}
+            for k, harq in configs:
+                t = frag_tables(tbl, k, harq)
+                bF_2d = np.stack([_interp_like_bler16(t, 'bler_frame_mod', snr_2d[r], is_ray_2d[r])
+                                  for r in range(D.N_REPLAY)])
+                q1_2d = np.stack([_interp_like_bler16(t, 'q_first', snr_2d[r], is_ray_2d[r])
+                                  for r in range(D.N_REPLAY)])
+                payF_2d = D.PAY['F'] * (1.0 + q1_2d) if harq else np.full_like(q1_2d, D.PAY['F'])
+                acc = {p: [np.empty(D.N_REPLAY), np.empty(D.N_REPLAY)]
+                       for p in ('RF', 'tau', 'Fixed-L')}
+                for r in range(D.N_REPLAY):
+                    eff = np.stack([ego, late, comp * (1 - bF_2d[r]) + ego * bF_2d[r]], axis=1)
+                    pay = np.stack([np.full(n, D.PAY['E']), np.full(n, D.PAY['L']), payF_2d[r]], axis=1)
+                    for name, idx in (('RF', rf_idx[r]), ('tau', ta_idx[r])):
+                        acc[name][0][r] = eff[np.arange(n), idx].mean()
+                        acc[name][1][r] = pay[np.arange(n), idx].mean()
+                    acc['Fixed-L'][0][r] = eff[:, 1].mean()
+                    acc['Fixed-L'][1][r] = D.PAY['L']
+                for name, (f1, pay) in acc.items():
+                    row = dict(split=split, budget=bmax, k=k, harq=int(harq), policy=name,
+                               F1=round(float(f1.mean()), 5), payload=round(float(pay.mean()), 5))
+                    if (k, harq) == (1, False):
+                        base[name] = (row['F1'], row['payload'])
+                        row['dF_vs_no_harq'] = 0.0
+                        row['dB_vs_no_harq'] = 0.0
+                        if name == 'RF':                       # pre-registered invariant
+                            p = ref[(ref.split == split) & (np.isclose(ref.budget, bmax))].iloc[0]
+                            if abs(row['F1'] - float(p.F1_RF)) > 1e-5 or \
+                               abs(row['payload'] - float(p.B_RF)) > 1e-5:
+                                fuse(f'(k=1, no HARQ) does not reproduce replay_summary at {split} '
+                                     f'B{bmax}: {row["F1"]}/{row["payload"]} vs {p.F1_RF}/{p.B_RF}')
+                    else:
+                        row['dF_vs_no_harq'] = round(row['F1'] - base[name][0], 5)
+                        row['dB_vs_no_harq'] = round(row['payload'] - base[name][1], 5)
+                    rows.append(row)
+        print(f'[3b] fragmentation replay done: {split}', flush=True)
+    prov.append('3b. fragmentation/HARQ REPLAY (R25-3): 6 configurations (k in {1,2,4} x '
+                'HARQ in {0,1}) x 3 splits x 3 budgets, frozen policies blind to the transport '
+                'model; F payload charged at B_F x (1 + q_first) under HARQ. The (k=1, no HARQ) '
+                'configuration is asserted equal to replay_summary.csv.')
+
+
 def main() -> int:
     os.makedirs(OUT, exist_ok=True)
     prov = []
-    sb, bl, fr, fb = [], [], [], []
+    sb, bl, fr, fb, fp = [], [], [], [], []
     scene_bootstrap(sb, prov)
     object_message_bler(bl, prov)
     fragmentation(fb, fr, prov)
+    fragmentation_replay(fp, prov)
     pd.DataFrame(sb).to_csv(os.path.join(OUT, 'r23_scene_bootstrap.csv'), index=False)
     pd.DataFrame(bl).to_csv(os.path.join(OUT, 'r23_object_message_bler.csv'), index=False)
     pd.DataFrame(fr).to_csv(os.path.join(OUT, 'r23_fragmentation_harq.csv'), index=False)
     pd.DataFrame(fb).to_csv(os.path.join(OUT, 'r23_fragmentation_bler.csv'), index=False)
+    pd.DataFrame(fp).to_csv(os.path.join(OUT, 'r25_fragmentation_replay.csv'), index=False)
     with open(PROV, 'w') as f:
         f.write('CA-TOSG R23-C -- the three R20 item-10 sensitivities (r23_sensitivity.py).\n'
                 'Pre-registered in Change-log R23-C BEFORE this file existed. Zero GPU.\n' + '=' * 88 + '\n')

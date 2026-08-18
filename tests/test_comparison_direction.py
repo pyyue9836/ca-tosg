@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Gate (R25-6): every explicit comparison in the text is evaluated against the canonical products.
+
+The fingerprint sweep catches a retired *value*; the literal-coverage gate catches an *unbound*
+value. Neither catches a sentence whose numbers are all correct and whose **direction** is wrong.
+Three such sentences survived every gate until a human read them:
+
+  * `sec:threshold` said the selector was "ahead of a threshold ... at $B_{\\max}=0.10$", when on
+    test the nominal threshold is ahead at that budget (0.89247 vs 0.89148) -- and at all three;
+  * the Conclusion repeated it as "ahead of it at the tightest budget";
+  * `sec:threshold` also said the channel-only variant "does reach a higher F1 than the full
+    selector" at `B_max=0.30`, contradicting `sec:ablation` two sections earlier, which says it is
+    beaten on both axes (0.89529 vs 0.89783). The same fact, two directions.
+
+This gate reads a table of (entity A, entity B, direction, metric, condition) tuples extracted from
+the delivered text, looks each quantity up in the canonical product that owns it, and fails when the
+claimed direction disagrees with the data. The tuples live in `tests/comparison_claims.md` so that
+adding a comparison to the paper means adding a checkable row, not editing code.
+
+    python tests/test_comparison_direction.py [--self-test]
+"""
+from __future__ import annotations
+
+import os
+import re
+import sys
+
+import pandas as pd
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CLAIMS = os.path.join(ROOT, 'tests', 'comparison_claims.md')
+TEX = os.path.join(ROOT, 'paper', 'main.tex')
+
+# how a policy name resolves to (csv, row filter, column) -- all canonical products
+SOURCES = {
+    'RF': ('results/main/replay_summary.csv', 'F1_RF', 'B_RF'),
+    'tau_nominal': ('results/main/replay_summary.csv', 'F1_tau', 'B_tau'),
+    'tau_feasible': ('results/main/tau_feasible.csv', 'F1_tau_feasible', 'B_tau_feasible'),
+    'channel_only': ('results/sensitivity/feature_ablation.csv', 'F1', 'payload'),
+    'combined': ('results/sensitivity/feature_ablation.csv', 'F1', 'payload'),
+    'hand_rule_3': ('results/baselines/two_gate_dgate.csv', 'F1_2G', 'B_2G'),
+    'hand_rule_2': ('results/baselines/two_gate.csv', 'F1_2G', 'B_2G'),
+}
+METRIC_COL = {'F1': 0, 'payload': 1}
+
+
+def value(entity, metric, split, budget):
+    rel, f1col, bcol = SOURCES[entity]
+    d = pd.read_csv(os.path.join(ROOT, rel))
+    if 'variant' in d.columns:                       # the ablation table keys on the variant name
+        d = d[d.variant == entity]
+    d = d[(d.split == split) & (d.budget.round(2) == round(budget, 2))]
+    if len(d) != 1:
+        raise SystemExit(f'comparison gate FUSE: {entity} @ {split}/{budget} matched {len(d)} rows '
+                         f'in {rel}')
+    return float(d[[f1col, bcol][METRIC_COL[metric]]].iloc[0])
+
+
+def rows():
+    """(label, A, B, direction, metric, split, budget, sentence-probe) from the claims table."""
+    out = []
+    for line in open(CLAIMS, encoding='utf-8'):
+        if not line.startswith('|') or line.startswith('|---') or line.startswith('| label'):
+            continue
+        c = [x.strip() for x in line.strip().strip('|').split('|')]
+        if len(c) != 8:
+            continue
+        label, a, b, direction, metric, split, budget, probe = c
+        out.append((label, a, b, direction, metric, split, float(budget), probe.strip('`')))
+    return out
+
+
+def evaluate(a_val, direction, b_val):
+    if direction == '>':
+        return a_val > b_val
+    if direction == '<':
+        return a_val < b_val
+    if direction == '~':                              # parity: within 0.0005 on the quantity
+        return abs(a_val - b_val) < 5e-4
+    raise SystemExit(f'comparison gate FUSE: unknown direction {direction!r}')
+
+
+def check(tex, verbose=False):
+    bad = []
+    for label, a, b, direction, metric, split, budget, probe in rows():
+        av, bv = value(a, metric, split, budget), value(b, metric, split, budget)
+        ok = evaluate(av, direction, bv)
+        present = probe in tex if probe else True
+        if verbose:
+            print(f'  {"PASS" if ok else "FAIL"}  {label}: {a}={av:.5f} {direction} {b}={bv:.5f} '
+                  f'({metric}, {split} @ {budget})' + ('' if present else '  [probe ABSENT]'))
+        if not ok:
+            bad.append((label, a, av, direction, b, bv, metric, split, budget))
+        elif probe and not present:
+            bad.append((label + ' [probe]', a, av, 'probe absent from main.tex', b, bv,
+                        metric, split, budget))
+    return bad
+
+
+def main():
+    tex = open(TEX, encoding='utf-8').read()
+    if '--self-test' in sys.argv:
+        # the regression cases: the three directions this batch corrected must FAIL when flipped
+        controls = [('R25 flip 1', 'RF', 'tau_nominal', '>', 'F1', 'test', 0.10),
+                    ('R25 flip 2', 'RF', 'tau_nominal', '>', 'F1', 'test', 0.20),
+                    ('R25 flip 3', 'channel_only', 'combined', '>', 'F1', 'test', 0.30)]
+        fired = 0
+        for label, a, b, d, m, sp, bu in controls:
+            av, bv = value(a, m, sp, bu), value(b, m, sp, bu)
+            if not evaluate(av, d, bv):
+                fired += 1
+            print(f'SELF-TEST {label}: "{a} {d} {b}" -> '
+                  f'{"FIRES" if not evaluate(av, d, bv) else "DOES NOT FIRE"} '
+                  f'({av:.5f} vs {bv:.5f})')
+        live = check(tex)
+        print(f'SELF-TEST: the live table -> {len(live)} failure(s) (expected 0)')
+        return 0 if (fired == len(controls) and not live) else 1
+    bad = check(tex, verbose='--verbose' in sys.argv)
+    print(f'comparison direction: {len(rows())} claims evaluated against the canonical products')
+    for label, a, av, direction, b, bv, metric, split, budget in bad:
+        print(f'  WRONG DIRECTION [{label}]: the text says {a} {direction} {b} on {metric} '
+              f'({split} @ B_max={budget}), the data says {a}={av:.5f}, {b}={bv:.5f}')
+    if bad:
+        print(f'COMPARISON GATE FAIL: {len(bad)} claimed direction(s) disagree with the data (R25-6)')
+        return 1
+    print('COMPARISON GATE PASS: every registered comparison agrees with the canonical products.')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

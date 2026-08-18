@@ -21,7 +21,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 35 |
-| | `results/sensitivity/` | 34 |
+| | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 8 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
 
@@ -307,6 +307,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `r23_fragmentation_harq.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
 | `r23_object_message_bler.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
 | `r23_scene_bootstrap.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R23-C: the three R20 item-10 sensitivities (scene-level bootstrap, L-link reliability, fragmentation/HARQ), pre-registered in Change-log R23-C |
+| `r25_fragmentation_replay.csv` | `python projects/ca_tosg/evaluation/r23_sensitivity.py` | R25-3: the fragmentation/HARQ arm carried through the full deployment replay (6 configurations x 3 splits x 3 budgets, RF / tau / Fixed-L) |
 | `rician_proxy.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `robustness_csi_aging.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
 | `robustness_csi_noise.csv` | `python projects/ca_tosg/evaluation/ablations/(robustness|a9_hardening).py` |  |
@@ -343,4 +344,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-241 files indexed, 0 unattributed.
+242 files indexed, 0 unattributed.

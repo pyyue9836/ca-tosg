@@ -51,6 +51,7 @@ GATES = [
     ('content',   'intra-repo imports',   [PY, 'tests/test_intra_repo_imports.py']),
     ('content',   'action-set wording',   [PY, 'tests/test_action_set_wording.py']),
     ('artifacts', 'numeric literals',     [PY, 'tests/test_numeric_literals.py']),
+    ('artifacts', 'comparison direction', [PY, 'tests/test_comparison_direction.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]
