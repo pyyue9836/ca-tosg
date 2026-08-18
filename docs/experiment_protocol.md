@@ -4199,3 +4199,40 @@ All four prose changes fall inside insertion-gated paragraphs, so each is declar
 (CoDS enumeration) and `R28-4` (harm quantifier). Deriving each ruling's source **verbatim from the
 post-inlining draft** rather than typing it was necessary: the footnote is inlined before rulings are
 applied, and a hand-typed source silently failed to match three times.
+
+---
+
+## Change-log R29 (2026-08-18) — the generalisation claim narrowed to what transferred
+
+**Zero GPU.** One contribution bullet, one fingerprint family, one locator fix. Final batch before
+compilation.
+
+### 1 · Contribution 4 said "verify generalisation"; only half of it generalises
+
+The bullet claimed to "verify cross-split and Culver-City domain-shift generalisation with a frozen
+selector". Checked against the frozen replay before rewriting: **the communication saving transfers**
+— payload reductions against the nominal threshold are `32.2`--`49.2%` on test and `42.1`--`68.9%` on
+Culver-City — **but the F1 non-inferiority does not**. On Culver at `B_max = 0.20` the selector is
+`0.00883` below the threshold rule (95% CI `[-0.00902, -0.00865]`), **outside** the pre-registered
+`0.005` margin. It holds at the other two Culver budgets (`-0.00290`, `-0.00384`) and against
+`tau_feasible` the same cell is `-0.00726`, also outside the margin — so the exception is stated with
+its budget rather than blanketed. The bullet now says exactly that, matching `sec:generalisation`
+("the transfer is in the channel use, not the F1") and the Conclusion.
+
+The **"verify generalisation" family is fingerprinted** in three verb-anchored forms, so a future
+edit cannot restore a claim that asserts both halves; the payload-transfer half stays sayable.
+
+### 2 · A locator fix the new sentence exposed
+
+`0.00883` was bound at claim level and **unlocated** at literal level: the paper writes "falls
+`0.00883` below", where a minus sign would be wrong, while the CSV stores the signed `-0.00883`. The
+verified set had been sign-normalised in R24-3 but `carries_any_unit` had not, so the same number was
+simultaneously verified and unverifiable. The locator now tries the negation and reports the match as
+`sign`. Sixteen further literals across the document became located as a side effect (`found` 242 ->
+257), none of them newly *claimed* — they were always bound, just invisible to this check.
+
+### State at the end of the batch series
+
+Sixteen gates, all passing, twice in a row on a clean tree. The literal debt register stands at
+**10 entries**, every one a precision-floor effect rather than a finding. Nothing in this batch
+touched a frozen product, a manifest or a result CSV.

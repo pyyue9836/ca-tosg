@@ -219,3 +219,11 @@ RX 0\.7 / 4\.2 / 0\.9
 RX 2\.5 / 3\.2 / 4\.5
 RX 1\.0 / 5\.8 / 0\.9
 
+# R29: the "verify generalisation" family. Under a frozen selector the COMMUNICATION SAVING
+# transfers to test and Culver-City, but F1 non-inferiority does NOT hold on Culver at B_max=0.20
+# (dF -0.00883, CI [-0.00902,-0.00865], outside the 0.005 margin). "Verify generalisation" asserts
+# both halves; only one survives. Verb-anchored so the transfer claim about payload stays sayable.
+RX verify[a-z ]{0,20}(cross-split|domain-shift|Culver-City)[a-z ]{0,20}generalisation
+RX (confirm|establish|demonstrate)[a-z ]{0,25}generalisation (to|across) (the )?(test|Culver)
+RX generalis(es|ation) (holds|transfers) (on|to) (both|all) split
+

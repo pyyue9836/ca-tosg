@@ -42,6 +42,12 @@ def carries_any_unit(vals, lit):
     """
     if carries(vals, lit):
         return 'exact'
+    # R29: the sign is not part of the measurement. The paper writes "falls 0.00883 below", where a
+    # minus sign would be wrong English, while the CSV stores the signed difference -0.00883. The
+    # verified set already normalised signs (R24-3); the locator must too, or the same number is
+    # bound at claim level and unlocated at literal level.
+    if carries([-v for v in vals], lit):
+        return 'sign'
     dec = len(lit.split('.')[1]) if '.' in lit else 0
     target = float(lit) / 100.0
     if any(round(v, dec + 2) == round(target, dec + 2) for v in vals):
