@@ -203,3 +203,10 @@ RX (beats|outperforms|better than|superior to)[^.\n]{0,60}(hand|simple|two-gate|
 RX (hand|simple|two-gate|two-parameter|heuristic) rule[^.\n]{0,60}(is beaten|falls short|cannot match|worse F1)
 RX (F1|accuracy) (advantage|gain|win)[^.\n]{0,40}over[^.\n]{0,30}(threshold|hand|simple) rule
 
+# R26-1/2: the easy-stratum effect and the delivery-semantics bracket, both re-read from their own
+# products. Retired: -0.0040 (the frozen value is -0.00471 at test/B=0.20, and the effect is
+# budget-monotone and split-dependent) and the 690-frame scope (the product says 964).
+RX 0\.0040(?![0-9])[^\n]{0,60}(easy|over-request)
+RX (easy|over-request)[^\n]{0,60}0\.0040(?![0-9])
+RX \$690\$~?frames|the \$690\$ frames
+

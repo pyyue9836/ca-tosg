@@ -24,3 +24,7 @@ Directions: `>` A exceeds B, `<` A is below B, `~` parity (within 0.0005).
 | handrule3-F1-B020 | hand_rule_3 | RF | ~ | F1 | test | 0.20 | `it \emph{matches} the selector on F1` |
 | handrule3-payload-B020 | hand_rule_3 | RF | > | payload | test | 0.20 | `The difference lies on the other axis` |
 | handrule2-payload-B020 | hand_rule_2 | RF | < | payload | test | 0.20 | `it degenerates to Fixed $L$` |
+| abstract-handrule-F1 | hand_rule_3 | RF | ~ | F1 | test | 0.20 | `a three-scalar hand rule reach comparable F1` |
+| abstract-handrule-payload | hand_rule_3 | RF | > | payload | test | 0.20 | `they do so by sending more feature messages` |
+| abstract-threshold-F1 | RF | tau_nominal | < | F1 | test | 0.20 | `perception held non-inferior at lower communication` |
+

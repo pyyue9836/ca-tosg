@@ -98,6 +98,30 @@ def check(tex, verbose=False):
     return bad
 
 
+def abstract_span(tex):
+    """The abstract's character span, or None."""
+    i = tex.find(r'\begin{abstract}')
+    j = tex.find(r'\end{abstract}')
+    return (i, j) if 0 <= i < j else None
+
+
+def abstract_in_scope(tex):
+    """R26-4: at least one registered comparison must be probed INSIDE the abstract.
+
+    The abstract is where "On test there is therefore effectively nothing to contest" survived: it
+    carries comparative claims, it is prose rather than a table, and nothing pointed a direction
+    check at it. Making its coverage an assertion is what stops that recurring.
+    """
+    span = abstract_span(tex)
+    if span is None:
+        return ['no abstract found in main.tex -- the scope assertion cannot run']
+    lo, hi = span
+    inside = [r for r in rows() if r[7] and lo <= tex.find(r[7]) < hi]
+    if not inside:
+        return ['no registered comparison is probed inside the abstract (R26-4)']
+    return []
+
+
 def main():
     tex = open(TEX, encoding='utf-8').read()
     if '--self-test' in sys.argv:
@@ -115,14 +139,28 @@ def main():
                   f'({av:.5f} vs {bv:.5f})')
         live = check(tex)
         print(f'SELF-TEST: the live table -> {len(live)} failure(s) (expected 0)')
-        return 0 if (fired == len(controls) and not live) else 1
+        scope_ok = not abstract_in_scope(tex)
+        print('SELF-TEST: abstract scope assertion -> %s'
+              % ('covered' if scope_ok else 'NOT COVERED'))
+        no_abs = abstract_in_scope(tex.replace(r'\begin{abstract}', r'\begin{gone}'))
+        print('SELF-TEST: with the abstract removed -> %s'
+              % ('FIRES' if no_abs else 'DOES NOT FIRE'))
+        return 0 if (fired == len(controls) and not live and scope_ok and no_abs) else 1
     bad = check(tex, verbose='--verbose' in sys.argv)
-    print(f'comparison direction: {len(rows())} claims evaluated against the canonical products')
+    scope = abstract_in_scope(tex)
+    for msg in scope:
+        print(f'  SCOPE: {msg}')
+    lo_hi = abstract_span(tex)
+    n_abs = (len([r for r in rows() if r[7] and lo_hi and lo_hi[0] <= tex.find(r[7]) < lo_hi[1]])
+             if lo_hi else 0)
+    print(f'comparison direction: {len(rows())} claims evaluated against the canonical products '
+          f'({n_abs} of them probed inside the abstract)')
     for label, a, av, direction, b, bv, metric, split, budget in bad:
         print(f'  WRONG DIRECTION [{label}]: the text says {a} {direction} {b} on {metric} '
               f'({split} @ B_max={budget}), the data says {a}={av:.5f}, {b}={bv:.5f}')
-    if bad:
-        print(f'COMPARISON GATE FAIL: {len(bad)} claimed direction(s) disagree with the data (R25-6)')
+    if bad or scope:
+        print(f'COMPARISON GATE FAIL: {len(bad)} claimed direction(s) disagree with the data, '
+              f'{len(scope)} scope failure(s) (R25-6 / R26-4)')
         return 1
     print('COMPARISON GATE PASS: every registered comparison agrees with the canonical products.')
     return 0

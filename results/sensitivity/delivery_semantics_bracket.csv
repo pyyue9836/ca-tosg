@@ -1,0 +1,4 @@
+split,budget,N,frames_where_semantics_differ,F1_requested_semantics_A,F1_delivered_semantics_B,payload_msym,dF_B_minus_A,dF_lcb95,dF_ucb95
+validate,0.1,2,964,0.89201,0.89217,0.14979,0.00016,0.00016,0.00017
+validate,0.2,2,964,0.89444,0.8948,0.26937,0.00036,0.00035,0.00038
+validate,0.3,2,964,0.89504,0.89603,0.35707,0.00099,0.00097,0.00102

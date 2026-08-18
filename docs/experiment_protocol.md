@@ -4030,3 +4030,61 @@ three errors above are the regression cases: the self-test asserts that each, wr
 **fires**. Each row also carries a verbatim `probe` from the sentence that makes the claim, so the
 table cannot drift away from the text — that control fired immediately, on a probe of mine that said
 `Fixed L` where the paper writes `Fixed $L$`.
+
+---
+
+## Change-log R26 (2026-08-18) — the two debt findings discharged, and the abstract brought into scope
+
+**Zero GPU.** One derived product, two sentences re-read from their sources, three abstract fixes,
+one gate-scope assertion.
+
+### 1 · The easy-stratum sentence, re-read from `difficulty_frozen.csv`
+
+The mis-binding R24 flagged is discharged rather than excused. The frozen product does not say
+`-0.0040`; it says **`-0.00471` (95% CI `[-0.00742,-0.00236]`)** at test / `B_max = 0.20`, and the
+effect is **monotone in the budget** — `-0.00020`, `-0.00471`, `-0.01129` across `0.10/0.20/0.30`,
+as a looser cap lets more easy frames be sent as `F`. It is also **split-dependent, not universal**:
+on validate and Culver-City the same tercile *gains* at every budget (`+0.00035`--`+0.01016` and
+`0.00000`--`+0.00558`). The narrative follows the data: the over-request cost is now stated as a
+property of the test split's easy tercile, where Fixed `L` already reaches `0.97962`. The retired
+`-0.0040` is fingerprinted in its easy-stratum context.
+
+### 2 · The delivery-semantics bracket gets a product of its own
+
+The sentence was bound to `results/baselines/SCOMCP_FUSE_REPORT.md` — a narrative report about a
+different arm, which does not contain its numbers. `delivery_semantics_bracket.py` now derives
+`results/sensitivity/delivery_semantics_bracket.csv` from the committed `collaborator_scale.csv`
+(semantics A vs B, validate, `N=2`, per budget). **The old sentence was wrong twice over:** the
+bracket is `+0.00016 / +0.00036 / +0.00099`, not "`+0.0001` to `+0.0003`", and the scope is
+**964 frames, not 690** (`frames_in_scope` is the count where partial fusion replaces the
+all-or-nothing collapse). Payload is identical under both conventions because the **request** is
+what is charged — now stated explicitly. The SComCP mis-binding is deleted.
+
+**The debt register is down to 10 entries**, and every survivor is a floor effect (`distinctive()`
+skips literals with fewer than 3 decimals and 3 significant digits), not a finding. The ratchet has
+only shortened: 101 -> 12 -> 10.
+
+### 3 · Three abstract repairs
+
+* **"On test there is therefore effectively nothing to contest" is deleted.** The abstract now reads
+  the headroom the same way `sec:true_e2e` does: the triple `0.0550 / 0.0240 / 0.0970`, the frozen
+  selector converting **at most about a fifth** of it (`2.5`--`21.3%` across splits and budgets),
+  and no AP advantage claimed on any split.
+* **The "currency" sentence is rebuilt on the canonical framing (R25-5):** the result is not an
+  accuracy result; a one-line threshold and a three-scalar hand rule reach comparable F1 by sending
+  more feature messages; what the cues buy is knowing which of the carriable frames are worth
+  sending.
+* **The graceful-JSCC half no longer asserts in the abstract's own voice.** "the graceful JSCC
+  branch, modelled as analog transmission, survives" is gone; what remains is that whether a
+  graceful codec shifts the balance is *exploratory evidence only, reported in an appendix under the
+  prior protocol and not re-evaluated under the frozen one*.
+
+### 4 · The abstract is now inside the gates, as an assertion
+
+The literal-coverage gate always scanned it (`paper/main.tex` is a target, and the claim walker
+places the abstract in its `(preamble)` chunk) — but the direction gate did not point at it, which is
+exactly how a comparative abstract sentence with no numbers survived. `tests/comparison_claims.md`
+gains three abstract-probed rows, and `test_comparison_direction.py` now **asserts** that at least
+one registered comparison is probed inside `\begin{abstract}...\end{abstract}`: **17 comparisons
+registered, 3 of them inside the abstract**. The self-test removes the abstract and confirms the
+scope assertion fires.

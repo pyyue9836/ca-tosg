@@ -21,7 +21,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 35 |
-| | `results/sensitivity/` | 35 |
+| | `results/sensitivity/` | 36 |
 | | `results/sensitivity/ablation/` | 8 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
 
@@ -287,6 +287,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `channel_misclassification.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `channel_ratio.csv` | `python tools/run_sensitivity.py` | Appendix B items 1-5 |
 | `collaborator_scale.csv` | `python projects/ca_tosg/evaluation/collaborator_scale.py` | P4-C semantics A; caches built by projects/ca_tosg/datasets/p4c_sweep.py |
+| `delivery_semantics_bracket.csv` | `python projects/ca_tosg/evaluation/delivery_semantics_bracket.py` | R26-2: the two delivery semantics (charge on delivery vs on request) bracketed per budget, derived from the committed collaborator_scale.csv |
 | `difficulty_frozen.csv` | `python projects/ca_tosg/evaluation/difficulty_frozen.py` | P5-5 item 7: difficulty stratification under the FROZEN protocol, reliable-channel view only (the all-channel view is deliberately not reproduced) |
 | `f1_ap_decoupling_culver.csv` | `python projects/ca_tosg/evaluation/true_e2e_global.py` | Culver F1-vs-AP decoupling note |
 | `f1_ap_decoupling_culver.md` | `python projects/ca_tosg/evaluation/true_e2e_global.py` | Culver F1-vs-AP decoupling note |
@@ -344,4 +345,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-242 files indexed, 0 unattributed.
+243 files indexed, 0 unattributed.
