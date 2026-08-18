@@ -62,6 +62,7 @@ PARAS = {
     1: dict(
         body_first="Of the two feature-level modes, the 256-QAM variant",
         body_last="earns no more than a marginal share is itself a finding.",
+        inserted_body_last="is itself the finding.",
         start_anchor="Of the two feature-level modes, the 256-QAM variant",
         next_boundary=r"\\(subsection|section)\{",
         subs=[
@@ -89,6 +90,18 @@ PARAS = {
              "The deployed classifier uses $\\mathcal{S}=\\{E,L,F\\}$; $C_{256}$ is excluded "
              "from the deployed action set",
              'R23-4'),
+            # R28-1 (supervisor ruling, 2026-08-18): the three pre-corrigendum percentage families
+            # in this paragraph are deleted, together with the footnote that explained them. They
+            # were full-collaborator fractions sourced from the retired
+            # results/sensitivity/c256_dominance_verify.csv (now in tests/retired_products.md).
+            # The argument stands on the physical-layer ordering plus the structurally-zero
+            # deployment count, which are convention-independent.
+            (';\\footnote{Fractions rounded to 0.1 pp. All four come from one run of the dominance-verification procedure, which asserts $\\mathrm{frac\\_dominated}=\\mathrm{frac}(\\mathrm{comp}\\ge\\mathrm{ego}) +\\mathrm{frac}(\\mathrm{comp}<\\mathrm{ego}\\wedge b_{16}=b_{256})$ at the count level; displayed percentages may differ from the total by up to $0.1$~pp due to rounding.} the margin over $\\mathrm{frac}(\\mathrm{comp}\\ge\\mathrm{ego})=$ 99.0 / 94.2 / 99.1\\% is the 0.7 / 4.2 / 0.9\\% of frames where $\\mathrm{comp}<\\mathrm{ego}$ but $b_{16}=b_{256}$ -- both flatline, or both deliver at high SNR -- which tie rather than reverse.',
+             ': wherever $b_{16}=b_{256}$ the two modes tie rather than reverse, and wherever $\\mathrm{comp}\\ge\\mathrm{ego}$ the sign of $(\\mathrm{comp}-\\mathrm{ego})(b_{16}-b_{256})$ makes C256 no better.',
+             'R28-1a'),
+            ("deployment account.} -- and even the oracle's payload-penalised frontier activates it at only 2.5 / 3.2 / 4.5\\% of frames. That a rate-matched, lower-channel-use action earns no more than a marginal share is itself a finding.",
+             'deployment account.}. That a rate-matched, lower-channel-use action earns no operational role at all, on physical grounds that hold for any collaborator convention, is itself the finding.',
+             'R28-1b'),
             # Q2 (supervisor ruling, 2026-08-02): reframe the paragraph's role from a "completeness
             # defence" for retaining C256 to the "exclusion basis" for it -- C256 is dominated by C16
             # and excluded from the now 2-element deployed action set S={L,C16} (Eq.~\ref{eq:action_set}).
@@ -105,7 +118,13 @@ PARAS = {
         next_boundary=r"\\(subsection|section)\{",
         subs=[],       # #3 carries no placeholders: \cite{gan2025cods} resolves via the bib
                        # entry added in the infra commit; \method{}/\emph{} are existing macros.
-        rulings=[],
+        rulings=[
+            # R28-3: the CoDS comparison enumerated the action set without E. E is a deployed
+            # action and C256 is not, so the enumeration is ego-only / object-level / feature.
+            ('it selects the message \\emph{granularity} per frame -- the compact object-level message or one of the feature-level variants -- and signals the choice through the 2-bit request before any high-payload transmission;',
+             'it selects the message \\emph{granularity} per frame -- ego-only operation with no request at all, the compact object-level message, or the feature-level message -- and signals the choice through the 2-bit request before any high-payload transmission;',
+             'R28-3'),
+],
     ),
     2: dict(
         body_first="Collaboration is not unconditionally beneficial",
@@ -120,6 +139,12 @@ PARAS = {
         ],
         inserted_body_last=("not a message-format one."),
         rulings=[
+            # R28-4: the second harm quantifier was quoted from the retired pre-corrigendum C256
+            # dominance file; re-derived from the N=1 caches by collab_harm.py as 1.3/6.5/0.9%.
+            ('and -- from the same per-frame $(\\mathrm{comp}-\\mathrm{ego})$ identity and CSV as the C256 analysis (\\S\\ref{sec:candidates}) -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.0 / 5.8 / 0.9\\% of frames.',
+             'and -- from the same per-frame $(\\mathrm{comp}-\\mathrm{ego})$ identity, re-derived on the corrected single-collaborator caches -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.3 / 6.5 / 0.9\\% of frames.',
+             'R28-4'),
+
             # P5-7 item 10 (Peiyi, 2026-08-14): E is a DEPLOYED action, so the closing sentence
             # can no longer offer an ego-only action as future work.
             ("A remedy adds no signalling overhead: the `11' codeword of the 2-bit request is "

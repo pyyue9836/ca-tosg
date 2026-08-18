@@ -4134,3 +4134,68 @@ It asserted flatly that "under a graceful codec they become necessary for accura
 the same triple qualifier as the abstract: the graceful-codec half rests on **exploratory** evidence
 gathered under the **prior protocol** and reported in **Appendix A**, not re-evaluated under the
 frozen one. The cliff-codec half, which is supported by the mainline, is unchanged.
+
+---
+
+## Change-log R28 (2026-08-18) — the C256 paragraph's retired fractions, and the source that was passing them
+
+**Zero GPU.** Prose deletions, one regenerated product, one structural change to what counts as
+evidence.
+
+### 1 · Three pre-corrigendum percentage families deleted from the C256 paragraph
+
+`99.0 / 94.2 / 99.1%`, `0.7 / 4.2 / 0.9%` and `2.5 / 3.2 / 4.5%` are gone, together with the orphan
+footnote that explained the first two ("Fractions rounded to 0.1 pp. All four come from one run…").
+What remains is what does not depend on the collaborator convention: the physical-layer ordering
+(`b_256 >= b_16`, the 256-QAM cliff strictly to the right, Fig. 2), the sign argument on
+`(comp-ego)(b_16-b_256)`, and the structurally-zero deployment count
+(`0` of `396,000 / 434,000 / 110,000`, which is frames x 200 realisations and therefore convention-
+independent). The paragraph is self-sufficient without a single fraction.
+
+### 2 · The binding-source audit: how they passed, and what else that source was passing
+
+They were bound to **`results/sensitivity/c256_dominance_verify.csv`**, produced 2026-08-12 —
+*before* the P0 corrigendum. Its `frac_comp_ge_ego` / `frac_comp_lt_ego_and_tie` columns are
+full-collaborator fractions, and the literal gate accepted them by **percent-form matching**
+(`0.9899` satisfies `99.0`), so three retired families were "verified" inside one paragraph.
+
+**A committed file under `results/` is not automatically evidence.** `tests/retired_products.md` now
+registers products that are present in the tree but may not serve as binding sources, and
+`canonical_corpus()` excludes them, so a claim bound to one reports as unlocated instead of passing.
+**The same-source audit found exactly one other passenger:** the collaboration-harm sentence's second
+triple, `1.0 / 5.8 / 0.9%`, which came from that file's `frac_comp_lt_ego` column. Re-derived from
+the N=1 caches it is **`1.3 / 6.5 / 0.9%`** — corrected in the text, and the retired triple is
+fingerprinted.
+
+**A second retired product surfaced while checking it.** `step4_collaboration_harm.csv` existed
+**twice**: `results/step4_collaboration_harm.csv` (what the generator actually wrote) and
+`results/main/step4_collaboration_harm.csv` (a 2026-08-12 pre-corrigendum copy nothing regenerated),
+while the generator *printed* "wrote results/main/…". Both were indexed as products. The generator
+now writes where its message says, emits the second harm quantifier as a column
+(`frac_comp_lt_ego`), and the stale duplicate is deleted. Its regenerated first triple confirms the
+paper's `1.5 / 5.8 / 0.2%` exactly (0.0146 / 0.0576 / 0.0018).
+
+### 3 · The CoDS comparison enumerates the deployed set
+
+"the compact object-level message or one of the feature-level variants" -> "**ego-only operation with
+no request at all, the compact object-level message, or the feature-level message**". Singular `F`;
+`C_256` does not appear, because it is not in the deployed set.
+
+### 4 · Three verifications
+
+* **§IV-A action-set sentence** — confirmed: it states `s_t \in \mathcal{S} = \{E, L, F\}` and
+  defines all three, with `E` first.
+* **The `'11'` codepoint future-work sentence** — confirmed deleted; the surviving text says `E` is
+  already a deployed action with its own codepoint, so the remedy is a selection-policy question.
+* **The harm account** — the first triple `1.5 / 5.8 / 0.2%` is confirmed **current** (regenerated:
+  0.0146 / 0.0576 / 0.0018). The second triple was **not** current; see item 2.
+* **The Conclusion's graceful clause** — confirmed carrying R27-4's prior-protocol / appendix /
+  exploratory qualifier.
+
+### 5 · Three paragraph-gate rulings
+
+All four prose changes fall inside insertion-gated paragraphs, so each is declared: `R28-1a`
+(footnote + margin sentence), `R28-1b` (oracle-share clause and the closing sentence), `R28-3`
+(CoDS enumeration) and `R28-4` (harm quantifier). Deriving each ruling's source **verbatim from the
+post-inlining draft** rather than typing it was necessary: the footnote is inlined before rulings are
+applied, and a hand-typed source silently failed to match three times.

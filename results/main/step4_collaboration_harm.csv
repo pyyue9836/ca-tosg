@@ -1,4 +1,4 @@
-split,n,frac_ego_gt_late,n_ego_gt_late,mean_ego_f1,mean_late_f1,mean_ego_minus_late_on_harm
-validate,1980,0.0091,18,0.7358,0.9067,0.0462
-test,2170,0.0742,161,0.8176,0.9011,0.0477
-culver,550,0.0018,1,0.769,0.8722,0.0212
+split,n,frac_ego_gt_late,n_ego_gt_late,mean_ego_f1,mean_late_f1,mean_ego_minus_late_on_harm,frac_comp_lt_ego,n_comp_lt_ego,mean_ego_minus_comp_on_harm
+validate,1980,0.0146,29,0.7358,0.8554,0.0325,0.0126,25,0.0353
+test,2170,0.0576,125,0.8176,0.891,0.0445,0.0645,140,0.0633
+culver,550,0.0018,1,0.769,0.8466,0.0212,0.0091,5,0.0144

@@ -110,9 +110,30 @@ NON_CANONICAL = re.compile(r'(README|ANOMALY_REPORT|FUSE_REPORT|corrigendum|p0_c
                            r'PROVENANCE[\w]*\.txt|DERIVED_TABLE_CELLS|/logs/)', re.I)
 
 
+RETIRED_REGISTRY = os.path.join(ROOT, 'tests', 'retired_products.md')
+
+
+def retired_products():
+    """Paths listed in tests/retired_products.md -- present in the tree, not valid evidence.
+
+    R28-2: a file being committed under results/ is not the same as it being current. The C256
+    dominance file predates the P0 corrigendum and was still justifying three retired percentage
+    families by percent-form matching.
+    """
+    out = set()
+    if not os.path.exists(RETIRED_REGISTRY):
+        return out
+    for line in open(RETIRED_REGISTRY, encoding='utf-8'):
+        m = re.match(r'^\|\s*`(results/[^`]+)`\s*\|', line)
+        if m:
+            out.add(m.group(1))
+    return out
+
+
 def canonical_corpus(corpus):
+    retired = retired_products()
     return {f: v for f, v in corpus.items()
-            if f.endswith(CANONICAL_EXT) and not NON_CANONICAL.search(f)}
+            if f.endswith(CANONICAL_EXT) and not NON_CANONICAL.search(f) and f not in retired}
 
 
 def table_cells(corpus):

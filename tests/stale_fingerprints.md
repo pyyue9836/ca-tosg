@@ -210,3 +210,12 @@ RX 0\.0040(?![0-9])[^\n]{0,60}(easy|over-request)
 RX (easy|over-request)[^\n]{0,60}0\.0040(?![0-9])
 RX \$690\$~?frames|the \$690\$ frames
 
+# R28: the C256 paragraph's three pre-corrigendum percentage families, and the second harm
+# quantifier, all sourced from results/sensitivity/c256_dominance_verify.csv (now registered in
+# tests/retired_products.md as retired-not-a-source). Corrected: the paragraph carries no fractions
+# at all, and the harm triple is 1.3 / 6.5 / 0.9 from the N=1 caches.
+RX 99\.0 / 94\.2 / 99\.1
+RX 0\.7 / 4\.2 / 0\.9
+RX 2\.5 / 3\.2 / 4\.5
+RX 1\.0 / 5\.8 / 0\.9
+

@@ -25,16 +25,29 @@ def main():
     for sp in ('validate', 'test', 'culver'):
         d = pd.read_csv(os.path.join(DATA, f'dataset_{sp}_n1.csv'))
         ego = d['ego_f1'].to_numpy(); late = d['late_f1'].to_numpy()
+        comp = d['compressed_f1'].to_numpy()
         harm = ego > late
+        # R28-4: the second harm quantifier -- the delivered feature message scoring BELOW the
+        # ego-only fallback -- was quoted from the pre-corrigendum C256 dominance file (1.0/5.8/0.9%).
+        # It is re-derived here from the same N=1 caches as the first one: 1.3/6.5/0.9%.
+        harm_f = comp < ego
         rows.append(dict(
             split=sp, n=len(d),
             frac_ego_gt_late=round(float(harm.mean()), 4),
             n_ego_gt_late=int(harm.sum()),
             mean_ego_f1=round(float(ego.mean()), 4),
             mean_late_f1=round(float(late.mean()), 4),
-            mean_ego_minus_late_on_harm=round(float((ego - late)[harm].mean()), 4) if harm.any() else 0.0))
+            mean_ego_minus_late_on_harm=round(float((ego - late)[harm].mean()), 4) if harm.any() else 0.0,
+            frac_comp_lt_ego=round(float(harm_f.mean()), 4),
+            n_comp_lt_ego=int(harm_f.sum()),
+            mean_ego_minus_comp_on_harm=(round(float((ego - comp)[harm_f].mean()), 4)
+                                         if harm_f.any() else 0.0)))
     out = pd.DataFrame(rows)
-    out.to_csv(os.path.join(RESULTS, 'step4_collaboration_harm.csv'), index=False)
+    # R28-4: write where the message says. The generator wrote results/step4_collaboration_harm.csv
+    # while printing "wrote results/main/..."; the results/main/ copy was a 2026-08-12 pre-corrigendum
+    # file nothing regenerated, and both were indexed as products.
+    dest = os.path.join(RESULTS, 'main', 'step4_collaboration_harm.csv')
+    out.to_csv(dest, index=False)
     print(out.to_string(index=False))
     print('\nwrote results/main/step4_collaboration_harm.csv')
 
