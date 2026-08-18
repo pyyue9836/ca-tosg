@@ -544,6 +544,44 @@ The realised frame F1 reported so far is computed under the analytical block-los
 Two observations support the central claim. First, the boundary of the feature-active regime is \emph{measured}, not stipulated: reading the frozen selector's feature-request rate off the pre-registered SNR grid, $\rho_F$ is zero at every AWGN point up to $8$~dB and steps to its plateau at $10$~dB on all three splits---$0.472$ on validate, $0.433$ on test and $0.160$ on Culver-City---which is exactly where the $16$-QAM frame-error cliff clears (Section III-C of the main paper).\footnote{Validate shows a $0.4\%$ toe at $8$~dB, the single grid point at which the frame BLER is neither ${\approx}0$ nor ${\approx}1$ ($0.402$); test and Culver-City are exactly zero there. We therefore take $10$~dB as the regime boundary on all three splits and report the toe rather than smoothing it away. Earlier versions of this section stipulated $\ge14$~dB; that threshold was not derived from any measurement and is withdrawn.} At that boundary the true end-to-end AP on validate is $0.8287$ at IoU $0.5$ and $0.7292$ at IoU $0.7$, and it is flat above it. The selector reaches this while paying $0.300$~Msym/frame averaged over the feature-active regime instead of the $0.990$ of always-on Fixed $F$---a $70\%$ saving---though on validate it recovers only part of the perfect-channel reference of the underlying attentive-compression model ($0.8369$ on validate, Section VI-A of the main paper) rather than essentially all of it, as an earlier version of this section claimed. Second, the Rayleigh AP curve is flat across the full SNR range and matches Fixed $L$, confirming that the selector's conservative fading-regime behaviour, identified in Section VI-A of the main paper, is not a frame-F1 artefact but a genuine end-to-end property.
 
 
+
+\section{Figure and table moved from the main paper (R41)}\label{sec:moved_r41}
+The difficulty/importance figure and the feature-importance table; the main paper carries their conclusions and numbers.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.48\linewidth]{fig_difficulty.pdf}\hfill
+\includegraphics[width=0.48\linewidth]{fig_feature_importance.pdf}
+\caption{\emph{Left}: realised F1 by frame-difficulty tercile (ego object-level F1) on OPV2V test at $B_{\max}=0.20$ at a single reliable-channel grid point (AWGN $16$~dB) with the frozen selector; numbers above bars are \method{}$-$Fixed-$L$, the hard-frame gain being $+0.0660$ ($95\%$ CI $[+0.0591,+0.0730]$). \emph{Right}: top-12 features by Gini importance of the frozen $B_{\max}=0.20$ selector---the channel-side features jointly account for $61.7\%$, the $21$ perception-side cues for the remaining $38.3\%$, none above $3.0\%$ alone. Importance is not sufficiency (the ablation section of the main paper).}
+\label{fig:difficulty}
+\end{figure*}
+
+
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Top-7 features by Gini importance for the deployed \method{} selector (trained on OPV2V validate, $T=1{,}980$ frames). The two channel-side features account for $61.7\%$ of total importance; the $21$ perception-side cues carry the remaining $38.3\%$. Read directly from the frozen model, \texttt{results/main/feature\_importance\_frozen.csv}.}
+\label{tab:feat_imp}
+\begin{tabular}{lc}
+\toprule
+Feature & Gini importance \\
+\midrule
+\texttt{channel\_is\_rayleigh}    & \textbf{0.342} \\
+\texttt{est\_snr\_db}             & \textbf{0.275} \\
+\texttt{pcd\_mean\_range}         & 0.030 \\
+\texttt{pcd\_left\_points}        & 0.028 \\
+\texttt{ego\_num\_objects}        & 0.025 \\
+\texttt{pcd\_std\_range}          & 0.023 \\
+\texttt{pcd\_front\_far\_30m}     & 0.021 \\
+\midrule
+$\hat\gamma_t + c_t$ subtotal     & \textbf{0.617} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

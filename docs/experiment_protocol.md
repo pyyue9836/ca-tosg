@@ -4861,3 +4861,64 @@ forbids. Restoring that claim costs 19 words. **270 is the floor with every clai
 
 Seventeen gates pass, twice, on a clean tree. Main 17 pages / 1 overfull; supplementary 8 pages /
 7 overfull (its wide moved tables, recorded in `docs/compile_report.md`).
+
+## R41 — abstract to 246 words, six prose compressions, two floats relocated
+
+### 1 · Abstract: 270 -> 246 rendered words
+
+R40 recorded 270 as "the floor with every claim and number intact"; R41 ruled that the headroom
+triple (`0.0550/0.0240/0.0970`) and the importance split (`61.7%`/`38.3%`) move to the body, which is
+what made 250 reachable. Both landed: the triple stays in the Conclusion, and the split is restated in
+`sec:ablation` with the per-cue ceiling ("none above 3.0% alone"). Everything else the abstract
+carried is still there — budget set, converted share, channel-use range, both saving tracks with the
+over-budget label, the secondary `+0.00067`/`26.6%` without a non-inferiority decision, the
+comparable-F1-at-higher-payload claim (R40-6) and the latency. Count is measured on the RENDERED page
+(pypdf, `Abstract`..`Index Terms`), not on the source: the source-token count read 248 while the
+rendered one read 262, and the rendered count is the one a desk editor applies.
+
+### 2 · Six prose compressions
+
+`sec:where_gain` (VI-A) -1244 chars, `sec:intro` -774, `sec:threshold` (VI-J) -2081 — that last one
+was mostly internal duplication: the R9 claim and the `0.89701/0.89900`, `34.8%`, `26.6%`,
+`1.53x/1.47x` figures were each stated twice inside the same subsection. Then `sec:ap_snr` (VI-B)
+-662, `sec:candidates` -437, Conclusion -220. Total ~5.4k chars, no claim and no number removed.
+
+**Where the -30% target on `sec:candidates` stopped**: its C256 paragraph is paragraph #1 of the
+insertion gate, whose `start_anchor` is "Of the two feature-level modes, the 256-QAM variant". A
+112-char rewrite of it broke the gate; it was REVERTED rather than registered as a ruling, because a
+cosmetic rewrite is not worth an entry in a paragraph's authorised-rewrite chain. The section reached
+-437 chars (~10%), not -30%.
+
+### 3 · Relocation
+
+`fig:difficulty` (804 chars) and `tab:feat_imp` (946) moved to `paper/supplementary.tex` under
+"Figure and table moved from the main paper (R41)". Main is now **10 images**; per R36-4 no figure was
+touched otherwise. `tab:headline_agg` stays in the main paper (R41-3).
+
+### 4 · Registry maintenance forced by the rewrites
+
+Three direction-gate probes drifted with their sentences and were re-pointed in
+`tests/comparison_claims.md` (claim, direction and cell unchanged in all three):
+`attains the marginally higher realised F1 at \emph{every} budget` -> `... higher F1 at ...`;
+`ahead by $+0.00067$ at $B_{\max}=0.20$` -> `ahead by $+0.00067$ at $0.20$`;
+`but send more feature messages` -> `sending more feature messages, so the cues buy` (the abstract
+probe, still inside the abstract span). `docs/claims.md` was regenerated twice and rebound: 18 rows by
+number-set match, 3 by claim-similarity, 3 mechanically by `backfill_claims_evidence.py`, 2 by hand
+(the framework-definitional row and the confirmatory-cell lead-in), 4 more after the abstract edits.
+The abstract's `tau_feasible` row was bound to `replay_summary.csv` alone, which is where its
+`+0.00067`/`26.6%` are NOT — `p6_numbers_vs_csv` reported them as MISS; the binding now names
+`tau_feasible.csv` as well and the MISS count is 0.
+
+### 5 · Page count: 16, target was 14 — GAP REPORTED
+
+Main is **16 pages** (was 17 at R40; 25 at R31). Body text ends on page 15; page 16 is the tail of the
+bibliography. The six compressions removed ~5.4k characters, about one page of text, and the count
+moved 17 -> 16. The remaining 2 pages are NOT available in prose: the pages are float-dominated (10
+figures + 6 tables across 15 body pages, at ~850-1050 words/page), and every prose compression in this
+batch stopped on a claim sentence. The reserve named in R41 — moving `tab:headline_agg` — has NOT been
+touched: it needs a further ruling.
+
+### 6 · State
+
+Sixteen gates pass, twice, on a clean tree; `p6_cross_section_scan` 0 conflicts in all four classes;
+`p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED table cells. Main 16 pages / 1 overfull; supplementary 9 pages.
