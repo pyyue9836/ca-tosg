@@ -284,7 +284,15 @@ def main() -> int:
         print('=== tab:headline_agg ==='); print(ab)
         return 0
     tex = splice(tex, 'tab:headline', hb)
-    tex = splice(tex, 'tab:headline_agg', ab)
+    # R42-1: tab:headline_agg moved to the supplementary; splice it wherever it now lives, the same
+    # rule tab:ablation has had since R40. A generator that silently writes nothing is worse than a
+    # missing one, so the else-branch raises through splice() if the label is in neither document.
+    _supp_p = os.path.join(ROOT, 'paper/supplementary.tex')
+    if 'tab:headline_agg' in tex:
+        tex = splice(tex, 'tab:headline_agg', ab)
+    else:
+        _s = open(_supp_p, encoding='utf-8').read()
+        open(_supp_p, 'w', encoding='utf-8').write(splice(_s, 'tab:headline_agg', ab))
     # R40: tab:ablation moved to the supplementary in R35; splice it wherever it now lives
     supp_p = os.path.join(ROOT, 'paper/supplementary.tex')
     if 'tab:ablation' in tex:
@@ -316,10 +324,10 @@ def main() -> int:
     # R40: the share-of-B_F column is derived wherever its table lives -- tab:headline_agg in the
     # main file, tab:gen_headline in the supplementary since R36.
     shares = set()
-    for doc, lab in ((tex, 'tab:headline_agg'), (tex, 'tab:gen_headline'),
-                     (open(os.path.join(ROOT, 'paper/supplementary.tex'), encoding='utf-8').read()
-                      if os.path.exists(os.path.join(ROOT, 'paper/supplementary.tex')) else '',
-                      'tab:gen_headline')):
+    _supp_txt = (open(os.path.join(ROOT, 'paper/supplementary.tex'), encoding='utf-8').read()
+                 if os.path.exists(os.path.join(ROOT, 'paper/supplementary.tex')) else '')
+    for doc, lab in ((tex, 'tab:headline_agg'), (_supp_txt, 'tab:headline_agg'),
+                     (tex, 'tab:gen_headline'), (_supp_txt, 'tab:gen_headline')):
         m = re.search(r'\\label\{' + lab + r'\}(.*?)\\end\{tabular\}', doc, re.S)
         if m:
             shares |= set(re.findall(r'\$?(\d+\.\d+)\\%', m.group(1)))

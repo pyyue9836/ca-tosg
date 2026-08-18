@@ -582,6 +582,36 @@ $\hat\gamma_t + c_t$ subtotal     & \textbf{0.617} \\
 \end{table}
 
 
+
+\section{Channel-averaged comparison table moved from the main paper (R42)}\label{sec:moved_r42}
+The main paper reads this table in two sentences; the full row set is here.
+
+\begin{table*}[t]
+\centering
+\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames), read from the frozen replay: F1 and channel use are the means over the same $200$ paired CSI samplings (SNR $\sim\mathcal{U}[0,20]$~dB, $50/50$ AWGN/Rayleigh) for every row. The comparison is \emph{budget-indexed}: each frozen selector is shown against the SNR-threshold rule tuned to the \emph{same} budget, and it does not run one way. Share is channel use as a fraction of Fixed $F$ ($0.990$~Msym).}
+\label{tab:headline_agg}
+\begin{tabular}{lccc}
+\toprule
+Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
+\midrule
+Fixed $L$ (object-level)       & 0.8910 & 0.024 & $2.4\%$ \\
+Fixed $F$ (LDPC+16-QAM)        & 0.8483 & 0.990 & $100.0\%$ \\
+Fixed $C_{256}$ (LDPC+256-QAM) & 0.8255 & 0.495 & $50.0\%$ \\
+Masked oracle (upper bound)    & 0.9056 & 0.175 & $17.7\%$ \\
+\midrule
+\multicolumn{4}{l}{\emph{$B_{\max}=0.10$}} \\
+\quad SNR-threshold ($\tau^\star{=}18$)   & \textbf{0.89247} & 0.0724 & $7.3\%$ \\
+\quad \method{} (RF, frozen)              & 0.89148 & \textbf{0.0368} & $\mathbf{3.7\%}$ \\
+\multicolumn{4}{l}{\emph{$B_{\max}=0.20$}} \\
+\quad SNR-threshold ($\tau^\star{=}12$)   & \textbf{0.89701} & 0.2168 & $21.9\%$ \\
+\quad \method{} (RF, frozen)              & 0.89691 & \textbf{0.1414} & $\mathbf{14.3\%}$ \\
+\multicolumn{4}{l}{\emph{$B_{\max}=0.30$}} \\
+\quad SNR-threshold ($\tau^\star{=}8$)   & \textbf{0.89900} & 0.3125 & $31.6\%$ \\
+\quad \method{} (RF, frozen)              & 0.89783 & \textbf{0.2120} & $\mathbf{21.4\%}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

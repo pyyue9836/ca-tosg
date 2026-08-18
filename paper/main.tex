@@ -17,6 +17,18 @@
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 \newcommand{\method}{CA-TOSG}
 
+% R42-2: float geometry only -- no figure is removed and the count stays at 10. Values are inside
+% IEEEtran's own tolerances (it sets \abovecaptionskip to 0 for tables and ~3pt for figures by
+% default; the float separations below are the conservative end of what IEEE templates use).
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\textfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
+\renewcommand{\arraystretch}{0.95}
+
 \begin{document}
 
 \title{Channel-Aware Task-Oriented Semantic Granularity Selection for Bandwidth-Constrained V2V Cooperative Perception}
@@ -87,13 +99,13 @@ The main contributions of this paper are summarized as follows:
 
 \subsection{V2V Cooperative Perception}
 
-V2V cooperative perception exploits information from surrounding connected vehicles to alleviate occlusion, long-range sparsity and limited field of view~\cite{xu2022opv2v,han2023collaborative}. Methods are categorised by the stage at which information is shared.
+V2V cooperative perception exploits information from surrounding connected vehicles to alleviate occlusion, long-range sparsity and limited field of view~\cite{xu2022opv2v}. Methods are categorised by the stage at which information is shared.
 
 \emph{Early fusion} shares raw point clouds before feature extraction~\cite{xu2022opv2v}: the most complete information, but a very large payload requiring accurate spatio-temporal alignment, which is hard to deploy under practical V2V bandwidth and latency constraints.
 
 \emph{Late fusion} shares object-level predictions---boxes, classes, confidences~\cite{xu2022opv2v}. The payload is small and suits low-rate links, but intermediate semantic and spatial information is discarded: an object missed by the sender cannot be recovered by the receiver, which costs accuracy in occluded or uncertain scenes.
 
-\emph{Intermediate fusion} shares learned BEV features between backbone and detection head~\cite{xu2022v2xvit,hu2022where2comm,wang2020v2vnet,li2021disconet,xu2022cobevt,liu2020when2com,lu2024heal,hu2024pragmatic}, balancing the two extremes: richer spatial and semantic information than object-level sharing, but messages far larger, and expensive under bandwidth-constrained links.
+\emph{Intermediate fusion} shares learned BEV features between backbone and detection head~\cite{xu2022v2xvit,hu2022where2comm}, balancing the two extremes: richer spatial and semantic information than object-level sharing, but messages far larger, and expensive under bandwidth-constrained links.
 
 Benchmarks such as OPV2V and OpenCOOD~\cite{xu2022opv2v} provide common datasets and protocols for comparing these strategies. We build on that setting but ask a different question: rather than assuming a fixed fusion representation, how should the semantic granularity of the transmitted message be selected per frame from task and channel conditions?
 
@@ -109,7 +121,7 @@ Most of these methods, however, optimise \emph{within} a fixed semantic level: t
 
 \subsection{Semantic and Channel-Aware Communication for Vehicular Perception}
 
-Semantic communication optimises the transmitted representation for task performance rather than reconstruction or bit error rate~\cite{sheng2024importance,gan2026scomcp,bourtsoulatze2019deepjscc,xie2021deepsc,gunduz2023beyond}: in cooperative perception it should preserve what detection needs. A multi-mode IoT variant selects the transmission mode and allocates resources across sensors~\cite{yuan2025multimode}---a different axis from per-frame granularity for V2V perception.
+Semantic communication optimises the transmitted representation for task performance rather than reconstruction or bit error rate~\cite{sheng2024importance,gan2026scomcp,bourtsoulatze2019deepjscc}: in cooperative perception it should preserve what detection needs. A multi-mode IoT variant selects the transmission mode and allocates resources across sensors~\cite{yuan2025multimode}---a different axis from per-frame granularity for V2V perception.
 
 Joint source-channel coding and learned semantic codecs train encoder and decoder with the channel in the loop, and can degrade more gracefully than separated source and channel coding~\cite{sheng2024importance,gan2026scomcp}; digital QAM + LDPC baselines instead show threshold behaviour~\cite{ieee80211bd}, poor below an SNR and rapidly reliable above it.
 
@@ -350,37 +362,13 @@ Split & Regime & AP@0.5 & AP@0.7 & Payload \\
 \end{tabular}
 \end{table*}
 
-Three observations follow. (i) Realised AP@0.5 at $B_{\max}=0.10/0.20/0.30$ is $0.7887/0.7926/0.7936$ (validate), $0.8697/0.8742/0.8742$ (test) and $0.7299/0.7347/0.7504$ (Culver-City), against fixed object-level references $0.7819$, $0.8691$, $0.7299$. Every split is read against its headroom, the gap between the perfect-channel feature ceiling and fixed $L$: $0.8369-0.7819=0.0550$, $0.8931-0.8691=0.0240$ and $0.8269-0.7299=0.0970$ AP. The realised share $(\mathrm{AP}_{\method{}}-\mathrm{AP}_{\text{Fixed }L})/\text{headroom}$ is $12.4/19.5/21.3\%$, $2.5/21.2/21.2\%$ and $0.0/4.9/21.1\%$---at most about a fifth, so what is reliably delivered is the communication saving, descriptively reported. The $L$--$F$ gap is wider under the single-collaborator convention because box-level fusion of one neighbour discards more than feature-level fusion of it; the retired full-collaborator accounting showed a test headroom an order of magnitude smaller, an artefact of fusing every collaborator into both branches. (ii) Under fading or low SNR the selector holds $L$ and loses no AP, while fixed $C_{16}$ and $C_{256}$ are \emph{strictly dominated}: $21\text{--}41\times$ the channel use, below Fixed $L$ in realised AP (Fig.~\ref{fig:ap_snr}). (iii) Channel-averaged it spends $0.08102$--$0.20361$, $0.03680$--$0.21196$ and $0.02437$--$0.18226$~Msym/frame---$8.2$--$20.6\%$, $3.7$--$21.4\%$ and $2.5$--$18.4\%$ of Fixed $F$---the feature-active regime being only the high-SNR AWGN tail.
+Three observations follow. (i) Realised AP@0.5 at $B_{\max}=0.10/0.20/0.30$ is $0.7887/0.7926/0.7936$ (validate), $0.8697/0.8742/0.8742$ (test) and $0.7299/0.7347/0.7504$ (Culver-City), against fixed object-level references $0.7819$, $0.8691$, $0.7299$. Every split is read against its headroom, the gap between the perfect-channel feature ceiling and fixed $L$: $0.8369-0.7819=0.0550$, $0.8931-0.8691=0.0240$ and $0.8269-0.7299=0.0970$ AP. The realised share $(\mathrm{AP}_{\method{}}-\mathrm{AP}_{\text{Fixed }L})/\text{headroom}$ is $12.4/19.5/21.3\%$, $2.5/21.2/21.2\%$ and $0.0/4.9/21.1\%$---at most about a fifth, so what is reliably delivered is the communication saving, descriptively reported. The $L$--$F$ gap is wider under the single-collaborator convention because box-level fusion of one neighbour discards more than feature-level fusion of it; the retired full-collaborator accounting showed a test headroom an order of magnitude smaller, an artefact of fusing every collaborator into both branches. (ii) Under fading or low SNR the selector holds $L$ and loses no AP, while fixed $C_{16}$ and $C_{256}$ are \emph{strictly dominated}: $21\text{--}41\times$ the channel use, below Fixed $L$ in realised AP (Fig.~\ref{fig:ap_snr}). (iii) Channel-averaged, the selector spends $0.08102$--$0.20361$~Msym/frame on validate, $0.03680$--$0.21196$ on test and $0.02437$--$0.18226$ on Culver-City---$8.2$--$20.6\%$, $3.7$--$21.4\%$ and $2.5$--$18.4\%$ of Fixed $F$---the feature-active regime being only the high-SNR AWGN tail.
 
 \method{} is not designed to raise channel-\emph{averaged} AP above Fixed $L$ everywhere---object-level communication already suffices on many frames---but to activate the feature message \emph{only} where the expected gain justifies the payload and channel risk; Section~\ref{sec:threshold} and the supplementary material localise where.
 
-A one-line SNR threshold is the natural challenger, so it sits in the headline: Table~\ref{tab:headline_agg} gives channel-averaged frame F1 and channel use for Fixed $L$, a re-tuned threshold, the selector and the oracle over $200$ draws on test. The comparison is budget-indexed and does not run one way. At $B_{\max}=0.10$ the selector is marginally \emph{below} a threshold tuned for the same target budget, by $-0.00099$ ($95\%$ CI $[-0.00105,-0.00093]$), reported as it came out---secondary, interval only, no decision. At $0.20$ and $0.30$ the nominal threshold attains the higher F1---$0.89701$ and $0.89900$ against $0.89691$ and $0.89783$---at $1.53\times$ and $1.47\times$ the channel use and from outside the budget; against $\tau_{\mathrm{feasible}}$ the ordering at $0.20$ reverses in the selector's favour. What survives is the pre-registered claim on the single confirmatory comparison (test, $B_{\max}=0.20$): F1 lower by ${\approx}0.0001$ ($95\%$ CI upper bound $-0.00002$) yet far inside the $0.005$ margin, at $34.8\%$ lower payload against a threshold itself over budget ($0.2168>0.20$~Msym), or $26.6\%$ against $\tau_{\mathrm{feasible}}$. Frames within a scene are not independent; resampling over the $16$ test scenes widens both intervals without changing the ruling (supplementary material). On this cliff, then, channel state carries most of the \emph{accuracy} decision---most, not all, and only on this transport---and the ego-side cues buy \emph{bandwidth}. That is the paper's central diagnostic finding, and it recurs as the codec-dependent \emph{currency} of the cues.
+A one-line SNR threshold is the natural challenger, so it is read against the selector budget by budget over the same $200$ paired draws on test (the channel-averaged comparison table is in the supplementary material). The three frozen selectors sit at F1 $0.89148$, $0.89691$ and $0.89783$ for $0.0368$, $0.1414$ and $0.2120$~Msym, each against the threshold tuned to its own budget ($\tau^\star{=}18$, $12$, $8$) at $0.0724$, $0.2168$ and $0.3125$~Msym; the fixed references order as Fixed $L$ $0.89095$ at $0.024$~Msym, the masked oracle $0.90559$ at $0.17502$, Fixed $F$ $0.84827$ at $0.99$ and Fixed $C_{256}$ $0.82553$ at $0.495$, so both fixed feature-level policies sit below object-level communication at many times its channel use. The comparison is budget-indexed and does not run one way. At $B_{\max}=0.10$ the selector is marginally \emph{below} a threshold tuned for the same target budget, by $-0.00099$ ($95\%$ CI $[-0.00105,-0.00093]$), reported as it came out---secondary, interval only, no decision. At $0.20$ and $0.30$ the nominal threshold attains the higher F1---$0.89701$ and $0.89900$ against $0.89691$ and $0.89783$---at $1.53\times$ and $1.47\times$ the channel use and from outside the budget; against $\tau_{\mathrm{feasible}}$ the ordering at $0.20$ reverses in the selector's favour. What survives is the pre-registered claim on the single confirmatory comparison (test, $B_{\max}=0.20$): F1 lower by ${\approx}0.0001$ ($95\%$ CI upper bound $-0.00002$) yet far inside the $0.005$ margin, at $34.8\%$ lower payload against a threshold itself over budget ($0.2168>0.20$~Msym), or $26.6\%$ against $\tau_{\mathrm{feasible}}$. Frames within a scene are not independent; resampling over the $16$ test scenes widens both intervals without changing the ruling (supplementary material). On this cliff, then, channel state carries most of the \emph{accuracy} decision---most, not all, and only on this transport---and the ego-side cues buy \emph{bandwidth}. That is the paper's central diagnostic finding, and it recurs as the codec-dependent \emph{currency} of the cues.
 
-\begin{table*}[t]
-\centering
-\caption{Channel-averaged comparison on the frozen OPV2V \emph{test} split (selector trained on validate, \emph{not} retrained; $T=2{,}170$ frames), read from the frozen replay: F1 and channel use are the means over the same $200$ paired CSI samplings (SNR $\sim\mathcal{U}[0,20]$~dB, $50/50$ AWGN/Rayleigh) for every row. The comparison is \emph{budget-indexed}: each frozen selector is shown against the SNR-threshold rule tuned to the \emph{same} budget, and it does not run one way. Share is channel use as a fraction of Fixed $F$ ($0.990$~Msym).}
-\label{tab:headline_agg}
-\begin{tabular}{lccc}
-\toprule
-Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
-\midrule
-Fixed $L$ (object-level)       & 0.8910 & 0.024 & $2.4\%$ \\
-Fixed $F$ (LDPC+16-QAM)        & 0.8483 & 0.990 & $100.0\%$ \\
-Fixed $C_{256}$ (LDPC+256-QAM) & 0.8255 & 0.495 & $50.0\%$ \\
-Masked oracle (upper bound)    & 0.9056 & 0.175 & $17.7\%$ \\
-\midrule
-\multicolumn{4}{l}{\emph{$B_{\max}=0.10$}} \\
-\quad SNR-threshold ($\tau^\star{=}18$)   & \textbf{0.89247} & 0.0724 & $7.3\%$ \\
-\quad \method{} (RF, frozen)              & 0.89148 & \textbf{0.0368} & $\mathbf{3.7\%}$ \\
-\multicolumn{4}{l}{\emph{$B_{\max}=0.20$}} \\
-\quad SNR-threshold ($\tau^\star{=}12$)   & \textbf{0.89701} & 0.2168 & $21.9\%$ \\
-\quad \method{} (RF, frozen)              & 0.89691 & \textbf{0.1414} & $\mathbf{14.3\%}$ \\
-\multicolumn{4}{l}{\emph{$B_{\max}=0.30$}} \\
-\quad SNR-threshold ($\tau^\star{=}8$)   & \textbf{0.89900} & 0.3125 & $31.6\%$ \\
-\quad \method{} (RF, frozen)              & 0.89783 & \textbf{0.2120} & $\mathbf{21.4\%}$ \\
-\bottomrule
-\end{tabular}
-\end{table*}
+
 
 Fig.~\ref{fig:qualitative} is one such frame; the selector's job is to identify them and request $F$ only when the channel permits.
 
@@ -472,7 +460,7 @@ two-scalar and the three-scalar rule, over all six cue orientations
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{fig_pareto_test.pdf}
+    \includegraphics[width=0.85\linewidth]{fig_pareto_test.pdf}
     \caption{Communication--perception plane on OPV2V test, from the frozen $200$-realisation replay. The axis spans the full range so Fixed $F$ ($0.99$~Msym) is visible rather than clipped. The three frozen selectors are shown budget-indexed (circles, labelled by $B_{\max}$) beside the SNR-threshold rule tuned to the \emph{same} budget (open triangles); the feasibility-masked oracle is a separate marker (star). Fixed $F$ and Fixed $C_{256}$ are dominated by Fixed $L$ at far higher channel use.}\label{fig:pareto}
 \end{figure}
 

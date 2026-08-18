@@ -4922,3 +4922,65 @@ touched: it needs a further ruling.
 
 Sixteen gates pass, twice, on a clean tree; `p6_cross_section_scan` 0 conflicts in all four classes;
 `p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED table cells. Main 16 pages / 1 overfull; supplementary 9 pages.
+
+## R42 — headline table relocated, float geometry, citation audit (16 -> 15 pages)
+
+Zero GPU. Executed in the given order, recompiling after each step; the batch's stop rule was "stop
+at 14 pages", which was not reached.
+
+### 1 · `tab:headline_agg` to the supplementary, two reading sentences kept
+
+The table moved to `sec:moved_r42`; the main paper keeps its reading inline: the three frozen
+operating points (F1 `0.89148`/`0.89691`/`0.89783` at `0.0368`/`0.1414`/`0.2120`~Msym, each against
+the threshold tuned to its own budget, `tau*=18/12/8`, at `0.0724`/`0.2168`/`0.3125`~Msym) and the
+fixed-reference ordering (Fixed L `0.89095`@`0.024`, oracle `0.90559`@`0.17502`, Fixed F
+`0.84827`@`0.99`, Fixed C256 `0.82553`@`0.495`). The prose quotes the CSV's own 5-dp values, not the
+table's 4-dp rounding, so the literals bind to `fixed_references.csv` directly instead of relying on
+the derived-cell declaration. **16 -> 16 pages** (the freed space was absorbed by float placement).
+
+Two silent-failure faults surfaced here and are fixed:
+
+* `tools/build_paper_tables.py` spliced `tab:headline_agg` into `main.tex` unconditionally; after the
+  move it would have written nothing. It now splices wherever the label lives (the rule
+  `tab:ablation` has had since R40), and raises through `splice()` if the label is in neither file.
+* R41's `sec:where_gain` compression had rewritten "(iii) Channel-averaged, the selector spends" to
+  "(iii) Channel-averaged it spends", which silently unhooked `observation_iii()`'s `sub_once()`
+  pattern — the generator matched 0 times. Detected only because this batch re-ran the generator.
+  The generator-owned phrase is restored; **no gate covers "a generator whose pattern stopped
+  matching" until the generator is run**, which is worth a future gate.
+* `p6_numbers_vs_csv`'s table-cell scan read `main.tex` only, so the move took 17 cells out of
+  coverage (29 located -> 12). It now reads both documents: **150 located, 0 UNLOCATED**.
+
+### 2 · Float geometry (no figure removed, count stays 10)
+
+Preamble block, IEEEtran-safe: `\abovecaptionskip` 3pt, `\belowcaptionskip` 0pt,
+`\textfloatsep`/`\floatsep`/`\intextsep`/`\dbltextfloatsep`/`\dblfloatsep` 6pt plus 2pt minus 2pt,
+`\arraystretch` 0.95. The two single-column figures were already at `0.75\linewidth` (R33);
+`fig_pareto_test` was the one at full `\linewidth` and is now `0.85\linewidth`. **16 -> 15 pages.**
+
+### 3 · Citation audit: 25 -> 16 distinct keys in the main paper
+
+Deleted (each cited exactly once, in an enumeration no argument depends on): `han2023collaborative`,
+`wang2020v2vnet`, `li2021disconet`, `xu2022cobevt`, `liu2020when2com`, `lu2024heal`,
+`hu2024pragmatic`, `xie2021deepsc`, `gunduz2023beyond` — 9 keys. Kept for cause: `hu2022where2comm`
+and `sheng2024importance` (compared arms), `gan2026scomcp` and `gan2025cods` (the digital-domain
+paragraph, gate-protected), `xie2022mlcooper` (closest rival), `zhang2024smartcooper` / `accbev2025`
+(the fixed-granularity channel-adaptive contrast), `liu2024rbh` (the three-way positioning),
+`yuan2025multimode` (different-axis contrast), `bourtsoulatze2019deepjscc` (JSCC anchor for the
+graceful-codec half), `breiman2001random`, `xu2022opv2v`, `xu2022v2xvit`, `lang2019pointpillars`,
+`ieee80211bd`, `3gpp37885`. **15 -> 15 pages**; the saving is inside the bibliography column.
+
+### 4 · Page count: 15, target 14 — GAP REPORTED, remaining scope not taken
+
+Body ends on page 15, which is ~80% full (804 extracted words against a 850-1050 typical page). The
+residual is **about 0.9 page**. Nothing further was cut: the batch's own rule was to stop and wait
+for a scope ruling. What is left costs a claim or a figure — the untouched levers are (a) the
+`sec:ablation` collapse paragraph, which restates the four-rung ladder already given in
+`sec:handrule`, (b) `sec:threshold`'s closing italic summary, which repeats the abstract, and (c)
+dropping a figure, which R36-4 forbids without a ruling.
+
+### 5 · State
+
+Sixteen gates pass, twice; `p6_cross_section_scan` 0 conflicts; `p6_numbers_vs_csv` 0 MISS, 0
+UNLOCATED over both documents. Main **15 pages, 1 overfull (17.6pt)**; supplementary 9 pages, 7
+overfull. Abstract **246 rendered words**.

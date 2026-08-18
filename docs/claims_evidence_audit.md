@@ -7,9 +7,9 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | engine | claims |
 |---|---|
 | ANALYTIC | 50 |
-| FROZEN | 49 |
+| FROZEN | 50 |
 
-Total: **99** claims across **28** (sub)sections.
+Total: **100** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -169,7 +169,8 @@ _None._
 | `c6819b4` | FROZEN | 0.5, 0.10, 0.20, 0.30, 0.7887, 0.7926, 0.7936, 0.8697, 0.874 | Three observations follow. (i) Realised AP@0.5 at B_=0.10/0.20/0.30 is 0.7887/0.7926/0.7936 (validate), 0.8697/0.8742/0.8742 (test… |
 | `c5d24be` | FROZEN | 0.8369, -0.7819, 0.0550, 0.8931, -0.8691, 0.0240, 0.8269, -0 | 0.8369-0.7819=0.0550, 0.8931-0.8691=0.0240 and 0.8269-0.7299=0.0970 AP. |
 | `c8693a7` | FROZEN | 12.4, 19.5, 21.3, 2.5, 21.2, 0.0, 4.9, 21.1 | The realised share (AP_-AP_Fixed L)/headroom is 12.4/19.5/21.3\%, 2.5/21.2/21.2\% and 0.0/4.9/21.1\%---at most about a fifth, so w… |
-| `ce4109c` | FROZEN | 21, 41, 0.08102, 0.20361, 0.03680, 0.21196, 0.02437, 0.18226 | 21--41 × the channel use, below Fixed L in realised AP (Fig. [ref]). (iii) Channel-averaged it spends 0.08102--0.20361, 0.03680--0… |
+| `c3d45d7` | FROZEN | 21, 41, 0.08102, 0.20361, 0.03680, 0.21196, 0.02437, 0.18226 | 21--41 × the channel use, below Fixed L in realised AP (Fig. [ref]). (iii) Channel-averaged, the selector spends 0.08102--0.20361 … |
+| `c504c4a` | FROZEN | 1, 0.89148, 0.89691, 0.89783, 0.0368, 0.1414, 0.2120, 18, 12 | The three frozen selectors sit at F1 0.89148, 0.89691 and 0.89783 for 0.0368, 0.1414 and 0.2120 Msym, each against the threshold t… |
 | `c12a4a5` | FROZEN | 0.10, -0.00099, 95, -0.00105, -0.00093 | At B_=0.10 the selector is marginally below a threshold tuned for the same target budget, by -0.00099 (95\% CI [-0.00105,-0.00093]… |
 | `c9458eb` | FROZEN | 0.20, 0.30, 1, 0.89701, 0.89900, 0.89691, 0.89783, 1.53, 1.4 | At 0.20 and 0.30 the nominal threshold attains the higher F1---0.89701 and 0.89900 against 0.89691 and 0.89783---at 1.53 × and 1.4… |
 | `cfc0f56` | FROZEN | 0.20 | What survives is the pre-registered claim on the single confirmatory comparison (test, B_=0.20): |

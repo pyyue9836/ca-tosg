@@ -149,7 +149,12 @@ def table_cells(corpus):
     retired numbers while every claim around it was bound -- tab:headline survived two corrigendum
     batches that way. This walks the tabulars themselves.
     """
-    tex = open(os.path.join(ROOT, 'paper/main.tex'), encoding='utf-8').read()
+    # R42-1: tab:headline_agg moved to the supplementary, and with it 17 numeric cells that this
+    # scan silently stopped covering (29 located -> 12). A table's cells are checked wherever the
+    # table lives, the same rule R40 applied to the four text gates.
+    tex = '\n'.join(open(os.path.join(ROOT, f'paper/{n}.tex'), encoding='utf-8').read()
+                    for n in ('main', 'supplementary')
+                    if os.path.exists(os.path.join(ROOT, f'paper/{n}.tex')))
     declared = _declared_derived()
     canon = canonical_corpus(corpus)
     found, missing, derived_cells, only_narrative = [], [], [], []
@@ -221,7 +226,7 @@ def main() -> int:
         for label, lit, _ in t_missing:
             f.write(f'- `{label}` cell **{lit}** is in no committed result file\n')
         if not t_missing:
-            f.write('Every numeric cell of every table in `main.tex` is located in a committed '
+            f.write('Every numeric cell of every table in `main.tex` and `supplementary.tex` is located in a committed '
                     'product (structural constants excepted).\n')
         f.write(f'\n## DERIVED ({len(derived)})\n\n')
         for cid, loc, lit, file, gen in derived:
