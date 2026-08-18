@@ -227,3 +227,8 @@ RX verify[a-z ]{0,20}(cross-split|domain-shift|Culver-City)[a-z ]{0,20}generalis
 RX (confirm|establish|demonstrate)[a-z ]{0,25}generalisation (to|across) (the )?(test|Culver)
 RX generalis(es|ation) (holds|transfers) (on|to) (both|all) split
 
+# R30-1: the headroom-share range. The minimum across splits and budgets is 0.0% (Culver at
+# B_max=0.10, true_e2e_ap.csv), not 2.5%, so the interval form asserted a floor that does not exist.
+# The claim is now one-sided: up to 21.3%.
+RX 2\.5\$?--\$?21\.3
+

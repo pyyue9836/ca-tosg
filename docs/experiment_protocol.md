@@ -4236,3 +4236,62 @@ simultaneously verified and unverifiable. The locator now tries the negation and
 Sixteen gates, all passing, twice in a row on a clean tree. The literal debt register stands at
 **10 entries**, every one a precision-floor effect rather than a finding. Nothing in this batch
 touched a frozen product, a manifest or a result CSV.
+
+---
+
+## Change-log R30 (2026-08-18) — five wording corrections before compilation
+
+**Zero GPU.** Four prose repairs, one section title, one tracked-term addition. No product, manifest
+or CSV is touched.
+
+### 1 · The headroom share is one-sided, not an interval
+
+`2.5`--`21.3%` asserted a floor that does not exist: the minimum across splits and budgets is
+**`0.0%`** (Culver-City at `B_max = 0.10`, `true_e2e_ap.csv`), and `2.5%` is merely test's tightest
+budget. Both the abstract and the Conclusion now read **"up to `21.3%`"**, with the `0.0%` cell named
+rather than averaged away. The interval form is fingerprinted; the two claim rows are rebound with
+the max/min derivation spelled out.
+
+### 2 · The lighter-models claim, third home
+
+Sec. IV-F closed with "…shows lighter models and even a hand-tuned SNR-threshold rule reach the same
+realised F1" — the third instance after the Conclusion (R23-14) and the contribution list (R25-2).
+Replaced with the supervisor's wording: *the SNR-threshold and three-scalar hand-rule baselines
+achieve comparable F1, but require higher communication payload at the primary operating point.*
+The claim family is now a **TERMINOLOGY** row in `tests/tracked_terms.md`, so a fourth home fails a
+gate rather than waiting for a reader.
+
+### 3 · C256 exclusion restated as set domination
+
+The argument no longer needs frame statistics or a case analysis of strictness:
+
+* when `comp >= ego`, `C_16` delivers the identical payload at a block-error rate that is never
+  higher, so it is no worse than `C_256` on every such frame;
+* when `comp < ego`, sending any feature message can only lower the expected utility, and `E` is no
+  worse than either feature mode.
+
+The two cases are exhaustive, so `C_256` is dominated on every frame by an action already in
+`{E, C_16}`. The old concession — "dominance reverses only in the collaboration-harm regime" —
+**goes with the case analysis it belonged to**: under set domination there is no reversal to concede.
+
+### 4 · The abstract's non-inferiority claim names its cell and quotes both tracks
+
+It now states the **single pre-registered confirmatory comparison** (test at `B_max = 0.20`), leads
+with the **budget-matched** threshold (`26.6%` less channel, inside the `0.005` margin), and reports
+the nominal `34.8%` beside it **with its overspend on the face of it** (`0.2168 > 0.20` Msym) —
+quote-both-or-neither, satisfied with numbers rather than by dropping them.
+
+### 5 · Title and labelling
+
+`sec:handrule` is retitled **"Hand-Rule Baselines and Their Communication Cost"** — the arm is a
+baseline family, not a two-parameter curiosity, and the title now names the axis the result is on.
+Every nominal-threshold saving in the document was re-checked for its over-budget label: five
+occurrences, four already labelled, and the fifth (the contribution bullet's `32.2`--`49.2%` /
+`42.1`--`68.9%`) now carries it. The `sec:threshold` occurrence at L706 was verified to carry the
+label inside its own sentence and is left as written.
+
+### 6 · One chained ruling
+
+The C256 rewrite is the second authorised rewrite of the same sentence, so `R30-3` is chained onto
+`R28-1a` rather than replacing it: the paragraph gate's ruling list now reads
+`B2 -> R23-4 -> R28-1a -> R28-1b -> R30-3 -> Q2`, which is the sentence's full authorised history.

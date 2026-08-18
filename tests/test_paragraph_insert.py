@@ -102,6 +102,13 @@ PARAS = {
             ("deployment account.} -- and even the oracle's payload-penalised frontier activates it at only 2.5 / 3.2 / 4.5\\% of frames. That a rate-matched, lower-channel-use action earns no more than a marginal share is itself a finding.",
              'deployment account.}. That a rate-matched, lower-channel-use action earns no operational role at all, on physical grounds that hold for any collaborator convention, is itself the finding.',
              'R28-1b'),
+            # R30-3 (supervisor ruling, 2026-08-18): the exclusion is restated as SET DOMINATION
+            # -- C16 dominates C256 wherever comp>=ego, E dominates every feature mode wherever
+            # comp<ego, and the two cases are exhaustive -- so the 'reverses only in the harm
+            # regime' concession is removed with the case analysis it belonged to.
+            ('The exclusion of C256 from the deployed action set rests on that physical-layer ordering, which no collaborator convention can change: wherever $b_{16}=b_{256}$ the two modes tie rather than reverse, and wherever $\\mathrm{comp}\\ge\\mathrm{ego}$ the sign of $(\\mathrm{comp}-\\mathrm{ego})(b_{16}-b_{256})$ makes C256 no better. Dominance reverses only in the collaboration-harm regime ($\\mathrm{comp}<\\mathrm{ego}$, $b_{16}<b_{256}$; \\S\\ref{sec:harm}).',
+             'The exclusion of C256 from the deployed action set follows from set domination, and needs no frame statistics at all. When $\\mathrm{comp}\\ge\\mathrm{ego}$, $C_{16}$ delivers the identical payload at a block-error rate that is never higher, so it is no worse than $C_{256}$ on every such frame. When $\\mathrm{comp}<\\mathrm{ego}$, sending any feature message can only lower the expected utility, and $E$ --- ego-only, no request --- is no worse than either feature mode. The two cases are exhaustive, so $C_{256}$ is dominated on every frame by an action already in $\\{E, C_{16}\\}$: it is globally dominated by the deployed set and can be dropped without a case analysis of when the dominance is strict.',
+             'R30-3'),
             # Q2 (supervisor ruling, 2026-08-02): reframe the paragraph's role from a "completeness
             # defence" for retaining C256 to the "exclusion basis" for it -- C256 is dominated by C16
             # and excluded from the now 2-element deployed action set S={L,C16} (Eq.~\ref{eq:action_set}).
