@@ -52,6 +52,7 @@ GATES = [
     ('content',   'action-set wording',   [PY, 'tests/test_action_set_wording.py']),
     ('artifacts', 'numeric literals',     [PY, 'tests/test_numeric_literals.py']),
     ('artifacts', 'comparison direction', [PY, 'tests/test_comparison_direction.py']),
+    ('artifacts', 'R9 locked wording',    [PY, 'tools/build_r9_claims.py', '--check']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]
