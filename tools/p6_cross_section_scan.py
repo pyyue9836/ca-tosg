@@ -16,6 +16,10 @@ conflicts" carried no information. Entities here come from curated structure ins
   ORDERING      the paper's dominance/ordering statements, re-checked against the frozen
                 end-to-end AP table rather than against other prose.
   EXISTENCE     a \\ref to a label the document no longer defines.
+  TERMINOLOGY   entities whose DESCRIPTION has gone wrong more than once, curated in
+                `tests/tracked_terms.md`. Numbers are not the only thing that goes stale: the
+                signalling direction was written sender-side three times (R27-1), and no numeric
+                check can see that.
 
 Every check has a positive control under `--self-test`: a check that cannot fail on an injected
 fault is not evidence of consistency.
@@ -45,6 +49,34 @@ NUM = re.compile(r'(?<![\d.])([-+]?\d+\.\d{2,5})(?![\d])')
 # them in made a claim that merely mentions "B_max=0.20" collide with any other claim about the same
 # (metric, split) -- two such false conflicts survived to the last verification round.
 STRUCTURAL = {0.1, 0.2, 0.3, 0.5, 0.7, 0.024, 0.495, 0.99, 0.05, 0.02, 0.005}
+
+
+TRACKED = os.path.join(ROOT, 'tests', 'tracked_terms.md')
+
+
+def tracked_terms():
+    """[(term, forbidden regex, required framing, reason)] from the curated table."""
+    out = []
+    if not os.path.exists(TRACKED):
+        return out
+    for line in open(TRACKED, encoding='utf-8'):
+        if not line.startswith('|') or line.startswith('|---') or line.startswith('| term'):
+            continue
+        c = [x.strip() for x in line.strip().strip('|').split('|')]
+        if len(c) == 4 and c[1].startswith('`') and c[1].endswith('`'):
+            # '&#124;' is how a regex alternation survives a markdown table row
+            out.append((c[0], c[1].strip('`').replace('&#124;', '|'), c[2], c[3]))
+    return out
+
+
+def scan_terminology(text):
+    """Matches of any forbidden form. Each is a conflict between the text and the architecture."""
+    bad = []
+    for term, pattern, required, reason in tracked_terms():
+        for m in re.finditer(pattern, text, re.I):
+            ctx = ' '.join(text[max(0, m.start() - 60):m.end() + 60].split())
+            bad.append((term, m.group(0), required, reason, ctx))
+    return bad
 
 
 def entity_records(claims=None, ledger=None):
@@ -168,6 +200,13 @@ def self_test(tex):
         os.unlink(tmp)
     print(f'  ORDERING:     {"FIRES" if fired3 else "DOES NOT FIRE"}')
     rc |= 0 if fired3 else 1
+
+    # R27-1: the terminology control injects the exact form that recurred three times.
+    fired4 = scan_terminology(tex + '\nwhere the sender adaptively selects the semantic level.\n')
+    clean = scan_terminology(tex)
+    print(f'  TERMINOLOGY:  {"FIRES" if fired4 else "DOES NOT FIRE"} '
+          f'({len(tracked_terms())} tracked forms; {len(clean)} live match(es))')
+    rc |= 0 if (fired4 and not clean) else 1
     return rc
 
 
@@ -182,6 +221,7 @@ def main() -> int:
     values = scan_entity_values(records)
     orders = scan_ordering(tex)
     labels = scan_labels(tex)
+    terms = scan_terminology(tex)
     entities = {(m, s) for m, s, _l, _v, _c in records}
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write('# P6 gate 3 — cross-section logical conflicts (entity level)\n\n')
@@ -194,7 +234,15 @@ def main() -> int:
                 '(metric, split) entities**. Positive controls: '
                 '`python tools/p6_cross_section_scan.py --self-test`.\n\n')
         f.write(f'| class | count |\n|---|---|\n| ENTITY-VALUE | {len(values)} |\n'
-                f'| ORDERING | {len(orders)} |\n| EXISTENCE | {len(labels)} |\n\n')
+                f'| ORDERING | {len(orders)} |\n| EXISTENCE | {len(labels)} |\n'
+                f'| TERMINOLOGY | {len(terms)} |\n\n')
+        f.write(f'## TERMINOLOGY conflicts ({len(terms)})\n\n')
+        for term, hit, required, reason, ctx in terms:
+            f.write(f'- **{term}**: found `{hit}`; required framing: {required}. {reason}\n'
+                    f'  > {ctx[:260]}\n')
+        if not terms:
+            f.write('None — every tracked form in `tests/tracked_terms.md` is absent.\n')
+        f.write('\n')
         f.write(f'## ENTITY-VALUE conflicts ({len(values)})\n\n')
         for i, (key, la, va, ca, lb, vb, cb) in enumerate(values, 1):
             f.write(f'**EV-{i} — {key[0]} on {key[1]}**\n\n- `{la}` → {va}\n  > {ca[:260]}\n\n'
@@ -214,6 +262,7 @@ def main() -> int:
             f.write('None — every `\\ref` resolves.\n')
     print(f'coverage: {len(records)} entity records over {len(entities)} entities')
     print(f'ENTITY-VALUE {len(values)} | ORDERING {len(orders)} | EXISTENCE {len(labels)} '
+          f'| TERMINOLOGY {len(terms)} '
           f'-> {os.path.relpath(OUT, ROOT)}')
     for key, la, va, _ca, lb, vb, _cb in values:
         print(f'  {key}: {la} {va}  vs  {lb} {vb}')

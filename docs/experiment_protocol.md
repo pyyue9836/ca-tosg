@@ -4088,3 +4088,49 @@ gains three abstract-probed rows, and `test_comparison_direction.py` now **asser
 one registered comparison is probed inside `\begin{abstract}...\end{abstract}`: **17 comparisons
 registered, 3 of them inside the abstract**. The self-test removes the abstract and confirms the
 scope assertion fires.
+
+---
+
+## Change-log R27 (2026-08-18) — signalling direction, the JSCC arm's status, and a terminology class
+
+**Zero GPU.** Four prose corrections, one verification, one new check class.
+
+### 1 · The signalling direction, third recurrence — now tracked
+
+Contribution 1 said "the **sender** adaptively selects the semantic level". The architecture is
+receiver-driven (Sec. III-A): the ego evaluates its own perception and channel state and **requests**
+a level with a 2-bit codepoint; the collaborator transmits what was requested. Writing it sender-side
+inverts the contribution. Rewritten.
+
+Because this is the **third** time the direction has slipped, it is now checked rather than
+remembered. `p6_cross_section_scan.py` gains a **TERMINOLOGY** class: entities whose *description*
+has gone wrong more than once, curated in `tests/tracked_terms.md` with a forbidden form, the
+required framing and the reason. Three forms are tracked (sender-side verb, `sender-driven`, and the
+JSCC arm being described as mainline). The positive control injects the exact sentence that recurred;
+the self-test asserts it fires and that the live document is clean — and it earned its keep
+immediately: a literal `|` inside a regex broke its own markdown row, so the first draft silently
+parsed **1 of 3** rows, and the injected fault stopped firing. Alternation is now written `&#124;`.
+
+### 2 · The ImportanceMapJSCC arm is labelled where a reader meets it
+
+The `sec:baselines` entry is retitled **"ImportanceMapJSCC (exploratory; Appendix A)"** and states
+that it is a prior-protocol arm, not re-evaluated under the frozen single-collaborator protocol, and
+therefore present in **no** mainline table or figure. Contribution 3's baseline list is replaced by
+the comparators the mainline actually contains — fixed ego-only / object-level / feature-level with
+LDPC + 16/256-QAM, the SNR threshold at **both** its nominal and its budget-matched tuning, the two-
+and three-scalar hand rules, and the channel-aware oracle — with the JSCC arm named separately as
+the exploratory appendix comparison.
+
+### 3 · Sec. VI-B checked, nothing to clear
+
+Verified rather than assumed: `sec:ap_snr`'s prose carries **no** JSCC curve narrative. There is no
+"saturates near 0.71" family anywhere in `main.tex` (the three `saturat*` hits are the
+perfect-channel ceiling caption and two collaborator-supply sentences), and the subsection already
+routes the codec-comparison baselines to Appendix A explicitly. No change made.
+
+### 4 · The Conclusion's graceful-codec clause
+
+It asserted flatly that "under a graceful codec they become necessary for accuracy". It now carries
+the same triple qualifier as the abstract: the graceful-codec half rests on **exploratory** evidence
+gathered under the **prior protocol** and reported in **Appendix A**, not re-evaluated under the
+frozen one. The cliff-codec half, which is supported by the mainline, is unchanged.

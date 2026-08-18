@@ -9,6 +9,11 @@ Coverage: **76 entity records** over **59 distinct (metric, split) entities**. P
 | ENTITY-VALUE | 0 |
 | ORDERING | 0 |
 | EXISTENCE | 0 |
+| TERMINOLOGY | 0 |
+
+## TERMINOLOGY conflicts (0)
+
+None — every tracked form in `tests/tracked_terms.md` is absent.
 
 ## ENTITY-VALUE conflicts (0)
 
