@@ -62,6 +62,39 @@ SKIP_LINE = re.compile(r'(\\cite|\\label|\\ref|\\includegraphics|\\bibitem|arXiv
                        r'IEEE|3GPP|802\.11|version)', re.I)
 
 
+def bound_in_own_csv():
+    """Literals verified inside the CSV their OWN ledger row names, below `distinctive()`'s floor.
+
+    R33: `distinctive()` skips literals with fewer than three decimals and three significant digits,
+    because a weak literal cannot *attribute* a file. Once the ledger has named the file, though, the
+    literal can still be *verified* in it -- and the summary sentences R33 left in the main text quote
+    exactly such values (1.5 / 5.8 / 0.2%). This reads `docs/claims.md` directly rather than
+    recomputing claim ids: `audit_claims_evidence.claims_by_section` and the ledger builder disagree
+    on the id of some sentences (recorded as a finding in R26-3), and a check that depends on that
+    agreement silently covers nothing.
+    """
+    import re as _re
+    ledger = os.path.join(ROOT, 'docs', 'claims.md')
+    if not os.path.exists(ledger):
+        return set()
+    corpus = results_corpus()
+    out = set()
+    for line in open(ledger, encoding='utf-8'):
+        if not line.startswith('| c'):
+            continue
+        cells = [x.strip() for x in line.strip().strip('|').split('|')]
+        if len(cells) != 9:
+            continue
+        lits = _re.findall(r'(?<![\d.])(\d+\.\d+)(?![\d])', cells[2])
+        files = [f for f in _re.findall(r'[\w./-]+\.(?:csv|json)', cells[5] + ' ' + cells[6])
+                 if not f.startswith(('docs/', 'tests/', 'paper/'))]
+        vals = [corpus[f] for f in files if f in corpus]
+        for lit in lits:
+            if any(carries_any_unit(v, lit) or carries_any_unit([-x for x in v], lit) for v in vals):
+                out.add(lit)
+    return out
+
+
 def registered_debt():
     """{(file, literal)} already recorded as uncovered in the debt register.
 
@@ -202,7 +235,7 @@ def generated_intact():
 
 def main():
     verified = verified_literals()
-    wl, derived = whitelist(), registered_derived() | declared_derived()
+    wl, derived = whitelist(), registered_derived() | declared_derived() | bound_in_own_csv()
     if '--self-test' in sys.argv:
         # the control that matters: every value this batch retired must be UNCOVERED, and the
         # primary cell's own F1 must be covered.

@@ -270,6 +270,20 @@ def _canon(text):
     return text
 
 
+def _delivered_text():
+    """main.tex plus supplementary.tex.
+
+    R33 moved the collaboration-harm subsection (paragraph 2 of this gate) into the supplementary
+    document. The insertion guarantee follows the paragraph, not the file it happens to sit in, so
+    the gate reads the delivered text as a whole -- the same rule R32 applied to the registry gate.
+    """
+    parts = [_read(TEX)]
+    supp = os.path.join(os.path.dirname(TEX), 'supplementary.tex')
+    if os.path.exists(supp):
+        parts.append(_read(supp))
+    return '\n'.join(parts)
+
+
 def _inserted_block(tex, cfg):
     # Bound the inserted block by the draft's own last sentence (body_last), not by the next
     # sectioning command: a paragraph may be followed by relocated prose (e.g. TG-18 moved the
@@ -282,7 +296,7 @@ def _inserted_block(tex, cfg):
     last = cfg.get('inserted_body_last', cfg['body_last'])
     if last not in rest:
         raise SystemExit(
-            f'para bound not found in main.tex: {last[:60]!r}. If a ruling rewrote the closing '
+            f'para bound not found in the delivered text: {last[:60]!r}. If a ruling rewrote the closing '
             f'sentence, declare it in PARAS[n]["inserted_body_last"] and add the ruling.')
     j = rest.index(last) + len(last)
     return rest[:j].strip()
@@ -297,7 +311,7 @@ def gate(n):
     expected = _inline_footnotes(body, fns)                        # T3
     expected = _apply_subs(expected, cfg['subs'])                  # T1 (+ declared T2)
     expected = _apply_rulings(expected, cfg.get('rulings', []))    # ruling-authorised
-    actual = _inserted_block(_read(TEX), cfg)
+    actual = _inserted_block(_delivered_text(), cfg)
 
     exp_n, act_n = _canon(_norm_ws(expected)), _canon(_norm_ws(actual))  # T2 escapes
     if exp_n == act_n:

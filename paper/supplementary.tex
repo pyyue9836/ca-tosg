@@ -210,6 +210,127 @@ We report this as a boundary of the present method rather than a tuning target: 
 retrained and no threshold was adjusted after seeing these numbers.
 
 
+
+\section{Material moved from the main paper}\label{sec:moved}
+The four subsections below are reproduced verbatim from the main paper's results section;
+the main text keeps a short summary of each and points here.
+
+\subsection{Collaboration Is Not Always Beneficial}\label{sec:harm}
+
+Collaboration is not unconditionally beneficial, and that is what makes an explicit per-frame selector necessary rather than a convenience. Two failure modes call for two responses. When the channel cannot carry a feature message, requesting one spends the collaborator's transmission budget for nothing and collapses the output to the ego-only floor (the ego vehicle's own pre-fusion detection); the design answer is already in place -- the oracle removes any action whose frame-level failure probability is $\ge 0.999$ from its feasible set (the same $0.999$ constant as the \S\ref{sec:method} mask), and on failure the pipeline reverts to the ego-only output rather than a phantom feature. When the channel \emph{can} carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output falls below even the always-object-level (Fixed-$L$) baseline.\footnote{Test Easy stratum (top tercile of the ego's own object-level F1, the \S\ref{sec:difficulty} stratification), evaluated under a deterministic reliable-channel condition (AWGN $16$~dB; frame-level BLER ${\approx}0$, well above the $8.0$~dB onset), isolating the difficulty axis from channel variability: the frozen selector's realised F1 at $B_{\max}=0.20$ is $0.9749$ vs the Fixed-$L$ baseline $0.9796$ -- a gain of $-0.0047$ (frame-level paired $95\%$ CI $[-0.0074,-0.0024]$; $n=713$ frames). The selector requests $F$ on $241$ of these $713$ frames; on the remaining $472$, where it requests $L$, its output is frame-identical to Fixed-$L$, so the paired difference arises entirely on the $F$-request frames -- the loss is a structural consequence of requesting features on already-easy frames.} This mode has no masking answer; its remedy is left to future work. Two CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the object-level fused output on 1.5 / 5.8 / 0.2\% of validation / test / Culver-City frames, and -- from the same per-frame $(\mathrm{comp}-\mathrm{ego})$ identity, re-derived on the corrected single-collaborator caches -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.3 / 6.5 / 0.9\% of frames. Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean $15.2$ ground-truth objects on test vs $27.8$ on validate and $41.0$ on Culver-City). No new signalling is needed to act on this: $E$ (ego-only, issue no request) is already a deployed action of $\mathcal{S}$ with its own codepoint, so the remedy is a selection-policy question---the frozen selectors almost never choose it (Section~\ref{sec:pareto})---not a message-format one.
+
+
+
+\subsection{Comparison with Where2comm}\label{sec:where2comm}
+
+To place \method{} beside the most prominent spatial-selection cooperative
+perception method, we report a \emph{reference-only} comparison against
+Where2comm~\cite{hu2022where2comm} on the same OPV2V validate split
+($1{,}980$ frames). Three caveats bound what it can support, and they are
+stated rather than buried: the numbers come from our own $50$-epoch
+reproduction, not the authors' released model; they are measured under a
+\emph{perfect} channel, so no part of this paper's transport model applies to
+them; and they were scored by the retired global-sort scorer, which is a
+different track from the frozen AP chain that produces every headline number
+here. Our reproduction reaches AP@$0.5 = 0.871$ under a perfect channel, and we
+deliberately draw \textbf{no ranking} from it. It is not comparable to any
+number in this paper, on three independent axes at once: a different scorer
+(the retired global-sort track, not the frozen AP chain), a perfect channel
+rather than the modelled transport, and---decisively---a different
+collaborator convention, since the reproduction fuses every collaborator
+while the corrected main experiment pays for one. The direction of such a
+comparison is not even stable: under the corrected accounting the validate
+Fixed-$L$ reference is $0.7819$, \emph{below} $0.871$, which reverses the
+ordering an earlier version of this section reported. Numbers measured under
+three different conventions cannot be ordered, and we do not order them.
+
+The comparison is also \emph{orthogonal} to \method{}:
+Where2comm is a spatial-mask method that decides \emph{which feature
+regions} to send \emph{within} a fixed feature-level granularity, whereas
+\method{} decides \emph{whether} to send feature-level information at all
+and at \emph{what} granularity, given the channel. The two compose:
+Where2comm can be deployed inside the $C_q$ branches of \method{} as an
+alternative feature codec, while the granularity selector decides when
+feature-level communication is worth its payload and channel risk. Under
+a bandwidth-constrained, time-varying link, even a feature-level message
+is realised only when the channel can deliver it---precisely the regime
+\method{} arbitrates.
+
+
+
+\subsection{Collaborator Scale}\label{sec:collab_scale}
+
+The evaluation so far treats the collaborator set as given. To ask how the policy behaves as more
+vehicles are reachable, we sweep the number of requested collaborators $N\in\{1,2,3\}$, keeping the
+frozen selector, $\lambda^\star$ and $\tau^\star$ untouched.
+
+$N$ is not the operative quantity: what matters is the \emph{effective} count $k_{\mathrm{eff}}$, since requesting three cannot conjure a third. Of the $1{,}980$ validate frames, $733$ are saturated at $N=1$, $1{,}081$ at $N=2$ and $1{,}234$ at $N=3$; on Culver-City the supply runs out, so $N=2$ and $N=3$ are the \emph{same} arm. Comparisons are conditioned on the same frames.
+
+F1 then rises with $k_{\mathrm{eff}}$ with sharply diminishing returns. At $B_{\max}=0.20$ on validate, $N=1\!\to\!2$ buys $+0.0300$ F1 for $+0.1183$~Msym and the third adds $+0.0061$ for $+0.0991$~Msym---a fifth of the gain for three-quarters of the channel; on test the pattern is flatter ($+0.0096$ then $+0.0008$). The payload sub-linearity is a supply effect: the action distribution is unchanged across $N$, so the extra channel use comes only from frames that gained a collaborator.
+
+Because ``request $N$'' is ambiguous when fewer than $N$ collaborators exist, we bracket the two
+delivery semantics---charging only for what is delivered, versus charging for what was requested---on
+validate at $N=2$, on the $964$ frames where the two differ. The bracket is tight: charging for
+what is delivered rather than for what was requested raises realised F1 by $+0.00016$, $+0.00036$
+and $+0.00099$ across the three budgets, at identical payload---the request is what is charged under
+both---so the conclusions here do not depend on which convention is adopted. Finally, the budget does \emph{not} transfer automatically. The selector is frozen against an average per-frame budget measured with a single collaborator; total communication grows with the number of collaborators actually served, so the original budget guarantee does not carry over unchanged. This is measurable rather than hypothetical: on validate at $B_{\max}=0.20$, $N=3$ spends $0.36842$~Msym per frame, well above the $0.20$ it was frozen to satisfy --- and under the corrected single-collaborator accounting even $N=2$ (at $0.26937$) already breaches it. A deployment that serves more collaborators must therefore re-freeze, or budget on $k_{\mathrm{eff}}$ rather than per collaborator.
+
+
+
+\subsection{Deployment Robustness and Cost}\label{sec:robustness}
+
+Three practical imperfections---a noisy SNR estimate, channel-state aging, and a stale request---degrade the selector only gracefully, because an uncertain channel state falls back to $L$ (Table~\ref{tab:robustness}): SNR-estimation noise up to $\sigma\approx1$~dB costs $\le0.0002$ F1; a Jakes model at $60$~km/h decorrelates the estimate within ${\sim}10$~ms, costing $-0.0025$ before plateauing; a one-frame-stale decision costs at most $-0.0109$ under our i.i.d.-per-frame assumption (changing $18.2\%$ of decisions). The near-immunity to estimation noise follows from the channel-type-anchored policy of Section~\ref{sec:feat_imp}: perturbing continuous $\hat\gamma_t$ rarely flips a decision anchored on the discrete channel-type flag, and under Rayleigh the action remains $L$ regardless. Finally, the deployed
+Random Forest runs in $52.1\pm5.6$~ms per frame ($\mathrm{P95}=58.3$~ms) on a single CPU
+core, i.e.\ the selector's own inference occupies about half of the $100$~ms frame interval of a
+$10$~Hz LiDAR cycle; we measure the selector only and make no claim about the end-to-end
+perception--transmission chain. The
+figure is the slowest of the three frozen selectors over $1{,}000$ batch-1 trials each; the
+deployment claim must hold for every budget, so the worst case is the one quoted.
+
+A fourth imperfection concerns the \emph{cheap} message rather than the expensive one. The
+utilities above model the object-level link as reliable ($\mathrm{BLER}_L=0$), which is an assumption
+about the low-rate path, not a measurement. Re-weighting the object-level utility analytically as
+$\mathrm{eff}_L'=\mathrm{late}\,(1-\mathrm{BLER}_L)+\mathrm{ego}\,\mathrm{BLER}_L$ over
+$\mathrm{BLER}_L\in\{0.01,0.05,0.10\}$, with every policy frozen and blind to it, leaves the payload
+--- and therefore the payload advantage --- untouched by construction, and costs F1 roughly linearly:
+on test at $B_{\max}=0.20$, $\mathrm{BLER}_L=0.10$ costs the selector $0.00634$ F1, the threshold rule
+$0.00588$ and Fixed $L$ $0.00734$
+(\texttt{results/sensitivity/r23\_object\_message\_bler.csv}). The selector's margin over Fixed $L$
+therefore \emph{widens} as the cheap link degrades, while its gap to the threshold rule widens
+against it, from $-0.00010$ to $-0.00056$ --- the threshold rule leans harder on the feature action
+($\rho_F=0.20$ against $0.12$) and is correspondingly less exposed to an unreliable $L$. We report
+this rather than the favourable half alone; it remains inside the pre-registered margin of $0.005$ at
+every $\mathrm{BLER}_L$ evaluated.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Deployment robustness (OPV2V test; realised frame F1). Each row perturbs one
+imperfection while holding the others ideal; losses are bounded because an uncertain channel
+state defaults to the robust $L$ message. Re-derived under the single-collaborator convention with
+the frozen selectors at $B_{\max}=0.20$ (\texttt{results/sensitivity/robustness\_frozen.csv}); the
+CSI-noise and Jakes models are the ones used previously, so only the selector, grid and utilities
+changed.}
+\label{tab:robustness}
+\begin{tabular}{lll}
+\toprule
+Imperfection & Operating point & $\Delta$F1 \\
+\midrule
+\multirow{3}{*}{SNR-estimation noise $\sigma$}
+   & $\le 1$~dB              & $-0.0002$ \\
+   & $2$~dB                  & $-0.0006$ \\
+   & $5$~dB                  & $-0.0021$ \\
+\midrule
+CSI aging (Jakes, $60$~km/h) & stale by ${\sim}10$~ms & $-0.0025$ (then plateaus) \\
+\midrule
+Request delay & $1$-frame-stale decision & $-0.0109$ (pessimistic i.i.d.\ bound) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

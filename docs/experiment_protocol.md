@@ -4432,3 +4432,65 @@ above returned about 0.15 page per thousand characters rewritten. Closing the ga
 
 None of these is mine to take: each removes a section from the submitted paper rather than removing
 redundancy from it.
+
+---
+
+## Change-log R33 (2026-08-18) — four more subsections to the supplementary; 21 → 20 pages
+
+**Zero GPU.** Relocation, one table deletion, one merge, prose compression. No claim, number or
+locked wording changed; every moved subsection is reproduced verbatim in `paper/supplementary.tex`,
+and each leaves a 2–4 sentence summary in the main text carrying its headline numbers.
+
+### 1 · What moved and what stayed behind
+
+`§VI-H` (collaboration harm), `§VI-I` (collaborator scale), the deployment-robustness subsection and
+its table, and the Where2comm reference subsection are now in the supplementary document (**4 pages,
+compiles standalone, zero errors**). The main text keeps, in a new `sec:boundaries`:
+
+* harm — `1.5 / 5.8 / 0.2%` ego-above-fused and `1.3 / 6.5 / 0.9%` delivered-feature-below-ego, plus
+  both responses (the `0.999` feasibility mask, and `E` already being a deployed codepoint so the
+  remainder is a policy question);
+* collaborator scale — `+0.0300` F1 for `+0.1183` Msym at the second collaborator, `+0.0061` for
+  `+0.0991` at the third, and the budget not transferring (`0.36842` at `N=3`, already breached at
+  `N=2` with `0.26937`);
+* robustness — the three perturbation directions and magnitudes (`≤0.0002`, `−0.0025`, `−0.0109`)
+  and the `52.1 ± 5.6` ms / `P95 = 58.3` ms latency inside the `100` ms frame interval;
+* Where2comm — one reference-only pointer, with the three reasons it is not ranked.
+
+`tab:true_e2e` (validate per-SNR) is deleted, pointing at `true_e2e_ap_by_snr.csv`, and the three
+sensitivity analyses are merged into one paragraph plus `tab:sensitivity`. §III-G's rate-distortion
+passage is compressed to three sentences with the derivation untouched. The fallback rule was
+applied: the two largest figures are at `0.75\linewidth` / `0.75\textwidth`.
+
+### 2 · Gate coverage followed the content, in three places
+
+* **The paragraph-insertion gate** now reads main *plus* supplementary: paragraph 2 of that gate
+  **is** the collaboration-harm paragraph, which moved. The move also created an anchor collision —
+  the main-text summary opened with the same sentence the gate anchors on, so the extractor grabbed
+  the summary and ran to the end of the moved copy. The summary was reworded ("Cooperation can
+  hurt"), which is my own connective prose, not a locked claim.
+* **The registry gate** already read both files after R32.
+* **The literal gate gained a category rather than debt.** The summaries quote `1.5 / 5.8 / 0.2%`,
+  which sit below `distinctive()`'s floor and so were never *checked*, though their row names the
+  CSV that carries them. `bound_in_own_csv()` verifies exactly those against the file the row names,
+  reading `docs/claims.md` **directly** — because `claims_by_section` and the ledger builder disagree
+  on some sentence ids (the R26-3 finding), and a check resting on that agreement covers nothing
+  silently. The debt register fell from **10 to 4**, all floor effects.
+
+### 3 · Two self-inflicted breakages, both caught by the compile gate
+
+A regex that re-pointed table references produced `\texttt{true\_e2e\_ap\_by\_snr.csv}.csv}` (too
+many `}`), and the same substitution swallowed a sentence's verb elsewhere. Both were repaired in the
+pass; the build is the only thing that would have caught either.
+
+### 4 · Result
+
+| | main | supplementary | errors | overfull |
+|---|---|---|---|---|
+| R32 end | 21 | 3 | 0 | 4 |
+| **R33 end** | **20** | **4** | **0** | **4** |
+
+Sixteen gates pass; the compile gate still fails on page count alone (20 > 17). The four items of
+R33-1 and the two of R33-2 are all done, and the fallback of R33-3 is applied. What remains is
+listed at the end of R32: on this template the main file still holds ~18 pages of text, and no
+further redundancy is left to remove — the next page has to come from a section, not from wording.
