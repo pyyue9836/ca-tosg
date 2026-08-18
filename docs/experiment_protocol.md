@@ -4595,3 +4595,49 @@ that needs no root. The supplementary carries, verbatim and by relocation only, 
 prior-protocol appendices, the 21-cue definition table, six results subsections and two tables; the
 main text carries a 2–4 sentence summary of each, and every number the abstract or the Conclusion
 quotes is in the main text. Nothing was deleted to reach the page limit.
+
+---
+
+## Change-log R36 (2026-08-18) — the figures come back; 18 pages, one over
+
+**Zero GPU.** Every figure is remounted from a file the existing generators already produced; no new
+data, no new run. Claims and numbers unchanged.
+
+### 1 · Twelve images across seven floats, back in the main text
+
+Restored from the pre-R31 source and remounted: the qualitative BEV frame, the payload-versus-SNR
+panel, the difficulty bars, the feature-importance bars, the two decision-ratio panels and the
+stacked-area view, alongside the four that never left (overview, BLER, the two AP-SNR panels, and the
+Pareto plane). Grouping follows R36-2: **AP-SNR + payload** in one two-column float,
+**decision ratios + stacked area** in another, **difficulty + feature importance** in a third, each
+panel at `0.32`--`0.48` of the width; **overview and Pareto stay whole**.
+
+### 2 · Compensation, and where it stopped
+
+`tab:sensitivity` and the generalisation summary table moved to the supplementary
+(`tab:ablation` went there in R35), each leaving its conclusion sentence in the main text with the
+numbers intact; `tab:headline`, `tab:headline_agg`, `tab:notation` and `tab:feat_imp` stay. Three
+prose passages that the remounted captions now duplicate were trimmed to the caption
+(payload-versus-SNR, the difficulty stratification, the importance split) — the numbers are printed
+once, in the caption.
+
+**Result: 18 pages** (from 17 before the figures returned; the figures cost ~2 pages and the tables
+gave back ~1). Per R36-4 this stops here, and **no figure was touched after the count came in**.
+
+### 3 · A gate had to learn what a caption is
+
+Restoring the captions produced five literals the literal gate could not cover: a caption is not a
+sentence the claims ledger indexes, so those numbers had no claim row to ride. They are not unbound,
+though — `plot_frozen_figs.py` writes every value its figures draw into
+`results/provenance/PROVENANCE_figures.json`, a generator-written product. The gate gained a
+`figure_caption_literals()` category that accepts a caption number verified in that record, and the
+debt register stays **empty**. Sixteen gates pass; the compile gate fails on page count alone.
+
+### 4 · Residual candidates, tables versus text
+
+* `tab:headline_agg` to the supplementary, keeping its two-sentence reading — ≈ 0.45 page;
+* `tab:notation` to the supplementary — ≈ 0.3 page;
+* `sec:true_e2e`'s verification prose compressed to its two result sentences — ≈ 0.4 page;
+* the `sec:candidates` message-candidate discussion compressed ~30% — ≈ 0.35 page.
+
+Any one of the first three clears 17 pages; none touches a figure.

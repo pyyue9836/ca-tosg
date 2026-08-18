@@ -436,6 +436,65 @@ Fixed $L$                            & -- & 0.89095 & 0.02400 \\
 \end{table}
 
 
+
+\section{Tables moved from the main paper}\label{sec:moved_tables}
+The two tables the main paper points to; its prose carries their conclusions and numbers.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Pre-registered sensitivity analyses (test at $B_{\max}=0.20$ unless stated). Products:
+\texttt{r23\_scene\_bootstrap.csv}, \texttt{r23\_object\_message\_bler.csv},
+\texttt{r23\_fragmentation\_harq.csv}, \texttt{r25\_fragmentation\_replay.csv}.}
+\label{tab:sensitivity}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Check & Quantity & Result \\
+\midrule
+Scene-level bootstrap & $\Delta$F1 95\% CI & $[-0.001508,+0.001522]$ ($18.938\times$ wider) \\
+                      & $\Delta$B 95\% CI  & $[-0.119307,-0.029856]$ ($45.177\times$) \\
+$\mathrm{BLER}_L=0.10$ & F1 cost, selector  & $-0.00634$ (threshold $-0.00588$, Fixed $L$ $-0.00734$) \\
+                       & payload            & unchanged by construction \\
+Fragmentation + HARQ & AWGN $8$~dB BLER     & $0.402400 \to 0.100363$ ($k{=}2$), $0.057077$ ($k{=}4$) \\
+                     & payload factor       & $1.226954\times$, $1.120770\times$ \\
+                     & Rayleigh $0$--$20$~dB & frame BLER $1.0$ for every $k$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\begin{table*}[t]
+\centering
+\caption{Generalisation of the \emph{validate-trained} frozen selectors (no retraining) to the OPV2V test ($T=2{,}170$ frames, scene-disjoint) and Culver-City ($T=550$ frames, real-road-layout domain shift) splits. Every row is the mean over the same $200$ paired CSI samplings of the frozen replay (SNR $\sim\mathcal{U}[0,20]$~dB, $50/50$ AWGN/Rayleigh); each frozen selector is paired with the SNR-threshold rule tuned to the same budget. Share is channel use as a fraction of Fixed $F$ ($0.990$~Msym).}
+\label{tab:gen_headline}
+\begin{tabular}{lccc}
+\toprule
+Policy & Mean F1 & Channel use (Msym) & Share of Fixed $F$ \\
+\midrule
+\multicolumn{4}{l}{\emph{OPV2V test} ($T=2{,}170$)} \\
+Fixed $L$                       & 0.8910 & 0.024 & $2.4\%$ \\
+Fixed $F$ (LDPC + 16-QAM)       & 0.8483 & 0.990 & $100.0\%$ \\
+Fixed $C_{256}$ (LDPC + 256-QAM)& 0.8255 & 0.495 & $50.0\%$ \\
+\quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.89148 / 0.89247 & 0.0368 / 0.0724 & $3.7\%$ / $7.3\%$ \\
+\quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.89691 / 0.89701 & 0.1414 / 0.2168 & $14.3\%$ / $21.9\%$ \\
+\quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.89783 / 0.89900 & 0.2120 / 0.3125 & $21.4\%$ / $31.6\%$ \\
+Channel-aware oracle (masked)   & 0.9056 & 0.175 & $17.7\%$ \\
+\midrule
+\multicolumn{4}{l}{\emph{OPV2V Culver-City} ($T=550$)} \\
+Fixed $L$                       & 0.8466 & 0.024 & $2.4\%$ \\
+Fixed $F$ (LDPC + 16-QAM)       & 0.8099 & 0.990 & $100.0\%$ \\
+Fixed $C_{256}$ (LDPC + 256-QAM)& 0.7793 & 0.495 & $50.0\%$ \\
+\quad \method{} $B_{\max}{=}0.10$ / $\tau^\star$ & 0.87230 / 0.87491 & 0.0283 / 0.0718 & $2.9\%$ / $7.2\%$ \\
+\quad \method{} $B_{\max}{=}0.20$ / $\tau^\star$ & 0.87355 / 0.88340 & 0.0423 / 0.2174 & $4.3\%$ / $22.0\%$ \\
+\quad \method{} $B_{\max}{=}0.30$ / $\tau^\star$ & 0.88286 / 0.88740 & 0.1601 / 0.3146 & $16.2\%$ / $31.8\%$ \\
+Channel-aware oracle (masked)   & 0.8643 & 0.266 & $26.8\%$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 

@@ -95,6 +95,29 @@ def bound_in_own_csv():
     return out
 
 
+def figure_caption_literals():
+    """Numbers a figure caption prints, verified in the figure generator's own provenance record.
+
+    R36 remounted ten figures. A caption is not a sentence the claims ledger indexes, so its numbers
+    had no claim row to ride -- but they are not unbound: `plot_frozen_figs.py` writes every value
+    its figures draw into `results/provenance/PROVENANCE_figures.json`, which is a generator-written
+    data product. A caption literal is accepted when that record carries it.
+    """
+    import re as _re
+    prov = 'results/provenance/PROVENANCE_figures.json'
+    corpus = results_corpus()
+    if prov not in corpus:
+        return set()
+    vals = corpus[prov]
+    tex = open(os.path.join(ROOT, TARGETS[0]), encoding='utf-8').read()
+    out = set()
+    for cap in _re.findall(r'\\caption\{(.*?)\}\s*(?:\\label|\\end\{figure)', tex, _re.S):
+        for lit in _re.findall(r'(?<![\d.])(\d+\.\d+)(?![\d])', cap):
+            if carries_any_unit(vals, lit) or carries_any_unit([-v for v in vals], lit):
+                out.add(lit)
+    return out
+
+
 def registered_debt():
     """{(file, literal)} already recorded as uncovered in the debt register.
 
@@ -235,7 +258,7 @@ def generated_intact():
 
 def main():
     verified = verified_literals()
-    wl, derived = whitelist(), registered_derived() | declared_derived() | bound_in_own_csv()
+    wl, derived = whitelist(), registered_derived() | declared_derived() | bound_in_own_csv() | figure_caption_literals()
     if '--self-test' in sys.argv:
         # the control that matters: every value this batch retired must be UNCOVERED, and the
         # primary cell's own F1 must be covered.
