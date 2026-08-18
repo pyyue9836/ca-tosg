@@ -6,10 +6,10 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| ANALYTIC | 50 |
 | FROZEN | 50 |
+| ANALYTIC | 48 |
 
-Total: **100** claims across **28** (sub)sections.
+Total: **98** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -173,8 +173,7 @@ _None._
 | `c504c4a` | FROZEN | 1, 0.89148, 0.89691, 0.89783, 0.0368, 0.1414, 0.2120, 18, 12 | The three frozen selectors sit at F1 0.89148, 0.89691 and 0.89783 for 0.0368, 0.1414 and 0.2120 Msym, each against the threshold t… |
 | `c12a4a5` | FROZEN | 0.10, -0.00099, 95, -0.00105, -0.00093 | At B_=0.10 the selector is marginally below a threshold tuned for the same target budget, by -0.00099 (95\% CI [-0.00105,-0.00093]… |
 | `c9458eb` | FROZEN | 0.20, 0.30, 1, 0.89701, 0.89900, 0.89691, 0.89783, 1.53, 1.4 | At 0.20 and 0.30 the nominal threshold attains the higher F1---0.89701 and 0.89900 against 0.89691 and 0.89783---at 1.53 × and 1.4… |
-| `cfc0f56` | FROZEN | 0.20 | What survives is the pre-registered claim on the single confirmatory comparison (test, B_=0.20): |
-| `cbbbe49` | ANALYTIC | 1, 0.0001, 95, -0.00002, 0.005, 34.8, 0.2168, 0.20, 26.6 | F1 lower by ≈ 0.0001 (95\% CI upper bound -0.00002) yet far inside the 0.005 margin, at 34.8\% lower payload against a threshold i… |
+| `cefbf4e` | FROZEN | 0.20, 0.005 | What survives is the pre-registered claim on the single confirmatory comparison (test, B_=0.20): non-inferiority within the 0.005 … |
 
 ### Results and Analysis → Detection Performance versus SNR
 
@@ -212,14 +211,13 @@ _None._
 | `c394a3e` | FROZEN | 1, 0.89247, 0.89701, 0.89900, 0.89148, 0.89691, 0.89783, 1.9 | Under cliff transport a retuned SNR threshold captures most of the attainable F1, and the selector's edge is not on F1: on test th… |
 | `c1698d1` | FROZEN | 13, 0.1927, +0.00067, 0.20, -0.00174, -0.00118, 0.10, 0.30 | Against the budget-matched _feasible (=13, 0.1927 Msym) the ordering reverses at one budget only: ahead by +0.00067 at 0.20, behin… |
 | `c1da6dc` | FROZEN | 0.005, 1, 0.0001, 95, -0.00002, 34.8, 0.2168, 0.20, 26.6, 0. | What is pre-registered and survives is non-inferiority within the 0.005 margin (F1 lower by ≈ 0.0001, 95\% CI upper bound -0.00002… |
-| `cf186a6` | FROZEN | 0, 0.30, 0.89529, 0.89783, 1.36 | Neither half of the input suffices alone, and the shape of the failure is informative: given only the channel state the selector s… |
+| `cb6f83c` | FROZEN | 0, 0.30 | Neither half of the input suffices alone, and the shape of the failure is informative: given only the channel state the selector s… |
 
 ### Results and Analysis → Hand-Rule Baselines and Their Communication Cost [sec:handrule]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c04eefc` | FROZEN | 0.10, 0.20, 0.30, 0.29853, 0.29883 | At the two tighter budgets it cannot bid at all: the walk selects never-E and never-F at B_=0.10 and 0.20, degenerating to Fixed L… |
-| `c72365e` | ANALYTIC | 0.10, 0.20 | This is the four-rung ladder of Section [ref]: gating on the channel alone reaches only four mean payloads, and 0.10 and 0.20 fall… |
 | `c64df4f` | ANALYTIC | 0.89697, 0.89691, +0.00005, 95, -0.00002, +0.00012 | 0.89697 against 0.89691, paired difference +0.00005 (95\% CI [-0.00002,+0.00012]). |
 | `c6f930a` | ANALYTIC | 0.19900, 0.14141, +0.05760, 95, +0.05663, +0.05853, 40.7, +0 | The difference lies on the other axis: the hand rule spends 0.19900 Msym against 0.14141, a paired difference of +0.05760 (95\% CI… |
 | `cbcbe32` | ANALYTIC | 0.05022, 0.03660, 0.03038, 0.03042 | The mechanism is selectivity per transmitted frame: over the cells each policy sends F on, the mean feature-over-object gain is 0.… |

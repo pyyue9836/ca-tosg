@@ -4984,3 +4984,67 @@ dropping a figure, which R36-4 forbids without a ruling.
 Sixteen gates pass, twice; `p6_cross_section_scan` 0 conflicts; `p6_numbers_vs_csv` 0 MISS, 0
 UNLOCATED over both documents. Main **15 pages, 1 overfull (17.6pt)**; supplementary 9 pages, 7
 overfull. Abstract **246 rendered words**.
+
+## R43 — single-statement de-duplication, second geometry pass, generator gate (15 pages, 14 not reached)
+
+Zero GPU.
+
+### 1 · The payload ladder is stated once
+
+Full mechanism stays in `sec:ablation`, where the collapse family lives. `sec:handrule`'s restatement
+("This is the four-rung ladder ... $0.10$ and $0.20$ fall between rungs") becomes a pointer: "The same
+payload-ladder mechanism (Section~\ref{sec:ablation}) explains why the two-scalar rule cannot price
+intermediate budgets." The claim keeps one full home and one pointer; it never drops to zero.
+
+### 2 · `sec:threshold`'s closing italic summary deleted
+
+It restated the abstract almost sentence for sentence (`\method{} does not win by raising average
+F1 ...`). The subsection now ends on its last factual sentence, that channel-side importance is not
+channel-side sufficiency. The direction-gate probe `a three-scalar hand rule reach comparable F1`
+survives because its first occurrence — the one `tex.find` resolves — is in the abstract.
+
+### 3 · Second geometry pass (figure count still 10)
+
+`fig_qualitative_bev` `0.9` -> `0.78\textwidth`, `fig_pareto_test` `0.85` -> `0.80\linewidth`, and the
+six subfigure panels `0.32` -> `0.31\textwidth`. NOTE: the batch specified "qualitative BEV
+0.75->0.65"; the figure was at `0.9\textwidth` (a `figure*`), not 0.75, so the same ratio (x0.867)
+was applied to its actual width. **15 -> 15 pages**; the pass bought vertical slack, not a page.
+
+### 4 · New gate: `generators --check` (17 gates)
+
+`tests/test_generators_check.py` runs every generator that owns delivered text in `--check` mode.
+`build_paper_tables.py --check` used to print two table bodies and return BEFORE any `splice()` or
+`sub_once()` ran, so the one fault those helpers exist to catch — a pattern that no longer matches the
+delivered text — was invisible until the generator was next run for real. That is exactly how R41's
+compression of observation (iii) went unnoticed for a batch (found in R42). The generator is now
+factored into `transform()` (in-memory, both documents plus `DERIVED_TABLE_CELLS.json`), and `--check`
+fails if any pattern misses or if the delivered artefact differs from the generated one. Registered:
+`build_paper_tables`, `build_r9_claims`, `build_readme_tables`, `claims_ledger`. The self-test injects
+the R41 fault into `main.tex`, requires the gate to fire, and restores the file byte-for-byte in
+`finally`.
+
+### 5 · Limited de-duplication round (after 1–3 still 15 pages)
+
+Only pairs where the same claim was stated twice in full were touched, each keeping one full statement
+plus a pointer:
+
+* the R9 confirmatory claim — full statement kept in `sec:threshold` (with intervals and both payload
+  tracks), `sec:headline` reduced to the verdict plus a pointer;
+* the channel-only collapse at $B_{\max}=0.30$ — full statement kept in `sec:ablation`,
+  `sec:threshold`'s restatement of `0.89529`/`0.89783`/`1.36x` reduced to "beaten on both axes
+  (Section~\ref{sec:ablation})".
+
+Saving: 100 characters. **Still 15 pages.**
+
+### 6 · Page count: 15, 14 not reached — the remaining lever is the figure floor
+
+Body text now ends early on page 15; the rest of that page is the bibliography (695 extracted words on
+the page, of which the reference list is the bulk). Reaching 14 needs roughly a full page of content
+out, and after R42's citation audit and this batch's de-duplication the only remaining lever is the
+figure count, which R36-4 reserves for Josh. Not taken.
+
+### 7 · State
+
+Seventeen gates pass, twice; `p6_cross_section_scan` 0 conflicts; `p6_numbers_vs_csv` 0 MISS, 150 table
+cells located over both documents, 0 UNLOCATED. Main **15 pages, 1 overfull (17.6pt)**; supplementary
+9 pages, 7 overfull. Abstract **246 rendered words**.

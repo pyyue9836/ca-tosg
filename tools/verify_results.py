@@ -54,6 +54,9 @@ GATES = [
     ('artifacts', 'comparison direction', [PY, 'tests/test_comparison_direction.py']),
     ('artifacts', 'R9 locked wording',    [PY, 'tools/build_r9_claims.py', '--check']),
     ('artifacts', 'paper compiles',       [PY, 'tests/test_compile.py']),
+    # R43-4: the generators run their own substitutions; a pattern that no longer matches the
+    # delivered text is a FAIL here instead of a silent no-op nobody sees until the next run.
+    ('content',   'generators --check',  [PY, 'tests/test_generators_check.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]
