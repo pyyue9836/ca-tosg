@@ -4736,3 +4736,50 @@ it is offered rather than taken, because R38 authorised exactly one prose cut an
 | **R38 end** | **18** | **10** | **0** | **1** |
 
 Sixteen gates pass; the compile gate fails on page count alone.
+
+---
+
+## Change-log R39 (2026-08-18) — 2.5k characters of redundancy out; 17 pages, all gates green
+
+**Zero GPU.** Wording only: no claim, number, locked sentence, figure or table changed.
+
+### 1 · Where the redundancy was
+
+**Introduction (~700 chars).** The channel paragraph restated the bandwidth paragraph's point about
+feature messages needing a reliable link; the method paragraph and the complementarity paragraph
+carried connective verbosity. **Related work (~590 chars).** The JSCC paragraph and the
+"channel dependence matters for vehicular links" paragraph each restated what the paragraph before
+them had established. **§VI-A transitions (~680 chars).** The regime definition repeated the
+protocol that `sec:true_e2e` states, the "not designed to raise averaged AP" sentence listed three
+cross-references where one suffices, and the qualitative-frame sentence described a figure that is
+now mounted beside it — it points at the figure instead.
+
+**A last R31-1 leftover was found on the way**: the introduction still called the 256-QAM mode
+"excluded as *dominated*". Corrected to the comparator wording, which makes the fourth and final
+site of that family.
+
+### 2 · A gate learned that figures have more than one provenance record
+
+Restoring the qualitative figure surfaced two caption literals (`0.67`, `0.95`) that
+`figure_caption_literals()` could not see: it read `PROVENANCE_figures.json`, while the qualitative
+generator writes `PROVENANCE_qualitative.json`. Both records are now read. The debt register stays
+empty.
+
+### 3 · Result
+
+| | main | supplementary | errors | overfull |
+|---|---|---|---|---|
+| R38 end | 18 | 10 | 0 | 1 |
+| **R39 end** | **17** | **8** | **0** | **1** |
+
+**All seventeen gates pass, twice in a row on a clean tree**, including the compile gate: `0` LaTeX
+errors, **17 pages** at the 17-page limit, **1** overfull box (the `125.4` pt row of `tab:headline`,
+listed in `docs/compile_report.md`).
+
+### Final state of the batch series
+
+`paper/main.tex`: 17 pages, 12 images across 7 floats, 4 tables.
+`paper/supplementary.tex`: 8 pages, standalone, carrying by relocation only the two prior-protocol
+appendices, six results subsections, five tables and the full cue list. Every number the abstract or
+the Conclusion quotes is in the main text; nothing was deleted to meet the page limit; and the
+toolchain (tectonic in its own conda env) needs no root.

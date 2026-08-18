@@ -104,11 +104,14 @@ def figure_caption_literals():
     data product. A caption literal is accepted when that record carries it.
     """
     import re as _re
-    prov = 'results/provenance/PROVENANCE_figures.json'
+    # R39: each figure generator writes its own provenance record; the qualitative figure's values
+    # live in PROVENANCE_qualitative.json, the frozen curves' in PROVENANCE_figures.json.
+    provs = ('results/provenance/PROVENANCE_figures.json',
+             'results/provenance/PROVENANCE_qualitative.json')
     corpus = results_corpus()
-    if prov not in corpus:
+    vals = [v for p_ in provs if p_ in corpus for v in corpus[p_]]
+    if not vals:
         return set()
-    vals = corpus[prov]
     tex = open(os.path.join(ROOT, TARGETS[0]), encoding='utf-8').read()
     out = set()
     for cap in _re.findall(r'\\caption\{(.*?)\}\s*(?:\\label|\\end\{figure)', tex, _re.S):
