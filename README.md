@@ -86,13 +86,14 @@ Shortest path from raw OPV2V to the table above: `docs/getting_started.md`.
 ## Model Zoo
 
 Three frozen selectors, one per budget. sha256, hyper-parameters and the full freeze record:
-`docs/model_zoo.md`.
+`docs/model_zoo.md`. The table below is written by `tools/build_readme_tables.py` from
+`results/manifests/FROZEN_MANIFEST.json`; do not edit it by hand.
 
 | B_max (mean Msym/frame) | model | λ\* | τ\* | LOSO OOF F1 | frozen validate payload |
 |---|---|---|---|---|---|
-| 0.10 | `selector_B010` | 0.05 | 18.0 dB | 0.9070 | 0.0679 |
-| 0.20 | `selector_B020` | 0.02 | 12.0 dB | 0.9087 | 0.0992 |
-| 0.30 | `selector_B030` | 0.00 | 8.0 dB | 0.9094 | 0.1570 |
+| 0.10 | `selector_B010` | 0.05 | 18.0 dB | 0.8555 | 0.080803 |
+| 0.20 | `selector_B020` | 0.02 | 12.0 dB | 0.8606 | 0.150158 |
+| 0.30 | `selector_B030` | 0.00 | 8.0 dB | 0.8622 | 0.201607 |
 
 ## Reproduction
 

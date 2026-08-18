@@ -3883,3 +3883,76 @@ now restores the original bytes in a `finally` block, so it reports the state it
 working tree untouched; running it twice in a row is now identical. Fourth member of the family whose
 lesson is the same: **a check that changes what it is checking cannot report on it.**
 
+
+---
+
+## Change-log R24 (2026-08-18) — the hand-rule arm enters §V; the literal debt is paid down
+
+**Zero GPU.** Prose, one new generator, binding work. No new experiment and no new adjudication;
+the only new product is a selectivity column emitted from the existing R21 replay.
+
+### 1 · R21-A / R21-A-2 written into §V (`sec:handrule`)
+
+The new subsection states, in this order: the pre-registered two-scalar rule **cannot bid** at
+`B_max = 0.10` and `0.20` (never-E, never-F; it *is* Fixed L) and at `0.30` rediscovers the SNR
+threshold (`rho_F` 0.29853 vs 0.29883); the amendment to a three-scalar rule, **declared as an
+amendment and reported as three scalars**; **F1 parity at the primary cell** (0.89697 vs 0.89691,
+`+0.00005`, 95% CI `[-0.00002,+0.00012]`), stated plainly rather than around; and the payload gap
+that is the actual result (`+0.05760` Msym, 95% CI `[+0.05663,+0.05853]` — 40.7% more channel for
+that parity, or 28.9% less channel for the same F1).
+
+The **mechanism sentence** is new evidence, not prose: `gain_per_F_frame` is now emitted by the
+replay (mean `compressed_f1 - late_f1` over the cells each policy actually sends F on). On test at
+`B_max = 0.20` it is **0.05022** for the selector, **0.03660** for the hand rule and **0.03038** for
+the SNR threshold — the last indistinguishable from the **0.03042** unconditional mean, i.e. the
+threshold rule's feature frames are no better chosen than average. The selector buys more F1 per
+transmitted frame and needs fewer of them; that is the whole payload gap.
+
+**The "beats simple rules" family is now a fingerprint.** Three verb-anchored patterns block any
+claim of an F1 win over a hand / simple / threshold rule, while leaving the payload claim sayable.
+
+**E2's refutation is written into the E-collapse discussion**: a hand rule with an explicit `E` gate,
+searched over six cue orientations, selects `E` in **no** cell — on these cues `E` is structurally
+out of reach of a monotone threshold, and the frozen selector's small `rho_E` is more than any of
+them attains.
+
+### 2 · One mechanism, three collapses (`sec:ablation`)
+
+The four-rung payload ladder is stated once and referenced: the committed frame BLER is effectively
+binary in the channel state, so a policy whose feature decision depends on the channel **alone** can
+realise only `0.024 / ~0.27 / ~0.33 / 0.99` Msym, and the two tighter budgets fall between rungs.
+That single fact explains the channel-only ablation pinning to `B_L`, the two-scalar hand rule
+degenerating to Fixed L, and the nominal SNR threshold landing **over** budget at `B_max = 0.20`.
+
+### 3 · Literal debt: 101 -> 12 entries, and two findings inside it
+
+* **Sign normalisation** in the verified set (`+0.00005` in the ledger vs `0.00005` printed inside a
+  bracket) — 30 occurrences were never debt at all.
+* **`README.md` and `docs/model_zoo.md` cleared (58).** Echo documents now bind by the ledger's own
+  discipline: the source file must be **named in the document**, and the value must be in that named
+  file — not "somewhere under `results/`". While applying it, the README's **model-zoo table turned
+  out to be entirely pre-corrigendum** (0.9070/0.0679, 0.9087/0.0992, 0.9094/0.1570 against the
+  manifest's 0.8555/0.080803, 0.8606/0.150158, 0.8622/0.201607). Nothing had caught it: no claim row
+  covers the README and the fingerprint sweep only greps values already known to be retired. It is
+  now written by `tools/build_readme_tables.py` from `FROZEN_MANIFEST.json`.
+* **Provenance JSON is canonical again, provenance TXT is not.** The R23-9 exclusion was written for
+  narrative transcripts and had also excluded generator-written JSON records, which are the only
+  committed home of some figure-caption values. `DERIVED_TABLE_CELLS.json` stays excluded — that one
+  is the generator certifying its own output.
+* **Six structural entries**, each with a reason: `1.98`, `3.96`, `0.999`, `0.01`, plus **two
+  EXTERNAL REFERENCE values** (`0.775`, `0.682` — the OpenCOOD zoo's published AP for the SECOND
+  late-fusion checkpoint, recorded 2026-08-18; our reproductions are bound to
+  `P4B_VERIFICATION_late.json`).
+* **Two of the twelve survivors are findings, not floor effects, and are flagged as such:**
+  `0.0040` is bound to `robustness_frozen.csv`, **which does not contain it** — it escaped p6 because
+  p6's sentence walk and the ledger builder disagree on that sentence's id; and `0.0003`'s evidence
+  is `SCOMCP_FUSE_REPORT.md`, a narrative report, with the value absent from `scomcp.csv`. Both need
+  a re-derivation or a sentence downgrade. **Neither is silently retained.** The other ten are
+  below `distinctive()`'s precision floor (fewer than 3 decimals and 3 significant digits), so p6
+  never checks them; their claim rows are bound, their literals are not verified.
+
+### 4 · The R23 sentences, re-checked in place
+
+Confirmed by locating each verbatim: the scene-level pair beside the realisation-level one
+(`sec:headline`), both halves of the `BLER_L` result including the unfavourable one
+(`sec:robustness`), and the numerical HARQ qualifier (`sec:channel`). R23's report was accurate.

@@ -195,3 +195,11 @@ RX 0\.9011(?![0-9])
 RX Channel-aware oracle \(masked\)[^\n]{0,30}0\.(9165|8891)(?![0-9])
 RX Channel-aware oracle \(masked\)[^\n]{0,50}0\.(1706|2542)(?![0-9])
 
+# R24-1: the "beats simple rules" family. R21-A-2 established F1 PARITY at the primary cell
+# (0.89697 hand rule vs 0.89691 selector, CI [-0.00002,+0.00012]); the selector's advantage is on
+# PAYLOAD (28.9% less channel for the same F1). Any sentence claiming an F1 win over a hand /
+# simple / threshold rule is retired. Verb-anchored so the payload claim stays sayable.
+RX (beats|outperforms|better than|superior to)[^.\n]{0,60}(hand|simple|two-gate|two-parameter|heuristic) rule
+RX (hand|simple|two-gate|two-parameter|heuristic) rule[^.\n]{0,60}(is beaten|falls short|cannot match|worse F1)
+RX (F1|accuracy) (advantage|gain|win)[^.\n]{0,40}over[^.\n]{0,30}(threshold|hand|simple) rule
+

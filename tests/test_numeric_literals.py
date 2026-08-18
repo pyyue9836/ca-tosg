@@ -41,6 +41,7 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 
 import p6_numbers_vs_csv as p6                                       # noqa: E402
 from audit_claims_evidence import results_corpus                     # noqa: E402
+from p6_numbers_vs_csv import carries_any_unit                       # noqa: E402
 
 WHITELIST = os.path.join(ROOT, 'tests', 'structural_literals.md')
 REGISTER = os.path.join(ROOT, 'tests', 'uncovered_literals.md')   # the R23-15 debt register
@@ -107,11 +108,16 @@ def verified_literals():
     every located table cell, and every cell the generator declares derived. Misses are deliberately
     excluded -- a miss is the gate reporting that a number is not where it says it is.
     """
+    # signs are stripped on BOTH sides: the ledger stores a CI bound as `+0.00005` while the
+    # document prints `0.00005` inside a bracket, and a string comparison called six correctly
+    # verified literals unbound.
+    def bare(x):
+        return x.lstrip('+-')
     hits, _misses, derived, _skipped = p6.rows()
-    out = {h[2] for h in hits} | {d[2] for d in derived}
+    out = {bare(h[2]) for h in hits} | {bare(d[2]) for d in derived}
     found, _missing, derived_cells = p6.table_cells(results_corpus())
-    out |= {f[1].lstrip('-') for f in found}
-    out |= {c[1].lstrip('-') for c in derived_cells}
+    out |= {bare(f[1]) for f in found}
+    out |= {bare(c[1]) for c in derived_cells}
     out |= set(p6.STRUCTURAL)
     return out
 
@@ -122,17 +128,39 @@ def registered_derived():
     return set(re.findall(r'(\d+\.\d+)', open(p, encoding='utf-8').read()))
 
 
+def named_sources(text):
+    """The committed products a document names in its own body.
+
+    An echo document (README, model_zoo) carries no claim rows, so it cannot ride main.tex's
+    verified set. The equivalent discipline is the ledger's: the file must be NAMED, and the value
+    must be in that named file -- not "somewhere under results/", which is the rule this gate was
+    rewritten to avoid.
+    """
+    corpus = results_corpus()
+    out = {}
+    for rel in set(re.findall(r'[\w./-]+\.(?:csv|json)', text)):
+        for key in corpus:
+            if key.endswith(rel) or rel.endswith(os.path.basename(key)):
+                out[key] = corpus[key]
+    return out
+
+
 def scan(verified, wl, derived):
     bad = []
     for rel in TARGETS + ECHO_TARGETS:
         path = os.path.join(ROOT, rel)
         if not os.path.exists(path):
             continue
-        for i, line in enumerate(open(path, encoding='utf-8'), 1):
+        text = open(path, encoding='utf-8').read()
+        named = named_sources(text) if rel in ECHO_TARGETS else {}
+        for i, line in enumerate(text.split('\n'), 1):
             if SKIP_LINE.search(line):
                 continue
             for lit in LITERAL.findall(line):
                 if lit in wl or lit in derived or lit in verified:
+                    continue
+                if named and any(carries_any_unit(v, lit) or carries_any_unit([-x for x in v], lit)
+                                 for v in named.values()):
                     continue
                 bad.append((rel, i, lit, ' '.join(line.split())[:110]))
     return bad

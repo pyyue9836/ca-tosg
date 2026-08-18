@@ -102,8 +102,12 @@ def _declared_derived():
 # gate. Binding sources are now restricted to generator-written data products (.csv/.json), minus an
 # explicit deny-list of records that exist to quote superseded states.
 CANONICAL_EXT = ('.csv', '.json')
+# R24-3 narrowing: a PROVENANCE *.txt is a narrative transcript, but a generator-written
+# PROVENANCE_*.json is a data product and is the only committed home of some figure-caption values.
+# DERIVED_TABLE_CELLS.json stays excluded -- it is the table generator's own declaration of its own
+# output, and accepting it is the self-certification R23-9 removed.
 NON_CANONICAL = re.compile(r'(README|ANOMALY_REPORT|FUSE_REPORT|corrigendum|p0_corrigendum|'
-                           r'PROVENANCE|/logs/)', re.I)
+                           r'PROVENANCE[\w]*\.txt|DERIVED_TABLE_CELLS|/logs/)', re.I)
 
 
 def canonical_corpus(corpus):

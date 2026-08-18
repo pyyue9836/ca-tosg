@@ -134,11 +134,19 @@ def main(arm=None):
                 row[name + '_ucb95'] = round(hi, 5)
             summ.append(row)
 
+            # R24-1: selectivity -- what each policy buys per transmitted feature frame. This is
+            # the mechanism behind the payload gap, so it is emitted as a product rather than
+            # recomputed in prose: mean (compressed_f1 - late_f1) over the cells the policy sends F on.
+            gain = np.tile(comp - late, (D.N_REPLAY, 1))
             for k, idx in (('two_gate', tg_idx), ('RF', rf_idx), ('tau', ta_idx)):
+                sel = idx == 2
                 act_rows.append(dict(split=split, budget=bmax, policy=k, arm=arm,
                                      rho_E=round(float((idx == 0).mean()), 5),
                                      rho_L=round(float((idx == 1).mean()), 5),
-                                     rho_F=round(float((idx == 2).mean()), 5)))
+                                     rho_F=round(float(sel.mean()), 5),
+                                     gain_per_F_frame=(round(float(gain[sel].mean()), 5)
+                                                       if sel.any() else None),
+                                     gain_all_cells=round(float(gain.mean()), 5)))
             print(f'[{split} B{int(bmax*100):03d}] F1 2G={F["TG"].mean():.5f} RF={F["RF"].mean():.5f} '
                   f'tau={F["TA"].mean():.5f} | B 2G={B["TG"].mean():.5f} RF={B["RF"].mean():.5f} | '
                   f'dF(2G-RF)=[{row["2G_vs_RF_dF_lcb95"]:.5f},{row["2G_vs_RF_dF_ucb95"]:.5f}] '
