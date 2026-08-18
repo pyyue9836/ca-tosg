@@ -61,7 +61,7 @@ GATES = [
 
 # R20 9c: the fingerprint sweep covers the reader-facing docs too. It read main.tex only, so a
 # retired number could (and did) survive in README and docs/ with every gate green.
-FINGERPRINT_TARGETS = ('paper/main.tex', 'README.md', 'docs/model_zoo.md',
+FINGERPRINT_TARGETS = ('paper/main.tex', 'paper/supplementary.tex', 'README.md', 'docs/model_zoo.md',
                        'docs/milestone_summary.md')
 # NOT swept, by design: docs/p0_corrigendum.md and docs/canonical_quantities.md exist to record what
 # the retired values WERE (old-vs-new tables, "which side flipped"), so a retired number is correct

@@ -4364,3 +4364,71 @@ seven pages require a **scope decision**, which is not mine to take:
 Sensitivity-merge (C5's "three sensitivities into one paragraph + one table") is **not done**: it is
 a relocation of three bound passages worth ≈ 0.3 page, and it would need a rebinding round that the
 page target does not benefit from until the scope decision above is taken.
+
+---
+
+## Change-log R32 (2026-08-18) — the move to supplementary material, and 25 → 21 pages
+
+**Zero GPU.** Relocation and redundancy removal only: no claim, number or locked wording changed,
+and nothing moved out of the main file was deleted.
+
+### 1 · What moved, and where it went
+
+`paper/supplementary.tex` is new, standalone and compiles on its own (**3 pages**, tectonic, zero
+errors). It carries, verbatim:
+
+* **Appendix A** (JSCC cliff-versus-graceful, prior-protocol arm) and **Appendix B** (second
+  detection backbone) — both already labelled non-mainline in the main text;
+* **the full 21-cue definition table**. The main text keeps five representative cues
+  (ego object count, LiDAR point count, near-range density $0$--$20$~m, mean point range,
+  front-sector far count beyond $30$~m) and points to the supplementary list.
+
+All 16 main-text pointers into that material now read "the supplementary material"; no `\ref`
+dangles. The ledger rows for the moved sentences leave `docs/claims.md` with them, because that file
+is generated from `main.tex` — the **LEGACY** rows among them (the prior-protocol appendix) therefore
+now live in the supplementary domain, which is where the audit should look for them.
+
+**Coverage follows the content, in both directions:** `paper/supplementary.tex` is added to the
+fingerprint sweep (no retired value may reappear there), and `tests/test_canonical_quantities.py`
+now reads main *plus* supplementary — reading only `main.tex` made four correctly printed JSCC
+registry numbers report as missing the moment they moved.
+
+### 2 · What was cut from the main file
+
+Two per-SNR generalisation tables (`tab:gen_true_e2e`, `tab:gen_true_e2e_culver`), replaced by a
+pointer to `true_e2e_ap_by_snr.csv`, with the aggregate generalisation table kept; six figures whose
+content the tables and prose already carry (`fig:qualitative`, `fig:payload_snr`, `fig:two_regime`,
+`fig:decision_budgets`, `fig:difficulty`, `fig:feat_imp`), every number moved into the surrounding
+sentences; §VI-D and §VI-E merged into one subsection; the payload-versus-SNR subsection folded into
+§VI-B; the remaining figures reduced to $0.8\linewidth$ / $0.42\textwidth$; related work, the
+introduction, the headline, generalisation, collaborator-scale, hand-rule and robustness prose
+compressed by removing restatement — including one genuine duplicate, the per-split headroom triple
+that §VI-A stated twice in the same paragraph.
+
+**One self-inflicted error, caught by the compile gate.** A regex that ended a sentence at the first
+`.` cut inside `$B_{\max}=0.20$` and spliced two sentences together; the build failed with a missing
+`$`, which is exactly what the gate exists for. Repaired in the same pass.
+
+### 3 · Result: 21 pages, still above the 17-page target
+
+| | pages | LaTeX errors | overfull \hbox |
+|---|---|---|---|
+| R31 start | 25 | 0 | 9 |
+| R31 end | 24 | 0 | 6 |
+| **R32 end** | **21** | **0** | **4** |
+| supplementary | 3 | 0 | — |
+
+Sixteen gates pass; the compile gate fails on page count alone. The remaining four pages cannot come
+from redundancy: at ~6k characters per page the main file now holds ~19 pages of text, and the passes
+above returned about 0.15 page per thousand characters rewritten. Closing the gap needs another
+**scope decision**, and the honest options are:
+
+* move §VI-H (collaboration harm) and §VI-I (collaborator scale) to the supplementary — ≈ 1.2 pages;
+* move the deployment-robustness subsection and its table — ≈ 0.9 pages;
+* drop `tab:true_e2e` (validate per-SNR) as its held-out twins already went — ≈ 0.4 pages;
+* cut the three sensitivity passages to one paragraph with a combined table — ≈ 0.3 pages (the
+  merge item of R32-2, deliberately not done: it is the smallest of the four and the only one
+  requiring a rebinding round).
+
+None of these is mine to take: each removes a section from the submitted paper rather than removing
+redundancy from it.

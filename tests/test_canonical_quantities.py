@@ -31,7 +31,17 @@ REGISTRY = os.path.join(ROOT, 'docs', 'canonical_quantities.md')
 
 
 def tex():
-    return open(MAIN, encoding='utf-8').read()
+    """The delivered text: main.tex plus the supplementary document.
+
+    R32 moved the two prior-protocol appendices and the cue table into `paper/supplementary.tex`.
+    The registry's quantities did not move with them, so reading only `main.tex` made four correctly
+    printed JSCC numbers report as missing. Scope follows the content.
+    """
+    parts = [open(MAIN, encoding='utf-8').read()]
+    supp = os.path.join(os.path.dirname(MAIN), 'supplementary.tex')
+    if os.path.exists(supp):
+        parts.append(open(supp, encoding='utf-8').read())
+    return '\n'.join(parts)
 
 
 def printed(literal, text):
