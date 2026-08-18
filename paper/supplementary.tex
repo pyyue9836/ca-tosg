@@ -73,7 +73,7 @@ Category & Cue & Definition \\
 
 \noindent\emph{Protocol note.} A \textbf{prior-protocol arm}, \emph{not} re-evaluated under the frozen P2 protocol: its selector is trained and evaluated inside the codec-comparison pipeline, sharing the retired engine's BLER lookup and $200$-realisation CSI convention. Its numbers may not appear in the same sentence as a frozen-replay number, and no main-text claim rests on them.
 
-Under LDPC + QAM a one-line threshold tracks the learned selector (Section~\ref{sec:threshold}); does that equivalence survive a feature codec \emph{without} a sharp SNR cliff? We replace the feature branch with importance-map JSCC~\cite{sheng2024importance} and re-run the per-frame pipeline: per-frame JSCC F1 is re-cached at each SNR ($1{,}000$ frames per SNR, AWGN and Rayleigh), the $\{L,\text{Feature-JSCC}\}$ oracle relabelled and the selector retrained---no perception-backbone change.
+Under LDPC + QAM a one-line threshold tracks the learned selector (the main paper); does that equivalence survive a feature codec \emph{without} a sharp SNR cliff? We replace the feature branch with importance-map JSCC~\cite{sheng2024importance} and re-run the per-frame pipeline: per-frame JSCC F1 is re-cached at each SNR ($1{,}000$ frames per SNR, AWGN and Rayleigh), the $\{L,\text{Feature-JSCC}\}$ oracle relabelled and the selector retrained---no perception-backbone change.
 
 The mechanism is a codec property. The LDPC + QAM feature F1 cliffs over the $8$--$12$~dB decoding transition (onset $8.0$~dB), so SNR is highly informative; the learned JSCC feature F1 is \emph{essentially flat} at $\approx 0.89$ across $0$--$20$~dB, so the estimated SNR says almost nothing about whether a feature message will help on a given frame.
 
@@ -82,10 +82,10 @@ This flips the comparison (Table~\ref{tab:two_regime}). Both codecs are evaluate
 \emph{(a) In-distribution.} Under LDPC + QAM the AWGN edge over the best SNR threshold is only
 $+0.002$ F1 ($95\%$ CI $[+0.001,+0.003]$): small, and---as the feature ablation shows---not
 attributable to the perception cues alone
-(Section~\ref{sec:ablation}).\footnote{This in-distribution per-frame edge ($+0.002$) is
+(the main paper).\footnote{This in-distribution per-frame edge ($+0.002$) is
 distinct from two other LDPC-regime quantities: the feature-ablation gain of the cues (Full
-vs.\ channel-state-only, $+0.0090$, $95\%$ CI $[+0.0089,+0.0091]$, Section~\ref{sec:ablation}) and
-the matched-payload margin over the retuned threshold ($+0.0032$, Section~\ref{sec:headline}). The
+vs.\ channel-state-only, $+0.0090$, $95\%$ CI $[+0.0089,+0.0091]$, the main paper) and
+the matched-payload margin over the retuned threshold ($+0.0032$, the main paper). The
 three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively.
 Under the corrected single-collaborator convention all three are positive, with the ordering
 $+0.002 < +0.0032 < +0.0090$: the cue axis, smallest and indistinguishable from zero under the
@@ -118,7 +118,7 @@ $\tau$ tuned on the training folds only). \emph{Deployed edge}: selector trained
 frozen, applied cross-split (the headline protocol). In-distribution the JSCC edge is
 $9$--$11{\times}$ the LDPC-cliff edge---an SNR threshold cannot reach it---while under LDPC the
 margin is the selector's function form, not a cue gain (cues add no significant F1,
-Section~\ref{sec:ablation}). The deployed JSCC edge is negative: the validate-trained selector
+the main paper). The deployed JSCC edge is negative: the validate-trained selector
 does not transfer the graceful-channel gain across the domain shift
 (Appendix~\ref{sec:jscc_aware}(b)).}
 \label{tab:two_regime}
@@ -217,7 +217,7 @@ the main text keeps a short summary of each and points here.
 
 \subsection{Collaboration Is Not Always Beneficial}\label{sec:harm}
 
-Collaboration is not unconditionally beneficial, and that is what makes an explicit per-frame selector necessary rather than a convenience. Two failure modes call for two responses. When the channel cannot carry a feature message, requesting one spends the collaborator's transmission budget for nothing and collapses the output to the ego-only floor (the ego vehicle's own pre-fusion detection); the design answer is already in place -- the oracle removes any action whose frame-level failure probability is $\ge 0.999$ from its feasible set (the same $0.999$ constant as the \S\ref{sec:method} mask), and on failure the pipeline reverts to the ego-only output rather than a phantom feature. When the channel \emph{can} carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output falls below even the always-object-level (Fixed-$L$) baseline.\footnote{Test Easy stratum (top tercile of the ego's own object-level F1, the \S\ref{sec:difficulty} stratification), evaluated under a deterministic reliable-channel condition (AWGN $16$~dB; frame-level BLER ${\approx}0$, well above the $8.0$~dB onset), isolating the difficulty axis from channel variability: the frozen selector's realised F1 at $B_{\max}=0.20$ is $0.9749$ vs the Fixed-$L$ baseline $0.9796$ -- a gain of $-0.0047$ (frame-level paired $95\%$ CI $[-0.0074,-0.0024]$; $n=713$ frames). The selector requests $F$ on $241$ of these $713$ frames; on the remaining $472$, where it requests $L$, its output is frame-identical to Fixed-$L$, so the paired difference arises entirely on the $F$-request frames -- the loss is a structural consequence of requesting features on already-easy frames.} This mode has no masking answer; its remedy is left to future work. Two CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the object-level fused output on 1.5 / 5.8 / 0.2\% of validation / test / Culver-City frames, and -- from the same per-frame $(\mathrm{comp}-\mathrm{ego})$ identity, re-derived on the corrected single-collaborator caches -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.3 / 6.5 / 0.9\% of frames. Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean $15.2$ ground-truth objects on test vs $27.8$ on validate and $41.0$ on Culver-City). No new signalling is needed to act on this: $E$ (ego-only, issue no request) is already a deployed action of $\mathcal{S}$ with its own codepoint, so the remedy is a selection-policy question---the frozen selectors almost never choose it (Section~\ref{sec:pareto})---not a message-format one.
+Collaboration is not unconditionally beneficial, and that is what makes an explicit per-frame selector necessary rather than a convenience. Two failure modes call for two responses. When the channel cannot carry a feature message, requesting one spends the collaborator's transmission budget for nothing and collapses the output to the ego-only floor (the ego vehicle's own pre-fusion detection); the design answer is already in place -- the oracle removes any action whose frame-level failure probability is $\ge 0.999$ from its feasible set (the same $0.999$ constant as the feasibility mask of the main paper), and on failure the pipeline reverts to the ego-only output rather than a phantom feature. When the channel \emph{can} carry the message, requesting it can still cost accuracy: on the easy stratum the selector's realised output falls below even the always-object-level (Fixed-$L$) baseline.\footnote{Test Easy stratum (top tercile of the ego's own object-level F1, the \S\ref{sec:difficulty} stratification), evaluated under a deterministic reliable-channel condition (AWGN $16$~dB; frame-level BLER ${\approx}0$, well above the $8.0$~dB onset), isolating the difficulty axis from channel variability: the frozen selector's realised F1 at $B_{\max}=0.20$ is $0.9749$ vs the Fixed-$L$ baseline $0.9796$ -- a gain of $-0.0047$ (frame-level paired $95\%$ CI $[-0.0074,-0.0024]$; $n=713$ frames). The selector requests $F$ on $241$ of these $713$ frames; on the remaining $472$, where it requests $L$, its output is frame-identical to Fixed-$L$, so the paired difference arises entirely on the $F$-request frames -- the loss is a structural consequence of requesting features on already-easy frames.} This mode has no masking answer; its remedy is left to future work. Two CSV-verified quantifiers bound where the ego-side harm sits: the ego-only output strictly exceeds the object-level fused output on 1.5 / 5.8 / 0.2\% of validation / test / Culver-City frames, and -- from the same per-frame $(\mathrm{comp}-\mathrm{ego})$ identity, re-derived on the corrected single-collaborator caches -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.3 / 6.5 / 0.9\% of frames. Test carries the harm most, consistent with fusion having the least to add in thin scenes (mean $15.2$ ground-truth objects on test vs $27.8$ on validate and $41.0$ on Culver-City). No new signalling is needed to act on this: $E$ (ego-only, issue no request) is already a deployed action of $\mathcal{S}$ with its own codepoint, so the remedy is a selection-policy question---the frozen selectors almost never choose it (Section~\ref{sec:pareto})---not a message-format one.
 
 
 
@@ -328,6 +328,86 @@ Request delay & $1$-frame-stale decision & $-0.0109$ (pessimistic i.i.d.\ bound)
 \bottomrule
 \end{tabular}
 \end{table}
+
+
+
+
+\subsection{Selector Training}
+
+The selector is a Random Forest classifier~\cite{breiman2001random} over the $23$-dimensional input $x_t = [z_t,\hat\gamma_t,c_t]$, with labels the channel-aware oracle $s_t^\star$ of the oracle definition of the main paper. Selection is budget-indexed and pre-registered rather than hand-tuned: a fixed block of $112$ candidates (hyperparameter settings $\times$ a payload-penalty grid $\lambda$) is evaluated once under \emph{scene-level $9$-fold leave-one-scene-out} cross-validation on validate---each of the nine scenes held out exactly once, $1{,}008$ fold rows---and for each budget $B_{\max}\in\{0.10,0.20,0.30\}$ the candidate list is walked in descending out-of-fold F1 until one meets the budget, which freezes that budget's $(\lambda^\star,\tau^\star)$ and hyperparameters. The three frozen selectors are $\lambda^\star = 0.05/0.02/0.00$ with $\tau^\star = 18/12/8$~dB at $B_{\max}=0.10/0.20/0.30$; all three carry \texttt{class\_weight=None}---the \texttt{balanced} candidates were walked past for exceeding their budget---and \texttt{FROZEN\_MANIFEST.json} is the authority for every one of these values. Each frozen configuration is then refitted once on the full $1{,}980$-frame validate split and \emph{frozen}---never retrained---for every reported test and Culver-City result. Run-to-run variance is exposed not by a within-validate resplit but by averaging all realised-F1 and payload metrics over $200$ Monte-Carlo channel realisations per operating point (per-frame SNR $\sim\mathcal{U}[0,20]$~dB and channel type $\sim\mathrm{Bernoulli}(0.5)$ AWGN/Rayleigh).
+
+
+
+\subsection{Selector Decisions and Feature Importance}\label{sec:decision_ratio}
+
+Fig.~\ref{fig:decision_ratio} shows the per-mode selection ratios $\rho_s$ against SNR, with the frozen selector overlaid on that budget's payload-penalised oracle and the stacked-area panel showing the share of each action of $\mathcal{S}=\{E,L,F\}$ at every SNR. Under AWGN the selector's adaptation knee is at $10$~dB, where the frame-error cliff clears: $\rho_F$ steps from $0$ to $0.472$ on validate ($0.433$ on test, $0.160$ on Culver-City) and is flat above it, with $\rho_L$ falling correspondingly. Under Rayleigh $\rho_L$ stays at essentially $1$ across the whole range. The panel also makes the $E$-collapse of Section~\ref{sec:pareto} visible: under Rayleigh the oracle spends a substantial share on the ego-only action---$\rho_E=0.157$ on test and $0.133$ on Culver-City---while the frozen selector's $\rho_E$ is $0.002$ and $0.000$. $E$ is a deployed action that the imitation objective almost never selects, which is a limitation of the trained policy rather than of the action set. It is, however, not a limitation a simpler policy repairs: a hand rule with an explicit $E$ gate, fitted over three difficulty proxies in both orientations, selects $E$ in \emph{no} split $\times$ budget cell ($\rho_E=0.00000$ throughout, the main paper) --- on these cues $E$ is structurally out of reach of a monotone threshold, and the frozen selector's small but non-zero $\rho_E$ is more than any of them attains.
+Under the corrected single-collaborator convention this limitation became \emph{cheaper without becoming milder}. The behaviour is unchanged --- the selector still almost never chooses $E$ --- but the price of those missed calls fell from $0.58$--$0.61\delta$ to $0.44$--$0.47\delta$ on test, where $\delta=0.005$ is the pre-registered non-inferiority margin. The oracle's own appetite for $E$ moved in \emph{opposite} directions on the two splits: the number of grid cells it labels $E$ rose on validate ($335\to529$) and fell on test ($6{,}303\to5{,}696$), so the correction does not simply make ego-only more attractive everywhere.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.42\textwidth]{fig_decisions_awgn.pdf}\hfill
+    \includegraphics[width=0.42\textwidth]{fig_decisions_rayleigh.pdf}\\
+    \includegraphics[width=0.75\linewidth]{fig_stacked_area.pdf}
+    \caption{Per-mode selection ratios versus SNR on OPV2V validate at $B_{\max}=0.20$, from the frozen grid. \emph{Top:} the frozen selector (solid) against \emph{that budget's $\lambda$-penalised oracle} (dashed) --- the oracle sees the frame BLER, \emph{not} the per-frame block outcome, so it is not clairvoyant. \emph{Bottom:} stacked-area view of the selector's action distribution over the deployed action set $\mathcal{S}=\{E,L,F\}$ under AWGN and Rayleigh (the dominated $C_{256}$ is a physical-layer comparator, not a deployed action, the main paper); the dotted line marks the measured $10$~dB policy knee. Two readings: under AWGN $\rho_F$ steps from $0$ to $0.472$ at $10$~dB and is flat above it, and under Rayleigh the selector's $\rho_E$ is $0.002$ (test) / $0.000$ (Culver-City) while the oracle spends $\rho_E=0.157$ / $0.133$ there --- the $E$-collapse limitation of Section~\ref{sec:pareto}. The three-budget version is the per-budget action distributions (repository figure product).}\label{fig:decision_ratio}
+\end{figure*}
+
+\noindent\emph{Feature importance.}\label{sec:feat_imp}
+
+the feature-importance table of the main paper report the top Gini feature importances of the deployed selector. The two channel-side features dominate: the channel-type indicator $c_t$ contributes $34.2\%$ of importance and the estimated SNR $\hat\gamma_t$ a further $27.5\%$, so two of the $23$ inputs carry $61.7\%$ between them against $38.3\%$ spread over the $21$ perception-side cues. The strongest of those, \texttt{pcd\_mean\_range}, reaches only $3.0\%$.
+Two cautions belong with that number. \emph{Importance is not sufficiency:} a Gini share says how often a feature is split on, not that the remaining $38.3\%$ is redundant, and the feature ablation shows the opposite --- with the channel features alone the selector stops requesting features at the tighter budgets and never recovers the full selector's operating point (the main paper). \emph{And the split is transport-specific:} it is measured under an LDPC + QAM cliff where the channel state is nearly decisive by construction; under graceful degradation the same cues carry the decision instead (the supplementary material). That the channel-type indicator $c_t$ outranks the estimated SNR $\hat\gamma_t$ is consistent with the frame-level channel physics: under Rayleigh fading the feasible set collapses to $L$ regardless of SNR, so the channel-type flag is the single highest-information split for the decision.
+
+
+
+\subsection{Communication--Perception Pareto Frontier}\label{sec:pareto}
+
+The headline table compares policies at a single operating point. To show that
+\method{} sits on the attainable payload--F1 frontier rather than merely better on average, we sweep
+the Lagrangian selector $s_t^\star=\arg\max_s (F_t^s-\lambda B_s)$ over $\lambda$ and
+plot every policy on the payload--F1 plane (Fig.~\ref{fig:pareto}). As $\lambda$
+grows from $0$ (max F1) to large values (min payload), the oracle traces the
+achievable upper frontier; the fixed feature-level policies $C_{16}$ and $C_{256}$
+sit far below it (high payload, low realised F1 due to the LDPC cliff), i.e.\ they
+are strictly dominated. \method{} and a $\lambda$-cost RF retrained on
+$\arg\max_s(F_t^s-\lambda B_s)$ labels lie on the frontier between Fixed $L$ and the
+oracle. The P2 product is three frozen selectors, one per budget, so the operating point is
+budget-indexed: on test they realise F1 $0.89148$, $0.89691$ and $0.89783$ at $0.037$, $0.141$
+and $0.21196$~Msym/frame for $B_{\max}=0.10$, $0.20$ and $0.30$. At $B_{\max}=0.20$ that payload
+is $14.3\%$ of the feature-level payload $B_F$.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.75\linewidth]{fig_pareto_test.pdf}
+    \caption{Communication--perception plane on OPV2V test, from the frozen $200$-realisation replay. The axis spans the full range so Fixed $F$ ($0.99$~Msym) is visible rather than clipped. The three frozen selectors are shown budget-indexed (circles, labelled by $B_{\max}$) beside the SNR-threshold rule tuned to the \emph{same} budget (open triangles); the feasibility-masked oracle is a separate marker (star). Fixed $F$ and Fixed $C_{256}$ are dominated by Fixed $L$ at far higher channel use.}\label{fig:pareto}
+\end{figure}
+
+
+
+\subsection{Where the Gain Concentrates: Difficulty Stratification}\label{sec:difficulty}
+
+A channel-averaged mean masks where \method{} matters. We stratify frames into
+easy/medium/hard terciles by the ego's own object-level detection F1 (low $=$ hard) and
+evaluate the frozen selectors at a single reliable-channel operating point---deterministic
+AWGN at $16$~dB, one point of the pre-registered SNR grid rather than a channel
+draw (the difficulty stratification (repository figure product)). At $B_{\max}=0.20$ the CA-TOSG-over-Fixed-$L$ gain rises
+monotonically with difficulty: on test it is $-0.0047$ ($95\%$ CI $[-0.0074,-0.0024]$) on
+easy frames, $+0.0056$ ($[+0.0027,+0.0085]$) on medium frames and
+$\mathbf{+0.0660}$ ($[+0.0591,+0.0730]$) on hard frames. Validate has the same shape
+($+0.0058 / +0.0441 / +0.0470$); Culver-City is weaker throughout
+($+0.0011 / +0.0021 / +0.0310$). The value of \method{} is therefore two-dimensional:
+it materialises where a \emph{hard frame meets a reliable channel}, and a
+channel-averaged headline necessarily dilutes it. On easy frames the deployed selector
+over-requests $F$ on test, and the frozen product puts the cost at $-0.00471$ F1
+($95\%$ CI $[-0.00742,-0.00236]$) at $B_{\max}=0.20$, growing monotonically with the budget
+---$-0.00020$, $-0.00471$, $-0.01129$ across $0.10/0.20/0.30$---as the looser cap lets more easy
+frames be sent as $F$. The effect is \emph{split-dependent rather than universal}: on validate and
+Culver-City the same stratum \emph{gains} at every budget ($+0.00035$ to $+0.01016$ and $0.00000$
+to $+0.00558$), so it is a property of the test split's easy tercile, where fixed $L$ already
+reaches $0.97962$ and there is almost nothing left to buy. A payload-penalised
+($\lambda>0$) operating point on the Lagrangian frontier of Section~\ref{sec:pareto}
+would mitigate it.\footnote{The channel-averaged companion view reported in an earlier
+version of this subsection is withdrawn rather than recomputed: it was a product of the
+retired 200-realisation policy engine and its selector, not of the frozen selectors
+evaluated here, and the two are different quantities that may not be placed side by side.}
 
 
 

@@ -4494,3 +4494,58 @@ Sixteen gates pass; the compile gate still fails on page count alone (20 > 17). 
 R33-1 and the two of R33-2 are all done, and the fallback of R33-3 is applied. What remains is
 listed at the end of R32: on this template the main file still holds ~18 pages of text, and no
 further redundancy is left to remove — the next page has to come from a section, not from wording.
+
+---
+
+## Change-log R34 (2026-08-18) — four more subsections moved; 20 → 18 pages, one over the limit
+
+**Zero GPU.** Relocation only. No claim, number or locked wording changed; every number the abstract
+or the Conclusion quotes stayed in the main text.
+
+### 1 · What moved, and what each left behind
+
+`§VI-F` (difficulty stratification), `§VI-C` (decisions and feature importance, **table kept in the
+main text**), `§VI-G` (Pareto frontier and its figure) and `§IV`'s selector-training detail are now
+in `paper/supplementary.tex` (**6 pages, standalone, zero errors**). The main text keeps a new
+`sec:decision_ratio` carrying:
+
+* the hard-tercile gain `+0.0660` F1 (`95%` CI `[+0.0591,+0.0730]`), the monotone shape, and the
+  easy-tercile `test` exception (`-0.00471`, `[-0.00742,-0.00236]`, Fixed `L` already at `0.97962`);
+* the measured `10` dB policy knee, `rho_E = 0.002` against the oracle's `0.157` under Rayleigh, and
+  the `61.7% / 38.3%` importance split with the *importance is not sufficiency* guardrail;
+* the frontier statement: the three frozen points lie on the attainable frontier between Fixed `L`
+  and the oracle, the fixed feature-level policies far below it;
+* a manifest-level training sentence: scene-level `9`-fold LOSO, the frozen walk under the hard
+  budget constraint, and `lambda* = 0.05/0.02/0.00` with `tau* = 18/12/8` dB.
+
+Cross-document references were resolved **both ways**: the main text names the supplementary where
+its material went, and the supplementary names the main paper for labels that live there.
+
+### 2 · Gate coverage followed, and caught two things
+
+The paragraph-insertion gate (already reading both files after R33) failed on paragraph 2 because
+the cross-reference rewrite touched a `\S\ref` *inside* the moved paragraph; that rewrite is now the
+declared ruling `R34-xref`, and the doubled article it produced ("the the main paper") is fixed. The
+literal gate's debt register is now **empty**: the four remaining floor-effect entries were in the
+moved subsections and left with them.
+
+### 3 · Result: 18 pages, one over
+
+| | main | supplementary | errors | overfull |
+|---|---|---|---|---|
+| R33 end | 20 | 4 | 0 | 4 |
+| **R34 end** | **18** | **6** | **0** | **4** |
+
+Sixteen gates pass; the compile gate fails on the page count alone. Two further redundancy cuts were
+taken on the way (the Conclusion's recap, and the scene-bootstrap sentence that the R33 sensitivity
+merge had duplicated in `sec:headline`) and they did not clear the boundary. Per the batch's own
+fallback rule, this stops here for a ruling. What is left, all of it a scope decision:
+
+* `tab:feat_imp` to the supplementary — its two numbers (`61.7 / 38.3%`) are already in the summary
+  sentence; ≈ 0.35 page. Explicitly kept in the main text by R34-1b, so it needs your word.
+* `tab:ablation` to the supplementary, keeping the FA-1 sentence — ≈ 0.35 page.
+* `fig:ap_snr` (the two-panel SNR figure) to the supplementary — ≈ 0.4 page.
+* the `sec:true_e2e` verification subsection to the supplementary, keeping its two-sentence result —
+  ≈ 0.45 page.
+
+Any one of the last three clears 17 pages on its own.

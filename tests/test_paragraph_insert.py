@@ -162,6 +162,11 @@ PARAS = {
             ('and -- from the same per-frame $(\\mathrm{comp}-\\mathrm{ego})$ identity and CSV as the C256 analysis (\\S\\ref{sec:candidates}) -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.0 / 5.8 / 0.9\\% of frames.',
              'and -- from the same per-frame $(\\mathrm{comp}-\\mathrm{ego})$ identity, re-derived on the corrected single-collaborator caches -- the compressed-feature message, when delivered, yields lower frame F1 than the ego-only fallback on 1.3 / 6.5 / 0.9\\% of frames.',
              'R28-4'),
+            # R34: the paragraph moved to supplementary.tex, where a label defined in the main
+            # paper cannot resolve; the cross-reference becomes a named pointer.
+            ("the same $0.999$ constant as the \\S\\ref{sec:method} mask",
+             "the same $0.999$ constant as the feasibility mask of the main paper",
+             'R34-xref'),
 
             # P5-7 item 10 (Peiyi, 2026-08-14): E is a DEPLOYED action, so the closing sentence
             # can no longer offer an ego-only action as future work.
