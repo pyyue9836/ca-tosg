@@ -87,6 +87,9 @@ def self_test():
         'where2comm-baseline': 'Where2comm is the strongest baseline for this setting.',
         'c256-dominance': 'Fixed $C_{256}$ is dominated by $C_{256}$ on both axes.',
         'latency-budget': 'which fits the $100$~ms budget of a $10$~Hz cycle.',
+        'reference-tensor': 'The feature-level message encodes the transmitted BEV feature tensor of '
+                            'size 256 x 48 x 176.',
+        'shared-backbone': 'All methods share the same backbone and detection head.',
     }
     for cid, probe in probes.items():
         injected = dict(docs)

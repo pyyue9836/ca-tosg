@@ -313,9 +313,13 @@ deployment question rather than a detail. We flip $c_t$ on a random fraction of 
 the frozen policy (P3 sensitivity arm, \texttt{channel\_misclassification.csv}). The degradation is
 graceful and roughly linear in the flip rate: on test at $B_{\max}=0.20$ the arm's own no-flip
 baseline is $0.89701$ realised F1, falling to $0.89620$ at a $5\%$ flip rate, $0.89542$ at $10\%$
-and $0.89384$ at $20\%$, with the payload essentially unchanged ($0.14036$ to $0.14051$~Msym). A
-misread channel type therefore costs a small amount of F1 rather than breaking the policy, because a
-wrongly-Rayleigh frame falls back to $L$ and a wrongly-AWGN frame is caught by the feasibility mask.
+and $0.89384$ at $20\%$, while the payload remains nearly unchanged ($0.14036$, $0.14033$,
+$0.14032$ and $0.14051$~Msym). The asymmetry of the two error directions is what keeps the cost
+small. A frame misread as Rayleigh biases the selector towards the conservative $L$, which is safe
+and merely forgoes a gain. A frame misread as AWGN may lead the selector to request $F$; the block
+error probability is then evaluated on the \emph{true} channel, so the message is likely to be lost
+and the frame falls back to the ego-only output rather than to $L$. Only the second direction can
+lose accuracy, and it loses it to the ego-only floor, not to a corrupted feature map.
 The arm is a sensitivity replay, not a deployed configuration: its no-flip cell is not the mainline
 replay's.
 

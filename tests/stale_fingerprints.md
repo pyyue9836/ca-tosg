@@ -251,3 +251,12 @@ RX 56\.3\\?%
 RX (dF|.F)[^\n]{0,20}-0\.0028(?![0-9])
 RX -0\.0099(?![0-9])
 
+
+# R46: the reference geometry is not the deployed configuration, and the branches do not share weights.
+# The y-range [-38.4, 38.4] is the JSCC baseline's geometry; the deployed pointpillar checkpoint is
+# y in [-40, 40]. Anchored on the range form so the 38.4 that belongs to the reference tensor's own
+# arithmetic (76.8 = 2 x 38.4) is not caught -- only the DETECTION-RANGE claim is.
+RX y \\in \[-38\.4, 38\.4\]
+RX \[-38\.4, ?38\.4\]~m
+RX All methods share the same backbone
+RX (identical|the same) backbone and detection head

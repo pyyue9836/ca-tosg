@@ -220,14 +220,16 @@ def self_test(tex):
               '\nmethods can be used inside the $C_{16}$ or $C_{256}$ branches, while the selector '
               'decides when these branches should be activated.\n'
               # R45-4: the retired framing -- Where2comm entering a comparison as a baseline
-              '\nWhere2comm is the strongest baseline available for this setting.\n')
+              '\nWhere2comm is the strongest baseline available for this setting.\n'
+              # R46-2: the retired fair-comparison sentence
+              '\nAll methods share the same backbone and detection head to ensure a fair comparison.\n')
     fired4 = scan_terminology(tex + probes)
     clean = scan_terminology(tex)
     n_hits = len({t[0] for t in fired4})
     print(f'  TERMINOLOGY:  {"FIRES" if len(fired4) >= 4 else "DOES NOT FIRE"} '
           f'({len(tracked_terms())} tracked forms; {len(fired4)} injected hits over {n_hits} '
           f'families; {len(clean)} live match(es))')
-    rc |= 0 if (len(fired4) >= 5 and not clean) else 1
+    rc |= 0 if (len(fired4) >= 6 and not clean) else 1
     return rc
 
 

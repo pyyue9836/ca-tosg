@@ -5243,3 +5243,87 @@ Eighteen gates pass, twice, over both documents; `p6_cross_section_scan --self-t
 four controls fire) with 0/0/0/0 live; `p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED; figure gate 0
 never-stated. Main **15 pages, 1 overfull**; supplementary 9 pages; abstract 248 words. No page lever
 pulled.
+
+## R46 — reference geometry vs deployed tensor, branch weights, and a paper-vs-code discipline
+
+Zero GPU; wording, documentation, one new discipline and two new reconciliation pairs. No experiment
+was re-run.
+
+### 1 · The reference geometry is not the deployed tensor
+
+`sec:exp` now opens the budget derivation with the supervisor's framing: *To define a common
+source-budget convention, we use a reference BEV geometry of $256\times48\times176$ …* and, in the
+same paragraph, **This reference geometry is not the transmitted tensor of the deployed PointPillar
+checkpoint.** The preceding sentence, which called that tensor "the transmitted BEV feature tensor",
+is gone — it asserted a measurement that the probe contradicts (3,942,400 pre-compression /
+739,200 transmitted per CAV).
+
+The detection range printed in *Dataset and Implementation* was the reference geometry's
+($y \in [-38.4, 38.4]$), not the deployed checkpoint's. It now reads $y \in [-40, 40]$, which is what
+`pointpillar_attentive_fusion_compression`'s config carries. `y \in [-38.4, 38.4]` is a retired
+fingerprint, anchored on the range form so the reference tensor's own arithmetic ($76.8 = 2\times38.4$)
+is not caught.
+
+### 2 · The branches do NOT share weights
+
+Retired: "All methods share the same backbone and detection head to ensure a fair comparison." The
+late-fusion checkpoint behind $L$ and the attentive-compression checkpoint behind $F$ are **separate
+trainings** of PointPillar-based OpenCOOD models. The paper now says so, and says what follows: their
+clean-channel performance difference **reflects the complete pipeline of each branch — training,
+fusion and codec — rather than the semantic granularity in isolation**, and every $L$ versus $F$
+comparison is to be read that way.
+
+Tracked as a TERMINOLOGY family (`shared-backbone claim`) with the retired sentence as a self-test
+probe, and registered as a reconciliation pair (§6 below).
+
+**Pre-registered, not run:** a *unified three-branch construction* — one backbone and detection head
+trained once, with the object-level, feature-level and ego-only branches derived from it — which is
+the only construction that would license attributing the $L$–$F$ gap to granularity alone. Cost:
+retraining the shared model plus re-deriving every cached per-frame outcome, i.e. the whole grid
+rebuild. Not started; nothing in the current paper depends on it, because the claims it would support
+have been withdrawn rather than kept.
+
+### 3 · The $c_t$ mechanism sentence, verified against the source
+
+R45's mechanism sentence was **wrong as written**: it said a wrongly-AWGN frame "is caught by the
+feasibility mask". Reading `projects/ca_tosg/evaluation/sensitivity.py`, that is not what the arm
+does. `replay()` flips only the selector's `channel_is_rayleigh` feature; the frame BLER is computed
+on the **true** channel (`bF = bler16(tbl, snr, is_ray_2d)`), and `eff_matrix_blerL` mixes
+`comp·(1−bF) + ego·bF` — so a feature request that the true channel drops falls back to **ego-only**,
+not to $L$, and no mask is involved in this path. The supplementary now states the asymmetry the code
+implements: misread-Rayleigh biases towards the conservative $L$ (safe, forgoes a gain);
+misread-AWGN may request $F$, which is then likely lost on the true channel and falls back to the
+ego-only output. "Payload unchanged" became "payload remains nearly unchanged" with all four values
+(0.14036 / 0.14033 / 0.14032 / 0.14051 Msym).
+
+**New discipline — paper-vs-code.** A sentence that explains a *mechanism* must be verified against
+the source that implements it before it is written, and the verification named in the change-log.
+This sits beside the R45-6 paper-vs-protocol gate: that one blocks a claim the record has retired;
+this one blocks a claim the code never implemented. Three mechanism sentences have now been wrong at
+least once (the E "no request" family in R44, the four-rung ladder's original framing, and this one),
+and in each case the source settled it in minutes.
+
+### 4 · Gate counts are computed, not typed
+
+`tools/build_gate_counts.py` writes the counts into `docs/reproducibility.md` (the two-tier block and
+the six-step table's last row) and into `verify_results.py`'s usage line, from the runner itself.
+Current: **10 content-tier of 18**. Note the count that made this necessary — `len(GATES)` is 17,
+because `stale-fingerprint exit` is run inline by `__main__` and printed like the rest; counting the
+list rather than the runner is exactly the error the hand-written numbers kept making. Registered in
+the generator gate.
+
+### 5 · Introduction
+
+"approaches oracle performance" → "**recovers part of the available oracle headroom** when the channel
+supports richer communication", which is what the headroom table shows (at most about a fifth).
+
+### 6 · Two more reconciliation pairs
+
+`reference-tensor` and `shared-backbone`, both `false-as-written`, with the retired forms as
+injected self-test faults. The gate now carries six pairs.
+
+### 7 · State
+
+Eighteen gates pass, twice, over both documents; all four `p6_cross_section_scan` controls fire;
+`p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED; figure gate 0 never-stated. Main 15 pages, supplementary 9;
+abstract 248 words. No page lever pulled.

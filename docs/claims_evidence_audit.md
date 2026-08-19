@@ -103,7 +103,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c518be1` | ANALYTIC | 2, 802.11, 5 | In a deployed V2X stack, _t is obtained from pilot-symbol SNR estimation already produced by 802.11bd or 5G NR sidelink receivers … |
-| `c779596` | FROZEN | 10, 1, 0.89542, 0.89701, 0.20 | Both inputs are treated as estimates, and the results below are conditional on them being available at the ego: an SNR estimate th… |
+| `c08c9e5` | FROZEN | 10, 1, 0.89542, 0.89701, 0.20 | Both inputs are treated as estimates, and the results below are conditional on them being available at the ego: an SNR estimate th… |
 
 ### Proposed Method [sec:method] → Message Branches
 
@@ -125,15 +125,15 @@ _None._
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c28a158` | ANALYTIC | -140.8, 140.8, -38.4, 38.4 | The perception model is a PointPillars BEV backbone [cite] with detection range x [-140.8, 140.8] m and y [-38.4, 38.4] m. |
+| `cbf0589` | ANALYTIC | -140.8, 140.8, -40, 40 | The perception model is a PointPillars BEV backbone [cite]; the deployed checkpoints are configured with detection range x [-140.8… |
 
 ### Experimental Setup [sec:exp] → Message Construction and Payload Accounting
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cf3bea1` | ANALYTIC | 2, 27, 3, 110, 8, 0.024 | The object-level message L carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average 27… |
-| `cf2cf54` | ANALYTIC | 256, 48, 176, 2.16, 10, 6, 281.6, 76.8, 0.4, 704, 192, 4 | The feature-level message encodes the transmitted BEV feature tensor of size 256 × 48 × 176 ≈ 2.16 × 10^6 elements: the 281.6 × 76… |
-| `c92cf61` | ANALYTIC | 1.98, 0.92, 2.16, 10, 6 | We adopt a fixed source budget of B_C ≈ 1.98 Mbit/frame for the feature message, i.e.\ ≈ 0.92 bit per element of this 2.16 × 10^6-… |
+| `c30541a` | ANALYTIC | 281.6, 76.8, 0.4, 704, 192, 4, 48, 176, 256 | The feature-level budget is defined on a reference BEV geometry, not on a measured tensor: a 281.6 × 76.8 m range at 0.4 m voxels … |
+| `cabb3b9` | ANALYTIC | 256, 48, 176, 2.16, 10, 6, 1.98, 0.92 | To define a common source-budget convention we therefore use that reference geometry, 256 × 48 × 176 ≈ 2.16 × 10^6 elements, and a… |
 | `c873513` | ANALYTIC | 16, 256, 1.98, 1, 2, 0.99, 0.495 | Both feature modes C_16 and C_256 carry this same 1.98 Mbit perception payload but require different numbers of channel uses; appl… |
 
 ### Experimental Setup [sec:exp] → Channel Settings

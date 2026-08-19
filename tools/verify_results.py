@@ -4,7 +4,7 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (9 of 17)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (10 of 18)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that

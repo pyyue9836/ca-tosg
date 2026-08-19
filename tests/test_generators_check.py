@@ -47,6 +47,9 @@ GENERATORS = [
     # an ancestor of HEAD, i.e. when the file describes a state the branch has left.
     ('build_handoff_header', ['tools/build_handoff_header.py', '--check'],
      "docs/HANDOFF.md's commit header"),
+    # R46-4: how many gates exist, and how many a clean clone can run, are computed from the runner.
+    ('build_gate_counts', ['tools/build_gate_counts.py', '--check'],
+     'the gate counts in docs/reproducibility.md and verify_results.py'),
 ]
 
 
