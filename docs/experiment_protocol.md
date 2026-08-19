@@ -5478,3 +5478,41 @@ and the paragraph says plainly that none of them is repaired by rewording.
 Eighteen gates pass, twice, over both documents; generator gate now covers 8 products;
 `p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED; figure gate 0 never-stated; reconciliation gate 6 pairs.
 Main **16 pages** (unchanged by this batch's net wording), supplementary 9; abstract 248 words.
+
+## R49 — the ordering claim becomes an assertion, and the canonical summary covers four conventions
+
+Zero GPU. No experiment re-run.
+
+### 1 · Three ordering assertions in `check_anchor_sensitivity.py`
+
+The ordering claim was verified once, by hand, in R47, and then written into the paper. Since R49 it
+is asserted on every run, per convention and per split/budget cell: the selector spends at least
+`B_L`; strictly less than `B_F`; and more at a looser budget than at a tighter one. Twelve assertions
+(three per convention, four conventions), each failing the gate red.
+
+The self-test injects the fault that would actually matter — one cell where the policy spends
+1.5× `B_F`, i.e. above the fixed feature message it is supposed to undercut — requires the gate to
+fire, and restores the CSV byte-for-byte in `finally`. Result: FIRES, then silent.
+
+### 2 · `docs/canonical_quantities.md` now reports four conventions and two directions
+
+R45's entry named a single "declared→deployed re-anchor, −4.86 % to −41.99 %". That label meant the
+**pre-compression** convention, and after R47-2 there are two deployed-side conventions whose shifts
+run in **opposite directions**. The canonical summary is now a table:
+
+| counterfactual | shift | direction |
+|---|---|---|
+| declared → 1 bit per reference element | −8.45 % to −0.77 % | down |
+| declared → deployed pre-compression | −45.14 % to −4.12 % | down |
+| declared → transmitted-bottleneck counterfactual | +17.56 % to +192.57 % | **up** |
+
+The bottleneck case reverses the sign because it shrinks `B_F` while `B_L` is anchored
+independently. Note the pre-compression range itself reads −45.14 % to −4.12 % on the present
+decision logs against the −4.86 % to −41.99 % recorded in R45; the historical figure stays in the
+change-log as written at the time, and the canonical file is the current summary. That is the
+division of labour between the two files, and it is why the change-log is never edited in place.
+
+### 3 · State
+
+Eighteen gates pass, twice; generator gate covers 8 products; `p6_numbers_vs_csv` 0 MISS,
+0 UNLOCATED; figure gate 0 never-stated. Main 16 pages, supplementary 9; abstract 248 words.

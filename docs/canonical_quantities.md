@@ -67,8 +67,27 @@ counts and deliberately not the declared anchor. A declared constant still has t
 the gate derives it from the geometry the paper itself states, and separately asserts that the two
 measured counts are printed exactly as the probe recorded them.
 
-What is retired here: "the conclusions are insensitive to this constant". The measured counterfactual
-(`results/channel/payload_anchor_sensitivity.csv`) moves the headline channel-use fraction by
-−0.90 % to −7.75 % under the paper's own 1.98 → 2.16 Mbit re-anchor and by −4.86 % to −41.99 % under
-the declared→deployed one. The **ordering** survives; the fraction does not, and the paper now says
-so — a claim the R45-6 reconciliation gate holds to the protocol's verdict.
+What is retired here: "the conclusions are insensitive to this constant". The measured
+counterfactual (`results/channel/payload_anchor_sensitivity.csv`) moves the headline channel-use
+fraction, and by R47-2 it does so in **two directions**, which is why a single "re-anchoring shifts
+it by X" summary is no longer usable. Current values, recomputed by
+`tools/second_payload_and_bler.py` and re-derived cell by cell by
+`tools/check_anchor_sensitivity.py`:
+
+| counterfactual | shift in CA-TOSG channel use as a fraction of Fixed F | direction |
+|---|---|---|
+| declared → 1 bit per reference element (the paper's old named 2.16 Mbit case) | −8.45 % to −0.77 % | down |
+| declared → **deployed pre-compression** (3,942,400 elements, 1.8047 Msym) | −45.14 % to −4.12 % | down |
+| declared → **transmitted-bottleneck counterfactual** (739,200 elements, 0.3384 Msym) | **+17.56 % to +192.57 %** | **up — the opposite direction** |
+
+The bottleneck case reverses the sign because it shrinks `B_F` while `B_L` stays anchored
+independently, so an L-heavy mix becomes a larger share of a smaller ceiling. R45's entry named a
+single "declared→deployed" shift of −4.86 % to −41.99 %; that label meant the pre-compression
+convention, whose current range is −45.14 % to −4.12 % on the present decision logs. The historical
+figure stays in the change-log as written at the time; this table is the canonical summary and
+covers all four conventions.
+
+The **ordering** survives every convention — the selector spends at least `B_L`, strictly less than
+`B_F`, and more at a looser budget than at a tighter one — and since R49-1 that is an assertion in
+`check_anchor_sensitivity.py` (12 ordering assertions, one injected-fault self-test), not a sentence
+someone read off a table.
