@@ -5139,3 +5139,107 @@ Seventeen gates pass, twice, over both documents; `p6_cross_section_scan` 0/0/0/
 `p6_numbers_vs_csv` 0 MISS, 150 located + 4 declared-derived, 0 UNLOCATED; figure gate 0
 never-stated. Main **15 pages, 1 overfull (17.6pt)**; supplementary 9 pages. Page count unchanged by
 design: this batch pulled no page lever.
+
+## R45 — the payload anchor is a convention, Where2comm is not a baseline, and the record is now gated
+
+Zero GPU; wording, documentation and two gates. No experiment was re-run.
+
+### 1 · Payload anchor: declared convention, and the deployed counts stated as such
+
+The paper claimed "the conclusions are insensitive to this constant" and that re-anchoring "would
+rescale the feature cost of all policies equally". P4-B-d measured both and recorded them as **false
+as written**: a deployed policy pays `ρ_L·B_L + ρ_F·B_F` and `B_L` is anchored independently, so only
+the feature term rescales, and the headline channel-use fraction moves by −0.90 % to −7.75 % under
+the paper's own 1.98 → 2.16 Mbit counterfactual and by −4.86 % to −41.99 % under the
+declared→deployed re-anchor. That measurement sat in the record for four batches while the paper
+asserted its negation.
+
+`sec:exp` now states the supervisor's framing: the feature-level source budget is a **declared
+source-budget convention**, every feature-level payload is **conditional on that anchor**, and
+re-anchoring **changes the absolute and the relative payload values** while the **policy ordering is
+unchanged over the anchors recorded** in `payload_anchor_sensitivity.csv`.
+
+The deployed counts are now in the paper, as measurement and explicitly not as the anchor: a dummy
+forward through `pointpillar_attentive_fusion_compression` counts **3,942,400** pre-compression
+elements per collaborator across three branches, of which **739,200** go on the wire as autoencoder
+bottlenecks (`results/manifests/P4B_PROBE_pointpillar_compression.json`,
+`results/channel/payload_conventions.csv`). Neither is the declared anchor, and the paper says so
+rather than reconciling them silently. The implication that the $2.16\times10^{6}$-element tensor is
+what the deployed model transmits is gone.
+
+### 2 · Channel-type misclassification: the arm existed, the paper did not report it
+
+Checked as instructed rather than assumed. The experiment **exists** —
+`results/sensitivity/channel_misclassification.csv`, P3 sensitivity arm, flip rates 0/5/10/20 % over
+all three splits — but **neither delivered document reported it**: the supplementary's robustness
+paragraph listed three imperfections (noisy SNR, CSI aging, stale request) and not this one. So both
+halves of the instruction applied: the qualifier is now in the main text with one measured
+degradation and a pointer, and the arm itself is written up in the supplementary.
+
+Main text (`sec:cues`): both channel inputs are treated as estimates and the results are conditional
+on their availability; flipping $c_t$ on 10 % of frames moves realised F1 to **0.89542** from that
+arm's **0.89701** no-flip baseline (test, `B_max` = 0.20), payload unchanged. The supplementary adds
+the full ladder (0.89701 / 0.89620 / 0.89542 / 0.89384 at 0/5/10/20 %) with the mechanism — a
+wrongly-Rayleigh frame falls back to `L`, a wrongly-AWGN frame is caught by the feasibility mask —
+and the standing warning that the arm's no-flip cell is **not** the mainline replay's.
+
+### 3 · The latency family
+
+**Selector-only latency** is what this work measures. Every "fits within the 100 ms budget" form is
+gone from both documents. The supervisor's sentence — *Selector-only latency is 52.1 ms; end-to-end
+system latency is not measured here.* — is stated **once** in `sec:selector` (main) and once in the
+supplementary; the other three sites now point at it rather than repeat it, because three verbatim
+copies collide in the claims ledger (identical claim text ⇒ identical stable ID, which the ledger
+refuses — the collision is how the duplication was caught).
+
+### 4 · Where2comm is an adjacent-technology reference
+
+Not a baseline, in any sentence, in either document. The supplementary subsection is retitled and
+opens by saying so. The main-text pointer no longer calls it a comparison. Tracked as a TERMINOLOGY
+family with a negative-lookbehind pattern so the disclaimers themselves ("not a baseline", "is not
+ranked") do not trip it, and the retired form is a self-test probe.
+
+### 5 · Three documentation defects
+
+* **The handoff's commit field is now generated** (`tools/build_handoff_header.py`). A hand-typed
+  hash is wrong one commit after it is written. `--check` does *not* demand equality with `HEAD` —
+  that fails on every commit and is how the previous convention died — it demands that the recorded
+  commit be an **ancestor** of `HEAD`, which fails exactly when the file describes a state the branch
+  has left. Registered in the generator gate.
+* **"No experiment is mid-flight" vs "Where2comm never executed"** is closed by Josh's decision, and
+  the handoff now says which: the budget-matched rerun is **closed by decision, archived for
+  revision** — scoped, costed, deliberately not run, and nothing in the paper depends on it.
+* **`docs/reproducibility.md`'s tier counts were wrong** ("7 of 9"). Content tier is **9 of 17**, the
+  other 8 are reported as skipped, and the two-tier claim is now stated plainly: this repository can
+  establish that *the committed results are internally consistent and the documents still say what
+  those results say*; independent reproduction from raw OPV2V additionally needs `data/p2`, the
+  frozen models and the sibling OpenCOOD checkout, **none of which is in this repository**.
+
+### 6 · Gate 18 — paper ↔ protocol reconciliation
+
+`tests/test_protocol_reconciliation.py` + `tests/protocol_claims.md`. Each row pairs a verdict
+recorded here (`false-as-written` or `superseded`) with a retired form that must match nothing in
+either delivered document and a replacement claim that must appear. The anchor phrase must still
+exist in this file, so a row cannot pass by having its record deleted. Four pairs registered: the
+payload-anchor insensitivity claim, the Where2comm-as-baseline framing, the C256 set-domination
+argument (superseded by R31-1) and the 100 ms latency budget. The self-test injects each retired form
+and requires the gate to fire, and injects a deleted anchor and requires the same.
+
+Two faults the self-test caught in the gate's own first draft: the row parser left the markdown
+backticks inside every pattern, making all four unmatchable (a gate that cannot fail), and the
+injected-fault check counted a stale-anchor failure as the injection firing.
+
+### 7 · A dead positive control, repaired
+
+`p6_cross_section_scan.py --self-test`'s ENTITY-VALUE control had been silently dead: it injected
+`max(vals) + 0.5` against `records[0]`, whose own values span 0.0007 to 0.2168, so the injected value
+failed the `_same_scale` guard and no conflict was ever raised. A control that depends on which
+record happens to sort first is not a control. It now selects a record whose values sit within one
+octave and injects a disjoint value on the same scale, and says so loudly if no such record exists.
+
+### 8 · State
+
+Eighteen gates pass, twice, over both documents; `p6_cross_section_scan --self-test` **PASS** (all
+four controls fire) with 0/0/0/0 live; `p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED; figure gate 0
+never-stated. Main **15 pages, 1 overfull**; supplementary 9 pages; abstract 248 words. No page lever
+pulled.

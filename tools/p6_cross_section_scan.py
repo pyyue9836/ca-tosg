@@ -177,10 +177,20 @@ def self_test(tex):
     rc = 0
     recs = entity_records()
     inj = list(recs)
-    if recs:
-        metric, split, _loc, vals, _c = recs[0]
-        inj.append((metric, split, 'INJECTED SECTION', {round(max(vals) + 0.5, 4)},
+    # R45: this control had been DEAD. It injected `max(vals) + 0.5` against records[0], whose own
+    # values span 0.0007 to 0.2168 -- so the injected 0.7168 failed `_same_scale` against the record's
+    # own smallest value and no conflict was ever raised. A positive control that depends on which
+    # record happens to sort first is not a control. Pick a record whose values are tightly clustered
+    # (max/min <= 2) and inject a disjoint value on the SAME scale, and say so loudly if none exists.
+    target = next((r for r in recs
+                   if [abs(x) for x in r[3] if x]
+                   and max(abs(x) for x in r[3] if x) / min(abs(x) for x in r[3] if x) <= 2), None)
+    if target:
+        metric, split, _loc, vals, _c = target
+        inj.append((metric, split, 'INJECTED SECTION', {round(max(vals) * 1.5, 4)},
                     'injected contradictory claim'))
+    else:
+        print('  ENTITY-VALUE: NO INJECTABLE RECORD (every record spans more than one octave)')
     fired = [c for c in scan_entity_values(inj) if 'INJECTED' in c[1] + c[4]]
     print(f'  ENTITY-VALUE: {"FIRES" if fired else "DOES NOT FIRE"} '
           f'({len(recs)} real records available)')
@@ -208,14 +218,16 @@ def self_test(tex):
               '\nAt moderate SNR, $C_{16}$ may become useful because it provides richer features '
               'with better reliability than $C_{256}$.\n'
               '\nmethods can be used inside the $C_{16}$ or $C_{256}$ branches, while the selector '
-              'decides when these branches should be activated.\n')
+              'decides when these branches should be activated.\n'
+              # R45-4: the retired framing -- Where2comm entering a comparison as a baseline
+              '\nWhere2comm is the strongest baseline available for this setting.\n')
     fired4 = scan_terminology(tex + probes)
     clean = scan_terminology(tex)
     n_hits = len({t[0] for t in fired4})
     print(f'  TERMINOLOGY:  {"FIRES" if len(fired4) >= 4 else "DOES NOT FIRE"} '
           f'({len(tracked_terms())} tracked forms; {len(fired4)} injected hits over {n_hits} '
           f'families; {len(clean)} live match(es))')
-    rc |= 0 if (len(fired4) >= 4 and not clean) else 1
+    rc |= 0 if (len(fired4) >= 5 and not clean) else 1
     return rc
 
 

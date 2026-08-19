@@ -38,11 +38,18 @@ results and the manifests; it does not carry the per-frame grids, the frozen `.p
 the OPV2V-derived cue CSVs (all git-excluded). Say so plainly rather than implying a `git clone`
 reproduces everything.
 
-* **Tier 1 --- committed-content consistency**: `python tools/verify_results.py --content-only`. No
-  dataset, no GPU, no OpenCOOD checkout. It answers "is the committed tree internally consistent and
-  does it still say what it claims?"
-* **Tier 2 --- full run**: `python tools/verify_results.py` (all 17). Additionally requires the
-  sibling `../OpenCOOD/` checkout, the local grids `data/p2/p2_grid_*.csv` and the frozen models.
+* **Tier 1 --- committed-content consistency**: `python tools/verify_results.py --content-only` runs
+  **9 of the 17** gates (paragraph insertion, claims vs main.tex, P3 SNR support, intra-repo imports,
+  action-set wording, generators --check, canonical quantities, assumptions ledger,
+  stale-fingerprint exit); the other **8 are skipped and reported as skipped**. No dataset, no GPU,
+  no OpenCOOD checkout. What this tier can establish is bounded and worth stating plainly: **the
+  committed results are internally consistent, and the documents still say what those results say.**
+  It cannot establish that the results are reproducible from raw data.
+* **Tier 2 --- full run**: `python tools/verify_results.py` runs all **17**. Additionally requires
+  the sibling `../OpenCOOD/` checkout, the local grids `data/p2/p2_grid_*.csv` and the frozen models
+  `data/p2/selector_B0*.pkl`. **Independent reproduction from the raw OPV2V data needs all three,
+  and none of them is in this repository** --- so a third party can verify the internal chain here
+  and must obtain the dataset and re-run steps 1--4 to verify the rest.
 
 Both tiers fail **loudly** on missing data rather than skipping --- a gate that cannot verify must
 never report success --- so on a clean clone the full run correctly reports GATE FAILURE.

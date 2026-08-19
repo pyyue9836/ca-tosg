@@ -51,3 +51,24 @@ selector's operating point.
 ## Why the JSCC recovery entry names its estimator
 
 Three estimators exist for this appendix and they disagree, which is the point: the 200-realisation held-out comparison gives 56--62%, the in-distribution k-fold diagnostic gives 36.7--74.9% (71.6% on the AWGN/test row), and the frozen cross-split evaluation is **negative** on test. The retired sentence quoted "55--70%" -- reproducible from none of them -- and used the *headroom* 0.031 as though it were the recovered gain, which is +0.0224 on that row. The registry therefore pins the estimator, the split and both quantities separately.
+
+## The payload anchor: a declared convention next to two measurements (R45-1)
+
+| quantity | how it is re-derived at gate time | product |
+|---|---|---|
+| declared anchor element count, `2.16e6` | `256 x 48 x 176 = 2,162,688`, the geometry stated in the same sentence | none — it is a **declared convention**, which is exactly why it has no CSV |
+| declared bit/element, `0.92` | `1.98 Mbit / 2,162,688 elements = 0.9155` | the source budget, declared |
+| deployed pre-compression count, `3,942,400` | read from the row `pointpillar / pre_compression` | `results/channel/payload_conventions.csv`, from `tools/bev_tensor_probe.py` (`P4B_PROBE_pointpillar_compression.json`) |
+| deployed transmitted count, `739,200` | read from the row `pointpillar / transmitted_bottleneck` | same |
+
+The distinction is the entry's whole purpose. `p6_numbers_vs_csv` reported `2.16` as a MISS against
+the products the claim is bound to, and it was **right to**: those products carry the *deployed*
+counts and deliberately not the declared anchor. A declared constant still has to be re-derivable, so
+the gate derives it from the geometry the paper itself states, and separately asserts that the two
+measured counts are printed exactly as the probe recorded them.
+
+What is retired here: "the conclusions are insensitive to this constant". The measured counterfactual
+(`results/channel/payload_anchor_sensitivity.csv`) moves the headline channel-use fraction by
+−0.90 % to −7.75 % under the paper's own 1.98 → 2.16 Mbit re-anchor and by −4.86 % to −41.99 % under
+the declared→deployed one. The **ordering** survives; the fraction does not, and the paper now says
+so — a claim the R45-6 reconciliation gate holds to the protocol's verdict.

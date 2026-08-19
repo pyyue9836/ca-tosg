@@ -4,7 +4,7 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (7 of 9)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (9 of 17)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
@@ -57,6 +57,9 @@ GATES = [
     # R43-4: the generators run their own substitutions; a pattern that no longer matches the
     # delivered text is a FAIL here instead of a silent no-op nobody sees until the next run.
     ('content',   'generators --check',  [PY, 'tests/test_generators_check.py']),
+    # R45-6: the paper vs the RECORD. Every other gate compares the paper against data; this one
+    # blocks a sentence the protocol has already ruled false-as-written or superseded.
+    ('content',   'protocol reconcile',  [PY, 'tests/test_protocol_reconciliation.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]

@@ -55,6 +55,16 @@ def carries_any_unit(vals, lit):
     return None
 
 
+
+def registry_literals():
+    """Literals the canonical-quantities registry names, e.g. `2.16` -- re-derived, not stored."""
+    p = os.path.join(ROOT, 'docs', 'canonical_quantities.md')
+    if not os.path.exists(p):
+        return set()
+    text = open(p, encoding='utf-8').read()
+    return {m.strip('`').replace(',', '') for m in re.findall(r'`-?[\d.,]+`', text)}
+
+
 def rows():
     ledger = ledger_rows(by_text=True)
     corpus = results_corpus()
@@ -79,6 +89,13 @@ def rows():
                 hits.append((cid, loc, lit, found[0][0], found[0][1]))
             elif DERIVED_HINT.search(gen_cell):
                 derived.append((cid, loc, lit, files[0], gen_cell[:120]))
+            elif lit in registry_literals():
+                # R45-1: the module docstring has always said registered quantities count as derived,
+                # but only the generator-cell hint was implemented. A DECLARED convention (the 2.16e6
+                # anchor) is exactly the case that needs it: no product carries it by design, and
+                # `tests/test_canonical_quantities.py` re-derives it instead.
+                derived.append((cid, loc, lit, 'docs/canonical_quantities.md',
+                                'registered quantity, re-derived by the canonical-quantities gate'))
             else:
                 misses.append((cid, loc, lit, files, claim))
     return hits, misses, derived, skipped

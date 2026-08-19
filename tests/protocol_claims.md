@@ -1,0 +1,27 @@
+# Paper ↔ protocol reconciliation (R45-6)
+
+`tests/test_protocol_reconciliation.py` reads this table. Each row pairs a **finding recorded in
+`docs/experiment_protocol.md`** with what the delivered documents are allowed to say about it. The
+gate exists because the two files drifted apart twice without any existing check noticing: the
+protocol recorded a measurement as *false as written*, and `main.tex` went on asserting the
+retired form for four more batches.
+
+Columns:
+
+| column | meaning |
+|---|---|
+| `id` | short label for the pair |
+| `protocol_probe` | a substring that must be present in `docs/experiment_protocol.md`; if it disappears, the row is stale and the gate FAILS (the record is the anchor, so it may not vanish silently) |
+| `verdict` | `false-as-written` or `superseded` — what the protocol says about the retired claim |
+| `retired_regex` | the retired form. **Zero** matches allowed in `main.tex` + `supplementary.tex` |
+| `required_probe` | a substring at least one delivered document must contain — the replacement claim. Empty means "no positive requirement" |
+| `why` | why this pair is load-bearing |
+
+A literal `|` inside a regex breaks the markdown row, so alternation is written `&#124;`.
+
+| id | protocol_probe | verdict | retired_regex | required_probe | why |
+|---|---|---|---|---|---|
+| anchor-insensitivity | "Conclusions are insensitive to this constant" — measured, and false as written | false-as-written | `conclusions are insensitive to this constant&#124;rescale the feature cost of all policies equally&#124;insensitive to this (constant&#124;anchor)` | declared source-budget convention | The protocol measured the counterfactual: the headline channel-use fraction moves by −0.90 % to −7.75 % under the paper's own named re-anchor and −4.86 % to −41.99 % under the declared→deployed one. Only the ordering survives. The paper asserted the opposite for four batches after the measurement landed. |
+| where2comm-baseline | Where2comm: no ranking | superseded | `[Ww]here2comm[^.\n]{0,60}(?<!not a )(?<!not )(baseline&#124;outperforms&#124;ranked against)` | adjacent-technology reference | Three axes of incomparability at once (retired global-sort scorer, perfect channel, full-collaborator convention). The record already flipped once — validate Fixed-L 0.7819 is *below* the 0.871 reproduction — which is what reading a non-comparison as a comparison produces. |
+| c256-dominance | SUPERSEDED BY R31-1 | superseded | `(dominated&#124;dominates)[^.\n]{0,40}C_?\{?256\}?` | physical-layer comparator | R31-1 withdrew the set-domination argument: C256 is excluded by design (modulation order is a transport parameter), not by measurement. |
+| latency-budget | Selector-only latency | superseded | `fits (the&#124;within the) \$100\$~ms budget&#124;within the \$100\$~ms frame interval` | end-to-end system latency is not measured here | The measured quantity is the selector alone; "fits within the 100 ms budget" reads as an end-to-end system claim the paper never measured. |

@@ -6,10 +6,10 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| FROZEN | 51 |
+| FROZEN | 54 |
 | ANALYTIC | 47 |
 
-Total: **98** claims across **28** (sub)sections.
+Total: **101** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -32,6 +32,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c4f16b5` | FROZEN | 256, 3 | This paper proposes Channel-Aware Task-Oriented Semantic Granularity Selection (CA-TOSG): instead of a fixed representation, the e… |
+| `c73fb65` | FROZEN | 52.1 | We instantiate the framework as a lightweight, interpretable, receiver-driven policy that uses only ego-side perception cues and a… |
 | `ccfd4fe` | FROZEN | 16, 256 | The mainline comparison is between fixed ego-only, object-level and feature-level transmission with LDPC + 16/256-QAM coding [cite… |
 | `c6e2d9d` | FROZEN | 1, 32.2, 49.2, 42.1, 68.9, 0.20, 0.30, 0.00883, 95, -0.00902 | We characterise where it sits on the payload--F1 plane rather than claiming it is better on average, and report, per budget, the c… |
 
@@ -102,6 +103,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c518be1` | ANALYTIC | 2, 802.11, 5 | In a deployed V2X stack, _t is obtained from pilot-symbol SNR estimation already produced by 802.11bd or 5G NR sidelink receivers … |
+| `c779596` | FROZEN | 10, 1, 0.89542, 0.89701, 0.20 | Both inputs are treated as estimates, and the results below are conditional on them being available at the ego: an SNR estimate th… |
 
 ### Proposed Method [sec:method] → Message Branches
 
@@ -110,12 +112,13 @@ _None._
 | `cdf7a49` | ANALYTIC | 0.024 | Its average payload is approximately B_L = 0.024 Msym/frame, allowing it to be transmitted with strong channel coding and treated … |
 | `cf29705` | ANALYTIC | 16, 0.99, 256, 0.495 | The C_16 mode is more reliable but less spectrally efficient (channel-use payload B_C_16 ≈ 0.99 Msym/frame), while the C_256 mode … |
 
-### Proposed Method [sec:method] → Channel-Aware Semantic Granularity Selector
+### Proposed Method [sec:method] → Channel-Aware Semantic Granularity Selector [sec:selector]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `ceb8c43` | FROZEN | 400, 2, 10, 0.10, 0.20, 0.30 | N_T=400 trees and max\_features=sqrt throughout, minimum samples per leaf of 2, a depth bound of 10 at B_=0.10 and 0.20 and unboun… |
-| `ce4a414` | FROZEN | 52.1, 5.6, 95, 58.3, 1,000, 1, 100, 10 | Third, its per-frame inference cost on a single CPU core is 52.1 ± 5.6 ms (P95 = 58.3 ms), measured over 1,000 batch-1 trials per … |
+| `cd1a648` | FROZEN | 52.1, 5.6, 95, 58.3, 1,000, 1 | Third, its per-frame inference cost on a single CPU core is 52.1 ± 5.6 ms (P95 = 58.3 ms), measured over 1,000 batch-1 trials per … |
+| `c7b92f1` | FROZEN | 52.1 | Selector-only latency is 52.1 ms; end-to-end system latency is not measured here. |
 | `cfb1749` | ANALYTIC | 0.999 | Before taking the argmax in Eq. [eqref], the oracle applies a feasibility mask: any mode whose frame-level block-error rate exceed… |
 
 ### Experimental Setup [sec:exp] → Dataset and Implementation
@@ -130,7 +133,7 @@ _None._
 |---|---|---|---|
 | `cf3bea1` | ANALYTIC | 2, 27, 3, 110, 8, 0.024 | The object-level message L carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average 27… |
 | `cf2cf54` | ANALYTIC | 256, 48, 176, 2.16, 10, 6, 281.6, 76.8, 0.4, 704, 192, 4 | The feature-level message encodes the transmitted BEV feature tensor of size 256 × 48 × 176 ≈ 2.16 × 10^6 elements: the 281.6 × 76… |
-| `cb73427` | ANALYTIC | 1.98, 0.92, 2.16, 10, 6, 1 | We adopt a fixed source budget of B_C ≈ 1.98 Mbit/frame for the feature message, i.e.\ ≈ 0.92 bit per element of this 2.16 × 10^6-… |
+| `c92cf61` | ANALYTIC | 1.98, 0.92, 2.16, 10, 6 | We adopt a fixed source budget of B_C ≈ 1.98 Mbit/frame for the feature message, i.e.\ ≈ 0.92 bit per element of this 2.16 × 10^6-… |
 | `c873513` | ANALYTIC | 16, 256, 1.98, 1, 2, 0.99, 0.495 | Both feature modes C_16 and C_256 carry this same 1.98 Mbit perception payload but require different numbers of channel uses; appl… |
 
 ### Experimental Setup [sec:exp] → Channel Settings
@@ -240,7 +243,7 @@ _None._
 | `c19bd42` | FROZEN | 0.20, +0.0300, 1, +0.1183, +0.0061, +0.0991 | Collaborator scale. Requesting more collaborators has sharply diminishing returns: at B_=0.20 on validate the second collaborator … |
 | `cb21f27` | FROZEN | 3, 0.36842, 2, 0.26937 | The budget does not transfer automatically: the selector is frozen against a per-frame budget measured with a single collaborator,… |
 | `cd09db5` | ANALYTIC | 1, 0.0002, 60, -0.0025, -0.0109 | SNR-estimation noise up to ≈ 1 dB costs ≤ 0.0002 F1, CSI aging under a Jakes model at 60 km/h costs -0.0025, and acting on a one-f… |
-| `c0b0c40` | FROZEN | 52.1, 5.6, 95, 58.3, 100, 10 | The deployed Random Forest runs in 52.1 ± 5.6 ms (P95=58.3 ms) per frame on a single CPU core, the slowest of the three frozen sel… |
+| `c527ae5` | FROZEN | 52.1, 5.6, 95, 58.3 | The deployed Random Forest runs in 52.1 ± 5.6 ms (P95=58.3 ms) per frame on a single CPU core, the slowest of the three frozen sel… |
 | `cee9e8b` | FROZEN | 16, 200, 1, 18.938, -0.001508, +0.001522, 45.177, -0.119307, | Resampling the primary cell at the level of the 16 test scenes rather than the 200 CSI draws widens the F1 interval by 18.938 × to… |
 | `cf01bf9` | FROZEN | 0.10, 0.00634, 1, 0.00588, 0.00734 | Charging the object-level link with BLER_L=0.10 costs the selector 0.00634 F1 against 0.00588 for the threshold rule and 0.00734 f… |
 | `cdd3def` | FROZEN | 2,4, 8, 0.402400, 0.100363, 0.057077, 1.226954, 1.120770 | Splitting the feature frame into k\2,4\ fragments with one retransmission lowers the marginal AWGN cliff point at 8 dB from 0.4024… |
@@ -250,7 +253,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `c19323f` | FROZEN | 2, 16, 256 | We presented , a channel-aware task-oriented semantic granularity selector for V2V cooperative perception: from per-frame LiDAR cu… |
-| `c7dfac9` | FROZEN | 52.1, 5.6, 95, 58.3, 100, 10 | It runs in 52.1 ± 5.6 ms (P95 = 58.3 ms) per frame on one CPU core---the slowest of the three frozen selectors---within the 100 ms… |
+| `c055877` | FROZEN | 52.1, 5.6, 95, 58.3 | It runs in 52.1 ± 5.6 ms (P95 = 58.3 ms) per frame on one CPU core, the slowest of the three frozen selectors---selector-only, as … |
 | `cdf1c6a` | FROZEN | 0.0550, 0.0240, 0.0970, 21.3, 0.0, 3.7, 21.4 | Second, the AP a granularity policy can contest is bounded by each split's headroom (0.0550 validate, 0.0240 test, 0.0970 Culver-C… |
 | `cf4f060` | FROZEN | 1, 1.47, 1.97, 0.005, 34.8, 26.6 | Third, the dominant decision signal is the channel state: a simple SNR-threshold rule tracks the learned selector closely on the c… |
 | `c88ae5d` | FROZEN | +0.0660, 1, 95, +0.0591, +0.0730 | The policy's gain over object-level communication is frame-selective, reaching +0.0660 F1 (95\% CI [+0.0591,+0.0730]) on the harde… |

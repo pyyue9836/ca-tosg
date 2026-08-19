@@ -43,6 +43,10 @@ GENERATORS = [
     # defect rather than a reading -- a number the figures draw that nothing states.
     ('check_figure_consistency', ['tools/check_figure_consistency.py', '--check'],
      'docs/figure_text_consistency.md (and the drawn-but-never-stated set)'),
+    # R45-5: the handoff's commit field is generated; --check fails when the recorded commit is not
+    # an ancestor of HEAD, i.e. when the file describes a state the branch has left.
+    ('build_handoff_header', ['tools/build_handoff_header.py', '--check'],
+     "docs/HANDOFF.md's commit header"),
 ]
 
 

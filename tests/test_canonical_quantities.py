@@ -269,6 +269,37 @@ def q_registry_arithmetic(text):
     return rc
 
 
+def q_declared_anchor(text):
+    """2.16e6 <- 256 x 48 x 176, the DECLARED anchor geometry, and 0.92 bit/element <- 1.98 Mbit / it.
+
+    R45-1: the anchor is a convention, so there is no CSV that carries "2.16" -- `p6_numbers_vs_csv`
+    reported it as a MISS against the deployed-count products the claim is bound to, which is
+    correct: those products carry the DEPLOYED counts (3,942,400 / 739,200), deliberately not this.
+    A declared constant still has to be re-derivable, so it is derived here from the geometry the
+    same sentence states, and from the source budget.
+    """
+    elements = 256 * 48 * 176                                   # the declared tensor geometry
+    lit = f'{elements / 1e6:.2f}'                               # 2.16
+    bits = 1.98e6 / elements                                    # bit per element of the anchor
+    rc = check('declared anchor element count', printed(lit, text),
+               f'256 x 48 x 176 = {elements:,} -> "{lit}e6" '
+               f'{"printed" if printed(lit, text) else "NOT printed"} in main.tex')
+    rc |= check('declared anchor bit/element', printed(f'{bits:.2f}', text),
+                f'1.98 Mbit / {elements:,} elements = {bits:.4f} bit/element -> '
+                f'"{bits:.2f}" {"printed" if printed(f"{bits:.2f}", text) else "NOT printed"}')
+    # and the deployed counts, which are measurements and must come from the probe product
+    conv = pd.read_csv(os.path.join(ROOT, 'results/channel/payload_conventions.csv'))
+    pp = conv[(conv.backbone == 'pointpillar')].set_index('convention')
+    for conv_name, label in (('pre_compression', 'pre-compression'),
+                             ('transmitted_bottleneck', 'transmitted bottleneck')):
+        n = int(pp.loc[conv_name, 'elements_per_cav'])
+        printed_form = f'{n:,}'.replace(',', '{,}')             # LaTeX thousands separator
+        rc |= check(f'deployed {label} count', printed_form in text,
+                    f'{conv_name} = {n:,} -> "{printed_form}" '
+                    f'{"printed" if printed_form in text else "NOT printed"} in main.tex')
+    return rc
+
+
 def main() -> int:
     if not os.path.exists(REGISTRY):
         print(f'FAIL: {os.path.relpath(REGISTRY, ROOT)} is missing -- the registry is the '
@@ -278,12 +309,13 @@ def main() -> int:
     print('canonical quantities (every reference re-derived from its committed product):')
     rc = 0
     for fn in (q_feature_importance, q_latency, q_fa1_ratio, q_payload_reduction,
-               q_ratio_families, q_jscc_recovery, q_docs_display, q_registry_arithmetic):
+               q_ratio_families, q_jscc_recovery, q_docs_display, q_registry_arithmetic,
+               q_declared_anchor):
         rc |= fn(text)
     # the registry must name every quantity this file checks, so the two cannot drift apart
     reg = open(REGISTRY, encoding='utf-8').read()
     for token in ('feature_importance_frozen.csv', 'selector_latency.csv', 'feature_ablation.csv',
-                  'replay_summary.csv', 'jscc_selector_'):
+                  'replay_summary.csv', 'jscc_selector_', 'payload_conventions.csv'):
         if token not in reg:
             rc |= check('registry coverage', False, f'{token} is checked here but absent from '
                                                     f'{os.path.relpath(REGISTRY, ROOT)}')

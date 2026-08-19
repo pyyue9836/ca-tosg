@@ -241,10 +241,12 @@ Collaboration is not unconditionally beneficial, and that is what makes an expli
 
 
 
-\subsection{Comparison with Where2comm}\label{sec:where2comm}
+\subsection{Where2comm as an Adjacent-Technology Reference}\label{sec:where2comm}
 
-To place \method{} beside the most prominent spatial-selection cooperative
-perception method, we report a \emph{reference-only} comparison against
+Where2comm is an \emph{adjacent-technology reference}, not a baseline: it is
+not ranked against any arm of this paper, and no claim here rests on it. To
+place \method{} beside the most prominent spatial-selection cooperative
+perception method, we report reference-only measurements of
 Where2comm~\cite{hu2022where2comm} on the same OPV2V validate split
 ($1{,}980$ frames). Three caveats bound what it can support, and they are
 stated rather than buried: the numbers come from our own $50$-epoch
@@ -299,13 +301,23 @@ both---so the conclusions here do not depend on which convention is adopted. Fin
 
 \subsection{Deployment Robustness and Cost}\label{sec:robustness}
 
-Three practical imperfections---a noisy SNR estimate, channel-state aging, and a stale request---degrade the selector only gracefully, because an uncertain channel state falls back to $L$ (Table~\ref{tab:robustness}): SNR-estimation noise up to $\sigma\approx1$~dB costs $\le0.0002$ F1; a Jakes model at $60$~km/h decorrelates the estimate within ${\sim}10$~ms, costing $-0.0025$ before plateauing; a one-frame-stale decision costs at most $-0.0109$ under our i.i.d.-per-frame assumption (changing $18.2\%$ of decisions). The near-immunity to estimation noise follows from the channel-type-anchored policy of Section~\ref{sec:feat_imp}: perturbing continuous $\hat\gamma_t$ rarely flips a decision anchored on the discrete channel-type flag, and under Rayleigh the action remains $L$ regardless. Finally, the deployed
+Four practical imperfections---a noisy SNR estimate, channel-state aging, a stale request, and a misread channel type---degrade the selector only gracefully, because an uncertain channel state falls back to $L$ (Table~\ref{tab:robustness}): SNR-estimation noise up to $\sigma\approx1$~dB costs $\le0.0002$ F1; a Jakes model at $60$~km/h decorrelates the estimate within ${\sim}10$~ms, costing $-0.0025$ before plateauing; a one-frame-stale decision costs at most $-0.0109$ under our i.i.d.-per-frame assumption (changing $18.2\%$ of decisions). The near-immunity to estimation noise follows from the channel-type-anchored policy of Section~\ref{sec:feat_imp}: perturbing continuous $\hat\gamma_t$ rarely flips a decision anchored on the discrete channel-type flag, and under Rayleigh the action remains $L$ regardless. Finally, the deployed
 Random Forest runs in $52.1\pm5.6$~ms per frame ($\mathrm{P95}=58.3$~ms) on a single CPU
-core, i.e.\ the selector's own inference occupies about half of the $100$~ms frame interval of a
-$10$~Hz LiDAR cycle; we measure the selector only and make no claim about the end-to-end
-perception--transmission chain. The
+core. Selector-only latency is $52.1$~ms; end-to-end system latency is not measured here. The
 figure is the slowest of the three frozen selectors over $1{,}000$ batch-1 trials each; the
 deployment claim must hold for every budget, so the worst case is the one quoted.
+
+\emph{Misreading the channel type.} The selector takes the channel-type indicator $c_t$ as an
+input, and $c_t$ carries the single largest Gini share of any feature, so its reliability is a
+deployment question rather than a detail. We flip $c_t$ on a random fraction of frames and replay
+the frozen policy (P3 sensitivity arm, \texttt{channel\_misclassification.csv}). The degradation is
+graceful and roughly linear in the flip rate: on test at $B_{\max}=0.20$ the arm's own no-flip
+baseline is $0.89701$ realised F1, falling to $0.89620$ at a $5\%$ flip rate, $0.89542$ at $10\%$
+and $0.89384$ at $20\%$, with the payload essentially unchanged ($0.14036$ to $0.14051$~Msym). A
+misread channel type therefore costs a small amount of F1 rather than breaking the policy, because a
+wrongly-Rayleigh frame falls back to $L$ and a wrongly-AWGN frame is caught by the feasibility mask.
+The arm is a sensitivity replay, not a deployed configuration: its no-flip cell is not the mainline
+replay's.
 
 A fourth imperfection concerns the \emph{cheap} message rather than the expensive one. The
 utilities above model the object-level link as reliable ($\mathrm{BLER}_L=0$), which is an assumption
