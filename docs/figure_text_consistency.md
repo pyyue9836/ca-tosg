@@ -6,10 +6,10 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 
 | state | count |
 |---|---|
-| quoted on both sides | 12 |
-| quoted on one side only | 19 |
-| drawn but never stated | 1 |
-| same value, different condition | 2 |
+| quoted on both sides | 8 |
+| quoted on one side only | 24 |
+| drawn but never stated | 0 |
+| same value, different condition | 1 |
 
 ## Quoted on one side only
 
@@ -32,18 +32,21 @@ Matching is condition-aware: a drawn number counts as quoted only inside a sente
 | `pareto_catosg_B030_payload` | 0.212 | body only |
 | `pareto_oracle_f1` | 0.9056 | body only |
 | `pareto_oracle_payload` | 0.175 | body only |
-| `payload_catosg_awgn_low` | 0.0237 | body only |
+| `payload_catosg_awgn_at_knee` | 0.4795 | caption only |
+| `payload_catosg_awgn_low` | 0.0237 | caption only |
+| `rho_E_catosg_rayleigh_test` | 0.0018 | caption only |
+| `rho_E_oracle_rayleigh_culver` | 0.1327 | caption only |
 | `rho_E_oracle_rayleigh_test` | 0.1571 | body only |
+| `rho_F_at_knee_test` | 0.4327 | body only |
+| `rho_F_at_knee_validate` | 0.4717 | caption only |
 
 ## Drawn but never stated
 
 | drawn number | value | condition |
 |---|---|---|
-| `rho_E_catosg_rayleigh_test` | 0.0018 | split=test budget=0.2 channel=rayleigh snr_db=10.0 |
 
 ## Same value, different condition
 
 | drawn number | value | drawn at | side |
 |---|---|---|---|
-| `payload_catosg_awgn_low` | 0.0237 | split=validate budget=0.2 channel=awgn snr_db=0.0 | caption |
 | `rho_E_oracle_rayleigh_test` | 0.1571 | split=test budget=0.2 channel=rayleigh snr_db=10.0 | caption |

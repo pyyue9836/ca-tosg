@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -28,7 +29,24 @@ TEX = os.path.join(PAPER, 'main.tex')
 LOG = os.path.join(PAPER, 'main.log')
 DOCS = ('main', 'supplementary')          # R40: both delivered documents are built and checked
 REPORT = os.path.join(ROOT, 'docs', 'compile_report.md')
-TECTONIC = os.path.expanduser('~/miniconda3/envs/latex/bin/tectonic')
+def _tectonic():
+    """R44-7: resolve the engine instead of hard-coding one machine's path.
+
+    Order: $TECTONIC_BIN (an explicit override always wins), then whatever is on PATH, then the
+    conda env this repo installed it into. The hard-coded path was correct here and nowhere else,
+    so the gate could not run on any other machine -- a gate that only one host can run is a gate
+    the next person deletes.
+    """
+    env = os.environ.get('TECTONIC_BIN')
+    if env and os.path.exists(env):
+        return env
+    found = shutil.which('tectonic')
+    if found:
+        return found
+    return os.path.expanduser('~/miniconda3/envs/latex/bin/tectonic')
+
+
+TECTONIC = _tectonic()
 MAX_PAGES = 17
 
 
@@ -39,7 +57,7 @@ def compile_one(name):
 
 def compile_paper():
     if not os.path.exists(TECTONIC):
-        return None, f'tectonic not found at {TECTONIC}'
+        return None, (f'tectonic not found at {TECTONIC} -- set $TECTONIC_BIN or put tectonic on PATH')
     return {n: compile_one(n) for n in DOCS}, None
 
 

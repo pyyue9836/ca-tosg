@@ -5048,3 +5048,94 @@ figure count, which R36-4 reserves for Josh. Not taken.
 Seventeen gates pass, twice; `p6_cross_section_scan` 0 conflicts; `p6_numbers_vs_csv` 0 MISS, 150 table
 cells located over both documents, 0 UNLOCATED. Main **15 pages, 1 overfull (17.6pt)**; supplementary
 9 pages, 7 overfull. Abstract **246 rendered words**.
+
+## R44 — E defined by what it withholds, CAM scope, generator/figure gate registration
+
+Zero GPU; text, documentation and gate registration only. No figure was touched and no page-count
+lever was pulled.
+
+### 1 · The "no request" family is retired
+
+The supervisor's objection is structural, not stylistic: the ego sends the $E$ control codepoint on
+every frame, so describing $E$ as "no request at all" contradicts the $2$-bit signalling the same
+section defines. What $E$ withholds is the **cooperative perception payload**. Six sites changed
+(overview caption, `sec:intro` contribution, `sec:system` mode list, the codepoint sentence,
+`sec:candidates` definition and the Conclusion) plus one in the supplementary. The definition
+sentence is now the supervisor's: *the ego sends the $E$ control codepoint, and the collaborator
+transmits no cooperative perception payload.*
+
+Self-consistency with the $2$-bit/$20$~bps accounting is now stated rather than left implicit: "The
+codepoint is sent on every frame, including when the ego selects $E$, so the $20$~bps signalling cost
+does not depend on the mode chosen; what $E$ removes is the cooperative perception payload, not the
+request." $B_E=0$ therefore refers to the perception payload, which is what the payload model charges.
+
+Two of the six sites sit inside insertion-gate paragraphs (#2 in the supplementary, #3 in related
+work), so the change is registered as ruling **R44-1** in both. The first attempt placed the
+paragraph-2 ruling BEFORE `P5-7-10`, whose replacement text is what introduces the clause being
+rewritten; the gate reported "source not found in draft", which is what a wrong ORDER looks like.
+Rulings apply in sequence: a ruling's source is the draft as the earlier rulings left it.
+
+### 2 · CAM claim downgraded, ETSI references added
+
+"piggy-backed on the existing Cooperative Awareness Message (CAM) ... already provisioned in the
+standard CAM signalling budget" asserted a standards fact the paper does not establish. It now reads
+as an **application-layer extension associated with** the ETSI CAM~(EN 302 637-2) and CPM~(TS 103 324)
+services, with standards integration explicitly outside scope. Both references added to `refs.bib`;
+the two "CAM-embedded request" mentions elsewhere are now plain "$2$-bit request".
+
+### 3 · The Conclusion's `near-sufficient statistic` sentence is replaced
+
+Replaced by the two-axis reading: the channel state settles which frames a feature message can reach
+at all, the task cues settle which of those frames are worth spending on, which is why the cues move
+channel use rather than average F1 here. The abstract's "neither half of the input suffices alone" is
+untouched.
+
+### 4 · `check_figure_consistency.py --check`, registered
+
+The tool reported and decided nothing, which is right for the one-sided and different-condition rows
+(those are readings). "Drawn but never stated" is not a reading: a figure shows a number no caption
+and no sentence states. `--check` now fails on exactly two things — a non-empty never-stated set, and
+a stale `docs/figure_text_consistency.md` — and is registered in `tests/test_generators_check.py`.
+
+The three never-stated rows are **disposed of individually**, none silently:
+
+| row | value | disposition |
+|---|---|---|
+| `payload_catosg_awgn_low` | 0.0237 | the caption stated it, but inside a clause pinned to the $10$~dB knee while the value is drawn at $0$~dB. Caption split so the value carries its own condition ("$0.0237$~Msym/frame at $0$~dB"). |
+| `payload_catosg_awgn_at_knee` | 0.4795 | same sentence ended "...and holds $L$ throughout under Rayleigh", so the only channel named in the window was Rayleigh and the AWGN-drawn value read as a condition conflict. Split into its own AWGN sentence. |
+| `rho_E_catosg_rayleigh_test` | 0.0018 | the caption rounded it to $0.002$, which the checker refuses (a two-significant-digit literal is collision-prone). Caption now quotes the drawn value $0.0018$. |
+
+Result: **0 drawn-but-never-stated**, and the one remaining different-condition row
+(`rho_E_oracle_rayleigh_test`) is matched on the body side and recorded in the report.
+
+### 5–6 · `HANDOFF.md` and `reproducibility.md` rewritten
+
+`HANDOFF.md` now opens on the current state (17 gates, 98 claims all bound, 150+4 table cells over
+both documents, 0 LEGACY, 15 pages, abstract 248 words), the four gates worth knowing before editing,
+and three open items that are all Josh's call — page count (figure floor), R21-B Where2comm rerun
+(never executed, awaiting cost approval), and his own figure/bib passes. Everything previous is under
+"History (superseded)" with an explicit do-not-quote banner.
+
+`reproducibility.md` now leads with the six-step current chain (grids → freeze → replay → verification
+arms → regenerate → verify+compile), each step naming the command that writes the product, plus the
+seeds and the two verification tiers. The v3 global-sort pipeline, its table/figure map and its
+"compile on Overleaf" instruction are all under "Legacy (v3 engine, superseded)".
+
+### 7 · Compile gate is no longer host-specific
+
+`TECTONIC` was a hard-coded path into one machine's conda env. Resolution order is now
+`$TECTONIC_BIN` → `shutil.which('tectonic')` → the local env, and the failure message says how to
+override. A gate only one host can run is a gate the next person deletes.
+
+### 8 · Abstract latency sentence
+
+"Inference: $52.1$~ms/frame, one CPU core." → "Selector-only inference: $52.1$~ms/frame on one CPU
+core." — the measured quantity is the selector, not the end-to-end chain, and the abstract now says
+so. **248 rendered words**, still inside the 250 limit.
+
+### 9 · State
+
+Seventeen gates pass, twice, over both documents; `p6_cross_section_scan` 0/0/0/0;
+`p6_numbers_vs_csv` 0 MISS, 150 located + 4 declared-derived, 0 UNLOCATED; figure gate 0
+never-stated. Main **15 pages, 1 overfull (17.6pt)**; supplementary 9 pages. Page count unchanged by
+design: this batch pulled no page lever.

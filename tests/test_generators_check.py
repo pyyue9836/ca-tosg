@@ -39,6 +39,10 @@ GENERATORS = [
      "README.md's model-zoo table"),
     ('claims_ledger', ['tests/test_result_consistency.py', '--check'],
      'docs/claims.md'),
+    # R44-4: reports the figure/caption/body three-way, and fails on the one row class that is a
+    # defect rather than a reading -- a number the figures draw that nothing states.
+    ('check_figure_consistency', ['tools/check_figure_consistency.py', '--check'],
+     'docs/figure_text_consistency.md (and the drawn-but-never-stated set)'),
 ]
 
 

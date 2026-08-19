@@ -6,8 +6,8 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| FROZEN | 50 |
-| ANALYTIC | 48 |
+| FROZEN | 51 |
+| ANALYTIC | 47 |
 
 Total: **98** claims across **28** (sub)sections.
 
@@ -25,7 +25,7 @@ _None._
 | `c3faeb6` | ANALYTIC | 2, 0.5, 0.10, 0.20, 0.30 | On OPV2V (validate, scene-disjoint test, Culver-City) under AWGN and Rayleigh we report true end-to-end AP@0.5 at B_\0.10,0.20,0.3… |
 | `cef09af` | FROZEN | 3.7, 21.4 | It buys channel use---3.7--21.4\% of fixed feature-level transmission on test---falling back to object-level under fading. |
 | `c5ab25a` | FROZEN | 0.20, 0.005, 34.8, 0.2168, +0.00067, 26.6 | On the pre-registered confirmatory cell (test, B_=0.20) it is non-inferior to the nominal SNR threshold within a 0.005 margin at 3… |
-| `cc1b924` | FROZEN | 52.1 | 52.1 ms/frame, one CPU core. |
+| `cd87af5` | FROZEN | 52.1 | 52.1 ms/frame on one CPU core. |
 
 ### Introduction
 
@@ -39,20 +39,20 @@ _None._
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c3eca4e` | FROZEN | 2 | makes the prevailing channel state a first-class conditioning signal alongside the task: from local task cues and the estimated ch… |
+| `cd306e4` | FROZEN | 2 | makes the prevailing channel state a first-class conditioning signal alongside the task: from local task cues and the estimated ch… |
 
 ### System Model and Problem Formulation [sec:system] → Cooperative Perception Setting
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `c641b8b` | ANALYTIC | 2, 802.11 | We adopt a receiver-driven signalling architecture: the ego vehicle evaluates its own perception state and channel state, decides … |
-| `c5a3774` | ANALYTIC | 2, 10, 20, 24, 0.24 | The request thus costs 2 bits per frame at 10 Hz, i.e., 20 bps, which is negligible relative to the 24 kbit per frame (0.24 Mbit/s… |
+| `c939218` | FROZEN | 802.11 | We treat this request as an application-layer extension associated with the ETSI Cooperative Awareness Message (CAM) [cite] and Co… |
+| `c41ec0b` | ANALYTIC | 2, 10, 20, 24, 0.24 | The request costs 2 bits per frame at 10 Hz, i.e., 20 bps, which is negligible relative to the 24 kbit per frame (0.24 Mbit/s at 1… |
 
 ### System Model and Problem Formulation [sec:system] → Message Candidates [sec:candidates]
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cda9913` | ANALYTIC | 0, 0.024, 0.99, 16, 1, 2 | [label] At each frame, the ego receiver selects one communication mode from the deployed action set and requests it where E is ego… |
+| `c232fc8` | ANALYTIC | 0, 0.024, 0.99, 16, 1, 2 | [label] At each frame, the ego receiver selects one communication mode from the deployed action set and requests it where E is ego… |
 | `cc5669c` | ANALYTIC | 16, 256, 0.495 | We write F C_16, using the C_q form only where modulation order is the subject; C_256 (0.495 Msym) is a physical-layer comparator,… |
 | `c174446` | ANALYTIC | 1.98, 16, 256 | The two feature-level modes carry the same perception payload of approximately 1.98 Mbit but need different numbers of channel use… |
 | `cc2eac3` | ANALYTIC | 256, 16, 0.495, 0.99, 1.98, 1, 2, 3.96, 8, 4 | Of the two feature-level modes, the 256-QAM variant (C_256) carries the identical semantic content as C_16---the same compressed f… |
@@ -95,7 +95,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cb54696` | ANALYTIC | 802.11, 5 | Meanwhile, the current channel quality is represented by the estimated SNR _t and the channel type c_t, both produced by the ego's… |
-| `cbb7a09` | ANALYTIC | 16 | The collaborator transmits the requested message: if s_t=L, compact object-level detections; if s_t=F, a compressed feature-level … |
+| `cbb82b9` | ANALYTIC | 16 | The collaborator transmits the requested message: if s_t=L, compact object-level detections; if s_t=F, a compressed feature-level … |
 
 ### Proposed Method [sec:method] → Channel Quality Cue
 
@@ -249,9 +249,9 @@ _None._
 
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
-| `cfc3777` | FROZEN | 2, 16, 256 | We presented , a channel-aware task-oriented semantic granularity selector for V2V cooperative perception: from per-frame LiDAR cu… |
+| `c19323f` | FROZEN | 2, 16, 256 | We presented , a channel-aware task-oriented semantic granularity selector for V2V cooperative perception: from per-frame LiDAR cu… |
 | `c7dfac9` | FROZEN | 52.1, 5.6, 95, 58.3, 100, 10 | It runs in 52.1 ± 5.6 ms (P95 = 58.3 ms) per frame on one CPU core---the slowest of the three frozen selectors---within the 100 ms… |
 | `cdf1c6a` | FROZEN | 0.0550, 0.0240, 0.0970, 21.3, 0.0, 3.7, 21.4 | Second, the AP a granularity policy can contest is bounded by each split's headroom (0.0550 validate, 0.0240 test, 0.0970 Culver-C… |
 | `cf4f060` | FROZEN | 1, 1.47, 1.97, 0.005, 34.8, 26.6 | Third, the dominant decision signal is the channel state: a simple SNR-threshold rule tracks the learned selector closely on the c… |
-| `cf73e41` | FROZEN | +0.0660, 1, 95, +0.0591, +0.0730 | The policy's gain over object-level communication is frame-selective, reaching +0.0660 F1 (95\% CI [+0.0591,+0.0730]) on the harde… |
+| `c88ae5d` | FROZEN | +0.0660, 1, 95, +0.0591, +0.0730 | The policy's gain over object-level communication is frame-selective, reaching +0.0660 F1 (95\% CI [+0.0591,+0.0730]) on the harde… |
 

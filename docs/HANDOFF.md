@@ -1,5 +1,110 @@
 # HANDOFF — read this first in a new session
 
+**Branch** `p1-phy-rebuild` · **written after R44** (HEAD at the time: `4dc4a03`; always re-check with
+`git ls-remote origin p1-phy-rebuild`) · **recovery tag** `pre-p0-corrigendum` (the pre-correction
+state; nothing before it is quotable).
+
+## Where the work stands
+
+The paper is **written, verified and compiled**. What remains is layout and Josh's own decisions, not
+experiments. The P0 corrigendum, the frozen-selector protocol (P2), the physical-layer rebuild (P1)
+and the R21–R43 revision batches are all committed; no experiment is mid-flight and no GPU work is
+queued.
+
+**Verification state — all green:**
+
+| check | state |
+|---|---|
+| repo gates (`python tools/verify_results.py`) | **17/17 PASS** (run it twice; it is cheap) |
+| compile (`python tests/test_compile.py`) | main **15 pages**, supplementary 9; 0 errors, 0 undefined refs, 1 overfull (17.6pt) |
+| numbers↔CSV (`tools/p6_numbers_vs_csv.py`) | MISS 0; **150 table cells located + 4 declared-derived, 0 UNLOCATED**, over BOTH documents |
+| claims↔evidence (`tools/audit_claims_evidence.py`) | 0 PENDING, 0 STALE, **0 LEGACY** |
+| cross-section scan (`tools/p6_cross_section_scan.py`) | ENTITY-VALUE / ORDERING / EXISTENCE / TERMINOLOGY all 0 |
+| figure↔caption↔body (`tools/check_figure_consistency.py --check`) | 0 drawn-but-never-stated |
+| ledger (`docs/claims.md`) | **98 claims, 98 filled, 0 unbound** |
+| abstract | **248 rendered words** (limit 250; count on the rendered page, not the source) |
+
+**Headline numbers (test @ B_max = 0.20, the sole primary cell):**
+F1 0.89691 vs nominal τ 0.89701; payload 0.14141 vs 0.21679 Msym. The payload saving is
+**two-track and must be quoted as both**: 34.8% against the nominal threshold (itself over budget at
+0.2168 > 0.20) and **26.6%** against `tau_feasible`, the budget-matched one — against which the
+selector is *ahead* on F1 by +0.00067.
+
+## The gate suite, and what each new one exists for
+
+`python tools/verify_results.py` runs 17. Four are worth knowing before you edit anything:
+
+* **paragraph insertion** — three paragraphs are byte-locked to their drafts through a whitelist of
+  authorised rewrites. Rewording one without registering a ruling is a FAIL, and reverting your edit
+  is usually the right fix (R41 tried the alternative).
+* **numeric literals** — every number in either document must be bound to a committed product
+  through `docs/claims.md`, or registered as debt. The register is currently empty.
+* **comparison direction** — 17 registered (A, B, direction, metric, split, budget, probe) tuples,
+  evaluated against the CSVs. If you reword a sentence carrying one, re-point its probe.
+* **generators --check** (R43-4) — every generator that owns delivered text runs its own
+  substitutions; a pattern that stopped matching is a FAIL. This exists because R41 silently
+  unhooked `observation_iii()` and a full sixteen-gate suite passed anyway.
+
+## Read these, in this order
+
+1. `docs/experiment_protocol.md` — the decision record. The revision batches are change-logs
+   **R21 → R44** at the end; read backwards from R44 for current state.
+2. `docs/p0_corrigendum.md` — what the corrigendum changed, old vs new, per arm.
+3. `docs/assumptions_ledger.md` — every input artefact: physical semantics vs accounting convention.
+4. `docs/canonical_quantities.md` — derived quantities and how each is re-derived at gate time.
+5. `docs/reproducibility.md` — the six-step chain from raw OPV2V to the delivered PDF.
+
+## Working rules that are load-bearing here
+
+* **Never hand-copy a number into the paper.** Tables come from `tools/build_paper_tables.py`,
+  figures from `tools/generate_figures.py`, README results from the registry sources. After editing
+  `main.tex`, regenerate the ledger: `python tests/test_result_consistency.py`.
+* **Pre-register before running.** Amendments are written as amendments (see R18-3 and R21-A-2,
+  where a pre-registered rule proved degenerate and was corrected in public).
+* **A gate that cannot fail is not a gate.** Every checker has a self-test; run it with
+  `--self-test`.
+* **Retired-value fingerprints must be written `NUMBER(?![0-9])`**, never `NUMBER[^d]`.
+* **Never blend engines.** The retired global-sort v3 engine and the frozen replay are different
+  quantities; a sentence may not mix them.
+* **Frozen means frozen.** Deployed models, δ, τ\*, `FROZEN_MANIFEST.json`, the mainline replay and
+  every committed result CSV are read-only unless a change-log entry says otherwise.
+* Josh writes in Chinese; reply in Chinese. Lead any reply about committed work with the
+  `git ls-remote` hash.
+
+## Open items — all of them are Josh's call, none are mine
+
+1. **Page count.** Main is 15 pages; the target was 14. Prose compression, a citation audit
+   (25 → 16 keys), two float-geometry passes and a de-duplication round are done (R41–R43). The only
+   remaining lever is the **figure count** (currently 10 in the main paper), which R36-4 reserves for
+   Josh. Nothing further will be cut without his ruling.
+2. **Where2comm budget-matched rerun (R21-B).** Planned and costed; **never executed** — it is
+   waiting on Josh's GPU-cost approval.
+3. **Josh's own passes:** per-figure visual tick on the compiled PDF, bib author names, Fig. 1
+   drawio source.
+
+## Reproduce the verification in one go
+
+```bash
+cd ~/cooperative_semantic_perception/ca-tosg && conda activate sionna310
+python tools/verify_results.py                      # 17 gates
+python tools/p6_numbers_vs_csv.py                   # numbers <-> CSV (+ table cells, both documents)
+python tools/p6_cross_section_scan.py --self-test && python tools/p6_cross_section_scan.py
+python tools/audit_claims_evidence.py               # claims <-> evidence
+python tests/test_compile.py                        # both PDFs, page count, undefined refs
+```
+
+The compile gate resolves `tectonic` through `$TECTONIC_BIN` → `PATH` → the local conda env, so it
+runs on a machine that is not this one (R44-7).
+
+---
+
+# History (superseded)
+
+_Everything below this line is the previous handoff, kept as a record of where things stood. It
+describes states that no longer hold — gate counts, claim counts, open blockers — and must not be
+quoted as current._
+
+
 **Branch** `p1-phy-rebuild` · **HEAD** `e6d8276` · **recovery tag** `pre-p0-corrigendum` (the
 pre-correction state; nothing before it is quotable).
 

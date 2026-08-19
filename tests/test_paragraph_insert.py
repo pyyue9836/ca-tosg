@@ -148,6 +148,13 @@ PARAS = {
             ('it selects the message \\emph{granularity} per frame -- the compact object-level message or one of the feature-level variants -- and signals the choice through the 2-bit request before any high-payload transmission;',
              'it selects the message \\emph{granularity} per frame -- ego-only operation with no request at all, the compact object-level message, or the feature-level message -- and signals the choice through the 2-bit request before any high-payload transmission;',
              'R28-3'),
+            # R44-1 (supervisor): "no request at all" contradicts the signalling architecture -- the
+            # ego DOES send the E codepoint every frame; what E removes is the cooperative
+            # perception payload. The whole "no request" family is retired for that reason, here and
+            # in five other sites.
+            ('ego-only operation with no request at all, the compact object-level message',
+             'ego-only operation with no cooperative perception payload, the compact object-level message',
+             'R44-1'),
 ],
     ),
     2: dict(
@@ -205,6 +212,14 @@ PARAS = {
              "frame-identical to Fixed-$L$, so the paired difference arises entirely on the "
              "$F$-request frames -- the loss",
              'P5-5-7'),
+            # R44-1 (supervisor): applied AFTER P5-7-10, whose replacement text introduced this
+            # clause -- a ruling's source is the draft as the earlier rulings left it, and placing
+            # this one before P5-7-10 made it look like a missing source rather than a wrong order.
+            # The E action sends its codepoint like any other; what it withholds is the cooperative
+            # perception payload.
+            ("$E$ (ego-only, issue no request) is already a deployed action",
+             "$E$ (ego-only, no cooperative perception payload) is already a deployed action",
+             'R44-1'),
         ],
     ),
 }

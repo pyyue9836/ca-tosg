@@ -1,5 +1,63 @@
 # Reproducing CA-TOSG (Paper 1)
 
+Every number in `paper/main.tex` and `paper/supplementary.tex` traces to a committed product in
+`results/` and to the command that wrote it (`results/README.md` is the file-by-file index). Nothing
+is hand-typed: `tests/test_numeric_literals.py` fails on a literal that is not bound to a product,
+and `tools/build_paper_tables.py --check` fails if a table body differs from what its CSV produces.
+
+## The current chain, in six steps
+
+Run everything with the `sionna310` conda env. Steps 1--4 need the OPV2V-derived artefacts (git
+excluded, see `docs/dataset.md`); steps 5--6 run on the committed tree alone.
+
+| # | step | command | writes |
+|---|---|---|---|
+| 1 | build the per-frame grids (21 ego-side cues, per-branch clean F1, Sionna frame BLER) | `python tools/prepare_data.py` | `data/p2/p2_grid_{validate,test,culver}.csv` |
+| 2 | freeze the three budget-indexed selectors through the scene-level LOSO walk | `python tools/train_selector.py` | `data/p2/selector_B0{10,20,30}.pkl`, `results/manifests/FROZEN_MANIFEST.json` |
+| 3 | replay the frozen selectors over the 200 paired CSI realisations | `python tools/evaluate_selector.py` | `results/main/replay_summary.csv` (+ `tau_feasible.csv`, `fixed_references.csv`, `frozen_curves.csv` from their own scripts, see `results/README.md`) |
+| 4 | the deployed-AP verification and the sensitivity arms | `python projects/ca_tosg/evaluation/end_to_end_ap_snr.py`, `python projects/ca_tosg/evaluation/r23_sensitivity.py` | `results/main/true_e2e_ap_by_snr.csv`, `results/sensitivity/*.csv` |
+| 5 | regenerate every table, figure and generated sentence from those CSVs | `python tools/build_paper_tables.py`, `python tools/generate_figures.py`, `python tests/test_result_consistency.py` | `paper/*.tex` table bodies, `paper/figures/*.pdf`, `docs/claims.md` |
+| 6 | verify and compile | `python tools/verify_results.py`, `python tests/test_compile.py` | 17 gate results, `main.pdf` (15 pp.), `supplementary.pdf` (9 pp.), `docs/compile_report.md` |
+
+**Environment.** `conda activate sionna310` (python 3.10.18 / sklearn 1.7.0 / numpy 1.26.4 /
+pandas 2.2.2 --- pinned by `FROZEN_MANIFEST.json`); `PYTHONPATH=/home/josh/cooperative_semantic_perception/OpenCOOD`
+for the data-side steps. A GPU is needed only for the inference stages of step 1; steps 2--6 are
+CPU-only. **LaTeX is no longer external**: the compile gate drives `tectonic`, resolved through
+`$TECTONIC_BIN`, then `PATH`, then the local `latex` conda env (R44-7). The Overleaf instruction in
+the legacy section below is retired.
+
+**Randomness.** The replay draw is `CSI_SEED=20260809`, 200 realisations, per frame
+`snr ~ U[0,20]` dB and `is_rayleigh` Bernoulli(0.5); the paired bootstrap is `N_BOOT=10000`,
+`BOOT_SEED=12345`. The frozen selectors' hyper-parameters and the LOSO fold structure are recorded in
+`FROZEN_MANIFEST.json`; the walk that selected them is pre-registered in `docs/experiment_protocol.md`.
+
+## Verification --- two tiers, and a clean clone cannot do both
+
+**A clean clone cannot complete the full verification.** The committed tree carries the code, the
+results and the manifests; it does not carry the per-frame grids, the frozen `.pkl`/`.pt` models, or
+the OPV2V-derived cue CSVs (all git-excluded). Say so plainly rather than implying a `git clone`
+reproduces everything.
+
+* **Tier 1 --- committed-content consistency**: `python tools/verify_results.py --content-only`. No
+  dataset, no GPU, no OpenCOOD checkout. It answers "is the committed tree internally consistent and
+  does it still say what it claims?"
+* **Tier 2 --- full run**: `python tools/verify_results.py` (all 17). Additionally requires the
+  sibling `../OpenCOOD/` checkout, the local grids `data/p2/p2_grid_*.csv` and the frozen models.
+
+Both tiers fail **loudly** on missing data rather than skipping --- a gate that cannot verify must
+never report success --- so on a clean clone the full run correctly reports GATE FAILURE.
+
+---
+
+# Legacy (v3 engine, superseded)
+
+_Everything below describes the retired global-sort v3 pipeline and the table/figure map as it stood
+before the P0 corrigendum and the frozen-selector protocol. It is kept because several products in
+`results/` were first built by it. It is **not** the current chain: its commands, CSV paths, RF
+hyper-parameters (`class_weight='balanced'`, `min_samples_leaf=4`) and its "compile on Overleaf"
+instruction are all superseded by the six steps above._
+
+
 Every table and figure in `paper/main.tex` traces to a committed CSV in `results/` and a generator
 script in `code/`. This file maps each one to its command, lists the data-prep chain, and states the
 randomness. All numbers in the paper are read from these CSVs (never hand-typed); `tests/test_payload.py`
