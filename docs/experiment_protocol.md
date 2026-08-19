@@ -5516,3 +5516,48 @@ division of labour between the two files, and it is why the change-log is never 
 
 Eighteen gates pass, twice; generator gate covers 8 products; `p6_numbers_vs_csv` 0 MISS,
 0 UNLOCATED; figure gate 0 never-stated. Main 16 pages, supplementary 9; abstract 248 words.
+
+## R50 — Where2comm budget-matched rerun, plan v2 (PLAN ONLY, no GPU spent)
+
+Zero GPU. This entry registers a plan; it registers no result, and no number in the paper changes.
+
+`docs/where2comm_rerun_plan_v2.md` supersedes the archived R21-B plan, which predates the P0
+corrigendum, the frozen protocol and the four-convention payload accounting. Its load-bearing
+decisions:
+
+* **N = 1**, the mainline single-collaborator convention. The existing full-collaborator
+  reproduction (AP@0.5 `0.871`, retired global-sort scorer, perfect channel) is relabelled
+  historical and never ranked. The old comparison's sign already depended on this convention —
+  validate Fixed-L `0.7819` sits *below* `0.871` — which is the argument for fixing it first.
+* **Eight sparsity points with inference cached per point**, so budget matching is a table join and
+  not a re-run. The payload convention has changed twice in three batches (R47, R48); an arm that
+  welds accounting into inference would have to be re-inferred each time.
+* **A pre-registered sparse-payload convention** (transmitted elements at 0.9155 bit/element, plus
+  a charged index cost, min of index-list and dense bitmap, rate-1/2 LDPC, 16-QAM), reported under
+  all four existing conventions and destined for `payload_conventions.csv` as a fifth.
+* **The frozen scoring chain**, not the retired global-sort scorer, with a GT-count assertion as a
+  pre-condition on reporting anything.
+* **Four verdict templates** — win / loss / non-inferior / inconclusive — with the confirmatory cell
+  named in advance (test, `B_max = 0.20`, declared convention) and the direction left to the data.
+* **Three cost tiers and three fuses.** Conservative ≈ 15 GPU-h, typical ≈ 22, worst case ≈ 40,
+  anchored on this repository's measured JSCC sweep (~0.28 GPU-h per channel×SNR×split) and the
+  existing 50-epoch Where2comm training. The fuses are the SComCP lesson applied in advance: a
+  reproduction that does not converge is reported as a negative reproduction result, never as a
+  measurement of the method.
+
+**Self-audit, and the one deliberate conflict.** The plan agrees with the collaborator convention,
+the replay draw, the δ = 0.005 single-confirmatory-cell rule, the scoring chain and the evidence
+grading of R48-1. It **conflicts by design** with R45-4's TERMINOLOGY row and the
+`where2comm-baseline` reconciliation pair, both of which currently forbid the word *baseline*: a
+budget-matched arm is a baseline. Those two registrations must be amended **in the same commit that
+lands the first number**, or the gates will correctly block it — which is the intended behaviour and
+is recorded here so it is not mistaken for a gate defect later.
+
+Six gate items the run will require are listed in the plan: provenance binding for the new products,
+a direction probe for the verdict sentence, the TERMINOLOGY amendment, the reconciliation re-point,
+a machine check for the fifth payload convention, and a loudly-failing GT-count assertion in the
+arm's own pipeline.
+
+**Waiting on Josh: cost approval.** Nothing starts without it, and nothing in the paper depends on
+the outcome — limitation (iv) of `sec:boundaries` states the absence of a unified external baseline
+as a limitation rather than resting a claim on one.
