@@ -6,10 +6,10 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| FROZEN | 54 |
-| ANALYTIC | 47 |
+| FROZEN | 55 |
+| ANALYTIC | 49 |
 
-Total: **101** claims across **28** (sub)sections.
+Total: **104** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -126,6 +126,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cbf0589` | ANALYTIC | -140.8, 140.8, -40, 40 | The perception model is a PointPillars BEV backbone [cite]; the deployed checkpoints are configured with detection range x [-140.8… |
+| `c99fd44` | FROZEN | 52.1 | Because the two branches do not share weights, per-frame branch switching implies either keeping both perception pipelines residen… |
 
 ### Experimental Setup [sec:exp] → Message Construction and Payload Accounting
 
@@ -134,6 +135,8 @@ _None._
 | `cf3bea1` | ANALYTIC | 2, 27, 3, 110, 8, 0.024 | The object-level message L carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average 27… |
 | `c30541a` | ANALYTIC | 281.6, 76.8, 0.4, 704, 192, 4, 48, 176, 256 | The feature-level budget is defined on a reference BEV geometry, not on a measured tensor: a 281.6 × 76.8 m range at 0.4 m voxels … |
 | `cabb3b9` | ANALYTIC | 256, 48, 176, 2.16, 10, 6, 1.98, 0.92 | To define a common source-budget convention we therefore use that reference geometry, 256 × 48 × 176 ≈ 2.16 × 10^6 elements, and a… |
+| `cc33815` | ANALYTIC | 16, 1, 2, 0.99, 1.8047, 0.3384 | Under 16-QAM and rate-1/2 LDPC the three conventions put the feature message at 0.99, 1.8047 and 0.3384 Msym respectively. |
+| `cdb4547` | ANALYTIC | 3.5, 20.7, 2.4, 19.8, 8.1, 24.5 | Re-anchoring changes the absolute and the relative payload values---a deployed policy pays _L B_L + _F B_F while B_L is anchored i… |
 | `c873513` | ANALYTIC | 16, 256, 1.98, 1, 2, 0.99, 0.495 | Both feature modes C_16 and C_256 carry this same 1.98 Mbit perception payload but require different numbers of channel uses; appl… |
 
 ### Experimental Setup [sec:exp] → Channel Settings

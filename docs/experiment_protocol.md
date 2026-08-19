@@ -5327,3 +5327,80 @@ injected self-test faults. The gate now carries six pairs.
 Eighteen gates pass, twice, over both documents; all four `p6_cross_section_scan` controls fire;
 `p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED; figure gate 0 never-stated. Main 15 pages, supplementary 9;
 abstract 248 words. No page lever pulled.
+
+## R47 — deployment cost of two branches, three payload conventions, and the ordering claim re-verified
+
+Zero GPU. One computation: the anchor counterfactual re-run on CPU from the frozen decision logs and
+the committed probe, with a third convention added. Pre-registered outcome: **the ordering claim may
+change under the bottleneck convention, and if it does the sentence changes with the data.** It did
+not — reported below with the check that establishes it.
+
+### 1 · The deployment cost of not sharing weights
+
+R46 recorded that the $L$ and $F$ branches are separate trainings. The consequence for deployment was
+not stated, and it is not free: *Because the two branches do not share weights, per-frame branch
+switching implies either keeping both perception pipelines resident or swapping models between
+frames; the reported 52.1 ms covers the selector only, not this dual-branch overhead.* The
+pre-registered unified three-branch construction is now also named as the fix for this cost — one
+resident model would serve all three actions.
+
+### 2 · Three payload conventions, and what the recomputation showed
+
+`payload_anchor_sensitivity.csv` carried one deployed-side convention under the ambiguous label
+`deployed_tensor`. It is renamed **`deployed_precompression_tensor`** (1.8047 Msym), and the
+convention that describes what actually goes on the wire — **`transmitted_bottleneck`**, 739,200
+elements, **0.3384 Msym** — is added, computed through the identical mechanism (frozen action mix,
+$\rho_L B_L + \rho_F B_F$, no new replay). The paper's old named counterfactual is kept as
+`reanchor_1bit_per_element`.
+
+**A generator was broken and this found it.** The tool parsed `re-anchoring to $2.16$~Mbit` out of
+`main.tex` to get its counterfactual. R45 retired that sentence, so the parse returned `None` and the
+script crashed on the next run — a generator coupled to prose the paper no longer contains. The
+counterfactual is now derived from the reference geometry (one bit per element), which is what
+2.16 Mbit always meant.
+
+**The recomputation, on test:** the selector's share of Fixed $F$ is $3.5$–$20.7\%$ under the declared
+anchor, $2.4$–$19.8\%$ under the pre-compression count and $8.1$–$24.5\%$ under the transmitted
+bottleneck. The bottleneck convention moves the fraction by $+17.6\%$ to $+192.6\%$ relative to the
+declared anchor — the largest movement of any convention, and in the opposite direction, because it
+shrinks $B_F$ while $B_L$ stays fixed.
+
+**The ordering claim, re-verified rather than re-asserted.** Across all four anchors and every
+split/budget cell: the selector spends at least $B_L$, strictly less than $B_F$, and more at a looser
+budget than at a tighter one. The claim survives, and now survives *because it was checked under the
+new convention*, not because the old sentence was carried forward. The paper states the three
+conventions side by side, adds that **both $B_{\max}$ and $\lambda$ are conditional on the
+convention** (they are stated in channel uses), and quotes the three share ranges.
+
+### 3 · "Shared PointPillars backbone" disambiguated
+
+Two sentences still said "a shared PointPillars backbone", which after R46 reads as contradicting
+"the branches do not share weights". Both now say what is shared with what: the backbone is shared
+**between ego and collaborator within each branch, but not between the $L$ and $F$ branches**.
+
+### 4 · The Rayleigh infeasibility statements are conditioned
+
+Both sites now read "under the evaluated retransmission and all-or-nothing delivery settings, the
+deep-fade frame BLER never falls low enough …". The statement is about this transport configuration,
+not about Rayleigh channels in general.
+
+### 5 · A fourth stale hand-written count
+
+`verify_results.py`'s module docstring said "Nine checks: the five original gates, …". It is now a
+generated line (`GATE-COUNT-LINE: 18 checks in total, 10 of which a clean clone can run.`) under
+`tools/build_gate_counts.py`, like the other three counts. Fourth occurrence of this failure mode,
+same fix.
+
+### 6 · A seventh fingerprint collision
+
+`24.5%` was a retired feature-importance share and is now also a LIVE value — the upper end of the
+transmitted-bottleneck share range, $8.1$–$24.5\%$. The bare-number pattern fired on the new sentence.
+Re-anchored on the retired quantity's own context (`24.5\% of importance` / `importance … 24.5\%`),
+which is the same correction the six earlier collisions needed: a bare number is not a fingerprint.
+
+### 7 · State
+
+Eighteen gates pass, twice, over both documents; `p6_numbers_vs_csv` 0 MISS, 0 UNLOCATED; figure gate
+0 never-stated; reconciliation gate 6 pairs. Main is **16 pages** (was 15): this batch adds the
+dual-branch limitation, the three-convention paragraph and two qualifiers, all of which are content
+the batch required. Supplementary 9 pages; abstract 248 words.

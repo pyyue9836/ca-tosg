@@ -72,7 +72,11 @@ RX accuracy versus the oracle
 RX 0\.405
 RX 40\.5
 RX 65\\%
-RX 24\.5\\%
+# R47: 24.5% collided with a LIVE value -- the transmitted-bottleneck share range 8.1--24.5%.
+# The retired quantity is the perception-cue IMPORTANCE share, so the pattern is re-anchored on
+# that context (same rule as the six earlier collisions: a bare number is not a fingerprint).
+RX 24\.5\\% of (the )?(total )?importance
+RX importance[^.\n]{0,40}24\.5\\%
 RX -0\.025
 RX -0\.070
 RX -0\.057

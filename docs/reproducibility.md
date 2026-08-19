@@ -17,7 +17,7 @@ excluded, see `docs/dataset.md`); steps 5--6 run on the committed tree alone.
 | 3 | replay the frozen selectors over the 200 paired CSI realisations | `python tools/evaluate_selector.py` | `results/main/replay_summary.csv` (+ `tau_feasible.csv`, `fixed_references.csv`, `frozen_curves.csv` from their own scripts, see `results/README.md`) |
 | 4 | the deployed-AP verification and the sensitivity arms | `python projects/ca_tosg/evaluation/end_to_end_ap_snr.py`, `python projects/ca_tosg/evaluation/r23_sensitivity.py` | `results/main/true_e2e_ap_by_snr.csv`, `results/sensitivity/*.csv` |
 | 5 | regenerate every table, figure and generated sentence from those CSVs | `python tools/build_paper_tables.py`, `python tools/generate_figures.py`, `python tests/test_result_consistency.py` | `paper/*.tex` table bodies, `paper/figures/*.pdf`, `docs/claims.md` |
-| 6 | verify and compile | `python tools/verify_results.py`, `python tests/test_compile.py` | 18 gate results, `main.pdf` (15 pp.), `supplementary.pdf` (9 pp.), `docs/compile_report.md` |
+| 6 | verify and compile | `python tools/verify_results.py`, `python tests/test_compile.py` | 18 gate results, `main.pdf` (16 pp.), `supplementary.pdf` (9 pp.), `docs/compile_report.md` |
 
 **Environment.** `conda activate sionna310` (python 3.10.18 / sklearn 1.7.0 / numpy 1.26.4 /
 pandas 2.2.2 --- pinned by `FROZEN_MANIFEST.json`); `PYTHONPATH=/home/josh/cooperative_semantic_perception/OpenCOOD`

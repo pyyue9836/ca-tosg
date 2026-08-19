@@ -210,6 +210,8 @@ def main() -> int:
     # what re-anchoring actually does: pure-F costs rescale, an L/F MIX does not
     sec = table[(table.backbone == 'second') & (table.convention == 'pre_compression')].iloc[0]
     pp_pre = table[(table.backbone == 'pointpillar') & (table.convention == 'pre_compression')].iloc[0]
+    pp_bottleneck = table[(table.backbone == 'pointpillar')
+                          & (table.convention == 'transmitted_bottleneck')].iloc[0]
     pp_declared_msym = payload_chain(elems_declared, bit_per_elem, code_rate, bps[16], k_info)
     print(f"\nmainline declared anchor  {elems_declared:,} elem -> "
           f"{pp_declared_msym['msym']:.4f} Msym, N_cw={pp_declared_msym['n_cw']}")
@@ -220,15 +222,22 @@ def main() -> int:
     rho = rho_L_from_frozen_logs()
     b_l = float(re.search(r'B_L\s*=\s*([0-9.]+)', read(MAIN)).group(1))
     # the alternative budget the paper itself names, parsed from the same sentence
-    reanchor_mbit = float(re.search(r're-anchoring to \$([0-9.]+)\$~Mbit', read(MAIN)).group(1))
+    # R47-2: this used to parse "re-anchoring to $2.16$~Mbit" out of main.tex. R45 retired that
+    # sentence (the insensitivity claim went with it), so the parse crashed -- a generator coupled to
+    # a sentence the paper no longer contains. The counterfactual it named is simply ONE bit per
+    # element of the reference geometry, so it is derived from the geometry instead of from prose.
+    reanchor_mbit = elems_declared * 1.0 / 1e6
     reanchor_factor = reanchor_mbit / b_c_mbit
     mix_rows = []
     for (split, b), r in sorted(rho.items()):
+        # R47-2: three DEPLOYED-side conventions are now carried, not one. "deployed_tensor" was
+        # ambiguous -- it meant the pre-compression pyramid -- and the convention that actually
+        # describes what goes on the wire (the autoencoder bottlenecks) was missing entirely.
         for label, bf in (('declared_anchor', pp_declared_msym['msym']),
-                          # the paper's OWN stated counterfactual: "re-anchoring to 2.16 Mbit
-                          # would rescale the feature cost of all policies equally"
-                          ('paper_reanchor_2p16Mbit', pp_declared_msym['msym'] * reanchor_factor),
-                          ('deployed_tensor', pp_pre.B_F_msym_16qam)):
+                          # the counterfactual the paper used to name: 1 bit per reference element
+                          ('reanchor_1bit_per_element', pp_declared_msym['msym'] * reanchor_factor),
+                          ('deployed_precompression_tensor', pp_pre.B_F_msym_16qam),
+                          ('transmitted_bottleneck', pp_bottleneck.B_F_msym_16qam)):
             pay = r['rho_L'] * b_l + r['rho_F'] * bf          # E costs nothing
             mix_rows.append({'split': split, 'budget': b, 'anchor': label,
                              'rho_E': r['rho_E'], 'rho_L': r['rho_L'], 'rho_F': r['rho_F'],
@@ -239,10 +248,12 @@ def main() -> int:
     if len(mix):
         piv = mix.pivot_table(index=['split', 'budget'], columns='anchor',
                               values='policy_over_fixedF')
-        piv['shift_paper_reanchor_pct'] = 100 * (piv['paper_reanchor_2p16Mbit']
-                                                  / piv['declared_anchor'] - 1)
-        piv['shift_deployed_tensor_pct'] = 100 * (piv['deployed_tensor']
-                                                  / piv['declared_anchor'] - 1)
+        piv['shift_reanchor_1bit_pct'] = 100 * (piv['reanchor_1bit_per_element']
+                                                 / piv['declared_anchor'] - 1)
+        piv['shift_precompression_pct'] = 100 * (piv['deployed_precompression_tensor']
+                                                 / piv['declared_anchor'] - 1)
+        piv['shift_bottleneck_pct'] = 100 * (piv['transmitted_bottleneck']
+                                             / piv['declared_anchor'] - 1)
         print(f'\n=== is the conclusion really insensitive to the anchor? '
               f'(frozen action mix, CA-TOSG payload as a fraction of Fixed-F; '
               f'paper re-anchor {b_c_mbit} -> {reanchor_mbit} Mbit = x{reanchor_factor:.4f}) ===')

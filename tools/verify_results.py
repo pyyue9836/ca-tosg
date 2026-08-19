@@ -10,8 +10,7 @@
   the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  Nine checks: the five original gates, the configs/manifest contract, and the three guards added
-  with the 2026-08-12 errata (P4A-1 fold-local scaling, P3-1 SNR support, and import resolution).
+  GATE-COUNT-LINE: 18 checks in total, 10 of which a clean clone can run.
 
   python tools/verify_results.py
 """
