@@ -238,6 +238,37 @@ def observation_iii(tex):
         'observation (iii)')
 
 
+def feature_object_ratios(tex):
+    """R48-3: the feature/object payload ratio, stated for all four conventions, never typed.
+
+    The paper said "the feature-level message is therefore ~82x the object-level payload", one number
+    with no convention attached -- and 82 is the SOURCE ratio, while the channel-use ratio the rest of
+    the paper spends is 41.25. Once three deployed-side conventions exist (R47-2), a single ratio is
+    not a fact about the system, it is a fact about an unstated accounting choice.
+    """
+    conv = pd.read_csv(os.path.join(ROOT, 'results/channel/payload_conventions.csv'))
+    pp = conv[conv.backbone == 'pointpillar'].set_index('convention')
+    tex_src = open(TEX, encoding='utf-8').read()
+    b_l_mbit = float(re.search(r'B_L \\approx 27 \\times 110 \\times 8 \\approx ([0-9.]+)', tex_src).group(1))
+    b_l_msym = float(re.search(r'B_L = ([0-9.]+)\$~Msym', tex_src).group(1))
+    b_c_mbit = float(re.search(r'fixed source budget of \$B_C \\approx ([0-9.]+)\$~Mbit', tex_src).group(1))
+    b_f_msym = float(re.search(r'B_\{C_\{16\}\} \\approx ([0-9.]+)\$~Msym', tex_src).group(1))
+    src = b_c_mbit / b_l_mbit
+    declared = b_f_msym / b_l_msym
+    pre = float(pp.loc['pre_compression', 'B_F_msym_16qam']) / b_l_msym
+    bott = float(pp.loc['transmitted_bottleneck', 'B_F_msym_16qam']) / b_l_msym
+    return sub_once(
+        tex,
+        # the pattern must match the generator's OWN output too, or the second run rewrites
+        # nothing and --check reports a dead pattern (R23-8's failure mode, caught by R43-4).
+        r'The feature-level message is therefore .*?(?:the object-level payload\.|conventions respectively\.)',
+        lambda _m: (f'The feature-level message is therefore ${src:.1f}\\times$ the object-level '
+                    f'payload at the source, and ${declared:.2f}\\times$, ${pre:.1f}\\times$ or '
+                    f'${bott:.1f}\\times$ in channel uses under the declared, pre-compression and '
+                    f'bottleneck conventions respectively.'),
+        'feature/object ratios')
+
+
 def ablation_body():
     """tab:ablation: the feature-ablation variants on test at B_max=0.20, from the CSVs."""
     d = pd.read_csv(os.path.join(ROOT, 'results/sensitivity/feature_ablation.csv'))
@@ -301,6 +332,7 @@ def transform():
     elif supp is not None:
         supp = splice(supp, 'tab:ablation', ablation_body())
     tex = observation_iii(tex)
+    tex = feature_object_ratios(tex)
     # R40: tab:gen_headline moved to the supplementary document, so its generator runs there
     if supp is not None:
         supp = gen_headline_baselines(supp)

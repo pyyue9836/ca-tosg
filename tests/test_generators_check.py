@@ -50,6 +50,10 @@ GENERATORS = [
     # R46-4: how many gates exist, and how many a clean clone can run, are computed from the runner.
     ('build_gate_counts', ['tools/build_gate_counts.py', '--check'],
      'the gate counts in docs/reproducibility.md and verify_results.py'),
+    # R48-5: the anchor sensitivity is quoted three times in the paper and carries an ordering
+    # claim; this re-derives every cell from the frozen logs and payload_conventions.csv.
+    ('check_anchor_sensitivity', ['tools/check_anchor_sensitivity.py', '--check'],
+     'results/channel/payload_anchor_sensitivity.csv (B_F per convention, mix, payload formula)'),
 ]
 
 

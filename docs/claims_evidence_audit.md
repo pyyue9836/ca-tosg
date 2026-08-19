@@ -7,9 +7,9 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | engine | claims |
 |---|---|
 | FROZEN | 55 |
-| ANALYTIC | 49 |
+| ANALYTIC | 50 |
 
-Total: **104** claims across **28** (sub)sections.
+Total: **105** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -135,8 +135,9 @@ _None._
 | `cf3bea1` | ANALYTIC | 2, 27, 3, 110, 8, 0.024 | The object-level message L carries the collaborator's detected objects; on the OPV2V validate split a frame contains on average 27… |
 | `c30541a` | ANALYTIC | 281.6, 76.8, 0.4, 704, 192, 4, 48, 176, 256 | The feature-level budget is defined on a reference BEV geometry, not on a measured tensor: a 281.6 × 76.8 m range at 0.4 m voxels … |
 | `cabb3b9` | ANALYTIC | 256, 48, 176, 2.16, 10, 6, 1.98, 0.92 | To define a common source-budget convention we therefore use that reference geometry, 256 × 48 × 176 ≈ 2.16 × 10^6 elements, and a… |
-| `cc33815` | ANALYTIC | 16, 1, 2, 0.99, 1.8047, 0.3384 | Under 16-QAM and rate-1/2 LDPC the three conventions put the feature message at 0.99, 1.8047 and 0.3384 Msym respectively. |
+| `c01ca99` | ANALYTIC | 16, 1, 2, 0.99, 1.8047, 0.3384, 0.9155 | Under 16-QAM and rate-1/2 LDPC the first two conventions put the feature message at 0.99 and 1.8047 Msym; the third gives 0.3384 M… |
 | `cdb4547` | ANALYTIC | 3.5, 20.7, 2.4, 19.8, 8.1, 24.5 | Re-anchoring changes the absolute and the relative payload values---a deployed policy pays _L B_L + _F B_F while B_L is anchored i… |
+| `ca5bb45` | ANALYTIC | 82.5, 41.25, 75.2, 14.1 | The feature-level message is therefore 82.5 × the object-level payload at the source, and 41.25 × , 75.2 × or 14.1 × in channel us… |
 | `c873513` | ANALYTIC | 16, 256, 1.98, 1, 2, 0.99, 0.495 | Both feature modes C_16 and C_256 carry this same 1.98 Mbit perception payload but require different numbers of channel uses; appl… |
 
 ### Experimental Setup [sec:exp] → Channel Settings
