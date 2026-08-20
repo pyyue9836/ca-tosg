@@ -5615,3 +5615,41 @@ R51 item 1 said "prerequisites first, then touch the GPU". The 20-frame probe ra
 gates were in place. It cost 15 seconds and it is what produced amendment A — the plan's grid axis
 was unexecutable, and no amount of gate-writing would have revealed that. Recorded as a deviation
 rather than presented as the plan.
+
+### R51 stage 1 — dense point run, and a BLOCKER the GT assertion caught
+
+**Run.** Dense point (`threshold = 0`, mask all cells, mean communication rate `1.0000`), validate,
+N=1, existing 50-epoch checkpoint: 1,980 frames in **1,546 s (0.78 s/frame)**, cached to
+`data/where2comm_v2/validate_thr0.000.npz`. The arm's inference path works end to end.
+
+**Blocker, before any AP is reported.** The GT assertion of `baselines/where2comm_v2/score_arm.py`
+fails: this arm sees **27.17** ground-truth objects/frame on validate against **27.80** in the
+committed audit (`results/sensitivity/gt_object_stats.csv`). Cause, from the configs:
+
+| arm | evaluation volume |
+|---|---|
+| Where2comm reproduction | x ∈ [−140.8, 140.8], **y ∈ [−38.4, 38.4]** |
+| mainline `pointpillar_late_fusion` (the $L$ branch) | **x ∈ [−70.4, 70.4]**, y ∈ [−40, 40] |
+| mainline `pointpillar_attentive_fusion_compression` (the $F$ branch, P4B probe) | x ∈ [−140.8, 140.8], y ∈ [−40, 40] |
+
+Three different volumes, therefore three different GT sets, therefore APs that cannot be ordered —
+which is precisely what the assertion exists to prevent, and it fired on the first scored point
+rather than after a full sweep. **No AP is reported for this point.**
+
+Note the second finding inside the first: the $L$ and $F$ branches of the mainline are themselves
+evaluated over **different x-ranges** (±70.4 m against ±140.8 m). That is a question about the
+mainline caches, not about Where2comm, and it is recorded here rather than acted on — acting on it
+would touch frozen products.
+
+**The sweep is halted at stage 1** pending a ruling, because every later point inherits the same
+mismatch. Two repairs, neither taken unilaterally:
+
+* **(R-a) Common-volume post-filter.** Crop predictions and GT of *every* arm to the intersection
+  volume (x ∈ [−70.4, 70.4], y ∈ [−38.4, 38.4]) in post-processing, on the cached outputs. No
+  re-inference, consistent with the plan's caching design, and it re-scores the mainline arms too —
+  which means producing a second, clearly-labelled scoring track beside the frozen one.
+* **(R-b) Re-run Where2comm inference under the mainline volume.** One config override, ~1 GPU-h per
+  grid point for the affected splits. It evaluates the model outside the range it was trained on,
+  which is a distribution change and must be labelled as one.
+
+Cost so far: **~26 GPU-minutes** (20-frame probe + one dense validate point) of the approved ≈22 h.
