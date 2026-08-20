@@ -5653,3 +5653,54 @@ mismatch. Two repairs, neither taken unilaterally:
   which is a distribution change and must be labelled as one.
 
 Cost so far: **~26 GPU-minutes** (20-frame probe + one dense validate point) of the approved ≈22 h.
+
+### R52 stage 2 — the mainline L/F volume diagnostic, measured
+
+Zero GPU (post-processing on committed caches). **Nothing frozen was touched**; outputs go to
+`results/diagnostic/`.
+
+**(a) What the frozen chain actually filters on, read from the code.**
+`projects/ca_tosg/evaluation/end_to_end_ap.py` line ~148 takes the canonical GT from the
+**attentive-compression** cache (`cb, cs, cg = ...comp_{split}.npz...`; `canon = tt(cg[s], ...)`)
+and scores all three branches against it. The three branches were produced under different
+configured ranges: `pointpillar_late_fusion` x ∈ [−70.4, 70.4], `pointpillar_attentive_fusion_
+compression` x ∈ [−140.8, 140.8], Where2comm x ∈ [−140.8, 140.8] with y ∈ [−38.4, 38.4]. Measured in
+the caches themselves (validate, first 400 frames): ego predictions reach |x| ≈ 70 m, late ≈ 86 m,
+comp ≈ 110 m, canonical GT ≈ 119 m.
+
+**(b) Impact, from the cached outputs, cropped to x ∈ [−70.4, 70.4], y ∈ [−40, 40].**
+
+| split | GT dropped | Fixed-L AP@0.5 frozen → cropped | Ceiling AP@0.5 frozen → cropped | headroom frozen → cropped |
+|---|---|---|---|---|
+| validate | 18.89 % | 0.7819 → 0.9064 (+0.1245) | 0.8369 → 0.9181 (+0.0812) | **0.0550 → 0.0117** |
+| test | 9.94 % | 0.8691 → 0.9429 (+0.0738) | 0.8931 → 0.9368 (+0.0437) | **0.0240 → −0.0061** |
+| Culver-City | 20.48 % | 0.7299 → 0.8825 (+0.1526) | 0.8269 → 0.9077 (+0.0808) | **0.0970 → 0.0252** |
+
+CA-TOSG's own AP moves with its branches (validate +0.112 to +0.118, test +0.067 to +0.073,
+Culver +0.136 to +0.153 at AP@0.5). The *level* of every arm rises inside the common volume, which
+is expected — the removed GT is GT nobody could detect. What matters is the **gap**: the
+feature-level headroom the paper reports shrinks by 79 % on validate, by 74 % on Culver-City, and on
+test it **changes sign** — inside the common volume the perfect-channel feature ceiling sits
+*below* Fixed L.
+
+**(c) No conclusion is drawn here, and no paper text changed.** Read narrowly, this says the
+headroom triple `0.0550 / 0.0240 / 0.0970` is measured across branches whose fields of view differ,
+so part of it — most of it on validate and Culver-City, all of it and more on test — is a
+field-of-view effect rather than a semantic-granularity effect. Whether that warrants a corrigendum,
+a re-scoring track, or a caveat is Josh's ruling; it is not taken here.
+
+Caveats on the diagnostic itself, stated: the crop is centre-based; the replay uses 20 of the 200
+realisations (the CA-TOSG rows only, the fixed references are deterministic); the frozen chain is
+re-used unchanged apart from the crop.
+
+**One defect in the diagnostic, found and fixed:** the first version keyed its output filename on
+`(x, y)` only, so the later `test,culver` run silently overwrote the complete `validate` table with
+a partial one. The filename now carries the split set, and the full three-split table is being
+regenerated in one process.
+
+### R52 stage 2 — sweep status
+
+The 7-threshold × 3-split sweep is running sequentially in the background
+(`baselines/where2comm_v2/sweep.sh`). At ~0.8 s/frame it needs ≈8 wall-clock hours; at the time of
+this entry the first point (`threshold = 0.01`, validate) is in progress. GPU spent so far:
+≈45 minutes of the approved ≈22 h.
