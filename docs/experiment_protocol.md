@@ -5774,3 +5774,36 @@ common-volume figures appear beside it as a companion with their caveats.
   repository. `baselines/where2comm_v2/branch_ranges.py` now reads each checkpoint's own config and
   writes `results/diagnostics/branch_ranges.csv` (late fusion x ±70.4 / y ±40; attentive compression
   x ±140.8 / y ±40; Where2comm x ±140.8 / y ±38.4), and the claim binds there.
+
+## R54 — the threshold grid re-pointed: plan v2 fuse 3, fired early
+
+Same GPU budget, different points. No new approval was spent: the 5 remaining thresholds are
+replaced, not added to.
+
+**Why.** The measured threshold→sparsity map is far steeper than plan v2 assumed:
+
+| threshold | 0.0 | 0.01 | 0.05 | 0.10 |
+|---|---|---|---|---|
+| mean rate (validate) | 1.0000 | 0.4839 | 0.0319 | 0.0099 |
+| mean rate (test) | — | 0.4648 | 0.0179 | — |
+| mean rate (Culver-City) | — | 0.4851 | 0.0379 | — |
+
+Every threshold at or above 0.10 collapses to "send almost nothing", so the original upper points
+(0.10 … 0.70) would have produced five near-identical near-$L$ policies. Meanwhile the rates the
+budgets actually require — roughly 0.10 / 0.20 / 0.30 of the dense payload for
+$B_{\max}=0.10/0.20/0.30$ under the declared convention — sit in the **unsampled gap between
+threshold 0.01 and 0.05**.
+
+**What changed.** The remaining five points become **{0.015, 0.02, 0.025, 0.03, 0.04}**. The eight
+completed points are kept: 0.0 (dense anchor), 0.01, 0.05 (the bracket ends) and 0.10 (now the
+collapse evidence, which is worth having on the curve rather than assumed).
+
+**Registered as fuse 3, fired early.** Plan v2 §f wrote fuse 3 as "if no grid point lands within
+±20 % of the cap, add one refinement pass and no more". The condition is already established from
+the completed points rather than after the full sweep, so the refinement is taken now instead of
+after spending 3.2 GPU-hours on points known in advance to be redundant. It remains **one** pass: if
+{0.015 … 0.04} still misses a cap by more than ±20 %, the bracketing pair is reported and the arm
+stops, per the fuse's own wording.
+
+Cost unchanged: 5 thresholds × 3 splits ≈ 3.2 h plus the two dense points ≈ 0.25 h. GPU spent before
+this entry: ≈2.1 h of the approved ≈22 h.
