@@ -1,0 +1,4 @@
+branch,config,x_min,y_min,z_min,x_max,y_max,z_max,x_half_extent,y_half_extent
+late_fusion_L_branch,/mnt/h/opencood_project/pretrained_models/pointpillar_late_fusion/config.yaml,-70.4,-40.0,-3.0,70.4,40.0,1.0,70.4,40.0
+attentive_compression_F_branch,/mnt/h/opencood_project/pretrained_models/pointpillar_attentive_fusion/pointpillar_attentive_fusion_compression/config.yaml,-140.8,-40.0,-3.0,140.8,40.0,1.0,140.8,40.0
+where2comm_reproduction,/mnt/h/wsl_backup/OpenCOOD_20260601_1326/opencood/logs/point_pillar_where2comm_2026_05_22_17_56_51/config.yaml,-140.8,-38.4,-3.0,140.8,38.4,1.0,140.8,38.4

@@ -5760,3 +5760,17 @@ granularity contradicts this record and is blocked by the `headroom-fov` pair.
 
 The paper's own numbers do not change: the deployed track remains what is reported, and the
 common-volume figures appear beside it as a companion with their caveats.
+
+### 4 · Two binding repairs the gates forced, both worth recording
+
+* **`results/README.md` is generator-owned.** The first attempt hand-added a row for the new
+  diagnostic; the numeric-literal gate's generated-document check caught it immediately. The index
+  generator now carries patterns for `diagnostics/common_volume_ap.csv`,
+  `diagnostics/branch_ranges.csv`, the provenance file and the raw per-run outputs under
+  `results/diagnostic/`. Note the generator only writes the file under `--write`, which is how the
+  gate invokes it — running it bare looked idempotent and was not.
+* **The `70.4` in the paper had no committed home.** `p6_numbers_vs_csv` reported it as a MISS,
+  correctly: the late-fusion branch's configured range lived only in a checkpoint config outside this
+  repository. `baselines/where2comm_v2/branch_ranges.py` now reads each checkpoint's own config and
+  writes `results/diagnostics/branch_ranges.csv` (late fusion x ±70.4 / y ±40; attentive compression
+  x ±140.8 / y ±40; Where2comm x ±140.8 / y ±38.4), and the claim binds there.

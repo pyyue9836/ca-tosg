@@ -187,6 +187,14 @@ RULES = [
      '--realisations 20',
      'R53 DIAGNOSTIC TRACK (not frozen): AP inside the common volume x<=70.4, y<=40 beside the '
      'frozen table, per cell, with the GT fraction dropped'),
+    # the diagnostic's raw per-run outputs (the promoted copy is diagnostics/common_volume_ap.csv)
+    (r'^diagnostic/volume_(diagnostic|delta)_x[\d.]+_y[\d.]+_[a-z-]+\.csv$',
+     'python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver '
+     '--realisations 20',
+     'R53 raw output of the common-volume diagnostic, one file per (volume, split set)'),
+    (r'^diagnostics/branch_ranges\.csv$',
+     'python baselines/where2comm_v2/branch_ranges.py',
+     'R53: each branch checkpoint\'s CONFIGURED lidar range, read from its own config'),
     (r'^diagnostics/PROVENANCE_common_volume\.txt$',
      'python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver '
      '--realisations 20',
