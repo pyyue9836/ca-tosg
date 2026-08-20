@@ -5561,3 +5561,57 @@ arm's own pipeline.
 **Waiting on Josh: cost approval.** Nothing starts without it, and nothing in the paper depends on
 the outcome — limitation (iv) of `sec:boundaries` states the absence of a unified external baseline
 as a limitation rather than resting a claim on one.
+
+## R51 — Where2comm rerun, stage 0: three plan amendments before any sweep, and a cost recalibration
+
+Josh approved the typical tier (≈22 GPU-h). Stage 0 spent **15 seconds of GPU** on a 20-frame
+feasibility probe, and that probe plus two code reads invalidate three parts of plan v2. Amendments
+are recorded here **before** the sweep, as the protocol requires.
+
+### A · The grid axis is the communication THRESHOLD, not a sparsity `s`
+
+Read `opencood/models/fuse_modules/where2comm_fuse.py`, `Communication.forward`: at eval time the
+mask is `confidence_map > threshold` and the sparsity is *measured* afterwards
+(`communication_rate = mask.sum() / (L*H*W)`). Only during training is a rate drawn directly
+(`K = int(H*W*uniform(0,1))`). Plan v2 §b asked for eight sparsity points `s`; that grid **cannot be
+executed as written** — `s` is an output. The grid becomes eight thresholds, with the achieved rate
+recorded per frame and the budget match done on the realised mean. Probe: `threshold = 0.01` gives a
+mean rate of `0.5515` over the first 20 validate frames, so the useful threshold range is far above
+0.01 and will be bracketed by the sweep.
+
+### B · No retraining — and retraining would have been the inconsistent choice
+
+`CATOSG_MAX_COLLAB=1` is an **inference-time** hook (`opencood/utils/catosg_collab_subset.py`,
+applied in `intermediate_fusion_dataset.__getitem__` before the CAV loop). Every mainline arm reaches
+the single-collaborator convention this way, on public pretrained checkpoints, with **no** retraining.
+Plan v2 §a's "retrain at N=1" would therefore have made Where2comm the only arm trained under a
+different discipline from the one it is compared against. The existing 50-epoch reproduction
+(`point_pillar_where2comm_2026_05_22_17_56_51/net_epoch50.pth`, recovered from
+`/mnt/h/wsl_backup/`) is used, with N=1 applied at inference exactly as the mainline arms do.
+
+### C · Confidence-map billing, decided by reading the code (R46-3 discipline)
+
+The threshold is a **constant shared by both vehicles**, so the collaborator can apply the mask
+itself and transmit only the selected cells; the single-process implementation computes the mask at
+the fusion site from each CAV's `psm_single`, which does not distinguish the two placements. The
+billing convention therefore charges **selected feature elements + index cost only, and not the
+confidence map** — the cheaper reading, which *favours* Where2comm. This choice, and the fact that it
+favours the comparator, is to be stated wherever the arm's payload appears.
+
+### D · Cost recalibration — the approved estimate was wrong in both directions
+
+| item | plan v2 estimate | measured | why |
+|---|---|---|---|
+| training, 50 epochs | ~10 GPU-h | **~28–38 GPU-h** (33–45 min/epoch in `where2comm_train/train_where2comm.log`) | the estimate was never anchored on this machine's own training log |
+| inference, per grid point, 3 splits | 0.28 h × 3 ≈ 0.8 h | **≈ 1.0 h** (0.75 s/frame × 4,700 frames) | close enough |
+| **total** | **≈ 22 GPU-h** | **≈ 8 GPU-h** (8 points × 1.0 h, no training) | amendment B removes the training entirely |
+
+So the run costs roughly **8 GPU-h against the 22 approved**, and the training estimate inside that
+22 was itself ~3× low. Both errors are reported; neither is used to justify spending more.
+
+### E · Deviation from the batch's own order, stated plainly
+
+R51 item 1 said "prerequisites first, then touch the GPU". The 20-frame probe ran before the six
+gates were in place. It cost 15 seconds and it is what produced amendment A — the plan's grid axis
+was unexecutable, and no amount of gate-writing would have revealed that. Recorded as a deviation
+rather than presented as the plan.
