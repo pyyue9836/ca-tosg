@@ -41,7 +41,16 @@ SOURCES = {
     'combined': ('results/sensitivity/feature_ablation.csv', 'F1', 'payload'),
     'hand_rule_3': ('results/baselines/two_gate_dgate.csv', 'F1_2G', 'B_2G'),
     'hand_rule_2': ('results/baselines/two_gate.csv', 'F1_2G', 'B_2G'),
+    # R53-4: the common-volume diagnostic track. Its rows key on policy, and the paper's new
+    # sentence asserts a SIGN CHANGE on test -- the ceiling below Fixed L inside a shared field of
+    # view -- which is exactly the kind of claim that silently inverts when a table is regenerated.
+    'ceiling_common_volume': ('results/diagnostics/common_volume_ap.csv',
+                              'ap50_mean_crop', 'ap70_mean_crop'),
+    'fixedL_common_volume': ('results/diagnostics/common_volume_ap.csv',
+                             'ap50_mean_crop', 'ap70_mean_crop'),
 }
+# rows of the diagnostic track are selected by policy name, not by a `variant` column
+POLICY_OF = {'ceiling_common_volume': 'Feature-ceiling', 'fixedL_common_volume': 'Fixed-L'}
 METRIC_COL = {'F1': 0, 'payload': 1}
 
 
@@ -50,6 +59,12 @@ def value(entity, metric, split, budget):
     d = pd.read_csv(os.path.join(ROOT, rel))
     if 'variant' in d.columns:                       # the ablation table keys on the variant name
         d = d[d.variant == entity]
+    if entity in POLICY_OF:                          # R53-4: diagnostic track, keyed on policy
+        d = d[(d.policy == POLICY_OF[entity]) & (d.split == split)]
+        if len(d) != 1:
+            raise SystemExit(f'comparison gate FUSE: {entity} @ {split} matched {len(d)} rows '
+                             f'in {rel}')
+        return float(d[[f1col, bcol][METRIC_COL[metric]]].iloc[0])
     d = d[(d.split == split) & (d.budget.round(2) == round(budget, 2))]
     if len(d) != 1:
         raise SystemExit(f'comparison gate FUSE: {entity} @ {split}/{budget} matched {len(d)} rows '

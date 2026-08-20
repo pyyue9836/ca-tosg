@@ -1,0 +1,15 @@
+CA-TOSG R53 -- common-volume AP diagnostic. DIAGNOSTIC TRACK, NOT A FROZEN PRODUCT.
+==============================================================================
+generator : python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver --realisations 20
+inputs    : peiyi_work/paper1/gs_rerun/n1_mainline/{late,comp,ego}_{split}.npz (the frozen caches, read-only)
+            results/main/true_e2e_ap.csv (the frozen table, read-only, joined for the deltas)
+volume    : |x| <= 70.4 m, |y| <= 40 m -- the intersection of the branches' configured ranges
+crop rule : box CENTRE inside the volume; applied identically to predictions and to the canonical GT
+scorer    : projects/ca_tosg/evaluation/end_to_end_ap.py (global-sort AP, one canonical GT), unchanged apart from the crop
+replay    : CA-TOSG rows use 20 of the 200 paired realisations (CSI_SEED / BLER_COIN_SEED unchanged);
+            the three fixed references are deterministic and use no replay
+caveat    : this track answers "how much of the L-F gap survives inside a common field of view";
+            the frozen track answers "what each deployed branch delivers as configured". Same GT
+            denominator, different questions. Neither supersedes the other.
+sha256(16): 6a855a7fdd05366c
+file      : results/diagnostics/common_volume_ap.csv

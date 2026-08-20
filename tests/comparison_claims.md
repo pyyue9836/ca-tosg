@@ -27,4 +27,4 @@ Directions: `>` A exceeds B, `<` A is below B, `~` parity (within 0.0005).
 | abstract-handrule-F1 | hand_rule_3 | RF | ~ | F1 | test | 0.20 | `a three-scalar hand rule reach comparable F1` |
 | abstract-handrule-payload | hand_rule_3 | RF | > | payload | test | 0.20 | `sending more feature messages, so the cues buy` |
 | abstract-threshold-F1 | RF | tau_nominal | < | F1 | test | 0.20 | `non-inferior to the nominal SNR threshold within a $0.005$ margin` |
-
+| common-volume-test | ceiling_common_volume | fixedL_common_volume | < | F1 | test | 0.20 | `on test it changes sign to $-0.0061$` |

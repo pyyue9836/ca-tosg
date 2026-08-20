@@ -5704,3 +5704,59 @@ The 7-threshold × 3-split sweep is running sequentially in the background
 (`baselines/where2comm_v2/sweep.sh`). At ~0.8 s/frame it needs ≈8 wall-clock hours; at the time of
 this entry the first point (`threshold = 0.01`, validate) is in progress. GPU spent so far:
 ≈45 minutes of the approved ≈22 h.
+
+## R53 — the F1 chain's GT, checked first; then the common-volume diagnostic written into the paper
+
+### 1 · Does the F1 chain score all three branches against ONE canonical GT? **YES.**
+
+`projects/ca_tosg/evaluation/canonical_f1.py`, lines 30–35:
+
+```
+canon = co['gts']                              # comp cache's union GT
+lf = np.array([f1(la['boxes'][s], canon[s]) for s in sids])   # late   vs canon
+cf = np.array([f1(co['boxes'][s], canon[s]) for s in sids])   # comp   vs canon
+ef = np.array([f1(eg['boxes'][s], canon[s]) for s in sids])   # ego    vs canon
+```
+
+All three per-frame columns (`late_f1`, `compressed_f1`, `ego_f1`) are computed against the same
+canonical GT tensor, at the same IoU 0.5, by the same function. The file's own header records why
+this exists: no stale dataset F1 column is reused. **The F1 chain is internally consistent, and the
+F1-based claims do not rest on three different GT sets.** No paper editing was blocked.
+
+**But the answer must be read precisely, and the batch's framing invites a mistake.** "Same GT" was
+never the defect. The AP chain also uses one canonical GT — that is exactly how the field-of-view
+asymmetry becomes visible: the shared GT extends to |x| ≈ 119 m while the $L$ branch's predictions
+stop at |x| ≈ 70 m. F1 inherits the same asymmetry, and inherits it identically.
+
+What follows, stated at the level the evidence supports:
+
+* **Policy-vs-policy F1 comparisons are unaffected in kind.** CA-TOSG and the SNR threshold both mix
+  the same three branches against the same GT, so the out-of-range GT is a common term. The R9
+  confirmatory claim, the payload comparisons and the hand-rule comparisons all live here.
+* **Branch-vs-branch comparisons carry the asymmetry.** Any statement of the form "$F$ is worth
+  $x$ more than $L$" — the headroom family above all — is measured across branches with different
+  fields of view.
+
+That distinction is what the paper now says, and it is why the diagnostic is a companion track
+rather than a correction: the frozen track answers *what each deployed branch delivers as
+configured*; the common-volume track answers *how much of the gap survives inside a shared field of
+view*. Same GT denominator; different questions.
+
+### 2 · The diagnostic, promoted
+
+`results/diagnostics/common_volume_ap.csv` + `PROVENANCE_common_volume.txt` (18 rows: 3 splits ×
+{Fixed-L, feature ceiling, ego-only, CA-TOSG at three budgets}), each row carrying the frozen value,
+the cropped value and the delta. Crop: box centre inside |x| ≤ 70.4, |y| ≤ 40, applied identically
+to predictions and GT. CA-TOSG rows use 20 of 200 realisations; the fixed references are
+deterministic.
+
+### 3 · Verdict recorded for the reconciliation gate (R53-4)
+
+**The headroom triple is a field-of-view effect rather than a granularity effect** on test, and
+partly so on validate and Culver-City. Measured: inside the common volume the headroom is
+`0.0117` / `-0.0061` / `0.0252` against the deployed-configuration `0.0550` / `0.0240` / `0.0970`.
+Any sentence in either delivered document that attributes the headroom purely to semantic
+granularity contradicts this record and is blocked by the `headroom-fov` pair.
+
+The paper's own numbers do not change: the deployed track remains what is reported, and the
+common-volume figures appear beside it as a companion with their caveats.

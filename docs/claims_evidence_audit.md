@@ -7,9 +7,10 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 | engine | claims |
 |---|---|
 | FROZEN | 55 |
-| ANALYTIC | 50 |
+| ANALYTIC | 51 |
+| UNRESOLVED | 1 |
 
-Total: **105** claims across **28** (sub)sections.
+Total: **107** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -126,6 +127,7 @@ _None._
 | ID | engine | exact values | claim (truncated) |
 |---|---|---|---|
 | `cbf0589` | ANALYTIC | -140.8, 140.8, -40, 40 | The perception model is a PointPillars BEV backbone [cite]; the deployed checkpoints are configured with detection range x [-140.8… |
+| `cc41927` | ANALYTIC | -70.4, 70.4, -140.8, 140.8 | Four factors differ at once: the trained weights, the fusion architecture, the feature codec, and---measured after the fact---the … |
 | `c99fd44` | FROZEN | 52.1 | Because the two branches do not share weights, per-frame branch switching implies either keeping both perception pipelines residen… |
 
 ### Experimental Setup [sec:exp] → Message Construction and Payload Accounting
@@ -175,6 +177,7 @@ _None._
 | `c5fe25d` | ANALYTIC | 0.024, 10 | [label] Feature-level cooperation pays only when the channel delivers it, so we report true end-to-end AP in the two regimes that … |
 | `c6819b4` | FROZEN | 0.5, 0.10, 0.20, 0.30, 0.7887, 0.7926, 0.7936, 0.8697, 0.874 | Three observations follow. (i) Realised AP@0.5 at B_=0.10/0.20/0.30 is 0.7887/0.7926/0.7936 (validate), 0.8697/0.8742/0.8742 (test… |
 | `c5d24be` | FROZEN | 0.8369, -0.7819, 0.0550, 0.8931, -0.8691, 0.0240, 0.8269, -0 | 0.8369-0.7819=0.0550, 0.8931-0.8691=0.0240 and 0.8269-0.7299=0.0970 AP. |
+| `c54e362` | UNRESOLVED | 70.4, 40, 0.0117, 0.0252, -0.0061 | These are measured between branches whose fields of view differ, and that difference carries most of the gap: re-scored inside the… |
 | `c8693a7` | FROZEN | 12.4, 19.5, 21.3, 2.5, 21.2, 0.0, 4.9, 21.1 | The realised share (AP_-AP_Fixed L)/headroom is 12.4/19.5/21.3\%, 2.5/21.2/21.2\% and 0.0/4.9/21.1\%---at most about a fifth, so w… |
 | `c3d45d7` | FROZEN | 21, 41, 0.08102, 0.20361, 0.03680, 0.21196, 0.02437, 0.18226 | 21--41 × the channel use, below Fixed L in realised AP (Fig. [ref]). (iii) Channel-averaged, the selector spends 0.08102--0.20361 … |
 | `c504c4a` | FROZEN | 1, 0.89148, 0.89691, 0.89783, 0.0368, 0.1414, 0.2120, 18, 12 | The three frozen selectors sit at F1 0.89148, 0.89691 and 0.89783 for 0.0368, 0.1414 and 0.2120 Msym, each against the threshold t… |
@@ -258,7 +261,7 @@ _None._
 |---|---|---|---|
 | `c19323f` | FROZEN | 2, 16, 256 | We presented , a channel-aware task-oriented semantic granularity selector for V2V cooperative perception: from per-frame LiDAR cu… |
 | `c055877` | FROZEN | 52.1, 5.6, 95, 58.3 | It runs in 52.1 ± 5.6 ms (P95 = 58.3 ms) per frame on one CPU core, the slowest of the three frozen selectors---selector-only, as … |
-| `cdf1c6a` | FROZEN | 0.0550, 0.0240, 0.0970, 21.3, 0.0, 3.7, 21.4 | Second, the AP a granularity policy can contest is bounded by each split's headroom (0.0550 validate, 0.0240 test, 0.0970 Culver-C… |
+| `cc60bf1` | FROZEN | 0.0550, 0.0240, 0.0970, 0.0117, -0.0061, 0.0252, 21.3, 0.0,  | Second, the AP a granularity policy can contest is bounded by each split's headroom (0.0550 validate, 0.0240 test, 0.0970 Culver-C… |
 | `cf4f060` | FROZEN | 1, 1.47, 1.97, 0.005, 34.8, 26.6 | Third, the dominant decision signal is the channel state: a simple SNR-threshold rule tracks the learned selector closely on the c… |
 | `c88ae5d` | FROZEN | +0.0660, 1, 95, +0.0591, +0.0730 | The policy's gain over object-level communication is frame-selective, reaching +0.0660 F1 (95\% CI [+0.0591,+0.0730]) on the harde… |
 

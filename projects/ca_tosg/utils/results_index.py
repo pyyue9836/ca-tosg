@@ -180,6 +180,17 @@ RULES = [
      'SC-2 pre-registered fuse conditions evaluated on the SComCP table'),
     (r'^baselines/where2comm\.csv$',
      'python baselines/where2comm/compare.py', 'epoch-50 global-sort AP; see its README'),
+    # R53: the common-volume diagnostic track. Not a frozen product: it re-scores the SAME cached
+    # outputs inside the branches' intersection volume and reports the delta per cell.
+    (r'^diagnostics/common_volume_ap\.csv$',
+     'python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver '
+     '--realisations 20',
+     'R53 DIAGNOSTIC TRACK (not frozen): AP inside the common volume x<=70.4, y<=40 beside the '
+     'frozen table, per cell, with the GT fraction dropped'),
+    (r'^diagnostics/PROVENANCE_common_volume\.txt$',
+     'python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver '
+     '--realisations 20',
+     'provenance for the common-volume diagnostic track'),
     (r'^baselines/contextual_bandit\.csv$',
      'python tools/run_baselines.py contextual_bandit --evaluate', ''),
     (r'^baselines/contextual_bandit_runs/.*$',

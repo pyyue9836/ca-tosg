@@ -599,6 +599,72 @@ $\hat\gamma_t + c_t$ subtotal     & \textbf{0.617} \\
 
 
 
+\section{Common-Volume Diagnostic: How Much of the Headroom Is Field of View?}\label{sec:common_volume}
+
+\emph{Motivation.} The branches of this paper are separate trained pipelines, and one of the four
+ways they differ is the configured perception range: the late-fusion checkpoint behind $L$ covers
+$x \in [-70.4, 70.4]$~m, the compression checkpoint behind $F$ covers $x \in [-140.8, 140.8]$~m.
+Both are scored against one canonical ground-truth set, which extends to $|x| \approx 119$~m. Ground
+truth beyond the $L$ branch's range is therefore a structural miss for $L$ and a detectable object
+for $F$, so part of the measured $L$--$F$ gap is field of view rather than semantic granularity. The
+size of that part was unknown, so we measured it.
+
+\emph{Method.} Every prediction and every ground-truth box, from the same committed caches the
+headline table uses, is cropped to the intersection volume $|x| \le 70.4$, $|y| \le 40$~m by box
+centre, and the unchanged scorer is re-run. Two caveats belong with the numbers: the crop is
+centre-based, so a box straddling the boundary is kept or dropped whole; and the \method{} rows use
+$20$ of the $200$ paired realisations, the three fixed references being deterministic. The
+percentage of canonical ground truth removed is $18.89\%$ on validate, $9.94\%$ on test and
+$20.48\%$ on Culver-City.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Common-volume diagnostic, AP@$0.5$. \emph{Deployed} is the frozen table (each branch as
+configured); \emph{common volume} re-scores the same cached outputs inside
+$|x|\le70.4$, $|y|\le40$~m. The headroom row is the feature ceiling minus fixed $L$.
+Source: \texttt{results/diagnostics/common\_volume\_ap.csv}.}
+\label{tab:common_volume}
+\begin{tabular}{llccc}
+\toprule
+Split & Policy & Deployed & Common volume & $\Delta$ \\
+\midrule
+\multirow{4}{*}{validate}
+ & ego-only              & 0.6116 & 0.7539 & $+0.1423$ \\
+ & Fixed $L$             & 0.7819 & 0.9064 & $+0.1245$ \\
+ & Feature ceiling       & 0.8369 & 0.9181 & $+0.0812$ \\
+ & \emph{headroom}       & \emph{0.0550} & \emph{0.0117} & \emph{$-0.0433$} \\
+\midrule
+\multirow{4}{*}{test}
+ & ego-only              & 0.7350 & 0.8162 & $+0.0812$ \\
+ & Fixed $L$             & 0.8691 & 0.9429 & $+0.0738$ \\
+ & Feature ceiling       & 0.8931 & 0.9368 & $+0.0437$ \\
+ & \emph{headroom}       & \emph{0.0240} & \emph{$-0.0061$} & \emph{$-0.0301$} \\
+\midrule
+\multirow{4}{*}{Culver-City}
+ & ego-only              & 0.6185 & 0.7775 & $+0.1590$ \\
+ & Fixed $L$             & 0.7299 & 0.8825 & $+0.1526$ \\
+ & Feature ceiling       & 0.8269 & 0.9077 & $+0.0808$ \\
+ & \emph{headroom}       & \emph{0.0970} & \emph{0.0252} & \emph{$-0.0718$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\emph{Reading.} Every arm's absolute AP rises inside the common volume, which is expected: the
+removed ground truth is ground truth no branch could reach. What matters is the gap. On validate the
+headroom falls from $0.0550$ to $0.0117$, on Culver-City from $0.0970$ to $0.0252$, and on test it
+changes sign, from $0.0240$ to $-0.0061$---inside a shared field of view the perfect-channel feature
+ceiling is \emph{below} fixed $L$ on test.
+
+\emph{Relation to the frozen track.} The two tracks share a ground-truth denominator and answer
+different questions. The deployed track asks what each branch delivers \emph{as configured}, which is
+the question a deployment faces and is what every headline number in the main paper reports. The
+common-volume track asks how much of the $L$--$F$ gap survives when the field of view is held equal,
+which is the question a reader asking ``is this a granularity effect?'' is really asking. Neither
+supersedes the other, and the diagnostic changes no number in the main paper. It does bound one
+claim: on test, the headroom a granularity policy could contest is a field-of-view effect.
+
 \section{Channel-averaged comparison table moved from the main paper (R42)}\label{sec:moved_r42}
 The main paper reads this table in two sentences; the full row set is here.
 
