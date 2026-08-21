@@ -5869,3 +5869,49 @@ That is the next step and is not taken in this entry.
 Reaching the 0.20 and 0.30 caps would need a *second* refinement inside the cliff — thresholds
 between 0.010 and 0.015, where the rate falls from 0.48 to 0.08 — which fuse 3 forbids without a new
 ruling. Estimated cost if ruled: 2–3 thresholds × 3 splits ≈ 1.2–1.8 GPU-h.
+
+## R55-1/2 — the descriptive cell is blocked by a GT boundary rule; amendment A1 running
+
+### 1 · `B_max = 0.10` scoring attempt, and why no AP is reported
+
+The three budget-matched points (validate thr 0.02, test thr 0.015, Culver thr 0.02) were scored in
+the three-way common volume $|x|\le70.4$, $|y|\le38.4$. **The GT assertion fails on all three**, so
+no AP is reported, per the plan's pre-condition:
+
+| split | Where2comm cropped GT | mainline cropped GT | difference |
+|---|---|---|---|
+| validate | 43,697 | 44,766 | −1,069 (−2.4 %) |
+| test | 29,183 | 29,354 | −171 (−0.6 %) |
+| Culver-City | 18,389 | 18,650 | −261 (−1.4 %) |
+
+Diagnosed rather than assumed. On validate, **1,450 of 1,980 frames are identical** and the 530 that
+differ are all one-sided (difference between −6 and 0; the Where2comm track never sees *more*).
+Uncropped totals: 53,789 against 55,190. The signature points at a **boundary rule**, not a different
+scene set: the Where2comm config filters ground truth at $|y|\le38.4$ inside the dataset, the
+mainline at $|y|\le40$, and OpenCOOD's own in-range test is not the centre-based crop this
+diagnostic applies afterwards. Objects near the $y$ boundary are therefore kept by one track and
+dropped by the other, and no amount of post-hoc cropping by box centre reconciles two different
+in-dataset filters.
+
+**Proposed repair, zero GPU, not taken without a ruling:** score both tracks on the *intersection*
+GT set — objects matched between the two canonical sets by centre proximity — which makes "the same
+objects" true by construction rather than by hoping two filters agree. It changes the denominator for
+both tracks equally and would be a third labelled track, not a change to anything frozen.
+
+### 2 · Amendment A1 (the last refinement round) is running
+
+Thresholds {0.011, 0.012, 0.013} × 3 splits, ≈1.8 GPU-h, launched. Registered in `sweep.sh` with the
+pre-registered endpoint in the comment: **after this round there is no further refinement, whether or
+not a point lands within ±20 % of a cap.** Fuse 3's single pass was spent in R54; this round exists
+only because it was ruled explicitly.
+
+### 3 · The threshold→sparsity cliff, recorded as a finding in its own right
+
+Data, no interpretation: mean sparsity against threshold on validate is
+1.0000 / 0.4839 / 0.1204 / 0.0831 / 0.0654 / 0.0540 / 0.0402 / 0.0319 / 0.0099 at
+0.0 / 0.01 / 0.015 / 0.02 / 0.025 / 0.03 / 0.04 / 0.05 / 0.10, i.e. **86 % of the control range
+collapses between threshold 0.01 and 0.015**, and the two larger budgets fall inside that collapse.
+Test and Culver-City behave the same way with a shifted knee. Whether this is the same phenomenon as
+the payload ladder of `sec:ablation` — a control parameter whose reachable operating points are
+sparse where the budgets live — is a question for the write-up, and is deliberately not answered
+here.

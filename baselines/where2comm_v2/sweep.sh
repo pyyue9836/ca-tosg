@@ -13,7 +13,11 @@ cd "$ROOT"
 # gap between 0.01 and 0.05. The upper five points are replaced by five inside that gap;
 # the completed 0.0 / 0.01 / 0.05 / 0.10 points are kept as the anchors and as the
 # collapse evidence.
-for thr in 0.015 0.02 0.025 0.03 0.04; do
+# R55 amendment A1: the LAST refinement round, inside the 0.010-0.015 cliff. Registered as an
+# explicit amendment to plan v2 fuse 3, whose single permitted pass was spent in R54. The
+# endpoint is pre-registered: after this round there is no further refinement, whether or not
+# a point lands within +-20% of a cap.
+for thr in 0.011 0.012 0.013; do
   for split in validate test culver; do
     out="data/where2comm_v2/${split}_thr${thr}.npz"
     if [ -f "${out%.npz}.json" ]; then echo "skip $out (done)"; continue; fi
