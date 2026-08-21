@@ -5963,3 +5963,72 @@ Threshold 0.011 completed on all three splits: rates **0.4349 / 0.4222 / 0.4331*
 Culver-City). The cliff is sharper than the refinement assumed — between 0.011 and 0.015 the rate
 falls from ≈0.43 to ≈0.08–0.13 — so the required 0.1978 (for `B_max = 0.20`) still has no point near
 it. Thresholds 0.012 and 0.013 are running; the pre-registered endpoint stands either way.
+
+## R57 — A1 lands: `B_max = 0.30` matched, the confirmatory cell is not. Fifth case, final.
+
+Amendment A1 completed (thresholds 0.011 / 0.012 / 0.013 × 3 splits, ≈1.9 GPU-h; total for the arm
+≈7.3 h of the approved ≈22 h). **The pre-registered endpoint is reached: no further refinement.**
+
+### 1 · The full control curve
+
+Mean sparsity against communication threshold:
+
+| threshold | 0.0 | 0.01 | 0.011 | 0.012 | 0.013 | 0.015 | 0.02 | 0.025 | 0.03 | 0.04 | 0.05 | 0.10 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| validate | 1.0000 | 0.4839 | 0.4349 | 0.3875 | 0.3209 | 0.1204 | 0.0831 | 0.0654 | 0.0540 | 0.0402 | 0.0319 | 0.0099 |
+| test | 1.0000 | 0.4648 | 0.4222 | 0.3786 | 0.3130 | 0.0802 | 0.0521 | 0.0392 | 0.0314 | 0.0227 | 0.0179 | — |
+| Culver-City | 1.0000 | 0.4851 | 0.4331 | 0.3825 | 0.3117 | 0.1264 | 0.0908 | 0.0730 | 0.0608 | 0.0463 | 0.0379 | — |
+
+The step from 0.013 to 0.015 drops the rate by ≈0.23 in one move, and the rate `B_max = 0.20`
+requires (0.1978) sits inside that step on every split. **This is not undersampling: it is a control
+parameter with no resting point there.** Twelve thresholds, three of them placed inside the step by
+two separate refinement rounds, and none lands within ±20 % of the middle budget.
+
+### 2 · Budget matching, final
+
+| split | `B_max = 0.10` | `B_max = 0.20` | `B_max = 0.30` |
+|---|---|---|---|
+| validate | 0.0831, −14.1 % ✔ | 0.1204, −39.1 % ✘ (bracket 0.1204–0.3209) | 0.3209, +7.4 % ✔ |
+| test | 0.0802, −17.1 % ✔ | 0.3130, +58.3 % ✘ (bracket 0.0802–0.3130) | 0.3130, +4.8 % ✔ |
+| Culver-City | 0.0908, −6.1 % ✔ | 0.1264, −36.1 % ✘ (bracket 0.1264–0.3117) | 0.3117, +4.3 % ✔ |
+
+### 3 · The confirmatory cell: fifth case, stated as the record requires
+
+The pre-registered confirmatory comparison is **test @ `B_max = 0.20`**. It cannot be run:
+
+> *The budget-matched comparison at the confirmatory cell could not be performed. Where2comm's
+> communication threshold has no setting that places its mean payload within ±20 % of the
+> `B_max = 0.20` cap: the reachable rates bracket the required 0.1978 as [0.0802, 0.3130] on test,
+> and twelve grid points — three of them placed inside the bracket by two refinement rounds — leave
+> the interval empty. Reported as a bracketing pair, with no verdict.*
+
+None of the four pre-registered verdict templates applies, because all four presuppose a matched
+budget. **No verdict sentence exists for this arm, and none may be written into the paper.**
+
+### 4 · Descriptive cells, both budgets that are matched (intersection-GT track, AP@0.5)
+
+| budget | split | Where2comm | CA-TOSG | Δ | Fixed L | ceiling | W2C rate |
+|---|---|---|---|---|---|---|---|
+| 0.10 | validate | 0.91519 | 0.90883 | **+0.00636** | 0.90934 | 0.92084 | 0.0831 |
+| 0.10 | test | 0.94358 | 0.94490 | **−0.00132** | 0.94506 | 0.93952 | 0.0802 |
+| 0.10 | Culver-City | 0.89572 | 0.89508 | **+0.00064** | 0.89507 | 0.92060 | 0.0908 |
+| 0.30 | validate | 0.91653 | 0.90930 | **+0.00723** | 0.90934 | 0.92084 | 0.3209 |
+| 0.30 | test | 0.94417 | 0.94363 | **+0.00054** | 0.94506 | 0.93952 | 0.3130 |
+| 0.30 | Culver-City | 0.89885 | 0.89864 | **+0.00021** | 0.89507 | 0.92060 | 0.3117 |
+
+Read with the same discipline as everything else here:
+
+* **Descriptive. Not confirmatory. No interval, no decision, no margin.** Five of six cells favour
+  Where2comm by between `+0.0002` and `+0.0072` AP@0.5; one (test @ 0.10) favours CA-TOSG by
+  `-0.0013`. Nobody should read a sign pattern of that size as a result — that is exactly what the
+  pre-registered margin and interval exist to prevent, and neither is available here.
+* At `B_max = 0.10` the comparator spends **under** its cap on all three splits, so the comparison
+  does not flatter CA-TOSG. At `0.30` it spends slightly **over** (+4.3 % to +7.4 %), so there the
+  advantage is partly bought.
+* On test both arms sit at or below Fixed $L$, which on that split is above the feature ceiling —
+  the R53 field-of-view finding, reproduced on a GT set built by a different construction.
+
+### 5 · Cost
+
+Arm total ≈7.3 GPU-h of the approved ≈22 h: 5.4 h for the main sweep, 1.9 h for A1. No training was
+run (R51-B). Zero GPU was spent on any of the three scoring tracks.

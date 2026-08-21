@@ -1,16 +1,31 @@
-split,track,policy,w2c_threshold,w2c_rate,ap50,ap70,gt_objects
-validate,intersection-GT,Where2comm,0.02,0.08314459953325415,0.91519,0.82653,43697
-validate,intersection-GT,Fixed-L,,,0.90934,0.82362,43697
-validate,intersection-GT,Feature-ceiling,,,0.92084,0.83827,43697
-validate,intersection-GT,ego-only,,,0.77232,0.67689,43697
-validate,intersection-GT,CA-TOSG-RF @ B0.10,,,0.90883,0.81924,43697
-test,intersection-GT,Where2comm,0.015,0.08020847205433153,0.94358,0.87108,29183
-test,intersection-GT,Fixed-L,,,0.94506,0.87663,29183
-test,intersection-GT,Feature-ceiling,,,0.93952,0.87096,29183
-test,intersection-GT,ego-only,,,0.81751,0.72421,29183
-test,intersection-GT,CA-TOSG-RF @ B0.10,,,0.9449,0.87678,29183
-culver,intersection-GT,Where2comm,0.02,0.09077856238592755,0.89572,0.80118,18389
-culver,intersection-GT,Fixed-L,,,0.89507,0.79817,18389
-culver,intersection-GT,Feature-ceiling,,,0.9206,0.82846,18389
-culver,intersection-GT,ego-only,,,0.78855,0.67728,18389
-culver,intersection-GT,CA-TOSG-RF @ B0.10,,,0.89508,0.79816,18389
+split,track,policy,w2c_threshold,w2c_rate,ap50,ap70,gt_objects,budget
+validate,intersection-GT,Where2comm,0.02,0.0831445995332541,0.91519,0.82653,43697,0.10
+validate,intersection-GT,Fixed-L,,,0.90934,0.82362,43697,0.10
+validate,intersection-GT,Feature-ceiling,,,0.92084,0.83827,43697,0.10
+validate,intersection-GT,ego-only,,,0.77232,0.67689,43697,0.10
+validate,intersection-GT,CA-TOSG-RF @ B0.10,,,0.90883,0.81924,43697,0.10
+test,intersection-GT,Where2comm,0.015,0.0802084720543315,0.94358,0.87108,29183,0.10
+test,intersection-GT,Fixed-L,,,0.94506,0.87663,29183,0.10
+test,intersection-GT,Feature-ceiling,,,0.93952,0.87096,29183,0.10
+test,intersection-GT,ego-only,,,0.81751,0.72421,29183,0.10
+test,intersection-GT,CA-TOSG-RF @ B0.10,,,0.9449,0.87678,29183,0.10
+culver,intersection-GT,Where2comm,0.02,0.0907785623859275,0.89572,0.80118,18389,0.10
+culver,intersection-GT,Fixed-L,,,0.89507,0.79817,18389,0.10
+culver,intersection-GT,Feature-ceiling,,,0.9206,0.82846,18389,0.10
+culver,intersection-GT,ego-only,,,0.78855,0.67728,18389,0.10
+culver,intersection-GT,CA-TOSG-RF @ B0.10,,,0.89508,0.79816,18389,0.10
+validate,intersection-GT,Where2comm,0.013,0.3208883138392309,0.91653,0.82739,43697,0.30
+validate,intersection-GT,Fixed-L,,,0.90934,0.82362,43697,0.30
+validate,intersection-GT,Feature-ceiling,,,0.92084,0.83827,43697,0.30
+validate,intersection-GT,ego-only,,,0.77232,0.67689,43697,0.30
+validate,intersection-GT,CA-TOSG-RF @ B0.30,,,0.9093,0.81965,43697,0.30
+test,intersection-GT,Where2comm,0.013,0.3130422530635711,0.94417,0.87124,29183,0.30
+test,intersection-GT,Fixed-L,,,0.94506,0.87663,29183,0.30
+test,intersection-GT,Feature-ceiling,,,0.93952,0.87096,29183,0.30
+test,intersection-GT,ego-only,,,0.81751,0.72421,29183,0.30
+test,intersection-GT,CA-TOSG-RF @ B0.30,,,0.94363,0.87324,29183,0.30
+culver,intersection-GT,Where2comm,0.013,0.3117262915860523,0.89885,0.80134,18389,0.30
+culver,intersection-GT,Fixed-L,,,0.89507,0.79817,18389,0.30
+culver,intersection-GT,Feature-ceiling,,,0.9206,0.82846,18389,0.30
+culver,intersection-GT,ego-only,,,0.78855,0.67728,18389,0.30
+culver,intersection-GT,CA-TOSG-RF @ B0.30,,,0.89864,0.80132,18389,0.30

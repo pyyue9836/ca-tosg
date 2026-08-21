@@ -87,6 +87,9 @@ def main() -> int:
     ap.add_argument('--x', type=float, default=70.4)
     ap.add_argument('--y', type=float, default=38.4)
     ap.add_argument('--realisations', type=int, default=20)
+    ap.add_argument('--budget', default='0.10', choices=['0.10', '0.20', '0.30'],
+                    help='which frozen selector the CA-TOSG row uses; must be the budget the '
+                         'Where2comm point is matched to (R56)')
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     rows = []
@@ -150,7 +153,7 @@ def main() -> int:
         # CA-TOSG at B_max = 0.10, the budget the Where2comm point is matched to
         man, budgets = D.load_manifest()
         tbl = pd.read_csv(D.BLER_CSV)
-        bd = budgets['0.10']
+        bd = budgets[a.budget]
         rng = np.random.default_rng(E.CSI_SEED)
         snr = rng.uniform(0, 20, size=(E.N_REPLAY, n))
         ray = rng.random(size=(E.N_REPLAY, n)) < 0.5
@@ -164,14 +167,14 @@ def main() -> int:
                      for p in E.branch_of(rf[r], surv[r]).tolist()]
             v = E.ap_pick(picks, ST, gtn)
             a50.append(v[1]); a70.append(v[2])
-        rows.append(dict(split=split, track='intersection-GT', policy='CA-TOSG-RF @ B0.10',
+        rows.append(dict(split=split, track='intersection-GT', policy=f'CA-TOSG-RF @ B{a.budget}',
                          w2c_threshold=None, w2c_rate=None,
                          ap50=round(float(np.mean(a50)), 5), ap70=round(float(np.mean(a70)), 5),
                          gt_objects=sum(gtn)))
         print(f'  CA-TOSG-RF@B0.10 AP@.5={np.mean(a50):.5f} AP@.7={np.mean(a70):.5f}', flush=True)
 
     df = pd.DataFrame(rows)
-    p = os.path.join(OUT, 'intersection_gt_track.csv')
+    p = os.path.join(OUT, f'intersection_gt_track_B{a.budget}.csv')
     df.to_csv(p, index=False)
     print('\n' + df.to_string(index=False))
     print(f'\nwrote {os.path.relpath(p, ROOT)} (DESCRIPTIVE; third track, nothing frozen touched)')
