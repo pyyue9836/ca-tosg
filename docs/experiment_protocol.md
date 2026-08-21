@@ -5807,3 +5807,65 @@ stops, per the fuse's own wording.
 
 Cost unchanged: 5 thresholds × 3 splits ≈ 3.2 h plus the two dense points ≈ 0.25 h. GPU spent before
 this entry: ≈2.1 h of the approved ≈22 h.
+
+## R55 — sweep complete; fuse 3 fires on the confirmatory cell; the arm stops there
+
+The re-pointed sweep finished (25 threshold×split products, `data/where2comm_v2/`). GPU spent
+≈5.4 h of the approved ≈22 h. Two committed products:
+`results/baselines/where2comm_v2/sparsity_payload.csv` and `budget_match.csv`.
+
+### 1 · Measured threshold → sparsity (mean over frames)
+
+| threshold | 0.0 | 0.01 | 0.015 | 0.02 | 0.025 | 0.03 | 0.04 | 0.05 | 0.10 |
+|---|---|---|---|---|---|---|---|---|---|
+| validate | 1.0000 | 0.4839 | 0.1204 | 0.0831 | 0.0654 | 0.0540 | 0.0402 | 0.0319 | 0.0099 |
+| test | 1.0000 | 0.4648 | 0.0802 | 0.0521 | 0.0392 | 0.0314 | 0.0227 | 0.0179 | — |
+| Culver-City | 1.0000 | 0.4851 | 0.1264 | 0.0908 | 0.0730 | 0.0608 | 0.0463 | 0.0379 | — |
+
+The map is steeper still than the refinement assumed: between threshold 0.01 and 0.015 the rate
+falls from ≈0.48 to ≈0.08–0.13. That interval is a cliff, not a slope, and it is where the two
+larger budgets live.
+
+### 2 · The fifth payload convention, applied
+
+`B_{W2C}(s) = [s·N_ref·0.9155 + min(s·H·W·⌈log2 HW⌉, H·W)] / R / 4` Msym, with the reference
+geometry `N_ref = 256×48×176`, `H·W = 48×176`, `R = 1/2`, 16-QAM — the convention pre-registered in
+plan v2 §c, charging the index cost and **not** charging the confidence map (the reading that favours
+the comparator, per R51-C). Required rates to meet each cap under the declared convention:
+`B_max = 0.10 → s ≈ 0.0967`, `0.20 → s ≈ 0.1978`, `0.30 → s ≈ 0.2988`.
+
+### 3 · Budget matching — and fuse 3 fires
+
+| split | `B_max` | rate needed | nearest measured | error | matched (±20 %)? |
+|---|---|---|---|---|---|
+| validate | 0.10 | 0.0967 | 0.0831 (thr 0.02) | −14.1 % | **yes** |
+| validate | 0.20 | 0.1978 | 0.1204 (thr 0.015) | −39.1 % | no — bracket [0.1204, 0.4839] |
+| validate | 0.30 | 0.2988 | 0.1204 (thr 0.015) | −59.7 % | no — bracket [0.1204, 0.4839] |
+| test | 0.10 | 0.0967 | 0.0802 (thr 0.015) | −17.1 % | **yes** |
+| **test** | **0.20** | 0.1978 | 0.0802 (thr 0.015) | −59.5 % | **no — bracket [0.0802, 0.4648]** |
+| test | 0.30 | 0.2988 | 0.4648 (thr 0.01) | +55.6 % | no — bracket [0.0802, 0.4648] |
+| Culver-City | 0.10 | 0.0967 | 0.0908 (thr 0.02) | −6.1 % | **yes** |
+| Culver-City | 0.20 | 0.1978 | 0.1264 (thr 0.015) | −36.1 % | no |
+| Culver-City | 0.30 | 0.2988 | 0.1264 (thr 0.015) | −57.7 % | no |
+
+**The pre-registered confirmatory cell is test @ `B_max = 0.20`, and it is not matched.** Plan v2
+fuse 3 allows exactly one refinement pass; R54 spent it. Its own wording then applies verbatim: *"if
+it still misses, report the bracketing pair and say the cap was not matched."* Reported:
+`s ∈ [0.0802, 0.4648]` brackets the required `0.1978` on test, and no grid point lies inside ±20 %.
+
+**Therefore no verdict sentence is produced for the confirmatory cell**, and none of the four
+templates (win / loss / non-inferior / inconclusive-at-the-margin) is applied: all four presuppose a
+budget-matched comparison. The honest statement is the fifth case the plan did not enumerate — *the
+comparison was not run at a matched budget, because the comparator's control parameter has no
+setting that lands there.*
+
+### 4 · What is still open, and what it would cost
+
+`B_max = 0.10` **is** matched on all three splits (−14.1 %, −17.1 %, −6.1 %), so a descriptive
+comparison at the tightest budget is available and needs only a scoring pass over the three cached
+points (thr 0.02 / 0.015 / 0.02), in the three-way common volume with the GT assertion, zero GPU.
+That is the next step and is not taken in this entry.
+
+Reaching the 0.20 and 0.30 caps would need a *second* refinement inside the cliff — thresholds
+between 0.010 and 0.015, where the rate falls from 0.48 to 0.08 — which fuse 3 forbids without a new
+ruling. Estimated cost if ruled: 2–3 thresholds × 3 splits ≈ 1.2–1.8 GPU-h.
