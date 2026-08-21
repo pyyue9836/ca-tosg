@@ -222,14 +222,16 @@ def self_test(tex):
               # R45-4: the retired framing -- Where2comm entering a comparison as a baseline
               '\nWhere2comm is the strongest baseline available for this setting.\n'
               # R46-2: the retired fair-comparison sentence
-              '\nAll methods share the same backbone and detection head to ensure a fair comparison.\n')
+              '\nAll methods share the same backbone and detection head to ensure a fair comparison.\n'
+              # R57-3: an adjudication of the external arm, which no cell licenses
+              '\nWhere2comm is non-inferior to CA-TOSG at the confirmatory cell.\n')
     fired4 = scan_terminology(tex + probes)
     clean = scan_terminology(tex)
     n_hits = len({t[0] for t in fired4})
     print(f'  TERMINOLOGY:  {"FIRES" if len(fired4) >= 4 else "DOES NOT FIRE"} '
           f'({len(tracked_terms())} tracked forms; {len(fired4)} injected hits over {n_hits} '
           f'families; {len(clean)} live match(es))')
-    rc |= 0 if (len(fired4) >= 6 and not clean) else 1
+    rc |= 0 if (len(fired4) >= 7 and not clean) else 1
     return rc
 
 

@@ -28,3 +28,7 @@ Directions: `>` A exceeds B, `<` A is below B, `~` parity (within 0.0005).
 | abstract-handrule-payload | hand_rule_3 | RF | > | payload | test | 0.20 | `sending more feature messages, so the cues buy` |
 | abstract-threshold-F1 | RF | tau_nominal | < | F1 | test | 0.20 | `non-inferior to the nominal SNR threshold within a $0.005$ margin` |
 | common-volume-test | ceiling_common_volume | fixedL_common_volume | < | F1 | test | 0.20 | `on test it changes sign to $-0.0061$` |
+| w2c-desc-validate-B010 | w2c_isect | catosg_isect | > | F1 | validate | 0.10 | `favour Where2comm by between $+0.00021$ and $+0.00723$` |
+| w2c-desc-test-B010-REVERSED | w2c_isect | catosg_isect | < | F1 | test | 0.10 | `one favours \method{} by
+$-0.00132$` |
+| w2c-desc-culver-B030 | w2c_isect | catosg_isect | > | F1 | culver | 0.30 | `the $0.30$ rows are partly bought` |

@@ -241,44 +241,128 @@ Collaboration is not unconditionally beneficial, and that is what makes an expli
 
 
 
-\subsection{Where2comm as an Adjacent-Technology Reference}\label{sec:where2comm}
+\subsection{Budget-Matched External Comparison (Where2comm)}\label{sec:where2comm}
 
-Where2comm is an \emph{adjacent-technology reference}, not a baseline: it is
-not ranked against any arm of this paper, and no claim here rests on it. To
-place \method{} beside the most prominent spatial-selection cooperative
-perception method, we report reference-only measurements of
-Where2comm~\cite{hu2022where2comm} on the same OPV2V validate split
-($1{,}980$ frames). Three caveats bound what it can support, and they are
-stated rather than buried: the numbers come from our own $50$-epoch
-reproduction, not the authors' released model; they are measured under a
-\emph{perfect} channel, so no part of this paper's transport model applies to
-them; and they were scored by the retired global-sort scorer, which is a
-different track from the frozen AP chain that produces every headline number
-here. Our reproduction reaches AP@$0.5 = 0.871$ under a perfect channel, and we
-deliberately draw \textbf{no ranking} from it. It is not comparable to any
-number in this paper, on three independent axes at once: a different scorer
-(the retired global-sort track, not the frozen AP chain), a perfect channel
-rather than the modelled transport, and---decisively---a different
-collaborator convention, since the reproduction fuses every collaborator
-while the corrected main experiment pays for one. The direction of such a
-comparison is not even stable: under the corrected accounting the validate
-Fixed-$L$ reference is $0.7819$, \emph{below} $0.871$, which reverses the
-ordering an earlier version of this section reported. Numbers measured under
-three different conventions cannot be ordered, and we do not order them.
+\emph{What was run, and under which conventions.} Where2comm is compared against \method{} under
+this paper's own transport and scoring chain. Everything that could make the comparison unfair is
+disclosed rather than buried. The collaborator convention is the mainline one: the nearest single
+collaborator, applied at inference through the same hook every mainline arm uses, so the comparator
+is \emph{not} retrained---retraining it at $N=1$ would have made it the only arm trained under a
+different discipline. Its checkpoint is our own $50$-epoch reproduction. Scoring uses the frozen
+chain and a ground-truth set made identical to the mainline's \emph{by construction}: the two
+in-dataset filters disagree near the $|y|$ boundary, so ground-truth boxes are matched one-to-one
+between the two canonical sets by box centre (tolerance $0.5$~m; every matched pair is at distance
+$0.000$~m, and the counts at $0.01$~m are identical), and only matched objects are scored, inside the
+three-way volume $|x|\le70.4$, $|y|\le38.4$~m. Payload uses the pre-registered sparse convention:
+selected feature elements at the declared bit-per-element rate, the index cost charged, and the
+confidence map \emph{not} charged---the cheaper reading, which favours the comparator.
 
-The comparison is also \emph{orthogonal} to \method{}:
-Where2comm is a spatial-mask method that decides \emph{which feature
-regions} to send \emph{within} a fixed feature-level granularity, whereas
-\method{} decides \emph{whether} to send feature-level information at all
-and at \emph{what} granularity, given the channel. The two compose:
-Where2comm can be deployed inside the $C_q$ branches of \method{} as an
-alternative feature codec, while the granularity selector decides when
-feature-level communication is worth its payload and channel risk. Under
-a bandwidth-constrained, time-varying link, even a feature-level message
-is realised only when the channel can deliver it---precisely the regime
-\method{} arbitrates.
+\emph{The control parameter does not rest where the middle budget is.} Where2comm's sparsity is not
+a setting but an outcome: a confidence threshold is the control, and the transmitted fraction is
+measured after the fact. Twelve thresholds were run, three of them placed by two refinement rounds
+inside the interval where the budgets live.
 
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Measured mean transmitted fraction against the communication threshold. Between $0.013$ and
+$0.015$ the fraction falls by ${\approx}0.23$ in one step, and the fraction required by
+$B_{\max}=0.20$ ($0.1978$) lies inside that step on every split.
+Source: \texttt{results/baselines/where2comm\_v2/sparsity\_payload.csv}.}
+\label{tab:w2c_cliff}
+\begin{tabular}{lccccccc}
+\toprule
+threshold & 0.01 & 0.011 & 0.012 & 0.013 & 0.015 & 0.02 & 0.05 \\
+\midrule
+validate    & 0.4839 & 0.4349 & 0.3875 & 0.3209 & 0.1204 & 0.0831 & 0.0319 \\
+test        & 0.4648 & 0.4222 & 0.3786 & 0.3130 & 0.0802 & 0.0521 & 0.0179 \\
+Culver-City & 0.4851 & 0.4331 & 0.3825 & 0.3117 & 0.1264 & 0.0908 & 0.0379 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Budget matching. A point counts as matched when its mean payload is within $\pm20\%$ of the
+cap. The middle budget is matched on no split; its bracket is the pair of reachable fractions either
+side of the requirement. Source: \texttt{results/baselines/where2comm\_v2/budget\_match.csv}.}
+\label{tab:w2c_budget_match}
+\begin{tabular}{lccccc}
+\toprule
+Split & $B_{\max}$ & fraction needed & nearest reachable & error & matched \\
+\midrule
+validate    & 0.10 & 0.0967 & 0.0831 & $-14.1\%$ & yes \\
+validate    & 0.20 & 0.1978 & 0.1204 & $-39.1\%$ & no \\
+validate    & 0.30 & 0.2988 & 0.3209 & $+7.4\%$  & yes \\
+\midrule
+test        & 0.10 & 0.0967 & 0.0802 & $-17.1\%$ & yes \\
+test        & 0.20 & 0.1978 & 0.3130 & $+58.3\%$ & no \\
+test        & 0.30 & 0.2988 & 0.3130 & $+4.8\%$  & yes \\
+\midrule
+Culver-City & 0.10 & 0.0967 & 0.0908 & $-6.1\%$  & yes \\
+Culver-City & 0.20 & 0.1978 & 0.1264 & $-36.1\%$ & no \\
+Culver-City & 0.30 & 0.2988 & 0.3117 & $+4.3\%$  & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\emph{Budget matching, and the cell that could not be matched.} A grid point counts as matched when
+its mean payload is within $\pm20\%$ of the cap. $B_{\max}=0.10$ is matched on all three splits
+($-14.1\%$, $-17.1\%$, $-6.1\%$; the comparator spends \emph{under} its cap) and $B_{\max}=0.30$ on
+all three ($+7.4\%$, $+4.8\%$, $+4.3\%$; \emph{over} its cap, so part of any advantage there is
+bought). $B_{\max}=0.20$ is matched on none: on test the reachable fractions bracket the required
+$0.1978$ as $[0.0802, 0.3130]$, and the interval is empty.
+
+That cell is the pre-registered confirmatory comparison, so the confirmatory result of this arm is
+that \textbf{the budget-matched comparison at $B_{\max}=0.20$ could not be performed}: Where2comm's
+threshold has no setting placing its payload within $\pm20\%$ of that cap, and twelve grid points---
+three of them placed inside the bracket deliberately---leave the interval empty. It is reported as a
+bracketing pair, with no adjudication. This is a statement about the comparator's control parameter,
+not about either method's perception quality.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Descriptive comparison at the two matched budgets, AP@$0.5$, on the intersection
+ground-truth set inside $|x|\le70.4$, $|y|\le38.4$~m. No interval, no margin and no decision is
+attached to any cell. Source: \texttt{results/diagnostics/intersection\_gt\_track.csv}.}
+\label{tab:w2c_descriptive}
+\begin{tabular}{llccccc}
+\toprule
+$B_{\max}$ & Split & Where2comm & \method{} & $\Delta$ & Fixed $L$ & fraction \\
+\midrule
+\multirow{3}{*}{0.10}
+ & validate    & 0.91519 & 0.90883 & $+0.00636$ & 0.90934 & 0.0831 \\
+ & test        & 0.94358 & 0.94490 & $-0.00132$ & 0.94506 & 0.0802 \\
+ & Culver-City & 0.89572 & 0.89508 & $+0.00064$ & 0.89507 & 0.0908 \\
+\midrule
+\multirow{3}{*}{0.30}
+ & validate    & 0.91653 & 0.90930 & $+0.00723$ & 0.90934 & 0.3209 \\
+ & test        & 0.94417 & 0.94363 & $+0.00054$ & 0.94506 & 0.3130 \\
+ & Culver-City & 0.89885 & 0.89864 & $+0.00021$ & 0.89507 & 0.3117 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\emph{How Table~\ref{tab:w2c_descriptive} is to be read.} Four points, none of which is optional.
+First, these cells are descriptive: no interval, no pre-registered margin and no decision is attached
+to any of them, and the confirmatory cell is the one that could not be run. Second, five of the six
+cells favour Where2comm by between $+0.00021$ and $+0.00723$ AP@$0.5$ and one favours \method{} by
+$-0.00132$; a sign pattern at that magnitude, without intervals, is not a result and is not offered
+as one. Third, the budget errors run in opposite directions at the two budgets---under the cap at
+$0.10$, over it by $4.3$--$7.4\%$ at $0.30$---so the $0.30$ rows are partly bought. Fourth, on test
+both arms sit at or below Fixed $L$, which on that split is above the perfect-channel feature
+ceiling; that is the field-of-view effect of Section~\ref{sec:common_volume}, reproduced here on a
+ground-truth set built by a different construction.
+
+\emph{Orthogonality is unchanged by the comparison.} Where2comm decides \emph{which feature regions}
+to send within a fixed granularity; \method{} decides \emph{whether} feature-level information is
+sent at all. The two compose: a spatial-selection codec can sit inside the feature branch while the
+granularity selector decides when that branch is worth its payload and channel risk.
 
 \subsection{Collaborator Scale}\label{sec:collab_scale}
 

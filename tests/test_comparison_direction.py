@@ -46,11 +46,17 @@ SOURCES = {
     # view -- which is exactly the kind of claim that silently inverts when a table is regenerated.
     'ceiling_common_volume': ('results/diagnostics/common_volume_ap.csv',
                               'ap50_mean_crop', 'ap70_mean_crop'),
+    # R57-4: the external arm's descriptive cells, on the intersection-GT track. Five of six favour
+    # Where2comm and one does not; the reversed cell gets its own row so a regenerated table cannot
+    # quietly align the sign pattern.
+    'w2c_isect': ('results/diagnostics/intersection_gt_track.csv', 'ap50', 'ap70'),
+    'catosg_isect': ('results/diagnostics/intersection_gt_track.csv', 'ap50', 'ap70'),
     'fixedL_common_volume': ('results/diagnostics/common_volume_ap.csv',
                              'ap50_mean_crop', 'ap70_mean_crop'),
 }
 # rows of the diagnostic track are selected by policy name, not by a `variant` column
-POLICY_OF = {'ceiling_common_volume': 'Feature-ceiling', 'fixedL_common_volume': 'Fixed-L'}
+POLICY_OF = {'ceiling_common_volume': 'Feature-ceiling', 'fixedL_common_volume': 'Fixed-L',
+             'w2c_isect': 'Where2comm', 'catosg_isect': 'CA-TOSG'}
 METRIC_COL = {'F1': 0, 'payload': 1}
 
 
@@ -60,7 +66,12 @@ def value(entity, metric, split, budget):
     if 'variant' in d.columns:                       # the ablation table keys on the variant name
         d = d[d.variant == entity]
     if entity in POLICY_OF:                          # R53-4: diagnostic track, keyed on policy
-        d = d[(d.policy == POLICY_OF[entity]) & (d.split == split)]
+        want = POLICY_OF[entity]
+        d = d[(d.policy.str.startswith(want)) & (d.split == split)]
+        if entity.endswith('_isect'):                # R57-4: the arm has two descriptive budgets
+            # compare numerically: pandas reads "0.10" as 0.1, so a string compare silently
+            # matches nothing and the FUSE fires on a well-formed table
+            d = d[d.budget.astype(float).round(2) == round(budget, 2)]
         if len(d) != 1:
             raise SystemExit(f'comparison gate FUSE: {entity} @ {split} matched {len(d)} rows '
                              f'in {rel}')

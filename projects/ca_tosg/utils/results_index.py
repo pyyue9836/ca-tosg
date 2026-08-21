@@ -192,6 +192,9 @@ RULES = [
      'python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver '
      '--realisations 20',
      'R53 raw output of the common-volume diagnostic, one file per (volume, split set)'),
+    (r'^baselines/where2comm_v2/(sparsity_payload&#124;budget_match)\.csv$'.replace('&#124;', '|'),
+     'python baselines/where2comm_v2/sweep.sh then the accounting in the R55/R57 change-log',
+     'R55-R57: measured threshold->sparsity and the budget-match verdict per cap (descriptive arm)'),
     (r'^diagnostics/intersection_gt_track\.csv$',
      'python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 '
      '--point test:0.015 --point culver:0.02',

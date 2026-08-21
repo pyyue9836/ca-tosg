@@ -119,7 +119,10 @@ RX \+0\.025.{0,8}F1 edge
 #    set-membership and selector-choice forms are stale.
 RX \{L, ?C_\{16\}, ?C_\{256\}\}
 RX s_t ?= ?C_\{256\}
-RX three-way
+# R57: 'three-way' collided with LIVE text -- the three-way intersection volume and the
+# three-way GT construction. The retired entity is the ACTION SET, so the pattern is anchored
+# on that. Eighth collision of this family: a bare phrase is not a fingerprint either.
+RX three-way (action set|set \$?\\mathcal\{S\}|choice between \$?L)
 RX 3-way
 RX Pareto-dominat
 RX Pareto-optimal

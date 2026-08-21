@@ -6032,3 +6032,36 @@ Read with the same discipline as everything else here:
 
 Arm total ≈7.3 GPU-h of the approved ≈22 h: 5.4 h for the main sweep, 1.9 h for A1. No training was
 run (R51-B). Zero GPU was spent on any of the three scoring tracks.
+
+## R57 — the arm enters the paper; no verdict does
+
+Zero GPU. The paper is now in compile state.
+
+1. **Supplementary**: the non-baseline subsection is replaced by *Budget-Matched External Comparison
+   (Where2comm)* — full protocol disclosure (N=1 inference hook, no retraining, intersection-GT
+   construction, the billing convention that favours the comparator), the threshold→fraction cliff
+   table, the budget-match table, both descriptive tables, the four readings verbatim, and the fifth
+   case with its bracketing pair. **No verdict sentence exists anywhere in either document.**
+2. **Main text**, four sites: the pointer now says a budget-matched comparison was run and carries no
+   adjudication at the confirmatory cell; limitation (iv) is rewritten to *comparison run,
+   confirmatory adjudication unreachable, confirmatory external comparison still outstanding*; the
+   `B_max = 0.30` reference carries its over-spend disclosure; and the cliff is placed beside the
+   payload ladder with an explicit refusal to generalise ("two mechanisms can leave a budget
+   unreachable without being the same mechanism").
+3. **TERMINOLOGY migrated** as pre-registered: the `never a baseline` family becomes
+   `no confirmatory adjudication`. The forbidden set is now verbs of adjudication
+   (outperforms / beats / wins / non-inferior / confirmatory), with `baseline` kept under a
+   `(?<!not a )` guard so the retired R45-4 form still fires as a self-test probe. Seven injected
+   faults, all firing.
+4. **Six gate items landed**: products indexed and claims bound; three direction probes over the
+   descriptive cells with the reversed one (test @ 0.10) registered separately so a regenerated table
+   cannot quietly align the sign pattern; a `w2c-no-verdict` reconciliation pair; the five-convention
+   accounting machine-checked by `check_anchor_sensitivity.py`; the cliff table sourced to its CSV;
+   and the arm's GT assertion resident in `score_common_volume.py` / `intersection_gt_track.py`.
+
+**An eighth fingerprint collision**, handled the usual way: `three-way` was a retired action-set
+form and is now live text (the three-way intersection volume). Re-anchored on the action set.
+
+State: 18 gates pass twice; all four `p6_cross_section_scan` controls fire; `p6_numbers_vs_csv`
+0 MISS; reconciliation 7 pairs, 6 injected faults firing; direction gate 21 claims. Main **16 pages**,
+supplementary **11 pages**, abstract 248 words.
