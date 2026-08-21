@@ -6065,3 +6065,26 @@ form and is now live text (the three-way intersection volume). Re-anchored on th
 State: 18 gates pass twice; all four `p6_cross_section_scan` controls fire; `p6_numbers_vs_csv`
 0 MISS; reconciliation 7 pairs, 6 injected faults firing; direction gate 21 claims. Main **16 pages**,
 supplementary **11 pages**, abstract 248 words.
+
+## R58-1 — CORRECTION, committed alone and first: the arm was never run under the transport
+
+**The R57 text was false.** It said the Where2comm comparison was run "under this paper's own
+transport and scoring chain". The scoring chain, the frames, the ground truth and the collaborator
+convention are true. **The transport is not**: no channel model was applied to either arm in that
+comparison. `run_inference.py` produces detections; `intersection_gt_track.py` scores them; nothing
+in that path draws an SNR, looks up a BLER, or falls back on a delivery failure. The AP numbers in
+Table~\ref{tab:w2c_descriptive} are **ideal-delivery** numbers for both arms.
+
+How it happened, stated plainly: the plan (v2 §d) specified the frozen replay for this arm, the
+implementation scored cached detections directly, and no gate compared the two — every gate here
+checks the paper against products or against the record, and this was a claim about a *procedure*
+that no product contradicts. The R46-3 paper-vs-code discipline exists for exactly this and was not
+applied to my own summary sentence.
+
+Wording downgraded in the same commit, before anything else: the arm is now a **budget-aligned
+perception diagnostic under ideal delivery**, said in the supplementary lead, in the descriptive
+table's caption, in the main-text pointer and in limitation (iv). Every "under this paper's
+transport" form is gone from both documents (0 occurrences).
+
+The transport-aware replay is R58-2 and is not in this commit. Until it lands, nothing in either
+document claims a same-transport comparison.

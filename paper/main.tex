@@ -506,10 +506,11 @@ costs $\le0.0002$ F1, CSI aging under a Jakes model at $60$~km/h costs $-0.0025$
 one-frame-stale decision costs at most $-0.0109$. The deployed Random Forest runs in
 $52.1 \pm 5.6$~ms ($\mathrm{P95}=58.3$~ms) per frame on a single CPU core, the slowest of the three
 frozen selectors; that is selector-only latency, on the reading fixed in Section~\ref{sec:selector}. Details and the full
-table are in the supplementary material, which also reports the budget-matched
-comparison against Where2comm: run under this paper's transport, scoring chain and collaborator
-convention, descriptive at the two budgets its control parameter can reach, and \emph{without} an
-adjudication at the confirmatory cell, which its threshold cannot reach at all.
+table are in the supplementary material, which also reports the budget-aligned
+comparison against Where2comm: same frames, ground truth, scoring chain and collaborator convention,
+\emph{under ideal delivery} rather than under the modelled transport, descriptive at the two budgets
+its control parameter can reach, and \emph{without} an adjudication at the confirmatory cell, which
+its threshold cannot reach at all.
 
 \emph{What this evaluation does not establish.} Four limitations are experimental rather than
 presentational, and each has a pre-registered repair that is \emph{not} run here. (i) The $L$ and $F$
@@ -519,9 +520,7 @@ Section~\ref{sec:exp}, which would also remove the dual-branch residency cost. (
 quantised bitstream is produced: the feature payload is a declared source-budget convention, and a
 deployed figure needs a specified quantisation width, entropy coder and packetisation. (iii) The
 bottleneck convention is an accounting counterfactual only---no selector is re-frozen and no
-$N_{\mathrm{cw}}$, BLER or $\lambda$ is re-derived under it. (iv) The external comparison has been run---Where2comm under this paper's transport, scoring
-chain, collaborator convention and a ground-truth set made identical by construction---but it
-carries no confirmatory adjudication: at $B_{\max}=0.20$ the comparator's control parameter has no
+$N_{\mathrm{cw}}$, BLER or $\lambda$ is re-derived under it. (iv) The external comparison has been run as a \emph{budget-aligned perception diagnostic under ideal delivery}---Where2comm on this paper's frames, scoring chain, collaborator convention and a ground-truth set made identical by construction, but without the channel model applied to either arm---and it carries no confirmatory adjudication: at $B_{\max}=0.20$ the comparator's control parameter has no
 setting within $\pm20\%$ of the cap, so that cell is reported as a bracketing pair and the two
 budgets it can reach are descriptive only (supplementary material). A confirmatory external
 comparison therefore remains outstanding, and would need a comparator whose payload is settable

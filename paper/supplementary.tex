@@ -243,9 +243,12 @@ Collaboration is not unconditionally beneficial, and that is what makes an expli
 
 \subsection{Budget-Matched External Comparison (Where2comm)}\label{sec:where2comm}
 
-\emph{What was run, and under which conventions.} Where2comm is compared against \method{} under
-this paper's own transport and scoring chain. Everything that could make the comparison unfair is
-disclosed rather than buried. The collaborator convention is the mainline one: the nearest single
+\emph{What was run, and under which conventions.} This is a \emph{budget-aligned perception
+diagnostic under ideal delivery}: Where2comm is compared against \method{} on the same frames, the
+same ground truth and the same scoring chain, at payloads aligned to the same budgets, but the
+channel model is \emph{not} applied to either arm's detections here---every message is treated as
+delivered. The transport-aware comparison is a separate step and is not reported below. Everything
+that could make the comparison unfair is disclosed rather than buried. The collaborator convention is the mainline one: the nearest single
 collaborator, applied at inference through the same hook every mainline arm uses, so the comparator
 is \emph{not} retrained---retraining it at $N=1$ would have made it the only arm trained under a
 different discipline. Its checkpoint is our own $50$-epoch reproduction. Scoring uses the frozen
@@ -328,8 +331,9 @@ not about either method's perception quality.
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \caption{Descriptive comparison at the two matched budgets, AP@$0.5$, on the intersection
-ground-truth set inside $|x|\le70.4$, $|y|\le38.4$~m. No interval, no margin and no decision is
-attached to any cell. Source: \texttt{results/diagnostics/intersection\_gt\_track.csv}.}
+ground-truth set inside $|x|\le70.4$, $|y|\le38.4$~m, \emph{under ideal delivery}---no channel
+model is applied to either arm in this table. No interval, no margin and no decision is attached to
+any cell. Source: \texttt{results/diagnostics/intersection\_gt\_track.csv}.}
 \label{tab:w2c_descriptive}
 \begin{tabular}{llccccc}
 \toprule
