@@ -5915,3 +5915,51 @@ Test and Culver-City behave the same way with a shifted knee. Whether this is th
 the payload ladder of `sec:ablation` — a control parameter whose reachable operating points are
 sparse where the budgets live — is a question for the write-up, and is deliberately not answered
 here.
+
+## R56 — the intersection-GT track: the descriptive `B_max = 0.10` comparison, on identical objects
+
+Zero GPU. Third labelled track; nothing frozen touched.
+
+### 1 · Construction, as pre-registered
+
+Box-centre matching, one-to-one, tolerance **ε = 0.5 m**, a second claim on either side refused.
+**Assertion PASS on all three splits** — matched counts strictly equal: validate 53,789, test 32,248,
+Culver-City 22,856; inside the volume $|x|\le70.4$, $|y|\le38.4$: 43,697 / 29,183 / 18,389.
+
+The tolerance turns out not to matter: every matched pair is at distance **0.000 m** and the counts
+at ε = 0.01 m are identical to those at 0.5 m, because both sets are the same simulator annotations
+filtered differently at the boundary. The script reports both so the insensitivity is visible rather
+than asserted. (The first implementation did a full argsort per frame and would have taken hours;
+exact-centre hashing with the ε path as fallback does the same job in minutes.)
+
+### 2 · Result, DESCRIPTIVE — not the confirmatory cell
+
+Where2comm at the budget-matched point against the mainline arms, AP@0.5, same objects, same volume,
+same scorer:
+
+| split | Where2comm | CA-TOSG @ B0.10 | Δ (W2C − CA-TOSG) | Fixed L | feature ceiling | W2C rate / budget error |
+|---|---|---|---|---|---|---|
+| validate | **0.91519** | 0.90883 | **+0.00636** | 0.90934 | 0.92084 | 0.0831, −14.1 % under cap |
+| test | 0.94358 | **0.94490** | **−0.00132** | 0.94506 | 0.93952 | 0.0802, −17.1 % under cap |
+| Culver-City | **0.89572** | 0.89508 | **+0.00064** | 0.89507 | 0.92060 | 0.0908, −6.1 % under cap |
+
+Read with the discipline this record has used throughout:
+
+* **This is not the pre-registered confirmatory cell.** That is test @ `B_max = 0.20`, which fuse 3
+  established cannot be matched. No verdict template applies here, and none is applied.
+* The budget errors are all **under** the cap, so the comparator is spending less than it is allowed
+  — the comparison is not flattering CA-TOSG.
+* On validate Where2comm is ahead by `+0.0064` and is also above Fixed $L$; on test it is behind by
+  `-0.0013` and both sit essentially at Fixed $L$, which on that split is *above* the feature
+  ceiling (the R53 field-of-view finding, reproduced here on a different GT construction); on
+  Culver-City the two are within `0.0007` of each other and of Fixed $L$.
+* Three splits, one budget, one realisation count (20 of 200 for the CA-TOSG rows), no interval
+  estimate. Nothing here is a claim about either method; it is the descriptive cell the plan allows
+  at a non-confirmatory budget.
+
+### 3 · Amendment A1, partial
+
+Threshold 0.011 completed on all three splits: rates **0.4349 / 0.4222 / 0.4331** (validate / test /
+Culver-City). The cliff is sharper than the refinement assumed — between 0.011 and 0.015 the rate
+falls from ≈0.43 to ≈0.08–0.13 — so the required 0.1978 (for `B_max = 0.20`) still has no point near
+it. Thresholds 0.012 and 0.013 are running; the pre-registered endpoint stands either way.

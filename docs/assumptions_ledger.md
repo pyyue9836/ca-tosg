@@ -64,6 +64,7 @@ they agree only under a stated assumption, and the assumption is itself checked 
 | `ldpc_qam_bler_table.csv` | the WCSP-era LDPC + QAM block-error table used by the prior-protocol arms | looked up per (QAM, SNR) exactly as `bler_sionna.csv` is in the mainline | **BOUNDED** — a *different* table from the mainline's Sionna chain; the two are never mixed within one arm |
 | `bler_sionna_ofdm.csv` | frame BLER over the frequency-selective TDL/OFDM link (τ_rms = 46.2 ns) | used only in the codec-comparison analysis, never in the headline | **OK** |
 | `bler_frame_second.csv`, `bler_onset_second.csv` | frame BLER and activation onset re-derived at the SECOND arm's own `N_cw` | equal-budget protocol: `B_F ≡ 0.99` Msym with `N_cw` re-derived, never inherited | **OK** — P4-B-d |
+| `data/where2comm_v2/{split}_thr{thr}.npz` | cached per-frame Where2comm detections (boxes, scores, GT) and the MEASURED communication rate, one file per (threshold, split), produced with `CATOSG_MAX_COLLAB=1` | R51-R55 adjacent-arm products, DESCRIPTIVE: the threshold is the control, the sparsity is an output, and the payload is a counterfactual under the pre-registered sparse convention. Not a deployed product and not in any frozen table |
 
 ---
 

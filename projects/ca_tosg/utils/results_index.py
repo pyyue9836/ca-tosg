@@ -192,6 +192,14 @@ RULES = [
      'python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver '
      '--realisations 20',
      'R53 raw output of the common-volume diagnostic, one file per (volume, split set)'),
+    (r'^diagnostics/intersection_gt_track\.csv$',
+     'python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 '
+     '--point test:0.015 --point culver:0.02',
+     'R56 THIRD TRACK (descriptive): Where2comm vs the mainline arms on a GT set made identical by '
+     'construction (centre matching, eps=0.5 m, counts asserted equal)'),
+    (r'^diagnostics/PROVENANCE_intersection_gt\.txt$',
+     'python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 '
+     '--point test:0.015 --point culver:0.02', 'provenance for the intersection-GT track'),
     (r'^diagnostics/branch_ranges\.csv$',
      'python baselines/where2comm_v2/branch_ranges.py',
      'R53: each branch checkpoint\'s CONFIGURED lidar range, read from its own config'),
