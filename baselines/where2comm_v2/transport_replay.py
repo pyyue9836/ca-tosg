@@ -194,6 +194,11 @@ def main() -> int:
                catosg_ap70=round(float(np.mean(c70)), 5),
                d_ap50=round(float(np.mean(w50) - np.mean(c50)), 5),
                w2c_ideal_ap50=round(float(ideal[1]), 5))
+    # R59-1: the PER-REALISATION arrays, so the paired bootstrap can be run over the same 200 draws
+    # both arms saw. Storing only the mean and the standard deviation, as the first version did,
+    # makes a paired interval impossible after the fact -- the pairing lives in the per-draw values.
+    row['w2c_ap50_per_realisation'] = [round(float(x), 6) for x in w50]
+    row['catosg_ap50_per_realisation'] = [round(float(x), 6) for x in c50]
     os.makedirs(OUT, exist_ok=True)
     p = os.path.join(OUT, f'transport_replay_{split}_thr{thr}_B{a.budget}.json')
     json.dump(row, open(p, 'w'), indent=2)

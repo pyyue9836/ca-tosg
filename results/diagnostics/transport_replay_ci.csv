@@ -1,0 +1,8 @@
+split,budget,mixture,realisations,w2c_ap50,catosg_ap50,d_ap50,ci_lo,ci_hi,excludes_zero,beyond_delta
+culver,0.10,False,200,0.81679,0.89508,-0.0783,-0.07864,-0.07794,True,True
+test,0.10,False,200,0.87437,0.94492,-0.07055,-0.07076,-0.07034,True,True
+validate,0.10,False,200,0.82529,0.9088,-0.08351,-0.08374,-0.08327,True,True
+test,0.20,True,200,0.87427,0.94492,-0.07064,-0.07087,-0.07042,True,True
+culver,0.30,False,200,0.81729,0.89878,-0.08149,-0.08182,-0.08114,True,True
+test,0.30,False,200,0.87414,0.94332,-0.06918,-0.06941,-0.06895,True,True
+validate,0.30,False,200,0.82507,0.9091,-0.08403,-0.08426,-0.0838,True,True

@@ -16,7 +16,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/baselines/where2comm_v2/` | 2 |
 | | `results/channel/` | 8 |
 | | `results/diagnostic/` | 4 |
-| | `results/diagnostics/` | 6 |
+| | `results/diagnostics/` | 14 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 54 |
 | | `results/manifests/` | 26 |
@@ -135,7 +135,15 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `branch_ranges.csv` | `python baselines/where2comm_v2/branch_ranges.py` | R53: each branch checkpoint's CONFIGURED lidar range, read from its own config |
 | `common_volume_ap.csv` | `python baselines/where2comm_v2/volume_diagnostic.py --splits validate,test,culver --realisations 20` | R53 DIAGNOSTIC TRACK (not frozen): AP inside the common volume x<=70.4, y<=40 beside the frozen table, per cell, with the GT fraction dropped |
 | `intersection_gt_track.csv` | `python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 --point test:0.015 --point culver:0.02` | R56 THIRD TRACK (descriptive): Where2comm vs the mainline arms on a GT set made identical by construction (centre matching, eps=0.5 m, counts asserted equal) |
-| `intersection_gt_track_B0.30.csv` | **UNATTRIBUTED** |  |
+| `intersection_gt_track_B0.30.csv` | `python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 --point test:0.015 --point culver:0.02` | R56 THIRD TRACK (descriptive): Where2comm vs the mainline arms on a GT set made identical by construction (centre matching, eps=0.5 m, counts asserted equal) |
+| `transport_replay.csv` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_culver_thr0.013_B0.30.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_culver_thr0.02_B0.10.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_test_thr0.013_B0.20.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_test_thr0.013_B0.30.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_test_thr0.015_B0.10.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_validate_thr0.013_B0.30.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
+| `transport_replay_validate_thr0.02_B0.10.json` | `python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> [--mix <thr>:<p>]` | R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery coin, failure falls back to its own ego-only forward); --mix is amendment A2 |
 
 ## `results/latency/`
 
@@ -368,4 +376,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-254 files indexed, 1 unattributed.
+262 files indexed, 0 unattributed.

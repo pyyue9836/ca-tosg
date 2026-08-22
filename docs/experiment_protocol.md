@@ -6153,3 +6153,63 @@ replay; the shared scorer is untouched.
 `same-transport-claim`: any sentence claiming the external arm ran under this paper's transport is a
 contradiction unless the replay product exists. The R57 text made exactly that claim with no replay
 in the repository at all.
+
+## R59 — intervals, then the verdict enters the paper
+
+Zero GPU. CPU: the seven cells were re-run to store per-realisation AP arrays (the R58 products kept
+only a mean and a standard deviation, and the pairing lives in the per-draw values), then bootstrapped.
+
+### 1 · Paired bootstrap, and exactly what it is
+
+`N_BOOT = 10000`, `BOOT_SEED = 12345`, percentile, **paired on the CSI realisation** — both arms see
+the same 200 draws through the same delivery coin. The ruling is carried verbatim in the tool and in
+the paper: *the interval quantifies stability over channel realisations, conditional on the fixed
+evaluation set, and does not cover scene-sampling variability; it must not be cited as the same
+construction as the frame-level R9 interval.* The parallel frame-F1 metric track was ruled **not
+opened**: AP with a stated metric deviation is the final form.
+
+| `B_max` | split | Δ (W2C − CA-TOSG) | 95 % CI |
+|---|---|---|---|
+| 0.10 | validate | −0.08351 | [−0.08374, −0.08327] |
+| 0.10 | test | −0.07055 | [−0.07076, −0.07034] |
+| 0.10 | Culver-City | −0.07830 | [−0.07864, −0.07794] |
+| **0.20 (A2)** | **test** | **−0.07064** | **[−0.07087, −0.07042]** |
+| 0.30 | validate | −0.08403 | [−0.08426, −0.08380] |
+| 0.30 | test | −0.06918 | [−0.06941, −0.06895] |
+| 0.30 | Culver-City | −0.08149 | [−0.08182, −0.08114] |
+
+Every interval excludes zero and lies beyond `δ = 0.005` by more than an order of magnitude. They are
+tight because the pairing removes the shared channel draw — a statement about realisation stability
+and nothing else.
+
+### 2–4 · What the documents now say
+
+The supplementary section is a **pair**: an ideal-delivery table (perception-layer diagnostic,
+numbers unchanged, caption now says what it isolates) and a transport table (delivered fraction,
+200/200 realisations, full replay disclosure, paired CI per cell), with the mechanism paragraph
+between them — always-transmit, no cheap rung, cliff channel, ≈69 % of frames lost and reverted to
+the comparator's own ego-only output, against a selector that requests the feature branch on a
+minority of frames.
+
+The confirmatory sentence carries every fixed element: **under amendment A2 (mixture policy)**, the
+metric deviation (AP@0.5, not the frame F1 the margin was registered on), the interval disclosure,
+Δ = −0.07064 against δ = 0.005, attribution to **transmission behaviour under this transport rather
+than detection quality**, the **evaluated retransmission and all-or-nothing delivery settings**
+qualifier, and the comparator's status as a **reproduction-grade checkpoint applied without
+retraining**.
+
+Main text: the pointer states both readings in one sentence; limitation (iv) is narrowed to what
+remains — one external method, a reproduction-grade checkpoint, an amendment in the confirmatory
+path, a metric deviation, and no unified-training controlled comparison.
+
+### 5 · Gates
+
+Direction probes are split by track: three on the ideal-delivery track (directions unchanged,
+including the reversed `test @ 0.10` cell) and three on the transport track, a separate registry
+entry — a probe must name which track it asserts. 24 registered comparisons. `same-transport-claim`
+now passes because the replay product exists.
+
+`0.5052` was unbound: the mixture probability lived only in a command line. It is a stored field of
+the A2 product (`mixture_p`, with its derivation), which is where a number a sentence quotes belongs.
+
+State: 18 gates pass, `milestone_summary.md` regenerated. Main **16 pages**, supplementary **12**.

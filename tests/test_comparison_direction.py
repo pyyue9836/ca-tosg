@@ -51,12 +51,20 @@ SOURCES = {
     # quietly align the sign pattern.
     'w2c_isect': ('results/diagnostics/intersection_gt_track.csv', 'ap50', 'ap70'),
     'catosg_isect': ('results/diagnostics/intersection_gt_track.csv', 'ap50', 'ap70'),
+    # R59-5: the transport track is a SEPARATE registry entry from the ideal-delivery one. The two
+    # answer different questions and their directions differ, so a probe must name which track it
+    # is asserting -- the failure mode here would be a sentence about one being checked against the
+    # other's numbers.
+    'w2c_transport': ('results/diagnostics/transport_replay_ci.csv', 'w2c_ap50', 'w2c_ap50'),
+    'catosg_transport': ('results/diagnostics/transport_replay_ci.csv',
+                         'catosg_ap50', 'catosg_ap50'),
     'fixedL_common_volume': ('results/diagnostics/common_volume_ap.csv',
                              'ap50_mean_crop', 'ap70_mean_crop'),
 }
 # rows of the diagnostic track are selected by policy name, not by a `variant` column
 POLICY_OF = {'ceiling_common_volume': 'Feature-ceiling', 'fixedL_common_volume': 'Fixed-L',
              'w2c_isect': 'Where2comm', 'catosg_isect': 'CA-TOSG'}
+TRANSPORT = ('w2c_transport', 'catosg_transport')      # rows keyed on split+budget, no policy column
 METRIC_COL = {'F1': 0, 'payload': 1}
 
 
@@ -65,6 +73,12 @@ def value(entity, metric, split, budget):
     d = pd.read_csv(os.path.join(ROOT, rel))
     if 'variant' in d.columns:                       # the ablation table keys on the variant name
         d = d[d.variant == entity]
+    if entity in TRANSPORT:                          # R59-5: transport track, one row per cell
+        d = d[(d.split == split) & (d.budget.astype(float).round(2) == round(budget, 2))]
+        if len(d) != 1:
+            raise SystemExit(f'comparison gate FUSE: {entity} @ {split}/{budget} matched {len(d)} '
+                             f'rows in {rel}')
+        return float(d[[f1col, bcol][METRIC_COL[metric]]].iloc[0])
     if entity in POLICY_OF:                          # R53-4: diagnostic track, keyed on policy
         want = POLICY_OF[entity]
         d = d[(d.policy.str.startswith(want)) & (d.split == split)]

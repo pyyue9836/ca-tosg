@@ -330,10 +330,11 @@ not about either method's perception quality.
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Descriptive comparison at the two matched budgets, AP@$0.5$, on the intersection
-ground-truth set inside $|x|\le70.4$, $|y|\le38.4$~m, \emph{under ideal delivery}---no channel
-model is applied to either arm in this table. No interval, no margin and no decision is attached to
-any cell. Source: \texttt{results/diagnostics/intersection\_gt\_track.csv}.}
+\caption{\emph{Perception-layer diagnostic, ideal delivery.} Comparison at the two matched budgets,
+AP@$0.5$, on the intersection ground-truth set inside $|x|\le70.4$, $|y|\le38.4$~m, with no channel
+model applied to either arm. This table isolates what the two selections do to detection quality
+when every message arrives; Table~\ref{tab:w2c_transport} adds the transport and reverses every
+sign. No interval, no margin and no decision is attached to any cell here. Source: \texttt{results/diagnostics/intersection\_gt\_track.csv}.}
 \label{tab:w2c_descriptive}
 \begin{tabular}{llccccc}
 \toprule
@@ -362,6 +363,63 @@ $0.10$, over it by $4.3$--$7.4\%$ at $0.30$---so the $0.30$ rows are partly boug
 both arms sit at or below Fixed $L$, which on that split is above the perfect-channel feature
 ceiling; that is the field-of-view effect of Section~\ref{sec:common_volume}, reproduced here on a
 ground-truth set built by a different construction.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{\emph{Under the modelled transport.} The same grid points and the same ground truth, now
+replayed over the frozen $200$ paired CSI draws: same seed and draw order as the mainline, frame BLER
+re-derived at \emph{this arm's own} codeword count ($N_{\mathrm{cw}}=335$--$1288$ against the
+mainline's $3960$), one shared delivery coin, whole-frame all-or-nothing, and a delivery failure
+falling back to Where2comm's own ego-only forward. Intervals are paired bootstrap
+($10{,}000$ resamples, seed $12345$, percentile) over the CSI realisations.
+Source: \texttt{results/diagnostics/transport\_replay\_ci.csv}.}
+\label{tab:w2c_transport}
+\begin{tabular}{llcccc}
+\toprule
+$B_{\max}$ & Split & delivered & Where2comm & \method{} & $\Delta$ (95\% CI) \\
+\midrule
+\multirow{3}{*}{0.10}
+ & validate    & 0.3095 & 0.82529 & 0.90880 & $-0.08351$ $[-0.08374,-0.08327]$ \\
+ & test        & 0.3095 & 0.87437 & 0.94492 & $-0.07055$ $[-0.07076,-0.07034]$ \\
+ & Culver-City & 0.3118 & 0.81679 & 0.89508 & $-0.07830$ $[-0.07864,-0.07794]$ \\
+\midrule
+\multirow{3}{*}{0.30}
+ & validate    & 0.3055 & 0.82507 & 0.90910 & $-0.08403$ $[-0.08426,-0.08380]$ \\
+ & test        & 0.3056 & 0.87414 & 0.94332 & $-0.06918$ $[-0.06941,-0.06895]$ \\
+ & Culver-City & 0.3081 & 0.81729 & 0.89878 & $-0.08149$ $[-0.08182,-0.08114]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\emph{Why every sign reverses.} Under ideal delivery five of the six cells favour Where2comm by
+between $+0.00021$ and $+0.00723$; under the transport all six favour \method{} by $0.069$ to
+$0.084$, an order of magnitude larger and in the opposite direction. The mechanism is in the
+delivered column. Where2comm transmits on every frame---its sparsity control sets \emph{how much} to
+send, never \emph{whether}---and it has no cheap rung to fall back to, so on the ${\approx}69\%$ of
+frames the link cannot carry it loses the message entirely and reverts to its own ego-only output.
+\method{} at these budgets requests the feature branch on a minority of frames and holds the compact
+object-level message otherwise, so the transport barely moves it. The comparison therefore measures
+exactly the property this paper argues for: on a cliff channel, choosing \emph{whether} to send is
+worth more than choosing \emph{what} to send within a fixed granularity.
+
+\emph{Confirmatory cell, under amendment A2.} The pre-registered confirmatory cell (test,
+$B_{\max}=0.20$) is unreachable by any single threshold, so it is reached under a registered
+amendment: a per-frame mixture policy, $p=0.5052$ of threshold $0.013$ with $0.015$, whose mean
+transmitted fraction is $0.1978$---the cap exactly---with each frame charged at its own codeword
+count. Under that amendment, and under the evaluated retransmission and all-or-nothing delivery
+settings, \method{} attains AP@$0.5$ $0.94492$ against Where2comm's $0.87427$, a difference of
+$-0.07064$ with a $95\%$ paired-bootstrap interval of $[-0.07087,-0.07042]$: an advantage more than
+an order of magnitude beyond the pre-registered $\delta=0.005$ margin, attributable to transmission
+behaviour under this transport rather than to detection quality, which the ideal-delivery table
+shows running the other way. Three qualifications belong with that sentence and are not optional.
+The metric is AP@$0.5$, not the frame F1 the margin was pre-registered on. The interval quantifies
+stability over channel realisations, conditional on the fixed evaluation set; it does not cover
+scene-sampling variability and is not the same construction as the frame-level
+paired-bootstrap interval the main paper's confirmatory comparison uses. And the comparator is a \emph{reproduction-grade}
+checkpoint---our own $50$-epoch training, not the authors' released weights---applied without
+retraining.
 
 \emph{Orthogonality is unchanged by the comparison.} Where2comm decides \emph{which feature regions}
 to send within a fixed granularity; \method{} decides \emph{whether} feature-level information is

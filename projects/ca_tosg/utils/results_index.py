@@ -200,7 +200,7 @@ RULES = [
      '[--mix <thr>:<p>]',
      'R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery '
      'coin, failure falls back to its own ego-only forward); --mix is amendment A2'),
-    (r'^diagnostics/intersection_gt_track\.csv$',
+    (r'^diagnostics/intersection_gt_track(_B[\d.]+)?\.csv$',
      'python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 '
      '--point test:0.015 --point culver:0.02',
      'R56 THIRD TRACK (descriptive): Where2comm vs the mainline arms on a GT set made identical by '
