@@ -6088,3 +6088,68 @@ transport" form is gone from both documents (0 occurrences).
 
 The transport-aware replay is R58-2 and is not in this commit. Until it lands, nothing in either
 document claims a same-transport comparison.
+
+## R58-2/3 — the arm under the modelled transport: every ideal-delivery sign reverses
+
+Zero further GPU beyond the 38.6 min of ego-only forwards (arm total ≈8.0 h of the approved ≈22 h);
+the replay itself is CPU. Product: `results/diagnostics/transport_replay.csv` (7 cells).
+
+### 1 · What the replay does, and the invariant that guards it
+
+Same CSI draw as the mainline (`CSI_SEED`, `uniform` then `random`, in that order), the arm's **own**
+codeword count (`N_cw(s) = info_bits(s)/500`, e.g. 335–1288 against the mainline's 3960 — its frame
+BLER is re-derived from `bler_cw`, never read off the `bler_frame` column), the shared delivery coin
+(`BLER_COIN_SEED`), whole-frame all-or-nothing, and a failure falling back to **Where2comm's own
+ego-only forward** (threshold 1.1, measured fraction 0.0000). Invariant checked in every run: at
+`bF = 0` the replay reproduces that point's ideal-delivery AP exactly.
+
+### 2 · Six descriptive cells, AP@0.5, 200/200 realisations
+
+| `B_max` | split | fraction | delivery rate | W2C ideal | **W2C transport** | **CA-TOSG** | **Δ** |
+|---|---|---|---|---|---|---|---|
+| 0.10 | validate | 0.0831 | 0.3095 | 0.91519 | 0.82529 | 0.90880 | **−0.08351** |
+| 0.10 | test | 0.0802 | 0.3095 | 0.94358 | 0.87437 | 0.94492 | **−0.07055** |
+| 0.10 | Culver-City | 0.0908 | 0.3118 | 0.89572 | 0.81679 | 0.89508 | **−0.07830** |
+| 0.30 | validate | 0.3209 | 0.3055 | 0.91653 | 0.82507 | 0.90910 | **−0.08403** |
+| 0.30 | test | 0.3130 | 0.3056 | 0.94417 | 0.87414 | 0.94332 | **−0.06918** |
+| 0.30 | Culver-City | 0.3117 | 0.3081 | 0.89885 | 0.81729 | 0.89878 | **−0.08149** |
+
+**Every sign reverses.** Under ideal delivery five of six cells favoured Where2comm by `+0.0002` to
+`+0.0072`; under the transport all six favour \method{} by `0.069` to `0.084` — an order of
+magnitude larger, and in the opposite direction. The mechanism is visible in the delivery column:
+Where2comm transmits on every frame, so it eats the channel on the ~69 % of frames the link cannot
+carry and falls back to its own ego-only output; \method{} at these budgets rarely requests the
+feature branch at all, so the transport barely moves it. That is the paper's own thesis measured
+against an external arm, and it is precisely what the missing transport had hidden.
+
+### 3 · Amendment A2 — the confirmatory cell, reached by mixture
+
+Registered as an amendment, **not** part of the original pre-registration. The confirmatory cell
+(test @ `B_max = 0.20`) is unreachable by any single threshold, so the arm mixes two per frame:
+`p = 0.5052` of threshold 0.013 (fraction 0.3130) with 0.015 (fraction 0.0802), giving a mean
+fraction of **0.1978** — the cap, exactly. Each frame carries its own source's `N_cw`.
+
+Result, 200/200 realisations: **W2C 0.87427 ± 0.00149, \method{} 0.94492 ± 0.00051,
+Δ = −0.07064**, delivery rate 0.3076.
+
+Template applied, **under amendment A2**: this is the *CA-TOSG wins* branch — the difference exceeds
+the `δ = 0.005` margin by more than an order of magnitude, in \method{}'s favour. Two deviations from
+the template's own terms must be stated with it: the metric is AP@0.5, not the frame F1 the templates
+were written for, and the dispersion is the across-realisation standard deviation, not the
+pre-registered paired bootstrap interval.
+
+**This verdict is not in the paper and will not be written into it without a ruling.** The delivered
+documents still describe the ideal-delivery diagnostic, which is what they contain.
+
+### 4 · One crash, and what it was
+
+The two `test` cells failed first time: a handful of frames in the ego-only forward detect nothing,
+`tt()` returns a 0-d array, and `crop()` raised on `.shape[0]`. Only the fallback cache produces such
+frames, which is why no earlier scoring pass hit it. Normalised to an empty `(0, 8, 3)` inside the
+replay; the shared scorer is untouched.
+
+### 5 · New gate pair
+
+`same-transport-claim`: any sentence claiming the external arm ran under this paper's transport is a
+contradiction unless the replay product exists. The R57 text made exactly that claim with no replay
+in the repository at all.

@@ -1,0 +1,17 @@
+{
+  "split": "validate",
+  "threshold": 0.02,
+  "budget": "0.10",
+  "rate": 0.0831,
+  "n_cw": 346,
+  "realisations": 200,
+  "mean_delivery_rate": 0.3095,
+  "w2c_ap50": 0.82529,
+  "w2c_ap50_std": 0.00168,
+  "w2c_ap70": 0.73177,
+  "catosg_ap50": 0.9088,
+  "catosg_ap50_std": 0.00027,
+  "catosg_ap70": 0.81943,
+  "d_ap50": -0.08351,
+  "w2c_ideal_ap50": 0.91519
+}

@@ -1,0 +1,17 @@
+{
+  "split": "test",
+  "threshold": 0.015,
+  "budget": "0.10",
+  "rate": 0.0802,
+  "n_cw": 335,
+  "realisations": 200,
+  "mean_delivery_rate": 0.3095,
+  "w2c_ap50": 0.87437,
+  "w2c_ap50_std": 0.00149,
+  "w2c_ap70": 0.77562,
+  "catosg_ap50": 0.94492,
+  "catosg_ap50_std": 0.00015,
+  "catosg_ap70": 0.87681,
+  "d_ap50": -0.07055,
+  "w2c_ideal_ap50": 0.94358
+}

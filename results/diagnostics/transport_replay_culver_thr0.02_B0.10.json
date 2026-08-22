@@ -1,0 +1,17 @@
+{
+  "split": "culver",
+  "threshold": 0.02,
+  "budget": "0.10",
+  "rate": 0.0908,
+  "n_cw": 376,
+  "realisations": 200,
+  "mean_delivery_rate": 0.3118,
+  "w2c_ap50": 0.81679,
+  "w2c_ap50_std": 0.0025,
+  "w2c_ap70": 0.71304,
+  "catosg_ap50": 0.89508,
+  "catosg_ap50_std": 2e-05,
+  "catosg_ap70": 0.79817,
+  "d_ap50": -0.0783,
+  "w2c_ideal_ap50": 0.89572
+}
