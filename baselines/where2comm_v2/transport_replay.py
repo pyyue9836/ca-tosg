@@ -66,13 +66,19 @@ def frame_bler_at(bler_cw, n_cw):
 
 
 def arm_bler(tbl, n_cw, snr, is_ray):
-    """Frame BLER for THIS arm's codeword count, interpolated on the committed table."""
-    out = np.empty_like(snr, dtype=float)
+    """Frame BLER at this arm's codeword count. `n_cw` may be a scalar or PER FRAME (R60-1).
+
+    With a per-frame count the codeword BLER is interpolated first and the frame BLER formed after,
+    frame by frame -- interpolating a frame-BLER curve built at one N_cw and then pretending it
+    holds at another is exactly the error this replaces.
+    """
+    n_cw = np.asarray(n_cw)
+    cw = np.empty_like(snr, dtype=float)
     for chan, mask in (('awgn', ~is_ray), ('rayleigh', is_ray)):
         t = tbl[(tbl.qam == 16) & (tbl.channel == chan)].sort_values('esno_db')
-        fb = frame_bler_at(t.bler_cw.to_numpy(), n_cw)
-        out[mask] = np.interp(snr[mask], t.esno_db.to_numpy(), fb, left=1.0, right=fb[-1])
-    return np.clip(out, 0.0, 1.0)
+        cw[mask] = np.interp(snr[mask], t.esno_db.to_numpy(), t.bler_cw.to_numpy(),
+                             left=1.0, right=float(t.bler_cw.iloc[-1]))
+    return np.clip(frame_bler_at(cw, n_cw), 0.0, 1.0)
 
 
 def main() -> int:
@@ -99,11 +105,19 @@ def main() -> int:
     meta = json.load(open(os.path.join(ROOT, f'data/where2comm_v2/{split}_thr{thr}.json')))
     rate = float(meta['mean_comm_rate'])
     n_cw = w2c_n_cw(rate)
+    # R60-1: the payload is a PER-FRAME quantity. The first version charged every frame at the
+    # split's mean fraction, which is wrong in both directions at once -- a sparse frame was billed
+    # for codewords it never sent, a dense one was billed for fewer than it did -- and the frame
+    # BLER is convex in N_cw, so the error does not cancel.
+    rate_pf = np.asarray(zc['comm_rate'], dtype=float)
+    n_cw_pf = np.array([w2c_n_cw(x) for x in rate_pf], dtype=int)
     if zm is not None:
         meta_m = json.load(open(os.path.join(ROOT,
                                              f'data/where2comm_v2/{split}_thr{mix_thr}.json')))
         rate_m = float(meta_m['mean_comm_rate'])
         n_cw_m = w2c_n_cw(rate_m)
+        rate_pf_m = np.asarray(zm['comm_rate'], dtype=float)
+        n_cw_pf_m = np.array([w2c_n_cw(x) for x in rate_pf_m], dtype=int)
         rate = mix_p * rate + (1 - mix_p) * rate_m          # the realised mean fraction
         print(f'A2 mixture: p={mix_p:.4f} of thr={thr} (rate {meta["mean_comm_rate"]:.4f}, '
               f'N_cw={n_cw}) with thr={mix_thr} (rate {rate_m:.4f}, N_cw={n_cw_m}); '
@@ -165,13 +179,14 @@ def main() -> int:
     w50, w70, c50, c70, deliv = [], [], [], [], []
     for r in range(R):
         if zm is None:
-            bF_w2c = arm_bler(tbl, n_cw, snr[r], ray[r])
+            bF_w2c = arm_bler(tbl, n_cw_pf, snr[r], ray[r])
             surv_w = coin[r] > bF_w2c
             src_pick = np.zeros(n, dtype=int)
         else:
             use_main = np.random.default_rng(a.mix_seed + r).random(n) < mix_p
-            bF_w2c = np.where(use_main, arm_bler(tbl, n_cw, snr[r], ray[r]),
-                              arm_bler(tbl, n_cw_m, snr[r], ray[r]))
+            # each frame is charged at ITS OWN selected point's per-frame codeword count
+            bF_w2c = np.where(use_main, arm_bler(tbl, n_cw_pf, snr[r], ray[r]),
+                              arm_bler(tbl, n_cw_pf_m, snr[r], ray[r]))
             surv_w = coin[r] > bF_w2c
             src_pick = np.where(use_main, 0, 5)
         deliv.append(float(surv_w.mean()))
@@ -186,7 +201,9 @@ def main() -> int:
             print(f'  replay {r + 1}/{R}: W2C {np.mean(w50):.5f} | CA-TOSG {np.mean(c50):.5f}',
                   flush=True)
 
-    row = dict(split=split, threshold=float(thr), budget=a.budget, rate=round(rate, 4), n_cw=n_cw,
+    row = dict(split=split, threshold=float(thr), budget=a.budget, rate=round(rate, 4),
+               n_cw_mean=int(round(float(np.mean(n_cw_pf)))), n_cw_min=int(n_cw_pf.min()),
+               n_cw_max=int(n_cw_pf.max()), accounting='per-frame (R60-1)',
                realisations=R, mean_delivery_rate=round(float(np.mean(deliv)), 4),
                w2c_ap50=round(float(np.mean(w50)), 5), w2c_ap50_std=round(float(np.std(w50)), 5),
                w2c_ap70=round(float(np.mean(w70)), 5),
@@ -197,6 +214,12 @@ def main() -> int:
     # R59-1: the PER-REALISATION arrays, so the paired bootstrap can be run over the same 200 draws
     # both arms saw. Storing only the mean and the standard deviation, as the first version did,
     # makes a paired interval impossible after the fact -- the pairing lives in the per-draw values.
+    if zm is not None:                                 # R60-3: the mixture is part of the product
+        row['mixture'] = True
+        row['mixture_with_threshold'] = float(mix_thr)
+        row['mixture_p'] = mix_p
+        row['mixture_note'] = ('amendment A2, POST-HOC: p chosen so the mean transmitted fraction '
+                               'equals the cap; each frame charged at its own selected point')
     row['w2c_ap50_per_realisation'] = [round(float(x), 6) for x in w50]
     row['catosg_ap50_per_realisation'] = [round(float(x), 6) for x in c50]
     os.makedirs(OUT, exist_ok=True)

@@ -52,6 +52,8 @@ GENERATORS = [
      'the gate counts in docs/reproducibility.md and verify_results.py'),
     # R48-5: the anchor sensitivity is quoted three times in the paper and carries an ordering
     # claim; this re-derives every cell from the frozen logs and payload_conventions.csv.
+    ('collect_transport', ['baselines/where2comm_v2/collect_transport.py', '--check'],
+     'results/diagnostics/transport_replay.csv (the 7 per-cell JSONs, summarised)'),
     ('check_anchor_sensitivity', ['tools/check_anchor_sensitivity.py', '--check'],
      'results/channel/payload_anchor_sensitivity.csv (B_F per convention, mix, payload formula)'),
 ]

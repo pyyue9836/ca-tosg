@@ -195,12 +195,22 @@ RULES = [
     (r'^baselines/where2comm_v2/(sparsity_payload&#124;budget_match)\.csv$'.replace('&#124;', '|'),
      'python baselines/where2comm_v2/sweep.sh then the accounting in the R55/R57 change-log',
      'R55-R57: measured threshold->sparsity and the budget-match verdict per cap (descriptive arm)'),
+    (r'^diagnostics/transport_replay_ci\.csv$',
+     'python baselines/where2comm_v2/paired_bootstrap.py',
+     'R59/R60: paired-bootstrap intervals over CSI realisations for the transport cells'),
+    (r'^diagnostics/transport_replay\.csv$',
+     'python baselines/where2comm_v2/collect_transport.py',
+     'R60: deterministic summary of the seven per-cell transport JSONs'),
     (r'^diagnostics/transport_replay(_[a-z]+_thr[\d.]+_B[\d.]+)?\.(csv|json)$',
      'python baselines/where2comm_v2/transport_replay.py --point <split>:<thr> --budget <B> '
      '[--mix <thr>:<p>]',
      'R58-2: the external arm under the MODELLED transport (own N_cw, shared CSI draw and delivery '
      'coin, failure falls back to its own ego-only forward); --mix is amendment A2'),
-    (r'^diagnostics/intersection_gt_track(_B[\d.]+)?\.csv$',
+    (r'^diagnostics/intersection_gt_track_B0\.30\.csv$',
+     'python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.013 '
+     '--point test:0.013 --point culver:0.013 --budget 0.30',
+     'R57 ideal-delivery track at B_max=0.30 (threshold 0.013 on all three splits)'),
+    (r'^diagnostics/intersection_gt_track\.csv$',
      'python baselines/where2comm_v2/intersection_gt_track.py --point validate:0.02 '
      '--point test:0.015 --point culver:0.02',
      'R56 THIRD TRACK (descriptive): Where2comm vs the mainline arms on a GT set made identical by '

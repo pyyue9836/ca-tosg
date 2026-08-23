@@ -6213,3 +6213,59 @@ now passes because the replay product exists.
 the A2 product (`mixture_p`, with its derivation), which is where a number a sentence quotes belongs.
 
 State: 18 gates pass, `milestone_summary.md` regenerated. Main **16 pages**, supplementary **12**.
+
+## R60 — per-frame accounting, and the confirmatory framing withdrawn
+
+Zero GPU; the recompute is CPU.
+
+### 1 · Per-frame payload accounting
+
+The replay charged every frame at the split's **mean** transmitted fraction, so one `N_cw` covered a
+whole split. That is wrong in both directions at once — a sparse frame billed for codewords it never
+sent, a dense one billed for fewer than it did — and the frame BLER is convex in `N_cw`, so the error
+does not cancel. Fixed: per-frame `comm_rate[k]` → per-frame `N_cw[k]` → per-frame BLER, with the
+codeword BLER interpolated first and the frame BLER formed after (interpolating a frame-BLER curve
+built at one `N_cw` and using it at another was itself part of the error). In the A2 mixture each
+frame is charged at its own selected point's per-frame count. Spread within a single point is large:
+`N_cw` runs 175–543 inside one Culver-City cell whose mean is 376.
+
+Seven cells recomputed, old → new:
+
+| `B_max` | split | Δ old | Δ new | delivery old → new |
+|---|---|---|---|---|
+| 0.10 | validate | −0.08351 | **−0.08486** | 0.3095 → 0.3001 |
+| 0.10 | test | −0.07055 | **−0.07155** | 0.3095 → 0.3002 |
+| 0.10 | Culver-City | −0.07830 | **−0.07952** | 0.3118 → 0.3014 |
+| 0.20 (mixture) | test | −0.07064 | **−0.07166** | 0.3076 → 0.2977 |
+| 0.30 | validate | −0.08403 | **−0.08540** | 0.3055 → 0.2954 |
+| 0.30 | test | −0.06918 | **−0.07021** | 0.3056 → 0.2952 |
+| 0.30 | Culver-City | −0.08149 | **−0.08280** | 0.3081 → 0.2972 |
+
+Every gap widens by 0.001–0.0014 and every delivery rate falls by about a point. The direction and
+the order of magnitude are unchanged; the old values are retired.
+
+### 2 · The confirmatory framing is withdrawn
+
+The mixture policy is **post-hoc**: the budget is met by a policy chosen after seeing the grid, on
+the data the analysis runs on. Calling its output a confirmatory verdict — as R59 did, with an
+"under amendment A2" label — dressed a post-hoc analysis in pre-registration language. Removed from
+both documents: *confirmatory verdict*, *adjudicated at the confirmatory cell*, the *wins branch*
+framing, and *beyond the pre-registered δ*. The sentence is now the supervisor's form: *in a post-hoc
+budget-matched mixture analysis, CA-TOSG achieved AP@0.5 0.94492 compared with 0.87325 for our
+Where2comm reproduction under the evaluated transport*, with its interval, the metric deviation, the
+no-retransmission qualifier and the reproduction-grade-checkpoint disclosure attached, and no margin
+applied.
+
+The TERMINOLOGY exemption that let adjudication verbs appear inside an A2-labelled sentence is
+**withdrawn**; `adjudicat` joins the forbidden set, with no exemption anywhere. The
+`w2c-no-verdict` reconciliation pair is back on active duty and now anchors on the post-hoc wording.
+
+**Pre-registered as a future item, in limitation (iv):** a genuine confirmatory external comparison
+needs an AP margin fixed *before* the run and an evaluation split that took no part in choosing the
+comparator's operating point. Neither exists here.
+
+### 5 · One more wording repair
+
+"under the evaluated retransmission and all-or-nothing delivery settings" → **"under the evaluated
+no-retransmission, all-or-nothing delivery setting"**. No retransmission was performed anywhere in
+this replay; the earlier phrasing implied one had been.

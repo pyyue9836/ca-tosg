@@ -32,8 +32,7 @@ Directions: `>` A exceeds B, `<` A is below B, `~` parity (within 0.0005).
 | w2c-desc-test-B010-REVERSED | w2c_isect | catosg_isect | < | F1 | test | 0.10 | `one favours \method{} by
 $-0.00132$` |
 | w2c-desc-culver-B030 | w2c_isect | catosg_isect | > | F1 | culver | 0.30 | `the $0.30$ rows are partly bought` |
-| w2c-transport-test-B020-A2 | w2c_transport | catosg_transport | < | F1 | test | 0.20 | `a difference of
-$-0.07064$ with a $95\%$ paired-bootstrap interval` |
+| w2c-transport-test-B020-A2 | w2c_transport | catosg_transport | < | F1 | test | 0.20 | `compared with $0.87325$ for our Where2comm reproduction` |
 | w2c-transport-validate-B010 | w2c_transport | catosg_transport | < | F1 | validate | 0.10 | `under the transport all six favour \method{} by $0.069$ to
 $0.084$` |
 | w2c-transport-culver-B030 | w2c_transport | catosg_transport | < | F1 | culver | 0.30 | `transmits on every frame---its sparsity control sets` |

@@ -370,8 +370,8 @@ ground-truth set built by a different construction.
 \setlength{\tabcolsep}{3pt}
 \caption{\emph{Under the modelled transport.} The same grid points and the same ground truth, now
 replayed over the frozen $200$ paired CSI draws: same seed and draw order as the mainline, frame BLER
-re-derived at \emph{this arm's own} codeword count ($N_{\mathrm{cw}}=335$--$1288$ against the
-mainline's $3960$), one shared delivery coin, whole-frame all-or-nothing, and a delivery failure
+re-derived \emph{per frame} at that frame's own codeword count (e.g.\ $175$--$543$ within one
+Culver-City point, against the mainline's fixed $3960$), one shared delivery coin, whole-frame all-or-nothing, and a delivery failure
 falling back to Where2comm's own ego-only forward. Intervals are paired bootstrap
 ($10{,}000$ resamples, seed $12345$, percentile) over the CSI realisations.
 Source: \texttt{results/diagnostics/transport\_replay\_ci.csv}.}
@@ -381,14 +381,14 @@ Source: \texttt{results/diagnostics/transport\_replay\_ci.csv}.}
 $B_{\max}$ & Split & delivered & Where2comm & \method{} & $\Delta$ (95\% CI) \\
 \midrule
 \multirow{3}{*}{0.10}
- & validate    & 0.3095 & 0.82529 & 0.90880 & $-0.08351$ $[-0.08374,-0.08327]$ \\
- & test        & 0.3095 & 0.87437 & 0.94492 & $-0.07055$ $[-0.07076,-0.07034]$ \\
- & Culver-City & 0.3118 & 0.81679 & 0.89508 & $-0.07830$ $[-0.07864,-0.07794]$ \\
+   & validate    & 0.3001 & 0.82394 & 0.90880 & $-0.08486$ $[-0.08509,-0.08463]$ \\
+  & test        & 0.3002 & 0.87337 & 0.94492 & $-0.07155$ $[-0.07175,-0.07135]$ \\
+ & Culver-City & 0.3014 & 0.81557 & 0.89508 & $-0.07952$ $[-0.07986,-0.07917]$ \\
 \midrule
 \multirow{3}{*}{0.30}
- & validate    & 0.3055 & 0.82507 & 0.90910 & $-0.08403$ $[-0.08426,-0.08380]$ \\
- & test        & 0.3056 & 0.87414 & 0.94332 & $-0.06918$ $[-0.06941,-0.06895]$ \\
- & Culver-City & 0.3081 & 0.81729 & 0.89878 & $-0.08149$ $[-0.08182,-0.08114]$ \\
+   & validate    & 0.2954 & 0.82370 & 0.90910 & $-0.08540$ $[-0.08563,-0.08517]$ \\
+  & test        & 0.2952 & 0.87312 & 0.94332 & $-0.07021$ $[-0.07043,-0.06998]$ \\
+  & Culver-City & 0.2972 & 0.81597 & 0.89878 & $-0.08280$ $[-0.08313,-0.08248]$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -397,23 +397,25 @@ $B_{\max}$ & Split & delivered & Where2comm & \method{} & $\Delta$ (95\% CI) \\
 between $+0.00021$ and $+0.00723$; under the transport all six favour \method{} by $0.069$ to
 $0.084$, an order of magnitude larger and in the opposite direction. The mechanism is in the
 delivered column. Where2comm transmits on every frame---its sparsity control sets \emph{how much} to
-send, never \emph{whether}---and it has no cheap rung to fall back to, so on the ${\approx}69\%$ of
+send, never \emph{whether}---and it has no cheap rung to fall back to, so on the ${\approx}70\%$ of
 frames the link cannot carry it loses the message entirely and reverts to its own ego-only output.
 \method{} at these budgets requests the feature branch on a minority of frames and holds the compact
 object-level message otherwise, so the transport barely moves it. The comparison therefore measures
 exactly the property this paper argues for: on a cliff channel, choosing \emph{whether} to send is
 worth more than choosing \emph{what} to send within a fixed granularity.
 
-\emph{Confirmatory cell, under amendment A2.} The pre-registered confirmatory cell (test,
-$B_{\max}=0.20$) is unreachable by any single threshold, so it is reached under a registered
-amendment: a per-frame mixture policy, $p=0.5052$ of threshold $0.013$ with $0.015$, whose mean
+\emph{Post-hoc budget-matched mixture analysis.} The pre-registered confirmatory cell (test,
+$B_{\max}=0.20$) is unreachable by any single threshold. What follows is therefore \emph{not} a
+confirmatory result and is not adjudicated against the pre-registered margin: it is a post-hoc
+analysis in which the budget is met by a per-frame mixture policy, $p=0.5052$ of threshold $0.013$ with $0.015$, whose mean
 transmitted fraction is $0.1978$---the cap exactly---with each frame charged at its own codeword
-count. Under that amendment, and under the evaluated retransmission and all-or-nothing delivery
-settings, \method{} attains AP@$0.5$ $0.94492$ against Where2comm's $0.87427$, a difference of
-$-0.07064$ with a $95\%$ paired-bootstrap interval of $[-0.07087,-0.07042]$: an advantage more than
-an order of magnitude beyond the pre-registered $\delta=0.005$ margin, attributable to transmission
-behaviour under this transport rather than to detection quality, which the ideal-delivery table
-shows running the other way. Three qualifications belong with that sentence and are not optional.
+count. Under that amendment, and under the evaluated no-retransmission, all-or-nothing delivery
+setting, in a post-hoc budget-matched mixture analysis \method{} achieved AP@$0.5$
+$0.94492$ compared with $0.87325$ for our Where2comm reproduction under the evaluated transport
+(difference $-0.07166$, $95\%$ paired-bootstrap interval $[-0.07188,-0.07145]$ over the CSI
+realisations). The gap is attributable to transmission behaviour under this transport rather
+than to detection quality, which the ideal-delivery table shows running the other way; no margin is
+applied to it and no verdict is drawn from it. Three qualifications belong with that sentence and are not optional.
 The metric is AP@$0.5$, not the frame F1 the margin was pre-registered on. The interval quantifies
 stability over channel realisations, conditional on the fixed evaluation set; it does not cover
 scene-sampling variability and is not the same construction as the frame-level

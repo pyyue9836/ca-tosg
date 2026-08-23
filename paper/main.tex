@@ -509,8 +509,8 @@ frozen selectors; that is selector-only latency, on the reading fixed in Section
 table are in the supplementary material, which also reports the comparison against
 Where2comm on the same frames, ground truth, scoring chain and collaborator convention. Under ideal
 delivery the two are within $0.007$ AP@$0.5$ of each other; replayed over the modelled transport,
-\method{} leads by $0.069$--$0.084$ across both reachable budgets and all three splits, because the
-comparator transmits on every frame and loses the message on the ${\approx}69\%$ the link cannot
+\method{} leads by $0.07021$--$0.08540$ across both reachable budgets and all three splits, because the
+comparator transmits on every frame and loses the message on the ${\approx}70\%$ the link cannot
 carry.
 
 \emph{What this evaluation does not establish.} Four limitations are experimental rather than
@@ -521,7 +521,7 @@ Section~\ref{sec:exp}, which would also remove the dual-branch residency cost. (
 quantised bitstream is produced: the feature payload is a declared source-budget convention, and a
 deployed figure needs a specified quantisation width, entropy coder and packetisation. (iii) The
 bottleneck convention is an accounting counterfactual only---no selector is re-frozen and no
-$N_{\mathrm{cw}}$, BLER or $\lambda$ is re-derived under it. (iv) The external comparison has been run---Where2comm on this paper's frames, scoring chain, collaborator convention, a ground-truth set made identical by construction, and both under ideal delivery and under the modelled transport---and it is adjudicated at the confirmatory cell under a registered amendment, since no single setting of the comparator's control parameter lands within $\pm20\%$ of the $B_{\max}=0.20$ cap and a per-frame mixture policy is used to reach it (supplementary material). What that leaves open is narrower than before but real: one external method, a reproduction-grade checkpoint rather than released weights, a protocol amendment in the confirmatory path, a metric that is AP rather than the frame F1 the margin was pre-registered on, and no controlled comparison in which both systems are trained under a single unified recipe. None of these is repaired by rewording,
+$N_{\mathrm{cw}}$, BLER or $\lambda$ is re-derived under it. (iv) The external comparison has been run---Where2comm on this paper's frames, scoring chain, collaborator convention, a ground-truth set made identical by construction, and both under ideal delivery and under the modelled transport---but not at the pre-registered confirmatory cell: no single setting of the comparator's control parameter lands within $\pm20\%$ of the $B_{\max}=0.20$ cap, and the mixture policy that reaches it was chosen after seeing the grid, so that cell is a post-hoc analysis rather than a confirmatory one (supplementary material). A genuine confirmatory external comparison would need an AP margin fixed before the run and an evaluation split that took no part in choosing the comparator's operating point; both are pre-registered as future work. What that leaves open is narrower than before but real: one external method, a reproduction-grade checkpoint rather than released weights, a protocol amendment in the confirmatory path, a metric that is AP rather than the frame F1 the margin was pre-registered on, and no controlled comparison in which both systems are trained under a single unified recipe. None of these is repaired by rewording,
 and the claims that would need them have been withdrawn rather than kept.
 
 \emph{Sensitivity analyses.} Three pre-registered checks bound what the headline rests on, and none
