@@ -6314,3 +6314,27 @@ nothing beyond this repository; the other **8 are artefact-tier**, requiring `da
 models and the sibling OpenCOOD checkout. **On this machine those artefacts are present, so all 18
 run and pass** — the two-tier language describes what a clean clone can reproduce, not a gate that
 went unrun here. Reports and `docs/reproducibility.md` now say it the same way.
+
+## R62 — one manifest, realised values, final reproduction wording
+
+Zero GPU. No result number changes.
+
+1. **One source of truth for the cell set.** `paired_bootstrap.py` imported nothing and globbed the
+   directory itself, so the collector's manifest guarded one script and not the other. It now imports
+   `EXPECTED` from `collect_transport` and fails on a missing or extra cell. Self-tests: an eighth
+   JSON **FIRES** in both scripts, removal goes silent in both.
+
+2. **Realised, not designed.** The replay now accumulates, inside the loop, the fraction and codeword
+   counts it actually used, and reports `realised_mean_fraction`, its deviation from the design
+   value, and realised mean/min/max codewords. Under a mixture the fraction is a draw, not the design
+   value, and a product reporting the design value cannot show how far the draw landed.
+
+   Until those fields exist in regenerated cells, the paper uses the transitional form: the mixture's
+   **expected** mean transmitted fraction is `0.1978`, the cap, with the realised fraction described
+   as a draw around it. The retired phrasing --- "whose mean transmitted fraction is 0.1978, the cap
+   exactly" --- attached *exactly* to an expectation, which is the error being removed.
+
+3. **Reproduction wording, final.** All 18 gates run and pass on the full experiment machine; a clean
+   clone reproduces the content, comparison and generator tiers unaided; the artefact tier
+   additionally needs `data/p2`, the frozen models, the OpenCOOD checkout, PyTorch and Tectonic.
+   `docs/reproducibility.md` and every report now say this identically.

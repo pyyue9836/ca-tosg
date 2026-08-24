@@ -181,6 +181,10 @@ def main() -> int:
 
     R = min(a.realisations, E.N_REPLAY)
     w50, w70, c50, c70, deliv = [], [], [], [], []
+    # R62-2: what the simulation ACTUALLY used, accumulated in the loop rather than reconstructed
+    # afterwards. Under a mixture the realised fraction is a draw, not the design value, and a
+    # product that reports the design value cannot show how far the draw landed from it.
+    used_rate, used_ncw = [], []
     for r in range(R):
         if zm is None:
             bF_w2c = arm_bler(tbl, n_cw_pf, snr[r], ray[r])
@@ -193,6 +197,8 @@ def main() -> int:
                               arm_bler(tbl, n_cw_pf_m, snr[r], ray[r]))
             surv_w = coin[r] > bF_w2c
             src_pick = np.where(use_main, 0, 5)
+            used_rate.append(float(np.where(use_main, rate_pf, rate_pf_m).mean()))
+            used_ncw.append(np.where(use_main, n_cw_pf, n_cw_pf_m).astype(float))
         deliv.append(float(surv_w.mean()))
         v = E.ap_pick(np.where(surv_w, src_pick, 1).tolist(), ST, gtn)
         w50.append(v[1]); w70.append(v[2])
@@ -214,7 +220,12 @@ def main() -> int:
         sel = np.stack([np.random.default_rng(a.mix_seed + r).random(n) < mix_p for r in range(R)])
         n_cw_used = np.where(sel, n_cw_pf[None, :], n_cw_pf_m[None, :])
         assert n_cw_used.shape == (R, n), 'A2 codeword sequence does not match the replay shape'
+    ur = np.asarray(used_rate); un = np.concatenate(used_ncw)
     row = dict(split=split, threshold=float(thr), budget=a.budget, rate=round(rate, 4),
+               realised_mean_fraction=round(float(ur.mean()), 5),
+               realised_fraction_deviation=round(float(ur.mean() - rate), 5),
+               realised_ncw_mean=round(float(un.mean()), 1),
+               realised_ncw_min=int(un.min()), realised_ncw_max=int(un.max()),
                n_cw_mean=float(round(float(np.mean(n_cw_used)), 1)),
                n_cw_min=int(np.min(n_cw_used)), n_cw_max=int(np.max(n_cw_used)),
                n_cw_source='mixture-realised' if zm is not None else 'single-point',

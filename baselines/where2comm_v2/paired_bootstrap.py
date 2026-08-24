@@ -30,6 +30,9 @@ import sys
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from collect_transport import EXPECTED          # noqa: E402  single source of truth (R62-1)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, 'results', 'diagnostics')
 N_BOOT = 10000
@@ -37,8 +40,18 @@ BOOT_SEED = 12345
 
 
 def main() -> int:
+    found = {os.path.basename(f) for f in glob.glob(os.path.join(OUT, 'transport_replay_*.json'))}
+    missing, extra = set(EXPECTED) - found, found - set(EXPECTED)
+    if missing or extra:
+        # R62-1: the same manifest the collector enforces. Two scripts globbing the same directory
+        # is two chances to summarise a set nobody declared; an eighth file must break both.
+        print('PAIRED BOOTSTRAP FAIL: the cell set does not match the manifest -- '
+              + (f'missing {sorted(missing)} ' if missing else '')
+              + (f'unexpected {sorted(extra)}' if extra else ''))
+        return 1
     rows = []
-    for f in sorted(glob.glob(os.path.join(OUT, 'transport_replay_*.json'))):
+    for name in EXPECTED:
+        f = os.path.join(OUT, name)
         d = json.load(open(f))
         w = np.asarray(d.get('w2c_ap50_per_realisation', []), dtype=float)
         c = np.asarray(d.get('catosg_ap50_per_realisation', []), dtype=float)
@@ -74,5 +87,19 @@ def main() -> int:
     return 0
 
 
+def self_test() -> int:
+    """An eighth cell must break this too, not be quietly averaged in (R62-1)."""
+    fake = os.path.join(OUT, 'transport_replay_ghost_thr0.99_B0.10.json')
+    json.dump({'split': 'ghost', 'budget': '0.10'}, open(fake, 'w'))
+    try:
+        fired = main() != 0
+    finally:
+        os.remove(fake)
+    print('SELF-TEST: an eighth JSON -> %s' % ('FIRES' if fired else 'DOES NOT FIRE'))
+    clean = main() == 0
+    print('SELF-TEST: manifest restored -> %s' % ('silent' if clean else 'FALSE POSITIVE'))
+    return 0 if (fired and clean) else 1
+
+
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(self_test() if '--self-test' in sys.argv else main())
