@@ -6393,3 +6393,26 @@ removing a field **FIRES**, drifting a single-threshold cell's fraction **FIRES*
   the products contradict.
 
 All three are tracked TERMINOLOGY families with live-match zero.
+
+## R66 (part 1) — the same-name overwrite risk is closed
+
+Zero GPU. The figure-chain audit found the numbers correct; the defect was the *mapping*.
+
+1. **`a2_difficulty.py` can no longer write `fig_difficulty.pdf`.** The delivered figure is built
+   from the frozen product (`difficulty_frozen.py` → `results/sensitivity/difficulty_frozen.csv`),
+   while the retired v3-era script wrote the **same filename** from v3-era data — one accidental run
+   from silently replacing a frozen figure. The write path is removed and the script exits with the
+   reason, rather than being renamed: a renamed output still invites use.
+
+2. **The frozen builder is now a first-class entry in `tools/generate_figures.py`.** It had been
+   listed as a "known gap", which is precisely how the retired script stayed the only thing anyone
+   associated with that figure. Also fixed: `plot_feature_importance.py`'s header still said 65 %,
+   the pre-corrigendum channel-side share; it now says 61.7 %.
+
+3. **Two content guardrails, tracked rather than trusted.** A sentence claiming the difficulty figure
+   shows improvement across all strata contradicts its own product (the easy tercile is −0.0047 on
+   test); a sentence saying the channel features "contribute 61.7 % of performance" turns a Gini
+   split statistic into a causal share. Both are TERMINOLOGY families, live-match zero.
+
+**Not in this commit** (R66 items 3–5, 7): the two_regime decoupling, the second deletion round with
+its `test_payload.py` migration, the four document rewrites, and the protocol split.

@@ -9,7 +9,7 @@ views, both under the v3 canonical protocol:
   (2) RELIABLE-CHANNEL conditional (AWGN, 16 dB, C deliverable): isolates the frame-difficulty axis from
       the channel axis -- the per-frame gain the channel-averaged view dilutes. Deterministic condition
       (NOT a single random draw): every frame at est_snr=16, awgn.
-Outputs: out/a2_difficulty.csv, out/a2_difficulty_reliable.csv, paper/figures/fig_difficulty.pdf
+Outputs: out/a2_difficulty.csv, out/a2_difficulty_reliable.csv (figure output RETIRED, R66-1)
 """
 import os
 import numpy as np
@@ -114,8 +114,15 @@ def main():
         _panel(axes[1], [r for r in rel if r['split'] == 'test'], r'OPV2V test: AWGN 16 dB (C reliable)')
         axes[0].set_ylabel('Mean realised F1'); axes[0].legend(fontsize=7, loc='lower left')
         fig.tight_layout()
-        out = os.path.join(C.FIGDIR, 'fig_difficulty.pdf')
-        fig.savefig(out, bbox_inches='tight'); fig.savefig(out.replace('.pdf', '_preview.png'), dpi=140, bbox_inches='tight')
+        # R66-1: this script may no longer write fig_difficulty.pdf. The delivered figure is built
+        # from the FROZEN product (difficulty_frozen.py -> difficulty_frozen.csv), and a retired
+        # script that still writes to the same filename is one accidental run away from silently
+        # replacing a frozen figure with a v3-era one. The figure path is removed, not renamed:
+        # a renamed output would still invite someone to use it.
+        out = None
+        raise SystemExit('a2_difficulty.py is RETIRED for figure output (R66-1). The delivered '
+                         'fig_difficulty.pdf comes from difficulty_frozen.csv via '
+                         'tools/generate_figures.py; this script writes CSVs only.')
         print('wrote', out)
     except Exception as e:
         print('plot skipped:', e)

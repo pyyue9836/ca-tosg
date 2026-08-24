@@ -5,7 +5,7 @@
 Top-12 features by Gini importance, with the two channel-side features
 highlighted in a contrasting colour. The total importance of
 {est_snr_db, channel_is_rayleigh} is annotated to support the abstract
-claim of "65% of importance from comm-side features".
+claim of "61.7% of importance from comm-side features".
 """
 import os
 import matplotlib

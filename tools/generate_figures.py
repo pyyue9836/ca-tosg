@@ -28,6 +28,12 @@ GENERATORS = [
                                                'fig_decisions_*, fig_stacked_area, '
                                                'fig_decisions_budgets, fig_pareto_test'),
     ('features',  'plot_feature_importance.py','fig_feature_importance.pdf'),
+    # R66-1/2: the difficulty figure is built from the FROZEN product
+    # (difficulty_frozen.py -> results/sensitivity/difficulty_frozen.csv). It used to be listed
+    # below as a "known gap", which is how the retired a2_difficulty.py stayed the only script
+    # anyone associated with fig_difficulty.pdf -- and that script wrote the same filename from
+    # v3-era data. It is a first-class entry here and the retired writer is disabled.
+    ('difficulty', '../difficulty_frozen.py',  'fig_difficulty.pdf (from difficulty_frozen.csv)'),
 ]
 
 if __name__ == '__main__':
@@ -51,5 +57,4 @@ if __name__ == '__main__':
     print('\nNOT regenerated here, and each is a KNOWN GAP rather than an omission:')
     print('  fig:qualitative  a BEV render; see projects/ca_tosg/evaluation/figures/'
           'plot_qualitative_bev.py')
-    print('  fig:difficulty   projects/ca_tosg/evaluation/difficulty_frozen.py (frozen, P5-5).')
     print('  fig:two_regime   the JSCC prior-protocol arm (Appendix).')
