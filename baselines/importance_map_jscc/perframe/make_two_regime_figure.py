@@ -67,9 +67,9 @@ def eval_regime(df, cues, late_f1, eff_C_fn, rng_seed):
 
 
 def main():
-    # v3 rewire: TEST split, reusing build_two_regime_edge's EXACT mechanism so the figure's edges bit-
+    # v3 rewire: TEST split, reusing two_regime_common's EXACT mechanism so the figure's edges bit-
     # reproduce two_regime_edge (RF random_state=0, TAU_GRID, 200-seed, PAY 0.024/0.99 -- all in BE).
-    import build_two_regime_edge as BE
+    import two_regime_common as BE   # R67-a
     SPLIT, CH = 'test', 'awgn'
     df = pd.read_csv(os.path.join(BE.DATA, f'dataset_{SPLIT}_v3.csv')).reset_index(drop=True)
     feat = C.feat_cols(df, 'full')

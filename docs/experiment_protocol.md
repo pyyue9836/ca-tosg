@@ -6416,3 +6416,16 @@ Zero GPU. The figure-chain audit found the numbers correct; the defect was the *
 
 **Not in this commit** (R66 items 3–5, 7): the two_regime decoupling, the second deletion round with
 its `test_payload.py` migration, the four document rewrites, and the protocol split.
+
+## R67 (a) — the two-regime arms are decoupled, and the leaky script is gone
+
+Zero GPU. `build_two_regime_edge_clean.py` imported its SNR grid, payload constants, interpolation
+bias and helpers **from `build_two_regime_edge.py`** — the leaky script it exists to replace. The
+clean arm therefore could not be run, or reasoned about, without the arm that leaks, and deleting the
+leak would have broken the replacement.
+
+`baselines/importance_map_jscc/perframe/two_regime_common.py` now holds those shared pieces
+(`SNR_GRID`, `PAY_L`/`PAY_C`, `TAU_GRID`, `INTERP_BIAS`, `eff_C_of`, `jscc_grid`), moved verbatim —
+nothing is recomputed. Both importers (`build_two_regime_edge_clean.py`, `make_two_regime_figure.py`)
+now take them from there, and `build_two_regime_edge.py` is **deleted**. Import gate PASS, no dangling
+references outside the archived history.

@@ -37,8 +37,10 @@ import score_jscc as SC
 # reuse the EXACT eff_C model + constants from the leaky script (single source of truth). jscc_grid
 # is overridden below to read the cached per-frame F1 npz (score_jscc.py output) instead of
 # re-scoring from the decode npz -- same values, ~100x faster.
-from build_two_regime_edge import (jscc_grid as _jscc_grid_rescore, eff_C_of, SNR_GRID,
-                                    PAY_L, PAY_C, TAU_GRID, INTERP_BIAS)
+# R67-a: the shared pieces come from the common module, not from the leaky script this file
+# replaces -- importing them from there made the clean arm depend on the arm that leaks.
+from two_regime_common import (jscc_grid as _jscc_grid_rescore, eff_C_of, SNR_GRID,
+                               PAY_L, PAY_C, TAU_GRID, INTERP_BIAS)
 
 P1 = os.path.join(REPO, 'peiyi_work/paper1'); DATA = os.path.join(P1, 'data')
 OUT = os.path.join(P1, 'results/baselines/importance_map_jscc')
