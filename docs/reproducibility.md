@@ -112,7 +112,7 @@ d. **Deployed selector** `data/selector_rf.pkl` — the 400-tree RandomForest, t
 | tab:headline_agg (RF vs SNR-threshold, 200-real.) | `python projects/ca_tosg/evaluation/policy_200seed.py` | `results/main/threshold_vs_rf.csv` (+ `policy/pareto_points.csv`, `policy/generalisation_{split}.csv`) |
 | tab:two_regime (In-dist / Deployed edge) | `python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` and `kfold_two_regime_diag.py` | `results/baselines/importance_map_jscc/two_regime_edge_clean.csv`, `results/baselines/importance_map_jscc/two_regime_kfold_diag.csv` |
 | tab:ablation (cue subsets + threshold) | `python projects/ca_tosg/evaluation/ablations/a7_ablation.py` | `results/sensitivity/ablation/a7_ablation.csv`, `ablation/a7_cue_value.csv` |
-| §Where2comm numbers | OpenCOOD global-sort eval of the epoch-50 Where2comm checkpoint (eval yaml in the CSV `source` column) — see `results/provenance/where2comm_ap_PROVENANCE.txt`. NOT `compare.py`, which is DEPRECATED (epoch-37 perfect-channel single point). | `results/baselines/where2comm.csv` |
+| §Where2comm numbers | OpenCOOD global-sort eval of the epoch-50 Where2comm checkpoint (eval yaml in the CSV `source` column) — see `archive/` (retired with the arm). NOT `compare.py`, which is DEPRECATED (epoch-37 perfect-channel single point). | `archive/` (retired: the arm was superseded by `results/baselines/where2comm_v2/`) |
 
 ## 3. Figures → generator → source
 

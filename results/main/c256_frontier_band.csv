@@ -1,4 +1,0 @@
-split,max_frac_C256,lam_lo,lam_hi,payload_lo,payload_hi
-validate,0.02546,0.0,0.45255,0.024,0.1565
-test,0.03155,0.0,2.08732,0.024,0.1789
-culver,0.04517,0.001,0.45255,0.0241,0.2366

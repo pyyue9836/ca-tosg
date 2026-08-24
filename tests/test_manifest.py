@@ -21,7 +21,7 @@ Part 2: the frozen manifests' INTERNAL relative paths.
   REPOSITORY ROOT (it used to be relative to paper1/). The gate resolves each of them and
   recomputes each recorded md5/sha256 from the file it lands on. A manifest whose pins point at
   nothing -- or at something whose hash has moved on -- is a decorative manifest, so this fails
-  loudly rather than skipping. The migration itself is docs/restructure/migrate_manifests.py.
+  loudly rather than skipping. The migration itself is archive/docs-history/restructure/migrate_manifests.py.
 
 Exit 0 iff every check passes.
 

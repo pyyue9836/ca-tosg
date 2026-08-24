@@ -1,2 +1,0 @@
-method,split,frames,epoch,sort,ap_03,ap_05,ap_07,source
-Where2comm,validate,1980,50,global,0.8867,0.8707,0.7897,"experiment_logs/opencood_training_logs/point_pillar_where2comm_2026_05_22_17_56_51/eval_global_sort.yaml"
