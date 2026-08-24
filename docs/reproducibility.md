@@ -43,6 +43,8 @@ reproduces everything.
 * **Tier 2 --- full run**: `python tools/verify_results.py` runs all **18**. Additionally requires the sibling `../OpenCOOD/` checkout, the local grids `data/p2/p2_grid_*.csv` and the frozen models `data/p2/selector_B0*.pkl`. **Independent reproduction from the raw OPV2V data needs all three, and none of them is in this repository** --- so a third party can verify the internal chain here and must obtain the dataset and re-run steps 1--4 to verify the rest.
 <!-- GATE-COUNTS:END -->
 
+On the machine that produced these results the artefact-tier inputs are present, so all 18 gates run and pass; the split above describes what a clean clone can reproduce, not a tier that went unrun here (R61-5).
+
 Both tiers fail **loudly** on missing data rather than skipping --- a gate that cannot verify must
 never report success --- so on a clean clone the full run correctly reports GATE FAILURE.
 

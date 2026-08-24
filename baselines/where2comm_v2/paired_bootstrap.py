@@ -57,8 +57,11 @@ def main() -> int:
                          w2c_ap50=round(float(w.mean()), 5), catosg_ap50=round(float(c.mean()), 5),
                          d_ap50=round(float(diff.mean()), 5),
                          ci_lo=round(float(lo), 5), ci_hi=round(float(hi), 5),
-                         excludes_zero=bool(lo * hi > 0),
-                         beyond_delta=bool(abs(diff.mean()) > 0.005)))
+                         # R61-3: no `beyond_delta` column. The margin was pre-registered for a
+                         # frame-F1 confirmatory comparison; this is a post-hoc AP analysis, and a
+                         # column comparing it to delta invites exactly the reading the wording was
+                         # corrected to remove.
+                         excludes_zero=bool(lo * hi > 0)))
     if not rows:
         print('PAIRED BOOTSTRAP: nothing to do')
         return 1

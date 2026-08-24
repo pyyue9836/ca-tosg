@@ -370,8 +370,8 @@ ground-truth set built by a different construction.
 \setlength{\tabcolsep}{3pt}
 \caption{\emph{Under the modelled transport.} The same grid points and the same ground truth, now
 replayed over the frozen $200$ paired CSI draws: same seed and draw order as the mainline, frame BLER
-re-derived \emph{per frame} at that frame's own codeword count (e.g.\ $175$--$543$ within one
-Culver-City point, against the mainline's fixed $3960$), one shared delivery coin, whole-frame all-or-nothing, and a delivery failure
+re-derived \emph{per frame} at that frame's own codeword count, rounded up (e.g.\ $175$--$544$
+within one Culver-City point, against the mainline's fixed $3960$), one shared delivery coin, whole-frame all-or-nothing, and a delivery failure
 falling back to Where2comm's own ego-only forward. Intervals are paired bootstrap
 ($10{,}000$ resamples, seed $12345$, percentile) over the CSI realisations.
 Source: \texttt{results/diagnostics/transport\_replay\_ci.csv}.}
@@ -382,7 +382,7 @@ $B_{\max}$ & Split & delivered & Where2comm & \method{} & $\Delta$ (95\% CI) \\
 \midrule
 \multirow{3}{*}{0.10}
    & validate    & 0.3001 & 0.82394 & 0.90880 & $-0.08486$ $[-0.08509,-0.08463]$ \\
-  & test        & 0.3002 & 0.87337 & 0.94492 & $-0.07155$ $[-0.07175,-0.07135]$ \\
+   & test        & 0.3002 & 0.87336 & 0.94492 & $-0.07155$ $[-0.07175,-0.07135]$ \\
  & Culver-City & 0.3014 & 0.81557 & 0.89508 & $-0.07952$ $[-0.07986,-0.07917]$ \\
 \midrule
 \multirow{3}{*}{0.30}

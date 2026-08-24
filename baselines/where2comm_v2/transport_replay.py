@@ -58,7 +58,11 @@ def w2c_info_bits(s):
 
 
 def w2c_n_cw(s):
-    return max(1, int(round(w2c_info_bits(s) / K_INFO)))
+    # R61-1: CEIL, not round. A partial codeword is still transmitted, so rounding down charged the
+    # comparator for fewer codewords than it sends. The correction can only leave the comparator's
+    # frame BLER equal or higher, i.e. it never flatters CA-TOSG -- stated with the per-frame
+    # accounting disclosure, since both corrections push the same way.
+    return max(1, int(math.ceil(w2c_info_bits(s) / K_INFO)))
 
 
 def frame_bler_at(bler_cw, n_cw):
@@ -201,9 +205,20 @@ def main() -> int:
             print(f'  replay {r + 1}/{R}: W2C {np.mean(w50):.5f} | CA-TOSG {np.mean(c50):.5f}',
                   flush=True)
 
+    # R61-2: the reported codeword statistics must describe the sequence the simulation used. Under
+    # a mixture that is neither component alone, so the realised per-frame counts are rebuilt from
+    # the same seeded selection the replay drew, and asserted identical to it.
+    if zm is None:
+        n_cw_used = n_cw_pf
+    else:
+        sel = np.stack([np.random.default_rng(a.mix_seed + r).random(n) < mix_p for r in range(R)])
+        n_cw_used = np.where(sel, n_cw_pf[None, :], n_cw_pf_m[None, :])
+        assert n_cw_used.shape == (R, n), 'A2 codeword sequence does not match the replay shape'
     row = dict(split=split, threshold=float(thr), budget=a.budget, rate=round(rate, 4),
-               n_cw_mean=int(round(float(np.mean(n_cw_pf)))), n_cw_min=int(n_cw_pf.min()),
-               n_cw_max=int(n_cw_pf.max()), accounting='per-frame (R60-1)',
+               n_cw_mean=float(round(float(np.mean(n_cw_used)), 1)),
+               n_cw_min=int(np.min(n_cw_used)), n_cw_max=int(np.max(n_cw_used)),
+               n_cw_source='mixture-realised' if zm is not None else 'single-point',
+               accounting='per-frame, ceil (R60-1, R61-1)',
                realisations=R, mean_delivery_rate=round(float(np.mean(deliv)), 4),
                w2c_ap50=round(float(np.mean(w50)), 5), w2c_ap50_std=round(float(np.std(w50)), 5),
                w2c_ap70=round(float(np.mean(w70)), 5),

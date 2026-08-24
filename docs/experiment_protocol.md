@@ -6269,3 +6269,48 @@ comparator's operating point. Neither exists here.
 "under the evaluated retransmission and all-or-nothing delivery settings" → **"under the evaluated
 no-retransmission, all-or-nothing delivery setting"**. No retransmission was performed anywhere in
 this replay; the earlier phrasing implied one had been.
+
+## R61 — codeword rounding, mixture statistics, and a locked cell manifest
+
+Zero GPU; CPU rerun of all seven cells.
+
+### 1 · `N_cw` is rounded **up**
+
+`round()` → `ceil()`: a partial codeword is still transmitted, so rounding down charged the
+comparator for fewer codewords than it sends. **Direction of both corrections, stated together:**
+this one can only leave Where2comm's frame BLER equal or higher, and R60's per-frame accounting also
+moved against it. Neither correction flatters \method{}; both were applied because they are right,
+and both push the same way.
+
+**Effect: negligible.** `info_bits/500` is in the hundreds, so ceil differs from round by at most one
+codeword. Across the seven cells exactly one number moved: `test @ B_max = 0.10`, W2C AP@0.5
+`0.87337 → 0.87336`. No Δ and no interval changed at five decimals. The seven cells are otherwise
+identical to R60, and the paper's numbers stand.
+
+### 2 · Mixture codeword statistics now describe the sequence the simulation used
+
+The A2 cell reported one component's counts. It now rebuilds the realised per-frame counts from the
+**same seeded selection the replay drew**, labels them `n_cw_source = mixture-realised`, and asserts
+the reconstruction has the replay's shape. Realised span: `42`–`1915` codewords per frame, against
+`42`–`820` and `668`–`1915` for the two components separately — neither component's range describes
+the mixture, which is why reporting one of them was wrong.
+
+### 3 · `beyond_delta` removed
+
+The column compared a post-hoc AP analysis against a margin pre-registered for a frame-F1
+confirmatory comparison. Deleted from `transport_replay_ci.csv` and from every quoting site: keeping
+it invited exactly the reading R60 corrected.
+
+### 4 · The cell manifest is explicit
+
+`collect_transport.py` names its seven files. A glob silently absorbs an eighth and silently
+tolerates a missing one; either way the summary stops describing what it claims to. Self-test:
+inserting an eighth JSON **FIRES**, removing it goes silent.
+
+### 5 · Gate reporting, one wording everywhere
+
+Two tiers, and the honest statement differs by machine: `--content-only` runs **10 of 18** and needs
+nothing beyond this repository; the other **8 are artefact-tier**, requiring `data/p2`, the frozen
+models and the sibling OpenCOOD checkout. **On this machine those artefacts are present, so all 18
+run and pass** — the two-tier language describes what a clean clone can reproduce, not a gate that
+went unrun here. Reports and `docs/reproducibility.md` now say it the same way.

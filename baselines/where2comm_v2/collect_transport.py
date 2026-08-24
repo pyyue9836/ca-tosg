@@ -21,15 +21,32 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, 'results', 'diagnostics', 'transport_replay.csv')
 DROP = ('w2c_ap50_per_realisation', 'catosg_ap50_per_realisation')
+# R61-4: the seven cells this summary is defined over, named. A glob silently absorbs an eighth file
+# and silently tolerates a missing one; either way the CSV stops describing what it claims to.
+EXPECTED = (
+    'transport_replay_culver_thr0.02_B0.10.json',
+    'transport_replay_test_thr0.015_B0.10.json',
+    'transport_replay_validate_thr0.02_B0.10.json',
+    'transport_replay_test_thr0.013_B0.20.json',
+    'transport_replay_culver_thr0.013_B0.30.json',
+    'transport_replay_test_thr0.013_B0.30.json',
+    'transport_replay_validate_thr0.013_B0.30.json',
+)
 
 
 def build() -> pd.DataFrame:
+    found = {os.path.basename(f) for f in
+             glob.glob(os.path.join(ROOT, 'results/diagnostics/transport_replay_*.json'))}
+    missing, extra = set(EXPECTED) - found, found - set(EXPECTED)
+    if missing or extra:
+        raise SystemExit(
+            'collect_transport FAIL: the cell set does not match the manifest -- '
+            + (f'missing {sorted(missing)} ' if missing else '')
+            + (f'unexpected {sorted(extra)}' if extra else ''))
     rows = []
-    for f in sorted(glob.glob(os.path.join(ROOT, 'results/diagnostics/transport_replay_*.json'))):
-        d = json.load(open(f))
+    for name in EXPECTED:
+        d = json.load(open(os.path.join(ROOT, 'results/diagnostics', name)))
         rows.append({k: v for k, v in d.items() if k not in DROP})
-    if not rows:
-        raise SystemExit('collect_transport: no per-cell JSON found')
     return pd.DataFrame(rows).sort_values(['budget', 'split']).reset_index(drop=True)
 
 
@@ -50,5 +67,27 @@ def main() -> int:
     return 0
 
 
+def self_test() -> int:
+    """An eighth cell must break the collector, not be quietly averaged in."""
+    fake = os.path.join(ROOT, 'results/diagnostics/transport_replay_ghost_thr0.99_B0.10.json')
+    json.dump({'split': 'ghost', 'budget': '0.10'}, open(fake, 'w'))
+    try:
+        try:
+            build()
+            fired = False
+        except SystemExit:
+            fired = True
+    finally:
+        os.remove(fake)
+    print('SELF-TEST: an eighth JSON -> %s' % ('FIRES' if fired else 'DOES NOT FIRE'))
+    clean = True
+    try:
+        build()
+    except SystemExit:
+        clean = False
+    print('SELF-TEST: manifest restored -> %s' % ('silent' if clean else 'FALSE POSITIVE'))
+    return 0 if (fired and clean) else 1
+
+
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(self_test() if '--self-test' in sys.argv else main())
