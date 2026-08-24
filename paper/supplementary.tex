@@ -105,7 +105,7 @@ attributable to the perception cues alone
 (the main paper).\footnote{This in-distribution per-frame edge ($+0.002$) is
 distinct from two other LDPC-regime quantities: the feature-ablation gain of the cues (Full
 vs.\ channel-state-only, $+0.0090$, $95\%$ CI $[+0.0089,+0.0091]$, the main paper) and
-the matched-payload margin over the retuned threshold ($+0.0032$, the main paper). The
+the margin over the nominal threshold tuned for the same target budget ($+0.0032$, the main paper; the two do \emph{not} spend the same payload). The
 three measure the selector along the cue, the equal-bandwidth, and the per-frame axis respectively.
 Under the corrected single-collaborator convention all three are positive, with the ordering
 $+0.002 < +0.0032 < +0.0090$: the cue axis, smallest and indistinguishable from zero under the
@@ -408,8 +408,9 @@ worth more than choosing \emph{what} to send within a fixed granularity.
 $B_{\max}=0.20$) is unreachable by any single threshold. What follows is therefore \emph{not} a
 confirmatory result and is not adjudicated against the pre-registered margin: it is a post-hoc
 analysis in which the budget is met by a per-frame mixture policy, $p=0.5052$ of threshold $0.013$ with $0.015$, whose
-\emph{expected} mean transmitted fraction is $0.1978$, the cap; the realised fraction is a draw
-around that value, and each frame is charged at its own codeword count. Under that amendment, and under the evaluated no-retransmission, all-or-nothing delivery
+\emph{expected} mean transmitted fraction is $0.1978$, the cap; the realised fraction over the $200$
+draws is $0.19774$ ($-0.00009$ from the design value), each frame charged at its own codeword count
+($42$--$1915$, mean $798.9$). Under that amendment, and under the evaluated no-retransmission, all-or-nothing delivery
 setting, in a post-hoc budget-matched mixture analysis \method{} achieved AP@$0.5$
 $0.94492$ compared with $0.87325$ for our Where2comm reproduction under the evaluated transport
 (difference $-0.07166$, $95\%$ paired-bootstrap interval $[-0.07188,-0.07145]$ over the CSI
@@ -538,7 +539,7 @@ Under the corrected single-collaborator convention this limitation became \emph{
 \noindent\emph{Feature importance.}\label{sec:feat_imp}
 
 the feature-importance table of the main paper report the top Gini feature importances of the deployed selector. The two channel-side features dominate: the channel-type indicator $c_t$ contributes $34.2\%$ of importance and the estimated SNR $\hat\gamma_t$ a further $27.5\%$, so two of the $23$ inputs carry $61.7\%$ between them against $38.3\%$ spread over the $21$ perception-side cues. The strongest of those, \texttt{pcd\_mean\_range}, reaches only $3.0\%$.
-Two cautions belong with that number. \emph{Importance is not sufficiency:} a Gini share says how often a feature is split on, not that the remaining $38.3\%$ is redundant, and the feature ablation shows the opposite --- with the channel features alone the selector stops requesting features at the tighter budgets and never recovers the full selector's operating point (the main paper). \emph{And the split is transport-specific:} it is measured under an LDPC + QAM cliff where the channel state is nearly decisive by construction; under graceful degradation the same cues carry the decision instead (the supplementary material). That the channel-type indicator $c_t$ outranks the estimated SNR $\hat\gamma_t$ is consistent with the frame-level channel physics: under Rayleigh fading the feasible set collapses to $L$ regardless of SNR, so the channel-type flag is the single highest-information split for the decision.
+Two cautions belong with that number. \emph{Importance is not sufficiency:} a Gini share says how often a feature is split on, not that the remaining $38.3\%$ is redundant, and the feature ablation shows the opposite --- with the channel features alone the selector stops requesting features at the tighter budgets and never recovers the full selector's operating point (the main paper). \emph{And the split is transport-specific:} it is measured under an LDPC + QAM cliff where the channel state is nearly decisive by construction; under graceful degradation the same cues carry the decision instead (the supplementary material). That the channel-type indicator $c_t$ outranks the estimated SNR $\hat\gamma_t$ is consistent with the frame-level channel physics: under Rayleigh fading the $0.999$ mask removes the feature action at every tabulated SNR, leaving the feasible set $\{E, L\}$---not $L$ alone. The oracle does use $E$ there ($\rho_E = 0.157$ on test, $0.133$ on Culver-City); that the deployed forest almost never does is the separate, already-acknowledged $E$-collapse, and the two must not be run together. Either way the channel-type flag is the single highest-information split for the decision.
 
 
 

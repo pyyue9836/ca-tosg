@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (10 of 18)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (11 of 19)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 18 checks in total, 10 of which a clean clone can run.
+  GATE-COUNT-LINE: 19 checks in total, 11 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -59,6 +59,8 @@ GATES = [
     # R45-6: the paper vs the RECORD. Every other gate compares the paper against data; this one
     # blocks a sentence the protocol has already ruled false-as-written or superseded.
     ('content',   'protocol reconcile',  [PY, 'tests/test_protocol_reconciliation.py']),
+    # R63-3: the transport cells must report what the simulation used, not a design value.
+    ('content',   'transport products',  [PY, 'tests/test_transport_products.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
 ]

@@ -6338,3 +6338,58 @@ Zero GPU. No result number changes.
    clone reproduces the content, comparison and generator tiers unaided; the artefact tier
    additionally needs `data/p2`, the frozen models, the OpenCOOD checkout, PyTorch and Tectonic.
    `docs/reproducibility.md` and every report now say this identically.
+
+## R63/R64 — realised values fixed at the source, three mechanism sentences corrected
+
+Zero GPU. **The "no result number changes" claim is now an executed verification, not an
+expectation**: all seven cells were regenerated after the code change and every AP and every interval
+is identical to R61 at five decimals. Products: `results/diagnostics/transport_replay.csv`,
+`transport_replay_ci.csv`, and the seven per-cell JSONs.
+
+### 1 · The realised-value accumulation
+
+A single-threshold point transmits the same payload every realisation, so appending it inside the
+replay loop stored one vector 200 times to describe one fact. It is now taken once after the loop.
+The mixture *is* a draw, so its accumulated sequence is the product — and it now carries a **true
+equality assertion** against the seeded reconstruction (`np.array_equal`), not a shape check: a shape
+check passes on the wrong numbers.
+
+Realised values for the mixture cell, now reported rather than assumed: fraction **0.19774**,
+deviation **−0.00009** from the design value, codewords **42–1915**, mean **798.9**. The paper quotes
+these; the retired form quoted the design value as though it were the outcome.
+
+### 2 · Seven cells, regenerated and compared
+
+| `B_max` | split | Δ (R61) | Δ (now) | CI (now) |
+|---|---|---|---|---|
+| 0.10 | validate | −0.08486 | −0.08486 | [−0.08509, −0.08463] |
+| 0.10 | test | −0.07155 | −0.07155 | [−0.07175, −0.07135] |
+| 0.10 | Culver-City | −0.07952 | −0.07952 | [−0.07986, −0.07917] |
+| 0.20 (mixture) | test | −0.07166 | −0.07166 | [−0.07188, −0.07145] |
+| 0.30 | validate | −0.08540 | −0.08540 | [−0.08563, −0.08517] |
+| 0.30 | test | −0.07021 | −0.07021 | [−0.07043, −0.06998] |
+| 0.30 | Culver-City | −0.08280 | −0.08280 | [−0.08313, −0.08248] |
+
+### 3 · A gate for the products
+
+`tests/test_transport_products.py`: all five `realised_*` fields present in all seven cells; a
+single-threshold cell's realised fraction must equal its stored rate (they cannot differ, so a
+difference means the fields came from the wrong point); the mixture's realised fraction must lie
+between its components and near the design value, with a non-degenerate codeword span. Self-test:
+removing a field **FIRES**, drifting a single-threshold cell's fraction **FIRES**, live cells clean.
+
+### 4 · Three mechanism sentences, corrected against the code
+
+* **Deployment gating.** The `0.999` mask shapes **oracle labels**; it is not a deployment-time gate.
+  `rf_actions_stacked` predicts over all three actions with no hard exclusion, so the frozen selector
+  is not *forbidden* the feature action — over the Rayleigh conditions evaluated here it has learned
+  empirically to avoid it. The retired sentence claimed a mechanism the code does not implement.
+* **Feasible set.** After masking the set is **{E, L}**, not `L` alone. The oracle does take `E`
+  under Rayleigh (0.157 test, 0.133 Culver-City); that the deployed forest almost never does is the
+  separate, already-acknowledged E-collapse. Merging the two hid a known limitation behind a
+  physics-sounding statement.
+* **The margin.** "matched-payload margin" → "margin over the nominal threshold tuned for the same
+  target budget". The two arms do not spend the same payload; the retired phrase asserted an equality
+  the products contradict.
+
+All three are tracked TERMINOLOGY families with live-match zero.

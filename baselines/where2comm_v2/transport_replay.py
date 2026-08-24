@@ -220,7 +220,19 @@ def main() -> int:
         sel = np.stack([np.random.default_rng(a.mix_seed + r).random(n) < mix_p for r in range(R)])
         n_cw_used = np.where(sel, n_cw_pf[None, :], n_cw_pf_m[None, :])
         assert n_cw_used.shape == (R, n), 'A2 codeword sequence does not match the replay shape'
-    ur = np.asarray(used_rate); un = np.concatenate(used_ncw)
+    if zm is None:
+        ur, un = np.array([float(rate_pf.mean())]), n_cw_pf.astype(float)
+    else:
+        # R63-1: the mixture IS a draw, so its accumulated sequence is the product. Assert it is
+        # exactly the sequence the same seeds rebuild -- equality, not a shape check, because a
+        # shape check passes on the wrong numbers.
+        rebuilt = np.stack([np.where(np.random.default_rng(a.mix_seed + r).random(n) < mix_p,
+                                     n_cw_pf, n_cw_pf_m).astype(float) for r in range(R)])
+        acc = np.stack(used_ncw)
+        assert np.array_equal(acc, rebuilt), (
+            'R63-1 FUSE: the accumulated mixture codeword sequence differs from the seeded '
+            'reconstruction -- the reported statistics would not describe the simulation')
+        ur, un = np.asarray(used_rate), acc.reshape(-1)
     row = dict(split=split, threshold=float(thr), budget=a.budget, rate=round(rate, 4),
                realised_mean_fraction=round(float(ur.mean()), 5),
                realised_fraction_deviation=round(float(ur.mean() - rate), 5),
