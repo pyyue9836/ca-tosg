@@ -5,7 +5,7 @@ r"""R46-4: gate counts are computed from the registry, never typed.
 A count that is typed is a count that goes stale. This reads `verify_results.GATES` -- plus the one
 gate the runner executes inline -- and writes every number, in every file that states one.
 
-R70 finished the job. The tool governed four sites and **five more were still hand-written**, three
+R70 finished the job. The tool governed four sites and **six more were still hand-written** (4 + 6 = the ten listed below), three
 of them wrong at the same moment: `README.md` said "all 11 gates (--content-only = the 7 a clean
 clone can run)" when the answer was 21 and 13, and two files said "the two artefact-tier gates" when
 there were eight. That was the fifth time a hand-written gate count went stale (R46-4, R47-5,
@@ -27,6 +27,15 @@ GOVERNED SITES -- ten, across five files:
 EVERY PATTERN MUST MATCH EXACTLY ONCE. A reworded sentence that stops matching is a FAIL here, not a
 silent no-op -- the R43-4 lesson, applied to this tool: a generator that quietly writes nothing is
 worse than one that is missing.
+
+R71 correction, worth keeping where it happened: this docstring said "five more" and the constant
+below said "five more sites", after a sixth had been added in the same batch. **The tool that exists
+to stop hand-written counts going stale had a hand-written count of its own, and it was wrong within
+minutes of being written.** A count in a comment is exactly as untrustworthy as a count in prose;
+the difference is only that no gate reads a comment. The rule this file already applies to the
+delivered text applies to itself: if it can be generated, generate it -- and if it cannot, expect it
+to be wrong and keep it out of anything a reader has to rely on. The authoritative list is GOVERNED,
+which the code builds; the prose above is commentary and is checked by reading, not by running.
 
 `--check` fails when any governed file differs from what the registry produces.
 `--self-test` proves each site is really governed by perturbing it and requiring the check to fire.
@@ -64,7 +73,8 @@ USAGE_RX = re.compile(r'(only the checks a CLEAN CLONE can run \()\d+ of \d+(\))
 # since the suite passed nine. Same root cause, same fix: the line is generated from the runner.
 COUNT_LINE_RX = re.compile(r'  GATE-COUNT-LINE: \d+ checks in total, \d+ of which a clean clone '
                            r'can run\.')
-# R70: five more sites, each previously hand-written.
+# R70: six more sites, each previously hand-written -- five found by sweeping the live tree,
+# and the sixth (PROTOCOL_RX) by sweeping R70's own work afterwards.
 FULL_RUN_RX = re.compile(r'All \*\*\d+\*\* checks run and pass on the full experiment machine[^.]*\.')
 CONTENT_TIER_RX = re.compile(r'All \d+ content-tier checks run on the committed tree')
 ARTEFACT_RX = re.compile(r'the [a-z-]+ artefact-tier gates fail loudly')

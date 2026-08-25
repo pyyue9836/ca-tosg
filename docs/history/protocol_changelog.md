@@ -4380,3 +4380,33 @@ A hand-written gate count went stale five times — R46-4 (which built this tool
 R68, and R70. Each fix corrected the sites someone was looking at. This one enumerated them.
 
 21/21 gates PASS; main 16 pages, supplementary 12. Focus returns to the paper and submission.
+
+## R71 — the counting tool miscounted itself
+
+Zero GPU, two comments. **No experimental number moved; no behaviour changed.** The `GOVERNED`
+tuple, every regex and every generated string are byte-identical to R70 — this batch edits prose
+inside `tools/build_gate_counts.py` and one registry description.
+
+R70's docstring said the tool "governed four sites and **five more were still hand-written**", and
+the constant below it said "R70: five more sites". Both were written while the count was five, and
+both stayed at five after the sixth site — the protocol's `**N checks, all passing**` row — was
+brought in later **in the same batch**. 4 + 6 = the ten sites R70's own list enumerates, so the
+docstring contradicted the list six lines under it.
+
+**The tool built to stop hand-written counts going stale carried a hand-written count of its own,
+and it was wrong within minutes of being written.** That is the finding, and it generalises:
+
+> A count in a comment is exactly as untrustworthy as a count in prose. The only difference is that
+> no gate reads a comment — which makes it worse, not better. If it can be generated, generate it;
+> if it cannot, expect it to be wrong and keep it out of anything a reader has to rely on.
+
+The authoritative list has been `GOVERNED` all along — the code builds it, `--check` enforces it,
+and `--self-test` proves each entry fires. The prose above it is commentary, checked by reading. It
+now says "six more (4 + 6 = the ten listed below)" and records where the five and the sixth came
+from: five from sweeping the live tree, the sixth from sweeping R70's own work afterwards.
+
+Also corrected: `tests/test_generators_check.py` described this generator as owning "the gate counts
+in reproducibility.md, verify_results.py, installation.md and README.md" — four of the five governed
+files, missing `experiment_protocol.md`. The registry description now matches what the tool does.
+
+21/21 gates PASS; main 16 pages, supplementary 12.
