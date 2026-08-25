@@ -10,10 +10,12 @@ Chain audited:
       --(16-QAM: /4 bit/sym)-->           0.990 Msym  = B_C16
       --(256-QAM: /8 bit/sym)-->          0.495 Msym  = B_C256
   object-level L: 0.024 Mbit info --(rate-1/2 QPSK, ~1 bit/ch-use)--> ~0.024 Msym = B_L
-  per-policy deployed mean payload (200-realisation deployment, results/main/threshold_vs_rf.csv):
-    Fixed policies == the per-action constants above; CA-TOSG == rho-weighted mean of {L, C16}
-    (C256 never deployed) == rho_L*B_L + (1-rho_L)*B_C16, in 16--25% of Fixed C16 across splits.
-  paper cross-check: Eq.(7) constants + tab:headline_agg (RF / best-tau payloads) parsed from main.tex.
+  per-frame deployed channel use (frozen 200-realisation replay, results/main/replay_summary.csv):
+    Fixed policies == the per-action constants above; CA-TOSG == B_RF, the replay's own realised
+    per-cell mean over {L, F} (C256 never deployed), checked as a share of Fixed F for every
+    split x budget cell.
+  paper cross-check: Eq.(7) constants parsed from main.tex, plus the abstract's payload-share range,
+    which must equal the test split's own min/max share. No range is typed into this file.
 
 Run (from ca-tosg root or paper1):
   python tests/test_payload.py
@@ -22,7 +24,6 @@ import os, re, sys, csv
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(HERE)                                   # paper1
-THRVRF = os.path.join(P1, 'results/main/threshold_vs_rf.csv')   # RETIRED engine; not read
 REPLAY = os.path.join(P1, 'results/main/replay_summary.csv')     # frozen 200-realisation replay
 MAIN = os.path.join(P1, 'paper/main.tex')
 # external OpenCOOD-runtime inputs for the two UPSTREAM links (sibling checkout; skipped if absent)
@@ -73,13 +74,6 @@ def parse_paper_eq7():
     return out
 
 
-def _retired_parse_paper_headline_agg():
-    """Read tab:headline_agg RF payload (0.251) and best-tau payload (0.303) from main.tex."""
-    tex = open(MAIN).read()
-    rf = re.search(r'RF\s*\$?([0-9.]+)\$?\s*versus the \$?\\tau\{?=?\}?8\.5\$?\s*\n?\s*threshold\'s\s*\$?([0-9.]+)\$?', tex)
-    return (float(rf.group(1)), float(rf.group(2))) if rf else (None, None)
-
-
 def upstream_source_budgets():
     """(0a) feature 1.98 Mbit is a DECLARED convention, not a source-paper value: verify that
     1.98 Mbit spread over the real feature tensor is ~=0.92 bit/element, reading the tensor dims from
@@ -118,8 +112,8 @@ def upstream_source_budgets():
 def deployed_averages(pay):
     """(3) FROZEN deployed channel use, and the ONE payload-share convention the paper now uses.
 
-    Reads `results/main/replay_summary.csv` (the frozen 200-realisation replay), not the retired
-    `threshold_vs_rf.csv`. The share is B_RF / B_F with B_F derived above, and the abstract's
+    Reads `results/main/replay_summary.csv` (the frozen 200-realisation replay), never the retired
+    v3 policy engine's output. The share is B_RF / B_F with B_F derived above, and the abstract's
     printed range must be exactly the min/max of the test split's three budgets -- parsed from
     main.tex, not typed in. A missing parse is a FAILURE, never a skip.
     """
@@ -249,7 +243,7 @@ def main():
     for k in ('L', 'C16', 'C256'):
         if eq7.get(k) is not None:
             chk(f'Eq.(7) B_{k} printed in paper == derived', pay[k], eq7[k], 'main.tex Eq.(7)', tol=TOL)
-    print('=== 3) deployed averages (results/main/threshold_vs_rf.csv) ===')
+    print('=== 3) deployed channel use (results/main/replay_summary.csv, frozen replay) ===')
     deployed_averages(pay)
     print('=== 5) P4-B-d: B_F^SECOND chain (declared bits-per-element convention) ===')
     second_backbone_chain(pay)

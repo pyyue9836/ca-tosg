@@ -6429,3 +6429,35 @@ leak would have broken the replacement.
 nothing is recomputed. Both importers (`build_two_regime_edge_clean.py`, `make_two_regime_figure.py`)
 now take them from there, and `build_two_regime_edge.py` is **deleted**. Import gate PASS, no dangling
 references outside the archived history.
+
+## R67 (b) — `tests/test_payload.py` no longer names the retired policy CSV
+
+Zero GPU. The payload audit's **data path was already frozen-replay-only**: `deployed_averages()` has
+read `results/main/replay_summary.csv` since R40-6. What survived was *residue* — a dead constant, a
+dead parser and two labels — all still naming `results/main/threshold_vs_rf.csv`, the retired v3
+200-realisation engine's output. Residue of that kind is what makes a later deletion look unsafe, and
+it was also carrying retired numbers in a docstring nobody executes.
+
+Removed (each swept for live references first; all three were **defined and never used**):
+
+* `THRVRF` — module-level path constant, commented "RETIRED engine; not read". Zero readers.
+* `_retired_parse_paper_headline_agg()` — dead parser for `tab:headline_agg`, whose docstring still
+  quoted the retired-engine pair **RF 0.251 / best-τ 0.303**. Zero callers.
+* Two labels: the module docstring's "per-policy deployed mean payload (… `threshold_vs_rf.csv`)"
+  bullet, whose stated share range **16–25 %** is a retired-engine figure (the frozen replay gives
+  2.5–21.4 % across splits), and the `=== 3) ===` section header.
+
+The (3) docstring's contrast now names the retired **engine**, not the retired **file**, so the entry
+stays true after the file itself is deleted.
+
+**Assertion-level evidence.** The audit prints one row per link. The HEAD version and the migrated
+version were both run in place (`tests/`, so `HERE`/`P1` resolve identically) and their assertion
+tables diffed: **all 33 rows byte-equal** — link text, derived, expected, result and source columns
+alike. The only diff anywhere in the output is the one section header above. No assertion changed
+value, tolerance, source or semantics; nothing was added and nothing was dropped. `ALL 33 LINKS
+MATCH`, exit 0, before and after.
+
+**Not done here, by design:** `results/main/threshold_vs_rf.csv` is **not** deleted, and its other
+live referents (`policy_200seed.py` as generator-of-record, `results_index.py`, `a8_models.py`'s τ
+comment, `results/README.md`, `docs/reproducibility.md`) are untouched. Those belong to the second
+deletion round (R67 c). 19/19 gates PASS; main 16 pages, supplementary 12.
