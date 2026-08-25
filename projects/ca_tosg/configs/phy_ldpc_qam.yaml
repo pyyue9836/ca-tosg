@@ -4,7 +4,7 @@
 name: phy_ldpc_qam
 derived_from:
   protocol: docs/experiment_protocol.md
-  channel_section_md5: 6456b7fd4ed160f7597e6816a35be017
+  channel_section_md5: eb2df3e89fff0890fe10d56af1c08ed7
 code:
   family: 5G-LDPC
   k: 500

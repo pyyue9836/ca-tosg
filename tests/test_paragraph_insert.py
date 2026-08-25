@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Normalize-compare gate for the 4-hand-written-paragraph insertion (item-12).
+r"""Normalize-compare gate for the 4-hand-written-paragraph insertion (item-12).
 
 PURPOSE. Prove that a paragraph inserted into paper/main.tex is the paragraph_drafts.md
 draft verbatim, modified by ONLY the three allowed transforms. The check is not "a human

@@ -34,7 +34,11 @@ GENERATORS = [
     # anyone associated with fig_difficulty.pdf -- and that script wrote the same filename from
     # v3-era data. It is a first-class entry here; the retired writer was disabled in R66-1 and
     # deleted with its two CSVs in R67 (c).
-    ('difficulty', '../difficulty_frozen.py',  'fig_difficulty.pdf (from difficulty_frozen.csv)'),
+    # R69-1: the entry points at the PLOT script, not the compute script. difficulty_frozen.py opens
+    # data/p2/ and the frozen pickle, so driving it from here made this one generator artefact-tier
+    # and `generate_figures.py difficulty` impossible on a clean clone. Every entry in this list now
+    # reads committed products only.
+    ('difficulty', 'plot_difficulty_frozen.py', 'fig_difficulty.pdf (from difficulty_frozen.csv)'),
 ]
 
 if __name__ == '__main__':

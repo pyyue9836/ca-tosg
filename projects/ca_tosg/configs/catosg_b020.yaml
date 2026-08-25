@@ -6,7 +6,7 @@ derived_from:
   protocol: docs/experiment_protocol.md
   candidate_block_md5: 05d8e424b41f98e090f2d3762efe5158
   action_section_md5: 5dbf1be3f7326497c37c07ecf7e134e9
-  channel_section_md5: 6456b7fd4ed160f7597e6816a35be017
+  channel_section_md5: eb2df3e89fff0890fe10d56af1c08ed7
 budget:
   b_max_msym: 0.2
   tag: B020

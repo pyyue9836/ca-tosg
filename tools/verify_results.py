@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (12 of 20)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (13 of 21)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 20 checks in total, 12 of which a clean clone can run.
+  GATE-COUNT-LINE: 21 checks in total, 13 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -70,6 +70,12 @@ GATES = [
     # fails on a MISS, on an unlocated table cell, and on the committed report drifting from a
     # fresh build. It is the slowest gate here (~85 s); that is the price of it being real.
     ('content',   'p6 numbers vs CSV',    [PY, 'tools/p6_numbers_vs_csv.py', '--check']),
+    # R69-2: deleting a product answered "does anything READ this?" and never "can anything WRITE
+    # it?". Two scripts could still rebuild theirs -- verify_c256_dominance.py and action_dist.py --
+    # and one routine run would have put a pre-corrigendum product back in results/, where every
+    # tool treats a present file as a real one. tests/retired_products.md is now binding in both
+    # directions: not evidence, and not re-creatable.
+    ('content',   'retired-write sweep',  [PY, 'tests/test_no_retired_writes.py']),
 ]
 
 

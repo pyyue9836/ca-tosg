@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""CLAIMS ledger extractor (P1 / P1.5 / P2).
+r"""CLAIMS ledger extractor (P1 / P1.5 / P2).
 
 Pulls every number-bearing sentence out of paper/main.tex and emits docs/claims.md, a 9-column
 ledger:

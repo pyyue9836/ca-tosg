@@ -4222,3 +4222,100 @@ p6 report, one file over. The note now names the product without an extension. A
 tools parse evidence cells for filenames; a historical mention that looks like a citation becomes one.
 
 20/20 gates PASS; main 16 pages, supplementary 12. No cleanup items remain open.
+
+## R69 — the difficulty figure comes off the artefact tier; resurrection becomes a gate
+
+Zero GPU. **No experimental number moved in this batch**, by instruction. Everything below is a
+reproducibility, hygiene or status change; the one document edit is a status section, not a result.
+
+### 1 · `fig_difficulty.pdf` is now drawn from the committed CSV alone
+
+`difficulty_frozen.py` both computed `results/sensitivity/difficulty_frozen.csv` **and** drew the
+figure, so `tools/generate_figures.py difficulty` opened `data/p2/p2_grid_*.csv`, the frozen
+`selector_B0XX.pkl` and `FROZEN_MANIFEST.json` — all git-excluded. A figure whose data is committed
+was not redrawable from the committed tree, and it was the only entry in the driver's list like that.
+
+`figures/plot_difficulty_frozen.py` now owns the PDF and reads only the CSV; it imports nothing from
+the evaluation package, `deployment` included, because importing the compute side back would quietly
+restore the dependency. The driver entry points at the plot script. The condition in the title is read
+**from the CSV** rather than passed in, and rows spanning more than one (channel, SNR) are an error —
+a caption saying "AWGN 16 dB" over rows computed elsewhere is exactly what the figure-consistency gate
+exists for.
+
+**Clean-clone verification, actually run.** A `git clone` of this branch into a scratch directory
+(no `data/`, no `.pkl`, no grids) with the three changed files copied in:
+
+* `python tools/generate_figures.py difficulty` → **exit 0**, `fig_difficulty.pdf` written.
+* The resulting PDF is **byte-identical** to the one produced in the full tree after normalising the
+  PDF `/CreationDate` — 20,472 bytes both sides, 0 residual differing bytes.
+* Negative control, same clone: the pre-R69 compute script stops at
+  `P2-B FUSE: budget 0.10 model absent: data/p2/selector_B010.pkl`.
+
+### 2 · Resurrection capability removed, then gated
+
+R67 (c)'s sweep asked "does anything **read** this?" and never "can anything **write** it?" — the
+wrong half. Two live scripts could still rebuild a deleted product:
+
+* **`action_dist.py` → archived** to `archive/retired-scripts/` (with a README for the directory).
+  Three retirements in one file: the v3 action set `{L, C16, C256}` rather than the deployed
+  `{E, L, F}`; pre-restructure absolute paths; and an output deleted in R67 (c). No live caller.
+* **`verify_c256_dominance.py` → kept, trimmed.** The judgement call, with its reason: the **algebra**
+  is convention-independent and is live evidence for a delivered sentence — the C256 paragraph states
+  the identity `eff_C256 − eff_C16 = (comp − ego)(b16 − b256)` — so archiving the whole file would
+  have removed the only programmatic check on a sentence in the paper. The **CSV write** and the
+  **200-realisation deployed-selector count** went: the write rebuilds a retired product, and the
+  count loaded `data/selector_rf.pkl`, the v3 selector the P2 freeze superseded. Under the frozen
+  action set C256 is not a predictable class at all, so that count is structurally zero rather than
+  measured. The file now writes nothing (0 write calls) and exits 1 when it cannot verify.
+
+**New gate (21st): `tests/test_no_retired_writes.py`.** Every path in the *product column* of
+`tests/retired_products.md`, against every live `.py` parsed with `ast`: a file fails if it names a
+retired product in a non-docstring string **and** contains any write primitive. Docstrings are exempt,
+so a script may explain its own history. Deliberately over-approximating — resolving a path through
+`os.path.join`, variables and f-strings is not decidable, and a resurrection gate defeatable by a
+variable is not a gate. `archive/` is not scanned; that is what archiving is for.
+
+*A first draft of the parser swept every `results/...` path in the register, pulled in the "what
+replaced it" column, and reported 20 violations — every one a live generator writing its own product.
+The parse is anchored to the first cell of a table row, the same rule
+`p6_numbers_vs_csv.retired_products()` uses, and refuses to run if it parses zero rows.*
+
+Controls: self-test plants a script writing a retired path (**FIRES**) and the same name in a
+docstring only (**silent**), and removes the planted file. Historical control — restoring the two
+pre-R69 scripts makes the gate **FAIL on both**, naming the exact write calls.
+
+### 3 · `docs/experiment_protocol.md` gains a status section, and stops claiming stale status
+
+The file was written as a *contract*, in the future tense, before the rebuild ran. It then kept saying
+so. New **`## Current authoritative state`** at the top: splits, action set `{E, L, F}`, the
+train → freeze → replay chain with its actual commands, the live result files, verification state,
+and which parts of the file are historical. Five stale-status sites corrected, each pointing at it:
+
+| site | was | now |
+|---|---|---|
+| §3 deployment eval | "**P2-B new deployment script (to be built)**" | names `tools/evaluate_selector.py`; notes the legacy engine it was fused off from no longer exists |
+| pre-registered change-log preamble | (nothing) | a "record of decisions, not a status report" banner |
+| Appendix A "Open P5 items" | three open items incl. "main.tex still carries the legacy-pipeline numbers" | struck through and marked **CLOSED**, with what replaced each |
+| Appendix A latency item | the retired v2 measurement, "update at P5" | closed; the paper quotes the frozen row, re-derived at gate time |
+| Appendix D | a keep-register read as current | HISTORICAL INVENTORY banner: pre-restructure paths, superseded by two deletion rounds |
+
+`projects/ca_tosg/configs/` regenerated from the protocol — a §3 edit changes the section hash four
+configs derive from, which the `manifest relpaths` gate caught immediately. Only the hash moved; every
+derived value is unchanged.
+
+### 4 · Two invalid escapes, and one obstacle written down instead of fixed
+
+`tests/test_paragraph_insert.py` and `tests/test_result_consistency.py` carried LaTeX/regex
+backslashes in their module docstrings (`\s`, `\p`) — a `SyntaxWarning` today, a `SyntaxError` from
+Python 3.12. Both docstrings are now raw strings; no text changed. Zero invalid-escape sites remain
+in the live tree.
+
+**33 scripts hard-code `/home/josh/…/OpenCOOD` or the pre-restructure `peiyi_work/paper1/…` layout**
+(19 `projects/`, 12 `baselines/`, 2 gate scripts). Not parameterised: rewriting 33 path constants
+touches the code that produced the frozen products, and this batch was scoped to move no experimental
+number. Recorded in `docs/reproducibility.md` as what it is — a real obstacle to third-party
+reproduction from raw OPV2V, affecting **no delivered result** (every one of them is an artefact-tier
+input whose products are committed and re-derived at gate time) and **no content-tier check** (all 13
+resolve relative to the repository root).
+
+21/21 gates PASS; main 16 pages, supplementary 12.

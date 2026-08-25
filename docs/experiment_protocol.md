@@ -16,6 +16,40 @@ this file cites the script that derives it rather than restating a literal (e.g.
 
 ---
 
+## Current authoritative state (R69-3)
+
+**Read this before anything else in the file.** The sections below were written as a *contract*, in
+the future tense, before the rebuild ran. The rebuild has since run and finished. Where a sentence
+below still says something is "to be built", "deferred", "not yet in main.tex" or "open", this
+section is what actually holds; nothing in this file is a status report except this section.
+
+| | current state |
+|---|---|
+| **Splits** | validate (1980 frames, 9 OPV2V scenes) = the *only* split anything is fitted, tuned or selected on; test (scene-disjoint) and Culver-City (domain shift) = one-shot frozen evaluation, no knob picked on either. §1 is live and enforced by `tests/test_data_leakage.py`. |
+| **Action set** | **S = {E, L, F}** — ego-only, object-level, feature-level — signalled by a 2-bit request. `C256` is a *physical-layer comparator*, not a deployed action: no frozen selector can predict it. §4 is live. |
+| **Budgets** | B_max ∈ {0.10, 0.20, 0.30} Msym/frame, **one frozen selector per budget** (§5, §6). |
+| **Train → freeze → replay** | `python tools/prepare_data.py` → `python tools/train_selector.py` (scene-level 9-fold LOSO on validate selects hyper-parameters and λ\*, then a final fit on full validate) → freeze recorded in `results/manifests/FROZEN_MANIFEST.json` → `python tools/evaluate_selector.py` replays the frozen selectors over 200 paired CSI realisations (`CSI_SEED=20260809`). **Done, frozen, and read-only.** |
+| **Live result files** | `results/main/replay_summary.csv` (the mainline replay), `tau_feasible.csv`, `fixed_references.csv`, `frozen_curves.csv`, `true_e2e_ap_by_snr.csv`, `action_distribution.csv`, `feature_importance_frozen.csv`, `results/sensitivity/*`, `results/channel/*`, `results/diagnostics/*`. The authoritative file→generator index is `results/README.md`; the sentence→product binding is `docs/claims.md`. |
+| **Retired / deleted products** | `tests/retired_products.md`, binding in both directions: not valid evidence, and not re-creatable (`tests/test_no_retired_writes.py`, R69-2). The v3 policy engine, the v3 trainer and their products no longer exist in this tree. |
+| **Deployment eval script** | built and in use: `tools/evaluate_selector.py` driving `projects/ca_tosg/evaluation/deployment.py`. The "P2-B new deployment script (to be built)" of §3 is that script. |
+| **Verification** | `python tools/verify_results.py` — **21 checks, all passing**. Compile: main 16 pages, supplementary 12. |
+| **Paper** | written, verified and compiled. What remains is Josh's own layout and reading passes, not experiments — see `docs/HANDOFF.md`. |
+
+**Which parts of this file are historical, not current:**
+
+* **`## Change-log — pre-registered protocol revisions`** — dated pre-registrations and errata,
+  written before the runs they govern. They are authoritative for *what was decided and why*, and
+  are **not** status: several describe files and gates that have since been superseded or deleted.
+* **Appendix A** is a snapshot at R11; `FROZEN_MANIFEST.json` is the authority for every value in it.
+* **Appendix C** (P4-A comparator) and **Appendix E** (FA-1 ablation) are pre-registrations whose
+  machine-parsed blocks are still read by code; their prose is a record of intent.
+* **Appendix D** is the 2026-08-12 pre-restructure keep-register. Its paths (`code/*`,
+  `extra_experiments/*`, `p2_dataprep/*`) are pre-restructure and do not resolve in this tree.
+* The **dated revision batches R17 → R69** are not in this file at all: they were split out to
+  `docs/history/protocol_changelog.md` in R67 (d), under a NOT-QUOTABLE banner.
+
+---
+
 ## 1. Split roles (HARD bans)
 
 Four data partitions, three distinct roles. The bans are **hard**: a violation is a protocol
@@ -77,8 +111,10 @@ to select on.
   0–20 dB (direct table lookup, no numerical averaging).
 - **Deployment eval distribution** (reported policy numbers, separate from the training substrate):
   per-frame SNR ~ U[0,20] dB × channel ~ Bernoulli(0.5 Rayleigh), 200 realisations, produced by the
-  **P2-B new deployment script (to be built)** reading only `FROZEN_MANIFEST.json` (the legacy
-  `policy_200seed.py` is fused off). The two distributions must not be conflated.
+  **P2-B deployment script**, reading only `FROZEN_MANIFEST.json`. The two distributions must not be
+  conflated. *(R69-3: that script was written and is `tools/evaluate_selector.py` driving
+  `projects/ca_tosg/evaluation/deployment.py`; this line read "to be built" for the whole rebuild.
+  The legacy `policy_200seed.py` it was fused off from no longer exists -- deleted in R67 (c).)*
 
 ## 4. Action set S = {E, L, F}
 
@@ -300,6 +336,12 @@ generated is the **validate** grid (`grid_builder.py --split validate`, the defa
 
 All entries are pre-registered **before P2 training** (legitimate: a protocol may be revised until
 the model is frozen, provided each change is logged with a reason and a date up front).
+
+> **These entries are a record of decisions, not a status report (R69-3).** Each was written on its
+> own date and describes the tree as it stood then: file paths, gate counts and "what is still open"
+> are all as-of. Several name scripts and products deleted in R65/R67 (c). For what holds now, read
+> **Current authoritative state** at the top of this file. What these entries remain authoritative
+> for is *what was decided, when, and why* -- including the amendments written as amendments.
 
 **Errata register.** An erratum is a defect found *after* the fact: the affected results are
 withdrawn and regenerated, the corrected rule is written into this file, and a test is added that
@@ -2096,18 +2138,23 @@ block-exit grep over `tests/stale_fingerprints.md` (0 hits); `tests/test_data_le
 **Route (Change-log R11).** Route C: frozen models retained; the E-collapse is reported as a quantified
 limitation; the E-scarcity fix is future work needing a new independent dataset.
 
-**Open P5 items (require a main.tex edit; main.tex is frozen through P2, so deferred).**
-- main.tex still carries the **legacy-pipeline** numbers (`tab:headline_agg` from
-  `results/main/threshold_vs_rf.csv` via `policy_200seed.py`; true-e2e-AP figures from
-  `results/true_e2e_global_*.csv` via `true_e2e_global.py`). The P2 artifacts above **supersede** these
-  at P5; until the prose is migrated, those legacy generators remain the provenance-of-record and are
-  **not** removable.
-- Latency sentence (main.tex §5.x, `52.8 ± 5.7` ms / P95 `59.1` ms, 2,000 trials) was measured on the
-  **retired v2** selector; the P2-frozen remeasure is ≈59.9 ms / P95 ≈67 ms (`selector_latency.csv`).
-  Update at P5.
-- The R9 / R10 / E-limitation sentences are **not yet in main.tex**; their CLAIMS rows will be created
-  by `test_result_consistency.py` only once the prose lands (P5), at which point the *Allowed wording* columns
-  point to `r9_result_claims.md` / `R10_REPORT.md`.
+**Open P5 items — ALL CLOSED (R69-3); kept as the record of what was open at R11.**
+~~- main.tex still carries the **legacy-pipeline** numbers (`tab:headline_agg` from the v3 policy
+  engine; true-e2e-AP figures from the v3 global-sort scorer). The P2 artifacts above supersede
+  these at P5; until the prose is migrated, those legacy generators remain the provenance-of-record
+  and are not removable.~~
+  **Closed.** The prose was migrated (P5 batches 1--3), `tab:headline_agg` is generated by
+  `tools/build_paper_tables.py` from `fixed_references.csv` + `replay_summary.csv`, the figures come
+  from `frozen_curves.csv` through one generator, and the legacy engines and their products were
+  **deleted** in R67 (c) -- see `tests/retired_products.md`. No legacy generator is
+  provenance-of-record for anything.
+- ~~Latency sentence measured on the **retired v2** selector; update at P5.~~ **Closed.** The paper
+  quotes the frozen selector's own row, re-derived at gate time from
+  `results/latency/selector_latency.csv` by `tests/test_canonical_quantities.py` (same-row
+  provenance, R23-6). The v2 and R11 figures above are both retired.
+- ~~The R9 / R10 / E-limitation sentences are **not yet in main.tex**.~~ **Closed.** They landed;
+  their rows exist in `docs/claims.md`, and the R9 wording is locked by
+  `tools/build_r9_claims.py --check`, a resident gate.
 
 ## Appendix B — P3 sensitivity expected behaviours (checks, not targets)
 
@@ -2216,6 +2263,14 @@ test/Culver, and over budget on test. Reported as found — a negative compariso
 re-run did not overturn it.
 
 ## Appendix D — KEEP-UNTIL-P5 register (Change-log LAYOUT)
+
+> **HISTORICAL INVENTORY — the paths below do not resolve in this tree (R69-3).** This register was
+> taken at the 2026-08-12 restructure and uses the *pre-restructure* layout (`code/*`,
+> `extra_experiments/*`, `p2_dataprep/*`, `analysis_tools/*`). Two deletion rounds have since run
+> against the current layout (R65 and R67 c, both after per-candidate reference sweeps), so the
+> "keep" verdicts here have been superseded file by file. Read it as the record of what the 2026-08-12
+> sweep decided, never as a list of files that exist. Current inventory: `results/README.md` for
+> products, `tests/retired_products.md` for what went and why.
 
 Produced by the reference sweep of the 2026-08-12 restructure (`RESTRUCTURE_GATE_SWEEP.md`,
 which keeps the delete list and the method). Every file below is kept although nothing a

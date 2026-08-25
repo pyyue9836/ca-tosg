@@ -19,7 +19,14 @@ Only ONE of that script's two views is recoverable here, and the distinction is 
                                  number under the frozen replay would be a different quantity
                                  wearing the old one's clothes, so it is deleted, not reproduced.
 
-    python projects/ca_tosg/evaluation/difficulty_frozen.py
+This file computes the CSV and needs the ARTEFACT tier (`data/p2/p2_grid_*.csv`, the frozen
+`selector_B0XX.pkl`, `FROZEN_MANIFEST.json`). R69-1 moved the drawing out to
+`figures/plot_difficulty_frozen.py`, which reads only the committed CSV, so the delivered figure can
+be redrawn on a clean clone. Do not draw here again: re-adding a savefig re-couples the figure to
+artefacts a clean clone does not have.
+
+    python projects/ca_tosg/evaluation/difficulty_frozen.py      # CSV only
+    python tools/generate_figures.py difficulty                  # the figure, from that CSV
 """
 from __future__ import annotations
 
@@ -40,7 +47,6 @@ for _d in ('projects/ca_tosg/evaluation', 'projects/ca_tosg/utils'):
 import deployment as D                                                           # noqa: E402
 
 OUT_CSV = os.path.join(D.P1, 'results/sensitivity/difficulty_frozen.csv')
-OUT_FIG = os.path.join(D.P1, 'paper/figures/fig_difficulty.pdf')
 PROV = os.path.join(D.PROV_DIR, 'PROVENANCE_difficulty_frozen.txt')
 STRATA = ('easy', 'medium', 'hard')
 
@@ -101,42 +107,12 @@ def run(split, budget_tag, snr_db, channel, budgets, n_boot, seed):
     return pd.DataFrame(rows)
 
 
-def figure(df, path, split, budget, snr_db, channel):
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-
-    d = df[(df.split == split) & (df.budget == budget)].set_index('stratum').loc[list(STRATA)]
-    x = np.arange(len(STRATA))
-    w = 0.27
-    fig, ax = plt.subplots(figsize=(4.2, 2.8))
-    ax.bar(x - w, d.f1_fixedL, w, label=r'Fixed $L$')
-    ax.bar(x, d.f1_catosg, w, label='CA-TOSG')
-    ax.bar(x + w, d.f1_oracle, w, label='Oracle')
-    for i, (g, lo, hi) in enumerate(zip(d.gain_catosg_minus_L, d.ci_lo, d.ci_hi)):
-        ax.text(i, max(d.f1_catosg.iloc[i], d.f1_fixedL.iloc[i]) + 0.004,
-                f'{g:+.4f}', ha='center', fontsize=7)
-    ax.set_xticks(x)
-    ax.set_xticklabels([s.capitalize() for s in STRATA])
-    ax.set_xlabel('Frame difficulty (ego object-level F1 tercile)')
-    ax.set_ylabel('Realised F1')
-    ax.set_title(f'{channel.upper()} {int(snr_db)} dB, {split}, '
-                 rf'$B_{{\max}}={budget:.2f}$', fontsize=8)
-    ax.legend(fontsize=7, frameon=False)
-    lo = min(d.f1_fixedL.min(), d.f1_catosg.min())
-    ax.set_ylim(lo - 0.02, d.f1_oracle.max() + 0.02)
-    fig.tight_layout()
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    fig.savefig(path)
-    plt.close(fig)
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--snr', type=float, default=16.0)
     ap.add_argument('--channel', default='awgn')
-    ap.add_argument('--budget', default='0.20', help='frozen budget tag for the figure')
-    ap.add_argument('--fig-split', default='test')
+    ap.add_argument('--budget', default='0.20', help='budget tag for the console preview')
+    ap.add_argument('--fig-split', default='test', help='split for the console preview')
     args = ap.parse_args()
 
     man, budgets = D.load_manifest()
@@ -147,8 +123,6 @@ def main():
     df = pd.concat(out, ignore_index=True)
     os.makedirs(os.path.dirname(OUT_CSV), exist_ok=True)
     df.to_csv(OUT_CSV, index=False)
-
-    figure(df, OUT_FIG, args.fig_split, float(args.budget), args.snr, args.channel)
 
     with open(PROV, 'w') as f:
         f.write('CA-TOSG P5-5 item 7 -- difficulty stratification, FROZEN protocol.\n' + '=' * 78 + '\n')
@@ -167,7 +141,10 @@ def main():
     show = df[(df.split == args.fig_split) & (df.budget == float(args.budget))]
     print(show[['split', 'budget', 'stratum', 'n', 'f1_fixedL', 'f1_catosg', 'f1_oracle',
                 'gain_catosg_minus_L', 'ci_lo', 'ci_hi', 'rho_F']].to_string(index=False))
-    print(f'\nwrote {OUT_CSV}\n      {OUT_FIG}\n      {PROV}')
+    print(f'\nwrote {OUT_CSV}\n      {PROV}')
+    print('the figure is NOT drawn here (R69-1): run '
+          'python tools/generate_figures.py difficulty, which calls '
+          'projects/ca_tosg/evaluation/figures/plot_difficulty_frozen.py on the CSV above.')
     return 0
 
 
