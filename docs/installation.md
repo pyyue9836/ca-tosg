@@ -54,6 +54,6 @@ python tools/verify_results.py --content-only
 
 Expected on a clean clone: `ALL GATES PASS (content tier only)`. The full run
 (`python tools/verify_results.py`, no flag) additionally needs the git-excluded `data/p2/` grids and
-models and the sibling OpenCOOD checkout; without them its two artefact-tier gates fail loudly by
+models and the sibling OpenCOOD checkout; without them its eight artefact-tier gates fail loudly by
 design rather than skipping — a gate that cannot verify must never report success. The two tiers are
 spelled out in `docs/reproducibility.md` §5; `docs/dataset.md` says how to rebuild the artefacts.

@@ -43,7 +43,7 @@ reproduces everything.
 * **Tier 2 --- full run**: `python tools/verify_results.py` runs all **21**. Additionally requires the sibling `../OpenCOOD/` checkout, the local grids `data/p2/p2_grid_*.csv` and the frozen models `data/p2/selector_B0*.pkl`. **Independent reproduction from the raw OPV2V data needs all three, and none of them is in this repository** --- so a third party can verify the internal chain here and must obtain the dataset and re-run steps 1--4 to verify the rest.
 <!-- GATE-COUNTS:END -->
 
-**Reproduction status, final wording (R62-3).** All **20** checks run and pass on the full experiment machine (19 gates plus the stale-fingerprint exit sweep; the generated block above counts them the same way). R67 (c) corrected this line from 18 to 19; R68 added the `p6 numbers vs CSV` gate, taking it to 20. A clean clone reproduces the content, comparison and generator tiers unaided; the artefact tier additionally requires `data/p2`, the frozen models, the sibling OpenCOOD checkout, PyTorch and Tectonic. The two-tier split describes what a clean clone can do, not a tier that went unrun here.
+**Reproduction status, final wording (R62-3).** All **21** checks run and pass on the full experiment machine. A clean clone reproduces the content, comparison and generator tiers unaided; the artefact tier additionally requires `data/p2`, the frozen models, the sibling OpenCOOD checkout, PyTorch and Tectonic. The two-tier split describes what a clean clone can do, not a tier that went unrun here.
 
 Both tiers fail **loudly** on missing data rather than skipping --- a gate that cannot verify must
 never report success --- so on a clean clone the full run correctly reports GATE FAILURE.

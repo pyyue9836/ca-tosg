@@ -4319,3 +4319,64 @@ input whose products are committed and re-derived at gate time) and **no content
 resolve relative to the repository root).
 
 21/21 gates PASS; main 16 pages, supplementary 12.
+
+## R70 — the last hand-written counts are taken over by their generator
+
+Zero GPU. **No experimental number moved.** Receipt: `results/` 0 files changed, `main.tex` 0,
+`supplementary.tex` 0, `docs/claims.md` 0, `docs/p6_numbers_vs_csv.md` 0.
+
+### 1 · The three sites named, and two more the sweep found
+
+| file | was | now |
+|---|---|---|
+| `docs/reproducibility.md` | "All **20** checks run and pass on the full experiment machine (19 gates plus… R67 (c) corrected this line from 18 to 19; R68 added…, taking it to 20.)" | "All **21** checks run and pass on the full experiment machine." — the running commentary is gone with the hand-editing that produced it |
+| `tools/verify_results.py` | "the **two** artefact-tier gates fail loudly" | "the **eight** artefact-tier gates fail loudly" |
+| `docs/installation.md` | "its **two** artefact-tier gates fail loudly" | "its **eight** artefact-tier gates fail loudly" |
+| `README.md` *(not on the list; found by the sweep)* | "# all **11** gates (--content-only = the **7** a clean clone can run)" | "# all **21** gates (--content-only = the **13** a clean clone can run)" |
+| `docs/reproducibility.md` *(R69's own sentence)* | "All 13 content-tier checks run on the committed tree" | same numbers, now generated |
+
+The README line was stale by a factor of two and had been since the suite passed eleven. It is the
+same defect as the two named sites, so it is fixed with them rather than left for a sixth round.
+
+### 2 · Root cause closed: nothing states a gate count by hand any more
+
+`tools/build_gate_counts.py` governed **four** sites; **six more were hand-written**. It now governs
+**ten sites across five files**, all computed from `verify_results.GATES` plus the one gate the
+runner executes inline:
+
+* `docs/reproducibility.md` — the tier block, the six-step table row, the full-run status sentence,
+  the content-tier sentence
+* `tools/verify_results.py` — the usage line, the `GATE-COUNT-LINE`, the artefact-tier sentence
+* `docs/installation.md` — the artefact-tier sentence
+* `README.md` — the command comment
+* `docs/experiment_protocol.md` — the `**N checks, all passing**` row of *Current authoritative
+  state*, which R69-3 had typed in three batches ago. **Found by R70's own sweep of R70's own work**,
+  which is the argument for sweeping rather than working from the list of sites someone remembers.
+
+**Every pattern must match exactly once.** Zero matches is now a hard failure with the reason
+printed, not a silent no-op: a sentence reworded out of the tool's reach would otherwise become a
+hand-written count again, invisibly. That is R43-4's lesson applied to this tool.
+
+The artefact-tier count is stated as a **word** ("eight"), derived from the same arithmetic
+(`total − content`), so the two prose sentences stay grammatical without a second source of truth.
+
+**`--self-test`** perturbs each governed file and requires the check to fire on it. The first run
+reported `docs/installation.md → DOES NOT FIRE`: the perturbation bumped **digits**, and that file
+states its count as a word, so the self-test was not testing the file it claimed to. The perturbation
+now corrupts both forms. All five FIRE; a reworded sentence FAILS loudly. `build_gate_counts --check`
+is already a member of the `generators --check` gate, so drift is red on every run.
+
+**One more emitter, silenced rather than counted.** `tools/build_pending_rulings.py` wrote "…and
+re-runs all nine gates" into every report it generates. The suite has been 11, 18, 19, 20 and 21
+since. The sentence now says "the full gate suite" and carries no number. The two R17-C reports it
+already wrote keep their text: they are dated records, not status.
+
+Live-tree sweep afterwards: the only remaining `N gates` strings are the generated ones, two dated
+R17-C reports, comments quoting the retired wording, and this NOT-QUOTABLE file.
+
+### 3 · The tally this closes
+
+A hand-written gate count went stale five times — R46-4 (which built this tool), R47-5, R67 (c),
+R68, and R70. Each fix corrected the sites someone was looking at. This one enumerated them.
+
+21/21 gates PASS; main 16 pages, supplementary 12. Focus returns to the paper and submission.

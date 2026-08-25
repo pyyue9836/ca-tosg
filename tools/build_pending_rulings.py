@@ -238,8 +238,11 @@ def main() -> int:
                 '- **List B** verbs: `evidence` (attach the cited source), `recompute` (I run it '
                 'and report cost first), `delete` (remove the sentence), `leave`.\n\n'
                 'e.g. `A2-A7 caption; A8 drop; B1-B41 evidence; B44 delete; rest leave`.\n\n'
+                # R70: this used to end "...and re-runs all nine gates". The suite has been 11,
+                # 18, 19, 20 and 21 since; a count typed into a generated report is a count that
+                # goes stale in whatever it writes next. The sentence no longer carries one.
                 'The landing pass applies every ruling in one batch, regenerates the ledger and the '
-                'figure-consistency list, and re-runs all nine gates.\n')
+                'figure-consistency list, and re-runs the full gate suite.\n')
     print(f'List A: {len(a)} rows  |  List B: {len(b)} rows')
     for k, n in sorted(counts.items(), key=lambda x: -x[1]):
         print(f'  A/{k}: {n}')

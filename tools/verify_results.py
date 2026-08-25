@@ -7,7 +7,7 @@
   python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (13 of 21)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
-  the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
+  the eight artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
   GATE-COUNT-LINE: 21 checks in total, 13 of which a clean clone can run.
