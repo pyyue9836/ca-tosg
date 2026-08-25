@@ -43,152 +43,124 @@ reproduces everything.
 * **Tier 2 --- full run**: `python tools/verify_results.py` runs all **19**. Additionally requires the sibling `../OpenCOOD/` checkout, the local grids `data/p2/p2_grid_*.csv` and the frozen models `data/p2/selector_B0*.pkl`. **Independent reproduction from the raw OPV2V data needs all three, and none of them is in this repository** --- so a third party can verify the internal chain here and must obtain the dataset and re-run steps 1--4 to verify the rest.
 <!-- GATE-COUNTS:END -->
 
-**Reproduction status, final wording (R62-3).** All **18** gates run and pass on the full experiment machine. A clean clone reproduces the content, comparison and generator tiers unaided; the artefact tier additionally requires `data/p2`, the frozen models, the sibling OpenCOOD checkout, PyTorch and Tectonic. The two-tier split describes what a clean clone can do, not a tier that went unrun here.
+**Reproduction status, final wording (R62-3).** All **19** checks run and pass on the full experiment machine (18 gates plus the stale-fingerprint exit sweep; the generated block above counts them the same way, and this line said 18 until R67 (c)). A clean clone reproduces the content, comparison and generator tiers unaided; the artefact tier additionally requires `data/p2`, the frozen models, the sibling OpenCOOD checkout, PyTorch and Tectonic. The two-tier split describes what a clean clone can do, not a tier that went unrun here.
 
 Both tiers fail **loudly** on missing data rather than skipping --- a gate that cannot verify must
 never report success --- so on a clean clone the full run correctly reports GATE FAILURE.
 
 ---
 
-# Legacy (v3 engine, superseded)
+## Data preparation (raw OPV2V → the cached per-frame inputs)
 
-_Everything below describes the retired global-sort v3 pipeline and the table/figure map as it stood
-before the P0 corrigendum and the frozen-selector protocol. It is kept because several products in
-`results/` were first built by it. It is **not** the current chain: its commands, CSV paths, RF
-hyper-parameters (`class_weight='balanced'`, `min_samples_leaf=4`) and its "compile on Overleaf"
-instruction are all superseded by the six steps above._
-
-
-Every table and figure in `paper/main.tex` traces to a committed CSV in `results/` and a generator
-script in `code/`. This file maps each one to its command, lists the data-prep chain, and states the
-randomness. All numbers in the paper are read from these CSVs (never hand-typed); `tests/test_payload.py`
-bit-checks the payload chain end-to-end.
-
-> **Repo layout.** Generators run in the **runtime** checkout
-> `OpenCOOD/peiyi_work/paper1/` (they compute `REPO` = the OpenCOOD root and read the source datasets
-> and caches there). Figures/scripts/CSVs are then copied into this **archive** repo (`ca-tosg/`)
-> and committed. The archive's own outputs carry no `_v3` suffix (cleaned 2026-08, tag `pre-cleanup`);
-> the runtime still uses `_v3` names for its inputs (`dataset_{split}_v3.csv`, `gs_rerun/jscc_v3/…`),
-> which the archive scripts reference as external inputs.
-
-## 0. Environment
-
-- Python: `/home/josh/miniconda3/envs/sionna310/bin/python` (conda env `sionna310`).
-- `PYTHONPATH=/home/josh/cooperative_semantic_perception/OpenCOOD` for every generator (imports
-  `opencood.*` + `peiyi_work/paper1/code/extra_experiments/*`).
-- Key deps: PyTorch 2.11 + cu128 (RTX 5070, sm_120), `spconv`, `sionna` (link-level BLER), `scikit-learn`
-  (RandomForest selector), `numpy`, `pandas`, `matplotlib`.
-- GPU needed only for inference stages (§1.b/§1.c); all table/figure post-processing is CPU-only.
-- LaTeX toolchain (pdflatex/latexmk) is **not** in this env — compile `paper/main.tex` on Overleaf.
-
-## 1. Data preparation (raw OPV2V → cached per-frame CSVs/npz)
-
-Run from the OpenCOOD repo root with the `sionna310` interpreter and `PYTHONPATH=.`.
+Step 1 of the chain above, expanded. Run from the sibling OpenCOOD checkout with the `sionna310`
+interpreter and `PYTHONPATH=.`. All of this is git-excluded (`docs/dataset.md`, `docs/data_manifest.md`).
 
 a. **Per-frame dataset** `data/dataset_{validate,test,culver}_v3.csv` — 21 ego-side cues + per-method
-   clean F1 (late/comp/ego) + Sionna frame BLER columns. Built by `projects/ca_tosg/datasets/opv2v.py`, then the
-   canonical F1 columns are (re)written by `projects/ca_tosg/evaluation/canonical_f1.py` (adds `ego_f1`, the v3
-   canonical outcome). These are the runtime *inputs* to everything below.
-b. **Global-sort AP caches** `gs_rerun/{late,comp,ego}_{split}.npz` — cached per-frame boxes+scores+GT
-   for the late-fusion, attentive-compression, and ego-only checkpoints, via
-   `projects/ca_tosg/datasets/regen_preds_with_scores.py` (one call per model_dir/fusion; see `gs_rerun/reproduce.sh`).
+   clean F1 (late / comp / ego) + Sionna frame-BLER columns. Built by
+   `projects/ca_tosg/datasets/opv2v.py`; the canonical F1 columns are then (re)written by
+   `projects/ca_tosg/evaluation/canonical_f1.py`, which adds `ego_f1`.
+b. **Global-sort AP caches** `gs_rerun/{late,comp,ego}_{split}.npz` — per-frame boxes + scores + GT for
+   the late-fusion, attentive-compression and ego-only checkpoints, via
+   `projects/ca_tosg/datasets/regen_preds_with_scores.py` (one call per model_dir/fusion; see
+   `gs_rerun/reproduce.sh`).
 c. **JSCC per-frame decodes** `gs_rerun/jscc_v3/jscc_{ch}_{split}_snr{NN}.npz` — importance-map JSCC
    inference over 3 channels × 6 SNRs × {validate,test,culver}, via
-   `baselines/importance_map_jscc/perframe/jscc_sweep.py --mode sweep` (~GPU-hours), then scored to
+   `baselines/importance_map_jscc/perframe/jscc_sweep.py --mode sweep` (~GPU-hours), scored to
    per-frame F1 by `score_jscc.py --mode score`.
-d. **Deployed selector** `data/selector_rf.pkl` — the 400-tree RandomForest, trained once on the full
-   `dataset_validate_v3.csv` oracle labels by `projects/ca_tosg/models/train_rf_v3.py`. Never retrained for test/culver.
-   *(Superseded by docs/experiment_protocol.md §6; retraining in P2 — hyper-parameters + λ\* now selected by
-   scene-level 9-fold LOSO on validate, then the final selector is retrained on full validate and
-   frozen via `FROZEN_MANIFEST.json`. `train_rf_v3.py`'s single full-validate fit is the legacy path.)*
+d. **The deployed selectors** `data/p2/selector_B0{10,20,30}.pkl` — one per budget, hyper-parameters
+   and λ\* chosen by scene-level 9-fold LOSO on validate, then retrained on full validate and frozen
+   through `results/manifests/FROZEN_MANIFEST.json` (`python tools/train_selector.py`). Never
+   retrained for test or Culver-City. The single full-validate v3 fit that preceded this protocol was
+   deleted with its trainer in R67 (c); the frozen models are the only deployed selectors.
 
-## 2. Tables → generator → source CSV
+## Tables → generator → source
 
-| Table (main.tex) | command (run in OpenCOOD runtime, `PYTHONPATH=.`) | source CSV (archive path) |
+Four table bodies are **written by a generator** and are re-derived on every run; a pattern that stops
+matching is a gate failure, not a silent no-op (`generators --check`, R43-4).
+
+| table | generator | source product |
 |---|---|---|
-| tab:cues | (static; the 21-cue definition table) | — |
-| tab:headline (true-e2e headline) | `python projects/ca_tosg/evaluation/true_e2e_global.py --split {validate,test,culver} …` | `results/true_e2e_global_{split}.csv` |
-| tab:true_e2e / tab:gen_true_e2e / tab:gen_true_e2e_culver | same as above (per split) | `results/true_e2e_global_{validate,test,culver}.csv` |
-| tab:headline_agg (RF vs SNR-threshold, 200-real.) | `python projects/ca_tosg/evaluation/policy_200seed.py` | `results/main/threshold_vs_rf.csv` (+ `policy/pareto_points.csv`, `policy/generalisation_{split}.csv`) |
-| tab:two_regime (In-dist / Deployed edge) | `python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py` and `kfold_two_regime_diag.py` | `results/baselines/importance_map_jscc/two_regime_edge_clean.csv`, `results/baselines/importance_map_jscc/two_regime_kfold_diag.csv` |
-| tab:ablation (cue subsets + threshold) | `python projects/ca_tosg/evaluation/ablations/a7_ablation.py` | `results/sensitivity/ablation/a7_ablation.csv`, `ablation/a7_cue_value.csv` |
-| §Where2comm numbers | OpenCOOD global-sort eval of the epoch-50 Where2comm checkpoint (eval yaml in the CSV `source` column) — see `archive/` (retired with the arm). NOT `compare.py`, which is DEPRECATED (epoch-37 perfect-channel single point). | `archive/` (retired: the arm was superseded by `results/baselines/where2comm_v2/`) |
+| `tab:headline` | `python tools/build_paper_tables.py` | `results/main/true_e2e_ap_by_snr.csv` (per split: the fallback regime below the measured knee and the feature-active regime at/above it; payload reconstructed from the per-point action mix) |
+| `tab:headline_agg` (supplementary) | `python tools/build_paper_tables.py` | `results/main/fixed_references.csv` (all four fixed rows) + `results/main/replay_summary.csv` (per-budget selector and τ rows) + `FROZEN_MANIFEST.json` (the τ\* row labels) |
+| `tab:gen_headline` (supplementary) | `python tools/build_paper_tables.py` | `results/main/replay_summary.csv` + `results/main/fixed_references.csv`, per split |
+| `tab:ablation` (supplementary) | `python tools/build_paper_tables.py` | `results/sensitivity/ablation/a7_ablation.csv`, `a7_cue_value.csv` |
 
-## 3. Figures → generator → source
+The remaining tables are laid out by hand, but **not** filled by hand: every numeric cell is located
+in a committed product by `python tools/p6_numbers_vs_csv.py`, which reports table cells over *both*
+documents and fails on an unlocated one.
 
-Run each generator in the OpenCOOD runtime (`PYTHONPATH=.`); the PDF lands in `paper/figures/` and is
-copied into this repo. (`fig_*_preview.png` are gitignored previews.)
+| table | source product |
+|---|---|
+| `tab:two_regime` | `results/baselines/importance_map_jscc/two_regime_edge_clean.csv` + `two_regime_kfold_diag.csv` (`python baselines/importance_map_jscc/perframe/build_two_regime_edge_clean.py`, `kfold_two_regime_diag.py`) |
+| `tab:feat_imp` | `results/main/feature_importance_frozen.csv` (`python projects/ca_tosg/evaluation/feature_importance_frozen.py`) |
+| `tab:robustness` | `results/sensitivity/ablation/robustness_{csi_noise,aging,staleness}.csv` (`python projects/ca_tosg/evaluation/ablations/robustness.py`) |
+| `tab:sensitivity` | `results/sensitivity/*.csv` (`python tools/run_sensitivity.py`) |
+| `tab:second_backbone` | `results/channel/payload_conventions.csv` (`python tools/second_payload_and_bler.py`) |
+| `tab:w2c_*` | `results/baselines/where2comm_v2/*.csv` |
+| `tab:cues`, `tab:notation`, `tab:common_volume` | structural / definitional — no result file |
 
-| Figure | file | generator | data source |
+`results/README.md` is the authoritative file → generator index (generated by
+`python projects/ca_tosg/utils/results_index.py --write`); `docs/claims.md` is the sentence → product
+binding.
+
+## Figures → generator → source
+
+`python tools/generate_figures.py` runs all of them; `paper/figures/README.md` carries the same map
+with the per-figure detail. Six of the ten main-paper figures come from **one** generator reading
+**one** frozen source (P5-7 D), which also writes `results/provenance/PROVENANCE_figures.json`, the
+input to `tools/check_figure_consistency.py`.
+
+| figure | file | generator | data source |
 |---|---|---|---|
-| fig:overview | `ca_tosg_method_overview.pdf` | **manual** (draw.io; see `figs/DRAW_OVERVIEW_FIGURE.md`) | schematic |
-| fig:bler | `fig_channel_bler_frame.pdf` | `projects/ca_tosg/evaluation/figures/plot_bler_frame.py` | `results/channel/bler_sionna.csv` |
-| fig:qualitative | `fig_qualitative_bev.pdf` | manual (BEV render) | — |
-| fig:ap_snr | `fig_ap50_{awgn,rayleigh}.pdf` | `projects/ca_tosg/evaluation/figures/plot_ap_snr.py` | `results/main/true_e2e_global_validate.csv` + `results/baselines/importance_map_jscc/{jscc_ap_f1,channel_codec_ap_validate}.csv` |
-| fig:payload_snr | `fig_payload_awgn.pdf` | `projects/ca_tosg/evaluation/figures/plot_pareto_payload.py` | `results/main/true_e2e_global_validate.csv` |
-| fig:decision_ratio | `fig_decisions_{awgn,rayleigh}.pdf` + `fig_stacked_area.pdf` | `projects/ca_tosg/evaluation/figures/snr_decision_plot.py`, `projects/ca_tosg/evaluation/figures/plot_stacked_area.py` | `results/main/true_e2e_global_validate.csv`, `results/main/step4_oracle_action_dist.csv` |
-| fig:feat_imp | `fig_feature_importance.pdf` | `projects/ca_tosg/evaluation/figures/plot_feature_importance.py` | `results/main/feature_importance.csv` (RF `feature_importances_` of the deployed selector) |
-| fig:pareto | `fig_pareto_test.pdf` | `projects/ca_tosg/evaluation/figures/plot_pareto_payload.py` | `results/main/pareto_points.csv`, `results/main/true_e2e_global_validate.csv` |
-| fig:difficulty | `fig_difficulty.pdf` | `projects/ca_tosg/evaluation/ablations/a2_difficulty.py` | `results/a2_difficulty.csv`, `results/a2_difficulty_reliable.csv` |
-| fig:two_regime | `fig_two_regime.pdf` | `baselines/importance_map_jscc/perframe/make_two_regime_figure.py` | `results/baselines/importance_map_jscc/two_regime_kfold_diag.csv` (panel b), JSCC per-frame F1 (panel a) |
+| fig:overview | `ca_tosg_method_overview.pdf` | `projects/ca_tosg/evaluation/figures/export_overview_svg.py` (hand-drawn SVG source; `paper/DRAW_OVERVIEW_FIGURE.md`) | schematic |
+| fig:bler | `fig_channel_bler_frame.pdf` | `projects/ca_tosg/evaluation/figures/plot_bler_frame.py` | `results/channel/bler_sionna*.csv` |
+| fig:ap_snr | `fig_ap50_{awgn,rayleigh}.pdf` | `projects/ca_tosg/evaluation/figures/plot_frozen_figs.py` | `results/main/frozen_curves.csv` + `replay_summary.csv` + `fixed_references.csv` |
+| fig:payload_snr | `fig_payload_awgn.pdf` | same generator | the same three |
+| fig:decision_ratio | `fig_decisions_{awgn,rayleigh}.pdf` + `fig_stacked_area.pdf` | same generator | the same three |
+| fig:pareto | `fig_pareto_test.pdf` | same generator | the same three |
+| fig:qualitative | `fig_qualitative_bev.pdf` | `projects/ca_tosg/evaluation/figures/plot_qualitative_bev.py` (known gap: run by hand) | BEV render from the cached predictions |
+| fig:feat_imp | `fig_feature_importance.pdf` | `projects/ca_tosg/evaluation/figures/plot_feature_importance.py` | `results/main/feature_importance_frozen.csv` |
+| fig:difficulty | `fig_difficulty.pdf` | `projects/ca_tosg/evaluation/difficulty_frozen.py` | `results/sensitivity/difficulty_frozen.csv` |
+| (not included; JSCC arm) | `fig_two_regime.pdf` | `baselines/importance_map_jscc/perframe/make_two_regime_figure.py` | `two_regime_kfold_diag.csv` (panel b), JSCC per-frame F1 (panel a) |
 
-## 4. Randomness / determinism (from `projects/ca_tosg/evaluation/v3_eval.py`)
+## Randomness / determinism
 
-- **200-realisation deployment eval** (`N_SEED = 200`): realisation `s` uses `numpy.random.default_rng(s)`
-  for `s ∈ 0..199`; per frame `snr ~ U[0,20]` dB, channel type `is_rayleigh = rng.random() < 0.5`
-  (Bernoulli 0.5). Fully seeded → deterministic.
-- **RandomForest**: `n_estimators=400, max_depth=10, min_samples_leaf=4, class_weight='balanced',
-  random_state=0`. *(Superseded by docs/experiment_protocol.md §6; retraining in P2 — `class_weight='balanced'` is
-  dropped, the class cost is carried by λ; hyper-parameters are re-selected by scene-level LOSO.)*
-- **k-fold in-distribution diagnostic** (`kfold_two_regime_diag.py`): `StratifiedKFold(5, shuffle=True,
+**The frozen replay** (`projects/ca_tosg/evaluation/deployment.py`, driven by
+`tools/evaluate_selector.py`) — this is what the paper's headline numbers come from:
+
+- `CSI_SEED = 20260809`, one set of 200 paired samplings per split; per frame `snr ~ U[0,20]` dB and
+  `is_rayleigh ~ Bernoulli(0.5)`.
+- Paired bootstrap `N_BOOT = 10000`, percentile, `BOOT_SEED = 12345`.
+- Selector hyper-parameters and the LOSO fold structure are recorded in `FROZEN_MANIFEST.json`; the
+  walk that selected them is pre-registered in `docs/experiment_protocol.md`.
+
+**The v3 200-realisation evaluator** (`projects/ca_tosg/evaluation/v3_eval.py`) — still live, and the
+only surviving implementation of the retired v3 policy engine's draw. It backs `a7_ablation.py`,
+`a8_models.py` and `robustness.py`:
+
+- `N_SEED = 200`; realisation `s` uses `numpy.random.default_rng(s)` for `s ∈ 0..199`, per frame
+  `snr ~ U[0,20]` dB and `is_rayleigh = rng.random() < 0.5`. Fully seeded → deterministic.
+- CSI-noise robustness perturbs the selector's `est_snr` with `default_rng(s + 10000)`; the channel
+  BLER always uses the *true* SNR.
+- k-fold in-distribution diagnostic (`kfold_two_regime_diag.py`): `StratifiedKFold(5, shuffle=True,
   random_state=0)`.
-- **Frame-level paired bootstrap CI** (`paired_ci_frames_from`): `n_boot=5000`, `seed=12345`.
-- **CSI-noise robustness**: selector `est_snr` perturbed with `default_rng(s+10000)`; the channel BLER
-  always uses the *true* snr.
 
-## 5. Verification — two tiers, and a clean clone cannot do both
+**Never blend the two.** They are different quantities; a sentence may not mix them.
 
-**A clean clone cannot complete the full verification.** The committed tree carries the code, the
-results and the manifests; it does not carry the per-frame grids, the frozen `.pkl`/`.pt` models, or
-the OPV2V-derived cue CSVs (all git-excluded, see `docs/dataset.md`). Say so plainly rather than
-implying a `git clone` reproduces everything.
+---
 
-### Tier 1 — committed-content consistency (clean clone is enough)
+# Legacy (v3 engine, superseded) — record only
 
-```
-python tools/verify_results.py --content-only        # 7 checks
-```
+_The retired global-sort v3 pipeline predates the P0 corrigendum and the frozen-selector protocol.
+Its RF hyper-parameters were `n_estimators=400, max_depth=10, min_samples_leaf=4,
+class_weight='balanced', random_state=0`; P2 drops `class_weight='balanced'` and carries the class
+cost in λ, re-selecting the rest by scene-level LOSO. Its "compile on Overleaf" instruction is
+retired: the compile gate drives `tectonic` itself (R44-7)._
 
-Nothing beyond the repository is required: no dataset, no GPU, no OpenCOOD checkout. It answers
-"is the committed tree internally consistent and does it still say what it claims?".
-
-| check | file | what it proves |
-|---|---|---|
-| payload chain | `tests/test_payload.py` | 17 links from 1.98 Mbit to the printed table values |
-| paragraph insertion | `tests/test_paragraph_insert.py` | the hand-written paragraphs went in verbatim |
-| claims vs main.tex | `tests/test_result_consistency.py` | `docs/claims.md` is current |
-| bandit fold scaling | `tests/test_bandit_fold_scaling.py` | no LOSO fold's scaler sees its held-out scene (erratum P4A-1) |
-| P3 SNR support | `tests/test_p3_snr_support.py` | every P3 draw is on the 11-point grid and each law sums to 1 (erratum P3-1) |
-| intra-repo imports | `tests/test_intra_repo_imports.py` | every internal import resolves (erratum LAYOUT-3) |
-| stale-fingerprint exit | `tests/stale_fingerprints.md` | retired numbers have not crept back into `main.tex` |
-
-### Tier 2 — full experimental reproduction (needs the artefacts)
-
-```
-python tools/verify_results.py                       # all 9 checks
-```
-
-Additionally requires: the sibling **OpenCOOD** checkout (`../OpenCOOD/`, for the per-frame cue CSVs
-the manifest md5-pins), the **local grids** `data/p2/p2_grid_*.csv`, and the **frozen models**
-`data/p2/selector_B0*.pkl` + `p4a_bandit_B0*.pt`.
-
-| check | file | what it proves | needs |
-|---|---|---|---|
-| data leakage + freeze | `tests/test_data_leakage.py` | split bans, LOSO structure, every manifest hash, post-freeze ordering | grids + models + the dumping tree |
-| manifest relpaths | `tests/test_manifest.py` | manifest paths resolve and their recorded hashes still match; configs are the protocol | models + cue CSVs |
-
-Both fail **loudly** on missing data rather than skipping — a gate that cannot verify must never
-report success, so on a clean clone the full run correctly reports GATE FAILURE. Rebuild the
-artefacts with `python tools/prepare_data.py`, then `python tools/train_selector.py`.
+_Its scripts and products are **gone**, not merely superseded: `policy_200seed.py`, `train_rf_v3.py`,
+`a1_pareto.py`, `a2_difficulty.py`, `c_channels.py`, the four per-figure plot scripts and their v3
+CSVs were deleted in R65/R67 (c) after a reference sweep. `tests/retired_products.md` records each one
+and what replaced it. Nothing in either document depends on any of them; the change-log entries in
+`docs/experiment_protocol.md` describe them as they were, and are the only place they are quotable._
 
 To regenerate the numbers themselves rather than check them, see `docs/getting_started.md`.

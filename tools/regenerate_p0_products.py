@@ -53,9 +53,13 @@ JOBS = [
      None),          # writes a whole family; guarded by prefix instead (see ALLOW_PREFIX)
     # JOBS omission caught in R18-5: c256_dominance_verify and the collaboration-harm family were
     # both on the work list and neither had a job, so L177 and L749 kept retired-convention numbers.
-    ('c256_dominance', [PY, 'projects/ca_tosg/evaluation/verifiers/verify_c256_dominance.py'],
-     ['results/sensitivity/c256_dominance_verify.csv',
-      'results/provenance/PROVENANCE_c256_dominance.txt']),
+    # R67 (c): the c256_dominance job is REMOVED, not disabled. Its output
+    # (results/sensitivity/c256_dominance_verify.csv) is a RETIRED product -- pre-corrigendum
+    # full-collaborator fractions, registered in tests/retired_products.md and deleted from the tree
+    # -- so a routine regeneration run must not resurrect it. The verifier itself
+    # (verifiers/verify_c256_dominance.py) is KEPT and still runnable by hand: its
+    # convention-independent columns carry the measured deployed-selector C256 request count, which
+    # is what the paragraph now rests on.
     ('collab_harm', [PY, 'projects/ca_tosg/evaluation/collab_harm.py'],
      ['results/main/step4_collaboration_harm.csv',
       'results/provenance/PROVENANCE_collab_harm.txt']),

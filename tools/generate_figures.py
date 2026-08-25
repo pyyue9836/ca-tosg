@@ -18,9 +18,9 @@ FIGDIR = os.path.join(ROOT, 'projects/ca_tosg/evaluation/figures')
 # P5-7 (D): Figs. 4/5/6/8 are now ONE generator reading ONE frozen source
 # (results/main/frozen_curves.csv + the frozen replay), which also writes
 # results/provenance/PROVENANCE_figures.json -- the input to
-# tools/check_figure_consistency.py. The retired per-figure scripts
-# (plot_ap_snr.py, plot_pareto_payload.py, snr_decision_plot.py, plot_stacked_area.py)
-# drew from the v3 products and are no longer invoked.
+# tools/check_figure_consistency.py. The retired per-figure scripts drew from the v3
+# products, were never invoked from here, and were deleted in R67(c) together with the
+# v3 CSVs they read.
 GENERATORS = [
     ('overview',  'export_overview_svg.py',    'ca_tosg_method_overview.pdf (from figs/*.svg)'),
     ('bler',      'plot_bler_frame.py',        'fig_channel_bler_frame.pdf'),
@@ -30,9 +30,10 @@ GENERATORS = [
     ('features',  'plot_feature_importance.py','fig_feature_importance.pdf'),
     # R66-1/2: the difficulty figure is built from the FROZEN product
     # (difficulty_frozen.py -> results/sensitivity/difficulty_frozen.csv). It used to be listed
-    # below as a "known gap", which is how the retired a2_difficulty.py stayed the only script
+    # below as a "known gap", which is how the retired v3 difficulty ablation stayed the only script
     # anyone associated with fig_difficulty.pdf -- and that script wrote the same filename from
-    # v3-era data. It is a first-class entry here and the retired writer is disabled.
+    # v3-era data. It is a first-class entry here; the retired writer was disabled in R66-1 and
+    # deleted with its two CSVs in R67 (c).
     ('difficulty', '../difficulty_frozen.py',  'fig_difficulty.pdf (from difficulty_frozen.csv)'),
 ]
 

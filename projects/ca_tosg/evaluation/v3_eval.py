@@ -2,7 +2,9 @@
 # robustness). Any number that may appear in the paper MUST go through this (200 realisations + v3 GT
 # + Sionna frame BLER + ego fallback); single-frozen-draw eval is DIAGNOSTIC-ONLY.
 """
-Mirrors policy_200seed.py exactly: per realisation draw per-frame SNR~U[0,20] and
+Mirrors the retired v3 200-realisation policy engine exactly (that engine was deleted in
+R67(c); this module is now the only implementation of its draw): per realisation draw
+per-frame SNR~U[0,20] and
 channel~Bernoulli(0.5 rayleigh), Sionna frame-level BLER (bler_frame), ego-only fallback
 eff_a = comp*(1-BLER_a) + ego*BLER_a, feasibility mask (BLER>=0.999) for the oracle label. The RF is
 trained ONCE on the frozen v3 oracle_3way labels (the labels are fixed); only the EVALUATION is

@@ -26,7 +26,8 @@ for _d in ('projects/ca_tosg/evaluation', 'projects/ca_tosg/evaluation/ablations
 import _common as C
 import v3_eval as V
 
-RETUNED_TAU = 8.5   # engine best-tau on test (results/main/threshold_vs_rf.csv)
+RETUNED_TAU = 8.5   # best-tau on test as reported by the retired v3 200-realisation policy
+#                     engine; its CSV was deleted in R67(c). Not a frozen-protocol quantity.
 
 
 def latency_ms(model, X1, n_warm=100, n_meas=1000):

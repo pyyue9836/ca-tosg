@@ -102,18 +102,6 @@ RULES = [
     (r'^main/true_e2e_ap\.csv$', 'python tools/evaluate_ap.py', 'global-sort true end-to-end AP'),
     (r'^main/r10c_\w+\.csv$',
      'python projects/ca_tosg/evaluation/decision_log.py', 'per-frame decision log + accounting'),
-    (r'^main/true_e2e_global_\w+\.csv$',
-     'python projects/ca_tosg/evaluation/true_e2e_global.py', 'P1-v3 global-sort scorer'),
-    (r'^main/(frontier_\w+|generalisation_\w+|pareto_points|threshold_sweep_\w+|threshold_vs_rf|'
-     r'action_dist_20dB|c256_frontier_band)\.csv$',
-     'python projects/ca_tosg/evaluation/policy_200seed.py', 'P1-v3 200-realisation policy engine'),
-    (r'^main/feature_importance\.csv$',
-     'python projects/ca_tosg/evaluation/figures/plot_feature_importance.py',
-     'RF feature_importances_ of the deployed selector'),
-    (r'^main/step4_oracle_action_dist\.csv$',
-     'python projects/ca_tosg/evaluation/action_dist.py', ''),
-    (r'^main/step4_(rf_class_report|rf_modes)\.csv|^main/step4_rf_train_meta\.json$',
-     'python projects/ca_tosg/models/train_rf_v3.py', 'P1-v3 selector (superseded by the P2 freeze)'),
     (r'^main/ego_only_acceptance\.csv$',
      'python projects/ca_tosg/datasets/run_ego_only.py', ''),
     (r'^sensitivity/(channel_ratio|nonuniform_snr|channel_misclassification|object_message_bler|'
@@ -122,10 +110,6 @@ RULES = [
      'python projects/ca_tosg/evaluation/p3_variants.py', 'validate-only, NOT deployed'),
     (r'^sensitivity/item5c_\w+\.csv$',
      'python projects/ca_tosg/evaluation/rician_bracket.py', 'bracketing variant, not deployed'),
-    (r'^sensitivity/ablation/a2_difficulty\w*\.csv$',
-     'python projects/ca_tosg/evaluation/ablations/a2_difficulty.py',
-     'RETIRED v3 engine (v3 selector + v3_eval); superseded in main.tex by '
-     'sensitivity/difficulty_frozen.csv -- kept as a record, cited by nothing'),
     (r'^sensitivity/difficulty_frozen\.csv$',
      'python projects/ca_tosg/evaluation/difficulty_frozen.py',
      'P5-5 item 7: difficulty stratification under the FROZEN protocol, reliable-channel view '
@@ -155,8 +139,8 @@ RULES = [
      'python projects/ca_tosg/evaluation/ablations/a6_l_reliability.py', ''),
     (r'^sensitivity/snr_threshold\.csv$',
      'python projects/ca_tosg/evaluation/ablations/a7_ablation.py', 'SNR-threshold arm'),
-    (r'^sensitivity/(gamma_mechanism|harm_stratum_structural|frontier_payload_invariance|'
-     r'c256_dominance_verify)\.csv$',
+    (r'^sensitivity/(gamma_mechanism|harm_stratum_structural|'
+     r'frontier_payload_invariance)\.csv$',
      'python projects/ca_tosg/evaluation/verifiers/verify_<name>.py', 'one-shot claim verifiers'),
     (r'^sensitivity/(canonical_rescore|canonical_f1_columns)\.csv$',
      'python projects/ca_tosg/evaluation/canonical_rescore.py', 'canonical union-GT ruler'),

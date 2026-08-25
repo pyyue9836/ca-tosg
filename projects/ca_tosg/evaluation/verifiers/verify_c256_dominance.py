@@ -9,7 +9,8 @@ D = os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__
 # Deployed selector -- MEASURED C256 request count (not inferred). The claim "the learned selector never
 # requests C256" has the DEPLOYED SELECTOR as its subject; oracle-label zero-support is the MECHANISM, not
 # the evidence (it proves "necessarily zero", not "measured zero"). So we replicate the 200-realisation
-# deployment loop of policy_200seed.py (snr~U[0,20], channel~Bernoulli(0.5) rayleigh; inject the
+# deployment loop of the retired v3 policy engine, whose draw now lives in v3_eval.py (snr~U[0,20],
+# channel~Bernoulli(0.5) rayleigh; inject the
 # drawn CSI; rf.predict) and COUNT predictions == 'C256'. verification-derive-not-hardcode applies to zero.
 RF = pickle.load(open(f'{D}/selector_rf.pkl', 'rb'))
 FEAT = list(RF.feature_names_in_); N_SEED = 200
@@ -31,7 +32,8 @@ for sp in ('validate', 'test', 'culver'):
     assert abs(frac_dom - (frac_comp_ge_ego + frac_gap)) < 1e-9, (sp, frac_dom, frac_comp_ge_ego, frac_gap)
     b256_ge_b16 = bool((b256 >= b16 - 1e-12).all())
     # MEASURED deployed-selector C256 requests across the 200-realisation deployment protocol (identical
-    # CSI draws to policy_200seed.py: rng=default_rng(s), snr~U[0,20], is_ray = rng.random<0.5).
+    # CSI draws as the retired v3 policy engine (see v3_eval.py): rng=default_rng(s), snr~U[0,20],
+    # is_ray = rng.random<0.5).
     c256_req = 0
     for s in range(N_SEED):
         rng = np.random.default_rng(s)

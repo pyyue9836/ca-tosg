@@ -7,7 +7,6 @@ Library code. Nothing here is an entry point: `tools/` runs it, `configs/` param
 models/           selector.py         RF construction, LOSO, frozen walk, freeze
                   oracle.py           E/L/F action set, payload vector, Lagrangian label rule
                   feature_encoder.py  the 23-column input: 21 ego cues + est SNR + channel flag
-                  train_rf_v3.py      the superseded P1-v3 trainer (kept: it generated the P1 rows)
 
 datasets/         opv2v.py            per-frame oracle labels on the canonical v3 datasets
                   grid_builder.py     frame x 11 SNR x 2 channels, built AFTER the scene split
@@ -25,7 +24,7 @@ evaluation/       deployment.py       200-realisation replay of the frozen selec
                   sensitivity.py      the pre-registered sensitivity items
                   metrics.py          shared F1 / AP helpers
                   figures/            one generator per figure main.tex includes
-                  ablations/          a1-a9, c_channels, robustness
+                  ablations/          a3-a8, robustness
                   verifiers/          one-shot claim verifiers
 
 utils/            manifest.py         manifest load + sha256 verification

@@ -29,7 +29,8 @@ expected-utility argmax -- argmax_a eff_f1_a with NO payload penalty. This is BO
 (v2's oracle_3way was also the pure argmax) AND v2's SAME criterion; the two interpretations coincide
 at lam=0, so there is nothing to re-tune. The ego fallback + Sionna BLER legitimately MOVE the
 resulting operating point (payload); we do NOT re-tune anything to chase v2's 0.0841 payload. The
-Lagrangian lambda>0 sweep lives only in the pareto experiment (a1_pareto.py) and is not touched here.
+Lagrangian lambda>0 sweep lived only in the retired v3 pareto experiment (deleted in R67(c)); no
+lambda>0 sweep exists under the frozen protocol, and nothing here is touched by one.
 
 FEASIBILITY MASK (supervisor ruling 2026-07-12, NOT lambda): a request that cannot be delivered is
 not a feasible action -- it spends the collaborator's channel-use for zero information (payload is

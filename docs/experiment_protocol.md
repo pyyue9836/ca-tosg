@@ -6461,3 +6461,90 @@ MATCH`, exit 0, before and after.
 live referents (`policy_200seed.py` as generator-of-record, `results_index.py`, `a8_models.py`'s τ
 comment, `results/README.md`, `docs/reproducibility.md`) are untouched. Those belong to the second
 deletion round (R67 c). 19/19 gates PASS; main 16 pages, supplementary 12.
+
+## R67 (c) — the second deletion round, and four documents rewritten
+
+Zero GPU. Reference sweep first, over `paper/`, `docs/`, `tools/`, `tests/`, `projects/`,
+`baselines/` and the READMEs, one candidate at a time; `archive/` excluded by design, since archived
+history is allowed to name what it recorded.
+
+### 1 · Deleted (18), after the sweep
+
+Nine products and nine scripts. **No paper number depends on any of them**: `tools/p6_numbers_vs_csv.py`
+locates zero literals and zero table cells in any of the nine CSVs.
+
+| deleted | why it could go |
+|---|---|
+| `results/main/threshold_vs_rf.csv` | last reader removed in R67 (b); the frozen replay is `replay_summary.csv` |
+| `results/main/pareto_points.csv` | read only by `a1_pareto.py` and `plot_pareto_payload.py`, both deleted here |
+| `results/main/true_e2e_global_{test,validate}.csv` | read only by the four retired figure scripts; Figs. 4/5/6/8 come from `frozen_curves.csv` (P5-7 D) |
+| `results/main/step4_oracle_action_dist.csv` | read only by `snr_decision_plot.py`; the frozen action mix is `action_distribution.csv` |
+| `results/main/feature_importance.csv` | the non-frozen twin. `plot_feature_importance.py` and every bound number read `feature_importance_frozen.csv` |
+| `results/sensitivity/ablation/a2_difficulty{,_reliable}.csv` | superseded by `difficulty_frozen.csv` (R66-1/2) |
+| `results/sensitivity/c256_dominance_verify.csv` | retired since R28-2; its row stays in `tests/retired_products.md` |
+| `evaluation/policy_200seed.py` | the v3 200-realisation policy engine; its draw survives in `v3_eval.py` |
+| `models/train_rf_v3.py` | the v3 single full-validate fit; superseded by the LOSO freeze. No file in `results/` matched its index rule any more |
+| `ablations/a1_pareto.py`, `a2_difficulty.py`, `c_channels.py` | v3-scored ablations; see the replacement column in `ablations/README.md` |
+| `figures/plot_ap_snr.py`, `plot_pareto_payload.py`, `snr_decision_plot.py`, `plot_stacked_area.py` | **never invoked** by `tools/generate_figures.py`; they were named in a comment only |
+
+`plot_oracle_action_dist.py` was on the list and is not counted: R65 already deleted it.
+
+### 2 · What had to be handled before the deletions
+
+Nothing was deleted while something still pointed at it as if it were live.
+
+* **`results_index.py`** — six rules removed, one narrowed. Checked first that no *surviving* file
+  matched any removed rule: the `policy_200seed` rule matched only the two CSVs deleted here, and the
+  `train_rf_v3` rule matched **nothing at all**. `results/README.md` was then regenerated from the
+  index (not hand-edited): `results/main/` 39 → 33 files, `sensitivity/ablation/` 8 → 6, still
+  0 UNATTRIBUTED.
+* **`tools/regenerate_p0_products.py`** — the `c256_dominance` job is **removed**. Deleting a retired
+  product while leaving a job that rebuilds it would have resurrected it on the next regeneration
+  run. The verifier script itself is kept and runnable by hand.
+* **Nine narrative references in live code** repointed from the deleted *file* to the retired
+  *engine* (`a8_models.py`'s τ comment, `opv2v.py`, `v3_eval.py`, `verify_c256_dominance.py` ×2,
+  `verify_harm_stratum_structural.py`, `difficulty_frozen.py` ×2, `generate_figures.py`), plus two
+  lines of `projects/ca_tosg/README.md`. Same rule as R67 (b): name the engine, and the sentence
+  stays true after the file is gone.
+* **Three records banner-marked, not rewritten** — `paper/paragraph_drafts.md` (its `src:` lines are
+  dated provenance; the paragraph gate compares only prose bodies and footnotes, and passes),
+  `docs/invariance_note.md` (it cites `policy_200seed.py` by *line number*, and the claim it was
+  provenance for is in neither document any more), and the `docs/claims.md` row that mentions the
+  C256 file — which was already bound to the regenerated product, so the deletion changes nothing.
+* **`tests/retired_products.md`** gained a "deleted, not merely retired" table. The registry's
+  parse rule (`p6_numbers_vs_csv.retired_products`) was re-run after editing: still 7 paths, C256
+  still among them.
+
+### 3 · Four documents rewritten
+
+* **`paper/figures/README.md`** — the old-protocol content is gone entirely: every `../../code/*`
+  path, the 2026-07-11 md5 provenance table (whose own rows said "superseded — pending P2 re-freeze")
+  and every retired script. Rebuilt from `tools/generate_figures.py`'s registry and from what the two
+  documents actually `\includegraphics`, with a "built but not included" section for
+  `fig_decisions_budgets.pdf` and `fig_two_regime.pdf`.
+* **`docs/reproducibility.md`** — the legacy §0–§5 block is replaced by a current tables map (four
+  generator-owned bodies named explicitly, the rest bound through `p6_numbers_vs_csv`), a current
+  figures map, and a randomness section that separates the frozen replay (`CSI_SEED=20260809`,
+  `N_BOOT=10000`) from `v3_eval` (`default_rng(s)`, s ∈ 0..199) — never blend the two. The legacy
+  section shrinks to a record with no runnable-looking commands. One correction landed here: the
+  R62-3 status line said "All **18** gates", against the generated block's 19; it now says 19 and
+  states the convention.
+* **`results/README.md`** — regenerated, never edited.
+* **`ablations/README.md`** — the old text described an `extra_experiments/` tree with an `out/`
+  directory and an "A1–A8 + C" line-up, none of which exists. Rebuilt around the seven surviving
+  scripts, each carrying its own file's PUBLICATION / DIAGNOSTIC marker, plus a deleted-experiments
+  table.
+
+### 4 · Exceptions and residue, reported rather than swept
+
+* **Five stray PNGs** in `paper/figures/` (`fig_ap50_*.png`, `fig_ap70_*.png`,
+  `fig_channel_bler_frame.png`) now have no writer. No document includes a `.png`. They were not on
+  the R67 (c) list and are left in place; flagged in `paper/figures/README.md` for a ruling.
+* **`docs/p6_numbers_vs_csv.md` is stale on the committed tree, and this predates R67.** A fresh run
+  reports **MISS 1** (claim `cca44e6`, the literal `0.007` in §Boundaries, bound to
+  `transport_replay_ci.csv` + `intersection_gt_track.csv`) and 297 table cells, against the committed
+  report's MISS 0 / 260. `p6_numbers_vs_csv.py` is **not** one of the 19 gates, which is why the
+  suite stayed green through it. Not touched here — it is neither caused by nor in scope for this
+  batch — and left for a ruling.
+
+19/19 gates PASS; main 16 pages, supplementary 12.

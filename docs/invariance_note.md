@@ -1,6 +1,14 @@
 # INVARIANCE note (highest-risk item; gates the C256 paragraph landing alongside item 12)
 
-_Status (R9 md cleanup): **KEPT** — provenance for the live C256 frontier-share claim (2.5/3.2/4.5%); re-verify against the P2 regeneration._
+> **HISTORICAL RECORD — not quotable, not re-runnable (R67 c).** The C256 frontier-share claim this
+> note was provenance for (2.5/3.2/4.5%) is in neither document any more, and
+> `results/main/c256_frontier_band.csv` no longer exists. The scripts cited below by file *and line
+> number* — `policy_200seed.py`, `plot_pareto_payload.py`, `snr_decision_plot.py` — were deleted in
+> R67 (c), so those line references describe code that is not in this tree; the v3 engine's draw
+> survives only in `projects/ca_tosg/evaluation/v3_eval.py`. Kept because the reasoning is the record
+> of how the payload correction was proven to reach the *utility*, not merely the summaries.
+
+_Status (superseded — see the banner): **KEPT** — provenance for the then-live C256 frontier-share claim (2.5/3.2/4.5%)._
 
 The C256 paragraph cites the 2.5/3.2/4.5% C256 frontier share. That number lives on the payload-penalised
 (lambda>0) frontier, so it depends on the payload correction being correctly propagated INTO the utility --

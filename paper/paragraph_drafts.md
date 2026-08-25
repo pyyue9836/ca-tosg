@@ -6,6 +6,15 @@ Working file. Each draft here is pending Josh's wording review; only on approval
 (during the .tex pass). Numbers are CSV-direct from the committed verification artifacts. Section/figure
 cross-refs (\S, Fig.) are placeholders to resolve in the .tex pass. Target: 150-250 words, one-pass approval.
 
+> **The `src:` and `###` lines are dated provenance, not current pointers (R67 c).** Each `src:` line
+> records what the draft was sourced from *on the day it was drafted*, and the paragraph gate compares
+> only the prose body and footnote content — never these lines. Three of the paths named below no
+> longer exist in this tree: `results/sensitivity/c256_dominance_verify.csv` (deleted in R67 c, row
+> kept in `tests/retired_products.md`) and the two `a2_difficulty*` products, which the paper
+> superseded with `results/sensitivity/difficulty_frozen.csv` in R66-1/2. The `code/extra_experiments/`
+> prefixes are pre-restructure paths and were already unresolvable. What a *delivered* sentence is
+> bound to is `docs/claims.md`, never this file.
+
 ## 1. C256 dominance (Method / message candidates) -- FINAL (v2, 9 revisions + hard-error fix applied
 ## 2026-07-15; supervisor: land without re-review). Deployed-point activation = 0 verified vs CSV (branch 1).
 

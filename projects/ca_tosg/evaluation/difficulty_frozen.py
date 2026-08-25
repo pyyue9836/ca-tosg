@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """P5-5 item 7: difficulty stratification under the FROZEN protocol (reliable-channel view only).
 
-`ablations/a2_difficulty.py` produced the published `+0.090` with the retired v3 engine: it loads
-`data/selector_rf.pkl` (the v3 deployed selector, per `ablations/_common.py`) and scores through
-`v3_eval`'s 200-realisation machinery. Neither is the frozen P2 product, so its numbers may not be
-mixed with anything in the P2 tables.
+The retired v3 difficulty ablation (`ablations/a2_difficulty.py`, deleted with its two CSVs in
+R67(c)) produced the published `+0.090`: it loaded `data/selector_rf.pkl` (the v3 deployed selector,
+per `ablations/_common.py`) and scored through `v3_eval`'s 200-realisation machinery. Neither is the
+frozen P2 product, so its numbers may not be mixed with anything in the P2 tables.
 
 Only ONE of that script's two views is recoverable here, and the distinction is the point:
 
@@ -46,7 +46,8 @@ STRATA = ('easy', 'medium', 'hard')
 
 
 def strata_of(eff_L):
-    """Tertiles of the frame's own object-level effective F1; LOW F1 = HARD (a2_difficulty's rule)."""
+    """Tertiles of the frame's own object-level effective F1; LOW F1 = HARD (the retired v3
+    ablation's rule, carried over verbatim)."""
     q1, q2 = np.quantile(eff_L, [1 / 3, 2 / 3])
     lab = np.full(len(eff_L), 'medium', dtype=object)
     lab[eff_L <= q1] = 'hard'
