@@ -112,6 +112,15 @@ def self_test():
         'reference-tensor': 'The feature-level message encodes the transmitted BEV feature tensor of '
                             'size 256 x 48 x 176.',
         'shared-backbone': 'All methods share the same backbone and detection head.',
+        # R68: the four rows added after R45-6 had no injection probe, so the self-test proved 5 of
+        # 9. Each string below is a plausible retired sentence written to match that row's
+        # retired_regex -- the wording the record has ruled out, not a synthetic token.
+        'headroom-fov': 'The remaining headroom is therefore purely a granularity effect.',
+        'w2c-no-verdict': 'Where2comm is adjudicated against the frozen selector on the '
+                          'confirmatory cell.',
+        'same-transport-claim': 'Where2comm was evaluated under this paper\'s own transport '
+                                'on all three splits.',
+        'per-frame-accounting': "Each frame is charged at the split's mean transmitted fraction.",
     }
     known = {r[0] for r in rows()}
     orphan = sorted(set(probes) - known)
@@ -119,15 +128,34 @@ def self_test():
         print('SELF-TEST: probe(s) with no row in protocol_claims.md -> %s (can never fire)'
               % ', '.join(orphan))
         return 1
+    # R68: coverage runs BOTH ways. Rows without a probe were never proven able to fire -- four of
+    # the nine sat that way from R53 to R67, and the self-test happily reported 5 of 5. An
+    # unprobed row is now a self-test failure, so adding a pair to protocol_claims.md forces
+    # adding its injection here.
+    unprobed = sorted(known - set(probes))
+    if unprobed:
+        print('SELF-TEST: row(s) in protocol_claims.md with no injection probe -> %s '
+              '(never proven able to fire)' % ', '.join(unprobed))
+        return 1
+    print(f'SELF-TEST: probe coverage {len(probes)}/{len(known)} rows')
+    restored = 0
     for cid, probe in probes.items():
         injected = dict(docs)
         first = sorted(injected)[0]
         injected[first] = injected[first] + '\n' + probe + '\n'
         base = {b[1] for b in check(protocol, docs) if b[0] == cid}
         got = [b for b in check(protocol, injected) if b[0] == cid and b[1] not in base]
+        # and removing the injection must go quiet again: a gate that stays red after the fault is
+        # withdrawn is not discriminating, it is just red.
+        back = [b for b in check(protocol, docs) if b[0] == cid and b[1] not in base]
         print(f'SELF-TEST: injected retired form for {cid} -> '
-              f'{"FIRES" if got else "DOES NOT FIRE"}')
+              f'{"FIRES" if got else "DOES NOT FIRE"}; '
+              f'removed -> {"silent" if not back else "STILL RED"}')
         fired += bool(got)
+        restored += not back
+    if restored != len(probes):
+        print('SELF-TEST: %d probe(s) did not go silent after removal' % (len(probes) - restored))
+        return 1
     # and a stale-anchor control: the record itself disappearing must fail, not pass
     stale = check(protocol.replace(rows()[0][1], 'REMOVED'), docs)
     print('SELF-TEST: protocol anchor removed -> %s' % ('FIRES' if stale else 'DOES NOT FIRE'))

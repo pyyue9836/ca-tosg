@@ -4130,3 +4130,95 @@ the table again. Self-test exits 0, with all five injections and the stale-ancho
 5 of 9. Writing four new probes was not in this batch's scope; flagged for a ruling.
 
 19/19 gates PASS; main 16 pages, supplementary 12.
+
+## R68 — the three residues closed, and the report that nobody read becomes a gate
+
+Zero GPU. This batch exists to clear the three items R67 left flagged for a ruling. Two of the three
+turned out to be worse than "residue", and one turned out not to exist.
+
+### 1 · The five "stray PNGs" were never in the repository
+
+`.gitignore` line 30 is `*.png` — "only the .pdf/.svg ship". The five files R67 (c) reported as stray
+and left "in place for a ruling" were **untracked all along**, so there was no repository state to
+rule on and the R67 (c) note was wrong to imply one. They are gone from the working tree
+(`fig_ap50_{awgn,rayleigh}.png`, `fig_ap70_{awgn,rayleigh}.png`, `fig_channel_bler_frame.png`);
+`fig_ap70_*` never had a PDF counterpart at all — the AP@0.7 pair was never a delivered figure. The
+one PNG a full figure run still writes, `fig_feature_importance.png`, is ignored and stays ignored.
+`paper/figures/README.md`'s PNG section is rewritten to say this instead.
+
+### 2 · The MISS was real, and the sentence was wrong
+
+**Diagnosis: the binding was fine; the number was not.** Claim `cca44e6` printed "Under ideal delivery
+the two are within $0.007$ AP@$0.5$ of each other". Both bound products exist and are correct. The
+literal is a **derived bound** — no CSV stores a gap column — and re-deriving it from
+`results/diagnostics/intersection_gt_track.csv` gives, over the six (split, budget) ideal-delivery
+cells:
+
+| split | `B_max` | Where2comm | CA-TOSG-RF | gap |
+|---|---|---|---|---|
+| culver | 0.10 | 0.89572 | 0.89508 | +0.00064 |
+| test | 0.10 | 0.94358 | 0.94490 | −0.00132 |
+| validate | 0.10 | 0.91519 | 0.90883 | +0.00636 |
+| culver | 0.30 | 0.89885 | 0.89864 | +0.00021 |
+| test | 0.30 | 0.94417 | 0.94363 | +0.00054 |
+| validate | 0.30 | 0.91653 | 0.90930 | **+0.00723** |
+
+max |gap| = **0.00723 > 0.007**. The printed figure was that bound **rounded DOWN**, which claims
+more than the cells support — and the supplementary was already printing `+0.00021`--`+0.00723` twice
+plus a `$+0.00723$` table cell, so the two documents disagreed at full precision while every gate
+stayed green. `main.tex` now prints `0.00723`.
+
+Registered, not patched: `docs/canonical_quantities.md` gains an *ideal-delivery AP gap bound* row and
+`tests/test_canonical_quantities.py` re-derives it at gate time — cell count, the bound, both span
+endpoints, and a **context-anchored** ban on the rounded-down form. Context-anchored because `0.007`
+also occurs as a legitimate CI endpoint (`$[-0.007,-0.001]$`) in the supplementary for a different
+quantity, and a bare fingerprint fires on it — the same narrowing the `0.248` payload family needed.
+Negative control: restoring `within $0.007$` makes the gate FAIL; the corrected text passes.
+
+**297 vs 260 table cells, accounted for exactly.** The committed report was last regenerated at
+**R57** (`66a6dfb`), ten batches ago. Re-running p6's own tokeniser over both revisions of the two
+documents attributes the whole delta to **one table**:
+
+| table | R57 cells | now | delta |
+|---|---|---|---|
+| `tab:w2c_transport` | 0 | 36 | **+36** |
+| every other table | unchanged | unchanged | 0 |
+| total scanned | 264 | 300 | +36 |
+
+located went 260 → 297 (+37) and declared-derived 4 → 3, because one `tab:headline` cell — `0.8177` —
+stopped being declared-derived and became *located*: `results/diagnostics/transport_replay_culver_thr0.013_B0.30.json`,
+a product R58 added, happens to carry that value. `DERIVED_TABLE_CELLS.json` itself is byte-identical
+to R57. +36 = +37 − 1.
+
+**The report is now a gate.** `tools/p6_numbers_vs_csv.py` always wrote its report and **always
+returned 0**, so `MISS 1` could sit unread for ten batches with a suite that was green by
+construction. The build is split out of `main()`; `--check` writes nothing and FAILS on a MISS, on an
+unlocated table cell, and on the committed report drifting from a fresh build — the same family as
+`check_figure_consistency.py --check`. Registered as the 19th gate (**20** checks with the
+fingerprint sweep). It costs ~85 s, which is the price of it being real. Its self-test gained a drift
+control: a one-line change to the report must be detected.
+
+### 3 · The reconciliation self-test now proves 9 of 9
+
+The four rows added after R45-6 (`headroom-fov`, `w2c-no-verdict`, `same-transport-claim`,
+`per-frame-accounting`) had no injection probe, so R67 (d)'s repair proved 5 of 9. Each now has a
+probe written to match its own `retired_regex`, and every one **FIRES** on injection and goes
+**silent** on removal — both directions printed per row, because a gate that stays red after the fault
+is withdrawn is not discriminating, it is just red. Coverage is asserted in **both** directions: a
+probe with no row already failed since R67 (d); a **row with no probe** now fails too, so adding a
+pair to `tests/protocol_claims.md` forces adding its injection.
+
+### 4 · A regression from R67 (c), found by this batch and fixed
+
+R67 (c) added a provenance note to the `docs/claims.md` collaboration-harm row saying the second
+triple "previously came from the retired c256_dominance_verify.csv". `tools/audit_claims_evidence.py`
+extracts `[\w./-]+\.csv` tokens from the evidence cells and treats each as a **cited** file; with that
+file's index entry removed in the same batch, the lookup failed and the claim reported **UNRESOLVED**.
+It went unnoticed because `docs/claims_evidence_audit.md` was itself stale — the same disease as the
+p6 report, one file over. The note now names the product without an extension. Audit: **110 claims,
+57 FROZEN / 53 ANALYTIC, 0 UNRESOLVED, 0 PENDING, 0 STALE, 0 LEGACY.**
+
+**Rule this batch adds: a record of a deleted product must not be written in citation form.** Two
+tools parse evidence cells for filenames; a historical mention that looks like a citation becomes one.
+
+20/20 gates PASS; main 16 pages, supplementary 12. No cleanup items remain open.

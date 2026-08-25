@@ -19,6 +19,22 @@ underlying data into a silent PASS, which is the failure this registry exists to
 | F1 share of the masked oracle | `98.4`--`99.1\%` (test), `98.0`--`99.4\%` (Culver) | `results/main/replay_summary.csv` + `results/main/fixed_references.csv` | `F1_RF` / oracle `F1` × 100, per budget |
 | JSCC oracle-headroom recovery | `56`--`62\%`; per channel `0.0291`/`+0.0181` (AWGN), `0.0275`/`+0.0158` (Rayleigh), `0.0281`/`+0.0158` (OFDM) | `results/baselines/importance_map_jscc/jscc_selector_{awgn,rayleigh,ofdm}.csv` | headroom = `or_f1` − `L_f1`; recovered = `rf_f1` − `L_f1`; share = recovered / headroom. **200-realisation held-out estimator on validate frames** — not the k-fold estimator used two sentences earlier, and the two are never mixed inside one sentence |
 | payload reduction | `34.8\%` vs nominal, `26.6\%` vs budget-matched | `results/main/replay_summary.csv` | `test`, `B_max=0.20`: `payload_reduction` × 100 |
+| ideal-delivery AP gap bound | `0.00723` AP@$0.5$ (main), the span `+0.00021`--`+0.00723` (supplementary) | `results/diagnostics/intersection_gt_track.csv` | per (split, budget) cell: `Where2comm.ap50` − `CA-TOSG-RF.ap50`, over the six ideal-delivery cells; the bound the main paper prints is the **maximum absolute** gap. A bound is rounded **up**, never down — see the R68 note below |
+
+## Why the ideal-delivery bound is a maximum, rounded up (R68)
+
+`main.tex` said the two arms are "within $0.007$ AP@$0.5$ of each other". The six ideal-delivery
+cells span $-0.00132$ to $+0.00723$, so the true bound is $0.00723$ and the printed one was the
+result of rounding a **bound** down to three decimals. That is the wrong direction: rounding a bound
+down asserts something the data does not support, and the supplementary was already printing
+`+0.00021` and `+0.00723` twice plus a `$+0.00723$` table cell — so the two documents disagreed at
+full precision while every gate stayed green.
+
+It stayed green because `0.007` is *derived*: no CSV stores a gap column, so
+`tools/p6_numbers_vs_csv.py` could only report it as a MISS against the products the claim is bound
+to — which it did, and was right to. The MISS sat unread because the committed report had not been
+regenerated since R57. Both halves are now closed: the number is $0.00723$, this registry re-derives
+it from the product at gate time, and the report itself is gated (`p6 numbers vs CSV`).
 
 ## Why the derivations are now arithmetic-checked (R23-6)
 

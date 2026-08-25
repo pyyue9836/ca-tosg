@@ -57,9 +57,19 @@ Kept deliberately; each is a live product of a live generator, not an orphan.
 * `fig_two_regime.pdf` — belongs to the JSCC prior-protocol arm and is built from that arm's own
   driver, not from this repo's frozen chain.
 
-## Stray PNGs
+## PNGs — none of them are in the repository
 
-`fig_ap50_*.png` and `fig_ap70_*.png` were written by `plot_ap_snr.py`, which no longer exists;
-`fig_channel_bler_frame.png` likewise has no writer left. Only `fig_feature_importance.png` is still
-produced (by `plot_feature_importance.py`). No document includes any `.png`. They are left in place
-rather than swept, because deleting them was not on the R67 (c) list — flagged for a ruling.
+`.gitignore` excludes `*.png` outright ("only the .pdf/.svg ship"), so **no PNG has ever been
+committed here** and no document `\includegraphics` one. Any PNG in `paper/figures/` is a local
+working-tree by-product of whichever generator last ran.
+
+R68 replaced the R67 (c) "Stray PNGs" note, which called five of them stray and left them "in place"
+for a ruling: they were untracked all along, so there was no repository state to rule on.
+The five local files (`fig_ap50_awgn.png`, `fig_ap50_rayleigh.png`, `fig_ap70_awgn.png`,
+`fig_ap70_rayleigh.png`, `fig_channel_bler_frame.png`) were written by the retired v3 figure scripts
+and have had no writer since R67 (c); they were removed from the working tree. `fig_ap70_*` never had
+a PDF counterpart — the AP@0.7 pair was never a delivered figure.
+
+The one PNG a full `python tools/generate_figures.py` still writes is `fig_feature_importance.png`,
+produced alongside its PDF by `plot_feature_importance.py`. It is ignored, not committed, and that is
+the intended state.

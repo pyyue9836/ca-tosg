@@ -19,6 +19,7 @@ in the CSV.
 """
 from __future__ import annotations
 
+import math
 import os
 import re
 import sys
@@ -300,6 +301,45 @@ def q_declared_anchor(text):
     return rc
 
 
+def q_ideal_delivery_gap(text):
+    """The ideal-delivery AP@0.5 bound <- results/diagnostics/intersection_gt_track.csv.
+
+    R68: the paper printed `0.007`, which is `0.00723` rounded DOWN. Rounding a *bound* down claims
+    more than the data supports, and the supplementary was already printing `+0.00723` in prose and
+    in a table cell, so the two documents disagreed at full precision. The bound is derived here from
+    the six ideal-delivery cells and compared against what is printed; nothing is hardcoded, so if a
+    cell moves, the gate fails instead of blessing a stale bound.
+    """
+    d = pd.read_csv(os.path.join(ROOT, 'results/diagnostics/intersection_gt_track.csv'))
+    w = d[d.policy == 'Where2comm'][['split', 'budget', 'ap50']].rename(columns={'ap50': 'w2c'})
+    c = (d[d.policy.str.startswith('CA-TOSG-RF')][['split', 'budget', 'ap50']]
+         .rename(columns={'ap50': 'cat'}))
+    m = w.merge(c, on=['split', 'budget'])
+    gap = (m.w2c - m.cat).round(5)
+    rc = check('ideal-delivery cell count', len(m) == 6,
+               f'{len(m)} (split, budget) cells paired from the intersection-GT track')
+    bound = f'{gap.abs().max():.5f}'
+    rc |= check('ideal-delivery bound printed', printed(bound, text),
+                f'max |Where2comm - CA-TOSG| over the {len(m)} cells = {bound}; ' +
+                ('printed' if printed(bound, text) else 'NOT printed -- the paper prints a '
+                 'different bound than the product supports'))
+    # A bound may be quoted rounded, but only UPWARDS; the retired `within $0.007$` is what this
+    # forbids. The pattern is CONTEXT-anchored, not a bare literal: `0.007` also occurs as a
+    # legitimate CI endpoint elsewhere in the supplementary ($[-0.007,-0.001]$ for a different
+    # quantity), and a bare fingerprint fires on it. Same lesson as the 0.248 narrowing.
+    rounded_down = f'{math.floor(gap.abs().max() * 1000) / 1000:.3f}'
+    rx_down = re.compile(r'within\s*\$' + re.escape(rounded_down) + r'\$', re.I)
+    rc |= check('bound is not rounded down', not rx_down.search(text),
+                f'"within ${rounded_down}$" (the bound rounded DOWN to 3 dp) must not appear; ' +
+                ('absent' if not rx_down.search(text) else 'PRESENT -- see the R68 note'))
+    # the supplementary states the signed span; both endpoints must be the derived ones
+    for end, lbl in ((f'{gap.min():+.5f}', 'low'), (f'{gap.max():+.5f}', 'high')):
+        rc |= check(f'ideal-delivery span {lbl}', printed(end.lstrip('+'), text),
+                    f'{end} derived; ' + ('printed' if printed(end.lstrip('+'), text)
+                                          else 'NOT printed'))
+    return rc
+
+
 def main() -> int:
     if not os.path.exists(REGISTRY):
         print(f'FAIL: {os.path.relpath(REGISTRY, ROOT)} is missing -- the registry is the '
@@ -310,12 +350,13 @@ def main() -> int:
     rc = 0
     for fn in (q_feature_importance, q_latency, q_fa1_ratio, q_payload_reduction,
                q_ratio_families, q_jscc_recovery, q_docs_display, q_registry_arithmetic,
-               q_declared_anchor):
+               q_declared_anchor, q_ideal_delivery_gap):
         rc |= fn(text)
     # the registry must name every quantity this file checks, so the two cannot drift apart
     reg = open(REGISTRY, encoding='utf-8').read()
     for token in ('feature_importance_frozen.csv', 'selector_latency.csv', 'feature_ablation.csv',
-                  'replay_summary.csv', 'jscc_selector_', 'payload_conventions.csv'):
+                  'replay_summary.csv', 'jscc_selector_', 'payload_conventions.csv',
+                  'intersection_gt_track.csv'):
         if token not in reg:
             rc |= check('registry coverage', False, f'{token} is checked here but absent from '
                                                     f'{os.path.relpath(REGISTRY, ROOT)}')

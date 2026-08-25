@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (11 of 19)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (12 of 20)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the two artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 19 checks in total, 11 of which a clean clone can run.
+  GATE-COUNT-LINE: 20 checks in total, 12 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -63,6 +63,13 @@ GATES = [
     ('content',   'transport products',  [PY, 'tests/test_transport_products.py']),
     ('content',   'canonical quantities', [PY, 'tests/test_canonical_quantities.py']),
     ('content',   'assumptions ledger',   [PY, 'tests/test_assumptions_ledger.py']),
+    # R68: the numbers<->CSV report was written by a tool that ALWAYS returned 0 and that nobody
+    # re-ran. It sat at "MISS 0" from R57 while a fresh run said "MISS 1" -- a bound literal
+    # (`0.007`) that no product held, because it was a bound rounded DOWN. Same family as
+    # check_figure_consistency --check: a stale report is a stale claim about the tree, so --check
+    # fails on a MISS, on an unlocated table cell, and on the committed report drifting from a
+    # fresh build. It is the slowest gate here (~85 s); that is the price of it being real.
+    ('content',   'p6 numbers vs CSV',    [PY, 'tools/p6_numbers_vs_csv.py', '--check']),
 ]
 
 

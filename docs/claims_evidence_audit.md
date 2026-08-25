@@ -6,11 +6,10 @@ Each claim in `docs/claims.md` is attributed to the section it appears in, and i
 
 | engine | claims |
 |---|---|
-| FROZEN | 55 |
-| ANALYTIC | 51 |
-| UNRESOLVED | 1 |
+| FROZEN | 57 |
+| ANALYTIC | 53 |
 
-Total: **107** claims across **28** (sub)sections.
+Total: **110** claims across **28** (sub)sections.
 
 ## LEGACY-ENGINE roster (by section)
 
@@ -120,7 +119,7 @@ _None._
 | `ceb8c43` | FROZEN | 400, 2, 10, 0.10, 0.20, 0.30 | N_T=400 trees and max\_features=sqrt throughout, minimum samples per leaf of 2, a depth bound of 10 at B_=0.10 and 0.20 and unboun… |
 | `cd1a648` | FROZEN | 52.1, 5.6, 95, 58.3, 1,000, 1 | Third, its per-frame inference cost on a single CPU core is 52.1 ± 5.6 ms (P95 = 58.3 ms), measured over 1,000 batch-1 trials per … |
 | `c7b92f1` | FROZEN | 52.1 | Selector-only latency is 52.1 ms; end-to-end system latency is not measured here. |
-| `cfb1749` | ANALYTIC | 0.999 | Before taking the argmax in Eq. [eqref], the oracle applies a feasibility mask: any mode whose frame-level block-error rate exceed… |
+| `c3669d5` | ANALYTIC | 0.999 | Before taking the argmax in Eq. [eqref], the oracle applies a feasibility mask: any mode whose frame-level block-error rate exceed… |
 
 ### Experimental Setup [sec:exp] → Dataset and Implementation
 
@@ -177,7 +176,7 @@ _None._
 | `c5fe25d` | ANALYTIC | 0.024, 10 | [label] Feature-level cooperation pays only when the channel delivers it, so we report true end-to-end AP in the two regimes that … |
 | `c6819b4` | FROZEN | 0.5, 0.10, 0.20, 0.30, 0.7887, 0.7926, 0.7936, 0.8697, 0.874 | Three observations follow. (i) Realised AP@0.5 at B_=0.10/0.20/0.30 is 0.7887/0.7926/0.7936 (validate), 0.8697/0.8742/0.8742 (test… |
 | `c5d24be` | FROZEN | 0.8369, -0.7819, 0.0550, 0.8931, -0.8691, 0.0240, 0.8269, -0 | 0.8369-0.7819=0.0550, 0.8931-0.8691=0.0240 and 0.8269-0.7299=0.0970 AP. |
-| `c54e362` | UNRESOLVED | 70.4, 40, 0.0117, 0.0252, -0.0061 | These are measured between branches whose fields of view differ, and that difference carries most of the gap: re-scored inside the… |
+| `c54e362` | FROZEN | 70.4, 40, 0.0117, 0.0252, -0.0061 | These are measured between branches whose fields of view differ, and that difference carries most of the gap: re-scored inside the… |
 | `c8693a7` | FROZEN | 12.4, 19.5, 21.3, 2.5, 21.2, 0.0, 4.9, 21.1 | The realised share (AP_-AP_Fixed L)/headroom is 12.4/19.5/21.3\%, 2.5/21.2/21.2\% and 0.0/4.9/21.1\%---at most about a fifth, so w… |
 | `c3d45d7` | FROZEN | 21, 41, 0.08102, 0.20361, 0.03680, 0.21196, 0.02437, 0.18226 | 21--41 × the channel use, below Fixed L in realised AP (Fig. [ref]). (iii) Channel-averaged, the selector spends 0.08102--0.20361 … |
 | `c504c4a` | FROZEN | 1, 0.89148, 0.89691, 0.89783, 0.0368, 0.1414, 0.2120, 18, 12 | The three frozen selectors sit at F1 0.89148, 0.89691 and 0.89783 for 0.0368, 0.1414 and 0.2120 Msym, each against the threshold t… |
@@ -199,6 +198,7 @@ _None._
 | `cdbe953` | FROZEN | 0.20, 2, 21, 0.000, 1, 0.8909, 0.8969, 0.141 | First, neither half of the input is sufficient on its own, and the failure mode is the same in both directions: run through the id… |
 | `c4166b6` | FROZEN | 1.0, 8, 0.0, 10, 0.024, 0.27, 0.33, 0.99 | The committed frame BLER is effectively binary in the channel state---1.0 for Rayleigh at every tabulated SNR, and for AWGN below … |
 | `c61c0b5` | FROZEN | 0.10, 0.20, 0.30 | That is why the channel-only variant pins itself to B_L at B_=0.10 and 0.20 and only activates F at 0.30; why the pre-registered t… |
+| `c7a87b5` | ANALYTIC | 0.23 | A comparable gap appears in the external comparator for an unrelated reason---its transmitted fraction falls by ≈ 0.23 between two… |
 | `c2f46bc` | ANALYTIC | 0.10, 0.20, 0 | At B_=0.10 and 0.20 the channel-only variant has no graded policy to offer at all (_F=0, payload pinned at B_L). |
 | `cbce9a1` | FROZEN | 0.30, 0.274, 0.89529, 0.89783, -0.0025, 1, 0.287, 0.212, 1.3 | At B_=0.30 it does activate the feature action (_F=0.274), but under the corrected convention it is now beaten on both axes at onc… |
 | `caf44fe` | FROZEN | +0.0021, 1 | Under the retired accounting this variant bought +0.0021 F1 for that extra spend; the correction removes even that. |
@@ -251,6 +251,8 @@ _None._
 | `cb21f27` | FROZEN | 3, 0.36842, 2, 0.26937 | The budget does not transfer automatically: the selector is frozen against a per-frame budget measured with a single collaborator,… |
 | `cd09db5` | ANALYTIC | 1, 0.0002, 60, -0.0025, -0.0109 | SNR-estimation noise up to ≈ 1 dB costs ≤ 0.0002 F1, CSI aging under a Jakes model at 60 km/h costs -0.0025, and acting on a one-f… |
 | `c527ae5` | FROZEN | 52.1, 5.6, 95, 58.3 | The deployed Random Forest runs in 52.1 ± 5.6 ms (P95=58.3 ms) per frame on a single CPU core, the slowest of the three frozen sel… |
+| `c1ca95f` | FROZEN | 0.00723, 0.5, 0.07021, 0.08540, 70 | Under ideal delivery the two are within 0.00723 AP@0.5 of each other; replayed over the modelled transport, leads by 0.07021--0.08… |
+| `c7a2b09` | ANALYTIC | 2, 20, 0.20 | What this evaluation does not establish. Four limitations are experimental rather than presentational, and each has a pre-register… |
 | `cee9e8b` | FROZEN | 16, 200, 1, 18.938, -0.001508, +0.001522, 45.177, -0.119307, | Resampling the primary cell at the level of the 16 test scenes rather than the 200 CSI draws widens the F1 interval by 18.938 × to… |
 | `cf01bf9` | FROZEN | 0.10, 0.00634, 1, 0.00588, 0.00734 | Charging the object-level link with BLER_L=0.10 costs the selector 0.00634 F1 against 0.00588 for the threshold rule and 0.00734 f… |
 | `cdd3def` | FROZEN | 2,4, 8, 0.402400, 0.100363, 0.057077, 1.226954, 1.120770 | Splitting the feature frame into k\2,4\ fragments with one retransmission lowers the marginal AWGN cliff point at 8 dB from 0.4024… |
