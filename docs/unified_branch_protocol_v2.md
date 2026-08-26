@@ -486,135 +486,176 @@ The full primary criterion is §7.0.
 
 ---
 
-## 11. Regeneration — twelve work packages, mapped to thirteen product rows (E)
+## 11. Regeneration — P0-3's invalidation list, the twelve work packages, and the mapping
 
-### 11.1 The twelve work packages
+### 11.1 P0-3 — the authoritative list of what plan A invalidates (supervisor verbatim)
 
-Titles recorded verbatim from the V2-R3 instruction. **Their bodies are not in this repository** —
-the instruction gave titles only — so each carries the scope this executor infers, clearly marked as
-inferred. **The supervisor's package bodies replace the inferred column when pasted in.**
+> **P0-3：所有方案A结果必须完整重冻，不能局部替换**
+>
+> 方案A之后，以下全部旧结果失效：
+>
+> - E/L/F逐帧F1和AP
+> - oracle labels
+> - λ
+> - RF selector
+> - SNR threshold
+> - two-/three-scalar rule
+> - action ratios
+> - payload
+> - 200次replay
+> - bootstrap CI
+> - Test和Culver-City结果
+> - 所有headline表格和曲线
+> - Where2comm比较
+>
+> 必须把它们捆在一次完整重冻里完成，不能保留"看起来变化不大"的旧数字。
 
-| # | work package (verbatim title) | inferred scope — replace with the supervisor's text |
+**Attribution corrected against the delivered text (B-1).** V2-R3 flagged that this repository's
+thirteen rows were *not* P0-3 and might or might not match. The original has now been supplied and
+**diffed row by row: 0 of 13 rows match.** They are different lists that happened to share a length
+— P0-3 enumerates *what is invalidated*, the V2-R1 table enumerated *a dependency order for
+re-deriving things*. **P0-3 is authoritative and replaces it.** The superseded table is kept at
+§11.4, labelled executor-derived, not deleted and not cited.
+
+**The binding instruction in P0-3 is the last line, not the list:** one complete re-freeze, bundled.
+No item may be kept because it "looks like it didn't change much".
+
+### 11.2 The twelve work packages (supervisor verbatim)
+
+| # | work package | scope |
 |---|---|---|
-| 1 | Checkpoint and forward invariants | hashes of §1 asserted at run time; `record_len` semantics; the AttFusion identity at `record_len=[1]` |
-| 2 | Per-agent single-vehicle inference | ego and the selected collaborator, each alone, all three splits |
-| 3 | E action products | boxes, F1, AP from the ego-alone forward; `B_E = 0` |
-| 4 | L action products | collaborator boxes, transform, box-level fusion, per-frame `N_box,t` |
-| 5 | F action products | int8 quantise → transmit → dequantise → attentive fusion; clean-delivery AP/F1 and the quantisation loss line |
-| 6 | Cue regeneration and verification | the 23-column cue set recomputed on the unified branch and verified against §9 |
-| 7 | Payload products | `B_F` from `N_cw`; per-frame `B_L,t`; β tiers; the identity self-check |
-| 8 | Transport products | fragmentation + partial recovery per §5; BLER per codeword; the all-or-nothing sensitivity |
-| 9 | Oracle and feasibility products | E/L/F argmax under the feasibility mask, on the new payload axis |
-| 10 | Validate-only model selection and freeze | LOSO, λ\*, per-β selector freeze, manifest |
-| 11 | Frozen held-out evaluation | test and Culver-City, one shot, scene-level bootstrap |
-| 12 | External baseline and publication products | §13 arm, then tables and figures |
+| 1 | Checkpoint and forward invariants | 验证三动作使用相同 checkpoint hash、FOV、score threshold 和 NMS。 |
+| 2 | Per-agent single-vehicle inference | 为 Validate、Test、Culver 生成每辆车的独立检测和中间 bottleneck。 |
+| 3 | E action products | 生成统一 checkpoint 下的 ego-only boxes、F1 和 AP。 |
+| 4 | L action products | 对锁定的单个 collaborator 进行 box transformation、cross-vehicle NMS 和 late fusion。 |
+| 5 | F action products | 生成 int8 quantise/dequantise、完整投递和部分投递条件下的 feature fusion 结果。 |
+| 6 | Cue regeneration and verification | 重新生成或逐项验证 23 维输入。定义保持不变，但所有依赖新 ego 检测输出的 cue 值必须更新。 |
+| 7 | Payload products | 生成逐帧 N_box,t、B_L,t、固定 B_F、packet 数量、header 和控制开销说明。 |
+| 8 | Transport products | 生成 codeword BLER、fragment mapping、partial recovery、L/F delivery 和 all-or-nothing sensitivity。 |
+| 9 | Oracle and feasibility products | 重新生成 E/L/F utility、feasible mask 和 oracle labels。 |
+| 10 | Validate-only model selection and freeze | 完成 LOSO、λ、RF、threshold、hand-rule 和 manifest 冻结。 |
+| 11 | Frozen held-out evaluation | Test 和 Culver 一次性重放、200 次 CSI 期望、scene-level bootstrap 和所有敏感性。 |
+| 12 | External baseline and publication products | 重跑统一 GT/FOV 的 Where2comm 及选定 adaptive baseline，最后生成表格、图片、claims 和 v2 门禁。 |
 
-### 11.2 The thirteen product rows
+*The `inferred` scope column V2-R1 carried is superseded by the text above and is retained at §11.4.*
 
-**Provenance correction, and it matters (E).** The instruction calls these "P0-3 的 13 行 verbatim
-产物清单". **They are not verbatim P0-3.** These thirteen rows were written by *this executor* in
-V2-R1 as a derived dependency order, and V2-R1 said so in the same breath. They are kept here because
-E asks for them to be kept, and because a dependency order is genuinely useful — but they must not be
-cited as the supervisor's text. **If P0-3's actual thirteen lines differ, paste them and this table
-is replaced.**
+### 11.3 Mapping — and what each list misses that the other catches
 
-| # | product | why it must be re-derived |
-|---|---|---|
-| 1 | per-vehicle detections, all splits | each vehicle through the unified checkpoint |
-| 2 | E boxes/F1/AP | new network for this action |
-| 3 | L boxes after box-level fusion | new detector + new fusion rule |
-| 4 | F boxes/F1/AP | same mechanism, re-scored on the unified GT, now with real int8 |
-| 5 | per-frame `N_box,t` | the input to the L payload |
-| 6 | `B_L,t` per frame | §4 |
-| 7 | `B_F` | §3.2, measured tensor, via `N_cw` |
-| 8 | BLER table / `N_cw` per message | `N_cw` changes with the payloads above |
-| 9 | oracle labels (E/L/F argmax under the mask) | every input to the argmax moved |
-| 10 | selector training + LOSO + freeze, per budget | new labels, new payload axis |
-| 11 | replay + `tau_feasible` + fixed references | new products |
-| 12 | figures and tables | last, from the above |
-| 13 | Where2comm arm | must move to the same GT and FOV, or the comparison re-acquires the confound |
+**P0-3 row → work package that produces its replacement**
 
-### 11.3 Bidirectional mapping — no row unmatched
-
-| work package | product rows |
+| P0-3 row | work package |
 |---|---|
-| 1 Checkpoint and forward invariants | — (an invariant, not a product; it gates rows 1–4) |
-| 2 Per-agent single-vehicle inference | 1 |
-| 3 E action products | 2 |
-| 4 L action products | 3, 5 |
-| 5 F action products | 4 |
-| 6 Cue regeneration and verification | **— no product row exists** |
-| 7 Payload products | 6, 7 |
-| 8 Transport products | 8 |
-| 9 Oracle and feasibility products | 9 |
-| 10 Validate-only model selection and freeze | 10 |
-| 11 Frozen held-out evaluation | 11 |
-| 12 External baseline and publication products | 12, 13 |
+| E/L/F 逐帧 F1 和 AP | 3, 4, 5 |
+| oracle labels | 9 |
+| λ | 10 |
+| RF selector | 10 |
+| SNR threshold | 10 |
+| two-/three-scalar rule | 10 |
+| action ratios | 11 (realised mix from the replay; the *oracle* mix is 9) |
+| payload | 7 |
+| 200 次 replay | 11 |
+| bootstrap CI | 11 |
+| Test 和 Culver-City 结果 | 11 |
+| 所有 headline 表格和曲线 | 12 |
+| Where2comm 比较 | 12 |
 
-| product row | work package |
+**Every one of P0-3's thirteen rows maps to a work package.**
+
+**Work package → P0-3 row**
+
+| work package | P0-3 row |
 |---|---|
-| 1 | 2 |
-| 2 | 3 |
-| 3 | 4 |
-| 4 | 5 |
-| 5 | 4 |
-| 6 | 7 |
-| 7 | 7 |
-| 8 | 8 |
-| 9 | 9 |
-| 10 | 10 |
-| 11 | 11 |
-| 12 | 12 |
-| 13 | 12 |
+| 1 Checkpoint and forward invariants | **none** |
+| 2 Per-agent single-vehicle inference | **none** |
+| 3, 4, 5 E / L / F action products | E/L/F 逐帧 F1 和 AP |
+| 6 Cue regeneration and verification | **none** |
+| 7 Payload products | payload |
+| 8 Transport products | **none** |
+| 9 Oracle and feasibility products | oracle labels |
+| 10 Validate-only selection and freeze | λ, RF selector, SNR threshold, two-/three-scalar rule |
+| 11 Frozen held-out evaluation | action ratios, 200 次 replay, bootstrap CI, Test 和 Culver-City 结果 |
+| 12 External baseline and publication | 所有 headline 表格和曲线, Where2comm 比较 |
 
-**Every one of the thirteen product rows maps to a work package. One work package — 6, cue
-regeneration and verification — maps to nothing**, because the thirteen-row list omitted it. That
-omission is the mapping's finding, and it is why the two lists cannot replace each other: the work
-packages are an implementation decomposition, the product rows are a dependency order, and each
-catches something the other misses.
+**Four work packages map to no P0-3 row: 1, 2, 6 and 8.** That is not a defect in either list — it
+is the reason both are kept. P0-3 enumerates **old results that die**; the packages enumerate **work
+that must happen**. Three of the four unmatched packages produce things v1 never had (per-agent
+bottlenecks, transport products under partial recovery, run-time invariants), so they *cannot* appear
+on a list of invalidated v1 outputs.
 
-**Package 1 deliberately has no product row**: it is an invariant asserted at run time, not a file.
+**Package 6, cue regeneration, is the one that matters (E).** It is unmatched for a different reason:
+the 23-dimensional cue vector **did** exist in v1 and P0-3 does not list it — yet package 6 states
+that every cue value depending on the new ego detections must be updated. **A cue set carried over
+unregenerated would silently feed v1 detections into a v2 selector.** V2-R3 predicted this gap
+against the derived list; it survives against the verbatim one. Flagged here permanently.
+
+### 11.4 Superseded: the V2-R1 executor-derived dependency order
+
+Kept per B-1. **Not authoritative, not to be cited.** Written by this executor in V2-R1 as a
+re-derivation order before P0-3's text was available; 0 of its 13 rows match P0-3.
+
+<details>
+<summary>executor-derived order (superseded)</summary>
+
+1 per-vehicle detections, all splits · 2 E boxes/F1/AP · 3 L boxes after box-level fusion ·
+4 F boxes/F1/AP · 5 per-frame `N_box,t` · 6 `B_L,t` per frame · 7 `B_F` · 8 BLER table / `N_cw` ·
+9 oracle labels · 10 selector training + LOSO + freeze · 11 replay + `tau_feasible` + fixed
+references · 12 figures and tables · 13 Where2comm arm
+
+</details>
 
 ---
 
 ## 12. Conditional branches P1-1 … P1-8, and stage-5 rewrite items P2-1 … P2-6
 
-**BLOCKED — the two tables are not in this repository.** F instructs that the supervisor's two tables
-be entered *verbatim, row by row*. The V2-R3 message names them but does not contain them, and no
-earlier message did either. **Transcribing tables I have not been given would be fabrication**, which
-is the one thing a pre-registration must never contain. The tables below therefore carry the correct
-shape and no invented content.
+**Delivered in V2-R4 and entered verbatim.** V2-R3 stopped here because the tables had not been
+supplied; the instruction has since acknowledged that as an instruction defect and provided them.
 
-**This section stays NOT LOCKED, and per §16 that blocks mainline GPU.** It is the only thing
-blocking it.
+### 12.1 P1 — conditional branches (supervisor verbatim)
 
-| id | trigger condition | pre-specified handling |
+| ID | 触发条件 | 预先规定的处理 |
 |---|---|---|
-| P1-1 | **TEXT REQUIRED** — but see the D-3 strengthening below, which applies to it whatever the row says | **TEXT REQUIRED** |
-| P1-2 … P1-5 | **TEXT REQUIRED** | **TEXT REQUIRED** |
-| P1-6 | **TEXT REQUIRED** | **TEXT REQUIRED**, plus the standing addition below |
-| P1-7, P1-8 | **TEXT REQUIRED** | **TEXT REQUIRED** |
+| P1-1 | 冻结 selector 的 ρ_E 仍接近 0，而 oracle 显著选择 E | 报告 E-action collapse；检查 label imbalance 和 training objective。若不修改协议则不声称有效学习三动作，只称 E 为可用但很少触发的安全动作。 |
+| P1-2 | RF 没有形成三个不同预算点，或不满足非劣效/节省标准 | 不声称 learned selector 优于简单规则；将贡献限定为 granularity-control framework，并按实测结果说明 threshold 或 hand rule 是否已经足够。 |
+| P1-3 | Culver-City 未通过 δ=0.005 | 只声称通信节省迁移；不得声称 accuracy preservation 跨域迁移。 |
+| P1-4 | 第二 backbone 或 JSCC 只在 in-sample 有效 | 仅作为 boundary/exploratory evidence，不进入摘要和核心贡献。 |
+| P1-5 | channel-type indicator 对结果占主导，或误判后明显退化 | 增加 channel-type 误判/去除 channel-type 敏感性；不得把完美 AWGN/Rayleigh 标签描述为天然可部署输入。 |
+| P1-6 | L 的实际 BLER 不可忽略 | 使用 L 的真实 packet size 和 PHY 计算 delivery；Fixed L 不得继续被称为绝对可靠。 |
+| P1-7 | selector 之外的总延迟未测量 | 只报告 selector-only latency；不得声称完整系统满足实时约束。 |
+| P1-8 | 多 collaborator 超出预算 | 第一篇文章明确限定 single ego–single collaborator；多车调度留给下一课题。 |
 
-**P1-6, standing addition (F).** The v2 main protocol already gives L a **real physical-layer
-delivery** derived from its codeword count (§4.3, D-2), rather than an assumed `BLER_L`. **This
-trigger condition is therefore expected not to hold under v2. If it does hold anyway, that is
-reported as measured** — the expectation does not license ignoring it.
+**P1-6, v2 execution note (not supervisor text).** The v2 main protocol already computes L's delivery
+from its **real packet size through the same PHY** (§4.3, D-2) rather than assuming a `BLER_L`, so
+this trigger is **expected not to hold** under v2. **If the measurement says otherwise it is reported
+as measured** — the expectation does not license skipping the check.
 
-| id | stage-5 rewrite item (not executed now) |
+**P1-8 is already discharged by the protocol, not merely planned for:** §2 locks the mainline to one
+ego and one collaborator, with the selection rule quoted in full.
+
+### 12.2 P2 — stage-5 rewrite list (supervisor verbatim; archived, not executed now)
+
+| ID | 重写项 |
 |---|---|
-| P2-1 … P2-6 | **TEXT REQUIRED** |
+| P2-1 | 重写摘要，只保留问题、方法、E/L/F、核心 payload–performance 结果和机制结论。 |
+| P2-2 | 贡献压缩为三项：问题形式化、receiver-driven 方法、统一协议下的实验发现。 |
+| P2-3 | 删除主文中的 retired、withdrawn、committed product、in the record 等内部审计语言，移入 changelog 或 supplementary。 |
+| P2-4 | 重写 Conclusion，只回答做了什么、证明了什么、在哪些条件下成立。 |
+| P2-5 | 将 baseline 分为 fixed policy、internal decision rule、feature-content/codec baseline、adaptive policy 和 oracle。 |
+| P2-6 | 修正文档问题：补齐 supplementary 标题和作者、移走 CSV 清单、修复重复命令/小写开头、统一标准引用，并删除 "safety certification"、"lightweight real-time" 等证据不足的措辞。 |
 
-**Superseded prose (F).** V2-R1's paragraph-form placeholder for this section is retired to the
-history track: not deleted, not quoted.
+**Not executed now.** The v1 manuscript is frozen (`docs/STOP_WORK_v1_freeze.md`); P2 is the stage-5
+rewrite of the **v2** manuscript and runs after the re-freeze lands.
 
-### 12.1 D-3 — the E-collapse diagnostic, strengthened before any result
+**Superseded prose.** V2-R1's paragraph-form placeholder for this section is retired to the history
+track: not deleted, not quoted.
 
-Under v2's accounting `B_L` is about **0.75 %** of the β = 0.10 budget (§4.4). E saves only that
-remaining fraction relative to L. **So `ρ_E ≈ 0` has an economic explanation and is not, by itself,
-evidence that the selector failed to learn E.**
+### 12.3 D-3 — the E-collapse diagnostic, strengthened before any result
 
-The P1-1 diagnostic is therefore **split into two questions, whose wording is fixed now**, and whose
-conclusions are **reported separately**:
+This strengthens **P1-1** above; it does not replace it. Under v2's accounting `B_L` is about
+**0.75 %** of the β = 0.10 budget (§4.4), so E saves only that remaining fraction relative to L.
+**`ρ_E ≈ 0` therefore has an economic explanation and is not by itself evidence that the selector
+failed to learn E.**
+
+The diagnostic is **split into two questions whose wording is fixed now**, reported **separately**:
 
 * **(i) A learning question.** *On the subset of frames where L is actually harmful — where the
   realised ego-only outcome exceeds the realised object-level outcome — does the selector choose E?*
@@ -623,20 +664,20 @@ conclusions are **reported separately**:
   saving being negligible?* Reported as: "Elsewhere, E saves at most `B_L,t` — a mean of Y % of the
   β budget — so its non-selection is a cost-scale consequence rather than a learning outcome."
 
-**Merging these into one sentence such as "the selector did not learn to use E" is forbidden.** They
-are different findings with different remedies, and v1 conflated exactly this kind of pair once
-already (the R63/R64 feasible-set correction).
+**Merging these into one sentence such as "the selector did not learn to use E" is forbidden.** Note
+that P1-1's own pre-specified handling — "只称 E 为可用但很少触发的安全动作" — is the *conclusion*
+that follows if (i) shows a learning problem; if only (ii) applies, the finding is different and must
+be said differently.
 
-### 12.2 D-4 — what β means physically, to be verified before it is written
+### 12.4 D-4 — what β means physically, to be verified before it is written
 
 **Observation, recorded now for possible use in the stage-5 rewrite:** L is nearly free and F is
-expensive, so to first order **β is the allowed F-request rate** — a budget of β × `B_F` buys about β
-frames' worth of feature requests per frame.
+expensive, so to first order **β is the allowed F-request rate**.
 
 **This is an interpretive statement and it is not yet evidence.** It may enter the manuscript **only
 after** it is checked against the frozen products, by comparing realised `ρ_F` against β. **Writing
-it first and verifying afterwards is forbidden**; this paragraph exists so that the claim is on
-record as *unverified* rather than arriving later as if it had always been known.
+it first and verifying afterwards is forbidden**; this paragraph exists so the claim is on record as
+*unverified* rather than arriving later as if it had always been known.
 
 ---
 
@@ -713,11 +754,11 @@ inventory — count and locate every use — so the rewrite is mechanical later.
 | 8 sanity | **LOCKED** | fuse held; all-CAV caveat recorded |
 | 9 cue set | **LOCKED** | v1 set carried over |
 | 10 budgets and criterion | **LOCKED** | B-3 β tiers; C-3 re-based ≥ 10 % |
-| 11 regeneration | **LOCKED** | twelve packages, thirteen rows, mapping complete; package bodies marked inferred |
-| 12 P1/P2 | **NOT LOCKED** | the supervisor's two tables are not in this repository |
+| 11 regeneration | **LOCKED** | P0-3 verbatim + twelve packages verbatim + full mapping (V2-R4) |
+| 12 P1/P2 | **LOCKED** | both tables entered verbatim (V2-R4) |
 | 13 external arm | **LOCKED as a placeholder** | report before GPU |
 | 14 v1 disposition | **LOCKED** | |
 | 15 wording audit | **LOCKED as a rule**, not yet executed | |
 
-**No mainline GPU runs while any section above reads NOT LOCKED.** §12 is the only one, and the only
-thing it needs is text.
+**No mainline GPU runs while any section above reads NOT LOCKED.** As of V2-R4 there are none:
+every declared section is LOCKED, and mainline Tier A is released to run.

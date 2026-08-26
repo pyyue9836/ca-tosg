@@ -4624,3 +4624,98 @@ validate, and this batch is specified as zero-GPU through step 7. It is also dow
 that is not fully locked. It is ready to run the moment §12 lands.
 
 21/21 gates PASS; main 16 pages, supplementary 12; PDFs restored to the freeze.
+
+## V2-R4 — §11/§12 entered verbatim, protocol fully locked, int8 costs nothing measurable
+
+**15/15 LOCKED, 0 NOT LOCKED.** Protocol sha256
+`5577655a019d404ad3b5fb41756c976054a9959f86897f4431194e92dbd18d13` (was `d5bd093ba2e4…`).
+The v1 manuscript was not touched: `paper/*.tex` 0, both PDFs 0, `results/main` 0.
+
+### The 13-row attribution, settled by diff
+
+V2-R3 reported that this repository's thirteen product rows were **not** P0-3 and said it could not
+check, because P0-3's text was not here. It has now been supplied. **Row-by-row diff: 0 of 13 match.**
+They are different lists that happened to share a length — P0-3 enumerates *what plan A invalidates*,
+the V2-R1 table enumerated *a dependency order for re-deriving things*.
+
+**P0-3 is authoritative and has replaced it** (§11.1, verbatim including its binding last line: one
+complete re-freeze, bundled, with no old number kept because it "looks like it didn't change much").
+The superseded table is retained at §11.4, labelled executor-derived, not deleted and not cited. The
+twelve work-package bodies are likewise entered verbatim, replacing the `inferred` column.
+
+### The mapping, and what it found this time
+
+**All thirteen P0-3 rows map to a work package.** Four packages map to no P0-3 row — 1, 2, 6 and 8 —
+and that asymmetry is the reason both lists are kept: P0-3 lists *old results that die*, the packages
+list *work that must happen*. Three of the four produce things v1 never had (run-time invariants,
+per-agent bottlenecks, transport products under partial recovery) and so cannot appear on a list of
+invalidated v1 outputs.
+
+**Package 6, cue regeneration, is the one that matters.** It is unmatched for a different reason: the
+23-dimensional cue vector **did** exist in v1, and P0-3 does not list it — yet package 6 requires
+every cue value depending on the new ego detections to be updated. **A cue set carried over
+unregenerated would silently feed v1 detections into a v2 selector.** V2-R3 predicted this gap
+against the derived list; it survives against the verbatim one, and is now flagged permanently.
+
+### Section hashes: exactly three moved
+
+§11 `eb79012f…` → `00b84fc4…`, §12 `PENDING` → `67cb50b5…`, §16 `d09229c1…` → `9c76ae43…`.
+**The other twelve are byte-identical**, which is the receipt that V2-R4 changed only what it should.
+
+### Step 4 — int8 scales calibrated on validate, frozen, and the loss measured
+
+220 validate frames, every 9th so all nine scenes contribute, ego + one collaborator. Three symmetric
+per-branch scales `s_b = max|x_b| / 127`, taken over every non-ego CAV's bottleneck so the scale is
+conservative and independent of which collaborator the selection rule picks:
+
+| branch | max\|x\| | `s_b` |
+|---|---|---|
+| 0 | 9.409498 | 0.07409054 |
+| 1 | 13.652488 | 0.10749990 |
+| 2 | 2.453234 | 0.01931680 |
+
+Frozen into `results/manifests/V2_INT8_SCALES.json`. **Clean delivery, float vs int8, same frames:**
+
+| | float | int8 | quantisation loss |
+|---|---|---|---|
+| AP@0.5 | 0.85489 | 0.85486 | **+0.00003** |
+| AP@0.7 | 0.75119 | 0.75137 | **−0.00018** |
+| mean per-frame F1 | 0.88808 | 0.88828 | **−0.00020** |
+
+**int8 costs nothing measurable** — two of the three deltas are negative, i.e. inside noise. Reported
+as measured, and it is **not** grounds for changing `w`; the `w ∈ {4, 16}` sensitivity arm is
+untouched.
+
+*Implementation note, because it is the kind of thing that must be visible:* `AutoEncoder.forward`
+runs encoder and decoder in one call, so the bottleneck — the thing that would go on the wire — is
+never exposed. `v2_int8_calibrate.py` wraps that call to split it and inserts the quantise/dequantise
+pair exactly where the protocol says the channel is. Branch 2 carries no AutoEncoder and is quantised
+where the fusion consumes it. **No weight, module or fusion rule is altered.**
+
+### Step 5 — `f_tail` measured, and the proxy was badly wrong
+
+| estimate | `f_tail` |
+|---|---|
+| V2-R1 assumption | 0.15 |
+| V2-R3 parameter share | 0.118 |
+| **V2-R4 measured wall clock** | **0.309** |
+
+3.20 ms tail against 10.35 ms full at `record_len=[2]`, 20 timed runs after warm-up. **The parameter
+share under-read it by 2.6×** — the deblocks are transposed convolutions over the full BEV grid,
+cheap in parameters and expensive in compute. This is precisely why V2-R3 declined to price tier B
+off the proxy, and the refusal paid: **tier B's typical estimate doubles, 5 h → ≈ 10 h**, and the
+A+B+C typical total moves from ≈ 13 h to **≈ 18 h**. `docs/v2_gpu_cost_estimate.md` updated.
+
+### Step 6 — Tier A is authorised and not yet started, and why that is not a stall
+
+The protocol is fully locked and V2-R4 releases Tier A without further approval. **What does not yet
+exist is the code**: work packages 1–5 (forward invariants, per-agent inference with the
+nearest-collaborator rule, and the E/L/F product generators) have to be written before there is
+anything to launch. The pieces built so far — the single-vehicle forward, the two-CAV restriction,
+the transmit-quantiser and the payload chain — are the components those packages assemble, not the
+packages themselves.
+
+**Reporting an unstarted run as started would be the one failure mode this whole protocol exists to
+prevent.** The authorisation is in hand; the next batch builds packages 1–5 and launches.
+
+21/21 gates PASS; main 16 pages, supplementary 12.

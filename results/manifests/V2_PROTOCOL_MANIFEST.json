@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-protocol-manifest/1",
  "protocol": "docs/unified_branch_protocol_v2.md",
- "protocol_sha256": "d5bd093ba2e4e3d92b555924dd5fdc86d43d9c4af7c501b3ed2207f37ebc576e",
+ "protocol_sha256": "5577655a019d404ad3b5fb41756c976054a9959f86897f4431194e92dbd18d13",
  "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
  "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
  "sections": [
@@ -94,20 +94,20 @@
    "bytes": 1348
   },
   {
-   "section": "11. Regeneration \u2014 twelve work packages, mapped to thirteen product rows (E)",
+   "section": "11. Regeneration \u2014 P0-3's invalidation list, the twelve work packages, and the mapping",
    "number": "11",
    "lock_state": "LOCKED",
-   "sha256": "eb79012f4e4d51f872e1efe701395e20419c024ddc32b64126beb45523f2e037",
-   "sha256_observed": "eb79012f4e4d51f872e1efe701395e20419c024ddc32b64126beb45523f2e037",
-   "bytes": 4641
+   "sha256": "00b84fc467cbe0be9b5978df86bd80b4bfd9dce775f2a6a12e5eb44058d776c8",
+   "sha256_observed": "00b84fc467cbe0be9b5978df86bd80b4bfd9dce775f2a6a12e5eb44058d776c8",
+   "bytes": 5999
   },
   {
    "section": "12. Conditional branches P1-1 \u2026 P1-8, and stage-5 rewrite items P2-1 \u2026 P2-6",
    "number": "12",
-   "lock_state": "NOT LOCKED",
-   "sha256": "PENDING",
-   "sha256_observed": "a2946ea5aef7b4bf21f997e1b8cf044752163e85020c4b8f600cf1b0b0b758b2",
-   "bytes": 3563
+   "lock_state": "LOCKED",
+   "sha256": "67cb50b587c839186559d6f7cac5113ec493563ac95df6cd2e2112d51103c507",
+   "sha256_observed": "67cb50b587c839186559d6f7cac5113ec493563ac95df6cd2e2112d51103c507",
+   "bytes": 5589
   },
   {
    "section": "13. External baseline arm (P0-7) \u2014 pre-registration placeholder",
@@ -137,12 +137,12 @@
    "section": "16. Lock status",
    "number": "16",
    "lock_state": "UNDECLARED",
-   "sha256": "d09229c1c1e396fa914da669ac1e20d7c0e7a70fb6e3e7e32da7671622a4883b",
-   "sha256_observed": "d09229c1c1e396fa914da669ac1e20d7c0e7a70fb6e3e7e32da7671622a4883b",
-   "bytes": 1278
+   "sha256": "9c76ae435a966fc72f568e2923d8d99c2d0865bc4b1d3f9abb8b5b9b87a1a525",
+   "sha256_observed": "9c76ae435a966fc72f568e2923d8d99c2d0865bc4b1d3f9abb8b5b9b87a1a525",
+   "bytes": 1282
   }
  ],
- "locked": 14,
+ "locked": 15,
  "partial": 0,
- "not_locked": 1
+ "not_locked": 0
 }

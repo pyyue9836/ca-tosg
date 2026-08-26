@@ -1,0 +1,38 @@
+{
+ "schema": "catosg-v2-int8-scales/1",
+ "protocol": "docs/unified_branch_protocol_v2.md sec 2 (F), sec 3.3 (C-2), B-4",
+ "checkpoint": "/mnt/h/opencood_project/pretrained_models/pointpillar_attentive_fusion/pointpillar_attentive_fusion_compression",
+ "calibration_split": "validate",
+ "calibration_every": 9,
+ "calibration_frames": 220,
+ "config": "ego + 1 collaborator (B-2)",
+ "quantiser": "symmetric int8, per branch, s_b = max|x_b| / 127",
+ "branch_max_abs": [
+  9.40949821472168,
+  13.652487754821777,
+  2.4532339572906494
+ ],
+ "scales": [
+  0.07409053712379275,
+  0.10749990358127384,
+  0.0193168028133122
+ ],
+ "mean_abs_dequant_error": [
+  0.00937600742009553,
+  0.015292563661932945,
+  9.914606565540783e-05
+ ],
+ "frames_evaluated": 220,
+ "seconds": 361.7,
+ "ap50_float": 0.8548941652397478,
+ "ap50_int8": 0.8548634834075944,
+ "ap70_float": 0.751186970223992,
+ "ap70_int8": 0.7513704403341513,
+ "f1_float": 0.8880781720056338,
+ "f1_int8": 0.8882761683775083,
+ "boxes_float_mean": 26.745454545454546,
+ "boxes_int8_mean": 26.740909090909092,
+ "ap50_quantisation_loss": 3.068183215337861e-05,
+ "ap70_quantisation_loss": -0.0001834701101594005,
+ "f1_quantisation_loss": -0.00019799637187456476
+}

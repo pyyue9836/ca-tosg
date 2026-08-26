@@ -84,13 +84,25 @@ tail is a small fraction of a full forward.
 
 | | `R` draws/condition | assumption | wall-clock h |
 |---|---|---|---|
-| conservative | 1 | tail-only, `f_tail ≈ 0.15` | 0.3 + a Tier-A pass |
-| **typical** | 20 | tail-only | **5** |
+| conservative | 1 | tail-only, `f_tail = 0.309` measured | 0.6 + a Tier-A pass |
+| **typical** | 20 | tail-only, `f_tail = 0.309` measured | **10** |
 | worst | 20 | full forward per condition | 30 |
 
-**`f_tail` is a guess until measured.** Before Josh prices this tier, a ~10-minute micro-benchmark
-should measure the tail fraction directly. **Recommendation: do not approve tier B on this
-estimate** — approve the micro-benchmark, then price it.
+### `f_tail` is now measured, and it is worse than assumed (V2-R4 step 5)
+
+| estimate | `f_tail` | basis |
+|---|---|---|
+| V2-R1 cost model | 0.15 | assumed |
+| V2-R3 parameter share | 0.118 | AutoEncoder decoders + AttFusion + deblocks + heads, by parameter count |
+| **V2-R4, measured wall clock** | **0.309** | 3.20 ms tail vs 10.35 ms full, `record_len=[2]`, 20 timed runs after warm-up |
+
+**The parameter share was the wrong proxy and under-read it by 2.6×.** The deblocks are transposed
+convolutions over the full BEV grid: cheap in parameters, expensive in compute. This is exactly why
+V2-R3 refused to price tier B off the proxy.
+
+**Tier B roughly doubles.** The typical row below was computed at `f_tail ≈ 0.15`; at the measured
+0.309 it is about **10 h**, not 5. The conservative and worst rows move in proportion (the worst row
+assumed a full forward and is unaffected).
 
 Storage: caching per-CAV bottlenecks for 4700 frames × 3.89 CAVs × 739,200 elements at int8 is
 on the order of **8 GB**; at float16, 16 GB. Not free, not prohibitive.
@@ -121,9 +133,9 @@ this one.**
 | tier | conservative | typical | worst |
 |---|---|---|---|
 | A — mainline re-freeze | **1.0** | **4** | 8.5 |
-| B — transport main-protocol | 0.3 + a Tier-A pass | **5** | 30 |
+| B — transport main-protocol | 0.6 + a Tier-A pass | **10** | 30 |
 | C — external arm | 1.5 | **4** | 40+ |
-| **A+B+C typical** | | **≈ 13 h wall-clock (A 4 + B 5 + C 4)** | |
+| **A+B+C typical** | | **≈ 18 h wall-clock (A 4 + B 10 + C 4)** | |
 
 Actual spend in V2-R1: **0.96 h** — 3,361 s for the 220-frame sanity run, 34 s for the
 production-regime calibration, ~30 s for the micro-benchmark. Inside the `<1 GPU-h` estimate, with
