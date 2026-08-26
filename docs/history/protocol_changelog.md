@@ -4807,3 +4807,64 @@ above the 0.00235 Msym proxy. WP4 prints both, as E-4 requires.
 Full validate run launched; test and Culver-City follow, then packages 3–5 per E-6.
 
 21/21 gates PASS; main 16 pages, supplementary 12.
+
+### V2-R5 continued — work package 2 complete on validate; work packages 3 and 4 delivered
+
+**WP2, full validate: 1980/1980 frames.** `n_cav` max **2**, mean **2.000**; every frame has a
+collaborator, matching the v1 count for this split. 1.119 s/frame. Collaborator boxes average
+**24.08** against the ego's 22.56.
+
+**WP3 and WP4 cost zero GPU.** Work package 2 already saved every box, score and GT, so E and L are
+derivable from its `.npz`. Re-running inference to obtain numbers already on disk would have burned
+an hour reproducing bytes.
+
+| validate, 1980 frames | E (ego-only) | L (late fusion) |
+|---|---|---|
+| AP@0.5 (global sort) | 0.72055 | **0.88851** |
+| AP@0.7 | 0.59996 | 0.74984 |
+| mean per-frame F1 | 0.78928 | **0.88915** |
+| boxes/frame | 22.56 | 28.40 |
+
+**Two things checked instead of assumed.**
+
+*Box transformation is already done by the dataset, and doing it again would break it.*
+`get_item_single_car()` states *"Project the lidar and bbx to ego space first, and then do
+clipping"*, so every CAV is voxelised **in the ego frame** and a single-vehicle forward already emits
+ego-frame boxes. Taking that from a docstring would be exactly the mistake R46-3 exists to prevent,
+so it was measured: **73.6 % of collaborator boxes overlap an ego box** (IoU > 0.1, 198 sampled
+frames). Two arms in different coordinate frames would drive that toward zero. **WP4 applies no
+further transform.**
+
+*Cross-vehicle NMS reuses OpenCOOD's own `nms_rotated` at the frozen 0.15* — the same function and
+threshold the intra-vehicle stage uses. A second NMS implementation is a second definition waiting to
+drift, which is the same reasoning that kept the collaborator rule unduplicated in WP2.
+
+**`B_L` corrected off the proxy, as E-4 requires.** The §4.4 figure used the *ego's* box counts
+because the collaborator arm did not exist. With the real distribution:
+
+| | proxy (ego) | measured (collaborator) | change |
+|---|---|---|---|
+| `N_box,t` mean | 22.41 | **24.08** | +7.5 % |
+| `N_cw,L` mean | 9.41 | **10.10** (range 2–21) | |
+| `B_L,t` mean | 0.00235 Msym | **0.00253 Msym** | **+7.4 %** |
+| share of the β = 0.10 budget | 0.75 % | **0.80 %** | |
+
+The proxy was low, in the direction expected — the collaborator is the *nearer* vehicle by
+construction and sees more. The D-3 argument is unaffected: `B_L` remains under 1 % of the tightest
+budget, so `ρ_E ≈ 0` still has an economic reading and still must be diagnosed as two separate
+questions.
+
+**Still running / still to do:** WP2 on test and Culver-City, then WP5 (F products: int8 quantise →
+transmit → dequantise → attentive fusion, clean and partial delivery under §5's six rules). WP5 is
+the only remaining Tier A component that needs GPU.
+
+**A disclosure about what is and is not committed.** `results/v2/wp2_per_agent_validate.npz` is
+14.9 MB of per-frame boxes and is **gitignored** (`.gitignore:18, *.npz`), like every other cache in
+this repository. The committed halves are the `.csv` per-frame table and the `.json` summary; the
+`.npz` is a **local intermediate that WP3/WP4 consume and that a clean clone cannot reproduce
+without rerunning WP2 on the artefact tier**. That is the same status the v1 `gs_rerun/*.npz` caches
+have, and it is registered as such in `docs/assumptions_ledger.md`. Stated here rather than left for
+someone to discover that the E/L numbers rest on a file they do not have.
+
+21/21 gates PASS. The assumptions-ledger gate again required a row before the new artefacts could be
+consumed, and again it was right to.
