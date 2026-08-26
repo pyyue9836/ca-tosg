@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-protocol-manifest/1",
  "protocol": "docs/unified_branch_protocol_v2.md",
- "protocol_sha256": "26202ce6ee251602574d7eb4ab86140f1a445e8199a6e70a2304dcde19c79111",
+ "protocol_sha256": "d5bd093ba2e4e3d92b555924dd5fdc86d43d9c4af7c501b3ed2207f37ebc576e",
  "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
  "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
  "sections": [
@@ -24,34 +24,34 @@
   {
    "section": "2. The three actions",
    "number": "2",
-   "lock_state": "PARTIAL",
-   "sha256": "249671825a27f8acd94bb7e0a8a2ebdd32199c40937f1adfffcd4da4bc7a7e2f",
-   "sha256_observed": "249671825a27f8acd94bb7e0a8a2ebdd32199c40937f1adfffcd4da4bc7a7e2f",
-   "bytes": 2652
+   "lock_state": "LOCKED",
+   "sha256": "47dfc0ed6282570a4d06f8ff9bc578475a592f61e062151ede7989629f94a3ac",
+   "sha256_observed": "47dfc0ed6282570a4d06f8ff9bc578475a592f61e062151ede7989629f94a3ac",
+   "bytes": 5649
   },
   {
    "section": "3. Unified FOV, GT, and the real F payload",
    "number": "3",
-   "lock_state": "PARTIAL",
-   "sha256": "f2726d051fb471db8ae5120bb2687b7a30da503e7917f929c5af155b17f24b28",
-   "sha256_observed": "f2726d051fb471db8ae5120bb2687b7a30da503e7917f929c5af155b17f24b28",
-   "bytes": 2725
+   "lock_state": "LOCKED",
+   "sha256": "130ff24e9f29ff57557d3f6bb0ad9b84019c1b210ea7e5f4b1d21d00ee3ff603",
+   "sha256_observed": "130ff24e9f29ff57557d3f6bb0ad9b84019c1b210ea7e5f4b1d21d00ee3ff603",
+   "bytes": 4405
   },
   {
-   "section": "4. L payload \u2014 per frame, from the boxes actually sent (P0-5)",
+   "section": "4. L payload \u2014 per frame, same transport chain as F (P0-5, B-1, D-2)",
    "number": "4",
    "lock_state": "LOCKED",
-   "sha256": "e796dab98f36c599672b9f83d44dccbfd819ad716c2f15603879927c782a50a4",
-   "sha256_observed": "e796dab98f36c599672b9f83d44dccbfd819ad716c2f15603879927c782a50a4",
-   "bytes": 1358
+   "sha256": "c4c59da5a70a4d245ee881bfe7c8ee08d1c76aede8e54da127244783e4fa4a80",
+   "sha256_observed": "c4c59da5a70a4d245ee881bfe7c8ee08d1c76aede8e54da127244783e4fa4a80",
+   "bytes": 3718
   },
   {
-   "section": "5. Transport model (P0-6)",
+   "section": "5. Transport model (P0-6), with partial recovery specified exactly (C-2)",
    "number": "5",
    "lock_state": "LOCKED",
-   "sha256": "c01a9737c98e3c3ba67022ace6cfebaddcce3fb4eb7e04863193e2f26e12c90e",
-   "sha256_observed": "c01a9737c98e3c3ba67022ace6cfebaddcce3fb4eb7e04863193e2f26e12c90e",
-   "bytes": 904
+   "sha256": "2add5d44f0534b6a316a514ec17fb3080c9b8c514c63a29156a3e4c9b8f4b6d8",
+   "sha256_observed": "2add5d44f0534b6a316a514ec17fb3080c9b8c514c63a29156a3e4c9b8f4b6d8",
+   "bytes": 1530
   },
   {
    "section": "6. Statistics (P0-8)",
@@ -65,17 +65,17 @@
    "section": "7. Success criteria \u2014 design correctness, not a better number",
    "number": "7",
    "lock_state": "LOCKED",
-   "sha256": "1a0a571d8191ffc6129c4c2f18afba84489f80f75950242f9d4d1ce887ed1e4f",
-   "sha256_observed": "1a0a571d8191ffc6129c4c2f18afba84489f80f75950242f9d4d1ce887ed1e4f",
-   "bytes": 2746
+   "sha256": "0809196045e27c3ce1b5cf50125f8977957df324b1a70484d10a6f8260002745",
+   "sha256_observed": "0809196045e27c3ce1b5cf50125f8977957df324b1a70484d10a6f8260002745",
+   "bytes": 3863
   },
   {
    "section": "8. Sanity check (P0-2) \u2014 the fuse, run before anything else",
    "number": "8",
    "lock_state": "LOCKED",
-   "sha256": "cf140b96edcd51e8b7a496bf89818b8a311bea119fcaf39bec629aecf3f4de48",
-   "sha256_observed": "cf140b96edcd51e8b7a496bf89818b8a311bea119fcaf39bec629aecf3f4de48",
-   "bytes": 732
+   "sha256": "e189b4c563bca0e62ad34c8e73ec9b390f4a91b645354cd54168197ca999faa2",
+   "sha256_observed": "e189b4c563bca0e62ad34c8e73ec9b390f4a91b645354cd54168197ca999faa2",
+   "bytes": 1134
   },
   {
    "section": "9. Selector cue set (2c)",
@@ -86,28 +86,28 @@
    "bytes": 802
   },
   {
-   "section": "10. Split discipline (unchanged from v1)",
+   "section": "10. Split discipline, budgets and the payload criterion",
    "number": "10",
-   "lock_state": "PARTIAL",
-   "sha256": "63a12ab9ab942b379d85bcd0f4526f78d3b22107f18282381abf60afb62dbd0f",
-   "sha256_observed": "63a12ab9ab942b379d85bcd0f4526f78d3b22107f18282381abf60afb62dbd0f",
-   "bytes": 792
+   "lock_state": "LOCKED",
+   "sha256": "9ee9626d78c05ca5fd3e651ecb1be2831457dd34c844f4d02bcb91f20b3e7d92",
+   "sha256_observed": "9ee9626d78c05ca5fd3e651ecb1be2831457dd34c844f4d02bcb91f20b3e7d92",
+   "bytes": 1348
   },
   {
-   "section": "11. Regeneration list \u2014 every product the unification touches",
+   "section": "11. Regeneration \u2014 twelve work packages, mapped to thirteen product rows (E)",
    "number": "11",
-   "lock_state": "NOT LOCKED",
-   "sha256": "PENDING",
-   "sha256_observed": "9eed1355b0debd38bfd431059ab6611bea371ccefbab6214ee707903774a6fb7",
-   "bytes": 1436
+   "lock_state": "LOCKED",
+   "sha256": "eb79012f4e4d51f872e1efe701395e20419c024ddc32b64126beb45523f2e037",
+   "sha256_observed": "eb79012f4e4d51f872e1efe701395e20419c024ddc32b64126beb45523f2e037",
+   "bytes": 4641
   },
   {
    "section": "12. Conditional branches P1-1 \u2026 P1-8, and stage-5 rewrite items P2-1 \u2026 P2-6",
    "number": "12",
    "lock_state": "NOT LOCKED",
    "sha256": "PENDING",
-   "sha256_observed": "558cd603397837f82699d155dd74b93b09219f36ec93b5548440dc982e5267c0",
-   "bytes": 738
+   "sha256_observed": "a2946ea5aef7b4bf21f997e1b8cf044752163e85020c4b8f600cf1b0b0b758b2",
+   "bytes": 3563
   },
   {
    "section": "13. External baseline arm (P0-7) \u2014 pre-registration placeholder",
@@ -137,12 +137,12 @@
    "section": "16. Lock status",
    "number": "16",
    "lock_state": "UNDECLARED",
-   "sha256": "2ea7d3a14f453497e0411b986df964586c37465b8b40a22273e568d802546915",
-   "sha256_observed": "2ea7d3a14f453497e0411b986df964586c37465b8b40a22273e568d802546915",
-   "bytes": 1013
+   "sha256": "d09229c1c1e396fa914da669ac1e20d7c0e7a70fb6e3e7e32da7671622a4883b",
+   "sha256_observed": "d09229c1c1e396fa914da669ac1e20d7c0e7a70fb6e3e7e32da7671622a4883b",
+   "bytes": 1278
   }
  ],
- "locked": 10,
- "partial": 3,
- "not_locked": 2
+ "locked": 14,
+ "partial": 0,
+ "not_locked": 1
 }

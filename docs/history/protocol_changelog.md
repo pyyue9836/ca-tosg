@@ -4501,3 +4501,126 @@ this estimate** — measure the tail-only re-decode fraction first, since that o
 between 0.3 h and 30 h.
 
 21/21 gates PASS. Main 16 pages, supplementary 12 — unchanged, and the PDFs restored to `400bfb6d`.
+
+## V2-R3 — rulings written in, payload chain derived, and one section that cannot lock
+
+Zero GPU. **The v1 manuscript was not touched**: `paper/*.tex` 0 changes, both PDFs 0,
+`results/main` 0.
+
+### A-1 · Packet parameters — single source, and the honest provenance
+
+Full-tree sweep for the retired pair (`1500 B`, `12,000 bit`, `160 bit`): **zero hits**. No V2-R2
+commit exists on this branch either.
+
+**Where 8,000 / 320 came from, since A-1 asks:** this executor wrote them in **V2-R1, commit
+`2c8378d`**, in a table column headed **"proposed"**, with its own stated reasons — an MTU-scale
+packet and an ordinary IP/UDP/application header. **They were never transcribed from a supervisor
+text.** So the divergence from V2-R2's 1500 B / 160 bit is **executor judgement, not transcription**,
+and C-2 has since ruled the same three values independently. Recorded in §3.3 rather than left as
+folklore.
+
+### B-1 · `B_box` — the value did not change, the basis did
+
+The V2-R1 field table summed to **144 bits** and was labelled 184. That was an **arithmetic error**,
+not a measurement. The fix was to ask what an ETSI CPM object container must carry, which supplied
+**planar velocity (2 × 16) and an object ID (8)**; 144 + 32 + 8 lands back on 184.
+
+**That coincidence is a coincidence, not a verification.** The two fields were added because the
+standard container has them — not because 184 needed defending. The protocol accordingly does **not**
+say 184 is "verified" or "confirmed", and it now carries a standing rule: **no field may ever be
+added or removed to preserve a number already written.** If a future correction moves the total, the
+total moves.
+
+### D-1 · `B_F` derived from `N_cw`, and the padding that the direct route hides
+
+`tools/v2_payload_chain.py` prints every step and refuses to finish if the identity fails:
+
+```
+739,200 elements x 8 bit            = 5,913,600 info bits
+739 full packets (8,000 b) + tail 1,600 b;  740 x 320 = 236,800 header bits
+full packet 8,320 b -> ceil/500 = 17 cw  (x739)
+tail packet 1,920 b -> ceil/500 =  4 cw  (x1)
+N_cw = 12,567
+B_F  = 12,567 x 1000 / 4 / 1e6 = 3.14175 Msym/frame
+```
+
+Identity `B_F ≡ N_cw × n / log2 M / 1e6`: **PASS**. The forbidden direct route gives **3.07520**; the
+**codeword-padding gap is +0.06655 Msym (+2.164 %)** — reproducing the reference estimate in the
+instruction to all printed digits, and demonstrating exactly why D-1 bans the direct route.
+
+β tiers: **0.31418 / 0.62835 / 0.94252** Msym. Ladder step (one codeword) = 0.00025 Msym; the tiers
+are 1,257 steps apart, so codeword granularity does not blur them.
+
+### D-2 · L on the same chain — and its reliability is computed, not assumed
+
+`N_cw,L` ≈ **9–12** codewords against F's **12,567** — a factor of ~1,300 fewer chances to fail. That
+is *why* L is reliable, and the protocol now says so instead of assuming `BLER_L`. Over the 220
+sanity frames (ego box counts as a **proxy** until work package 4 produces the collaborator's):
+`B_L` mean **0.00235 Msym = 0.75 % of the β = 0.10 budget`. The v1 all-or-nothing model and the
+`BLER_L` grid are demoted to sensitivity arms; **P1-6 is closed by this**.
+
+### Rulings written in
+
+**C-1** E keeps the internal AutoEncoder (it is network forward path; bypassing it would break the
+one-checkpoint control) and bypasses all communication coding; `B_E = 0`; the 2-bit request is a
+fixed control overhead charged to no action. **C-2** `w`/`P`/`H_F` = 8 / 8,000 / 320, with the
+partial-recovery rules written out to six numbered points so no implementation choice is left open.
+**C-3** primary criterion entered verbatim, and the **primary-endpoint change is registered**:
+nominal-τ → budget-feasible comparator, legitimate because **not one v2 number exists yet**, and
+noted as making the bar **harder**, with reverting forbidden. **B-2** one ego + one collaborator, the
+v1 P4-C nearest-collaborator rule quoted **in full** rather than named, `739,200` charged once per
+frame, multi-collaborator demoted. **B-3** β = {0.10, 0.20, 0.30}, primary cell renamed *Test at
+β = 0.20*. **B-4** int8 executed for real, with the ambiguity closed in three lines: the
+collaborator→ego bottleneck is quantised, the ego's own features are not, E/L transmit no tensor;
+"per-branch scale" defined as three symmetric scalars `max|x|/127`, validate-calibrated, frozen,
+pre-shared.
+
+**D-3** splits the E-collapse diagnostic into a **learning** question and a **design** question with
+both wordings fixed now, and forbids merging them — `ρ_E ≈ 0` has an economic explanation when L
+costs 0.75 % of the budget. **D-4** records the "β ≈ the allowed F-request rate" reading as
+**explicitly unverified**, admissible only after checking realised `ρ_F` against β.
+
+### §11 · Twelve work packages, thirteen product rows, and a provenance correction
+
+The twelve titles are recorded verbatim; **their bodies are not in this repository**, so each carries
+an *inferred* scope column marked as inferred.
+
+**Correction that has to be said plainly:** the instruction calls the thirteen rows "P0-3 的 13 行
+verbatim 产物清单". **They are not verbatim P0-3.** This executor wrote them in V2-R1 as a derived
+dependency order and said so at the time. They are kept, clearly labelled, and will be replaced if
+P0-3's actual lines differ.
+
+The bidirectional mapping is complete: **all thirteen rows map to a package**; **package 6 (cue
+regeneration) maps to nothing**, because the thirteen-row list omitted it — the omission the
+instruction predicted, now explicit. Package 1 has no product row by design: it is a run-time
+invariant, not a file.
+
+### §12 · BLOCKED — and this is the stop
+
+F asks for the supervisor's two tables (P1-1…P1-8, P2-1…P2-6) to be entered **verbatim, row by row**.
+**Those tables are not in this repository and were not in the message.** Transcribing tables that
+were never supplied would be fabrication, and a pre-registration is the last place that belongs. The
+section keeps the correct shape with `TEXT REQUIRED` markers and **stays NOT LOCKED**.
+
+**Manifest: 14 LOCKED, 0 PARTIAL, 1 NOT LOCKED.** Protocol sha256
+`d5bd093ba2e4e3d92b555924dd5fdc86d43d9c4af7c501b3ed2207f37ebc576e`.
+
+Per G-9 and the protocol's own rule, **mainline Tier A does not start.** Step 8's precondition
+("以上全绿") is not met, and §12 is the only thing not green. It needs text, not work.
+
+### Step 7 · Tail-only re-decode fraction, zero GPU
+
+Parameter shares of the modules a codeword erasure forces to re-run (AutoEncoder decoders +
+AttFusion + deblocks + heads) against the whole network: **842,384 / 7,112,752 = 0.118**, against the
+0.15 the V2-R1 cost model assumed. **Parameters are a proxy for compute, not compute** — the deblocks
+are transposed convolutions over the full BEV grid and are compute-heavy for their parameter count,
+so the wall-clock `f_tail` is expected **higher** than 0.118. A ~10 s timing run would settle it and
+is the right thing to do before tier B is priced.
+
+### Not done, and why
+
+**Step 6 (int8 scale calibration + clean-delivery AP/F1) was not run.** It requires a GPU pass over
+validate, and this batch is specified as zero-GPU through step 7. It is also downstream of a protocol
+that is not fully locked. It is ready to run the moment §12 lands.
+
+21/21 gates PASS; main 16 pages, supplementary 12; PDFs restored to the freeze.

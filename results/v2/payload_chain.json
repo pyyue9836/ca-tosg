@@ -1,0 +1,44 @@
+{
+ "schema": "catosg-v2-payload-chain/1",
+ "constants": {
+  "w_bits": 8,
+  "P_bits": 8000,
+  "H_bits": 320,
+  "K": 500,
+  "n": 1000,
+  "M": 16,
+  "B_box_bits": 184
+ },
+ "F": {
+  "elements": 739200,
+  "info_bits": 5913600,
+  "n_full": 739,
+  "tail_bits": 1600,
+  "packets": 740,
+  "header_bits": 236800,
+  "n_cw": 12567,
+  "msym": 3.14175,
+  "cw_full": 17,
+  "cw_tail": 4,
+  "direct_msym": 3.0752
+ },
+ "beta_tiers_msym": {
+  "0.10": 0.31417500000000004,
+  "0.20": 0.6283500000000001,
+  "0.30": 0.942525
+ },
+ "L_proxy_distribution": {
+  "n": 220,
+  "n_box_mean": 22.40909090909091,
+  "n_box_min": 5,
+  "n_box_max": 47,
+  "msym_mean": 0.002352272727272727,
+  "msym_min": 0.00075,
+  "msym_max": 0.00475,
+  "n_cw_mean": 9.409090909090908,
+  "n_cw_min": 3,
+  "n_cw_max": 19
+ },
+ "ladder_step_msym": 0.00025,
+ "identity_check": "PASS"
+}
