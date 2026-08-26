@@ -81,6 +81,11 @@ handles them.
 **Multi-collaborator is a separate sensitivity analysis, not the main experiment.** Any statement
 about N > 1 is labelled as such and never enters a mainline cell.
 
+**Runtime evidence that the lock is in the data path, not only in this document (V2-R6 C-3).** Work
+package 2 reports `n_cav` **max 2** on all three splits (mean 2.000 / 1.945 / 1.869), against the
+sanity check's mean 3.89 and **max 7** on the same validate frames before the rule was applied. That
+is an observed property of the tensors the model received, not a statement about intent.
+
 **Frozen decision parameters (2b). These are protocol constants, not knobs.**
 
 | parameter | value | source |
@@ -550,6 +555,61 @@ Retained at **10 %**, with the comparison against the **budget-feasible comparat
 Both arms are charged with the v2 **per-frame** `B_L,t` and the **measured** `B_F`. An over-budget
 nominal threshold is a **descriptive** contrast only and may not act as the confirmatory comparator.
 The full primary criterion is §7.0.
+
+---
+
+### 10.3 Frames with no collaborator — ruled (V2-R6 B)
+
+**The fact.** After the single-collaborator rule, some frames have `|C| = 0`: **validate 0/1980
+(0 %), test 119/2170 (5.48 %), Culver-City 72/550 (13.09 %)**. On those frames L and F are
+*physically unavailable* — there is no one to receive from — and the action space degenerates to
+`{E}`.
+
+**v1 already had a convention, and it is adopted rather than re-invented (B-2).** The v1 N=1
+per-frame caches keep **every** frame, and on a no-collaborator frame the cooperative outcome
+degenerates to the ego-only one. Checked against the data, not inferred: in
+`data/p2/dataset_{split}_n1.csv`, `late_f1 == ego_f1` on **all 119** test and **all 72** Culver-City
+no-collaborator frames — a perfect correspondence, matched frame by frame against the v2
+`has_collab` flag. (On test, 215 frames satisfy `late_f1 == ego_f1` in total; the other 96 are
+coincidental equality with a collaborator present, which is why the correspondence had to be checked
+per frame and not by counting.)
+
+**RULING: (a) full-frame accounting.** Every frame is included in the frame-weighted mean, on every
+split, for every arm. This matches v1, so **no amendment is required for the frame set**.
+
+**What v2 changes, and it is a fix rather than a carry-over.** Under v1's *fixed* `B_L = 0.024`, a
+frame with no collaborator that selected L still **paid for a message that could not be sent**. v2's
+per-frame accounting removes that artefact without a special case: with `N_box,t = 0` the chain of
+§4.2 gives `N_cw,L = 0` and therefore **`B_L,t = 0`**, automatically. For F the same must be stated
+explicitly, because `B_F` is a constant: **on a frame with `|C| = 0`, `B_F = 0`.**
+
+So, on a no-collaborator frame:
+
+| | value |
+|---|---|
+| realised outcome of E, L and F | the **ego-only** outcome — identical, because nothing is received |
+| `B_E`, `B_L,t`, `B_F` | **all 0** — nothing is transmitted, so nothing is charged |
+| action label | whatever the policy emits; the *physics* is unaffected by the label |
+
+**Both accountings are reported, always (B-3).** The **full-frame** figure is primary; the
+**collaborator-available** figure (restricted to `|C| ≥ 1`) is reported alongside it, and **the
+difference is stated explicitly**. Neither is allowed to appear without the other.
+
+**One definition, all comparators (B-4).** This applies identically to CA-TOSG, the SNR threshold τ,
+the two- and three-scalar hand rules, the oracle, and any external baseline. **No arm may use a
+different frame set from another arm it is compared against.** A comparison across different frame
+sets is not a comparison.
+
+### 10.4 A cross-domain risk to be checked, written before the numbers exist (B-5)
+
+The no-collaborator share is **5.48 % on test against 13.09 % on Culver-City — a factor of 2.4.**
+Under full-frame accounting those frames cost zero for every arm, so **part of Culver-City's apparent
+payload saving will come from collaborator unavailability rather than from policy choice.**
+
+This is a **precondition on P1-3's wording**, recorded now so it cannot be discovered later and
+described as always having been understood. After the freeze, the check is mechanical: report the
+Culver-City payload with and without the `|C| = 0` frames, and if the gap is material, say plainly
+that the domain has fewer collaborators rather than that the policy transfers better.
 
 ---
 

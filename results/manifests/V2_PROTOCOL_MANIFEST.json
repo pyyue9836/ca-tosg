@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-protocol-manifest/1",
  "protocol": "docs/unified_branch_protocol_v2.md",
- "protocol_sha256": "d9d756c02eaaaeba2f9a1c31117cbbcf9cb8d369dfccbeeaf330652e4a22e9a1",
+ "protocol_sha256": "14ca056474cd1dc240824e993c5a35a09855ab9b377f731806da8e5c72de4b2b",
  "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
  "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
  "sections": [
@@ -25,9 +25,9 @@
    "section": "2. The three actions",
    "number": "2",
    "lock_state": "LOCKED",
-   "sha256": "7c2f27c31f4a3d3774a6eb6b8d732db5695ee30915b5dff79f1df8723f590c31",
-   "sha256_observed": "7c2f27c31f4a3d3774a6eb6b8d732db5695ee30915b5dff79f1df8723f590c31",
-   "bytes": 7953
+   "sha256": "f1934526ea7d0ad6a066aae8be91194f15c6b77e0cb0d9c9700a51cbaf0ea64f",
+   "sha256_observed": "f1934526ea7d0ad6a066aae8be91194f15c6b77e0cb0d9c9700a51cbaf0ea64f",
+   "bytes": 8342
   },
   {
    "section": "3. Unified FOV, GT, and the real F payload",
@@ -89,9 +89,9 @@
    "section": "10. Split discipline, budgets and the payload criterion",
    "number": "10",
    "lock_state": "LOCKED",
-   "sha256": "9ee9626d78c05ca5fd3e651ecb1be2831457dd34c844f4d02bcb91f20b3e7d92",
-   "sha256_observed": "9ee9626d78c05ca5fd3e651ecb1be2831457dd34c844f4d02bcb91f20b3e7d92",
-   "bytes": 1348
+   "sha256": "3ac2df0846a3f997a860ac128c03633e8693a0179d110a939e48ea15cc46c251",
+   "sha256_observed": "3ac2df0846a3f997a860ac128c03633e8693a0179d110a939e48ea15cc46c251",
+   "bytes": 4758
   },
   {
    "section": "11. Regeneration \u2014 P0-3's invalidation list, the twelve work packages, and the mapping",

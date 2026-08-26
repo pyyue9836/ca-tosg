@@ -103,7 +103,7 @@ python tools/evaluate_ap.py           # true end-to-end AP under the frozen sele
 python tools/run_sensitivity.py       # the sensitivity items
 python tools/run_baselines.py contextual_bandit --train --evaluate
 python tools/generate_figures.py      # every figure main.tex includes
-python tools/verify_results.py        # all 21 gates (--content-only = the 13 a clean clone can run)
+python tools/verify_results.py        # all 22 gates (--content-only = the 14 a clean clone can run)
 python tools/apply_opencood_patches.py --check   # the OpenCOOD modifications this project needs
 ```
 

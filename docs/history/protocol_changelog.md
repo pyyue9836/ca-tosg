@@ -4915,3 +4915,109 @@ excluded the accuracy lines, and that is the only reason the claim is worth anyt
 **Remaining for Tier A: work package 5** — the F products (int8 quantise → transmit → dequantise →
 attentive fusion, clean and partial delivery under §5's six rules). It is the last component that
 needs GPU.
+
+## V2-R6 — the seal becomes gate 22, and the no-collaborator frames are ruled
+
+**The v1 manuscript was not touched**: `paper/*.tex` 0, both PDFs 0, `results/main` 0.
+**22 gates** now (14 content-tier, 8 artefact-tier).
+
+### A · Gate 22 — `tests/test_sealed_heldout.py`
+
+Moving the held-out numbers and gating the generator were *repairs*; this is what makes them hold.
+Same principle as gate 21: **judge the capability, not the intent.** Four checks — no live `.py`
+outside the allow-list may name `results/v2/sealed/` in a non-docstring string *and* contain a read
+primitive; only work package 11 may **pass** `--held-out-eval`; held-out accuracy may exist nowhere
+else; and every sealed file's sha256 is compared against `V2_SEALED_HASHES.json` (A-2), so work
+package 11 can prove nothing changed between sealing and unsealing. **Zero matches fails**, as in
+gate 21.
+
+Self-test: a planted reader **FIRES**, a docstring-only mention stays **silent**, a planted caller
+passing the flag **FIRES**, and the planted file is removed.
+
+**Two false positives, and what they cost to fix — worth recording because the fix is the interesting
+part.** The first draft flagged `results_index.py`, which *catalogues* the command
+`... v2_wp2_per_agent.py --held-out-eval` in an attribution row. Narrowing to "a bare argv element,
+or a longer string in a file that can spawn a process" **still** flagged it: that file shells out to
+`git ls-files` for an entirely unrelated reason. The working rule ties the flag to a **spawn call's
+own arguments**, walking each spawn's arg subtree. **A gate with a false positive is worse than no
+gate** — it teaches people to skim past it — so the discrimination had to be exact rather than
+approximately right.
+
+### B · Frames with no collaborator — v1 had a convention, and the data settles what it was
+
+**The fact:** validate **0/1980**, test **119/2170 (5.48 %)**, Culver-City **72/550 (13.09 %)**. On
+those frames L and F are physically unavailable and the action space is `{E}`.
+
+**v1's convention, checked against the data rather than inferred (B-2).** The v1 N=1 caches keep
+every frame, and the cooperative outcome degenerates to ego-only: in
+`data/p2/dataset_{split}_n1.csv`, `late_f1 == ego_f1` on **all 119** test and **all 72** Culver
+no-collaborator frames, matched **frame by frame** against the v2 `has_collab` flag. The per-frame
+match mattered: on test, 215 frames satisfy `late_f1 == ego_f1` in total, so the other 96 are
+coincidental equality with a collaborator present. **Counting would have given the wrong answer;
+only the frame-by-frame correspondence proves it.**
+
+**RULING: (a) full-frame accounting**, matching v1 — no amendment needed for the frame set.
+
+**What v2 fixes for free.** Under v1's fixed `B_L = 0.024`, a no-collaborator frame that selected L
+still **paid for a message that could not be sent**. v2's per-frame chain removes that artefact with
+no special case: `N_box,t = 0` → `N_cw,L = 0` → **`B_L,t = 0`** automatically. For F the same has to
+be *stated*, because `B_F` is a constant: **on `|C| = 0`, `B_F = 0`.**
+
+**Both accountings are always reported** — full-frame primary, collaborator-available alongside, with
+the difference stated; neither may appear without the other. **One definition for every comparator**
+(CA-TOSG, τ, both hand rules, oracle, external baseline): a comparison across different frame sets is
+not a comparison.
+
+**Cross-domain risk written before the numbers exist (B-5).** 5.48 % against 13.09 % is a factor of
+**2.4**, and under full-frame accounting those frames cost zero for every arm — so **part of
+Culver-City's apparent payload saving will come from collaborator unavailability, not policy.** This
+is a precondition on P1-3's wording, recorded now so it cannot later be described as always having
+been understood.
+
+### C · WP2, the missing row and two wording constraints
+
+**The validate row was missing from the previous report's table.** Filled in, with the v1 check:
+
+| | validate | test | Culver-City |
+|---|---|---|---|
+| frames | 1980 | 2170 | 550 |
+| `n_cav` max / mean | 2 / 2.000 | 2 / 1.945 | 2 / 1.869 |
+| frames with a collaborator | **1980** | **2051** | **478** |
+| v1 P4-C count | 1980 | 2051 | 478 |
+| GT/frame | 26.82 | 14.86 | 41.56 |
+| ego boxes/frame | 22.56 | 12.96 | 31.16 |
+| collaborator boxes/frame | 24.08 | 12.63 | 28.23 |
+| rate | 1.119 s/frame | 0.453 | 0.366 |
+
+**All three match.** And the wording constraint (C-2): this is a **regression check on implementation
+reuse — collaborator availability is frame-for-frame identical to v1** — and **not** evidence that
+the v2 path is correct. The same rule on the same data ought to give the same answer; agreement
+confirms the rule was reused, nothing more.
+
+**C-3:** `n_cav` max 2 on every split, against the sanity check's mean 3.89 and **max 7** on the same
+validate frames before the rule, is now recorded in §2 as **runtime evidence that the
+single-collaborator lock is in the data path** — an observed property of the tensors the model
+received, not a statement of intent.
+
+### D · Archived for stage 5, not written into the paper
+
+Culver-City carries **41.56 GT/frame against test's 14.86** (2.8×) and **28.23 collaborator boxes
+against 12.63**, so `B_L` runs roughly **0.0030 vs 0.0015 Msym** — a factor of two **between
+domains**. v1's fixed `B_L = 0.024` concealed this entirely: per-frame accounting makes the
+object-level cost a **domain-dependent quantity**. Both remain under 1 % of the β = 0.10 budget.
+
+**Consequence for wording:** the cross-domain discussion may no longer describe the L cost as a
+constant. **This observation is not yet evidence** — it must be re-derived from the frozen products
+before it enters any text (D-4's rule, applied to D-1).
+
+**A third false positive, caught by the gate on itself.** Recording the sha256 of *every* file in
+`results/v2/sealed/` meant the directory's own `README.md` was hashed — so editing the README (to add
+the unseal condition A-3 asks for) made the gate report **"sealed content changed"**. The record now
+covers the sealed **values** (`.json`, `.csv`) and not the prose that explains them. Three narrowings
+in one gate is worth noting: **the hard part of a capability check is not detecting the violation,
+it is not firing on the twenty legitimate things that look like one.**
+
+### Still to come
+
+Work package 5 — the F products. The B rulings and gate 22 land **before** the manifest freeze
+(work package 10), as E-2 requires, not deferred to 11.

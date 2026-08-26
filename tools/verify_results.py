@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (13 of 21)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 22)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the eight artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 21 checks in total, 13 of which a clean clone can run.
+  GATE-COUNT-LINE: 22 checks in total, 14 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -76,6 +76,10 @@ GATES = [
     # tool treats a present file as a real one. tests/retired_products.md is now binding in both
     # directions: not evidence, and not re-creatable.
     ('content',   'retired-write sweep',  [PY, 'tests/test_no_retired_writes.py']),
+    # V2-R6 A: work package 2 computed held-out accuracy before the selector freeze. Moving it to
+    # results/v2/sealed/ and gating the generator behind --held-out-eval were repairs; this is what
+    # makes them hold. Same principle as gate 21: judge the CAPABILITY, not the intent.
+    ('content',   'sealed held-out',      [PY, 'tests/test_sealed_heldout.py']),
 ]
 
 
