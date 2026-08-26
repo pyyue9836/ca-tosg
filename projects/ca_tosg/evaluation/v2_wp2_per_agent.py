@@ -82,6 +82,8 @@ def main():
     ap.add_argument('--every', type=int, default=1, help='1 = every frame (the real product run)')
     ap.add_argument('--limit', type=int, default=0)
     ap.add_argument('--tag', default='')
+    ap.add_argument('--held-out-eval', action='store_true',
+                    help='compute accuracy on a held-out split. Work package 11 only.')
     args = ap.parse_args()
 
     class O:
@@ -136,9 +138,14 @@ def main():
             else:
                 n_no_collab += 1
         eb.append(E_b); es.append(E_s); gts.append(G); cb.append(C_b); cs.append(C_s)
-        rows.append(dict(frame=idx[i], n_cav=n_cav, has_collab=int(n_cav >= 2), n_gt=len(G),
-                         n_box_ego=len(E_b), n_box_collab=len(C_b),
-                         f1_ego=f1_from_boxes(E_b, G)))
+        r = dict(frame=idx[i], n_cav=n_cav, has_collab=int(n_cav >= 2), n_gt=len(G),
+                 n_box_ego=len(E_b), n_box_collab=len(C_b))
+        # A per-frame F1 on a held-out split is MORE informative than the aggregate, not less, so
+        # it is sealed at the same standard (E-2). Box counts stay: they feed payload accounting,
+        # which is not accuracy.
+        if args.split == 'validate' or args.held_out_eval:
+            r['f1_ego'] = f1_from_boxes(E_b, G)
+        rows.append(r)
         if i % 100 == 0:
             print(f'  {i}/{len(idx)} frame={idx[i]} cav={n_cav} gt={len(G)} '
                   f'ego={len(E_b)} collab={len(C_b)}', flush=True)
@@ -166,7 +173,13 @@ def main():
         'n_box_ego_mean': float(df.n_box_ego.mean()),
         'n_box_collab_mean': float(df[df.has_collab == 1].n_box_collab.mean())
         if df.has_collab.any() else None,
-        'ego_ap50': ap_global(eb, es, gts, 0.5), 'ego_f1_mean': float(df.f1_ego.mean()),
+        # E-2: on a held-out split this is accuracy computed before the selector freeze. It is not
+        # written into the ordinary summary, because a number that sits in a file people read is a
+        # number that informs decisions whether or not anyone meant it to. WP11 passes
+        # --held-out-eval when it is time.
+        **({'ego_ap50': ap_global(eb, es, gts, 0.5), 'ego_f1_mean': float(df.f1_ego.mean())}
+           if (args.split == 'validate' or args.held_out_eval) else
+           {'held_out_accuracy': 'NOT COMPUTED -- sealed until work package 11 (E-2)'}),
         'seconds': round(dt, 1), 'sec_per_frame': round(dt / max(len(df), 1), 3),
     }
     with open(os.path.join(OUT_DIR, f'wp2_per_agent_{args.split}{tag}.json'), 'w') as f:
@@ -181,7 +194,11 @@ def main():
     print(f'  GT/frame mean              {summary["n_gt_mean"]:.2f}')
     print(f'  ego boxes/frame mean       {summary["n_box_ego_mean"]:.2f}')
     print(f'  collaborator boxes/frame   {summary["n_box_collab_mean"]}')
-    print(f'  ego AP@0.5 / mean F1       {summary["ego_ap50"]:.5f} / {summary["ego_f1_mean"]:.5f}')
+    if 'ego_ap50' in summary:
+        print(f'  ego AP@0.5 / mean F1       {summary["ego_ap50"]:.5f} / '
+              f'{summary["ego_f1_mean"]:.5f}')
+    else:
+        print('  ego AP@0.5 / mean F1       sealed (held-out split, E-2)')
     print(f'  {summary["sec_per_frame"]:.3f} s/frame')
     if summary['n_cav_max'] > 2:
         print('  FAIL: the single-collaborator rule did not take effect')

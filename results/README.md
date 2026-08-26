@@ -26,7 +26,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 6 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
-| | `results/v2/` | 4 |
+| | `results/v2/` | 8 |
 
 ## `results/baselines/`
 
@@ -355,7 +355,11 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `payload_chain.json` | `python tools/v2_payload_chain.py` | V2-R3 step 5: the whole v2 payload chain with its identity self-check |
 | `sanity_single_vehicle_validate.csv` | `python projects/ca_tosg/evaluation/v2_single_vehicle_sanity.py` | V2-R1 item 2: single-vehicle vs cooperative forward on the unified checkpoint |
 | `sanity_single_vehicle_validate.json` | `python projects/ca_tosg/evaluation/v2_single_vehicle_sanity.py` | V2-R1 item 2: single-vehicle vs cooperative forward on the unified checkpoint |
+| `wp2_per_agent_validate.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
+| `wp2_per_agent_validate.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
+| `wp34_e_l_validate.csv` | `python projects/ca_tosg/evaluation/v2_wp34_e_l_products.py` | work packages 3+4: E products, L late fusion, per-frame B_L from real box counts |
+| `wp34_e_l_validate.json` | `python projects/ca_tosg/evaluation/v2_wp34_e_l_products.py` | work packages 3+4: E products, L late fusion, per-frame B_L from real box counts |
 
 ---
 
-238 files indexed, 0 unattributed.
+242 files indexed, 0 unattributed.

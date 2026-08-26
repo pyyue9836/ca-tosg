@@ -4868,3 +4868,50 @@ someone to discover that the E/L numbers rest on a file they do not have.
 
 21/21 gates PASS. The assumptions-ledger gate again required a row before the new artefacts could be
 consumed, and again it was right to.
+
+### V2-R5 continued — WP2 complete on all three splits, and a held-out leak sealed
+
+**WP2 test and Culver-City finished.** Structural health, and a cross-check worth stating:
+
+| | test | Culver-City |
+|---|---|---|
+| frames | 2170 | 550 |
+| `n_cav` max / mean | 2 / 1.945 | 2 / 1.869 |
+| **frames with a collaborator** | **2051** | **478** |
+| GT/frame | 14.86 | 41.56 |
+| ego boxes/frame | 12.96 | 31.16 |
+| collaborator boxes/frame | 12.63 | 28.23 |
+| rate | 0.453 s/frame | 0.366 s/frame |
+
+**2051 and 478 are exactly the v1 P4-C counts** for frames with ≥ 1 collaborator on these splits
+(`docs/experiment_protocol.md`, Change-log P4-C: *validate 1980 / test 2051 / culver 478*). The v2
+selection reproduces v1's frame-by-frame collaborator availability exactly, which is what reusing the
+same implementation rather than rewriting it was supposed to buy.
+
+#### A held-out number that should not have been computed, and what was done about it
+
+WP2's summary computed an **ego AP and a per-frame F1 for whichever split it ran** — which on test
+and Culver-City is **accuracy on a held-out split, produced before the selector freeze**. Nothing
+tuned on it, so it is not a protocol breach; but E-2 says held-out products must not be readable by a
+tuning or selection step, and **a number sitting in a file people read is a number that can inform a
+decision whether or not anyone meant it to**. The generator's design let that happen.
+
+Fixed in three parts, none of them a promise:
+
+1. The values were **moved to `results/v2/sealed/`** with a README stating what they are and when
+   they unseal. **Deleting them would be theatre** — they were computed, and a record that pretends
+   otherwise is worse than one that says what happened.
+2. The generator now computes **no** accuracy on a held-out split unless `--held-out-eval` is passed,
+   which **work package 11 and nothing else** may pass.
+3. The **per-frame** F1 was sealed too, not just the aggregate: a per-frame column is *more*
+   informative than the mean, so sealing only the summary would have been the weaker half of the job.
+
+**Box counts were deliberately not sealed.** They feed `N_box,t → B_L,t`, which is payload
+accounting, not accuracy, and the transport products need them.
+
+I have not read the sealed values. The structural figures above were pulled with a filter that
+excluded the accuracy lines, and that is the only reason the claim is worth anything.
+
+**Remaining for Tier A: work package 5** — the F products (int8 quantise → transmit → dequantise →
+attentive fusion, clean and partial delivery under §5's six rules). It is the last component that
+needs GPU.

@@ -1,0 +1,9 @@
+{
+ "schema": "catosg-v2-sealed-heldout/1",
+ "split": "culver",
+ "why": "Accuracy on a held-out split, computed by WP2 before the selector freeze. E-2 / protocol sec 10: no tuning or selection step may read this. It is unsealed by work package 11, the frozen held-out evaluation, and not before.",
+ "values": {
+  "ego_ap50": 0.7189376252576711,
+  "ego_f1_mean": 0.8334404122289607
+ }
+}

@@ -1,0 +1,18 @@
+{
+ "schema": "catosg-v2-wp2/1",
+ "split": "culver",
+ "frames": 550,
+ "dataset_frames": 550,
+ "every": 1,
+ "collaborator_rule": "CATOSG_MAX_COLLAB=1 -- opencood/utils/catosg_collab_subset.py, the v1 P4-C rule the protocol quotes verbatim in sec 2",
+ "frames_with_collaborator": 478,
+ "frames_without_collaborator": 72,
+ "n_cav_max": 2,
+ "n_cav_mean": 1.8690909090909091,
+ "n_gt_mean": 41.556363636363635,
+ "n_box_ego_mean": 31.156363636363636,
+ "n_box_collab_mean": 28.228033472803347,
+ "seconds": 201.1,
+ "sec_per_frame": 0.366,
+ "held_out_accuracy": "SEALED -> results/v2/sealed/wp2_held_out_culver.json"
+}
