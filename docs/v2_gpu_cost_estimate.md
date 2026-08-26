@@ -96,7 +96,7 @@ tail is a small fraction of a full forward.
 | V2-R3 parameter share | 0.118 | AutoEncoder decoders + AttFusion + deblocks + heads, by parameter count |
 | **V2-R4, measured wall clock** | **0.309** | 3.20 ms tail vs 10.35 ms full, `record_len=[2]`, 20 timed runs after warm-up |
 
-**The parameter share was the wrong proxy and under-read it by 2.6×.** The deblocks are transposed
+**Parameters are the wrong proxy for compute, and under-read it by 2.6× (D-1).** The deblocks are transposed
 convolutions over the full BEV grid: cheap in parameters, expensive in compute. This is exactly why
 V2-R3 refused to price tier B off the proxy.
 
@@ -141,6 +141,12 @@ Actual spend in V2-R1: **0.96 h** — 3,361 s for the 220-frame sanity run, 34 s
 production-regime calibration, ~30 s for the micro-benchmark. Inside the `<1 GPU-h` estimate, with
 almost none of it GPU.
 
-**Recommended order:** A alone first — it is what makes the paper's central claim honest, and it is
-the cheapest of the three. B and C are improvements on top of a corrected result, and neither is
-worth spending before A has landed.
+## Approval state (V2-R5 D-2, D-3)
+
+| tier | state |
+|---|---|
+| **A — mainline re-freeze** | **APPROVED, running.** Released by V2-R4; no further approval needed. |
+| **B — transport main-protocol** | **APPROVED at ≈ 10 h typical**, to start **only after A completes and is accepted** — B's transport products consume A's bottleneck products. No further approval needed to start it, **but a run exceeding 2× the typical figure must stop and report** rather than continue. |
+| **C — external arm** | **NOT approved.** Waiting on the selection report: reproducibility, code availability, and feasibility of aligning ML-Cooper / SmartCooper on all seven unified elements. |
+
+**Order is a dependency, not a preference:** B reads what A writes.

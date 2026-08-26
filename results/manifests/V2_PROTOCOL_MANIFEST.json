@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-protocol-manifest/1",
  "protocol": "docs/unified_branch_protocol_v2.md",
- "protocol_sha256": "5577655a019d404ad3b5fb41756c976054a9959f86897f4431194e92dbd18d13",
+ "protocol_sha256": "d9d756c02eaaaeba2f9a1c31117cbbcf9cb8d369dfccbeeaf330652e4a22e9a1",
  "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
  "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
  "sections": [
@@ -25,9 +25,9 @@
    "section": "2. The three actions",
    "number": "2",
    "lock_state": "LOCKED",
-   "sha256": "47dfc0ed6282570a4d06f8ff9bc578475a592f61e062151ede7989629f94a3ac",
-   "sha256_observed": "47dfc0ed6282570a4d06f8ff9bc578475a592f61e062151ede7989629f94a3ac",
-   "bytes": 5649
+   "sha256": "7c2f27c31f4a3d3774a6eb6b8d732db5695ee30915b5dff79f1df8723f590c31",
+   "sha256_observed": "7c2f27c31f4a3d3774a6eb6b8d732db5695ee30915b5dff79f1df8723f590c31",
+   "bytes": 7953
   },
   {
    "section": "3. Unified FOV, GT, and the real F payload",
@@ -81,9 +81,9 @@
    "section": "9. Selector cue set (2c)",
    "number": "9",
    "lock_state": "LOCKED",
-   "sha256": "2b53648e3924ae457602451daf1ea75eec7a95c9223dae26c75416feb2c3360c",
-   "sha256_observed": "2b53648e3924ae457602451daf1ea75eec7a95c9223dae26c75416feb2c3360c",
-   "bytes": 802
+   "sha256": "293b7b80a323edc1b0eece6cffca4deb64bd2fdf1421ff35089908473eacb051",
+   "sha256_observed": "293b7b80a323edc1b0eece6cffca4deb64bd2fdf1421ff35089908473eacb051",
+   "bytes": 3198
   },
   {
    "section": "10. Split discipline, budgets and the payload criterion",

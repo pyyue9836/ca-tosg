@@ -139,6 +139,37 @@ that a reader can separate "what int8 costs" from "what the channel costs".
 changing `w`: the `w ∈ {4, 16}` sensitivity arm stays exactly as it is — an **evaluation-time**
 sweep, labelled as not-a-deployment-claim.
 
+#### How the quantiser is actually inserted, and where that is reconciled (C-3)
+
+This belongs in the protocol rather than in a report, because it is precisely the
+**billing ≠ pipeline** failure B-4 exists to prevent: an accounting document can say "int8" while the
+pipeline runs float, and nobody would see it.
+
+| protocol requirement | implementation site |
+|---|---|
+| the bottleneck is what crosses the link, so that is what is quantised | `projects/ca_tosg/evaluation/v2_int8_calibrate.py`, `TransmitQuant.patched()` — `AutoEncoder.forward` runs encoder **and** decoder in one call, so the bottleneck is never exposed; the wrapper splits that call and applies `_apply()` between them |
+| only the collaborator→ego tensor is quantised | `TransmitQuant._apply()` — operates on rows `x[1:]`; row 0 is the ego and is returned untouched |
+| a frame with no collaborator quantises nothing | `_apply()` returns `x` unchanged when `x.shape[0] < 2` |
+| branch 2 is transmitted uncompressed and must still be quantised | `patched()` wraps `fuse_modules[2].forward`, quantising where the fusion consumes the tensor |
+| three symmetric per-branch scales, `max\|x\|/127` | `TransmitQuant.maxima` → `scales`, one scalar per branch |
+| validate-only calibration, frozen before held-out use | `--calib` pass over validate only; written to `results/manifests/V2_INT8_SCALES.json` |
+| no weight, module or fusion rule is altered | `patched()` is a context manager that restores every patched attribute in its `finally` |
+
+**Any change to the left column requires a matching change to the right, and vice versa.** This pair
+is checked by reading, and it is the reason the pipeline detail is not allowed to live only in a
+commit message.
+
+#### Reporting constraint on the int8 result (C-1, C-2)
+
+**Permitted:** *"under this evaluation setting (220 validate frames, ego + one collaborator) no
+distinguishable quantisation loss was observed; two of the three metrics show a negative loss, i.e.
+the differences lie within noise."*
+
+**Forbidden:** *"int8 is lossless"*, *"quantisation does not affect performance"*, or any other
+universal claim. The measurement covers one split, one sample, one configuration.
+
+**The `w ∈ {4, 16}` sensitivity arm may not be reduced or dropped because this result was small.**
+
 ---
 
 ## 3. Unified FOV, GT, and the real F payload
@@ -447,6 +478,42 @@ unification rather than to a different input set.
 If the sanity check or the unified branch makes a cue meaningless (for example, a cue defined by a
 branch that no longer exists), adding or removing one is permitted **only as a written amendment,
 registered before any test or Culver-City number is seen.**
+
+**Two statements that are easy to collapse into one, and must not be (B-3):**
+
+1. **The cue *definitions* carry over unchanged.** That decision is pre-specified above and stands.
+2. **Every cue *value* must be recomputed under the v2 branch.** A definition surviving does not mean
+   a number survives.
+
+They do not conflict, and the second is not implied away by the first.
+
+### 9.1 Work package 6 is a leakage defence, not bookkeeping (B-1, B-2)
+
+**Carrying the v1 cue values over unregenerated would feed v1 detections into a v2 selector.** That
+is data leakage in the ordinary sense — the selector would be conditioning on outputs of a network
+the paper says it is not using — and **no gate in this repository would catch it**: the values are
+numerically plausible, the column names are unchanged, and every existing check would pass. It is
+invisible by construction, which is why it is written here rather than left to care.
+
+**Acceptance criteria for work package 6. All of them must be met before any v2 selector is frozen.**
+
+1. **A per-dimension table, all 23 rows.** Each row marked **`depends`** (its value derives from ego
+   or collaborator detection output) or **`independent`**.
+2. **The basis for each classification is a code location** — file and symbol where that cue is
+   computed. **A verbal assertion is not acceptable evidence**, including one from me.
+3. **`depends` rows are recomputed under the v2 branch**, and the old and new distributions are
+   **printed side by side**.
+4. **`independent` rows carry an invariance demonstration**: either a per-frame comparison showing
+   identical values from identical inputs, or a code-level argument that the computation cannot
+   reach a detection output. **"It looks like a channel quantity" is not a demonstration** — the
+   channel cues are the *likely* independents, not the *assumed* ones.
+5. **A dimension that cannot be classified stops the batch.** It is not carried over by default; the
+   default is to stop and report.
+6. **The table enters the manifest** and is a **precondition of the selector freeze**.
+
+**Why the strictness is proportionate:** P0-3's invalidation list does not mention the cue vector at
+all (§11.3), so nothing upstream of this section would have flagged it. The one list that does — work
+package 6 — states it in a single clause. This subsection is that clause made enforceable.
 
 ---
 

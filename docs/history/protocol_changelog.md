@@ -4719,3 +4719,91 @@ packages themselves.
 prevent.** The authorisation is in hand; the next batch builds packages 1–5 and launches.
 
 21/21 gates PASS; main 16 pages, supplementary 12.
+
+## V2-R5 — work packages 1 and 2 built; the cue leakage defence made enforceable
+
+**The v1 manuscript was not touched**: `paper/*.tex` 0, both PDFs 0, `results/main` 0.
+
+### A-1 · A second instance of the same mistake, recorded next to the first
+
+V2-R4's instruction guessed that the two thirteen-row lists were "highly similar, you may be
+misremembering". The diff returned **0 of 13**. The guess treated **equal length as evidence of equal
+content** — the same shape as B-1, where 144 + 32 + 8 landing back on 184 was read as confirmation
+when it was arithmetic coincidence.
+
+**One lesson, stated once, applying to both: a numeric coincidence is not an identity of objects.**
+Two lists of the same length are not the same list; a total that comes out to the same number is not
+the same total. Both cases are now in this log side by side because the pattern is what recurs, not
+the particular numbers.
+
+### B · Work package 6 is a leakage defence, and it is now written as one
+
+**Adopted and strengthened.** Carrying the v1 cue *values* over unregenerated would feed v1
+detections into a v2 selector — leakage in the ordinary sense, and **no gate in this repository would
+catch it**: the values are plausible, the column names unchanged, every existing check passes. It is
+invisible by construction.
+
+`§9.1` now carries six acceptance criteria, all preconditions of the selector freeze: a per-dimension
+table over all 23 rows marked `depends` / `independent`; **a code location as the basis of each
+classification, with a verbal assertion explicitly not accepted, including mine**; recomputation with
+old-and-new distributions printed for `depends` rows; an invariance demonstration for `independent`
+rows, with *"it looks like a channel quantity"* named as not a demonstration; **an unclassifiable
+dimension stops the batch**; and the table enters the manifest.
+
+`§9` also splits the two statements that are easy to collapse (B-3): **the cue definitions carry over
+unchanged, and every cue value must be recomputed.** They do not conflict, and the first does not
+imply away the second.
+
+### C · The int8 implementation note moved into the protocol, with a reconciliation pair
+
+The pipeline detail was living in a commit message, which is exactly the **billing ≠ pipeline**
+failure B-4 exists to prevent — an accounting document can say "int8" while the pipeline runs float
+and nobody would see it. `§2` now carries a seven-row table pairing **protocol requirement ↔
+implementation site**, so a change to either side without the other is visible.
+
+Reporting constraints are written in as well: the permitted sentence is scoped to *this evaluation
+setting*, and **"int8 is lossless" / "quantisation does not affect performance" are forbidden**. The
+`w ∈ {4, 16}` arm may not be reduced because the measured loss was small.
+
+### D · Tier B approved and priced; the ordering is a dependency
+
+`f_tail = 0.309` adopted; 0.118 and 0.15 recorded beside it with *parameters are the wrong proxy for
+compute, under-reading by 2.6×*. **Tier B approved at ≈ 10 h typical, to start after A is accepted**
+— B reads what A writes, so the order is a dependency, not a preference. **A run exceeding 2× the
+typical figure stops and reports.** Tier C stays unapproved pending the selection report.
+
+### E · Work packages 1 and 2
+
+**WP1 — forward invariants.** Checkpoint hashes, FOV, score threshold and NMS, with **the reference
+values parsed out of the protocol rather than typed into the checker**, so an amendment cannot leave
+it agreeing with a retired number. It is a *precondition call*: `assert_invariants()` runs before any
+generator writes anything. Live tree **PASS** on all six. Self-test perturbs score threshold, NMS and
+the x-range in turn — **all three FIRE**, live tree clean.
+
+**WP2 — per-agent inference. The collaborator rule is not re-implemented.** `§2` quotes the v1 P4-C
+subset rule verbatim, and that rule already exists as executable code in the sibling checkout
+(`opencood/utils/catosg_collab_subset.py`, applied inside `__getitem__` before the pairwise
+transformation). `CATOSG_MAX_COLLAB=1` selects ego + the single nearest collaborator by Euclidean
+distance on `lidar_pose[0:2]`, ties by ascending CAV id. **Writing a second implementation of a rule
+the protocol quotes is how two definitions drift apart**, so this module sets the variable and
+asserts the effect instead of re-deriving distances.
+
+Health check, 33 validate frames:
+
+| | value |
+|---|---|
+| `n_cav` after the rule | **max 2, mean 2.000** — the rule took effect |
+| frames with a collaborator | 33 / 33 |
+| GT/frame | 26.39 (two-CAV GT, below the all-CAV 27.75 — as it must be) |
+| ego boxes/frame | 22.58 |
+| **collaborator boxes/frame** | **23.73** |
+| ego AP@0.5 / mean F1 | 0.72869 / 0.79307 |
+| rate | 0.828 s/frame |
+
+**A number for work package 4 to correct:** the `B_L` proxy in §4.4 used the *ego's* 22.41 boxes.
+The collaborator's mean is **23.73**, about 6 % higher, so the real `B_L` will come out slightly
+above the 0.00235 Msym proxy. WP4 prints both, as E-4 requires.
+
+Full validate run launched; test and Culver-City follow, then packages 3–5 per E-6.
+
+21/21 gates PASS; main 16 pages, supplementary 12.
