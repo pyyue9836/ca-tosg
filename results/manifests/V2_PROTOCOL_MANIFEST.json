@@ -1,0 +1,148 @@
+{
+ "schema": "catosg-v2-protocol-manifest/1",
+ "protocol": "docs/unified_branch_protocol_v2.md",
+ "protocol_sha256": "26202ce6ee251602574d7eb4ab86140f1a445e8199a6e70a2304dcde19c79111",
+ "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
+ "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
+ "sections": [
+  {
+   "section": "0. Why v2 exists, in one paragraph",
+   "number": "0",
+   "lock_state": "UNDECLARED",
+   "sha256": "6f5c7c5209abe5e920073ad3cb85f26c7bff16012380fb194f502e718b4f7300",
+   "sha256_observed": "6f5c7c5209abe5e920073ad3cb85f26c7bff16012380fb194f502e718b4f7300",
+   "bytes": 653
+  },
+  {
+   "section": "1. The single checkpoint",
+   "number": "1",
+   "lock_state": "LOCKED",
+   "sha256": "fc9d4a8e5f9c55f85f31d45dc19923f8e40b2309228292cd23541d41ea6c1fe2",
+   "sha256_observed": "fc9d4a8e5f9c55f85f31d45dc19923f8e40b2309228292cd23541d41ea6c1fe2",
+   "bytes": 741
+  },
+  {
+   "section": "2. The three actions",
+   "number": "2",
+   "lock_state": "PARTIAL",
+   "sha256": "249671825a27f8acd94bb7e0a8a2ebdd32199c40937f1adfffcd4da4bc7a7e2f",
+   "sha256_observed": "249671825a27f8acd94bb7e0a8a2ebdd32199c40937f1adfffcd4da4bc7a7e2f",
+   "bytes": 2652
+  },
+  {
+   "section": "3. Unified FOV, GT, and the real F payload",
+   "number": "3",
+   "lock_state": "PARTIAL",
+   "sha256": "f2726d051fb471db8ae5120bb2687b7a30da503e7917f929c5af155b17f24b28",
+   "sha256_observed": "f2726d051fb471db8ae5120bb2687b7a30da503e7917f929c5af155b17f24b28",
+   "bytes": 2725
+  },
+  {
+   "section": "4. L payload \u2014 per frame, from the boxes actually sent (P0-5)",
+   "number": "4",
+   "lock_state": "LOCKED",
+   "sha256": "e796dab98f36c599672b9f83d44dccbfd819ad716c2f15603879927c782a50a4",
+   "sha256_observed": "e796dab98f36c599672b9f83d44dccbfd819ad716c2f15603879927c782a50a4",
+   "bytes": 1358
+  },
+  {
+   "section": "5. Transport model (P0-6)",
+   "number": "5",
+   "lock_state": "LOCKED",
+   "sha256": "c01a9737c98e3c3ba67022ace6cfebaddcce3fb4eb7e04863193e2f26e12c90e",
+   "sha256_observed": "c01a9737c98e3c3ba67022ace6cfebaddcce3fb4eb7e04863193e2f26e12c90e",
+   "bytes": 904
+  },
+  {
+   "section": "6. Statistics (P0-8)",
+   "number": "6",
+   "lock_state": "LOCKED",
+   "sha256": "696f2d3207d1e3c7e68107102c9058938efe4ec96afdb89570f204079a463b3a",
+   "sha256_observed": "696f2d3207d1e3c7e68107102c9058938efe4ec96afdb89570f204079a463b3a",
+   "bytes": 731
+  },
+  {
+   "section": "7. Success criteria \u2014 design correctness, not a better number",
+   "number": "7",
+   "lock_state": "LOCKED",
+   "sha256": "1a0a571d8191ffc6129c4c2f18afba84489f80f75950242f9d4d1ce887ed1e4f",
+   "sha256_observed": "1a0a571d8191ffc6129c4c2f18afba84489f80f75950242f9d4d1ce887ed1e4f",
+   "bytes": 2746
+  },
+  {
+   "section": "8. Sanity check (P0-2) \u2014 the fuse, run before anything else",
+   "number": "8",
+   "lock_state": "LOCKED",
+   "sha256": "cf140b96edcd51e8b7a496bf89818b8a311bea119fcaf39bec629aecf3f4de48",
+   "sha256_observed": "cf140b96edcd51e8b7a496bf89818b8a311bea119fcaf39bec629aecf3f4de48",
+   "bytes": 732
+  },
+  {
+   "section": "9. Selector cue set (2c)",
+   "number": "9",
+   "lock_state": "LOCKED",
+   "sha256": "2b53648e3924ae457602451daf1ea75eec7a95c9223dae26c75416feb2c3360c",
+   "sha256_observed": "2b53648e3924ae457602451daf1ea75eec7a95c9223dae26c75416feb2c3360c",
+   "bytes": 802
+  },
+  {
+   "section": "10. Split discipline (unchanged from v1)",
+   "number": "10",
+   "lock_state": "PARTIAL",
+   "sha256": "63a12ab9ab942b379d85bcd0f4526f78d3b22107f18282381abf60afb62dbd0f",
+   "sha256_observed": "63a12ab9ab942b379d85bcd0f4526f78d3b22107f18282381abf60afb62dbd0f",
+   "bytes": 792
+  },
+  {
+   "section": "11. Regeneration list \u2014 every product the unification touches",
+   "number": "11",
+   "lock_state": "NOT LOCKED",
+   "sha256": "PENDING",
+   "sha256_observed": "9eed1355b0debd38bfd431059ab6611bea371ccefbab6214ee707903774a6fb7",
+   "bytes": 1436
+  },
+  {
+   "section": "12. Conditional branches P1-1 \u2026 P1-8, and stage-5 rewrite items P2-1 \u2026 P2-6",
+   "number": "12",
+   "lock_state": "NOT LOCKED",
+   "sha256": "PENDING",
+   "sha256_observed": "558cd603397837f82699d155dd74b93b09219f36ec93b5548440dc982e5267c0",
+   "bytes": 738
+  },
+  {
+   "section": "13. External baseline arm (P0-7) \u2014 pre-registration placeholder",
+   "number": "13",
+   "lock_state": "LOCKED",
+   "sha256": "0ceb3c571e43fee9e9c204fcc18ebd07b1fb3bec21df5f5e04455ee67b3e6b7b",
+   "sha256_observed": "0ceb3c571e43fee9e9c204fcc18ebd07b1fb3bec21df5f5e04455ee67b3e6b7b",
+   "bytes": 630
+  },
+  {
+   "section": "14. Disposition of the v1 results",
+   "number": "14",
+   "lock_state": "LOCKED",
+   "sha256": "83d8cf641d820e337ac85315043d7dfdf73e45f68c40bf3eb2d277b1e6617678",
+   "sha256_observed": "83d8cf641d820e337ac85315043d7dfdf73e45f68c40bf3eb2d277b1e6617678",
+   "bytes": 917
+  },
+  {
+   "section": "15. Wording audit: \"pre-registered\" (P0-9)",
+   "number": "15",
+   "lock_state": "LOCKED",
+   "sha256": "e966e1e081bf641830c200e51bf456811ca133733d25259fe344bdb32cd20f5e",
+   "sha256_observed": "e966e1e081bf641830c200e51bf456811ca133733d25259fe344bdb32cd20f5e",
+   "bytes": 1147
+  },
+  {
+   "section": "16. Lock status",
+   "number": "16",
+   "lock_state": "UNDECLARED",
+   "sha256": "2ea7d3a14f453497e0411b986df964586c37465b8b40a22273e568d802546915",
+   "sha256_observed": "2ea7d3a14f453497e0411b986df964586c37465b8b40a22273e568d802546915",
+   "bytes": 1013
+  }
+ ],
+ "locked": 10,
+ "partial": 3,
+ "not_locked": 2
+}

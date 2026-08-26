@@ -17,6 +17,14 @@ OUT = os.path.join(ROOT, 'results/README.md')
 
 # (regex on the results/-relative path, command, note)
 RULES = [
+    # V2-R1: plan-A products. results/v2/ is the v2 tree; nothing under it feeds the frozen v1
+    # manuscript, and the sanity check is its first entry.
+    (r'^v2/sanity_single_vehicle_\w+\.(csv|json)$',
+     'python projects/ca_tosg/evaluation/v2_single_vehicle_sanity.py',
+     'V2-R1 item 2: single-vehicle vs cooperative forward on the unified checkpoint'),
+    (r'^manifests/V2_PROTOCOL_MANIFEST\.json$',
+     'python tools/build_v2_protocol_manifest.py',
+     'per-section hashes + lock state of docs/unified_branch_protocol_v2.md'),
     (r'^manifests/(FROZEN_MANIFEST\.json|validate_loso_folds\.csv|candidate_walk_B\d+\.csv)$',
      'python tools/train_selector.py', 'freeze record + LOSO evidence chain'),
     (r'^manifests/scene_manifest_\w+\.csv$',

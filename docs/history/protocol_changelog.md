@@ -4410,3 +4410,94 @@ in reproducibility.md, verify_results.py, installation.md and README.md" — fou
 files, missing `experiment_protocol.md`. The registry description now matches what the tool does.
 
 21/21 gates PASS; main 16 pages, supplementary 12.
+
+## V2-R1 — stop-work on v1, the plan-A protocol locked, and the sanity fuse held
+
+Zero GPU on anything but the sanity check, which spent **0.96 h wall-clock** against a `<1 GPU-h`
+estimate. **The v1 manuscript was not touched**: `paper/main.tex`, `paper/supplementary.tex`, both
+PDFs and every `results/main/**` product are byte-identical to `400bfb6d`.
+
+### 1 · Stop-work order
+
+`docs/STOP_WORK_v1_freeze.md`, in force from **`400bfb6d`**. The manuscript, abstract, headline
+tables, results figures, Conclusion and page count take zero changes until plan A's re-freeze, and
+**no new gate may be added for a v1 result** — the suite stops at 21. v1 is *frozen*, not withdrawn:
+nothing is deleted, and its disposition is decided in the protocol, not by the freeze.
+
+**An operational trap, found the same day:** `tests/test_compile.py` rewrites both PDFs every run,
+and it is one of the 21 gates — so `verify_results.py` mutates two frozen files as a side effect. The
+rewritten bytes are not content-identical even after normalising `/CreationDate`. The order now says
+to `git restore paper/*.pdf` after any full gate run, and this batch did exactly that.
+
+### 2 · Sanity check — the fuse held, and the result is better than the fuse required
+
+`projects/ca_tosg/evaluation/v2_single_vehicle_sanity.py`, 220 validate frames sampled every 9th so
+that **all nine scenes** are covered (the first 200 consecutive frames would have been one scene).
+
+| | cooperative | single-vehicle |
+|---|---|---|
+| AP@0.5 (global sort) | 0.91434 | **0.69147** |
+| AP@0.7 | 0.86487 | 0.57606 |
+| mean per-frame F1 | 0.91739 | 0.77555 |
+| boxes/frame mean / median / max | 28.23 / 25 / 57 | 22.41 / 16 / 47 |
+
+GT/frame 27.75, CAVs/frame 3.89 (max 7), score threshold 0.20 (the checkpoint's own default).
+
+**Fuse: stop below half the frozen v1 ego-only AP@0.5, i.e. below 0.30675. Measured 0.69147 —
+intact, by a factor of 2.25.** And the stronger reading: the single-vehicle arm of the
+attentive-compression checkpoint **exceeds v1's frozen ego-only AP@0.5 of 0.61350**, which was
+produced by a *different* (late-fusion) checkpoint. The detection head does not depend on cooperative
+fusion to work, so plan A's premise holds.
+
+**Why no forward code was touched.** `AttFusion` regroups by `record_len` and self-attends within each
+group; with `record_len = [1]` the softmax is over one element, so `attn == 1.0` and
+`context == value` — the fusion is an **exact identity**. Single-vehicle mode is therefore obtained
+purely by feeding one CAV's voxels, not by editing the model. That was the instruction and it was
+also the correct engineering.
+
+### 3 · `docs/unified_branch_protocol_v2.md` — locked before any main result
+
+Sixteen sections, hashed per section into `results/manifests/V2_PROTOCOL_MANIFEST.json` by
+`tools/build_v2_protocol_manifest.py`, which reads the lock state **out of the document's own table**
+so the manifest cannot claim a section is locked while the document says otherwise. Protocol sha256
+`26202ce6ee251602574d7eb4ab86140f1a445e8199a6e70a2304dcde19c79111`.
+
+**10 LOCKED · 3 PARTIAL · 2 NOT LOCKED.** Covered: the single checkpoint by hash; the three actions
+with frozen score threshold 0.20, NMS 0.15 and a written cross-vehicle de-duplication rule; unified
+FOV and GT; `B_F` from the **measured** 739,200-element bottleneck with stated quantisation width,
+packet size and header; per-frame `B_L,t` with the box container itemised to 184 bits; fragmentation
+with partial recovery as the main transport and all-or-nothing demoted to a sensitivity; scene-level
+bootstrap as the confirmatory unit; the v1 23-cue set carried over with its reason; success defined
+as **design correctness with a written ban on judging by whether the numbers improve**, plus
+pre-registered wording for all three outcome cases and a Culver-City sentence in each.
+
+**What is deliberately NOT locked, and why that is the honest state:** §11 (the supervisor's 12-item
+regeneration list) and §12 (P1-1…P1-8, P2-1…P2-6) exist only as labels in the instruction — their text
+is not in this repository. They are recorded as `PENDING` with the right shape and **no invented
+content**, because a fabricated pre-registration is worse than an empty one. §2 (the E-codec
+question), §3 (`w`, `P`, `H_F`) and §10 (whether the ≥10 % criterion survives a per-frame `B_L`)
+carry explicit one-line rulings for Josh.
+
+**No mainline GPU runs while any section reads NOT LOCKED.** That is written into the protocol, the
+handoff banner and this entry.
+
+### 4 · Cost — and the unit is wrong
+
+The micro-benchmark changed the shape of the answer: a cooperative forward is **0.0505 s**, a
+single-vehicle forward **0.0293 s**, and loading the frame they need is **1.89 s** from `/mnt/h`.
+**This workload is I/O-bound by about forty to one.** All of tier A is ~**0.2 h of actual GPU
+computation**; everything else is waiting for data, and four DataLoader workers bought almost nothing.
+
+| tier | conservative | typical | worst |
+|---|---|---|---|
+| A — mainline re-freeze | 1.1 | **4** | 8.5 |
+| B — transport main-protocol | 0.3 + a tier-A pass | **5** | 30 |
+| C — external arm | 1.5 | **4** | 40+ |
+
+Hours are **wall-clock on this machine**, not GPU-hours, because that is what a run will cost.
+Two recommendations follow and neither needs approval: copy the splits off the Windows mount (a 2.2×
+spread between warm and cold cache was measured, and it is pure I/O), and **do not price tier B off
+this estimate** — measure the tail-only re-decode fraction first, since that one number moves tier B
+between 0.3 h and 30 h.
+
+21/21 gates PASS. Main 16 pages, supplementary 12 — unchanged, and the PDFs restored to `400bfb6d`.
