@@ -1,0 +1,48 @@
+{
+ "schema": "catosg-v2-runtime-manifest/1",
+ "why": "V2-R17 C: this records that the deterministic point-shuffle was ENABLED AT RUN TIME. The failure it guards is not \"the code was never fixed\" but \"the code was fixed and the run did not switch it on\" -- the same family as reporting an unstarted run as started. A freeze gate must FAIL if CATOSG_EVAL_RNG is not 1.",
+ "CATOSG_EVAL_RNG": "1",
+ "CATOSG_MAX_COLLAB": "1",
+ "rng": {
+  "generator": "numpy.random.RandomState (MT19937)",
+  "seed_identity": "(split, scene_id, frame_id, cav_id)",
+  "derivation": "sha256('catosg-v2|{split}|{scene}|{frame}|{cav}')[:4], big-endian, uint32",
+  "digest_serialisation": "perm.astype('<i8').tobytes(order='C')",
+  "golden_identity": [
+   "validate",
+   0,
+   0,
+   "641"
+  ],
+  "golden_n": 1024,
+  "golden_head": [
+   936,
+   962,
+   482,
+   868,
+   812,
+   156,
+   807,
+   813
+  ],
+  "golden_digest": "c6e7ae5deba619e816c9e5bf5eca5b8712b5fbd64d26127d278eb35dd09cc829",
+  "numpy": "1.26.4",
+  "python": "3.10"
+ },
+ "collision_scan": {
+  "n_identities": 17905,
+  "n_unique_seeds": 17905,
+  "collisions": 0,
+  "schema": "catosg-v2-seed-collision-scan/1",
+  "scope": "every (split, scene, frame, cav) identity in validate + test + culver",
+  "why": "A collision is a SILENT failure: two identities share a seed, products stay deterministic, every other check passes, and two frames point orders become correlated. At 32 bits and ~18k identities the birthday probability is a few per cent, so this is enumerated rather than assumed.",
+  "birthday_expected_collisions_32bit": 0.037,
+  "remedy_if_nonzero": "SHA-256 first 16 bytes -> 4 uint32 -> RandomState (2^128 seed space, still MT19937). NOT per-case salting: that turns a rule into a table of exceptions."
+ },
+ "opencood_sibling_edits": [
+  "opencood/utils/catosg_eval_rng.py           (new, #self+)",
+  "opencood/utils/pcd_utils.py                 shuffle_points(points, rng=None)",
+  "opencood/data_utils/datasets/intermediate_fusion_dataset.py  per-sample rng threading"
+ ],
+ "note": "The three OpenCOOD edits live in the SIBLING checkout, which is not part of this git repository and is not pushed anywhere. A machine without them cannot reproduce these products."
+}

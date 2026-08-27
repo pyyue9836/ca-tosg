@@ -1,0 +1,18 @@
+{
+ "checked": true,
+ "frames_compared": 1980,
+ "box_count_max_abs_diff": 1,
+ "box_count_tol": 0,
+ "box_count_frames_differing": 30,
+ "f1_max_abs_diff": 0.03218390804597704,
+ "f1_tol": 1e-12,
+ "f1_frames_differing": 30,
+ "ap50_main": 0.8699370090920039,
+ "ap50_rebuilt": 0.8699432048239792,
+ "ap50_abs_diff": 6.195731975355834e-06,
+ "ap70_main": 0.7733933340392217,
+ "ap70_rebuilt": 0.7733016991536805,
+ "ap70_abs_diff": 9.163488554120303e-05,
+ "ap_tol": 1e-09,
+ "pass": false
+}

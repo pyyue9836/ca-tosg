@@ -32,7 +32,7 @@ section is what actually holds; nothing in this file is a status report except t
 | **Live result files** | `results/main/replay_summary.csv` (the mainline replay), `tau_feasible.csv`, `fixed_references.csv`, `frozen_curves.csv`, `true_e2e_ap_by_snr.csv`, `action_distribution.csv`, `feature_importance_frozen.csv`, `results/sensitivity/*`, `results/channel/*`, `results/diagnostics/*`. The authoritative file→generator index is `results/README.md`; the sentence→product binding is `docs/claims.md`. |
 | **Retired / deleted products** | `tests/retired_products.md`, binding in both directions: not valid evidence, and not re-creatable (`tests/test_no_retired_writes.py`, R69-2). The v3 policy engine, the v3 trainer and their products no longer exist in this tree. |
 | **Deployment eval script** | built and in use: `tools/evaluate_selector.py` driving `projects/ca_tosg/evaluation/deployment.py`. The "P2-B new deployment script (to be built)" of §3 is that script. |
-| **Verification** | `python tools/verify_results.py` — **22 checks, all passing**. Compile: main 16 pages, supplementary 12. |
+| **Verification** | `python tools/verify_results.py` — **23 checks, all passing**. Compile: main 16 pages, supplementary 12. |
 | **Paper** | written, verified and compiled. What remains is Josh's own layout and reading passes, not experiments — see `docs/HANDOFF.md`. |
 
 **Which parts of this file are historical, not current:**

@@ -45,6 +45,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 REPO = os.path.join(os.path.dirname(ROOT), 'OpenCOOD')
 sys.path.insert(0, REPO)
 
+os.environ.setdefault('CATOSG_EVAL_RNG', '1')  # V2-R16
+
 from torch.utils.data import DataLoader                                          # noqa: E402
 
 from opencood.data_utils.datasets import build_dataset                           # noqa: E402
@@ -150,6 +152,7 @@ def main():
     hypes['root_dir'] = split_dir
     hypes['validate_dir'] = split_dir
     ds = build_dataset(hypes, visualize=False, train=False)
+    ds.catosg_split = args.split   # V2-R16 B-3: part of the seed identity
     loader = DataLoader(ds, batch_size=1, num_workers=4, collate_fn=ds.collate_batch_test,
                         shuffle=False, pin_memory=False)
     n_total = len(ds)

@@ -5021,3 +5021,78 @@ it is not firing on the twenty legitimate things that look like one.**
 
 Work package 5 — the F products. The B rulings and gate 22 land **before** the manifest freeze
 (work package 10), as E-2 requires, not deferred to 11.
+
+## V2-R16 … R18 — the pipeline was never reproducible, and now is
+
+**The v1 manuscript was not touched.** 23 gates (14 content-tier, 9 artefact-tier).
+
+### The finding
+
+A **reconstruction-consistency bridge** — regenerate a product, compare it bit for bit against the
+run that produced it — failed: **30 of 1980 frames differed by one box**, per-frame F1 by up to
+0.032, AP@0.5 by 6.2e-6 and AP@0.7 by 9.2e-5. The bridge stopped the analysis, as V2-R15 B-2
+required, and refused the "the difference is small" exit.
+
+**Root cause: `shuffle_points()` drew from the global unseeded numpy RNG**, once per CAV per frame.
+With `max_points_per_voxel = 32`, which points survive depends on that order, so the pillar features
+differed between processes and borderline detections crossed the 0.20 score threshold.
+
+Diagnosed in four steps, each ruling something out rather than confirming a guess:
+
+| step | result |
+|---|---|
+| two forwards in the **same** process (1980 frames) | `max\|Δ\| = 0` — intra-process was already exact |
+| two **separate** processes, same frames | scores differ in the 3rd decimal |
+| cuDNN TF32 off, `deterministic=True`, `benchmark=False` | **still differ** — the GPU was never the cause |
+| seed numpy, two processes | **bit-identical** |
+
+**Every v1 product went through this path too.** It was never caught because nothing had ever
+compared two runs bit for bit: v1's "reproducible on re-run" was **not tested and passed — it was
+never tested**.
+
+### The fix, and what was deliberately not done
+
+A **per-sample `RandomState`** keyed on `(split, scene, frame, cav)`. Not `np.random.seed()`: a
+global seed pollutes every other consumer in the process and makes results depend on call order.
+`RandomState`, not `default_rng` — MT19937 is the family `np.random.permutation` already used, so
+the replacement draws from the same generator; PCG64 would have opened an avoidable gap between old
+and new products for nothing. Seed = `sha256('catosg-v2|split|scene|frame|cav')[:4]` big-endian;
+**not Python `hash()`**, which is per-process salted — the exact failure being removed.
+
+`rng=None` keeps the previous behaviour **exactly**, so training is untouched.
+
+### Two gates, and three false positives worth recording
+
+**Gate 22 (sealed held-out)** and **gate 23 (eval determinism)**. Between them they needed four
+narrowings, all of the same kind: `results_index.py` *catalogues* the command
+`... --held-out-eval` in an attribution row; it also shells out to `git ls-files` for an unrelated
+reason, defeating a file-level "does it spawn?" test; hashing every file in `sealed/` meant editing
+that directory's README read as tampering. **A gate with a false positive is worse than no gate** —
+it teaches people to skip it — so each rule had to be made exact rather than approximately right.
+
+Gate 23 enumerates **all 17,905 identities** for seed collisions every run. Zero now — but that is a
+property of *this* identity set, not of the derivation, and the birthday probability at 32 bits is
+~3.7 %. The remedy (SHA-256 → 4 × uint32, **not** per-case salting, which turns a rule into a table
+of exceptions) is pre-recorded so the ruling is not made under pressure.
+
+### Assistant error account
+
+* **Three inferences raised as challenges where one `grep` would have settled them**: IoU thresholds
+  were already stored per threshold; the second forward was a regeneration, not a duplicate; the
+  13-row list was never P0-3.
+* **A fabricated placeholder.** `GOLDEN_HEAD = [545, 217, …]` was invented and sat in a file until
+  `--record` produced `[936, 962, …]`. Short-lived does not mean not-invented, and a placeholder is
+  most dangerous precisely because it looks like a result. Self-reported; nothing would have caught it.
+* **A named-but-unimplemented guarantee.** V2-R16 claimed the golden values guarded against
+  "NumPy/Python version drift"; they pinned only `identity → uint32`, not `uint32 → permutation`. The
+  permutation digest now closes it. **A gate whose name overstates what it checks is worse than none,
+  because it is trusted.**
+* **An ETA reported as if measured.** 84 minutes projected from the first 800 frames; 194 actual.
+  validate is ordered by scene and the dense scenes are last, so early-frame extrapolation is biased.
+
+### After the fix
+
+The same bridge passes: **0 differing frames, per-frame F1 max |Δ| 1.11e-16, AP differences exactly
+0.000e+00** at both thresholds. WP2 regenerated on all three splits; WP3/WP4/WP5 regenerated on
+validate. Pre-fix products moved to `results/v2/diagnostic/` with a README — kept, because deleting
+them would erase the evidence, and `wp5_message_validate_BRIDGE_FAIL.json` is the record of the catch.

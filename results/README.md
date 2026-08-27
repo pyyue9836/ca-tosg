@@ -19,7 +19,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 27 |
+| | `results/manifests/` | 28 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -214,6 +214,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `TAU_FEASIBLE_MANIFEST.json` | `python projects/ca_tosg/evaluation/tau_feasible.py` | R18-3: the budget-matched threshold reference |
 | `V2_INT8_SCALES.json` | `python projects/ca_tosg/evaluation/v2_int8_calibrate.py` | frozen per-branch symmetric int8 transmit scales (validate-calibrated) |
 | `V2_PROTOCOL_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | per-section hashes + lock state of docs/unified_branch_protocol_v2.md |
+| `V2_SEALED_HASHES.json` | `python tests/test_sealed_heldout.py --write-hashes` | sha256 of each sealed held-out file, compared at unseal time (V2-R6 A-2) |
 | `candidate_walk_B010.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B020.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B030.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
@@ -377,4 +378,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-251 files indexed, 0 unattributed.
+252 files indexed, 0 unattributed.

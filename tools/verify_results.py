@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 22)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 23)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
-  the eight artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
+  the nine artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 22 checks in total, 14 of which a clean clone can run.
+  GATE-COUNT-LINE: 23 checks in total, 14 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -80,6 +80,12 @@ GATES = [
     # results/v2/sealed/ and gating the generator behind --held-out-eval were repairs; this is what
     # makes them hold. Same principle as gate 21: judge the CAPABILITY, not the intent.
     ('content',   'sealed held-out',      [PY, 'tests/test_sealed_heldout.py']),
+    # V2-R16/R17: shuffle_points() drew from the global unseeded numpy RNG, so two runs of the same
+    # frame disagreed (~1.5% of frames by one box, AP by 1e-5..1e-4). Found only because a
+    # reconstruction bridge compared two runs bit for bit -- v1 never did. This gate keeps the
+    # per-sample RandomState fix from regressing, and enumerates the whole identity set for seed
+    # collisions every run.
+    ('artifacts', 'eval determinism',     [PY, 'tests/test_eval_determinism.py']),
 ]
 
 

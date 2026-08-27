@@ -41,6 +41,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # set BEFORE the dataset module is imported/used, so the subset rule is active for every __getitem__
 os.environ.setdefault('CATOSG_MAX_COLLAB', '1')
+# V2-R16: deterministic per-sample point shuffle on the evaluation path
+os.environ.setdefault('CATOSG_EVAL_RNG', '1')
 
 from torch.utils.data import DataLoader, Subset                                  # noqa: E402
 
@@ -99,6 +101,8 @@ def main():
     print(f'WP1 invariants: PASS  |  CATOSG_MAX_COLLAB={os.environ["CATOSG_MAX_COLLAB"]}')
 
     ds = build_dataset(hypes, visualize=False, train=False)
+
+    ds.catosg_split = args.split   # V2-R16 B-3: part of the seed identity
     idx = list(range(0, len(ds), args.every))
     if args.limit:
         idx = idx[:args.limit]

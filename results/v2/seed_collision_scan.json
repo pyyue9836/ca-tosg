@@ -1,0 +1,10 @@
+{
+ "n_identities": 17905,
+ "n_unique_seeds": 17905,
+ "collisions": 0,
+ "schema": "catosg-v2-seed-collision-scan/1",
+ "scope": "every (split, scene, frame, cav) identity in validate + test + culver",
+ "why": "A collision is a SILENT failure: two identities share a seed, products stay deterministic, every other check passes, and two frames point orders become correlated. At 32 bits and ~18k identities the birthday probability is a few per cent, so this is enumerated rather than assumed.",
+ "birthday_expected_collisions_32bit": 0.037,
+ "remedy_if_nonzero": "SHA-256 first 16 bytes -> 4 uint32 -> RandomState (2^128 seed space, still MT19937). NOT per-case salting: that turns a rule into a table of exceptions."
+}

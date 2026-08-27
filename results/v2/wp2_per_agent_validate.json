@@ -10,10 +10,10 @@
  "n_cav_max": 2,
  "n_cav_mean": 2.0,
  "n_gt_mean": 26.82020202020202,
- "n_box_ego_mean": 22.55757575757576,
- "n_box_collab_mean": 24.081818181818182,
- "ego_ap50": 0.7205519807805845,
- "ego_f1_mean": 0.7892824107212805,
- "seconds": 2216.2,
- "sec_per_frame": 1.119
+ "n_box_ego_mean": 22.55808080808081,
+ "n_box_collab_mean": 24.078787878787878,
+ "ego_ap50": 0.7205540221496439,
+ "ego_f1_mean": 0.7892936458116007,
+ "seconds": 2272.3,
+ "sec_per_frame": 1.148
 }

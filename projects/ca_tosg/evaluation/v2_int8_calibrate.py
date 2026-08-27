@@ -45,6 +45,8 @@ REPO = os.path.join(os.path.dirname(ROOT), 'OpenCOOD')
 sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+os.environ.setdefault('CATOSG_EVAL_RNG', '1')  # V2-R16
+
 from torch.utils.data import DataLoader                                          # noqa: E402
 
 from opencood.data_utils.datasets import build_dataset                           # noqa: E402
@@ -157,6 +159,7 @@ def main():
     split_dir = os.path.join(args.data_root, 'validate')
     hypes['root_dir'] = hypes['validate_dir'] = split_dir
     ds = build_dataset(hypes, visualize=False, train=False)
+    ds.catosg_split = 'validate'   # V2-R16 B-3: part of the seed identity
     # Subset, not skip-in-the-loop: the workload is I/O-bound (~1.7 s to load a frame, ~0.05 s to
     # run one), so iterating the full 1980-frame loader and discarding 8 of every 9 frames costs
     # nine times the wall clock for the same result. Indices are strided so all nine scenes appear.

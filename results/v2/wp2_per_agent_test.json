@@ -10,9 +10,9 @@
  "n_cav_max": 2,
  "n_cav_mean": 1.9451612903225806,
  "n_gt_mean": 14.860829493087557,
- "n_box_ego_mean": 12.955299539170507,
- "n_box_collab_mean": 12.625548512920526,
- "seconds": 983.7,
- "sec_per_frame": 0.453,
- "held_out_accuracy": "SEALED -> results/v2/sealed/wp2_held_out_test.json"
+ "n_box_ego_mean": 12.957142857142857,
+ "n_box_collab_mean": 12.628961482203803,
+ "held_out_accuracy": "NOT COMPUTED -- sealed until work package 11 (E-2)",
+ "seconds": 701.5,
+ "sec_per_frame": 0.323
 }

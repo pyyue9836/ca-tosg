@@ -1,0 +1,177 @@
+{
+ "schema": "catosg-v2-wp5-message/1",
+ "split": "validate",
+ "frames": 1980,
+ "n_cw": 12567,
+ "n_replays": 200,
+ "mc_seed_base": 27260830,
+ "seconds": 2016.1,
+ "ap_mixing": "FORBIDDEN (B-2): AP is a global-sort statistic; the mixture of two APs is not the AP of the mixture. F1 is analytic per frame; AP is Monte Carlo.",
+ "baselines": {
+  "clean": {
+   "0.5": 0.8699395023458896,
+   "0.7": 0.7732097627889002
+  },
+  "ego": {
+   "0.5": 0.7205540221496439,
+   "0.7": 0.5999578531713615
+  },
+  "p1": {
+   "0.5": 0.7324997185725376,
+   "0.7": 0.5820635911594274
+  }
+ },
+ "message_regime": {
+  "0.0": {
+   "q_message_survives": 1.0,
+   "expected_frames_surviving": 1980.0,
+   "per_frame_expected_f1_mean": 0.9013345000576604,
+   "ap50_mc_mean": 0.8699395023458897,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.7732097627889002,
+   "ap70_mc_std": 0.0,
+   "note": "clean"
+  },
+  "0.001": {
+   "q_message_survives": 3.4633033734718293e-06,
+   "expected_frames_surviving": 0.006857340679474222,
+   "per_frame_expected_f1_mean": 0.7892940338430692,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "dominated by q, not a measure of F performance"
+  },
+  "0.01": {
+   "q_message_survives": 1.4043989865960671e-55,
+   "expected_frames_surviving": 2.7807099934602127e-52,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "dominated by q, not a measure of F performance"
+  },
+  "0.05": {
+   "q_message_survives": 1.1286197996907475e-280,
+   "expected_frames_surviving": 2.23466720338768e-277,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "dominated by q, not a measure of F performance"
+  },
+  "0.1": {
+   "q_message_survives": 0.0,
+   "expected_frames_surviving": 0.0,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "mixed"
+  },
+  "0.25": {
+   "q_message_survives": 0.0,
+   "expected_frames_surviving": 0.0,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "mixed"
+  },
+  "0.5": {
+   "q_message_survives": 0.0,
+   "expected_frames_surviving": 0.0,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "mixed"
+  },
+  "0.75": {
+   "q_message_survives": 0.0,
+   "expected_frames_surviving": 0.0,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "mixed"
+  },
+  "0.9": {
+   "q_message_survives": 0.0,
+   "expected_frames_surviving": 0.0,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "mixed"
+  },
+  "1.0": {
+   "q_message_survives": 0.0,
+   "expected_frames_surviving": 0.0,
+   "per_frame_expected_f1_mean": 0.7892936458116007,
+   "ap50_mc_mean": 0.720554022149644,
+   "ap50_mc_std": 1.1102230246251565e-16,
+   "ap70_mc_mean": 0.5999578531713616,
+   "ap70_mc_std": 1.1102230246251565e-16,
+   "note": "mixed"
+  }
+ },
+ "b3_validation": {
+  "0.5": {
+   "ap_global_direct": 0.8699395023458896,
+   "ap_from_parts": 0.8699395023458896,
+   "abs_diff": 0.0,
+   "tolerance": 1e-09,
+   "agree": true
+  },
+  "0.7": {
+   "ap_global_direct": 0.7732097627889002,
+   "ap_from_parts": 0.7732097627889002,
+   "abs_diff": 0.0,
+   "tolerance": 1e-09,
+   "agree": true
+  }
+ },
+ "reconstruction_bridge": {
+  "checked": true,
+  "frames_compared": 1980,
+  "box_count_max_abs_diff": 0,
+  "box_count_tol": 0,
+  "box_count_frames_differing": 0,
+  "f1_max_abs_diff": 1.1102230246251565e-16,
+  "f1_tol": 1e-12,
+  "f1_frames_differing": 0,
+  "ap50_main": 0.8699395023458896,
+  "ap50_rebuilt": 0.8699395023458896,
+  "ap50_abs_diff": 0.0,
+  "ap70_main": 0.7732097627889002,
+  "ap70_rebuilt": 0.7732097627889002,
+  "ap70_abs_diff": 0.0,
+  "ap_tol": 1e-09,
+  "pass": true
+ },
+ "tpfp_product": {
+  "path": "results/v2/wp5_tpfp_validate.npz",
+  "sha256": "e0b8e6d3969c0bed7cad2cc06278a287e844e31805e7cf5a4f3367e392d212d4",
+  "why": "C-2: the only forward cost that had to be paid. Any later recomputation reuses this and must not run inference again."
+ },
+ "p1_vs_ego": {
+  "frames_with_identical_boxes": 0,
+  "frames": 1980,
+  "pct_identical": 0.0,
+  "ap50_p1": 0.7324997185725376,
+  "ap50_ego": 0.7205540221496439,
+  "ap70_p1": 0.5820635911594274,
+  "ap70_ego": 0.5999578531713615,
+  "f1_p1": 0.7627091044326268,
+  "f1_ego": 0.7892936458116007,
+  "assertion": "p=1.00 is NOT assumed equal to ego-only (C-1/C-2). A zero collaborator tensor still enters AttFusion, whose softmax over two elements dilutes the ego features. The difference is measured, not defined."
+ }
+}
