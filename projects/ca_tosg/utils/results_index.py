@@ -79,6 +79,10 @@ RULES = [
     (r'^v2/wp6_distribution_compare_\w+\.json$',
      'python projects/ca_tosg/evaluation/v2_wp6_distribution_compare.py --split <split>',
      'D-1: measured BEFORE any refit; three arms, marginals and correlation geometry'),
+    (r'^v2/v2_grid_\w+_(ideal|packet)\.(csv|json)$',
+     'python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>',
+     'V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix '
+     'per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only'),
     (r'^v2/mc_survival_\w+\.json$',
      'python projects/ca_tosg/evaluation/v2_mc_survival_audit.py',
      'V2-R19 C: message-survival counts replayed from the fixed Monte-Carlo seed, with the '

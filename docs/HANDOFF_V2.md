@@ -217,6 +217,10 @@ checklist, so it could be skipped for a whole session:
   **and** `python tools/build_sibling_dependency_manifest.py`
 * any `results/v2/wp2_*` or `wp34_*` product regenerated → re-run `v2_alignment_audit.py`, or gate 25
   will fail on the recorded input hashes (by design)
+* **anything added under `results/` also moves the p6 report** → `python tools/p6_numbers_vs_csv.py`
+  (V2-R25: adding the grid moved the located-cell count 297 → 300 and the gate caught the stale
+  report. Third member of the same family as `results_index.py` and `apply_opencood_patches --export`
+  — a generated artefact whose generator nobody re-ran.)
 
 `tests/test_eval_determinism.py` enumerates **all 17,905 identities** for seed collisions on every
 run — 0 collisions now, but that is a property of *this* identity set, not of the derivation, and the

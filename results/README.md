@@ -26,7 +26,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 6 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
-| | `results/v2/` | 34 |
+| | `results/v2/` | 38 |
 | | `results/v2/diagnostic/` | 7 |
 | | `results/v2/sealed/` | 5 |
 
@@ -374,6 +374,10 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `sanity_single_vehicle_validate.csv` | `python projects/ca_tosg/evaluation/v2_single_vehicle_sanity.py` | V2-R1 item 2: single-vehicle vs cooperative forward on the unified checkpoint |
 | `sanity_single_vehicle_validate.json` | `python projects/ca_tosg/evaluation/v2_single_vehicle_sanity.py` | V2-R1 item 2: single-vehicle vs cooperative forward on the unified checkpoint |
 | `seed_collision_scan.json` | `python tests/test_eval_determinism.py` | determinism gate inputs: frames that diverged pre-fix, and the seed collision scan |
+| `v2_grid_validate_ideal.csv` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
+| `v2_grid_validate_ideal.json` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
+| `v2_grid_validate_packet.csv` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
+| `v2_grid_validate_packet.json` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
 | `wp2_per_agent_culver.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
 | `wp2_per_agent_culver.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
 | `wp2_per_agent_test.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
@@ -416,4 +420,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-284 files indexed, 2 unattributed.
+288 files indexed, 2 unattributed.
