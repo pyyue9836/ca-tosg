@@ -1,6 +1,6 @@
 # V2 HANDOFF — read this first, then `docs/unified_branch_protocol_v2.md`
 
-Written at the end of the V2-R21 session. Everything below is checkable from the repository; nothing
+Written at the end of the V2-R22 session. Everything below is checkable from the repository; nothing
 here is memory.
 
 ---
@@ -55,28 +55,28 @@ side effect — `git restore paper/*.pdf` after any full gate run.
 | 4 L products | **done (validate)** — AP@0.5 0.88851, F1 0.88918; `B_L` 0.00253 Msym = 0.80 % of the β=0.10 budget |
 | 5 F products | **done (validate)** — three regimes × 8 loss rates × R=4 + endpoints; both bridges pass bit-exactly |
 | — identity alignment audit (V2-R19 A) | **done, all three splits — 100.00 % on all four parts.** `v2_alignment_audit.py`; the A-3 precondition on `N_box,t → B_L,t` is discharged |
-| 6 cue regeneration | **STARTED, then STOPPED as criterion 5 requires.** Audit done: 23 dims classified with code locations, 0 depend on detections, **1 forbidden (GT)**, 20 of 23 move under v2. Two rulings needed before it can continue — see §3.8 |
+| 6 cue regeneration | **schema frozen and validate cues generated; STOPPED before the refit (V2-R22, H-3).** §9 amendment registered; `v2_ego_local_23d` = 21 ego-local + 2 channel; `results/v2/wp6_cues_validate.csv` (1980 frames) and the D-1 comparison exist. **One ruling open — see the boxed question in §3.** |
 | 7–10 | not started |
 | 11 held-out evaluation | not started; test/Culver accuracy is **sealed** |
 | 12 external baseline | not started; Tier C unapproved |
 
 ---
 
-## 2. The next task, and why it is not bookkeeping
+## 2. The next task
 
-**Work package 6 — cue regeneration.** `docs/unified_branch_protocol_v2.md` §9.1 carries six
-acceptance criteria, all preconditions of the selector freeze.
+**Work package 6 is past its audit and its schema freeze; what remains is E-1 — the refit.** See the
+boxed question in §3 first: it is the only thing blocking.
 
-Carrying the v1 cue *values* over unregenerated would feed **v1 detections into a v2 selector**. That
-is leakage, and **no gate in this repository would catch it**: the values are plausible, the column
-names unchanged, every existing check passes. P0-3's invalidation list does not mention the cue
-vector at all — the only list that does is work package 6.
+The §9.1 acceptance criteria are discharged as follows: all 23 v1 dimensions were tabulated with a
+**code location per row** (`results/v2/wp6_cue_audit.json`, `--verify-locations` re-checks the
+citations at run time); 0 turned out to depend on detection output; **1 was ground truth and stopped
+the batch** as criterion 5 requires; the replacement schema `v2_ego_local_23d` is frozen in §9.2 and
+generated for validate. The D-1 distribution comparison was produced **before** any refit, which is
+what caught the error recorded at §3.8.
 
-The six criteria, in short: all 23 dimensions tabulated `depends` / `independent`; **a code location
-as the basis of each classification, with a verbal assertion explicitly not acceptable**; `depends`
-rows recomputed with old and new distributions printed; `independent` rows given an invariance
-demonstration ("it looks like a channel quantity" is not one); **an unclassifiable dimension stops
-the batch**; the table enters the manifest.
+**What E-1 covers** (zero GPU): regenerate oracle / feasibility, refit RF + SNR threshold + hand
+rules on the new schema, then WP9–WP10 products and the freeze. **What it does not touch:** WP2
+predictions, E/L products, payload, WP5 transport — all confirmed unaffected (V2-R21 E-2).
 
 ---
 
@@ -106,14 +106,33 @@ the batch**; the table enters the manifest.
    collaborator-unique detection is discarded. V2-R19 A-3 released.
 6. ~~The `intra-repo imports` gate~~ — **CLOSED, V2-R20 D**, and the diagnosis was corrected: it was
    a **real** finding, not a false positive. Registered rather than exempted; see §0 and §5.
-7. **NEW (V2-R21) — `ego_num_objects` is ground truth and must leave the cue set.** It is
-   `len(ego['object_ids'])` from `params['vehicles']`; rank 5 of 23 by Gini importance (2.54 %). C-5
-   forbids GT in the cue vector. Removing it is a **§9 amendment**, which §9 requires to be
-   registered *before any test/Culver number is seen* — that window is open now and closes at WP11.
-8. **NEW (V2-R21) — §9's reason for carrying the cue set over is factually wrong.** It says the cues
-   describe "the ego's own scene"; 19 of 21 are computed over `np.vstack(projected_lidar_stack)`,
-   the **all-CAV** cloud (v1 up to 7 vehicles, v2 at most 2). Redefining them as genuinely ego-only
-   versus keeping fused-cloud statistics with corrected wording is a design decision, not a repair.
+7. ~~`ego_num_objects` is ground truth~~ — **CLOSED, V2-R22.** The §9 amendment is registered
+   (§9.0, 2026-08-28T10:34:12Z, parent `7f643296`, before WP11 and before any held-out number). The
+   field is out of the schema, replaced by `ego_detected_box_count`; the v1 RF/selector results are
+   **demoted to diagnostic**.
+8. ~~"19 of 21 cues are computed over the all-CAV cloud"~~ — **WITHDRAWN, V2-R22 C. That claim was
+   WRONG; this line is kept struck through so nobody acts on it.** Recomputing from the ego's own
+   sweep at the v1 range returns the v1 values **exactly (×1.000 on all 17 `pcd_*`)** — the v1 cues
+   were already ego-only. The v1 extractor loads the **late-fusion** config, so it ran
+   `LateFusionDataset.get_item_test()`, whose dict is per-CAV with each CAV's own `origin_lidar`
+   (`late_fusion_dataset.py:85`); the `vstack` at `:251` is inside `collate_batch_test`, never
+   called. What actually changed is the **field of view** (±70.4 → ±140.8 m), plus a real
+   *prospective* hazard: v2 runs `IntermediateFusionDataset`, where `origin_lidar` **is** the
+   all-CAV stack. **The amendment stands; one of its two stated grounds does not.**
+
+> ### ▶ THE ONE OPEN QUESTION — start here next session
+>
+> **Proceed to E-1 (regenerate oracle/feasibility, refit RF / threshold / hand rule on the new
+> `v2_ego_local_23d` schema), or revisit the schema first?**
+>
+> V2-R22 stopped before any refit, per H-3, because an amendment ground was withdrawn. The
+> executor's recommendation is **proceed**: the surviving grounds (GT leak, FOV change, prospective
+> hazard) are sufficient and the schema itself did not change as a result of the correction. But the
+> premise was rewritten after Josh wrote the instruction, so it is his to confirm.
+>
+> Everything E-1 needs already exists: `results/v2/wp6_cues_validate.csv`,
+> `wp6_distribution_compare_validate.json` (D-1, produced and reported), and the frozen
+> §9.2 schema. **Zero GPU** — E-2 of V2-R21 confirmed WP2/E/L/payload/WP5 all stay as they are.
 9. **NEW (V2-R20) — should the sibling live in a fork?** The modifications travel as patches
    because there is no writable OpenCOOD remote (§0). A fork under Josh's account would give them
    pushed, dated history. Creating one is an outward-facing act and is Josh's to authorise.
