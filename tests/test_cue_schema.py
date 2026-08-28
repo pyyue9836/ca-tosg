@@ -81,9 +81,13 @@ def f2_no_gt(df, meta):
             if re.search(p, c, re.I):
                 fails.append(f'{c}: matches the ground-truth pattern /{p}/')
                 break
-    ps = (meta.get('point_source') or '') + ' ' + ' '.join(meta.get('forbidden_and_absent', []))
-    if 'vehicles' in ps and 'absent' not in ps.lower() and 'forbidden' not in ps.lower():
-        fails.append('point_source mentions params[vehicles] outside a forbidden-list context')
+    # Only `point_source` is inspected. `forbidden_and_absent` NAMES the banned sources by design,
+    # so scanning it flags the declaration for containing the words it exists to contain -- a false
+    # positive, and principle 3 of docs/gate_design_principles.md.
+    ps = (meta.get('point_source') or '')
+    for tok in ('vehicles', 'object_ids', 'ground truth'):
+        if tok in ps.lower():
+            fails.append(f'point_source claims the points come from something containing {tok!r}')
     return fails
 
 

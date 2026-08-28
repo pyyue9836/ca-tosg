@@ -1,0 +1,143 @@
+{
+ "schema": "catosg-v2-cue-schema/1",
+ "name": "v2_ego_local_23d",
+ "protocol_section": "9.2",
+ "frozen": true,
+ "why": "The schema states what the ego is allowed to know at decision time. Freezing it stops a later run gaining a field, losing one, or keeping the names while changing what they are computed from.",
+ "n_fields": 23,
+ "fields": [
+  "ego_detected_box_count",
+  "has_collaborator",
+  "ego_origin_lidar_shape_0",
+  "ego_origin_lidar_shape_1",
+  "ego_pcd_num_points",
+  "ego_pcd_mean_range",
+  "ego_pcd_max_range",
+  "ego_pcd_std_range",
+  "ego_pcd_near_20m",
+  "ego_pcd_mid_20_50m",
+  "ego_pcd_far_50_80m",
+  "ego_pcd_very_far_80m",
+  "ego_pcd_front_points",
+  "ego_pcd_back_points",
+  "ego_pcd_left_points",
+  "ego_pcd_right_points",
+  "ego_pcd_front_far_30m",
+  "ego_pcd_front_far_50m",
+  "ego_pcd_density_0_20",
+  "ego_pcd_density_20_50",
+  "ego_pcd_density_50_80",
+  "est_snr_db",
+  "channel_is_rayleigh"
+ ],
+ "field_provenance": {
+  "ego_detected_box_count": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:ego_detected_box_count <- wp2_per_agent_validate.csv:n_box_ego"
+  ],
+  "has_collaborator": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:ego_points() <- catosg_collab_subset.subset_of + COM_RANGE"
+  ],
+  "ego_origin_lidar_shape_0": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_origin_lidar_shape_1": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_num_points": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_mean_range": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_max_range": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_std_range": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_near_20m": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_mid_20_50m": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_far_50_80m": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_very_far_80m": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_front_points": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_back_points": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_left_points": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_right_points": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_front_far_30m": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_front_far_50m": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_density_0_20": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_density_20_50": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "ego_pcd_density_50_80": [
+   "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py:extract_pcd_features(get_item_single_car()[projected_lidar])"
+  ],
+  "est_snr_db": [
+   "projects/ca_tosg/models/feature_encoder.py:46"
+  ],
+  "channel_is_rayleigh": [
+   "projects/ca_tosg/models/feature_encoder.py:47"
+  ]
+ },
+ "field_of_view": {
+  "cav_lidar_range": [
+   -140.8,
+   -40,
+   -3,
+   140.8,
+   40,
+   1
+  ],
+  "note": "The unified v2 FOV (\u00a73.1). v1 cues were extracted under the LATE-FUSION range x in [-70.4, 70.4]; a scene statistic is defined over a region, which is why the regeneration was required. Pinned because the fields would silently mean something else under another range."
+ },
+ "point_source": "get_item_single_car()['projected_lidar'] for the EGO CAV ONLY -- the same array pre_processor.preprocess() receives, so the cue describes exactly the scene action E sees. projected_lidar_stack is never built.",
+ "frozen_thresholds": {
+  "score_threshold": 0.2,
+  "nms_iou": 0.15
+ },
+ "forbidden_and_absent": [
+  "ground truth / object_ids / params[vehicles]",
+  "collaborator point clouds",
+  "fused tensors",
+  "task metrics",
+  "oracle labels",
+  "delivery outcomes"
+ ],
+ "depends_on": {
+  "wp2_per_agent_validate.csv": "ea5a44b971aa62c9e46b6a701ae574ae1d043b3362553ffc04cb7e70f7ed660e",
+  "wp6_cues_validate.csv": "30b63338d9d7577cd934212c948c004e24b82b65e99b1e7104867611238d1d94",
+  "alignment_audit_validate.json": "037398b461ac58d559be948759b0f8f8a47fa34f9756be81eee6d899a6047d56",
+  "checkpoint/latest.pth": "897fd516a3548f0a8250b5aab9a619520fba2bcea709bacccfd5eab1cd732344",
+  "checkpoint/config.yaml": "9348a20f236ab17c30e5a28e41f805fb1dc33e0eb06b2615f78f38a15bd84b3c"
+ },
+ "retired": {
+  "ego_num_objects": "GROUND TRUTH (params[vehicles]); kept outside the schema as evaluation_only_gt, never a selector input",
+  "num_cavs": "size of the fused CAV set (2-7) -- post-decision; replaced by the binary has_collaborator"
+ },
+ "gates": [
+  "tests/test_cue_schema.py",
+  "tests/test_cue_field_whitelist.py"
+ ]
+}

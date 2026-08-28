@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 26)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (15 of 29)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
-  the twelve artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
+  the fourteen artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 26 checks in total, 14 of which a clean clone can run.
+  GATE-COUNT-LINE: 29 checks in total, 15 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -102,6 +102,20 @@ GATES = [
     # the tree they claim to describe, in BOTH directions (patch content and worktree content), so
     # neither can be quietly rewritten to match the other.
     ('artifacts', 'patch freshness',      [PY, 'tests/test_patch_freshness.py']),
+    # V2-R22 F / V2-R24 B-1: the cue schema. F-3 is done by DATA FLOW, not by name -- the cues are
+    # recomputed from the ego-only path and must match, while an all-CAV control must differ. A
+    # rename is exactly what a wrong implementation would also do, so a name check would prove
+    # nothing here.
+    ('artifacts', 'cue schema',           [PY, 'tests/test_cue_schema.py']),
+    # V2-R21 C-5: no ground truth, task metric, oracle label, delivery outcome or future information
+    # may reach the ACTIVE cue schema. Held red on purpose from V2-R21 until the §9 amendment
+    # removed ego_num_objects; registered now that it is green on its own merits (F-7).
+    ('content',   'cue field whitelist',  [PY, 'tests/test_cue_field_whitelist.py']),
+    # V2-R24 B-2: the schema freeze. Pins the field list AND its order, a code location per field,
+    # the FOV the statistics are defined over, and the WP2 products + checkpoint the schema depends
+    # on. ego_detected_box_count IS a detector output, so a schema frozen without pinning those
+    # would be frozen against a moving input.
+    ('artifacts', 'cue schema freeze',    [PY, 'tools/build_cue_schema_manifest.py', '--check']),
 ]
 
 

@@ -42,82 +42,89 @@ BANNED_PATTERNS = [
 ]
 
 
-def cue_names_from_audit(audit):
-    return [c['name'] for c in audit['cues']]
+def active_schema(split='validate'):
+    """The cue set actually in force, not the retired one the audit describes."""
+    p = os.path.join(ROOT, 'results', 'v2', f'wp6_cues_{split}.json')
+    if not os.path.exists(p):
+        return None
+    m = json.load(open(p))
+    return {'name': m.get('schema'),
+            'fields': list(m.get('perception_fields', [])) + list(m.get('channel_fields', []))}
 
 
-def check(audit=None, extra_names=None):
+def check(schema=None, audit=None, extra_names=None):
+    """Fail if any BANNED source reaches the ACTIVE cue schema.
+
+    Two nets, and note which set each is applied to:
+
+      * the WP6 audit says which *v1* dimensions were forbidden. A forbidden dimension is a failure
+        only when it is still IN the active schema -- the audit is a record of what was found, not a
+        standing accusation against a field that has since been removed.
+      * the name patterns are applied to the active schema's own field list, so a newly added field
+        is caught even though the audit never classified it.
+    """
     fails = []
+    if schema is None:
+        schema = active_schema()
+    if schema is None:
+        return ['no active cue schema -- run projects/ca_tosg/evaluation/v2_wp6_generate_cues.py']
     if audit is None:
         if not os.path.exists(AUDIT):
             return ['no WP6 cue audit -- run projects/ca_tosg/evaluation/v2_wp6_cue_audit.py']
         audit = json.load(open(AUDIT))
 
+    live = set(schema['fields'])
     for c in audit['cues']:
-        if c['classification'] == 'forbidden':
+        if c['classification'] == 'forbidden' and c['name'] in live:
             fails.append(f'{c["name"]}: classified FORBIDDEN by the WP6 audit '
-                         f'[{c.get("forbidden_source")}] -- {c["sees"]} '
+                         f'[{c.get("forbidden_source")}] and STILL IN the active schema '
                          f'({c["code_location"][0]})')
 
-    names = cue_names_from_audit(audit) + list(extra_names or [])
-    for n in names:
+    for n in list(schema['fields']) + list(extra_names or []):
         for pat, src in BANNED_PATTERNS:
             if re.search(pat, n, re.I):
-                msg = f'{n}: name matches the {src} ban pattern /{pat}/'
-                if not any(msg.startswith(f.split(':')[0] + ':') for f in fails):
-                    fails.append(msg)
+                fails.append(f'{n}: name matches the {src} ban pattern /{pat}/')
                 break
     return fails
 
 
 def self_test():
+    schema = active_schema()
     audit = json.load(open(AUDIT)) if os.path.exists(AUDIT) else None
-    if audit is None:
-        print('SELF-TEST INCONCLUSIVE: no audit')
+    if schema is None or audit is None:
+        print('SELF-TEST INCONCLUSIVE: no active schema or no audit')
         return 1
-    clean = json.loads(json.dumps(audit))
-    clean['cues'] = [c for c in clean['cues'] if c['classification'] != 'forbidden'
-                     and not any(re.search(p, c['name'], re.I) for p, _ in BANNED_PATTERNS)]
-    if check(clean):
-        print('SELF-TEST FAIL: the cleaned baseline must be clean')
+    if check(schema, audit):
+        print('SELF-TEST FAIL: the live schema must be clean or the injections prove nothing')
         return 1
-    print(f'  baseline (audit with the forbidden row removed, {len(clean["cues"])} cues): clean')
+    print(f'  baseline ({schema["name"]}, {len(schema["fields"])} fields): clean')
 
-    cases = []
-    a1 = json.loads(json.dumps(clean))
-    a1['cues'].append(dict(name='ego_num_objects', classification='forbidden',
-                           forbidden_source='ground_truth', sees='GT', code_location=['x.py:1']))
-    cases.append(('a GT-derived cue is added back', a1, None))
+    def with_field(name):
+        s2 = json.loads(json.dumps(schema))
+        s2['fields'].append(name)
+        return s2
 
-    a2 = json.loads(json.dumps(clean))
-    a2['cues'].append(dict(name='scene_complexity_index', classification='independent',
-                           sees='?', code_location=['x.py:1']))
-    cases.append(('a renamed GT cue slips past the name net but the audit marks it independent',
-                  a2, None))
-
-    a3 = json.loads(json.dumps(clean))
-    cases.append(('an outcome column reaches the feature list under its own name',
-                  a3, ['compressed_f1']))
-
-    a4 = json.loads(json.dumps(clean))
-    cases.append(('an oracle label reaches the feature list', a4, ['oracle_3way']))
-
+    cases = [
+        ('the retired GT field is put back in the schema', with_field('ego_num_objects'), None),
+        ('an outcome column reaches the schema', with_field('compressed_f1'), None),
+        ('an oracle label reaches the schema', with_field('oracle_3way'), None),
+        ('a delivery outcome reaches the schema', with_field('eff_f1_L'), None),
+    ]
     ok = True
-    for name, a, extra in cases:
-        f = check(a, extra)
-        expected_fire = 'renamed' not in name
-        fired = bool(f)
-        verdict = 'FIRES  ' if fired else 'SILENT '
-        print(f'  {verdict}  {name}')
-        if fired:
+    for name, sc, extra in cases:
+        f = check(sc, audit, extra)
+        print(f'  {"FIRES  " if f else "SILENT "}  {name}')
+        if f:
             print(f'            -> {f[0][:130]}')
-        if expected_fire:
-            ok &= fired
-        else:
-            # documented limitation, asserted so it cannot be mistaken for coverage
-            print('            (EXPECTED SILENT: a rename with no source evidence is invisible to '
-                  'both nets -- this is why criterion 2 requires a code location per dimension, '
-                  'and why an unclassifiable cue must STOP the batch rather than default in)')
+        ok &= bool(f)
+
+    f = check(with_field('ego_scene_complexity'), audit)
+    print(f'  {"FIRES  " if f else "SILENT "}  a RENAMED GT cue with no source evidence')
+    print('            (EXPECTED SILENT -- DOCUMENTED BLIND SPOT: a GT quantity under an innocuous '
+          'name defeats both the name net and the provenance net. This is why §9.1 criterion 2 '
+          'requires a code location per dimension and criterion 5 stops the batch on an '
+          'unclassifiable cue: this gate holds the audit result, it cannot replace the audit.)')
+
     print('CUE WHITELIST SELF-TEST ' + ('PASS' if ok else 'FAIL: an injection did not fire'))
     return 0 if ok else 1
 
@@ -126,7 +133,9 @@ def main():
     if '--self-test' in sys.argv:
         return self_test()
     fails = check()
-    print('cue field whitelist: source-based ban over the WP6-audited cue set')
+    sc = active_schema()
+    print(f'cue field whitelist: source-based ban over the ACTIVE schema '
+          f'{sc["name"] if sc else "?"} ({len(sc["fields"]) if sc else 0} fields)')
     if fails:
         print('\nCUE WHITELIST GATE FAIL:')
         for f in fails:

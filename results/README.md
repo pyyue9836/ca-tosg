@@ -19,7 +19,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 30 |
+| | `results/manifests/` | 31 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -213,6 +213,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `R21A2_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `R21A_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `TAU_FEASIBLE_MANIFEST.json` | `python projects/ca_tosg/evaluation/tau_feasible.py` | R18-3: the budget-matched threshold reference |
+| `V2_CUE_SCHEMA.json` | **UNATTRIBUTED** |  |
 | `V2_INT8_SCALES.json` | `python projects/ca_tosg/evaluation/v2_int8_calibrate.py` | frozen per-branch symmetric int8 transmit scales (validate-calibrated) |
 | `V2_PROTOCOL_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | per-section hashes + lock state of docs/unified_branch_protocol_v2.md |
 | `V2_RUNTIME_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | runtime switches the products depend on (V2-R17 C) |
@@ -415,4 +416,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-283 files indexed, 1 unattributed.
+284 files indexed, 2 unattributed.
