@@ -1,6 +1,6 @@
 # V2 HANDOFF — read this first, then `docs/unified_branch_protocol_v2.md`
 
-Written at the end of the V2-R19 session. Everything below is checkable from the repository; nothing
+Written at the end of the V2-R21 session. Everything below is checkable from the repository; nothing
 here is memory.
 
 ---
@@ -55,7 +55,7 @@ side effect — `git restore paper/*.pdf` after any full gate run.
 | 4 L products | **done (validate)** — AP@0.5 0.88851, F1 0.88918; `B_L` 0.00253 Msym = 0.80 % of the β=0.10 budget |
 | 5 F products | **done (validate)** — three regimes × 8 loss rates × R=4 + endpoints; both bridges pass bit-exactly |
 | — identity alignment audit (V2-R19 A) | **done, all three splits — 100.00 % on all four parts.** `v2_alignment_audit.py`; the A-3 precondition on `N_box,t → B_L,t` is discharged |
-| 6 cue regeneration | **NOT STARTED — this is the next task, and it is a leakage defence** |
+| 6 cue regeneration | **STARTED, then STOPPED as criterion 5 requires.** Audit done: 23 dims classified with code locations, 0 depend on detections, **1 forbidden (GT)**, 20 of 23 move under v2. Two rulings needed before it can continue — see §3.8 |
 | 7–10 | not started |
 | 11 held-out evaluation | not started; test/Culver accuracy is **sealed** |
 | 12 external baseline | not started; Tier C unapproved |
@@ -106,7 +106,15 @@ the batch**; the table enters the manifest.
    collaborator-unique detection is discarded. V2-R19 A-3 released.
 6. ~~The `intra-repo imports` gate~~ — **CLOSED, V2-R20 D**, and the diagnosis was corrected: it was
    a **real** finding, not a false positive. Registered rather than exempted; see §0 and §5.
-7. **NEW (V2-R20) — should the sibling live in a fork?** The modifications travel as patches
+7. **NEW (V2-R21) — `ego_num_objects` is ground truth and must leave the cue set.** It is
+   `len(ego['object_ids'])` from `params['vehicles']`; rank 5 of 23 by Gini importance (2.54 %). C-5
+   forbids GT in the cue vector. Removing it is a **§9 amendment**, which §9 requires to be
+   registered *before any test/Culver number is seen* — that window is open now and closes at WP11.
+8. **NEW (V2-R21) — §9's reason for carrying the cue set over is factually wrong.** It says the cues
+   describe "the ego's own scene"; 19 of 21 are computed over `np.vstack(projected_lidar_stack)`,
+   the **all-CAV** cloud (v1 up to 7 vehicles, v2 at most 2). Redefining them as genuinely ego-only
+   versus keeping fused-cloud statistics with corrected wording is a design decision, not a repair.
+9. **NEW (V2-R20) — should the sibling live in a fork?** The modifications travel as patches
    because there is no writable OpenCOOD remote (§0). A fork under Josh's account would give them
    pushed, dated history. Creating one is an outward-facing act and is Josh's to authorise.
 
@@ -205,6 +213,11 @@ git restore paper/main.pdf paper/supplementary.pdf   # the compile gate rewrites
 ---
 
 ## 6. Working rules that bit these sessions
+
+**Gate design has its own file now:** `docs/gate_design_principles.md` — four rules, each bought with
+a real failure. The fourth, added V2-R21, is **a gate that cannot fail**, and it is the worst because
+it is indistinguishable from a working one until you watch it fail on purpose.
+
 
 * **A label is what the reader has to go on.** `FRAME-ALIGNMENT CHECK` computed a coordinate-frame
   overlap. Nobody misread the number; they read the name. Same family as V2-R16's "a gate whose name

@@ -1,0 +1,317 @@
+{
+ "schema": "catosg-v2-wp6-cue-audit/1",
+ "dimensions": 23,
+ "counts": {
+  "depends": 0,
+  "independent": 22,
+  "forbidden": 1,
+  "changes_under_v2": 20
+ },
+ "forbidden_sources": {
+  "ground_truth": "GT boxes, GT object ids, GT counts -- the answer the detector is estimating",
+  "task_metric": "AP, F1, precision, recall, tp/fp/fn -- outcomes, not inputs",
+  "oracle_action": "oracle labels or best_method/best_level columns",
+  "delivery_outcome": "realised delivery, effective F1, the actual erasure mask",
+  "future_information": "anything from a later frame or from after the decision"
+ },
+ "headline": "No cue reads a detection output -- the hazard \u00a79.1 named does not occur by that route. Two others do: ego_num_objects is a GROUND-TRUTH count (C-5), and 19 of the 21 \"ego-side\" cues are computed over the ALL-CAV stacked point cloud, so \u00a79 justification for carrying them over unchanged does not hold.",
+ "blocking": [
+  "ego_num_objects is ground truth and must leave the cue set -- an amendment under \u00a79, which requires a written registration before any test/Culver number is seen.",
+  "\u00a79 says the cues \"describe the ego own scene\"; origin_lidar is the ALL-CAV stack, so that sentence is wrong for 19 of 21 and must be corrected before the set is refrozen."
+ ],
+ "cues": [
+  {
+   "name": "num_cavs",
+   "group": "scene",
+   "sees": "the CAV set after the collaborator-subset rule (NOT detections, NOT GT)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "v1 counted every CAV in the frame (observed 2-7); the v2 rule caps it at 2, so the value moves on every frame with 3 or more CAVs",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:134",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:81"
+   ]
+  },
+  {
+   "name": "ego_num_objects",
+   "group": "scene",
+   "sees": "GROUND TRUTH: params[\"vehicles\"] via generate_object_center()",
+   "classification": "forbidden",
+   "forbidden_source": "ground_truth",
+   "changes_under_v2": true,
+   "why_changes": "irrelevant -- it may not be used at all (C-5)",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:137",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:235",
+    "opencood/data_utils/post_processor/base_postprocessor.py:125"
+   ]
+  },
+  {
+   "name": "ego_origin_lidar_shape_0",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "origin_lidar is np.vstack(projected_lidar_stack) over ALL CAVs",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:138",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "ego_origin_lidar_shape_1",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (column count)",
+   "classification": "independent",
+   "changes_under_v2": false,
+   "why_changes": "the column count is the point dimensionality, invariant to the CAV set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:139",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_num_points",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_mean_range",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_max_range",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_std_range",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_near_20m",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_mid_20_50m",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_far_50_80m",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_very_far_80m",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_front_points",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_back_points",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_left_points",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_right_points",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_front_far_30m",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_front_far_50m",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_density_0_20",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_density_20_50",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "pcd_density_50_80",
+   "group": "lidar",
+   "sees": "the stacked multi-CAV projected point cloud (no detector output on the path)",
+   "classification": "independent",
+   "changes_under_v2": true,
+   "why_changes": "computed from ego[\"origin_lidar\"], which is np.vstack(projected_lidar_stack) over ALL CAVs in the frame -- the v2 rule changes that set",
+   "code_location": [
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:58",
+    "projects/ca_tosg/datasets/test_split/02_extract_cues_and_f1.py:116",
+    "opencood/data_utils/datasets/intermediate_fusion_dataset.py:198"
+   ]
+  },
+  {
+   "name": "est_snr_db",
+   "group": "channel",
+   "sees": "the channel grid; no perception quantity on the path",
+   "classification": "independent",
+   "changes_under_v2": false,
+   "why_changes": "a channel condition assigned per (frame, realisation); the branch does not enter its computation",
+   "code_location": [
+    "projects/ca_tosg/models/feature_encoder.py:46"
+   ]
+  },
+  {
+   "name": "channel_is_rayleigh",
+   "group": "channel",
+   "sees": "the channel grid; no perception quantity on the path",
+   "classification": "independent",
+   "changes_under_v2": false,
+   "why_changes": "same as est_snr_db",
+   "code_location": [
+    "projects/ca_tosg/models/feature_encoder.py:47"
+   ]
+  }
+ ]
+}

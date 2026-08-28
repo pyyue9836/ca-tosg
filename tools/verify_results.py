@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 25)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 26)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
-  the eleven artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
+  the twelve artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 25 checks in total, 14 of which a clean clone can run.
+  GATE-COUNT-LINE: 26 checks in total, 14 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -96,6 +96,12 @@ GATES = [
     # (unlike the 73.6 % coordinate-frame diagnostic, which fails downward only). Re-runs the cheap
     # parts live and recomputes the audit's recorded input hashes, so a stale verdict cannot pass.
     ('artifacts', 'alignment audit',      [PY, 'tests/test_alignment_audit.py']),
+    # V2-R21 B: patches/opencood/ is the ONLY portable form of the sibling modifications, and it
+    # went stale at V2-R16 and survived four rounds with every gate green -- because no gate ever
+    # ran the generator (the R63 family). Gate 24 pins the manifest; this pins the patches against
+    # the tree they claim to describe, in BOTH directions (patch content and worktree content), so
+    # neither can be quietly rewritten to match the other.
+    ('artifacts', 'patch freshness',      [PY, 'tests/test_patch_freshness.py']),
 ]
 
 

@@ -5534,3 +5534,122 @@ batch that touches the sibling OpenCOOD checkout re-runs
 the same failure family and both had the same cause: **the step existed but was not on any batch's
 closing checklist**, which is why it could survive a whole session unnoticed. It is now on the
 checklist in `docs/HANDOFF_V2.md`.
+
+## V2-R21 — a patch-freshness gate, and work package 6 finds two things §9.1 did not name
+
+**Zero GPU. The v1 manuscript was not touched.** 26 gates, ALL PASS.
+
+### A · Commit record
+
+| item | value |
+|---|---|
+| main repository commit | `48bb277cf7808afb34932c37f2aaa415a551ad10` |
+| OpenCOOD base commit | `31ba16025da27ffe4e336f011290dfbc66f9a1f1` (upstream `DerrickXuNu/OpenCOOD`) |
+| `V2_SIBLING_DEPENDENCY.json` | `f79117d9afb43dbecf29a6115defd1c6491a7b3d37e08197d12783508ba88581` |
+| patches registered | 18 (4 v2-critical), each with patch and file SHA-256 in the manifest |
+
+**A-3, reported as it happened rather than as intended.** The post-commit re-run was **contaminated
+by my own concurrent edit**: gate 26 was added to `verify_results.py` while the suite was running, so
+`generators --check` failed on the gate-count line (25 registered, 26 present) — a real failure of a
+real check, caused by editing the thing under test while it ran. Every other gate passed. The
+confirmation was redone cleanly at 26 gates with no concurrent edits: **ALL GATES PASS**. Recorded
+because "the run was fine apart from the bit I broke" is not a passing run.
+
+### B · Gate 26 — patch freshness
+
+**Root cause:** `patches/opencood/` is the only portable form of the sibling modifications, it went
+stale at V2-R16, and it **survived four rounds with every gate green**. Nothing covered it because
+**no gate ever ran the generator** — the R63 family, where the suite checks committed artefacts and
+never asks whether the script that owns them still reproduces them.
+
+Gate 24 pins the manifest; gate 26 pins the patches against the tree they claim to describe:
+`--check` must report 0 conflicts and 0 missing, the applied count must equal the registered count,
+**every patch file must hash to its registered value, and every registered file in the sibling
+worktree must hash to its registered value.** Both directions are present deliberately — a patch
+could be rewritten to match a changed file, or a file changed to match a rewritten patch, and
+one-sided checking would bless either.
+
+**B-3 injections, all fire:** a patch edited → `patch content moved`; a patch deleted → `17 applied
+but 18 registered`; a sibling file whose content differs from its registered hash → `sibling file
+changed`. A clean baseline is asserted first.
+
+**B-4 · The standard library now exists as a file**, `docs/gate_design_principles.md`, because the
+four rules were scattered across change-log entries and each had to be rediscovered:
+
+1. judge the capability, not the intent;
+2. a pattern being alive is not the code running;
+3. a gate with a false positive is worse than no gate — *and check it is not a real finding first*;
+4. **a gate that cannot fail** — the new fourth, and the worst, because it reports success forever
+   and looks identical to one that works.
+
+Gate 25's design is entered as the **positive instance** of rule 4: a stored verdict re-read from a
+JSON saying `100 %` would be unfalsifiable, so the audit records the SHA-256 of every input it was
+computed from and the gate recomputes them.
+
+### C · Work package 6 — the audit, and why it stops here
+
+`v2_wp6_cue_audit.py` classifies all 23 dimensions with a **code location per row**, verified at run
+time by `--verify-locations` so the table cannot drift from the code it cites.
+
+| classification | count |
+|---|---|
+| depends on detection output | **0** |
+| independent | 22 |
+| **forbidden (C-5)** | **1** |
+| value **moves** under the v2 branch | **20 of 23** |
+
+**The hazard §9.1 named does not occur by the route it named.** No cue reads a detection output, so
+carrying v1 cue *values* over would not feed v1 detections into a v2 selector. Two different problems
+are there instead, and neither is visible from the `depends`/`independent` split alone — which is
+exactly why criterion 2 insists on a code location rather than an assertion.
+
+**C-i · `ego_num_objects` is a ground-truth object count.** It is `len(ego['object_ids'])`;
+`object_ids` is built by `generate_object_center()` from `cav_content['params']['vehicles']` — the
+dataset annotation, range-filtered. A selector conditioning on it reads the answer it is supposed to
+be estimating, and at deployment the ego cannot know it. Chain:
+`02_extract_cues_and_f1.py:137` → `intermediate_fusion_dataset.py:235` → `base_postprocessor.py:125`.
+
+It is **rank 5 of 23 by Gini importance (2.54 %)** in the frozen v1 selector — the highest-ranked
+*perception* cue, behind only the two channel cues. Not dominant; not negligible.
+
+*Checked rather than assumed:* its mean, **22.5646**, sits beside WP2's ego **detection** count mean
+**22.5581**. Those are different numbers and the two series are not equal frame by frame; the
+near-match is a coincidence, not an identity. It correlates 0.963 with WP2's GT count, which is what
+a GT quantity under a different range filter should do.
+
+**C-ii · Nineteen of the twenty-one "ego-side" cues are not ego-side.** They are computed from
+`ego['origin_lidar']`, which `intermediate_fusion_dataset.py:198` builds as
+`np.vstack(projected_lidar_stack)` — the projected LiDAR of **every CAV in the frame**, accumulated
+in the CAV loop. v1 stacked up to seven vehicles (mean 3.89); v2 stacks at most two.
+
+**This makes §9's stated justification for carrying the cue set over factually wrong.** §9 says the
+cues *"describe the ego's own scene and channel, not the branch architecture, so nothing that plan A
+changes invalidates them"*. For those nineteen the sentence is false: the branch change is precisely
+what alters the point set they are computed over. `pcd_num_points` averages **52,580** in the v1
+table, several times a single OPV2V sweep — the stacking is visible in the value.
+
+`num_cavs` moves too, by construction: observed 2–7 in v1 (1,247 of 1,980 frames have ≥3), capped at
+2 under the v2 rule.
+
+**C-5 is implemented as a gate**, `tests/test_cue_field_whitelist.py`, with two nets — source-based
+classification from the audit, and name patterns as a second layer. It **currently FAILS**, correctly,
+on `ego_num_objects`. It is **deliberately not registered** in `verify_results.py`: committing a
+knowingly-red gate is what teaches people to ignore the suite. It joins the suite in the same batch
+as the amendment that removes the field. Its self-test fires on 3 of 4 injections and **asserts the
+fourth stays silent** — a renamed GT cue with no source evidence defeats both nets, which is the
+documented reason criterion 2 requires a code location per dimension and criterion 5 makes an
+unclassifiable cue stop the batch rather than default in.
+
+### Two rulings this cannot decide for itself
+
+1. **Removing `ego_num_objects` is a §9 amendment**, and §9 requires cue-set changes to be
+   *"registered before any test or Culver-City number is seen"*. That window is still open; it will
+   not be after WP11.
+2. **§9's carry-over justification must be corrected before the set is refrozen**, because the
+   sentence that licensed carrying the cues over is not true of nineteen of them. Whether the cues
+   are then redefined as genuinely ego-only (recomputed from the ego's own sweep) or kept as
+   fused-cloud statistics with corrected wording is a design decision, not a repair — and it changes
+   what the selector is conditioning on.
+
+Work package 6 stops here, as criterion 5 requires: **an unclassifiable or forbidden dimension stops
+the batch rather than being carried over by default.**
