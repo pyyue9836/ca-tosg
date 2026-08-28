@@ -368,6 +368,55 @@ loses the whole message and the receiver falls back to ego-only. It stays as the
 **Optional enhancement, costed separately and not in the mainline:** OFDM with a vehicular TDL
 channel model in place of the flat block-fading table.
 
+### 5.1 Registered wordings for two transport findings — AMENDMENT, V2-R19, 2026-08-27
+
+**Why an amendment, and why wordings rather than numbers.** This file reports no results and that
+rule is not being broken here: what follows are **permitted and forbidden sentences**, the same
+kind of object as §7.1's outcome wordings and §12.3's split diagnostic. The numbers they refer to
+live in `results/v2/position_effect_level1_validate.json` and
+`results/v2/mc_survival_validate.json`, not here. Registered because in both cases a weaker true
+statement and a stronger false one differ by a few words, and the stronger one had already been
+written once.
+
+**(a) The position effect, level 1, with the amount of loss held fixed.**
+
+Both wordings were fixed before the selection was run (V2-R19 B-3); which one is active is decided
+by a **pre-registered sufficiency criterion** — at least 100 equal-loss replicate pairs spanning at
+least 30 distinct frames, with a Wilson 95 % lower bound on `P(ΔF1 ≠ 0)` strictly above 0.
+
+> **Permitted when the criterion is met:** *"At a fixed frame and an identical number of lost
+> codewords, different loss locations can produce different task outcomes."*
+
+> **Permitted when it is not met:** level 1 as already reported, plus — as a **separate and
+> separately-labelled stratum** — the `|ΔN_cw| ≤ 1` layer, together with the explicit statement that
+> the equal-codeword sample is too small to exclude the quantity explanation.
+
+**The two strata may never be merged into an "approximately equal amount" conclusion.** Conditioning
+exactly and conditioning approximately are different experiments, and pooling them buys sample size
+by giving up the thing that makes the strict sentence strict.
+
+**Level 2 — "position matters *more* than amount" — remains NOT ADJUDICATED**, and no threshold for
+it is set here. V2-R11 B-2 required that threshold to be pre-registered and it never was; choosing
+one now would be choosing it with the numbers already on screen. Either it is pre-registered for a
+future run or the claim is dropped.
+
+**(b) Message-level survival at very low codeword loss.**
+
+> **Forbidden:** *"the draw has no variance"*, *"fallback is certain"*, *"the standard deviation is
+> zero"* — at any rate where the expected number of surviving messages over the whole Monte Carlo is
+> of order one or greater.
+
+> **Permitted:** *"under the fixed Monte-Carlo seed, no surviving message was observed"*, reported
+> **with the survival count and the unrounded standard deviation**.
+
+**The rule this encodes, stated once so it generalises: "the reported value displays as 0.00000" is
+a statement about display precision; "the random process has no variance" is a statement about the
+process.** The second does not follow from the first, and at `p = 0.001` it is false — `q` is small
+but not zero, and `N_replay × N_frames × q` is of order one, so observing nothing is an ordinary
+draw rather than a certainty. Where the expectation is genuinely many orders below one, fallback
+**may** be called effectively certain, stated as an arithmetic consequence of `q` and still
+accompanied by the observed count.
+
 ---
 
 ## 6. Statistics (P0-8)
@@ -875,7 +924,7 @@ inventory — count and locate every use — so the rewrite is mechanical later.
 | 2 actions | **LOCKED** | C-1 rules E; B-2 locks one collaborator with the rule quoted in full; B-4 locks int8 |
 | 3 FOV/GT/`B_F` | **LOCKED** | C-2 rules `w`/`P`/`H_F`; D-1 derives `B_F` from `N_cw` |
 | 4 `B_L` | **LOCKED** | B-1 container; D-2 same transport chain, real BLER |
-| 5 transport | **LOCKED** | partial recovery specified rule by rule |
+| 5 transport | **LOCKED** | partial recovery specified rule by rule; §5.1 registered wordings added by amendment, V2-R19, 2026-08-27 |
 | 6 statistics | **LOCKED** | scene-level |
 | 7 success criteria | **LOCKED** | C-3 primary criterion verbatim; endpoint change registered |
 | 8 sanity | **LOCKED** | fuse held; all-CAV caveat recorded |

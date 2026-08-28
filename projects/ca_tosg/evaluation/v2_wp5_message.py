@@ -17,6 +17,13 @@ The correct treatment, and the one implemented here:
   seed, assemble the *whole* prediction set from the surviving-F and fallen-back-to-E frames, and
   compute the global-sort AP over that assembly. Repeat, and report mean and standard deviation.
 
+**One rule, three homes, cross-referenced (V2-R20 A-4).** Because AP does not decompose over
+predictions: (i) it may not be linearly mixed over frames — this docstring; (ii) TP/FP must be
+matched **within** a frame before any global sort — `tpfp()` below; (iii) the contribution of a
+*subset of boxes* is established by **ablation and re-scoring**, never by attributing a share of AP
+to them — `v2_coordinate_frame_check.py`, and the "AP attributed per prediction" row of
+`tests/tracked_terms.md`.
+
 **Zero neural-network forwards.** The draw only *chooses between* predictions that already exist, so
 the expensive part — the per-frame true-positive/false-positive/score decomposition — is computed
 once per frame per source and reused across every replay. That is what makes 200 replays × 9 loss
@@ -85,6 +92,11 @@ def tpfp(boxes, scores, gt, thr):
     **loses the frame boundary**: pooling detections and ground truth before matching, so a box in one
     frame can be assigned to an object in another. `caluclate_tp_fp` is called here once per frame,
     with that frame's own ground truth and nothing else, which is what keeps the boundary intact.
+
+    Second of the three homes of one rule (V2-R20 A-4): AP does not decompose over predictions.
+    The other two are this module's docstring (no linear mixing of APs) and
+    `v2_coordinate_frame_check.py` (a subset's contribution is attributed by ablation, not by
+    assigning it a share of AP).
     """
     pb = np.asarray(boxes, np.float32)
     ps = np.asarray(scores, np.float32)

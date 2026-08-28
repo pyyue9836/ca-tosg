@@ -1,16 +1,18 @@
 diff --git a/opencood/data_utils/datasets/intermediate_fusion_dataset.py b/opencood/data_utils/datasets/intermediate_fusion_dataset.py
-index 9c90bae..00c6e8b 100644
+index 9c90bae..3b6184c 100644
 --- a/opencood/data_utils/datasets/intermediate_fusion_dataset.py
 +++ b/opencood/data_utils/datasets/intermediate_fusion_dataset.py
-@@ -15,6 +15,7 @@ import torch
+@@ -15,7 +15,9 @@ import torch
  
  import opencood.data_utils.datasets
  import opencood.data_utils.post_processor as post_processor
 +from opencood.utils import catosg_collab_subset  #self+ CA-TOSG P4-C
  from opencood.utils import box_utils
++from opencood.utils import catosg_eval_rng  #self+ V2-R16 B
  from opencood.data_utils.datasets import basedataset
  from opencood.data_utils.pre_processor import build_preprocessor
-@@ -74,6 +75,10 @@ class IntermediateFusionDataset(basedataset.BaseDataset):
+ from opencood.utils.pcd_utils import \
+@@ -74,6 +76,10 @@ class IntermediateFusionDataset(basedataset.BaseDataset):
          assert ego_id != -1
          assert len(ego_lidar_pose) > 0
  
@@ -21,3 +23,49 @@ index 9c90bae..00c6e8b 100644
          pairwise_t_matrix = \
              self.get_pairwise_transformation(base_data_dict,
                                               self.max_cav)
+@@ -104,9 +110,17 @@ class IntermediateFusionDataset(basedataset.BaseDataset):
+             if distance > opencood.data_utils.datasets.COM_RANGE:
+                 continue
+ 
++            #self+ V2-R16 B-2/B-3: identity = (split, scene, frame, cav). Not a global seed, and
++            # not Python hash() -- the latter is per-process salted, which is the exact failure
++            # being removed here.
++            _rng = None
++            if catosg_eval_rng.enabled() and not self.train:
++                _rng = catosg_eval_rng.sample_rng(
++                    getattr(self, 'catosg_split', 'unknown'),
++                    self._catosg_scene_of(idx), int(idx), str(cav_id))
+             selected_cav_processed = self.get_item_single_car(
+                 selected_cav_base,
+-                ego_lidar_pose)
++                ego_lidar_pose, _rng)
+ 
+             object_stack.append(selected_cav_processed['object_bbx_center'])
+             object_id_stack += selected_cav_processed['object_ids']
+@@ -186,7 +200,16 @@ class IntermediateFusionDataset(basedataset.BaseDataset):
+                     projected_lidar_stack)})
+         return processed_data_dict
+ 
+-    def get_item_single_car(self, selected_cav_base, ego_pose):
++    def _catosg_scene_of(self, idx):
++        #self+ V2-R16 B-3: the scene index that owns this frame, from the dataset's own boundaries.
++        for s, end in enumerate(getattr(self, 'len_record', []) or []):
++            if idx < end:
++                return s
++        return -1
++
++    def get_item_single_car(self, selected_cav_base, ego_pose, rng=None):
++        #self+ CA-TOSG v2 (V2-R16 B): `rng` is a per-sample RandomState on the evaluation path and
++        # None everywhere else, which keeps training bit-identical to before.
+         """
+         Project the lidar and bbx to ego space first, and then do clipping.
+ 
+@@ -215,7 +238,7 @@ class IntermediateFusionDataset(basedataset.BaseDataset):
+ 
+         # filter lidar
+         lidar_np = selected_cav_base['lidar_np']
+-        lidar_np = shuffle_points(lidar_np)
++        lidar_np = shuffle_points(lidar_np, rng)
+         # remove points that hit itself
+         lidar_np = mask_ego_points(lidar_np)
+         # project the lidar to ego space

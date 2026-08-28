@@ -1,0 +1,133 @@
+{
+ "schema": "catosg-v2-sibling-dependency/1",
+ "why": "The v2 products cannot be reproduced from this repository alone. This pins exactly what else is needed. The intra-repo import gate flagged the gap and was RIGHT: it is narrowed against this manifest rather than exempted.",
+ "upstream": {
+  "url": "https://github.com/DerrickXuNu/OpenCOOD.git",
+  "base_commit": "31ba16025da27ffe4e336f011290dfbc66f9a1f1",
+  "note": "The base commit is upstream and fetchable. The modifications are carried as patches in this repository, not as pushed history -- see the module docstring for what that costs."
+ },
+ "apply": "python tools/apply_opencood_patches.py --apply --target <checkout of base_commit>",
+ "verify": "python tools/apply_opencood_patches.py --check",
+ "registered_external_imports": [
+  {
+   "module": "catosg_eval_rng",
+   "importer": "tests/test_eval_determinism.py",
+   "resolves_to": "opencood/utils/catosg_eval_rng.py",
+   "why": "V2-R16 per-sample deterministic RNG. The determinism gate must exercise the very derivation the products used, so it imports the real module rather than a copy; a copy in this repository would be a second definition free to drift from the one the evaluation path runs."
+  }
+ ],
+ "files": {
+  "opencood/hypes_yaml/point_pillar_importance_map_jscc_awgn.yaml": {
+   "sha256": "47c90b90ae0bedfdbc2b20ac8d18d4cd0ecf0529e528671916f83fa94596d20c",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_importance_map_jscc_awgn.yaml.patch",
+   "patch_sha256": "c42345b8d41785cd2708f1861191122c1c840b932dc49fc16f8ac0e6a5300eda",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/point_pillar_importance_map_jscc_awgn_learned.yaml": {
+   "sha256": "a29077f046045305f437f0c8474c08e16b9d0a966ccabc923c22a920c0b9f854",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_importance_map_jscc_awgn_learned.yaml.patch",
+   "patch_sha256": "3698179864193296a7d81dac268caafc3e063a0fcd1304603ff8bee9d5664a1e",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/point_pillar_importance_map_jscc_ofdm.yaml": {
+   "sha256": "14b942548e0c4e53aa9034d79b8f626ec7b55d6c68244d6239e9b2792a040f2c",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_importance_map_jscc_ofdm.yaml.patch",
+   "patch_sha256": "954ffa7f3588285fbed21d45c26935bf0903eacd942c2f0794bfce49947ddb23",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/point_pillar_importance_map_jscc_ofdm_learned.yaml": {
+   "sha256": "2a8f106287e3197ba7f578aca0c1763c33fb9b31ee20254f671481ff1d1abb0a",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_importance_map_jscc_ofdm_learned.yaml.patch",
+   "patch_sha256": "fff53a8a27ea55ed7e61d8127c05f771a7f199b3770c421d50bcbd092c08f718",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/point_pillar_importance_map_jscc_rayleigh.yaml": {
+   "sha256": "ddb17cd250099c8082c96b015e8a140f583a4a1b4c2beec36f6c4c255c5e6357",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_importance_map_jscc_rayleigh.yaml.patch",
+   "patch_sha256": "310549462d0cb214e030379c314da7abfe87e584492e5d57fb792b8a9fbb1d94",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/point_pillar_importance_map_jscc_rayleigh_learned.yaml": {
+   "sha256": "3d37b18017393f9133271d669a01b990faf8395748d162a6e46b92d0f14591ae",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_importance_map_jscc_rayleigh_learned.yaml.patch",
+   "patch_sha256": "aa906fca3207d9f21cfce54c32499d86c26bc9cd9540d05f8db300cf781f2e12",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/point_pillar_where2comm_local.yaml": {
+   "sha256": "18f571f744a37cc117f40e5d2c22bad26d6c0fe74b47ad91dd0ccefd962bfb41",
+   "patch": "patches/opencood/added__opencood_hypes_yaml_point_pillar_where2comm_local.yaml.patch",
+   "patch_sha256": "66fd082e184440e1673cb426ca651f94c664c2916a8820b508a31b47f8265b1c",
+   "v2_critical": false
+  },
+  "opencood/models/fuse_modules/importance_map_jscc_fuse.py": {
+   "sha256": "973af92443ecd355594fecee871432f3bdc5954113da483744ebbe2fafccee39",
+   "patch": "patches/opencood/added__opencood_models_fuse_modules_importance_map_jscc_fuse.py.patch",
+   "patch_sha256": "a921f16d7df95ed775d41fa6ff282cac47a4fbdd82c8a0534591bf7ec17affa9",
+   "v2_critical": false
+  },
+  "opencood/models/fuse_modules/scomcp_fuse.py": {
+   "sha256": "6bc31b2acbae88462cd7902e2ebd4fd2579fa5f649cc1b2f3d15f36273ace5dd",
+   "patch": "patches/opencood/added__opencood_models_fuse_modules_scomcp_fuse.py.patch",
+   "patch_sha256": "6533c739b2b281322344ea3b5480ab4d23c26936cdede0ae9112da74cb1cbf6e",
+   "v2_critical": false
+  },
+  "opencood/models/point_pillar_importance_map_jscc.py": {
+   "sha256": "3513d1700753d8e4534f1f7235713875360d536145d8abaf0b9a2d4e5ccad9a5",
+   "patch": "patches/opencood/added__opencood_models_point_pillar_importance_map_jscc.py.patch",
+   "patch_sha256": "50e80c7a21a8dc7596cf2dd567a3d06fb1c8b5c17f54bb849da0e0aa3d010314",
+   "v2_critical": false
+  },
+  "opencood/utils/catosg_collab_subset.py": {
+   "sha256": "ea40be24402cb15e46e85357410a35480355eb7f33b3c0127cc88e31dbb3b565",
+   "patch": "patches/opencood/added__opencood_utils_catosg_collab_subset.py.patch",
+   "patch_sha256": "c376d6483fe2e5eb35cb75e374379cb717de95f40e0678154e4bc724867c3ab2",
+   "v2_critical": true
+  },
+  "opencood/utils/catosg_eval_rng.py": {
+   "sha256": "0f33686cc3a80e42a32d76213675911ae1dbc933ef451a50f4f88900495f3776",
+   "patch": "patches/opencood/added__opencood_utils_catosg_eval_rng.py.patch",
+   "patch_sha256": "0e621b7a56da8f0183aca46b5078047e013960b083d21e85ed7771cc34758f65",
+   "v2_critical": true
+  },
+  "opencood/data_utils/datasets/intermediate_fusion_dataset.py": {
+   "sha256": "325c05ff5d3e5c84d7f3afdd1a6abff19f4a32052c2aa153a3ab9af1e8de4054",
+   "patch": "patches/opencood/modified__opencood_data_utils_datasets_intermediate_fusion_dataset.py.patch",
+   "patch_sha256": "a238849e2275d124e1c0546ec4e7c5cf4c9ba2558b1caba99701dc98592c04c5",
+   "v2_critical": true
+  },
+  "opencood/data_utils/datasets/late_fusion_dataset.py": {
+   "sha256": "0381563a1ed19cbc5fc33fcf7376351160f3e23c961760d8196da4104058a08f",
+   "patch": "patches/opencood/modified__opencood_data_utils_datasets_late_fusion_dataset.py.patch",
+   "patch_sha256": "fcd136bfffbcbdb05a69bfad429c310607466cfa9de1a9a4bd7dbc424546d7af",
+   "v2_critical": false
+  },
+  "opencood/hypes_yaml/visualization.yaml": {
+   "sha256": "42645547968df6c740769711f7da02adbe7c412297943c77f66b325c273642ca",
+   "patch": "patches/opencood/modified__opencood_hypes_yaml_visualization.yaml.patch",
+   "patch_sha256": "73bcae1b0effb8b2116617bf58c10c91735d0c949c65d2ff18467312d4fcb443",
+   "v2_critical": false
+  },
+  "opencood/models/fuse_modules/where2comm_fuse.py": {
+   "sha256": "5155fad088ea56da56bfa61d00ca0455e4efa7dc201a7638bfc68f9f9654232d",
+   "patch": "patches/opencood/modified__opencood_models_fuse_modules_where2comm_fuse.py.patch",
+   "patch_sha256": "85bbef286102993abc12aa263ff07b1e8167dba4ad8d0736a8228ca927ab9826",
+   "v2_critical": false
+  },
+  "opencood/utils/eval_utils.py": {
+   "sha256": "3214cb67ad8827c9809d5287ecf40f51454cde83462c782cd69ab6f5672fe3cb",
+   "patch": "patches/opencood/modified__opencood_utils_eval_utils.py.patch",
+   "patch_sha256": "29391c7d226de9f17cb0a814f160a917c7a86df9ea17c5a843f0e863fac54780",
+   "v2_critical": false
+  },
+  "opencood/utils/pcd_utils.py": {
+   "sha256": "08b7fd01a59c1a76bfa0c55c2de5e870936b974271cd3cf2e462f25f5d5a38cc",
+   "patch": "patches/opencood/modified__opencood_utils_pcd_utils.py.patch",
+   "patch_sha256": "3a94b3d434e5cae1fdc1838bbbeba47ff403ea60880e7b9d76180c7289bbc038",
+   "v2_critical": true
+  }
+ },
+ "counts": {
+  "files": 18,
+  "v2_critical": 4
+ }
+}

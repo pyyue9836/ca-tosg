@@ -24,5 +24,6 @@
  "proxy_B_L_mean": 0.002352272727272727,
  "proxy_n_box_mean": 22.40909090909091,
  "collab_box_overlap_with_ego": 0.7360005328598348,
- "overlap_frames_sampled": 198
+ "overlap_frames_sampled": 198,
+ "collab_box_overlap_interpretation": "COORDINATE-frame diagnostic, mean over frames of the per-frame fraction. Fails DOWNWARD only (toward 0 = different spatial reference frames). 100 % is NOT the target: the non-overlapping remainder is the collaborator unique contribution. See results/v2/coordinate_frame_check_<split>.json for the decomposition, and v2_alignment_audit.py for the identity check whose correct value IS 100 %."
 }

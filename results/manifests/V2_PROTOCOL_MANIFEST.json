@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-protocol-manifest/1",
  "protocol": "docs/unified_branch_protocol_v2.md",
- "protocol_sha256": "14ca056474cd1dc240824e993c5a35a09855ab9b377f731806da8e5c72de4b2b",
+ "protocol_sha256": "b5bf0c279a56a7601bffe0b02c6a17c91082cce6da04d1991c0f3bd8289b8926",
  "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
  "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
  "sections": [
@@ -49,9 +49,9 @@
    "section": "5. Transport model (P0-6), with partial recovery specified exactly (C-2)",
    "number": "5",
    "lock_state": "LOCKED",
-   "sha256": "2add5d44f0534b6a316a514ec17fb3080c9b8c514c63a29156a3e4c9b8f4b6d8",
-   "sha256_observed": "2add5d44f0534b6a316a514ec17fb3080c9b8c514c63a29156a3e4c9b8f4b6d8",
-   "bytes": 1530
+   "sha256": "5847c3bb9b8a824df6f379014997deb7cbc3d1c4b5df12660e0da1adaadc257b",
+   "sha256_observed": "5847c3bb9b8a824df6f379014997deb7cbc3d1c4b5df12660e0da1adaadc257b",
+   "bytes": 4692
   },
   {
    "section": "6. Statistics (P0-8)",
@@ -137,9 +137,9 @@
    "section": "16. Lock status",
    "number": "16",
    "lock_state": "UNDECLARED",
-   "sha256": "9c76ae435a966fc72f568e2923d8d99c2d0865bc4b1d3f9abb8b5b9b87a1a525",
-   "sha256_observed": "9c76ae435a966fc72f568e2923d8d99c2d0865bc4b1d3f9abb8b5b9b87a1a525",
-   "bytes": 1282
+   "sha256": "15f0687e67f222987c8ff64a32e96d7383d3a1a44bb5d568ea53d46fb5a7a616",
+   "sha256_observed": "15f0687e67f222987c8ff64a32e96d7383d3a1a44bb5d568ea53d46fb5a7a616",
+   "bytes": 1348
   }
  ],
  "locked": 15,

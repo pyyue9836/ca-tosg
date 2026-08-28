@@ -1,0 +1,22 @@
+diff --git a/opencood/utils/pcd_utils.py b/opencood/utils/pcd_utils.py
+index 875762f..48cc53e 100644
+--- a/opencood/utils/pcd_utils.py
++++ b/opencood/utils/pcd_utils.py
+@@ -88,8 +88,15 @@ def mask_ego_points(points):
+     return points
+ 
+ 
+-def shuffle_points(points):
+-    shuffle_idx = np.random.permutation(points.shape[0])
++def shuffle_points(points, rng=None):
++    #self+ CA-TOSG v2 (V2-R16 B-1): optional local RNG.
++    # rng=None keeps the previous behaviour EXACTLY -- the global unseeded generator -- so every
++    # existing caller, training included, is bit-identical to before. The evaluation path passes a
++    # per-sample RandomState instead, which is what makes a re-run reproducible: this permutation
++    # decides which points survive `max_points_per_voxel`, so an unseeded order made the pillar
++    # features differ between processes.
++    shuffle_idx = (np.random.permutation(points.shape[0]) if rng is None
++                   else rng.permutation(points.shape[0]))
+     points = points[shuffle_idx]
+ 
+     return points

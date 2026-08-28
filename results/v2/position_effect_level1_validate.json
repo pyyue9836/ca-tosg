@@ -1,0 +1,438 @@
+{
+ "schema": "catosg-v2-position-level1/1",
+ "split": "validate",
+ "frames": 1980,
+ "replicates": 4,
+ "rates": [
+  0.001,
+  0.01,
+  0.05,
+  0.1,
+  0.25,
+  0.5,
+  0.75,
+  0.9
+ ],
+ "preregistered_criterion": {
+  "min_pairs": 100,
+  "min_frames": 30,
+  "rule": "wilson95 lower bound on P(dF1 != 0) strictly above 0",
+  "written_before_the_run": true,
+  "basis": "Binomial(N_cw, p) tie frequency -- a distributional argument, not a look at the outcome column."
+ },
+ "level_2_position_vs_amount": "NOT ADJUDICATED (V2-R19 B-4). V2-R11 B-2 required a proportion threshold to be pre-registered and it never was; setting one now would be setting it with the data on screen.",
+ "regimes": {
+  "ideal": {
+   "equal_loss": {
+    "label": "ideal: dN_cw == 0",
+    "pairs": 1731,
+    "frames_involved": 1201,
+    "pairs_with_df1_nonzero": 493,
+    "proportion_df1_nonzero": 0.2848064702484113,
+    "wilson95_lo": 0.2640396818810326,
+    "wilson95_hi": 0.3065262994742682,
+    "abs_df1_distribution_over_nonzero": {
+     "n": 493,
+     "mean": 0.03577065421557411,
+     "median": 0.025522864232541687,
+     "p90": 0.07692307692307698,
+     "p99": 0.1424502432551969,
+     "max": 0.17502787068004433,
+     "min": 0.000717188620607212
+    },
+    "abs_df1_distribution_over_all_pairs": {
+     "n": 1731,
+     "mean": 0.010187713765614118,
+     "median": 0.0,
+     "p90": 0.03656462585034015,
+     "p99": 0.11372777263850364,
+     "max": 0.17502787068004433,
+     "min": 0.0
+    },
+    "by_rate": {
+     "0.001": {
+      "pairs": 908,
+      "frames": 789,
+      "df1_nonzero": 40,
+      "proportion": 0.04405286343612335,
+      "wilson95_lo": 0.032516094143955565,
+      "wilson95_hi": 0.05943145464083337,
+      "max_abs_df1": 0.055335968379446765
+     },
+     "0.01": {
+      "pairs": 311,
+      "frames": 294,
+      "df1_nonzero": 84,
+      "proportion": 0.27009646302250806,
+      "wilson95_lo": 0.22377567501929377,
+      "wilson95_hi": 0.3220276749827391,
+      "max_abs_df1": 0.07692307692307698
+     },
+     "0.05": {
+      "pairs": 136,
+      "frames": 131,
+      "df1_nonzero": 81,
+      "proportion": 0.5955882352941176,
+      "wilson95_lo": 0.5115764551936605,
+      "wilson95_hi": 0.6743481909774359,
+      "max_abs_df1": 0.13015873015873014
+     },
+     "0.1": {
+      "pairs": 103,
+      "frames": 99,
+      "df1_nonzero": 71,
+      "proportion": 0.6893203883495146,
+      "wilson95_lo": 0.5944983926937447,
+      "wilson95_hi": 0.7705279640811445,
+      "max_abs_df1": 0.1428571428571428
+     },
+     "0.25": {
+      "pairs": 63,
+      "frames": 63,
+      "df1_nonzero": 55,
+      "proportion": 0.873015873015873,
+      "wilson95_lo": 0.7689273848938224,
+      "wilson95_hi": 0.9342275365921983,
+      "max_abs_df1": 0.1288014311270126
+     },
+     "0.5": {
+      "pairs": 57,
+      "frames": 57,
+      "df1_nonzero": 48,
+      "proportion": 0.8421052631578947,
+      "wilson95_lo": 0.726365780957114,
+      "wilson95_hi": 0.9146430025068315,
+      "max_abs_df1": 0.15934065934065944
+     },
+     "0.75": {
+      "pairs": 69,
+      "frames": 69,
+      "df1_nonzero": 62,
+      "proportion": 0.8985507246376812,
+      "wilson95_lo": 0.8050790434713212,
+      "wilson95_hi": 0.9499839974283845,
+      "max_abs_df1": 0.17502787068004433
+     },
+     "0.9": {
+      "pairs": 84,
+      "frames": 84,
+      "df1_nonzero": 52,
+      "proportion": 0.6190476190476191,
+      "wilson95_lo": 0.5121524397704628,
+      "wilson95_hi": 0.7155301161028366,
+      "max_abs_df1": 0.11038961038961026
+     }
+    }
+   },
+   "near_equal_loss_separate": {
+    "label": "ideal: |dN_cw| == 1  (SEPARATE STRATUM, never merged)",
+    "pairs": 3561,
+    "frames_involved": 1690,
+    "pairs_with_df1_nonzero": 1002,
+    "proportion_df1_nonzero": 0.2813816343723673,
+    "wilson95_lo": 0.26685376072855804,
+    "wilson95_hi": 0.29638068985684796,
+    "abs_df1_distribution_over_nonzero": {
+     "n": 1002,
+     "mean": 0.03458362569961073,
+     "median": 0.024212250528039936,
+     "p90": 0.07316360005705336,
+     "p99": 0.15611560498820368,
+     "max": 0.2952380952380953,
+     "min": 0.0008964589870014139
+    },
+    "abs_df1_distribution_over_all_pairs": {
+     "n": 3561,
+     "mean": 0.00973119712187867,
+     "median": 0.0,
+     "p90": 0.03289473684210509,
+     "p99": 0.10734989648033129,
+     "max": 0.2952380952380953,
+     "min": 0.0
+    },
+    "by_rate": {
+     "0.001": {
+      "pairs": 1912,
+      "frames": 1218,
+      "df1_nonzero": 86,
+      "proportion": 0.04497907949790795,
+      "wilson95_lo": 0.03656588058644089,
+      "wilson95_hi": 0.05521707265979825,
+      "max_abs_df1": 0.07692307692307698
+     },
+     "0.01": {
+      "pairs": 604,
+      "frames": 516,
+      "df1_nonzero": 186,
+      "proportion": 0.3079470198675497,
+      "wilson95_lo": 0.27244053245931066,
+      "wilson95_hi": 0.34588108290890374,
+      "max_abs_df1": 0.09090909090909083
+     },
+     "0.05": {
+      "pairs": 286,
+      "frames": 263,
+      "df1_nonzero": 159,
+      "proportion": 0.5559440559440559,
+      "wilson95_lo": 0.49799590662749793,
+      "wilson95_hi": 0.6124092250030202,
+      "max_abs_df1": 0.1428571428571429
+     },
+     "0.1": {
+      "pairs": 198,
+      "frames": 188,
+      "df1_nonzero": 133,
+      "proportion": 0.6717171717171717,
+      "wilson95_lo": 0.6035824939543696,
+      "wilson95_hi": 0.7333153506921254,
+      "max_abs_df1": 0.15655133295518997
+     },
+     "0.25": {
+      "pairs": 135,
+      "frames": 131,
+      "df1_nonzero": 103,
+      "proportion": 0.762962962962963,
+      "wilson95_lo": 0.6845753130592345,
+      "wilson95_hi": 0.8267987995986432,
+      "max_abs_df1": 0.21175030599755196
+     },
+     "0.5": {
+      "pairs": 117,
+      "frames": 114,
+      "df1_nonzero": 101,
+      "proportion": 0.8632478632478633,
+      "wilson95_lo": 0.7893603878029154,
+      "wilson95_hi": 0.9140397657865771,
+      "max_abs_df1": 0.22688598979013064
+     },
+     "0.75": {
+      "pairs": 128,
+      "frames": 123,
+      "df1_nonzero": 112,
+      "proportion": 0.875,
+      "wilson95_lo": 0.8065722764742785,
+      "wilson95_hi": 0.9215742266021404,
+      "max_abs_df1": 0.2952380952380953
+     },
+     "0.9": {
+      "pairs": 181,
+      "frames": 177,
+      "df1_nonzero": 122,
+      "proportion": 0.6740331491712708,
+      "wilson95_lo": 0.6027448410425224,
+      "wilson95_hi": 0.7380875256974323,
+      "max_abs_df1": 0.125
+     }
+    }
+   },
+   "sufficient_by_preregistered_criterion": true
+  },
+  "packet": {
+   "equal_loss": {
+    "label": "packet: dN_cw == 0",
+    "pairs": 704,
+    "frames_involved": 583,
+    "pairs_with_df1_nonzero": 180,
+    "proportion_df1_nonzero": 0.2556818181818182,
+    "wilson95_lo": 0.2248425573224236,
+    "wilson95_hi": 0.2891730077418507,
+    "abs_df1_distribution_over_nonzero": {
+     "n": 180,
+     "mean": 0.03219443585825256,
+     "median": 0.02459561834561841,
+     "p90": 0.06478612920260524,
+     "p99": 0.12268398268398284,
+     "max": 0.14184397163120555,
+     "min": 0.0016542597187757524
+    },
+    "abs_df1_distribution_over_all_pairs": {
+     "n": 704,
+     "mean": 0.008231531895575937,
+     "median": 0.0,
+     "p90": 0.030224089635854393,
+     "p99": 0.08966666666666664,
+     "max": 0.14184397163120555,
+     "min": 0.0
+    },
+    "by_rate": {
+     "0.001": {
+      "pairs": 343,
+      "frames": 316,
+      "df1_nonzero": 20,
+      "proportion": 0.05830903790087463,
+      "wilson95_lo": 0.038059517134892626,
+      "wilson95_hi": 0.08834285213107775,
+      "max_abs_df1": 0.04347826086956519
+     },
+     "0.01": {
+      "pairs": 69,
+      "frames": 69,
+      "df1_nonzero": 30,
+      "proportion": 0.43478260869565216,
+      "wilson95_lo": 0.32432616178765283,
+      "wilson95_hi": 0.5521180678833044,
+      "max_abs_df1": 0.06315789473684241
+     },
+     "0.05": {
+      "pairs": 43,
+      "frames": 43,
+      "df1_nonzero": 27,
+      "proportion": 0.627906976744186,
+      "wilson95_lo": 0.47859538265273166,
+      "wilson95_hi": 0.7562386110622568,
+      "max_abs_df1": 0.14184397163120555
+     },
+     "0.1": {
+      "pairs": 28,
+      "frames": 28,
+      "df1_nonzero": 17,
+      "proportion": 0.6071428571428571,
+      "wilson95_lo": 0.42408726034906297,
+      "wilson95_hi": 0.7643454817241996,
+      "max_abs_df1": 0.13636363636363635
+     },
+     "0.25": {
+      "pairs": 12,
+      "frames": 12,
+      "df1_nonzero": 10,
+      "proportion": 0.8333333333333334,
+      "wilson95_lo": 0.5519636426153274,
+      "wilson95_hi": 0.9530358523851776,
+      "max_abs_df1": 0.09645232815964533
+     },
+     "0.5": {
+      "pairs": 26,
+      "frames": 26,
+      "df1_nonzero": 22,
+      "proportion": 0.8461538461538461,
+      "wilson95_lo": 0.6646841558168644,
+      "wilson95_hi": 0.9385006600107053,
+      "max_abs_df1": 0.1019955654101995
+     },
+     "0.75": {
+      "pairs": 51,
+      "frames": 51,
+      "df1_nonzero": 31,
+      "proportion": 0.6078431372549019,
+      "wilson95_lo": 0.4708491122516505,
+      "wilson95_hi": 0.7297285514197229,
+      "max_abs_df1": 0.11904761904761907
+     },
+     "0.9": {
+      "pairs": 132,
+      "frames": 132,
+      "df1_nonzero": 23,
+      "proportion": 0.17424242424242425,
+      "wilson95_lo": 0.11900446899386957,
+      "wilson95_hi": 0.24790522582715724,
+      "max_abs_df1": 0.0757575757575758
+     }
+    }
+   },
+   "near_equal_loss_separate": {
+    "label": "packet: |dN_cw| == 1  (SEPARATE STRATUM, never merged)",
+    "pairs": 1489,
+    "frames_involved": 1032,
+    "pairs_with_df1_nonzero": 401,
+    "proportion_df1_nonzero": 0.26930826057756885,
+    "wilson95_lo": 0.24739104395047423,
+    "wilson95_hi": 0.2924127771649074,
+    "abs_df1_distribution_over_nonzero": {
+     "n": 401,
+     "mean": 0.037907299327576166,
+     "median": 0.02555168408826969,
+     "p90": 0.08333333333333315,
+     "p99": 0.19512195121951204,
+     "max": 0.32048681541582125,
+     "min": 1.1102230246251565e-16
+    },
+    "abs_df1_distribution_over_all_pairs": {
+     "n": 1489,
+     "mean": 0.010208748845102781,
+     "median": 0.0,
+     "p90": 0.032224859230304014,
+     "p99": 0.12335873300463164,
+     "max": 0.32048681541582125,
+     "min": 0.0
+    },
+    "by_rate": {
+     "0.001": {
+      "pairs": 730,
+      "frames": 597,
+      "df1_nonzero": 45,
+      "proportion": 0.06164383561643835,
+      "wilson95_lo": 0.04638656259346233,
+      "wilson95_hi": 0.08149062507210472,
+      "max_abs_df1": 0.051063829787234116
+     },
+     "0.01": {
+      "pairs": 153,
+      "frames": 146,
+      "df1_nonzero": 67,
+      "proportion": 0.43790849673202614,
+      "wilson95_lo": 0.3617681656177596,
+      "wilson95_hi": 0.5170905045309765,
+      "max_abs_df1": 0.114975845410628
+     },
+     "0.05": {
+      "pairs": 60,
+      "frames": 60,
+      "df1_nonzero": 43,
+      "proportion": 0.7166666666666667,
+      "wilson95_lo": 0.5923247495026482,
+      "wilson95_hi": 0.8149332139569141,
+      "max_abs_df1": 0.17976552323056882
+     },
+     "0.1": {
+      "pairs": 54,
+      "frames": 54,
+      "df1_nonzero": 40,
+      "proportion": 0.7407407407407407,
+      "wilson95_lo": 0.610688551197827,
+      "wilson95_hi": 0.8388149203520608,
+      "max_abs_df1": 0.19512195121951204
+     },
+     "0.25": {
+      "pairs": 53,
+      "frames": 52,
+      "df1_nonzero": 47,
+      "proportion": 0.8867924528301887,
+      "wilson95_lo": 0.7742322969866086,
+      "wilson95_hi": 0.9470704108893132,
+      "max_abs_df1": 0.32048681541582125
+     },
+     "0.5": {
+      "pairs": 46,
+      "frames": 45,
+      "df1_nonzero": 36,
+      "proportion": 0.782608695652174,
+      "wilson95_lo": 0.6442603416081054,
+      "wilson95_hi": 0.8773922538141925,
+      "max_abs_df1": 0.25
+     },
+     "0.75": {
+      "pairs": 110,
+      "frames": 107,
+      "df1_nonzero": 65,
+      "proportion": 0.5909090909090909,
+      "wilson95_lo": 0.49747095246184675,
+      "wilson95_hi": 0.6782117505219484,
+      "max_abs_df1": 0.20879120879120872
+     },
+     "0.9": {
+      "pairs": 283,
+      "frames": 262,
+      "df1_nonzero": 58,
+      "proportion": 0.2049469964664311,
+      "wilson95_lo": 0.16201700909765804,
+      "wilson95_hi": 0.2557801305083127,
+      "max_abs_df1": 0.08974358974358965
+     }
+    }
+   },
+   "sufficient_by_preregistered_criterion": true
+  }
+ },
+ "verdict": "SUFFICIENT",
+ "reportable_sentence": "At a fixed frame and an identical number of lost codewords, different loss locations can produce different task outcomes."
+}

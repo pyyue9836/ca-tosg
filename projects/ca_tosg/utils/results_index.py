@@ -50,6 +50,24 @@ RULES = [
      'V2-R4 step 4: float vs int8 clean delivery on the same frames'),
     (r'^v2/payload_chain\.json$', 'python tools/v2_payload_chain.py',
      'V2-R3 step 5: the whole v2 payload chain with its identity self-check'),
+    # V2-R19 A/B/C -- audits, all zero GPU. None of them is a main result; each exists to make a
+    # number checkable that previously was not.
+    (r'^v2/(alignment_audit|collaborator_identity)_\w+\.(json|csv)$',
+     'python projects/ca_tosg/evaluation/v2_alignment_audit.py --split all',
+     'V2-R19 A-2: identity alignment -- index, collaborator identity, row-1 binding, payload '
+     'binding. Correct value is 100 %; the per-frame CSV is the collaborator provenance WP2 '
+     'never recorded'),
+    (r'^v2/coordinate_frame_check_\w+\.json$',
+     'python projects/ca_tosg/evaluation/v2_coordinate_frame_check.py',
+     'V2-R19 A-1: what the 73.6 % overlap diagnostic is, and what forcing it to 100 % would cost'),
+    (r'^v2/(position_effect_level1_\w+\.json|position_equal_loss_pairs_\w+_\w+\.csv)$',
+     'python projects/ca_tosg/evaluation/v2_position_effect_level1.py',
+     'V2-R19 B: level-1 position effect at EXACTLY equal codeword loss, pre-registered '
+     'sufficiency criterion'),
+    (r'^v2/mc_survival_\w+\.json$',
+     'python projects/ca_tosg/evaluation/v2_mc_survival_audit.py',
+     'V2-R19 C: message-survival counts replayed from the fixed Monte-Carlo seed, with the '
+     'unrounded AP standard deviations'),
     (r'^manifests/V2_INT8_SCALES\.json$',
      'python projects/ca_tosg/evaluation/v2_int8_calibrate.py',
      'frozen per-branch symmetric int8 transmit scales (validate-calibrated)'),

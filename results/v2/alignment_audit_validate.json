@@ -1,0 +1,74 @@
+{
+ "schema": "catosg-v2-alignment-audit/1",
+ "split": "validate",
+ "frames": 1980,
+ "why": "Every part is an identity: a frame either is the frame it claims to be or the product is misindexed. There is no legitimate partial reading, so the correct value is 100 % and anything else stops the batch. This is NOT collab_box_overlap_with_ego (73.6 %), which is a coordinate-frame diagnostic whose correct value is not 100 %.",
+ "input_hashes": {
+  "wp2_per_agent_validate.csv": "ea5a44b971aa62c9e46b6a701ae574ae1d043b3362553ffc04cb7e70f7ed660e",
+  "wp2_per_agent_validate.npz": "26d503df52fc8fc9a42ae567ba564b05fe4d96322601f3ce18d07ed010f4073a",
+  "wp34_e_l_validate.csv": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02"
+ },
+ "A_index_integrity": {
+  "rows": 1980,
+  "dataset_frames": 1980,
+  "every": 1,
+  "rows_equals_dataset_frames": true,
+  "missing_indices": [],
+  "duplicate_indices": [],
+  "out_of_order": false,
+  "csv_npz_frames_identical": true,
+  "npz_array_lengths": {
+   "ego_boxes": 1980,
+   "ego_scores": 1980,
+   "collab_boxes": 1980,
+   "collab_scores": 1980,
+   "gts": 1980
+  },
+  "npz_lengths_all_equal_rows": true,
+  "aligned": true,
+  "rate_pct": 100.0
+ },
+ "B_collaborator_identity": {
+  "frames_walked": 1980,
+  "ego_is_first_failures": [],
+  "subset_order_or_size_failures": [],
+  "collaborator_id_mismatches": [],
+  "collaborator_id_mismatch_count": 0,
+  "n_cav_mismatches": [],
+  "n_cav_mismatch_count": 0,
+  "has_collab_mismatches": [],
+  "has_collab_mismatch_count": 0,
+  "selected_collaborator_beyond_COM_RANGE": [],
+  "selected_collaborator_beyond_COM_RANGE_count": 0,
+  "COM_RANGE_m": 70.0,
+  "rate_pct": 100.0,
+  "seconds": 1513.1,
+  "aligned": true
+ },
+ "C_row1_binding": {
+  "sampled": 31,
+  "positive_bit_identical": 31,
+  "positive_failures": [],
+  "negative_control_differs": 21,
+  "negative_control_collisions": [],
+  "negative_control_not_applicable": 10,
+  "negative_control_exercised": true,
+  "rate_pct": 100.0,
+  "aligned": true
+ },
+ "D_payload_binding": {
+  "wp2_csv_vs_npz_collab_counts_identical": true,
+  "wp2_csv_vs_npz_ego_counts_identical": true,
+  "collab_equals_ego_on_all_frames": false,
+  "no_collab_frames_have_zero_boxes": true,
+  "wp34_frames_identical_to_wp2": true,
+  "wp34_n_box_collab_identical": true,
+  "wp34_n_cw_L_recomputes": true,
+  "wp34_B_L_recomputes": true,
+  "payload_would_differ_if_ego_counts_used": true,
+  "aligned": true,
+  "rate_pct": 100.0
+ },
+ "overall_aligned": true,
+ "overall_rate_pct": 100.0
+}

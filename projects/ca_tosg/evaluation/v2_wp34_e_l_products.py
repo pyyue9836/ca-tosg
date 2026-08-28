@@ -18,6 +18,14 @@ TWO THINGS VERIFIED RATHER THAN ASSUMED
    against the data, not taken from the docstring: `--verify-frame` reports the fraction of
    collaborator boxes that overlap an ego box, which would collapse toward zero if the two arms were
    in different frames.
+
+   **This is a COORDINATE-frame check, not a frame-index alignment rate, and 100 % is not its
+   correct value (V2-R19 A-1).** The diagnostic discriminates "same spatial reference frame" from
+   "different spatial reference frames"; its failure direction is toward 0, and it has no upper
+   failure threshold. A collaborator that only ever re-detected what the ego already saw would score
+   100 % and would add nothing — on validate, 92.6 % of L's AP@0.5 gain over E comes from precisely
+   the collaborator boxes that do NOT overlap an ego box. The identity quantity whose correct value
+   IS 100 % is a different check entirely, and it lives in `v2_alignment_audit.py`.
 2. **Cross-vehicle NMS reuses OpenCOOD's own `nms_rotated` at the frozen 0.15**, the same function
    and threshold the intra-vehicle stage uses (§2). A second NMS implementation is a second
    definition waiting to drift.
@@ -67,7 +75,10 @@ def fuse_boxes(eb, es, cb, cs):
 def frame_overlap(eb, cb):
     """Fraction of collaborator boxes overlapping ANY ego box (IoU > 0.1), BEV polygons.
 
-    Near zero would mean the two arms are not in a common coordinate frame."""
+    A COORDINATE-frame diagnostic. Near zero would mean the two arms are not in a common spatial
+    reference frame. It is NOT an alignment rate and 100 % is NOT its target: the non-overlapping
+    remainder is the collaborator's unique contribution, which is the entire point of fusing.
+    """
     if len(eb) == 0 or len(cb) == 0:
         return None
     pe = convert_format(np.asarray(eb, np.float32))
@@ -137,6 +148,15 @@ def main():
         'proxy_n_box_mean': proxy['n_box_mean'] if proxy else None,
         'collab_box_overlap_with_ego': (float(np.mean(overlaps)) if overlaps else None),
         'overlap_frames_sampled': len(overlaps),
+        # V2-R19 A-1: the number may not travel without its reading. It was once printed under the
+        # label "FRAME-ALIGNMENT CHECK", and was then read as a frame-index alignment rate that
+        # ought to be 100 %. It is not one.
+        'collab_box_overlap_interpretation':
+            'COORDINATE-frame diagnostic, mean over frames of the per-frame fraction. Fails '
+            'DOWNWARD only (toward 0 = different spatial reference frames). 100 % is NOT the '
+            'target: the non-overlapping remainder is the collaborator unique contribution. See '
+            'results/v2/coordinate_frame_check_<split>.json for the decomposition, and '
+            'v2_alignment_audit.py for the identity check whose correct value IS 100 %.',
     }
     with open(os.path.join(OUT_DIR, f'wp34_e_l_{args.split}.json'), 'w') as f:
         json.dump(res, f, indent=1)
@@ -151,12 +171,15 @@ def main():
     print(f'{"boxes/frame":26} {res["n_box_ego_mean"]:>14.2f} {res["n_box_L_mean"]:>16.2f}')
     print('=' * 78)
     if res['collab_box_overlap_with_ego'] is not None:
-        print(f'FRAME-ALIGNMENT CHECK: {res["collab_box_overlap_with_ego"] * 100:.1f} % of '
+        print(f'COORDINATE-FRAME CHECK: {res["collab_box_overlap_with_ego"] * 100:.1f} % of '
               f'collaborator boxes overlap an ego box (IoU > 0.1), over '
               f'{res["overlap_frames_sampled"]} sampled frames.')
-        print('  Near zero would mean the two arms are in different coordinate frames. They are not:')
-        print('  the dataset projects every CAV into the ego frame before voxelising, so WP4 must NOT')
-        print('  apply a further transform.')
+        print('  Reads DOWNWARD only. Near zero would mean the two arms are in different coordinate')
+        print('  frames. They are not: the dataset projects every CAV into the ego frame before')
+        print('  voxelising, so WP4 must NOT apply a further transform.')
+        print('  100 % IS NOT THE TARGET and would be bad news -- it would mean the collaborator only')
+        print('  ever re-detects what the ego already sees. This is not a frame-index alignment rate;')
+        print('  that check is v2_alignment_audit.py, and its correct value is 100 %.')
     print(f'\nL PAYLOAD, recomputed from the COLLABORATOR\'s real box counts (E-4):')
     print(f'  N_box,t mean      {res["n_box_collab_mean"]:.2f}   '
           f'(WP2 ego proxy was {res["proxy_n_box_mean"]:.2f})')

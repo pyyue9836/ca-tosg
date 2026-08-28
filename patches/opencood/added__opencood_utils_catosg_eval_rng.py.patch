@@ -1,0 +1,148 @@
+diff --git a/opencood/utils/catosg_eval_rng.py b/opencood/utils/catosg_eval_rng.py
+new file mode 100644
+index 0000000..9c42e60
+--- /dev/null
++++ b/opencood/utils/catosg_eval_rng.py
+@@ -0,0 +1,142 @@
++#self+ CA-TOSG v2 (V2-R16 B): deterministic per-sample RNG for the EVALUATION path.
++"""Why this exists, and why it is not `np.random.seed()`.
++
++`shuffle_points()` permutes a CAV's point cloud with the **global, unseeded** numpy RNG, once per
++CAV per frame. With `max_points_per_voxel = 32`, a voxel holding more than 32 points keeps a
++different subset depending on that order, so the pillar features differ run to run. Measured on
++OPV2V validate: two independent processes disagree on ~1.5 % of frames by one box, and on AP by
++1e-5 to 1e-4. Within a single process the forward is exact; the divergence is entirely upstream, in
++the data pipeline.
++
++**Not a global seed.** Calling `np.random.seed()` before building an item would fix the symptom and
++create two new problems: it pollutes every other consumer of the global RNG in the same process, and
++it makes the result depend on *call order*, so a change in how many random draws happen earlier
++silently shifts every later sample. A per-sample local RNG has neither property.
++
++**RandomState, not default_rng.** `np.random.RandomState` is the legacy MT19937 generator that
++`np.random.permutation` itself uses, so a seeded `RandomState.permutation` draws from the same family
++as the code being replaced. `default_rng` (PCG64) would produce a different permutation for the same
++seed, which would put an avoidable gap between old and new products for no benefit.
++
++**Seed derivation.** `(split, scene_id, frame_id, cav_id)` -> a stable UTF-8 string -> SHA-256 ->
++the **first four bytes**, read **big-endian**, as a uint32. Python's `hash()` is not used: it is
++salted per process by default, which is exactly the failure mode this module exists to remove.
++
++Enabled by `CATOSG_EVAL_RNG=1`, so a run that does not ask for it is bit-identical to before.
++"""
++import hashlib
++import os
++
++import numpy as np
++
++
++def enabled():
++    return os.environ.get('CATOSG_EVAL_RNG', '') not in ('', '0', 'false', 'False')
++
++
++def sample_seed(split, scene_id, frame_id, cav_id):
++    """Deterministic uint32 seed for one (split, scene, frame, CAV) sample.
++
++    The encoding is pinned here because it is the thing that must not drift: a different separator,
++    a different byte slice or a different endianness all give a different -- but equally
++    'deterministic' -- product, and the change would be invisible in the outputs.
++    """
++    key = f'catosg-v2|{split}|{scene_id}|{frame_id}|{cav_id}'.encode('utf-8')
++    digest = hashlib.sha256(key).digest()
++    return int.from_bytes(digest[:4], byteorder='big', signed=False)
++
++
++def sample_rng(split, scene_id, frame_id, cav_id):
++    return np.random.RandomState(sample_seed(split, scene_id, frame_id, cav_id))
++
++
++# V2-R17 B: golden PERMUTATION digest, not just golden seeds.
++#
++# The four seed values below lock the (identity -> uint32) half of the chain. They do NOT lock the
++# (uint32 -> permutation) half, which lives inside NumPy's MT19937. The V2-R16 text claimed this
++# guarded against "NumPy/Python version drift"; it did not, and a gate whose name overstates what it
++# checks is more dangerous than no gate, because it is trusted. These digests close that half.
++GOLDEN_IDENTITY = ('validate', 0, 0, '641')
++GOLDEN_N = 1024
++GOLDEN_HEAD = [936, 962, 482, 868, 812, 156, 807, 813]       # first 8 indices, in the clear
++GOLDEN_DIGEST = 'c6e7ae5deba619e816c9e5bf5eca5b8712b5fbd64d26127d278eb35dd09cc829'
++GOLDEN_NUMPY = '1.26.4'
++GOLDEN_PYTHON = '3.10'
++
++
++def golden_permutation():
++    """(head, sha256, numpy, python) for the pinned identity at N = GOLDEN_N.
++
++    V2-R18 A: the serialisation is pinned on purpose -- `'<i8'` fixes dtype AND byte order, and
++    `order='C'` fixes layout. NumPy's default integer width is platform-dependent (int32 on Windows,
++    int64 on Linux), so an unpinned `perm.tobytes()` would hash the same permutation to different
++    digests on different machines. The gate would then fail for a serialisation reason while
++    reporting "MT19937 output changed" -- the single most misleading failure this check could
++    produce, and the kind that teaches people to skip a gate. Note this cannot be demonstrated
++    locally: on this Linux box the native dtype already IS little-endian int64, so the pinned and
++    unpinned forms agree here and differ only where it matters.
++    """
++    import platform
++    perm = sample_rng(*GOLDEN_IDENTITY).permutation(GOLDEN_N)
++    digest = hashlib.sha256(perm.astype('<i8').tobytes(order='C')).hexdigest()
++    return ([int(x) for x in perm[:8]], digest, np.__version__,
++            '.'.join(platform.python_version_tuple()[:2]))
++
++
++def _self_test():
++    """A derivation whose output can drift silently is worse than no derivation.
++
++    Both halves of the chain are pinned: the seed values below cover identity -> uint32, and the
++    golden permutation digest covers uint32 -> permutation.
++    """
++    cases = {
++        ('validate', 0, 0, '641'): sample_seed('validate', 0, 0, '641'),
++        ('validate', 0, 0, '650'): sample_seed('validate', 0, 0, '650'),
++        ('test', 3, 120, '641'): sample_seed('test', 3, 120, '641'),
++        ('culver', 1, 7, '-1'): sample_seed('culver', 1, 7, '-1'),
++    }
++    ok = True
++    for k, v in cases.items():
++        again = sample_seed(*k)
++        same = (v == again)
++        ok &= same
++        print(f'  {str(k):42} -> {v:>10}  {"stable" if same else "UNSTABLE"}')
++    # distinct identities must give distinct seeds
++    vals = list(cases.values())
++    distinct = len(set(vals)) == len(vals)
++    print(f'  distinct identities -> distinct seeds: {"yes" if distinct else "NO"}')
++    # the permutation must actually be reproducible
++    a = sample_rng('validate', 0, 0, '641').permutation(1000)
++    b = sample_rng('validate', 0, 0, '641').permutation(1000)
++    c = sample_rng('validate', 0, 0, '650').permutation(1000)
++    print(f'  same identity -> same permutation:      {"yes" if np.array_equal(a, b) else "NO"}')
++    print(f'  different identity -> different perm:   {"yes" if not np.array_equal(a, c) else "NO"}')
++    ok &= distinct and np.array_equal(a, b) and not np.array_equal(a, c)
++    # --- B: the uint32 -> permutation half ---
++    head, digest, npv, pyv = golden_permutation()
++    print(f'  golden permutation head:  {head}')
++    print(f'  golden permutation sha256 {digest[:32]}...')
++    print(f'  numpy {npv} (golden {GOLDEN_NUMPY})   python {pyv} (golden {GOLDEN_PYTHON})')
++    if GOLDEN_DIGEST:
++        match = (head == GOLDEN_HEAD and digest == GOLDEN_DIGEST)
++        print(f'  permutation matches golden: {"yes" if match else "NO -- MT19937 output changed"}')
++        ok &= match
++        if npv != GOLDEN_NUMPY or pyv != GOLDEN_PYTHON:
++            print(f'  NOTE: version differs from the golden record but the permutation still '
++                  f'matches -- the pin is on the output, not the version')
++    else:
++        print('  GOLDEN_DIGEST is empty -- run with --record to pin it')
++    print('CATOSG EVAL RNG SELF-TEST ' + ('PASS' if ok else 'FAIL'))
++    return 0 if ok else 1
++
++
++if __name__ == '__main__':
++    import sys
++    if '--record' in sys.argv:
++        h, d, nv, pv = golden_permutation()
++        print(f'GOLDEN_HEAD = {h}')
++        print(f"GOLDEN_DIGEST = '{d}'")
++        print(f"GOLDEN_NUMPY = '{nv}'   GOLDEN_PYTHON = '{pv}'")
++        sys.exit(0)
++    print(f'numpy {np.__version__}')
++    sys.exit(_self_test())

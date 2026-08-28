@@ -1,6 +1,6 @@
 # OpenCOOD Namespace Modifications
 
-The upstream OpenCOOD package at `../../opencood/` is mostly untouched. The exceptions are listed below: **11 newly added files** and **5 modified files**, all marked with a `#self+ ...` header on line 1.
+The upstream OpenCOOD package at `../../opencood/` is mostly untouched. The exceptions are **12 newly added files** and **6 modified files**. Most carry a `#self+ ...` header on line 1, but that convention has proven unreliable (see the inventory corrections below). **The authority is `results/manifests/V2_SIBLING_DEPENDENCY.json`, which is machine-checked by gate 24; this page is prose around it.**
 
 These files **physically live in `../../opencood/`** rather than in this directory, because they participate in the `opencood` Python namespace (e.g., `from opencood.models.point_pillar_importance_map_jscc import ...`) and the OpenCOOD codebase resolves model and fusion modules by string name from `hypes_yaml/` configs. Moving them out would require updating dozens of import sites and config strings, breaking compatibility with the upstream training and inference pipelines.
 
@@ -72,3 +72,29 @@ This page said "9 added / 3 modified". The tree has **11 added / 5 modified**. T
 **Two modified files carry no `#self+` marker on line 1**, so the documented way to spot a user-modified file does not find them: `opencood/data_utils/datasets/intermediate_fusion_dataset.py`, `opencood/data_utils/datasets/late_fusion_dataset.py`. They are listed here instead; the marker convention is the thing that is unreliable, not the inventory.
 
 The whole set is now exported as portable patches in `patches/opencood/` and applied or checked with `python tools/apply_opencood_patches.py --check|--apply`, so a fresh OpenCOOD checkout can be brought to this state without copying a working tree.
+
+## Inventory correction (V2-R20 D, 2026-08-28) — and this page stops being the authority
+
+This page said "11 added / 5 modified". The tree has **12 added / 6 modified**. Missing were the two
+files the V2-R16 determinism fix introduced:
+
+| file | state | note |
+|---|---|---|
+| `opencood/utils/catosg_eval_rng.py` | added | per-sample deterministic RNG keyed on `(split, scene, frame, cav)`; **v2-critical** |
+| `opencood/utils/pcd_utils.py` | modified | `shuffle_points(points, rng=None)`; `None` reproduces the old global behaviour exactly; **v2-critical** |
+
+Worse than the page being stale: **`patches/opencood/` was stale too.** `--check` reported
+**15 applied and 1 CONFLICT** — `intermediate_fusion_dataset.py`'s patch predated the RNG threading,
+and the two files above had no patch at all. So the portable form, which exists precisely so that a
+fresh checkout can reproduce the products, could not have reproduced them. Re-exporting moved
+**exactly those three files**; the other fifteen patches came back byte-identical, which is what
+established that they were the only drift. Now **18 applied, 0 conflicts**.
+
+**This is the third time this inventory has drifted** (9/3 → 11/5 → 12/6), which is the argument for
+not keeping counts by hand. The counts, the file list, the base commit and every content hash now
+live in `results/manifests/V2_SIBLING_DEPENDENCY.json`, rebuilt by
+`tools/build_sibling_dependency_manifest.py` and verified by gate 24 on every run. **If this page and
+that manifest disagree, the manifest is right.**
+
+`python tools/apply_opencood_patches.py --export` and the manifest rebuild are now on the batch
+closing checklist in `docs/HANDOFF_V2.md`, because the step existed and was simply never listed.

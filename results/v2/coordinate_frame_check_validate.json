@@ -1,0 +1,48 @@
+{
+ "schema": "catosg-v2-coordinate-frame-check/1",
+ "split": "validate",
+ "frames": 1980,
+ "overlap_iou_threshold": 0.1,
+ "gt_iou_threshold": 0.5,
+ "what_this_is": "A COORDINATE-frame diagnostic: are the collaborator boxes already in ego coordinates? It fails DOWNWARD (toward 0). It is NOT a frame-index alignment rate and 100 % is not its correct value.",
+ "statistics_that_were_both_called_73.6_pct": {
+  "mean_over_frames_sampled_every_10th": 0.7360005328598348,
+  "frames_in_that_sample": 198,
+  "mean_over_frames_all": 0.7304122483891576,
+  "frames_in_that_population": 1980,
+  "pooled_over_boxes": 0.7580753418910983,
+  "note": "The mean of per-frame fractions and the pooled box-level fraction are different statistics and differ here. The product reports the first, over every 10th frame."
+ },
+ "collaborator_boxes": {
+  "overlapping_an_ego_box": 36142,
+  "not_overlapping_any_ego_box": 11534,
+  "total": 47676
+ },
+ "are_the_non_overlapping_boxes_real": {
+  "evaluated": 11534,
+  "matching_a_GT_object_at_iou_0.5": 8630,
+  "precision": 0.7482226460898214,
+  "reading": "These are objects the collaborator detected and the ego did not. Driving the diagnostic to 100 % would mean deleting them."
+ },
+ "what_100_pct_would_cost": {
+  "attribution_method": "ABLATION, not decomposition (V2-R20 A-4). L is rebuilt with the non-overlapping collaborator boxes removed and re-scored end to end. AP is a global-sort statistic and does not decompose additively over predictions, so these shares must be read as \"removing these boxes costs this much of the gain\" and NEVER as \"these boxes account for this much of the gain\". Same rule as the ban on AP = q*AP_F + (1-q)*AP_E in v2_wp5_message.py.",
+  "E_ap50": 0.7205540221496439,
+  "L_ap50_full": 0.8885083988695627,
+  "L_ap50_overlapping_collaborator_boxes_only": 0.7329215521112397,
+  "E_ap70": 0.5999578531713615,
+  "L_ap70_full": 0.7498606018521341,
+  "L_ap70_overlapping_collaborator_boxes_only": 0.6473539493699509,
+  "E_f1": 0.7892936458116007,
+  "L_f1_full": 0.8891840760087215,
+  "L_f1_overlapping_only": 0.7973755899742723,
+  "ap50_gain_share_lost_to_ablation": 0.9263637530433645,
+  "ap70_gain_share_lost_to_ablation": 0.6838210331985144,
+  "f1_gain_share_lost_to_ablation": 0.9190919075358577
+ },
+ "mean_boxes_per_frame": {
+  "ego": 22.55808080808081,
+  "collaborator": 24.078787878787878,
+  "L_after_cross_vehicle_nms": 28.402020202020203
+ },
+ "verdict": "The correct value of this diagnostic is NOT 100 %. It is a downward-failing coordinate-frame check, and removing the non-overlapping collaborator boxes costs most of the cooperative gain -- attributed by ablation and re-scoring, not by decomposing AP over predictions (V2-R20 A-4)."
+}

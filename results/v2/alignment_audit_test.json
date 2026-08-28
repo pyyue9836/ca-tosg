@@ -1,0 +1,149 @@
+{
+ "schema": "catosg-v2-alignment-audit/1",
+ "split": "test",
+ "frames": 2170,
+ "why": "Every part is an identity: a frame either is the frame it claims to be or the product is misindexed. There is no legitimate partial reading, so the correct value is 100 % and anything else stops the batch. This is NOT collab_box_overlap_with_ego (73.6 %), which is a coordinate-frame diagnostic whose correct value is not 100 %.",
+ "input_hashes": {
+  "wp2_per_agent_test.csv": "725ec8a7339890c128d8507e4edeca800dbcc9c4804e593361c88b16b12f9a94",
+  "wp2_per_agent_test.npz": "465eb5bbce51a2113da03bd243a42de2585483e9b2e5463c321a7810e7d17552"
+ },
+ "A_index_integrity": {
+  "rows": 2170,
+  "dataset_frames": 2170,
+  "every": 1,
+  "rows_equals_dataset_frames": true,
+  "missing_indices": [],
+  "duplicate_indices": [],
+  "out_of_order": false,
+  "csv_npz_frames_identical": true,
+  "npz_array_lengths": {
+   "ego_boxes": 2170,
+   "ego_scores": 2170,
+   "collab_boxes": 2170,
+   "collab_scores": 2170,
+   "gts": 2170
+  },
+  "npz_lengths_all_equal_rows": true,
+  "aligned": true,
+  "rate_pct": 100.0
+ },
+ "B_collaborator_identity": {
+  "frames_walked": 2170,
+  "ego_is_first_failures": [],
+  "subset_order_or_size_failures": [],
+  "collaborator_id_mismatches": [],
+  "collaborator_id_mismatch_count": 0,
+  "n_cav_mismatches": [],
+  "n_cav_mismatch_count": 0,
+  "has_collab_mismatches": [],
+  "has_collab_mismatch_count": 0,
+  "selected_collaborator_beyond_COM_RANGE": [
+   {
+    "frame": 59,
+    "dist": 70.25
+   },
+   {
+    "frame": 60,
+    "dist": 71.28
+   },
+   {
+    "frame": 61,
+    "dist": 72.31
+   },
+   {
+    "frame": 62,
+    "dist": 73.35
+   },
+   {
+    "frame": 63,
+    "dist": 74.39
+   },
+   {
+    "frame": 64,
+    "dist": 75.44
+   },
+   {
+    "frame": 65,
+    "dist": 76.51
+   },
+   {
+    "frame": 66,
+    "dist": 77.6
+   },
+   {
+    "frame": 67,
+    "dist": 78.71
+   },
+   {
+    "frame": 68,
+    "dist": 79.84
+   },
+   {
+    "frame": 69,
+    "dist": 80.99
+   },
+   {
+    "frame": 70,
+    "dist": 82.15
+   },
+   {
+    "frame": 71,
+    "dist": 83.31
+   },
+   {
+    "frame": 72,
+    "dist": 84.44
+   },
+   {
+    "frame": 73,
+    "dist": 85.55
+   },
+   {
+    "frame": 74,
+    "dist": 86.64
+   },
+   {
+    "frame": 75,
+    "dist": 87.71
+   },
+   {
+    "frame": 76,
+    "dist": 88.77
+   },
+   {
+    "frame": 77,
+    "dist": 89.82
+   },
+   {
+    "frame": 78,
+    "dist": 90.84
+   }
+  ],
+  "selected_collaborator_beyond_COM_RANGE_count": 119,
+  "COM_RANGE_m": 70.0,
+  "rate_pct": 100.0,
+  "seconds": 319.3,
+  "aligned": true
+ },
+ "C_row1_binding": {
+  "sampled": 32,
+  "positive_bit_identical": 32,
+  "positive_failures": [],
+  "negative_control_differs": 22,
+  "negative_control_collisions": [],
+  "negative_control_not_applicable": 10,
+  "negative_control_exercised": true,
+  "rate_pct": 100.0,
+  "aligned": true
+ },
+ "D_payload_binding": {
+  "wp2_csv_vs_npz_collab_counts_identical": true,
+  "wp2_csv_vs_npz_ego_counts_identical": true,
+  "collab_equals_ego_on_all_frames": false,
+  "no_collab_frames_have_zero_boxes": true,
+  "aligned": true,
+  "rate_pct": 100.0
+ },
+ "overall_aligned": true,
+ "overall_rate_pct": 100.0
+}

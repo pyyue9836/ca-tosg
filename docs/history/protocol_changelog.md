@@ -4835,6 +4835,13 @@ so it was measured: **73.6 % of collaborator boxes overlap an ego box** (IoU > 0
 frames). Two arms in different coordinate frames would drive that toward zero. **WP4 applies no
 further transform.**
 
+> **Forward note (V2-R19 A-1).** The generator printed this under the label `FRAME-ALIGNMENT CHECK`,
+> and it was later read as a frame-index alignment rate whose only correct value is 100 %. It is
+> not one: it is a **coordinate-frame** diagnostic that **fails downward only**, and 100 % would be
+> a bad result rather than a good one — 92.6 % of L's AP@0.5 gain over E is carried by exactly the
+> collaborator boxes that do *not* overlap an ego box. The number stands; the label is corrected,
+> and `results/v2/coordinate_frame_check_validate.json` carries the decomposition.
+
 *Cross-vehicle NMS reuses OpenCOOD's own `nms_rotated` at the frozen 0.15* — the same function and
 threshold the intra-vehicle stage uses. A second NMS implementation is a second definition waiting to
 drift, which is the same reasoning that kept the collaborator rule unduplicated in WP2.
@@ -5096,3 +5103,434 @@ The same bridge passes: **0 differing frames, per-frame F1 max |Δ| 1.11e-16, AP
 0.000e+00** at both thresholds. WP2 regenerated on all three splits; WP3/WP4/WP5 regenerated on
 validate. Pre-fix products moved to `results/v2/diagnostic/` with a README — kept, because deleting
 them would erase the evidence, and `wp5_message_validate_BRIDGE_FAIL.json` is the record of the catch.
+
+## V2-R19 — a mislabelled diagnostic, a strict position result, and a survival count that was never taken
+
+**Zero GPU. WP5 was not re-run. The v1 manuscript was not touched.**
+
+### A-1 · The 73.6 % is not a frame-alignment rate, and 100 % would be a failure
+
+**The instruction was to explain 73.6 % and correct it to 100 %, on the ground that an identity
+alignment admits no partial reading. The premise does not hold for this quantity, and the number is
+correct as it stands. What was wrong is the label — which is this executor's, and is the reason the
+number read the way it did.**
+
+`v2_wp34_e_l_products.py` printed it under the heading **`FRAME-ALIGNMENT CHECK`**. "Frame" there
+meant *spatial reference frame*; it reads as *frame index*. Those are different quantities with
+different correct values, and the printed line gave the reader no way to tell which was meant.
+
+What the number is, re-derived bit-exactly (`v2_coordinate_frame_check.py`): the mean, over every
+tenth validate frame, of the per-frame fraction of **collaborator boxes that overlap some ego box at
+IoU > 0.1**. Reproduced at **0.7360005329** against the stored `0.7360005328598348`. It exists to
+answer one question — *are the collaborator's boxes already in ego coordinates, so that WP4 must not
+transform them again?* — and it **fails downward**: two arms in different reference frames drive it
+toward 0. It has no upper failure threshold.
+
+**Three statistics were all being called "73.6 %"**, and they are not equal:
+
+| statistic | value |
+|---|---|
+| mean over frames, every 10th (198 frames) — **the reported one** | **0.736001** |
+| mean over frames, all 1980 | 0.730412 |
+| pooled over all 47,676 collaborator boxes | 0.758075 |
+
+**Why 100 % would be bad news, measured rather than argued.** L was rebuilt a second way, keeping
+only the collaborator boxes that *do* overlap an ego box — that is, the product the diagnostic would
+yield if it read 100 %:
+
+| validate, 1980 frames | E | L (full) | L (overlapping collaborator boxes only) |
+|---|---|---|---|
+| AP@0.5 | 0.72055 | **0.88851** | 0.73292 |
+| AP@0.7 | 0.59996 | 0.74986 | 0.64735 |
+| mean per-frame F1 | 0.78929 | **0.88918** | 0.79738 |
+
+**92.6 % of L's AP@0.5 gain over E, and 91.9 % of its F1 gain, is carried by the 11,534 collaborator
+boxes that do *not* overlap an ego box** (68.4 % at AP@0.7). Of those boxes **8,630 — 74.8 % —
+match a ground-truth object at IoU ≥ 0.5**: they are real vehicles the ego did not detect. Driving
+the diagnostic to 100 % means deleting them, and collapsing L from 0.88851 to 0.73292, a hair above
+ego-only. **A collaborator whose every detection duplicated the ego's would score 100 % and would be
+worth nothing.** Non-overlap is not misalignment; it is the entire cooperative gain.
+
+**Fixed:** the print label is now `COORDINATE-FRAME CHECK`, it states the failure direction and that
+100 % is not the target, and the summary JSON carries an `interpretation` field so the number cannot
+travel naked again. The docstring names the identity check that *does* read 100 %.
+
+**The regeneration was also a third reproducibility bridge, taken for free.** WP3/WP4 was re-run to
+pick the new field up: `wp34_e_l_validate.csv` came back **byte-identical**, and the JSON differs by
+**exactly one added key** — every shared value bit-identical, including all six AP/F1 figures and
+the 0.7360005328598348 overlap itself. Post-`CATOSG_EVAL_RNG` determinism holds on a path that was
+not one of the two bridges V2-R16 built.
+
+### A-2 · The check whose correct value really is 100 %
+
+The instruction's underlying concern is sound and was never tested: nothing in this repository had
+ever verified that WP2 row *i* is the frame it claims to be, or that `N_box,t` belongs to **the one
+selected collaborator** rather than to the ego or to a union over CAVs. `v2_alignment_audit.py` is
+that check, in four parts — index integrity; collaborator identity re-derived **independently** from
+the poses and compared against `subset_of` frame by frame; a bit-comparison proving row 1 of the
+stacked voxel tensor carries that CAV and no other; and the payload binding from `N_box,t` through
+the §4.2 chain. Every part is an identity, so **100 % is the only passing value and anything else
+stops the batch.**
+
+WP2 never recorded *which* CAV it used. The audit writes it out per frame
+(`collaborator_identity_<split>.csv`) — provenance the products were missing.
+
+**Result: 100.00 % on all four parts, on all three splits. Nothing to correct.**
+
+| | validate | test | Culver-City |
+|---|---|---|---|
+| frames walked | 1,980 | 2,170 | 550 |
+| **A** rows = dataset frames; missing / duplicate / out-of-order | 0 / 0 / no | 0 / 0 / no | 0 / 0 / no |
+| **A** CSV ≡ NPZ frame vector, all five NPZ arrays length N | yes | yes | yes |
+| **B** collaborator-id mismatches vs the independent re-derivation | **0** | **0** | **0** |
+| **B** `n_cav` / `has_collab` mismatches; ego-not-first; subset order or size | 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 |
+| **C** row-1 bit-identical under an explicit keep-list | 31/31 | 32/32 | 32/32 |
+| **C** negative control exercised (differs) / collisions | 21 / **0** | 22 / **0** | 11 / **0** |
+| **D** payload binding | pass | pass | pass |
+
+On validate, part D also confirms the chain end to end: WP3/WP4's frame vector matches WP2's, its
+`n_box_collab` matches, and `N_cw,L` and `B_L,t` **recompute** from those counts through §4.2 —
+while `payload_would_differ_if_ego_counts_used` is true, so the payload demonstrably comes from the
+collaborator's boxes and not the ego's. That is the A-3 precondition discharged: `N_box,t → B_L,t →
+budget → selector` rests on the right vehicle.
+
+**An unlooked-for cross-check fell out of part B.** The audit counts frames whose selected
+collaborator lies beyond `COM_RANGE = 70 m` — **validate 0, test 119, Culver-City 72** — which is
+*exactly* §10.3's no-collaborator tally (0 / 119 / 72), reached by a completely different route:
+§10.3 counted `record_len` after the forward, this counts pose distances before it. It also pins the
+**mechanism**, which §10.3 states only as `|C| = 0`: the candidate set is generally *not* empty; a
+nearest collaborator exists and is then dropped by OpenCOOD's own range filter, which runs **after**
+the subset rule. The two descriptions coincide exactly because the subset picks the nearest by the
+same distance the filter thresholds, so "the nearest is out of range" implies "all are" —
+**a selected-but-out-of-range collaborator can never mask an in-range one.** Worth having on record:
+it is the one way the §2 rule and the range filter could have interacted badly, and they do not.
+
+**A performance trap met on the way, recorded because the safe fix is not the obvious one.** Part B
+walks the real loader, and a 7-CAV frame calls `load_yaml` **36 times** against OPV2V's pure-Python
+`yaml.Loader`. Validate is ordered by scene with the two 7-CAV scenes last (frames 775–1979 of
+1980 — the same ordering that made V2-R18's ETA wrong), so the back half ran at ~21 s/frame and the
+first attempt was heading for hours. Memoising `load_yaml` gives **4.18×** — but a plain cache would
+have been **silently wrong**: `reform_param` *mutates* what `load_yaml` returns
+(`delay_params['vehicles'] = cur_params['vehicles']`), and when the delay timestamp equals the
+current one it holds two references to one object, so a shared cached dict would leak one frame's
+mutation into the next. The memo therefore returns a **deepcopy**, and the poses were verified
+byte-identical against the uncached path before it was used. test and Culver-City then returned
+**100 % under both the cached and uncached implementations** — 5,340.8 s → 281.5 s and 592.7 s →
+91.0 s — which is an unplanned but real agreement check.
+
+### B · The position effect, with the amount of loss held exactly fixed
+
+WP5's level 1 (σ_mask > 0 everywhere) was compatible with a pure *quantity* explanation: replicate A
+lost 12 codewords, B lost 15. That explanation is now removed by conditioning on it. Among the R = 4
+replicates of each (frame, rate, regime), only pairs whose **codeword-loss counts are exactly equal**
+were kept.
+
+**The sufficiency criterion was fixed before the selection ran** (≥ 100 equal-loss pairs, ≥ 30
+distinct frames, Wilson 95 % lower bound on `P(ΔF1 ≠ 0)` above 0), on a distributional argument about
+Binomial tie frequency rather than a look at the outcome column.
+
+| stratum | pairs | frames | ΔF1 ≠ 0 | Wilson 95 % | mean \|ΔF1\| (non-zero) | max |
+|---|---|---|---|---|---|---|
+| ideal, **ΔN_cw = 0** | 1,731 | 1,201 | 28.48 % | [0.2640, 0.3065] | 0.03577 | 0.17503 |
+| packet, **ΔN_cw = 0** | 704 | 583 | 25.57 % | [0.2248, 0.2892] | 0.03219 | 0.14184 |
+| ideal, \|ΔN_cw\| = 1 — **separate stratum** | 3,561 | 1,690 | 28.14 % | [0.2669, 0.2964] | 0.03458 | 0.29524 |
+| packet, \|ΔN_cw\| = 1 — **separate stratum** | 1,489 | 1,032 | 26.93 % | [0.2474, 0.2924] | 0.03791 | 0.32049 |
+
+**SUFFICIENT in both regimes, and by a wide margin**, so the strict wording is the one that was
+earned:
+
+> **At a fixed frame and an identical number of lost codewords, different loss locations can produce
+> different task outcomes.**
+
+The two strata are reported separately and are **not** merged; the `|ΔN_cw| ≤ 1` layer is not needed
+and is kept only as a labelled comparison.
+
+**The pooled proportion understates the effect and should not be quoted alone.** Equal-loss pairs
+are most abundant at `p = 0.001`, where losing 12 of 12,567 codewords rarely changes anything, and
+that stratum drags the average down. Per rate, the effect is monotone in the loss rate and present
+at **every** rate, each with a Wilson lower bound above 0:
+
+| p | 0.001 | 0.01 | 0.05 | 0.10 | 0.25 | 0.50 | 0.75 | 0.90 |
+|---|---|---|---|---|---|---|---|---|
+| ideal, pairs | 908 | 311 | 136 | 103 | 63 | 57 | 69 | 84 |
+| ideal, ΔF1 ≠ 0 | 4.41 % | 27.01 % | 59.56 % | 68.93 % | 87.30 % | 84.21 % | **89.86 %** | 61.90 % |
+
+The fall at `p = 0.90` is not a counter-example: with almost everything lost, outcomes converge on
+the ego-only fallback and there is little left for position to move.
+
+**Level 3 — position matters *more* than amount — remains unadjudicated**, for the unchanged reason:
+V2-R11 B-2 required its threshold to be pre-registered and it never was, so setting one now would be
+setting it with the numbers on screen.
+
+### C · The Monte Carlo survival count, which had never been taken
+
+`wp5_message_validate.json` recorded `ap50_mc_std = 1.11e-16` and the per-replay expectation `q·n`.
+Neither is a survival count, and the summary carried no way to distinguish *"the standard deviation
+displays as zero"* from *"the draw has no variance"*.
+
+`v2_mc_survival_audit.py` replays the exact draw — same generator, same seed schedule
+(`default_rng(27260830 + ri·7919 + r)`), no AP recomputed — and counts.
+
+| p | q = (1−p)^12567 | E[survivors]/replay | **E[survivors], all 200 replays** | **observed** | replays with ≥ 1 |
+|---|---|---|---|---|---|
+| 0.000 | 1.000e+00 | 1980.000 | 396,000 | 396,000 | 200 |
+| **0.001** | **3.463303e-06** | **0.00686** | **1.3715** | **0** | **0** |
+| 0.01 | 1.404e-55 | ~0 | 5.56e-50 | 0 | 0 |
+| ≥ 0.05 | ≤ 1.13e-280 | 0 | ≈ 0 | 0 | 0 |
+
+**The observation, in the only wording that is true:** *under the fixed Monte-Carlo seed, no
+surviving message was observed at p = 0.001.* Expected over the whole Monte Carlo is **1.3715** — of
+order one — so under a Poisson reading the probability of seeing none is **e^−1.3715 ≈ 0.254**.
+Observing zero is an ordinary draw, not a certainty. *"Fallback is certain"* and *"the draw has no
+variance"* are withdrawn at this rate. At `p ≥ 0.01` the expectation is 50 orders of magnitude below
+one and fallback **may** be called effectively certain — as an arithmetic consequence of `q`, still
+quoted with the count.
+
+**And the standard deviation was never evidence about the draw in the first place.** `1.11e-16`
+appears at **every** rate — including `p = 0.0`, where all 1,980 messages survive in all 200 replays
+and there is nothing to vary. It is floating-point noise in the AP accumulation, identical
+everywhere. A quantity that takes the same value when survival is certain and when it is a
+one-in-300,000 event carries no information about survival, and reading it as "no variance" was
+reading noise as a result. Both wordings are now registered in protocol §5.1(b).
+
+### D · Signed off, not re-checked
+
+Recorded as agreed and not re-examined this round: the unseeded `shuffle_points()` root cause and its
+two-bridge confirmation (0 differing frames, F1 max |Δ| 1.11e-16, AP difference 0.00e+00); the
+ideal > packet > message ordering; all-or-nothing message delivery being effectively dead at
+`q(0.001) = 3.5e-6`, which is the arithmetic case for partial recovery; level 1 of the position
+effect (σ_mask > 0 everywhere); `p = 1.00 ≠ ego-only` (0/1980 frames box-identical, AP@0.5 +0.01195,
+AP@0.7 −0.01789, F1 −0.02658), archived as a mechanism observation; and the B-3 decomposition reuse,
+C-1 identity, tpfp hashing and the 5,914 / 0.8001 % boundary-element record.
+
+### Protocol
+
+**§5.1 added by amendment** (V2-R19, 2026-08-27): registered wordings for both findings. It reports
+no numbers — those live in the products — which is why a wording amendment does not breach the
+"this file reports no result" rule that §7.1 and §12.3 already work under. §16's lock row for §5
+records the amendment.
+
+**Exactly two section hashes moved, and both were meant to.** `V2_PROTOCOL_MANIFEST.json` rebuilt:
+§5 `2add5d44…` → `5847c3bb…` (1,530 → 4,692 bytes, the amendment) and §16 `9c76ae43…` →
+`15f0687e…` (1,282 → 1,348 bytes, the lock-table note). The other fifteen sections are
+byte-unchanged, and the whole-file digest moves `14ca0564…` → `b5bf0c27…`.
+15 LOCKED | 0 PARTIAL | 0 NOT LOCKED.
+
+### Gates — and HEAD was already not green
+
+**22 of 23 PASS. The one failure is pre-existing and was verified as such rather than assumed:** a
+throwaway git worktree at `ddd72622` reproduces **both** of the failures this session first saw,
+byte for byte, before any V2-R19 edit existed.
+
+* **`intra-repo imports` FAIL — reported rather than silenced, and it turned out to be a REAL
+  finding.** `tests/test_eval_determinism.py:126–127` import `catosg_eval_rng`, which the gate
+  cannot find because it genuinely is not in this repository — it is one of the **three
+  sibling-checkout edits** §0 of the handoff is built around, reached by an explicit
+  `sys.path.insert` into `../OpenCOOD/opencood/utils`. The gate has no exemption mechanism beyond
+  `SKIP_DIRS`. **Adding one is loosening a gate, which is Josh's call and not the executor's**, so
+  it was reported rather than silenced. V2-R19's four new modules were checked against the same
+  gate with the files staged (179 files, 109 imports) and **add no new failure**.
+  *V2-R20 D-1 corrected the diagnosis: this is **not** a false positive.* The module was
+  unregistered **and** unexported to `patches/opencood/`, so a fresh clone could not reproduce any
+  v2 product — the gate had found a real reproducibility hole and only lacked the vocabulary to
+  name which. See V2-R20 D.
+* **`numeric literals` FAIL — fixed, and the fix was regeneration, not an exemption.**
+  `results/README.md` was not what its generator writes: **V2-R16..R18 committed
+  `V2_RUNTIME_MANIFEST.json`, `diverged_frames.json`, `seed_collision_scan.json`, the four
+  `wp5_final` / `wp5_message` products and the whole `results/v2/diagnostic/` tree without
+  re-running `results_index.py`.** Attribution rules were added for the V2-R19 artefacts and the
+  index regenerated; the gate now **PASSES**. This is "generated documents are owned by their
+  generators" doing exactly its job — the index had been stale for a whole session and nothing else
+  would have said so.
+
+**Standing note:** `python tools/verify_results.py` printed `GATE FAILURE` at `ddd72622` and kept
+doing so until the import gate was ruled on. **V2-R20 D closed it — by registering the dependency,
+not by exempting the import.**
+
+### Assistant error account
+
+* **A diagnostic was printed under a label naming a different quantity.** `FRAME-ALIGNMENT CHECK`
+  computes a coordinate-frame overlap. The label survived into a receipt, and the number was then
+  read — reasonably — as a frame-index alignment rate that had to be 100 %. **The mislabelling is
+  the executor's; the misreading followed from it.** This is the same family as V2-R16's
+  "a gate whose name overstates what it checks is worse than none, because it is trusted": a *name*
+  is what a reader has to go on, and it was wrong.
+* **The number was reported with no expected range.** Whether the true value had been 5 %, 74 % or
+  99 %, the receipt would have read identically. A diagnostic quoted without its failure direction
+  cannot be checked by the reader, and that — not a failure to question a non-100 % value — is the
+  real defect. The instruction's diagnosis ("a quantity that must be 100 % appeared as 73.6 % and
+  the shape itself was the alarm") does not fit this quantity, but it identified a genuinely
+  untested gap, and A-2 exists because of it.
+* **A false-positive-shaped bug in this session's own new gate, caught before it was reported.** The
+  first version of the row-1 binding check read a dict key that does not exist at that level, so
+  every digest came back `None` — and the negative control, written as `if c is None or c != a`,
+  counted `None` as "differs" and **passed vacuously**. It would have reported a control that had
+  never run as a control that had succeeded. Fixed to three outcomes, with the run now required to
+  have exercised the control for real at least once.
+
+## V2-R20 — A-1 withdrawn, the sibling dependency registered, and the gate that was right
+
+**Zero GPU. WP5 was not re-run. The v1 manuscript was not touched.**
+
+### A · The 73.6 % ruling is withdrawn, and this is the heaviest entry in the error account
+
+**Josh withdrew V2-R19 A-1/A-2's "correct it to 100 %" instruction.** 73.6 % is the coordinate-frame
+diagnostic — the fraction of collaborator boxes overlapping some ego box at IoU > 0.1 — not an
+identity or row-index alignment rate. 100 % is not its target; it would mean the collaborator
+contributes no new field of view. The number, the `COORDINATE-FRAME CHECK` name, the failure-direction
+note and the JSON `interpretation` field all stand. **No collaborator-unique detection is discarded.**
+V2-R19 A-3 is formally released.
+
+**The error account, recorded as the most serious of this batch.** The instruction did not merely
+misread a label. It went on to **redefine the quantity from its own inference** — as "1980 frames,
+no missing, no duplicate, no misordering" — and issued a correction order on that redefinition. Had
+the order been executed, it would have deleted the collaborator's unique detections and dropped L's
+AP@0.5 from **0.88851 to 0.73292**, about 0.012 above ego-only's 0.72055: the entire cooperative
+gain removed by a single instruction, in a repository whose whole subject is that gain.
+
+**The failure mode, stated so it is recognisable next time: seeing a proportion below 100 % and
+assuming it ought to be 100 %, without first looking up what the proportion is of.** It is the
+mirror image of the mask-reuse episode — there, suspicion was owed and not given; here, suspicion
+was given but aimed at the wrong object. **The shared root cause is not checking the definition
+first.** A ratio's denominator is part of its meaning, and neither "it looks wrong" nor "it looks
+fine" is available until you have read it.
+
+**The executor's refusal is recorded as a positive precedent.** It declined to execute, ran an
+independent ablation instead of arguing, and split the conflated pair into two named quantities —
+the coordinate-frame diagnostic (correct value: not 100 %) and the identity audit (correct value:
+100 %). That is the intended behaviour when an instruction and the data disagree.
+
+**A-5, the mechanism, stands:** the cooperative gain comes chiefly from valid objects the ego did
+not detect — **8,630 of the 11,534 non-overlapping boxes (74.8 %) match a real GT object at
+IoU ≥ 0.5**.
+
+### A-4 · "92.6 %" is an ablation result and must be written as one
+
+**Adopted.** The share is obtained by **rebuilding L without those boxes and re-scoring end to end**,
+and may not be phrased so as to suggest AP decomposes over predictions. Write *"removing them costs
+92.6 % of the AP@0.5 gain"*; never *"they account for 92.6 % of the gain"*.
+
+**Why it matters here specifically: AP is a global-sort statistic.** Removing one box changes the
+ranking every later box is scored against, so a per-prediction share of AP is not a well-formed
+quantity. **This is the third application of one rule**, and all three sites now cross-reference the
+other two:
+
+| # | site | form of the rule |
+|---|---|---|
+| i | `v2_wp5_message.py` docstring (B-2) | `AP = q·AP_F + (1−q)·AP_E` is forbidden |
+| ii | `v2_wp5_message.py:tpfp()` (B-1/B-2) | TP/FP matched **within** a frame, only then sorted globally |
+| iii | `v2_coordinate_frame_check.py` docstring | an ablation **attributes**; it does not **decompose** |
+
+Entered in `tests/tracked_terms.md` as the **"AP attributed per prediction"** row, so the wording is
+mechanically caught rather than remembered. The product's field names were renamed to match —
+`fraction_of_ap50_gain_from_NON_overlapping_boxes` → `ap50_gain_share_lost_to_ablation` — with an
+`attribution_method` field, because a key name is read far more often than a docstring.
+
+### B · The identity audit becomes a standing gate
+
+100.00 % on all four parts on all three splits, 4,700 frames, zero mismatches — **this** is the
+quantity whose correct value is 100 %, and it is now `tests/test_alignment_audit.py`.
+
+**A stored verdict is only worth trusting if staleness is detectable**, so the audit now records the
+SHA-256 of every product it was computed from (`wp2_per_agent_*.csv/npz`, `wp34_e_l_*.csv`) and the
+gate recomputes them. Without that the gate would re-read a JSON saying 100 % and believe it after
+the products underneath had moved — a gate that cannot fail, which is worse than none. The gate also
+re-runs the cheap parts (index integrity, payload binding) live rather than trusting the record.
+
+**B-2, archived:** collaborators beyond `COM_RANGE` number **0 / 119 / 72**, matching §10.3's
+no-collaborator counts by a different route (pose distances before the forward, versus `record_len`
+after it).
+
+**B-3, archived:** `payload_would_differ_if_ego_counts_used = True` — `B_L,t` demonstrably derives
+from the collaborator's box counts and not the ego's.
+
+### C · B and C signed off
+
+Level 1 in its strict form is approved for use, verbatim as registered in §5.1(a):
+
+> At a fixed frame and an identical number of lost codewords, different loss locations can produce
+> different task outcomes.
+
+Sufficiency was pre-registered before the selection ran; ideal 1,731 pairs and packet 704 pairs both
+clear it, at every one of the eight loss rates. The `|ΔN_cw| ≤ 1` stratum stayed separate, unmerged
+and unused — confirmed correct. **Level 2 remains unadjudicated**, and the boundary is confirmed
+correct.
+
+C signed off as corrected: the 0 survivals at `p = 0.001` are a **sampling outcome** of the fixed
+200-replay draw (Poisson `P(0) ≈ 0.254`), not a determinism result; `1.11e-16` is floating-point
+residue in the AP accumulation, identical at `p = 0.0` where survival is certain, and so was never
+evidence about the draw at all.
+
+### D · The gate was right, and the dependency is now registered rather than exempted
+
+**D-1 overturns V2-R19's characterisation, and the correction is the point.** The red
+`intra-repo imports` gate was **not** a false positive. `catosg_eval_rng.py` lived only in one
+working tree, so **a fresh clone of this repository could not reproduce a single v2 product.** The
+gate had found a real reproducibility hole; its wording was merely too coarse to say which. Narrowing
+it is making a blunt gate precise — **not** loosening it.
+
+**What the export actually found, and it was worse than the import gate could see.** This repository
+already carries `patches/opencood/` and `tools/apply_opencood_patches.py` — the portable form of its
+OpenCOOD modifications, with `--check`/`--apply`/`--export`. Running `--check` reported
+**15 applied, 1 CONFLICT**: `intermediate_fusion_dataset.py`'s patch was stale against V2-R16's RNG
+threading, and `catosg_eval_rng.py` and `pcd_utils.py` **were not in the patch set at all**.
+Re-exporting moved **exactly those three files and nothing else** — the other fifteen patches came
+back byte-identical, which is the check that the three were the only drift. **18 applied, 0
+conflicts.** Same failure family as the stale `results/README.md` in E: a session changed the inputs
+and did not re-run the exporter that owns their portable form.
+
+**`results/manifests/V2_SIBLING_DEPENDENCY.json`** now pins the upstream URL, the base commit
+`31ba16025da27ffe4e336f011290dfbc66f9a1f1`, and for each of the 18 files its content SHA-256 and its
+patch's SHA-256; four are marked `v2_critical`.
+
+**D-2 / D-6 could not be carried out as written, and the reason is access, not judgement.** The
+sibling's only remote is `https://github.com/DerrickXuNu/OpenCOOD.git` — **upstream**, which this
+account cannot push to. No fork exists and no `gh` CLI is installed, and creating a public fork is
+an outward-facing act that is Josh's to authorise. Committing locally would have been **actively
+harmful**: it would produce an unfetchable commit *and* silently break `--export`, which reads
+`git status --porcelain` and would then have nothing to see. So the **D-7 route** was taken — and it
+is worth saying that D-7 is not an improvised fallback here but **the mechanism this repository has
+used for sixteen files already**.
+
+**The honest limit, named rather than glossed:** the base commit is upstream and fetchable, but the
+modifications travel as patches rather than as pushed history, so there is no signed, dated record
+of them outside this repository's own change log. Content, apply order and verification are all
+covered; provenance-over-time is not. This is recorded in the manifest docstring, not only here.
+
+**D-3's "the three files must be clean in the sibling worktree" cannot hold under this route and is
+not claimed.** They are modified relative to the base commit *by construction* — that is the point of
+a patch set. It is replaced by a strictly stronger invariant: **the content hashes must equal the
+registered ones.** A clean worktree says only "unmodified since some commit"; a hash says which bytes.
+
+**D-4, the narrowed gate.** An unresolved import is accepted only when all six hold: the importer is
+exactly `tests/test_eval_determinism.py`; the module is exactly `catosg_eval_rng`; the manifest
+registers that pair; the resolved path exists in the sibling; the sibling's base commit matches; and
+the file's SHA-256 matches. A second external module, a different importer, a moved path, a changed
+hash, a changed base commit or a missing manifest all FAIL. **No code path returns "pass" without
+having compared a content hash** — a registration that were trusted rather than checked would be
+precisely the exemption the gate exists to prevent.
+
+**D-5, three injections, all fire:**
+
+| injection | result |
+|---|---|
+| registered hash tampered to `0…0` | **FIRES** — content hash mismatch |
+| a *second* sibling module imported (`catosg_collab_subset`) | **FIRES** — not a registered dependency |
+| the dependency registration deleted | **FIRES** — not a registered dependency |
+
+A baseline assertion runs first and requires the untouched case to be clean, so an injection that
+fires for an unrelated reason cannot be mistaken for a pass.
+
+### E · The stale index, and the checklist item that was missing
+
+**E-1 confirmed:** V2-R16..R18 committed new result files without re-running `results_index.py`;
+`results/README.md` was stale for a whole session, the `numeric literals` gate caught it, and it was
+fixed by **regeneration rather than exemption**.
+
+**E-2, standing rule, now written down:** *a batch that adds, removes or renames anything under
+`results/` re-runs `python projects/ca_tosg/utils/results_index.py --write` in the same batch; a
+batch that touches the sibling OpenCOOD checkout re-runs
+`python tools/apply_opencood_patches.py --export` and rebuilds the sibling manifest.* Both belong to
+the same failure family and both had the same cause: **the step existed but was not on any batch's
+closing checklist**, which is why it could survive a whole session unnoticed. It is now on the
+checklist in `docs/HANDOFF_V2.md`.

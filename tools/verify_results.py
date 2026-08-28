@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 23)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (14 of 25)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
-  the nine artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
+  the eleven artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 23 checks in total, 14 of which a clean clone can run.
+  GATE-COUNT-LINE: 25 checks in total, 14 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -86,6 +86,16 @@ GATES = [
     # per-sample RandomState fix from regressing, and enumerates the whole identity set for seed
     # collisions every run.
     ('artifacts', 'eval determinism',     [PY, 'tests/test_eval_determinism.py']),
+    # V2-R20 D: the v2 products cannot be reproduced from this repository alone -- files in the
+    # sibling OpenCOOD checkout are required. The intra-repo import gate found that and was RIGHT;
+    # it was narrowed against this manifest rather than exempted. Pins the upstream base commit and
+    # every file's content hash, so "it works on one machine" cannot pass for reproducible again.
+    ('artifacts', 'sibling dependency',   [PY, 'tools/build_sibling_dependency_manifest.py',
+                                           '--check']),
+    # V2-R20 B-1: the identity-alignment verdict -- the quantity whose correct value really IS 100 %
+    # (unlike the 73.6 % coordinate-frame diagnostic, which fails downward only). Re-runs the cheap
+    # parts live and recomputes the audit's recorded input hashes, so a stale verdict cannot pass.
+    ('artifacts', 'alignment audit',      [PY, 'tests/test_alignment_audit.py']),
 ]
 
 
