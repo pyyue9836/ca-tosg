@@ -5653,3 +5653,113 @@ unclassifiable cue stop the batch rather than default in.
 
 Work package 6 stops here, as criterion 5 requires: **an unclassifiable or forbidden dimension stops
 the batch rather than being carried over by default.**
+
+## V2-R22 — the §9 amendment is registered, and the measurement that was meant to size it disproved half of it
+
+**Zero GPU. The v1 manuscript was not touched.**
+
+### A · Registration
+
+| field | value |
+|---|---|
+| registered at | **2026-08-28T10:34:12Z** |
+| parent commit | **`7f643296de7cb8ed276ca051d9eb1e78d9247aa4`** |
+| position | before WP11, before any test or Culver-City number has been seen |
+
+The window is demonstrably open: held-out accuracy is sealed (gate 22), WP3/WP4 have never been run
+on test or Culver, and no selector has been fitted under v2. Protocol §9.0.
+
+### B · The ground-truth leak — confirmed, and it stands
+
+`ego_num_objects` is `len(ego['object_ids'])`, built by `generate_object_center()` from
+`params['vehicles']`. Verified twice and independently: by the code chain, and by the data — its mean
+is **22.5646** against WP2's ego *detection* mean **22.5581** (adjacent but **not the same series**,
+frame by frame), while correlating **0.963** with WP2's GT count, which is what a GT quantity under a
+different range filter should do.
+
+Removed from the schema, replaced by `ego_detected_box_count` — the ego-only detector's own output at
+the frozen 0.20 / 0.15 thresholds, available before any request. `ego_num_objects` is retained
+outside the schema as `evaluation_only_gt`.
+
+**Ruling recorded (B-4):** the 2.54 % Gini importance is *not* a reason to keep the field; it is
+evidence that a leaking field participated in the decision. **The v1 RF / selector results are
+demoted to diagnostic and may not be cited as final evidence for a learned policy.**
+
+### C · The all-CAV claim was WRONG, and D-1 is what caught it
+
+**V2-R21 reported that nineteen of the twenty-one perception cues were computed over
+`np.vstack(projected_lidar_stack)`, the all-CAV cloud. That is false.** The D-1 decomposition
+recomputed the same statistics from the ego's own sweep under the v1 range and returned the v1
+values **exactly — ratio 1.000 on all seventeen `pcd_*` cues.**
+
+| factor | what moves | measured |
+|---|---|---|
+| **(P) point set** | all-CAV → ego-only | **×1.000 on every cue — there was nothing to remove** |
+| **(R) field of view** | ±70.4 m → ±140.8 m in x | `pcd_max_range` ×1.54, `pcd_very_far_80m` ×592 (0.26 → 156 pts), `pcd_front_far_50m` ×1.29, `pcd_std_range` ×1.14; near-field cues and all three densities ×1.000 |
+
+**Why the claim was wrong.** `origin_lidar` *is* the all-CAV vstack in
+`intermediate_fusion_dataset.py:198` — but the v1 cue table was not built by that class. Its
+extractor loads the **late-fusion** config, so it ran `LateFusionDataset.get_item_test()`, whose
+returned dict is **per-CAV** and whose `origin_lidar` is each CAV's own `lidar_np`
+(`late_fusion_dataset.py:85`). The `vstack` in that file is at line 251, inside `collate_batch_test`,
+which the extractor never calls.
+
+**The failure mode, named because it is now the third instance:** *the definition was read in the
+wrong file for the code path that actually produced the data.* `num_cavs` ranging 2–7 was the visible
+sign — under `IntermediateFusionDataset` the keys are `['ego']` alone, so that range could only come
+from the late-fusion class. It was read as confirmation of the story instead of as the question that
+would have broken it. Same family as the 73.6 % label and as §9's carry-over sentence: **a claim
+about what code does, made without running the path that made the number.**
+
+**What survives, and it is enough to justify the amendment:** (i) the GT leak; (ii) the FOV change
+above; and (iii) a **prospective** hazard that is real — v2 runs `IntermediateFusionDataset`, where
+`origin_lidar` *is* the all-CAV stack, so regenerating cues under the v2 config with
+`visualize=True`, the obvious way to do it, would have introduced exactly the contamination that was
+wrongly reported as already present. The new generator forecloses it by never building the stack.
+
+**The schema is unchanged; one of the amendment's two stated grounds is withdrawn.** §9.0 carries the
+correction inline rather than being quietly repaired, because an amendment resting on an unexamined
+premise is the failure work package 6 exists to prevent.
+
+**D-1 earned its place.** It was ordered as "measure before you retrain, so a later behaviour change
+can be attributed". It did that — and it also refuted the premise it was sizing, before a single
+model was fitted. Had the retrain run first, the selector would have changed for reasons nobody could
+have separated.
+
+### D · The new schema, and what D-1 says about it
+
+`v2_ego_local_23d` — 21 perception + 2 channel. Ego points come from
+`get_item_single_car()['projected_lidar']`, the **same array** `pre_processor.preprocess()` receives,
+so the cue describes exactly the scene action E sees, from **one** configuration source (D-3).
+Generated for validate: 1,980 frames, ego points/frame mean **52,836** (49,494–56,290),
+`ego_detected_box_count` mean 22.56, `has_collaborator` 1,980/1,980. Both joins verified frame by
+frame at write time; the generator refuses to write if either disagrees.
+
+**Correlation geometry** (153 off-diagonal pairs): mean |r| **0.5161 → 0.5023**, mean |change|
+0.0753, max |change| 0.4560. Reported because the selector consumes the joint distribution, not
+nineteen marginals.
+
+### E · Gate 27, written and deliberately not registered yet
+
+`tests/test_cue_schema.py` checks F-1…F-5, with F-3 done **by data flow rather than by name**: the
+cues are recomputed for sampled frames from the ego-only path and must match exactly, **and** an
+all-CAV control must differ — a positive check whose control never fires is failure mode 4. F-6's
+fourth injection (a renamed GT cue with no source evidence) is asserted to stay **silent** and is
+documented as a blind spot: the gate holds the audit's result, it cannot replace the audit.
+
+Not registered until the whitelist gate turns green with it, per F-7.
+
+### F · Assistant error account
+
+* **G-1, accepted.** §9's "carry the 23-cue set over" was my pre-registration in V2-R1 2c, complete
+  with a reason sentence, and I never checked what the cues read. My red-team note predicted
+  *downstream* applicability ("the L branch changed, some cues may lose meaning") and never asked the
+  *upstream* question, which was availability. Same root as 73.6 %: a conclusion before the
+  definition.
+* **G-2, accepted.** The L/F confound struck the word *granularity* in the title; this one strikes
+  *receiver-driven*. Both were found by Josh and by the executor. I contributed nothing to either.
+* **New, and the worst of this batch:** I reported the all-CAV contamination as established fact,
+  with file and line numbers, and it was wrong — I had cited the right lines in the wrong class.
+  Josh then wrote a protocol amendment around it. It was caught only because D-1 required the
+  measurement to be produced *before* the retrain, which is the discipline working exactly as
+  designed. **Line numbers make a claim look verified; they only make it locatable.**

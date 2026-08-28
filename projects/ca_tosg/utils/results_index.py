@@ -64,6 +64,21 @@ RULES = [
      'python projects/ca_tosg/evaluation/v2_position_effect_level1.py',
      'V2-R19 B: level-1 position effect at EXACTLY equal codeword loss, pre-registered '
      'sufficiency criterion'),
+    # V2-R22: work package 6 -- the cue audit, the v2_ego_local_23d schema and the D-1 comparison.
+    (r'^v2/wp6_cue_audit\.json$',
+     'python projects/ca_tosg/evaluation/v2_wp6_cue_audit.py',
+     'WP6: all 23 v1 cue dimensions classified with a code location each; found the GT field'),
+    (r'^v2/wp6_cues_\w+\.(csv|json)$',
+     'python projects/ca_tosg/evaluation/v2_wp6_generate_cues.py --split <split>',
+     'the v2_ego_local_23d cue set (protocol §9.0/§9.2): ego-only points, detector box count, '
+     'binary collaborator availability -- no GT, no post-decision information'),
+    (r'^v2/wp6_range_decomposition_\w+\.csv$',
+     'python projects/ca_tosg/evaluation/v2_wp6_generate_cues.py --split <split>',
+     'D-1 decomposition arm: the SAME ego points masked to the v1 x-range, isolating the '
+     'point-set factor from the field-of-view factor'),
+    (r'^v2/wp6_distribution_compare_\w+\.json$',
+     'python projects/ca_tosg/evaluation/v2_wp6_distribution_compare.py --split <split>',
+     'D-1: measured BEFORE any refit; three arms, marginals and correlation geometry'),
     (r'^v2/mc_survival_\w+\.json$',
      'python projects/ca_tosg/evaluation/v2_mc_survival_audit.py',
      'V2-R19 C: message-survival counts replayed from the fixed Monte-Carlo seed, with the '

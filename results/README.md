@@ -26,7 +26,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 6 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
-| | `results/v2/` | 29 |
+| | `results/v2/` | 34 |
 | | `results/v2/diagnostic/` | 7 |
 | | `results/v2/sealed/` | 5 |
 
@@ -385,6 +385,11 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `wp5_final_validate.json` | `python projects/ca_tosg/evaluation/v2_wp5_final.py` | work package 5: F products, three delivery regimes, R=4 |
 | `wp5_message_validate.csv` | `python projects/ca_tosg/evaluation/v2_wp5_final.py` | work package 5: F products, three delivery regimes, R=4 |
 | `wp5_message_validate.json` | `python projects/ca_tosg/evaluation/v2_wp5_final.py` | work package 5: F products, three delivery regimes, R=4 |
+| `wp6_cue_audit.json` | `python projects/ca_tosg/evaluation/v2_wp6_cue_audit.py` | WP6: all 23 v1 cue dimensions classified with a code location each; found the GT field |
+| `wp6_cues_validate.csv` | `python projects/ca_tosg/evaluation/v2_wp6_generate_cues.py --split <split>` | the v2_ego_local_23d cue set (protocol §9.0/§9.2): ego-only points, detector box count, binary collaborator availability -- no GT, no post-decision information |
+| `wp6_cues_validate.json` | `python projects/ca_tosg/evaluation/v2_wp6_generate_cues.py --split <split>` | the v2_ego_local_23d cue set (protocol §9.0/§9.2): ego-only points, detector box count, binary collaborator availability -- no GT, no post-decision information |
+| `wp6_distribution_compare_validate.json` | `python projects/ca_tosg/evaluation/v2_wp6_distribution_compare.py --split <split>` | D-1: measured BEFORE any refit; three arms, marginals and correlation geometry |
+| `wp6_range_decomposition_validate.csv` | `python projects/ca_tosg/evaluation/v2_wp6_generate_cues.py --split <split>` | D-1 decomposition arm: the SAME ego points masked to the v1 x-range, isolating the point-set factor from the field-of-view factor |
 
 ## `results/v2/diagnostic/`
 
@@ -410,4 +415,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-278 files indexed, 1 unattributed.
+283 files indexed, 1 unattributed.
