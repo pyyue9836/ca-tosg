@@ -28,7 +28,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
 | | `results/v2/` | 41 |
 | | `results/v2/diagnostic/` | 7 |
-| | `results/v2/sealed/` | 5 |
+| | `results/v2/sealed/` | 6 |
 
 ## `results/baselines/`
 
@@ -423,7 +423,8 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `wp2_f1_ego_test.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --held-out-eval` | SEALED held-out accuracy -- no tuning or selection step may read it (E-2) |
 | `wp2_held_out_culver.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --held-out-eval` | SEALED held-out accuracy -- no tuning or selection step may read it (E-2) |
 | `wp2_held_out_test.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --held-out-eval` | SEALED held-out accuracy -- no tuning or selection step may read it (E-2) |
+| `wp34_e_l_test.csv` | **UNATTRIBUTED** |  |
 
 ---
 
-294 files indexed, 0 unattributed.
+295 files indexed, 1 unattributed.

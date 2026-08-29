@@ -40,11 +40,27 @@ SEALED_REL = 'results/v2/sealed'
 HASHES = os.path.join(ROOT, 'results', 'manifests', 'V2_SEALED_HASHES.json')
 SKIP_DIRS = {'archive', '.git', '__pycache__', '.ipynb_checkpoints', 'node_modules'}
 # the gate itself, and the one work package licensed to unseal
-ALLOW_READ = {os.path.join('tests', 'test_sealed_heldout.py')}
+# V2-R29 C-1: the held-out PRODUCER must name the sealed directory, because that is where its output
+# has to land (A-1). It is allow-listed as a WRITER, and the narrowing is deliberate: it prints only
+# structural counts, never an accuracy number (C-6), so allow-listing it does not create a reader.
+ALLOW_READ = {os.path.join('tests', 'test_sealed_heldout.py'),
+              os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_heldout_products.py')}
 WP11 = 'v2_wp11_heldout_eval.py'          # does not exist yet; named so the allowance is explicit
 READ_ATTRS = ('read_csv', 'read_json', 'load', 'read_text', 'read_bytes', 'read', 'readlines',
               'genfromtxt', 'loadtxt', 'glob', 'listdir', 'iglob')
-HELD_OUT_TOKENS = ('ego_ap50', 'f1_ego', 'ego_f1_mean')
+HELD_OUT_TOKENS = ('ego_ap50', 'f1_ego', 'ego_f1_mean', 'f1_E', 'f1_L', 'f1_clean',
+                   'eff_E', 'eff_L', 'eff_F', 'scene_equal_f1')
+
+# V2-R29 A-1. Once WP5 runs on test, held-out F1 EXISTS -- and a scope that stopped at WP2 would let
+# any debug print leak it. These names may exist ONLY under results/v2/sealed/. The list is by name
+# rather than by token because a grid file's accuracy is in its rows, not its header, and a 4 KB head
+# scan would not reach it.
+SEALED_ONLY_NAMES = (
+    'wp34_e_l_test', 'wp6_cues_test', 'wp5_final_test', 'wp5_message_test',
+    'v2_grid_test', 'v2_p12_comparison_test',
+    'wp34_e_l_culver', 'wp6_cues_culver', 'wp5_final_culver', 'wp5_message_culver',
+    'v2_grid_culver', 'v2_p12_comparison_culver',
+)
 
 
 def live_py():
@@ -171,6 +187,27 @@ def stray_products():
     return bad
 
 
+def misplaced_heldout_products(v2_dir=None):
+    """V2-R29 A-1: a named held-out product sitting outside results/v2/sealed/.
+
+    `stray_products()` catches accuracy tokens in a file HEAD; this catches the file existing at all
+    in the open tree. Both are needed: the grid's accuracy lives in 43,560 rows, not in its header.
+    """
+    bad = []
+    v2 = v2_dir or os.path.join(ROOT, 'results', 'v2')
+    if not os.path.isdir(v2):
+        return bad
+    for fn in sorted(os.listdir(v2)):
+        if not os.path.isfile(os.path.join(v2, fn)):
+            continue
+        for stem in SEALED_ONLY_NAMES:
+            if fn.startswith(stem):
+                bad.append((f'results/v2/{fn}',
+                            f'held-out product {stem}* may exist only under {SEALED_REL}/'))
+                break
+    return bad
+
+
 def sealed_hashes():
     """sha256 of the sealed VALUES only.
 
@@ -203,6 +240,24 @@ def check(extra=()):
     for p, tok in stray_products():
         bad.append((p, f'held-out accuracy `{tok}` outside {SEALED_REL}/'))
     return bad, scanned
+
+
+def _v2r29_injections():
+    """V2-R29 A-3: the EXTENDED scope must fire on the new WP3/4/5/6 test paths."""
+    import tempfile
+    ok = True
+    for stem in ('wp34_e_l_test', 'wp6_cues_test', 'wp5_final_test', 'v2_grid_test'):
+        with tempfile.TemporaryDirectory() as d:
+            open(os.path.join(d, stem + '.csv'), 'w').write('frame,f1_E\n0,0.5\n')
+            fired = bool(misplaced_heldout_products(d))
+            print(f'  {"FIRES  " if fired else "SILENT "}  {stem}.csv placed outside sealed/')
+            ok &= fired
+    with tempfile.TemporaryDirectory() as d:
+        open(os.path.join(d, 'wp34_e_l_validate.csv'), 'w').write('frame\n0\n')
+        quiet = not misplaced_heldout_products(d)
+        print(f'  {"quiet  " if quiet else "FIRES  "}  wp34_e_l_VALIDATE.csv (must NOT fire)')
+        ok &= quiet
+    return ok
 
 
 def self_test():
@@ -243,7 +298,9 @@ def self_test():
 
 def main() -> int:
     if '--self-test' in sys.argv:
-        return self_test()
+        ok_ext = _v2r29_injections()
+        r = self_test()
+        return r if ok_ext else 1
     h = sealed_hashes()
     if '--write-hashes' in sys.argv:
         os.makedirs(os.path.dirname(HASHES), exist_ok=True)
@@ -254,6 +311,7 @@ def main() -> int:
         print(f'wrote {os.path.relpath(HASHES, ROOT)} ({len(h)} files)')
         return 0
     bad, scanned = check()
+    bad += misplaced_heldout_products()
     print(f'sealed-heldout gate: {scanned} live .py scanned, {len(h)} sealed file(s)')
     if scanned == 0 or not h:
         print('SEALED GATE FAIL: nothing scanned or nothing sealed -- a scan that finds nothing '
