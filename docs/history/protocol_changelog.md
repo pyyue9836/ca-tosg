@@ -3091,6 +3091,17 @@ mean rate of `0.5515` over the first 20 validate frames, so the useful threshold
 `CATOSG_MAX_COLLAB=1` is an **inference-time** hook (`opencood/utils/catosg_collab_subset.py`,
 applied in `intermediate_fusion_dataset.__getitem__` before the CAV loop). Every mainline arm reaches
 the single-collaborator convention this way, on public pretrained checkpoints, with **no** retraining.
+
+> **WORDING CORRECTION (V2-R33 D-3).** *"on public pretrained checkpoints"* is **literally true about
+> N=1 and plainly false on a first reading.** The clause means only that no arm was retrained *at
+> N=1*; read straight, it says the Where2comm weights are OFFICIAL. **They are not.** They are a
+> local 50-epoch training at
+> `/mnt/h/.../logs/point_pillar_where2comm_2026_05_22_17_56_51` — established in V2-R32 from 50
+> `net_epochN.pth` files plus a TensorBoard events file, which is the signature of a training run
+> and not of a download. `V2_TIERC_FREEZE.json` carries the corrected record and the
+> `net_epoch50` sha256. (By contrast the SECOND-arm "official weights" in
+> `docs/experiment_protocol.md` **is** accurate: that archive was fetched manually and its hashes
+> are in `P4B_MANIFEST.json`.)
 Plan v2 §a's "retrain at N=1" would therefore have made Where2comm the only arm trained under a
 different discipline from the one it is compared against. The existing 50-epoch reproduction
 (`point_pillar_where2comm_2026_05_22_17_56_51/net_epoch50.pth`, recovered from
@@ -5763,3 +5774,67 @@ Not registered until the whitelist gate turns green with it, per F-7.
   Josh then wrote a protocol amendment around it. It was caught only because D-1 required the
   measurement to be produced *before* the retrain, which is the discipline working exactly as
   designed. **Line numbers make a claim look verified; they only make it locatable.**
+
+## V2-R33 — the primary criterion failed, and the record says so plainly
+
+**Zero GPU. 29/29 gates PASS.**
+
+### A · The result
+
+> "At Test β=0.20, CA-TOSG reduced mean realised payload by 99.85% relative to the frozen τ=16.5
+> comparator. Although the scene-equal F1 point difference was −0.00499, the scene-level bootstrap
+> lower confidence bound was −0.00738, exceeding the preregistered non-inferiority margin of −0.005.
+> Therefore, payload reduction was demonstrated, but accuracy non-inferiority was not established."
+
+**通信节省成立;预注册的精度非劣效没有成立。**
+
+**The criterion has been defined on the LCB since R8** — the correction that removed this executor's
+"the CI contains 0, so they are equivalent" fallacy. **It now rules against us**, and quoting the
+point estimate as though it passed is exactly what a pre-registered bound exists to prevent.
+
+validate ΔF1 −0.00238 → test −0.00499: the same shape, the magnitude landing just outside the margin
+on the held-out set. **A held-out set doing its job, not an anomaly.**
+
+### B · Wording, made mechanical rather than remembered
+
+Three rows added to `tests/tracked_terms.md`, scanned against the manuscript:
+
+* **accuracy preservation** — "maintains accuracy", "no loss of accuracy", "at the same accuracy",
+  "精度不变". The test refused that claim; the compliant form gives the point estimate **and** the
+  interval.
+* **payload saving as overall success** — the criterion is **joint** (R9). V2-R28 corrected the
+  opposite error (scoring on F1 and forgetting what the paper claims); **this row guards the mirror
+  image**, letting an overwhelming 99.85 % soften a failed F1 half.
+* **learned-selector superiority** — the RF beat no simple rule on F1 at any budget.
+
+**The frozen selector degenerated to E/L with ρ_F = 0.000, and that is reported, not smoothed.**
+
+### C · Contributions, at Case B/C
+
+1. a unified, reproducible E/L/F granularity-control framework with **real** communication accounting;
+2. mechanism findings — the necessity of partial recovery, the loss-position effect (level 1, strict),
+   and zero-tensor fusion ≠ ego-only;
+3. an empirical finding: the frozen RF cuts communication enormously, **and under a strict
+   scene-bootstrap non-inferiority test the evidence for accuracy preservation is insufficient**;
+4. the total collapse of the expensive F action, reported as D-3's two questions — a **learning**
+   question and a **design** question, never merged.
+
+### D · A wording category, not a single phrase
+
+R51 said the arms run *"on public pretrained checkpoints, with no retraining"*. That is **literally
+true about N=1 and plainly false on a first reading**: it meant "not retrained *at N=1*", and it
+reads as "official weights". The Where2comm weights are a **local 50-epoch training**.
+
+Corrected in place, and entered in `tracked_terms.md` as a **category** — *literally-true /
+plainly-false* — because the failure is not the phrase but the gap between the author's narrow
+reading and the reader's plain one. The repository-wide scan found **one** other family of hits, the
+SECOND arm's "official weights", and those are **accurate**: that archive was fetched manually and
+its hashes are in `P4B_MANIFEST.json`. So the pattern prompts for provenance rather than banning the
+words.
+
+### E · The unseal register, as a positive instance
+
+Letting the primary result live in the open tree by adding it to an allow-list would have exempted it
+**by name**. Instead `V2_UNSEAL_RECORD.json` records path, timestamp, commit, hash and scope, and
+gate 22 consults it. **The file is readable because a dated act made it so, not because someone
+edited a set literal.** Entered in `gate_design_principles.md`.

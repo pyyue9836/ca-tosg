@@ -470,6 +470,25 @@ payload:          (B_comp_bar - B_CA_bar) / B_comp_bar  >=  0.10
 > **If it is not met, that is reported as measured. Reverting to the nominal comparison is
 > forbidden.**
 
+### 7.0.1 RESULT — the primary criterion was NOT met (V2-R33 A, verbatim)
+
+> "At Test β=0.20, CA-TOSG reduced mean realised payload by 99.85% relative to the frozen τ=16.5
+> comparator. Although the scene-equal F1 point difference was −0.00499, the scene-level bootstrap
+> lower confidence bound was −0.00738, exceeding the preregistered non-inferiority margin of −0.005.
+> Therefore, payload reduction was demonstrated, but accuracy non-inferiority was not established."
+
+**通信节省成立;预注册的精度非劣效没有成立。**
+
+**The criterion has been defined on the LCB since R8** — the correction that removed this executor's
+"the CI contains 0, so they are equivalent" fallacy. It now rules against us. **Quoting the point
+estimate as though it passed is precisely what a pre-registered bound exists to prevent.**
+
+validate ΔF1 −0.00238 → test −0.00499: the same shape, and the magnitude on test lands just outside
+the margin. That is a held-out set doing its job, not an anomaly.
+
+**Joint criterion (R9): both halves must hold.** The 99.85 % saving may not be presented as an
+overall success. §7.1's Case B/C wording governs from here.
+
 ### 7.1 Pre-registered wording for the three outcome cases
 
 Written now, before any result, so the sentence is chosen by the design and not by the outcome.

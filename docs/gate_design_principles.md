@@ -81,6 +81,18 @@ hole is documented rather than discovered.
 
 ---
 
+### A positive instance, recorded because the shape is reusable (V2-R33 E-1)
+
+**The unseal register.** After WP11 the primary result legitimately lives in the open tree, and the
+obvious way to let it is to add the file to an allow-list. That would have exempted it **by name** —
+the same hole rule 3's corollary describes. Instead `results/manifests/V2_UNSEAL_RECORD.json` records
+the path, timestamp, commit, hash and scope of the unsealing act, and gate 22 consults that record.
+
+**The file is readable because a dated act made it so, not because someone edited a set literal.**
+That is "judge the capability, not the intent" applied constructively: the gate still judges
+capability, and the register supplies the one thing a capability check cannot — *when, and by what,
+this became permitted*.
+
 ### Why the fourth was not obvious
 
 Rules 1–3 are about a gate being *too weak*, *misdirected*, or *too noisy*. Rule 4 is about a gate
