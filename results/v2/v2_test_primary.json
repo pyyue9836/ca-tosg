@@ -1,0 +1,32 @@
+{
+ "schema": "catosg-v2-test-primary/1",
+ "cell": "test @ beta=0.2",
+ "delta": 0.005,
+ "unit": "scene-level bootstrap",
+ "n_scenes": 16,
+ "n_rows": 47740,
+ "boot": 10000,
+ "RF": {
+  "scene_equal_f1": 0.8767948327946947,
+  "mean_payload": 0.0008091642228739005
+ },
+ "tau": {
+  "tau": 16.5,
+  "scene_equal_f1": 0.8817798929446039,
+  "mean_payload": 0.5410180456640136
+ },
+ "delta_f1_point": -0.00498506014990914,
+ "delta_f1_LCB95": -0.007383884013809152,
+ "delta_payload_point": -0.547696022395407,
+ "delta_payload_UCB95": -0.4998745791645468,
+ "relative_payload_saving": 0.998504367406302,
+ "non_inferiority_met": false,
+ "payload_criterion_met": true,
+ "primary_met": false,
+ "action_mix": {
+  "E": 0.4030372852953498,
+  "L": 0.5969627147046502,
+  "F": 0.0
+ },
+ "WORDING": "R9 family: non-inferiority + payload saving. It may NOT be written as the RF having better F1; \"same F1\" and \"no loss\" are forbidden (V2-R28 C-3)."
+}

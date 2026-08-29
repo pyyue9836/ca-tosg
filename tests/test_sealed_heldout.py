@@ -31,6 +31,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import json
 import os
 import sys
 
@@ -55,7 +56,8 @@ ALLOW_WRITE = {os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_heldout_pro
                os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_build_grid.py'),
                os.path.join('projects', 'ca_tosg', 'models', 'v2_eff_f.py')}
 READ_TOKENS = ('np.load', 'load(', 'read_csv', 'read_json', 'open(', '.read(')
-WP11 = 'v2_wp11_heldout_eval.py'          # does not exist yet; named so the allowance is explicit
+WP11 = 'v2_wp11_heldout_eval.py'          # V2-R32 D-7: it now exists -- this IS the unseal step,
+                                          # the one module permitted to read the sealed grid
 READ_ATTRS = ('read_csv', 'read_json', 'load', 'read_text', 'read_bytes', 'read', 'readlines',
               'genfromtxt', 'loadtxt', 'glob', 'listdir', 'iglob')
 HELD_OUT_TOKENS = ('ego_ap50', 'f1_ego', 'ego_f1_mean', 'f1_E', 'f1_L', 'f1_clean',
@@ -178,9 +180,23 @@ def _is_add_argument(tree, target):
     return False
 
 
+def unsealed_registry():
+    """Paths deliberately unsealed at WP11, each with a date, a commit and a hash.
+
+    This is NOT an allow-list. An allow-list exempts a file because of its name; this records that a
+    specific file was unsealed by a specific act at a specific time, and the gate consults the
+    record. Editing it is a documented event, not a quiet edit to a set literal.
+    """
+    p = os.path.join(ROOT, 'results', 'manifests', 'V2_UNSEAL_RECORD.json')
+    if not os.path.exists(p):
+        return set()
+    return {e['path'] for e in json.load(open(p)).get('unsealed', [])}
+
+
 def stray_products():
-    """Held-out accuracy living outside results/v2/sealed/."""
+    """Held-out accuracy living outside results/v2/sealed/ and NOT in the unseal record."""
     bad = []
+    unsealed = unsealed_registry()
     v2 = os.path.join(ROOT, 'results', 'v2')
     if not os.path.isdir(v2):
         return bad
@@ -192,8 +208,10 @@ def stray_products():
             continue
         head = open(p, encoding='utf-8', errors='ignore').read(4096)
         for tok in HELD_OUT_TOKENS:
-            if tok in head and 'SEALED' not in head and 'NOT COMPUTED' not in head:
-                bad.append((os.path.relpath(p, ROOT), tok))
+            rel = os.path.relpath(p, ROOT).replace(os.sep, '/')
+            if tok in head and 'SEALED' not in head and 'NOT COMPUTED' not in head \
+                    and rel not in unsealed:
+                bad.append((rel, tok))
     return bad
 
 

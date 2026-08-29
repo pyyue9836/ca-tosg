@@ -1,0 +1,14 @@
+{
+ "schema": "catosg-v2-unseal-record/1",
+ "why": "After WP11 the primary result legitimately lives in the open tree. That transition is RECORDED here rather than granted as a gate exemption: gate 22 permits a held-out product outside sealed/ only if it is listed below, so the file being readable is the consequence of a dated act, not of someone editing an allow-list.",
+ "unsealed": [
+  {
+   "path": "results/v2/v2_test_primary.json",
+   "unsealed_at": "2026-08-29T19:01:47Z",
+   "commit": "a8589ab9c12a8ab554f4ee16bbc765c2f8e022b3",
+   "by": "projects/ca_tosg/evaluation/v2_wp11_heldout_eval.py --unseal",
+   "sha256": "28cd163c6d7b8bf40b051da33ef5b10e466a93d55d7d7c3ef64e1141844eaf50",
+   "scope": "the ONE pre-specified comparison at test @ beta=0.20: frozen RF candidate 67 vs the frozen comparator tau=16.5. Culver-City remains sealed and unrun."
+  }
+ ]
+}
