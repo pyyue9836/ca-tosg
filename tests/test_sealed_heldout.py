@@ -43,8 +43,16 @@ SKIP_DIRS = {'archive', '.git', '__pycache__', '.ipynb_checkpoints', 'node_modul
 # V2-R29 C-1: the held-out PRODUCER must name the sealed directory, because that is where its output
 # has to land (A-1). It is allow-listed as a WRITER, and the narrowing is deliberate: it prints only
 # structural counts, never an accuracy number (C-6), so allow-listing it does not create a reader.
-ALLOW_READ = {os.path.join('tests', 'test_sealed_heldout.py'),
-              os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_heldout_products.py')}
+ALLOW_READ = {os.path.join('tests', 'test_sealed_heldout.py')}
+
+# V2-R30 C-1. A producer must NAME the sealed directory to write there, but naming it is all it may
+# do. `ALLOW_READ` skips every check, which is a hole: it exempts a file by NAME when this gate's
+# whole principle is to judge CAPABILITY, not intent (V2-R6 A). So a writer goes here instead, and
+# is still checked -- it may name the path, and it must not read from it.
+ALLOW_WRITE = {os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_heldout_products.py'),
+               os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_wp5_final.py'),
+               os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_wp6_generate_cues.py')}
+READ_TOKENS = ('np.load', 'load(', 'read_csv', 'read_json', 'open(', '.read(')
 WP11 = 'v2_wp11_heldout_eval.py'          # does not exist yet; named so the allowance is explicit
 READ_ATTRS = ('read_csv', 'read_json', 'load', 'read_text', 'read_bytes', 'read', 'readlines',
               'genfromtxt', 'loadtxt', 'glob', 'listdir', 'iglob')
@@ -225,6 +233,28 @@ def sealed_hashes():
     return out
 
 
+def sealed_read_lines(rel, root=None):
+    """Lines in an allow-listed WRITER that both mention the sealed path and call a read function.
+
+    Line-scoped on purpose: the file legitimately reads NON-sealed inputs (the WP2 npz), so a
+    file-level "does it contain a read call" test would fire on every writer and be useless. What
+    must never appear is a read whose target is the sealed directory.
+    """
+    p = os.path.join(root or ROOT, rel)
+    hits = []
+    try:
+        lines = open(p, encoding='utf-8', errors='replace').read().splitlines()
+    except OSError:
+        return hits
+    for i, ln in enumerate(lines, 1):
+        code = ln.split('#')[0]
+        if 'SEALED' not in code and 'sealed' not in code:
+            continue
+        if any(t in code for t in READ_TOKENS) and "'w'" not in code and '"w"' not in code:
+            hits.append(f'{rel}:{i}: {ln.strip()[:90]}')
+    return hits
+
+
 def check(extra=()):
     bad = []
     scanned = 0
@@ -232,6 +262,13 @@ def check(extra=()):
         if rel in ALLOW_READ or os.path.basename(rel) == WP11:
             continue
         scanned += 1
+        if rel in ALLOW_WRITE:
+            # allow-listed to WRITE only: still checked, just permitted to name the path
+            for h in sealed_read_lines(rel):
+                bad.append((rel, f'allow-listed to WRITE only, but reads the sealed path -- {h}'))
+            if scan_flag(rel):
+                bad.append((rel, 'passes --held-out-eval; only work package 11 may'))
+            continue
         names, reads = scan_reads(rel)
         if names and reads:
             bad.append((rel, f'names the sealed path and can read via {reads}'))
@@ -257,6 +294,20 @@ def _v2r29_injections():
         quiet = not misplaced_heldout_products(d)
         print(f'  {"quiet  " if quiet else "FIRES  "}  wp34_e_l_VALIDATE.csv (must NOT fire)')
         ok &= quiet
+    # V2-R30 C-3: the allow-listed WRITER must not be able to READ sealed content.
+    import tempfile
+    w = sorted(ALLOW_WRITE)[0]
+    with tempfile.TemporaryDirectory() as d:
+        tgt = os.path.join(d, w)
+        os.makedirs(os.path.dirname(tgt), exist_ok=True)
+        src = open(os.path.join(ROOT, w), encoding='utf-8').read()
+        open(tgt, 'w').write(src + "\n_leak = pd.read_csv(os.path.join(SEALED, 'wp34_e_l_test.csv'))\n")
+        fired = bool(sealed_read_lines(w, root=d))
+        print(f'  {"FIRES  " if fired else "SILENT "}  the allow-listed WRITER made to READ sealed')
+        ok &= fired
+    clean = not sealed_read_lines(w)
+    print(f'  {"quiet  " if clean else "FIRES  "}  the real writer as committed (must NOT fire)')
+    ok &= clean
     return ok
 
 

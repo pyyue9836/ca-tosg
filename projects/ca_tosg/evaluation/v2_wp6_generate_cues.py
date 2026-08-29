@@ -70,6 +70,8 @@ exec(compile(_src[_src.index('def extract_pcd_features'):_src.index('def load_bo
 extract_pcd_features = _ns['extract_pcd_features']
 
 OUT_DIR = os.path.join(ROOT, 'results', 'v2')
+SEALED = os.path.join(OUT_DIR, 'sealed')
+HELD_OUT = ('test', 'culver')
 SCHEMA = 'v2_ego_local_23d'
 
 # D-1 DECOMPOSITION. The v1 cue table was extracted under the LATE-FUSION config, whose
@@ -117,7 +119,14 @@ def ego_points(ds, idx):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--split', default='validate')
+    ap.add_argument('--held-out-eval', action='store_true')
     args = ap.parse_args()
+    # V2-R30 B-3: a held-out cue table is created IN sealed/, never written openly and moved.
+    if args.split in HELD_OUT:
+        if not args.held_out_eval:
+            raise SystemExit(f'{args.split} is held out: pass --held-out-eval')
+        os.makedirs(SEALED, exist_ok=True)
+    dest = SEALED if args.split in HELD_OUT else OUT_DIR
 
     import pandas as pd
     wp2 = pd.read_csv(os.path.join(OUT_DIR, f'wp2_per_agent_{args.split}.csv'))
@@ -171,10 +180,10 @@ def main():
     if not np.array_equal(df.ego_detected_box_count.to_numpy(), wp2.n_box_ego.to_numpy()):
         raise SystemExit('ego_detected_box_count disagrees with WP2 n_box_ego -- stop')
 
-    csv = os.path.join(OUT_DIR, f'wp6_cues_{args.split}.csv')
+    csv = os.path.join(dest, f'wp6_cues_{args.split}.csv')
     df.to_csv(csv, index=False)
     pd.DataFrame(decomp).to_csv(
-        os.path.join(OUT_DIR, f'wp6_range_decomposition_{args.split}.csv'), index=False)
+        os.path.join(dest, f'wp6_range_decomposition_{args.split}.csv'), index=False)
     fields = [c for c in df.columns if c not in ('frame', 'ego_id')]
     meta = {
         'schema': SCHEMA, 'split': args.split, 'frames': int(len(df)),
@@ -193,7 +202,7 @@ def main():
                    sha256_file(os.path.join(OUT_DIR, f'wp2_per_agent_{args.split}.csv'))},
         'seconds': round(dt, 1),
     }
-    with open(os.path.join(OUT_DIR, f'wp6_cues_{args.split}.json'), 'w') as f:
+    with open(os.path.join(dest, f'wp6_cues_{args.split}.json'), 'w') as f:
         json.dump(meta, f, indent=1)
     print(f'\n{SCHEMA}: {len(df)} frames, {len(fields)} perception + 2 channel = '
           f'{len(fields) + 2} dimensions')

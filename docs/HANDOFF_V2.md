@@ -55,6 +55,7 @@ side effect — `git restore paper/*.pdf` after any full gate run.
 | 4 L products | **done (validate)** — AP@0.5 0.88851, F1 0.88918; `B_L` 0.00253 Msym = 0.80 % of the β=0.10 budget |
 | 5 F products | **done (validate)** — three regimes × 8 loss rates × R=4 + endpoints; both bridges pass bit-exactly |
 | — identity alignment audit (V2-R19 A) | **done, all three splits — 100.00 % on all four parts.** `v2_alignment_audit.py`; the A-3 precondition on `N_box,t → B_L,t` is discharged |
+| — WP3/WP4 **test** (sealed) | **done, V2-R29 C-1** — 2170 frames into `results/v2/sealed/wp34_e_l_test.csv`; structural counts only, no accuracy printed (C-6) |
 | 6 cue regeneration | **schema frozen and validate cues generated; STOPPED before the refit (V2-R22, H-3).** §9 amendment registered; `v2_ego_local_23d` = 21 ego-local + 2 channel; `results/v2/wp6_cues_validate.csv` (1980 frames) and the D-1 comparison exist. **One ruling open — see the boxed question in §3.** |
 | 7–10 | not started |
 | 11 held-out evaluation | not started; test/Culver accuracy is **sealed** |
@@ -89,9 +90,11 @@ predictions, E/L products, payload, WP5 transport — all confirmed unaffected (
    adjudicable**, and defining the threshold now would be choosing it after seeing the numbers.
    Either pre-register one for a future run or drop the claim. **Reaffirmed unchanged in V2-R19
    B-4.**
-2. **WP3/WP4 on test and Culver.** Not run. They would produce held-out accuracy, which is sealed.
-   Decide: generate boxes and box counts only (feeding payload accounting, no accuracy), or wait for
-   WP11.
+2. ~~WP3/WP4 on test and Culver~~ — **EXPIRED AND RESOLVED, V2-R29 D.** The two options
+   ("boxes and counts only" vs "wait for WP11") collapsed into one once the Test primary needed the
+   accuracy side: **generate the accuracy, but seal it strictly and unseal once at the end.**
+   WP3/WP4 on **test** are done and written straight into `results/v2/sealed/` (V2-R29 C-1);
+   **Culver is untouched** and stays independent. Logged as expired rather than left hanging.
 3. **Tier B** is approved at ≈10 h typical, to start after Tier A is accepted. **Tier C** is not
    approved, pending the ML-Cooper / SmartCooper selection report.
 4. **NEW (V2-R19) — should the alignment audit become gate 24?** `v2_alignment_audit.py` is

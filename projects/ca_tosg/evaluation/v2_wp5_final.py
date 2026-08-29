@@ -63,6 +63,42 @@ from v2_wp2_per_agent import SPLIT_DIR                                          
 from v2_wp5_f_products import BRANCH_ELEMS, QMAX, element_to_codeword            # noqa: E402
 
 OUT_DIR = os.path.join(ROOT, 'results', 'v2')
+SEALED_DIR = os.path.join(OUT_DIR, 'sealed')
+HELD_OUT_SPLITS = ('test', 'culver')
+
+
+def out_dir_for(split, held_out):
+    """V2-R30 B-3: held-out products are CREATED in sealed/, never written openly and moved.
+
+    A write-then-move leaves the accuracy in the open tree for however long the move takes, and a
+    crash in between leaves it there permanently. There is no window here.
+    """
+    if split in HELD_OUT_SPLITS:
+        if not held_out:
+            raise SystemExit(f'{split} is a held-out split: pass --held-out-eval (work package 11 '
+                             f'only), or run validate')
+        _verify_freeze()
+        os.makedirs(SEALED_DIR, exist_ok=True)
+        return SEALED_DIR
+    return OUT_DIR
+
+
+def _verify_freeze():
+    """Refuse to touch a held-out split unless the frozen selector is exactly what was frozen."""
+    import hashlib
+    fp = os.path.join(ROOT, 'results', 'manifests', 'V2_PRIMARY_FREEZE.json')
+    if not os.path.exists(fp):
+        raise SystemExit('no V2_PRIMARY_FREEZE.json -- nothing is frozen, so nothing may be unsealed')
+    f = json.load(open(fp))
+    mp = os.path.join(ROOT, f['selector']['model_path'])
+    if not os.path.exists(mp):
+        raise SystemExit('frozen model file is missing')
+    got = hashlib.sha256(open(mp, 'rb').read()).hexdigest()
+    if got != f['selector']['model_sha256']:
+        raise SystemExit(f'frozen model sha256 {got[:12]} != registered '
+                         f'{f["selector"]["model_sha256"][:12]} -- refusing to run on held-out data')
+    if f['selector']['candidate_index'] != 67 or f['primary_comparator']['tau'] != 16.5:
+        raise SystemExit('freeze contents moved (candidate or comparator) -- refusing')
 SCALES_JSON = os.path.join(ROOT, 'results', 'manifests', 'V2_INT8_SCALES.json')
 CHAIN_JSON = os.path.join(OUT_DIR, 'payload_chain.json')
 BASE_SEED = 20260809
@@ -178,9 +214,15 @@ def main():
     ap.add_argument('--every', type=int, default=1)
     ap.add_argument('--limit', type=int, default=0)
     ap.add_argument('--tag', default='')
+    ap.add_argument('--held-out-eval', action='store_true')
     args = ap.parse_args()
-    if args.split != 'validate':
-        raise SystemExit('WP5 is authorised for validate only (V2-R11 F-3).')
+    # V2-R11 F-3 authorised validate only. V2-R29 approved TEST, with conditions; Culver is NOT
+    # approved and stays blocked here rather than relying on anyone remembering.
+    if args.split == 'culver':
+        raise SystemExit('WP5 on Culver-City is NOT approved (V2-R29 F-1).')
+    if args.split != 'validate' and not getattr(args, 'held_out_eval', False):
+        raise SystemExit('WP5 on a held-out split requires --held-out-eval (work package 11 only, '
+                         'approved for test in V2-R29).')
 
     class O:
         model_dir = args.model_dir
@@ -301,7 +343,10 @@ def main():
     import pandas as pd
     df = pd.DataFrame(rows)
     tag = f'_{args.tag}' if args.tag else ''
-    df.to_csv(os.path.join(OUT_DIR, f'wp5_final_{args.split}{tag}.csv'), index=False)
+    od = out_dir_for(args.split, getattr(args, 'held_out_eval', False))
+    if args.split in HELD_OUT_SPLITS and os.path.abspath(od) != os.path.abspath(SEALED_DIR):
+        raise SystemExit('held-out output path is not sealed/ -- refusing to write')
+    df.to_csv(os.path.join(od, f'wp5_final_{args.split}{tag}.csv'), index=False)
 
     out = {'schema': 'catosg-v2-wp5-final/1', 'split': args.split, 'frames': len(df),
            'rates': list(RATES), 'replicates': R_REPS, 'regimes': list(REGIMES),
@@ -330,13 +375,13 @@ def main():
         'first_examples': [{'element': int(e), 'codewords': [int(cw_lo[e]), int(cw_hi[e])]}
                            for e in np.flatnonzero(straddle)[:8]],
     }
-    with open(os.path.join(OUT_DIR, f'wp5_final_{args.split}{tag}.json'), 'w') as f:
+    with open(os.path.join(od, f'wp5_final_{args.split}{tag}.json'), 'w') as f:
         json.dump(out, f, indent=1)
 
     print(f'\nidentity check (C-1): {len(identity_fail)} frame(s) differ '
           f'(criterion: exact equality of boxes and scores)')
     print(f'{dt / 60:.1f} min total, {out["sec_per_frame"]:.3f} s/frame')
-    print(f'wrote results/v2/wp5_final_{args.split}{tag}.{{csv,json}}')
+    print(f'wrote {os.path.relpath(od, ROOT)}/wp5_final_{args.split}{tag}.{{csv,json}}')
     return 1 if identity_fail else 0
 
 
