@@ -33,6 +33,8 @@ import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 V2 = os.path.join(ROOT, 'results', 'v2')
+SEALED = os.path.join(V2, 'sealed')
+HELD_OUT = ('test', 'culver')
 
 RATES = (0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9)
 R = 4
@@ -45,7 +47,10 @@ def load_nodes(split='validate', regime='ideal'):
     p_nodes runs 0.0, the 8 WP5 rates, then 1.0 -- the endpoints are real measurements
     (clean F1 and the p = 1.00 forward), not extrapolations (clause c).
     """
-    df = pd.read_csv(os.path.join(V2, f'wp5_final_{split}.csv'))
+    # held-out WP5 products live in sealed/ (V2-R29 A-1); this reads them to BUILD the grid, which
+    # is itself sealed. It prints nothing.
+    src = SEALED if split in HELD_OUT else V2
+    df = pd.read_csv(os.path.join(src, f'wp5_final_{split}.csv'))
     frames = df.frame.to_numpy()
     cols = []
     for p in RATES:

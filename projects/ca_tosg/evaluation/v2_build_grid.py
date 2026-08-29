@@ -47,6 +47,8 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, ROOT)
 V2 = os.path.join(ROOT, 'results', 'v2')
+SEALED = os.path.join(V2, 'sealed')
+HELD_OUT = ('test', 'culver')
 
 from projects.ca_tosg.models.v2_eff_f import eff_f, load_nodes, self_check   # noqa: E402
 
@@ -105,13 +107,32 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--split', default='validate')
     ap.add_argument('--regime', default='ideal', choices=['ideal', 'packet'])
+    ap.add_argument('--held-out-eval', action='store_true')
     args = ap.parse_args()
 
-    wp34 = pd.read_csv(os.path.join(V2, f'wp34_e_l_{args.split}.csv'))
+    # V2-R30 B-3 / V2-R32 D-5: a held-out grid is CREATED in sealed/, and its accuracy is never
+    # printed. Culver stays hard-blocked here as well as in WP5 (V2-R29 F-1).
+    if args.split == 'culver':
+        raise SystemExit('the Culver-City grid is NOT approved (V2-R29 F-1).')
+    held = args.split in HELD_OUT
+    if held and not args.held_out_eval:
+        raise SystemExit(f'{args.split} is held out: pass --held-out-eval')
+    dest = SEALED if held else V2
+    src = SEALED if held else V2
+    if held:
+        os.makedirs(SEALED, exist_ok=True)
+
+    wp34 = pd.read_csv(os.path.join(src, f'wp34_e_l_{args.split}.csv'))
     wp2 = pd.read_csv(os.path.join(V2, f'wp2_per_agent_{args.split}.csv'))
-    cues = pd.read_csv(os.path.join(V2, f'wp6_cues_{args.split}.csv'))
+    cues = pd.read_csv(os.path.join(src, f'wp6_cues_{args.split}.csv'))
     bler = pd.read_csv(os.path.join(ROOT, 'results/channel/bler_sionna.csv'))
-    old_grid = pd.read_csv(os.path.join(ROOT, 'data/p2/p2_grid_validate.csv'))
+    # V2-R32 D-5 BUG FIX: this was hardcoded to p2_grid_validate.csv regardless of --split, so a
+    # test grid silently inherited VALIDATE's sample_ids and scene labels -- 1980 of 2170 frames
+    # covered and the scene column wrong, which would have mis-clustered the scene-level bootstrap.
+    gp = os.path.join(ROOT, 'data/p2', f'p2_grid_{args.split}.csv')
+    if not os.path.exists(gp):
+        raise SystemExit(f'no SNR/channel support for {args.split}: {gp}')
+    old_grid = pd.read_csv(gp)
 
     frames, p_nodes, F = load_nodes(args.split, args.regime)
     sc = self_check(p_nodes, F)
@@ -123,6 +144,11 @@ def main():
     for name, df in (('wp34', wp34), ('wp2', wp2), ('cues', cues)):
         if not np.array_equal(df.frame.to_numpy(), frames):
             raise SystemExit(f'{name} frame vector differs from WP5 -- refusing to join by row')
+    # the grid's frame set must BE this split's frame set, not merely fit inside it
+    gs = np.sort(pd.unique(old_grid.sample_id.to_numpy()))
+    if not np.array_equal(gs, np.sort(frames)):
+        raise SystemExit(f'the {args.split} SNR grid covers {len(gs)} frames but the split has '
+                         f'{len(frames)} -- refusing to build a partial grid')
 
     # the SNR x channel support is carried over from v1 unchanged (11 SNR x 2 channels)
     pts = old_grid[['sample_id', 'scene', 'snr_db', 'channel']].copy()
@@ -163,7 +189,9 @@ def main():
         'eff_E': eff_E, 'eff_L': eff_L, 'eff_F': eff_F,
         'B_E': 0.0, 'B_L': B_L_row, 'B_F': B_F_row,
     })
-    csv = os.path.join(V2, f'v2_grid_{args.split}_{args.regime}.csv')
+    csv = os.path.join(dest, f'v2_grid_{args.split}_{args.regime}.csv')
+    if held and os.path.abspath(dest) != os.path.abspath(SEALED):
+        raise SystemExit('held-out grid path is not sealed/ -- refusing to write')
     out.to_csv(csv, index=False)
 
     meta = {
@@ -187,7 +215,7 @@ def main():
         'no_collaborator_rows': int(no.sum()),
         'mainline': args.regime == 'ideal',
     }
-    with open(os.path.join(V2, f'v2_grid_{args.split}_{args.regime}.json'), 'w') as f:
+    with open(os.path.join(dest, f'v2_grid_{args.split}_{args.regime}.json'), 'w') as f:
         json.dump(meta, f, indent=1)
 
     print(f'\nv2 grid [{args.regime}]: {len(out)} rows = {out.sample_id.nunique()} frames x '
@@ -198,9 +226,12 @@ def main():
           f'{q_msg_F.min():.3e} .. {q_msg_F.max():.3e}')
     print(f'  feasibility     STRUCTURAL only -- F feasible on '
           f'{int(has_collab.sum())}/{len(out)} rows (collaborator available)')
-    print(f'  eff_E mean      {eff_E.mean():.5f}')
-    print(f'  eff_L mean      {eff_L.mean():.5f}')
-    print(f'  eff_F mean      {eff_F.mean():.5f}')
+    if held:
+        print('  eff_E / eff_L / eff_F means: NOT PRINTED (held-out; V2-R29 C-6)')
+    else:
+        print(f'  eff_E mean      {eff_E.mean():.5f}')
+        print(f'  eff_L mean      {eff_L.mean():.5f}')
+        print(f'  eff_F mean      {eff_F.mean():.5f}')
     print(f'  B_L mean        {B_L_row.mean():.5f} Msym   B_F {B_F} Msym')
     print(f'wrote {os.path.relpath(csv, ROOT)}')
     return 0

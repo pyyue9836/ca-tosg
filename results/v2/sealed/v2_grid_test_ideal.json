@@ -1,0 +1,38 @@
+{
+ "schema": "catosg-v2-grid/1",
+ "split": "test",
+ "regime": "ideal",
+ "rows": 47740,
+ "frames": 2170,
+ "snr_points": [
+  0,
+  2,
+  4,
+  6,
+  8,
+  10,
+  12,
+  14,
+  16,
+  18,
+  20
+ ],
+ "channels": [
+  "awgn",
+  "rayleigh"
+ ],
+ "protocol": "\u00a79.3 (a)-(n)",
+ "eff_F": "piecewise-linear in RAW p over the replicate means of WP5 `ideal`; endpoints are the clean and all-lost measurements; no monotone correction",
+ "eff_L": "q_L*f1_L + (1-q_L)*f1_E with q_L = (1-p)^N_cw,L -- message level, per \u00a74.3 \"a failed delivery falls back to ego-only\". FLAGGED as a reading: it is the one place this module resolves an ambiguity in the protocol text.",
+ "payload": "charged for the ATTEMPT, never multiplied by the success probability (\u00a79.3(j))",
+ "B_F_msym": 3.14175,
+ "N_cw_F": 12567,
+ "feasibility": "STRUCTURAL ONLY (\u00a79.3(o)): F feasible iff a collaborator is available and a transport response is defined. No BLER threshold, and no eff_F-eff_E safety margin -- with lambda>=0 and B_F>0, eff_F<=eff_E already implies U_F<=U_E, so the objective handles it.",
+ "retired": {
+  "rule": "F_feasible = bler_F < 0.999",
+  "status": "retired_v1_all_or_nothing_rule",
+  "why": "the column it tested is the per-CODEWORD loss probability p_cw, not the probability the F message is unusable; WP5 measures an F output at every rate including p=1; and the channel damage is already inside eff_F, so masking on top of it charges the loss twice. Protocol \u00a79.3(o)."
+ },
+ "no_collaborator_rows": 2618,
+ "mainline": true
+}

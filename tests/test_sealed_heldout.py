@@ -51,7 +51,9 @@ ALLOW_READ = {os.path.join('tests', 'test_sealed_heldout.py')}
 # is still checked -- it may name the path, and it must not read from it.
 ALLOW_WRITE = {os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_heldout_products.py'),
                os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_wp5_final.py'),
-               os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_wp6_generate_cues.py')}
+               os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_wp6_generate_cues.py'),
+               os.path.join('projects', 'ca_tosg', 'evaluation', 'v2_build_grid.py'),
+               os.path.join('projects', 'ca_tosg', 'models', 'v2_eff_f.py')}
 READ_TOKENS = ('np.load', 'load(', 'read_csv', 'read_json', 'open(', '.read(')
 WP11 = 'v2_wp11_heldout_eval.py'          # does not exist yet; named so the allowance is explicit
 READ_ATTRS = ('read_csv', 'read_json', 'load', 'read_text', 'read_bytes', 'read', 'readlines',
