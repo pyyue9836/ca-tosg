@@ -1,0 +1,70 @@
+{
+ "schema": "catosg-v2-primary-freeze/1",
+ "frozen_at": "2026-08-29T09:33:08Z",
+ "parent_commit": "79b1e7d1dff064894d4a51dfbe7397276e425861",
+ "selector": {
+  "candidate_index": 67,
+  "lambda": 0.2,
+  "hyperparameters": {
+   "n_estimators": 400,
+   "max_depth": null,
+   "min_samples_leaf": 2,
+   "max_features": "sqrt",
+   "class_weight": "balanced"
+  },
+  "model_path": "data/p2/v2_selector_cand67.pkl",
+  "model_sha256": "87d990f68698732edb747d3ef06fdd3f89e905f2548d7fc691cb03fd5107ff7d",
+  "seed": 0
+ },
+ "cue_schema": {
+  "name": "v2_ego_local_23d",
+  "n_features": 23,
+  "manifest_sha256": "0d70b8794402065a5276fa1045964c38e3cca74ee6a85be05b0461a45edd29dd"
+ },
+ "tau_star_per_beta": {
+  "0.1": 18.5,
+  "0.2": 16.5,
+  "0.3": 14.5
+ },
+ "primary_comparator": {
+  "arm": "SNR threshold",
+  "tau": 16.5,
+  "beta": 0.2,
+  "why": "the best budget-feasible tau at the primary cell beta=0.20"
+ },
+ "runtime": {
+  "CATOSG_EVAL_RNG": "1",
+  "CATOSG_MAX_COLLAB": "1"
+ },
+ "budgets_beta": [
+  0.1,
+  0.2,
+  0.3
+ ],
+ "B_F_msym": 3.14175,
+ "validate_point_estimate": {
+  "note": "POINT ESTIMATE ON VALIDATE ONLY -- not a verdict; the formal conclusion requires the test comparison with scene-level bootstrap (V2-R28 A-3)",
+  "RF_scene_equal_f1": 0.8605023965388785,
+  "tau_scene_equal_f1": 0.8628866966328863,
+  "delta_f1": -0.0023843000940078074,
+  "RF_payload": 0.001309067952249771,
+  "tau_payload": 0.5732932851239672,
+  "payload_saving_pct": 99.77165824435451
+ },
+ "P1_2": {
+  "fired": true,
+  "RF_beats_all_simple_rules": false,
+  "note": "TRUE AND CO-EXISTS with the criterion shape above; neither overrides the other (A-2)"
+ },
+ "break_even_lambda": {
+  "grid_mean_over_ALL_rows": {
+   "value": 0.0048,
+   "definition": "mean net F gain over the WHOLE grid / B_F"
+  },
+  "conditional_on_F_best_rows": {
+   "value": 0.01556,
+   "definition": "mean net gain over ONLY the rows where F is best / B_F"
+  },
+  "rule": "neither may appear as a bare number; each carries its conditioning set (D-3)"
+ }
+}

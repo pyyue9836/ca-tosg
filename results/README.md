@@ -19,7 +19,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 33 |
+| | `results/manifests/` | 34 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -216,6 +216,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `V2_CUE_SCHEMA.json` | `python tools/build_cue_schema_manifest.py` | V2-R24 B-2: the frozen v2_ego_local_23d schema -- fields, order, FOV, pinned dependencies |
 | `V2_FROZEN_MANIFEST.json` | `python projects/ca_tosg/models/v2_selector.py` | V2-R26: v2 selector LOSO folds + per-budget walk on v2_ego_local_23d (validate only) |
 | `V2_INT8_SCALES.json` | `python projects/ca_tosg/evaluation/v2_int8_calibrate.py` | frozen per-branch symmetric int8 transmit scales (validate-calibrated) |
+| `V2_PRIMARY_FREEZE.json` | `(frozen record; see docs/history/protocol_changelog.md V2-R28)` | V2-R28 B: frozen selector candidate 67 + primary comparator tau=16.5, model sha256, schema hash, tau* per budget, runtime switches |
 | `V2_PROTOCOL_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | per-section hashes + lock state of docs/unified_branch_protocol_v2.md |
 | `V2_RUNTIME_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | runtime switches the products depend on (V2-R17 C) |
 | `V2_SEALED_HASHES.json` | `python tests/test_sealed_heldout.py --write-hashes` | sha256 of each sealed held-out file, compared at unseal time (V2-R6 A-2) |
@@ -425,4 +426,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-293 files indexed, 0 unattributed.
+294 files indexed, 0 unattributed.

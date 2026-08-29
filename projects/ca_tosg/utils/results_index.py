@@ -103,6 +103,10 @@ RULES = [
     (r'^v2/v2_lambda_fine_scan_validate\.(csv|json)$',
      'exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md',
      'V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim'),
+    (r'^manifests/V2_PRIMARY_FREEZE\.json$',
+     '(frozen record; see docs/history/protocol_changelog.md V2-R28)',
+     'V2-R28 B: frozen selector candidate 67 + primary comparator tau=16.5, model sha256, '
+     'schema hash, tau* per budget, runtime switches'),
     (r'^manifests/V2_INT8_SCALES\.json$',
      'python projects/ca_tosg/evaluation/v2_int8_calibrate.py',
      'frozen per-branch symmetric int8 transmit scales (validate-calibrated)'),
