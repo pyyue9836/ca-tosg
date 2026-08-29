@@ -62,6 +62,16 @@ that cannot fail. The fix is the positive instance of this rule: **the audit rec
 every product it was computed from, and the gate recomputes them**, so a verdict that no longer
 describes the tree is a FAIL rather than a pass. The cheap parts are additionally re-run live.
 
+**Instances so far — the list is kept because the shape recurs and the count matters:**
+
+| # | where | how it could not fail |
+|---|---|---|
+| 1 | V2-R19 row-1 binding check | every digest came back `None`; the control read `if c is None or c != a`, so `None` counted as "differs" and passed vacuously |
+| 2 | gate 25, by design question | a stored `100 %` verdict re-read from JSON — fixed by recording the inputs' SHA-256 and recomputing them |
+| 3 | gate 27's F-2 | scanned `forbidden_and_absent` for banned words, i.e. flagged a declaration for containing the words it exists to contain (that is failure 3, but it arrived from the same carelessness) |
+| 4 | gate 26's negative control | a `None` from the 2nd-nearest arm would have counted as "differs" — caught before it shipped |
+| 5 | **V2-R25 `eff_f` self-check** | compared the interpolant against **the same matrix it was built from**, which is self-consistent by construction; all three D-4 injections came back SILENT. Fixed with an explicit reference matrix; injections now FIRE and node reproduction is exact to 1e-12. **Written, run and corrected by the executor within one batch** — the injection is what found it, not review |
+
 **Test — the only reliable one:** every gate carries a `--self-test` that *injects the fault it
 claims to catch* and asserts the gate FIRES, with a clean baseline asserted first so that a firing
 for an unrelated reason cannot be mistaken for coverage. Gates 24, 25 and 26 carry 3, 5 and 3

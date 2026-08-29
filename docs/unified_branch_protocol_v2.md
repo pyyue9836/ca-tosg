@@ -767,6 +767,63 @@ here. This continues v1's E-then-L ordering, which is what removed the Rayleigh 
 
 **(n) The three budgets are unchanged: `B̄ ≤ β·B_F`, `β ∈ {0.10, 0.20, 0.30}`.**
 
+#### (o) The v1 F-infeasibility mask is RETIRED (V2-R26 A)
+
+`F_feasible = bler_F < 0.999` is **removed from the mainline**, for reasons that are about transport
+semantics:
+
+* under v2 the quantity that column held is the **per-codeword** loss probability `p_cw`, **not** the
+  probability that the F message is unusable;
+* WP5 defines and *measures* an F output at high loss rates and at `p = 1` — there is no rate at
+  which F becomes undefined;
+* the channel damage is **already inside** `eff_F,t`, so masking on top of it charges the same loss
+  twice;
+* whether F is worth choosing is a question for task utility against the mean budget, not for an
+  inherited BLER threshold that deletes the action before the optimiser sees it.
+
+**Mainline feasibility keeps only the structural condition:** *F is feasible iff a collaborator is
+available and a transport response is defined.* With no collaborator the executed action is E
+(§9.3(k)); with a collaborator and a high `p_cw`, F stays executable and simply performs badly.
+
+**No `eff_F − eff_E` safety threshold is added, and this is deliberate.** With `λ ≥ 0` and
+`B_F > 0`, `eff_F ≤ eff_E` already implies `U_F ≤ U_E`, so the oracle will not choose F — the
+Lagrangian objective guarantees it. Adding a threshold would patch a property the objective already
+has, and would introduce a new researcher degree of freedom. *(The executor initially favoured
+offering such a threshold; recorded.)*
+
+> **This ruling is made on transport semantics, not on the 68.2 % hit rate, and therefore is not a
+> rule chosen after seeing an outcome.** Stated plainly because of the risk it carries: on its face
+> the change frees the highest-utility action across two thirds of the grid, and it will be
+> questioned. **The only defence is this record showing the reason was semantic** — the mask was
+> built for all-or-nothing delivery and the mainline is partial recovery.
+
+#### (p) Renaming is the evidence, not tidying (V2-R26 B)
+
+`bler_F` → **`p_cw_F`**. The retired rule is kept, labelled
+`retired_v1_all_or_nothing_rule`, never deleted.
+
+**Why the rename is load-bearing:** the defect survived all the way to a built grid *because the
+message-level all-loss probability and the codeword-level loss probability shared one name.* Nothing
+in the code was wrong; the name licensed a wrong inference. This is the same family as citing the
+right line numbers in the wrong class (§9.0's correction): **same name, different meaning / same
+line, different class.** Both are failures of identity, not of arithmetic, and neither is caught by
+re-reading the value.
+
+#### (q) A sensitivity arm may never change the mainline's action space
+
+`packet` and `message` are reported alongside `ideal`; **neither may add or remove an action from
+the mainline, alter feasibility, or influence model selection.** A sensitivity analysis that can
+change what the main experiment is allowed to do is not a sensitivity analysis.
+
+#### (r) The BLER table-completion rule, pre-registered (V2-R26 C)
+
+Where a required (channel, SNR) point is absent from the Sionna sweep, the value is filled **only
+when both bracketing table entries are exactly equal** — a squeeze completion, which is arithmetic
+on the table. This is a **pre-registered table-completion rule, not a claim that the true physical
+BLER is exactly zero there**: it states what the table implies, not what the channel does. Every
+other case **raises**. AWGN 16-QAM falls from 0.7465 to 0.0410 between 6 and 7 dB, and a linear fill
+in that region would manufacture a plausible-looking number that was never measured.
+
 #### Implementation self-check, required before the grid is used (D)
 
 The interpolant is a **new modelling layer**, and a wrong one produces a curve that looks entirely

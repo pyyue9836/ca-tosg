@@ -27,7 +27,12 @@
  "payload": "charged for the ATTEMPT, never multiplied by the success probability (\u00a79.3(j))",
  "B_F_msym": 3.14175,
  "N_cw_F": 12567,
- "bler_infeasible": 0.999,
+ "feasibility": "STRUCTURAL ONLY (\u00a79.3(o)): F feasible iff a collaborator is available and a transport response is defined. No BLER threshold, and no eff_F-eff_E safety margin -- with lambda>=0 and B_F>0, eff_F<=eff_E already implies U_F<=U_E, so the objective handles it.",
+ "retired": {
+  "rule": "F_feasible = bler_F < 0.999",
+  "status": "retired_v1_all_or_nothing_rule",
+  "why": "the column it tested is the per-CODEWORD loss probability p_cw, not the probability the F message is unusable; WP5 measures an F output at every rate including p=1; and the channel damage is already inside eff_F, so masking on top of it charges the loss twice. Protocol \u00a79.3(o)."
+ },
  "no_collaborator_rows": 0,
  "mainline": false
 }

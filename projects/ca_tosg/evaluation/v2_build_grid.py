@@ -53,7 +53,16 @@ from projects.ca_tosg.models.v2_eff_f import eff_f, load_nodes, self_check   # n
 QAM = 16
 N_CW_F = 12567          # §3.2
 B_F = 3.14175           # Msym, §3.2
-BLER_INFEASIBLE = 0.999
+# V2-R26 A/B: the v1 all-or-nothing mask is RETIRED. Kept named, not deleted, so the retirement is
+# visible where the rule used to live.
+RETIRED_V1_ALL_OR_NOTHING_RULE = {
+    'rule': 'F_feasible = bler_F < 0.999',
+    'status': 'retired_v1_all_or_nothing_rule',
+    'why': 'the column it tested is the per-CODEWORD loss probability p_cw, not the probability the '
+           'F message is unusable; WP5 measures an F output at every rate including p=1; and the '
+           'channel damage is already inside eff_F, so masking on top of it charges the loss twice. '
+           'Protocol §9.3(o).',
+}
 
 
 def bler_lookup(bler, channels, snrs):
@@ -132,7 +141,10 @@ def main():
     eff_E = f1_E
     eff_L = q_L * f1_L + (1.0 - q_L) * f1_E
     eff_F = eff_f(p, p_nodes, F[fi])               # §9.3(b), partial recovery already in the nodes
-    bler_F = 1.0 - (1.0 - p) ** N_CW_F
+    # §9.3(p): p_cw_F is the per-CODEWORD loss probability. It is NOT a feasibility test -- the two
+    # meanings shared the name `bler_F`, and that shared name is what licensed the wrong inference.
+    p_cw_F = p
+    q_msg_F = (1.0 - p) ** N_CW_F        # kept as a DESCRIPTIVE column only; nothing masks on it
 
     # §9.3(k): with no collaborator nothing is received and nothing is charged
     no = has_collab == 0
@@ -144,7 +156,10 @@ def main():
     out = pd.DataFrame({
         'sample_id': fi, 'scene': pts.scene.to_numpy(),
         'snr_db': pts.snr_db.to_numpy(), 'channel': pts.channel.to_numpy(),
-        'p_cw': p, 'bler_F': bler_F, 'q_L': q_L, 'has_collaborator': has_collab,
+        'p_cw': p, 'p_cw_F': p_cw_F, 'q_msg_F_descriptive': q_msg_F,
+        'q_L': q_L, 'has_collaborator': has_collab,
+        # §9.3(o): structural feasibility ONLY
+        'F_feasible': has_collab.astype(int), 'L_feasible': has_collab.astype(int),
         'eff_E': eff_E, 'eff_L': eff_L, 'eff_F': eff_F,
         'B_E': 0.0, 'B_L': B_L_row, 'B_F': B_F_row,
     })
@@ -163,7 +178,12 @@ def main():
                  '"a failed delivery falls back to ego-only". FLAGGED as a reading: it is the one '
                  'place this module resolves an ambiguity in the protocol text.',
         'payload': 'charged for the ATTEMPT, never multiplied by the success probability (§9.3(j))',
-        'B_F_msym': B_F, 'N_cw_F': N_CW_F, 'bler_infeasible': BLER_INFEASIBLE,
+        'B_F_msym': B_F, 'N_cw_F': N_CW_F,
+        'feasibility': 'STRUCTURAL ONLY (§9.3(o)): F feasible iff a collaborator is available and a '
+                       'transport response is defined. No BLER threshold, and no eff_F-eff_E '
+                       'safety margin -- with lambda>=0 and B_F>0, eff_F<=eff_E already implies '
+                       'U_F<=U_E, so the objective handles it.',
+        'retired': RETIRED_V1_ALL_OR_NOTHING_RULE,
         'no_collaborator_rows': int(no.sum()),
         'mainline': args.regime == 'ideal',
     }
@@ -173,9 +193,11 @@ def main():
     print(f'\nv2 grid [{args.regime}]: {len(out)} rows = {out.sample_id.nunique()} frames x '
           f'{len(meta["snr_points"])} SNR x {len(meta["channels"])} channels')
     print(f'  p_cw            {p.min():.3e} .. {p.max():.3e}')
-    print(f'  bler_F          {bler_F.min():.3e} .. {bler_F.max():.3e}   '
-          f'infeasible (>= {BLER_INFEASIBLE}) on {(bler_F >= BLER_INFEASIBLE).sum()} rows '
-          f'({(bler_F >= BLER_INFEASIBLE).mean() * 100:.1f} %)')
+    print(f'  p_cw_F          {p_cw_F.min():.3e} .. {p_cw_F.max():.3e}')
+    print(f'  q_msg_F (descriptive only, masks nothing): '
+          f'{q_msg_F.min():.3e} .. {q_msg_F.max():.3e}')
+    print(f'  feasibility     STRUCTURAL only -- F feasible on '
+          f'{int(has_collab.sum())}/{len(out)} rows (collaborator available)')
     print(f'  eff_E mean      {eff_E.mean():.5f}')
     print(f'  eff_L mean      {eff_L.mean():.5f}')
     print(f'  eff_F mean      {eff_F.mean():.5f}')

@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-protocol-manifest/1",
  "protocol": "docs/unified_branch_protocol_v2.md",
- "protocol_sha256": "e6d6c55e31a88ddee21af1b837c23ea34d4b539271b73a807799d478ebc88b45",
+ "protocol_sha256": "727d8f57d708a05d82d7e02eb5a9d08a0b58a86b993c0575203843ab4880914f",
  "stop_work_order": "docs/STOP_WORK_v1_freeze.md",
  "stop_work_sha256": "c02dac3ebc7eb52f9da6b7e93486ed6535cd1a3b6acce75f8490595555b4c080",
  "sections": [
@@ -81,9 +81,9 @@
    "section": "9. Selector cue set (2c)",
    "number": "9",
    "lock_state": "LOCKED",
-   "sha256": "6d835d74605243d0a974321a5348d29d82808e19328aa4654057791cb96ca3fa",
-   "sha256_observed": "6d835d74605243d0a974321a5348d29d82808e19328aa4654057791cb96ca3fa",
-   "bytes": 18207
+   "sha256": "80c4defe3124d7f5c9a20b6c4c65a992231268fb448889dc5c92d3d32fabd78d",
+   "sha256_observed": "80c4defe3124d7f5c9a20b6c4c65a992231268fb448889dc5c92d3d32fabd78d",
+   "bytes": 21818
   },
   {
    "section": "10. Split discipline, budgets and the payload criterion",
