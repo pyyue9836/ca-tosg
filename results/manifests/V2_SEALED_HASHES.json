@@ -2,6 +2,10 @@
  "schema": "catosg-v2-sealed-hashes/1",
  "why": "A-2: work package 11 recomputes these at unseal time. A mismatch means something changed between sealing and unsealing -- stop and report.",
  "files": {
+  "v2_grid_culver_ideal.csv": "1726497f9420cb1078526ab14303286dcb0b3bedc72060cbcfe6d8e91f44f72c",
+  "v2_grid_culver_ideal.json": "385512877cbe213974f197782719f17514d199a29f79352bc597580959b73760",
+  "v2_grid_culver_packet.csv": "213fa0fd1d27c46cb83ee4486c8cd3d49f8b788f4c2e00d807f9e5ff7f4a45bd",
+  "v2_grid_culver_packet.json": "452c259fbf947b6afa6ffed8d193a26c708da2b75ba31a14f56be01916614def",
   "v2_grid_test_ideal.csv": "fdef6151975c710c506cc82835764c0a56f02c1dfaa41d8d07b6a43df4b58f34",
   "v2_grid_test_ideal.json": "cf8294cdf5cecd3e3040a550003651bdbd1e07e88d9e13ac9a0664b0323f4258",
   "v2_grid_test_packet.csv": "44bf3b7500a437ba8dd176babe7d0dafe47dd25f00227823b12344750fadfb82",
@@ -10,11 +14,17 @@
   "wp2_f1_ego_test.csv": "591a53c701cb60279822b5174f4c97986d789101672fdca066d98d50319d110b",
   "wp2_held_out_culver.json": "c36e66dd5bd1a398ce3d503050c128971cfb5aa2ef945aca2c11a710b329edc9",
   "wp2_held_out_test.json": "197a35e2e2e28dcaa58ac09e4b39b0ec69ec47365d6e5cb4ad2c6e907b756d0f",
+  "wp34_e_l_culver.csv": "af64cb7d1b2a8867f985e75a6815f258498545c296f6c7c63f246f128730c38f",
   "wp34_e_l_test.csv": "bc46866d38a56875120d4c525e5ababe205ea28f2417fe30bcb7f98263b74fc5",
+  "wp5_final_culver.csv": "645de600be0155dcd4b712a623ced14458116fc7cbac9091d78a0bc65370d720",
+  "wp5_final_culver.json": "400421768f4e8caf9064bf8771ff23ecac318091f6976926850b12386d339794",
   "wp5_final_test.csv": "320254312130da3676c2ecbd58bc63c3d1b0c0a2de3f157309bb5240a0afcaf4",
   "wp5_final_test.json": "a25fd85cdb8a405084ad36f4e1e3eb939e1c6e921330c26c5e27d8554b8a090d",
+  "wp6_cues_culver.csv": "02ae9a44b7aab66da2fdca7abd63d27861db6dedec7e0cd832b2fe85c00217a5",
+  "wp6_cues_culver.json": "efa830e1d9b2d10588c5fd29ea1b87eae32d95ad0e42e12c3d55e60106991565",
   "wp6_cues_test.csv": "b2bbbc418565f7596c0076e1c27deba452382685ef5e699479f16dfda1796490",
   "wp6_cues_test.json": "b6e2c809f3438c16499e727143d595173910b9e8fc436a8b09cac9a09d16ea52",
+  "wp6_range_decomposition_culver.csv": "1c81b964a494ba531726cfc7a77d69abab3e49d226cc375987ab082c5db8fb3a",
   "wp6_range_decomposition_test.csv": "861b1d7c331bf9e15a43a2f9a897780dcefdc65c480d0eb1f72dfe0bdd4ce0cf"
  }
 }

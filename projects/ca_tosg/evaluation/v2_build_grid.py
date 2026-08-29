@@ -112,8 +112,7 @@ def main():
 
     # V2-R30 B-3 / V2-R32 D-5: a held-out grid is CREATED in sealed/, and its accuracy is never
     # printed. Culver stays hard-blocked here as well as in WP5 (V2-R29 F-1).
-    if args.split == 'culver':
-        raise SystemExit('the Culver-City grid is NOT approved (V2-R29 F-1).')
+    # V2-R34 A-4: Culver approved; still requires --held-out-eval and still writes into sealed/.
     held = args.split in HELD_OUT
     if held and not args.held_out_eval:
         raise SystemExit(f'{args.split} is held out: pass --held-out-eval')

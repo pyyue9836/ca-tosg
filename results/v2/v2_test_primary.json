@@ -28,5 +28,26 @@
   "L": 0.5969627147046502,
   "F": 0.0
  },
- "WORDING": "R9 family: non-inferiority + payload saving. It may NOT be written as the RF having better F1; \"same F1\" and \"no loss\" are forbidden (V2-R28 C-3)."
+ "WORDING": "R9 family: non-inferiority + payload saving. It may NOT be written as the RF having better F1; \"same F1\" and \"no loss\" are forbidden (V2-R28 C-3).",
+ "dual_accounting": {
+  "full_frame": {
+   "n_rows": 47740,
+   "RF_scene_equal_f1": 0.8767948327946947,
+   "tau_scene_equal_f1": 0.8817798929446039,
+   "RF_payload": 0.0008091642228739005,
+   "tau_payload": 0.5410180456640136,
+   "relative_saving": 0.998504367406302
+  },
+  "collaborator_available_only": {
+   "n_rows": 45122,
+   "RF_scene_equal_f1": 0.8773896801908969,
+   "tau_scene_equal_f1": 0.8825857230697657,
+   "RF_payload": 0.0008561123177164134,
+   "tau_payload": 0.5724081711803556,
+   "relative_saving": 0.998504367406302
+  },
+  "no_collaborator_share": 0.054838709677419356,
+  "difference_in_relative_saving": 0.0,
+  "reading": "The two figures are reported together and never mixed (V2-R6 B-3). The gap between them is the part of the apparent saving that comes from collaborator unavailability rather than from policy choice (V2-R6 B-5)."
+ }
 }

@@ -7,8 +7,18 @@
    "unsealed_at": "2026-08-29T19:01:47Z",
    "commit": "a8589ab9c12a8ab554f4ee16bbc765c2f8e022b3",
    "by": "projects/ca_tosg/evaluation/v2_wp11_heldout_eval.py --unseal",
-   "sha256": "28cd163c6d7b8bf40b051da33ef5b10e466a93d55d7d7c3ef64e1141844eaf50",
-   "scope": "the ONE pre-specified comparison at test @ beta=0.20: frozen RF candidate 67 vs the frozen comparator tau=16.5. Culver-City remains sealed and unrun."
+   "sha256": "594ff0da06622272f4c87e4189e91273a8a6d6f235e991522985ce1c3dfcff77",
+   "scope": "the ONE pre-specified comparison at test @ beta=0.20: frozen RF candidate 67 vs the frozen comparator tau=16.5. Culver-City remains sealed and unrun.",
+   "note": "hash refreshed when V2-R34 B-6 dual accounting was added; the primary numbers did not change"
+  },
+  {
+   "path": "results/v2/v2_culver_primary.json",
+   "unsealed_at": "2026-08-29T22:31:15Z",
+   "commit": "f0f016043da784aaa75b6d7048012b8c72d127dd",
+   "by": "projects/ca_tosg/evaluation/v2_wp11_heldout_eval.py --unseal --split culver",
+   "sha256": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
+   "scope": "the same ONE pre-specified comparison at beta=0.20, frozen RF candidate 67 vs frozen tau=16.5, applied cross-domain. THIS IS THE LAST HELD-OUT SET."
   }
- ]
+ ],
+ "status": "ALL HELD-OUT SETS NOW UNSEALED. No further held-out evaluation exists (V2-R34 C-5)."
 }

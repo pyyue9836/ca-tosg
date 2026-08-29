@@ -28,12 +28,13 @@ sys.path.insert(0, ROOT)
 SEALED = os.path.join(ROOT, 'results', 'v2', 'sealed')
 FREEZE = os.path.join(ROOT, 'results', 'manifests', 'V2_PRIMARY_FREEZE.json')
 TIERC = os.path.join(ROOT, 'results', 'manifests', 'V2_TIERC_FREEZE.json')
-OUT = os.path.join(ROOT, 'results', 'v2', 'v2_test_primary.json')
+OUT_T = os.path.join(ROOT, 'results', 'v2', 'v2_test_primary.json')
 B_F, DELTA, BETA, N_BOOT = 3.14175, 0.005, 0.20, 10000
 
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--unseal', action='store_true')
+    ap.add_argument('--split', default='test', choices=['test', 'culver'])
     a = ap.parse_args()
     if not a.unseal:
         raise SystemExit('this is the unseal step; pass --unseal deliberately')
@@ -48,9 +49,10 @@ def main():
     rf = pickle.load(open(mp, 'rb'))
     tau = fr['primary_comparator']['tau']
 
-    g = pd.read_csv(os.path.join(SEALED, 'v2_grid_test_ideal.csv'))
-    cues = pd.read_csv(os.path.join(SEALED, 'wp6_cues_test.csv'))
-    meta = json.load(open(os.path.join(SEALED, 'wp6_cues_test.json')))
+    sp = a.split
+    g = pd.read_csv(os.path.join(SEALED, f'v2_grid_{sp}_ideal.csv'))
+    cues = pd.read_csv(os.path.join(SEALED, f'wp6_cues_{sp}.csv'))
+    meta = json.load(open(os.path.join(SEALED, f'wp6_cues_{sp}.json')))
     feat = meta['perception_fields']
     Xf = cues[feat].to_numpy(float)
     fi = g.sample_id.to_numpy()
@@ -79,7 +81,7 @@ def main():
 
     ni = lcb_f1 > -DELTA
     pay = (ucb_b < 0) and (rel >= 0.10)
-    out = {'schema': 'catosg-v2-test-primary/1', 'cell': f'test @ beta={BETA}', 'delta': DELTA,
+    out = {'schema': 'catosg-v2-test-primary/1', 'cell': f'{a.split} @ beta={BETA}', 'delta': DELTA,
            'unit': 'scene-level bootstrap', 'n_scenes': int(len(us)), 'n_rows': int(len(g)),
            'boot': N_BOOT,
            'RF': {'scene_equal_f1': float(np.mean([f1_rf[scenes == s].mean() for s in us])),
@@ -95,7 +97,38 @@ def main():
            'action_mix': {k: float((rf_pred == i).mean()) for i, k in enumerate(['E', 'L', 'F'])},
            'WORDING': 'R9 family: non-inferiority + payload saving. It may NOT be written as the RF '
                       'having better F1; "same F1" and "no loss" are forbidden (V2-R28 C-3).'}
-    json.dump(out, open(OUT, 'w'), indent=1)
+    # V2-R6 B-3 / V2-R34 B-6: BOTH accountings, always, with the difference stated. Culver has
+    # 13.09 % no-collaborator frames against test's 5.48 % -- a factor 2.4 -- and on those frames
+    # every arm costs zero, so part of any apparent saving is collaborator UNAVAILABILITY rather
+    # than policy. The decomposition below separates the two; they may never be conflated.
+    hc = g.has_collaborator.to_numpy() == 1
+    sub = np.array([s for s in us if hc[scenes == s].any()])
+    def acct(mask):
+        f1r, f1t = f1_rf[mask], f1_tau[mask]; br, bt = b_rf[mask], b_tau[mask]; sc = scenes[mask]
+        u = pd.unique(sc)
+        return {'n_rows': int(mask.sum()),
+                'RF_scene_equal_f1': float(np.mean([f1r[sc == s].mean() for s in u])),
+                'tau_scene_equal_f1': float(np.mean([f1t[sc == s].mean() for s in u])),
+                'RF_payload': float(br.mean()), 'tau_payload': float(bt.mean()),
+                'relative_saving': float((bt.mean() - br.mean()) / bt.mean())}
+    full = acct(np.ones(len(g), bool)); avail = acct(hc)
+    out['dual_accounting'] = {
+        'full_frame': full, 'collaborator_available_only': avail,
+        'no_collaborator_share': float((~hc).mean()),
+        'difference_in_relative_saving': full['relative_saving'] - avail['relative_saving'],
+        'reading': 'The two figures are reported together and never mixed (V2-R6 B-3). The gap '
+                   'between them is the part of the apparent saving that comes from collaborator '
+                   'unavailability rather than from policy choice (V2-R6 B-5).'}
+    json.dump(out, open(OUT_T.replace('v2_test_primary', f'v2_{sp}_primary'), 'w'), indent=1)
+    d = out['dual_accounting']
+    print(f'\n  DUAL ACCOUNTING (V2-R6 B-3) -- no-collaborator share '
+          f'{d["no_collaborator_share"]*100:.2f} %')
+    print(f'    full-frame                saving {full["relative_saving"]*100:.2f} %   '
+          f'RF F1 {full["RF_scene_equal_f1"]:.5f}  tau F1 {full["tau_scene_equal_f1"]:.5f}')
+    print(f'    collaborator-available    saving {avail["relative_saving"]*100:.2f} %   '
+          f'RF F1 {avail["RF_scene_equal_f1"]:.5f}  tau F1 {avail["tau_scene_equal_f1"]:.5f}')
+    print(f'    difference attributable to unavailability: '
+          f'{d["difference_in_relative_saving"]*100:+.3f} pp')
     print('=' * 78); print(f'TEST PRIMARY -- {out["cell"]}, {out["n_scenes"]} scenes, '
                            f'{out["n_rows"]} rows'); print('=' * 78)
     print(f'  RF   scene-equal F1 {out["RF"]["scene_equal_f1"]:.5f}   payload {out["RF"]["mean_payload"]:.5f}')
@@ -106,7 +139,7 @@ def main():
           f'met: {pay}')
     print(f'  action mix {out["action_mix"]}')
     print(f'\n  PRIMARY CRITERION MET: {out["primary_met"]}')
-    print(f'wrote {os.path.relpath(OUT, ROOT)}')
+    print(f'wrote results/v2/v2_{sp}_primary.json')
     return 0
 
 

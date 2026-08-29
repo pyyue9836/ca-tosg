@@ -1,0 +1,53 @@
+{
+ "schema": "catosg-v2-test-primary/1",
+ "cell": "culver @ beta=0.2",
+ "delta": 0.005,
+ "unit": "scene-level bootstrap",
+ "n_scenes": 4,
+ "n_rows": 12100,
+ "boot": 10000,
+ "RF": {
+  "scene_equal_f1": 0.8735225956465954,
+  "mean_payload": 0.001470702479338843
+ },
+ "tau": {
+  "tau": 16.5,
+  "scene_equal_f1": 0.8781282314479834,
+  "mean_payload": 0.4984983471074382
+ },
+ "delta_f1_point": -0.0046056358013879806,
+ "delta_f1_LCB95": -0.005405806139781283,
+ "delta_payload_point": -0.5221491430284795,
+ "delta_payload_UCB95": -0.4227151652393501,
+ "relative_payload_saving": 0.9970497344918541,
+ "non_inferiority_met": false,
+ "payload_criterion_met": true,
+ "primary_met": false,
+ "action_mix": {
+  "E": 0.40735537190082644,
+  "L": 0.5926446280991735,
+  "F": 0.0
+ },
+ "WORDING": "R9 family: non-inferiority + payload saving. It may NOT be written as the RF having better F1; \"same F1\" and \"no loss\" are forbidden (V2-R28 C-3).",
+ "dual_accounting": {
+  "full_frame": {
+   "n_rows": 12100,
+   "RF_scene_equal_f1": 0.8735225956465954,
+   "tau_scene_equal_f1": 0.8781282314479834,
+   "RF_payload": 0.001470702479338843,
+   "tau_payload": 0.4984983471074382,
+   "relative_saving": 0.9970497344918541
+  },
+  "collaborator_available_only": {
+   "n_rows": 10516,
+   "RF_scene_equal_f1": 0.8700777985658037,
+   "tau_scene_equal_f1": 0.8753932737905117,
+   "RF_payload": 0.0016922308862685432,
+   "tau_payload": 0.5735859642449602,
+   "relative_saving": 0.997049734491854
+  },
+  "no_collaborator_share": 0.13090909090909092,
+  "difference_in_relative_saving": 1.1102230246251565e-16,
+  "reading": "The two figures are reported together and never mixed (V2-R6 B-3). The gap between them is the part of the apparent saving that comes from collaborator unavailability rather than from policy choice (V2-R6 B-5)."
+ }
+}

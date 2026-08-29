@@ -218,8 +218,10 @@ def main():
     args = ap.parse_args()
     # V2-R11 F-3 authorised validate only. V2-R29 approved TEST, with conditions; Culver is NOT
     # approved and stays blocked here rather than relying on anyone remembering.
-    if args.split == 'culver':
-        raise SystemExit('WP5 on Culver-City is NOT approved (V2-R29 F-1).')
+    # V2-R34 A-4: Culver approved. The block is retired here and ONLY here; every other sealing
+    # mechanism is unchanged.
+    if args.split == 'culver' and not getattr(args, 'held_out_eval', False):
+        raise SystemExit('WP5 on Culver requires --held-out-eval (approved V2-R34).')
     if args.split != 'validate' and not getattr(args, 'held_out_eval', False):
         raise SystemExit('WP5 on a held-out split requires --held-out-eval (work package 11 only, '
                          'approved for test in V2-R29).')
