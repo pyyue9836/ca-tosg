@@ -1,0 +1,52 @@
+{
+ "schema": "v2_ego_local_23d",
+ "split": "test",
+ "frames": 2170,
+ "perception_fields": [
+  "ego_detected_box_count",
+  "has_collaborator",
+  "ego_origin_lidar_shape_0",
+  "ego_origin_lidar_shape_1",
+  "ego_pcd_num_points",
+  "ego_pcd_mean_range",
+  "ego_pcd_max_range",
+  "ego_pcd_std_range",
+  "ego_pcd_near_20m",
+  "ego_pcd_mid_20_50m",
+  "ego_pcd_far_50_80m",
+  "ego_pcd_very_far_80m",
+  "ego_pcd_front_points",
+  "ego_pcd_back_points",
+  "ego_pcd_left_points",
+  "ego_pcd_right_points",
+  "ego_pcd_front_far_30m",
+  "ego_pcd_front_far_50m",
+  "ego_pcd_density_0_20",
+  "ego_pcd_density_20_50",
+  "ego_pcd_density_50_80"
+ ],
+ "n_perception_fields": 21,
+ "channel_fields": [
+  "est_snr_db",
+  "channel_is_rayleigh"
+ ],
+ "total_dimensions": 23,
+ "protocol": "\u00a79.0 / \u00a79.2 amendment, V2-R22",
+ "point_source": "get_item_single_car()['projected_lidar'] for the EGO CAV ONLY -- the same array pre_processor.preprocess() receives, so the cue describes exactly the scene action E sees. projected_lidar_stack is never built.",
+ "forbidden_and_absent": [
+  "ground truth / object_ids / params[vehicles]",
+  "collaborator point clouds",
+  "fused tensors",
+  "task metrics",
+  "oracle labels",
+  "delivery outcomes"
+ ],
+ "frozen_thresholds": {
+  "score_threshold": 0.2,
+  "nms_iou": 0.15
+ },
+ "inputs": {
+  "wp2_per_agent_test.csv": "725ec8a7339890c128d8507e4edeca800dbcc9c4804e593361c88b16b12f9a94"
+ },
+ "seconds": 1434.3
+}

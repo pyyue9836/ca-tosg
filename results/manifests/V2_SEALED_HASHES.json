@@ -6,6 +6,9 @@
   "wp2_f1_ego_test.csv": "591a53c701cb60279822b5174f4c97986d789101672fdca066d98d50319d110b",
   "wp2_held_out_culver.json": "c36e66dd5bd1a398ce3d503050c128971cfb5aa2ef945aca2c11a710b329edc9",
   "wp2_held_out_test.json": "197a35e2e2e28dcaa58ac09e4b39b0ec69ec47365d6e5cb4ad2c6e907b756d0f",
-  "wp34_e_l_test.csv": "bc46866d38a56875120d4c525e5ababe205ea28f2417fe30bcb7f98263b74fc5"
+  "wp34_e_l_test.csv": "bc46866d38a56875120d4c525e5ababe205ea28f2417fe30bcb7f98263b74fc5",
+  "wp6_cues_test.csv": "b2bbbc418565f7596c0076e1c27deba452382685ef5e699479f16dfda1796490",
+  "wp6_cues_test.json": "b6e2c809f3438c16499e727143d595173910b9e8fc436a8b09cac9a09d16ea52",
+  "wp6_range_decomposition_test.csv": "861b1d7c331bf9e15a43a2f9a897780dcefdc65c480d0eb1f72dfe0bdd4ce0cf"
  }
 }
