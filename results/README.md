@@ -26,7 +26,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 6 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
-| | `results/v2/` | 38 |
+| | `results/v2/` | 41 |
 | | `results/v2/diagnostic/` | 7 |
 | | `results/v2/sealed/` | 5 |
 
@@ -380,6 +380,9 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `v2_grid_validate_ideal.json` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
 | `v2_grid_validate_packet.csv` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
 | `v2_grid_validate_packet.json` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
+| `v2_lambda_fine_scan_validate.csv` | `exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md` | V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim |
+| `v2_lambda_fine_scan_validate.json` | `exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md` | V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim |
+| `v2_p12_comparison.json` | `python projects/ca_tosg/evaluation/v2_p12_comparison.py` | V2-R27 E-1: P1-2 test -- frozen RF vs budget-matched tau, hand rules and Fixed E/L/F, plus the F-collapse two-question diagnostic |
 | `wp2_per_agent_culver.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
 | `wp2_per_agent_culver.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
 | `wp2_per_agent_test.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
@@ -422,4 +425,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-290 files indexed, 0 unattributed.
+293 files indexed, 0 unattributed.

@@ -96,6 +96,13 @@ RULES = [
     (r'^manifests/V2_SIBLING_DEPENDENCY\.json$',
      'python tools/build_sibling_dependency_manifest.py',
      'V2-R20 D: sibling OpenCOOD base commit + per-file hashes'),
+    (r'^v2/v2_p12_comparison\.json$',
+     'python projects/ca_tosg/evaluation/v2_p12_comparison.py',
+     'V2-R27 E-1: P1-2 test -- frozen RF vs budget-matched tau, hand rules and Fixed E/L/F, plus '
+     'the F-collapse two-question diagnostic'),
+    (r'^v2/v2_lambda_fine_scan_validate\.(csv|json)$',
+     'exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md',
+     'V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim'),
     (r'^manifests/V2_INT8_SCALES\.json$',
      'python projects/ca_tosg/evaluation/v2_int8_calibrate.py',
      'frozen per-branch symmetric int8 transmit scales (validate-calibrated)'),
