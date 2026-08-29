@@ -1,0 +1,47 @@
+{
+ "schema": "catosg-v2-tierc-freeze/1",
+ "frozen_at": "2026-08-29T14:23:19Z",
+ "parent_commit": "67580bccf509f96803db5df61ff59203e1f911af",
+ "decision": "Where2comm is frozen as THE external baseline. ML-Cooper and SmartCooper are cited as related work and NOT reimplemented. P0-7 is registered UNMET (V2-R32 A-1).",
+ "P0_7": "UNMET -- no candidate was chosen to fill the slot; see docs/tier_c_external_baseline_selection.md",
+ "negative_existence_claim": {
+  "searched_on": "2026-08-29",
+  "method": "web search per candidate with github / code release / channel-aware, plus two collaborative-perception paper-digest repositories",
+  "conclusion": "NO official runnable repository or weights found WITHIN THE PRE-REGISTERED SCOPE",
+  "not_claimed": "that no such release exists anywhere (A-2)"
+ },
+ "smartcooper_principled_misalignment": {
+  "separate_from": "the no-public-code finding -- this is a DISTINCT reason and is recorded on its own (A-3)",
+  "reason": "SmartCooper contribution IS a learnable CSI-conditioned compression ratio, so its payload is an output of its own encoder. Forcing it onto the fixed w=8 / N_cw chain deletes the mechanism under comparison; leaving it free makes the two arms not budget-matched.",
+  "still_holds_if_code_is_released": true
+ },
+ "mlcooper_exclusion": {
+  "reason": "reimplementing an unreleased method and then comparing against it carries no information -- consistent with the SComCP lesson, where a self-built scaffold that failed to reproduce demonstrated something about the scaffold, not about the method (A-4)"
+ },
+ "frozen_configuration": {
+  "code": "baselines/where2comm_v2/ in THIS repository (run_inference.py, score_arm.py, transport_replay.py, intersection_gt_track.py, paired_bootstrap.py)",
+  "upstream_commit": "UNRESOLVED -- the upstream MediaBrain-SJTU/where2comm commit is not recorded anywhere in this repository. MUST be established before the unseal (B-1).",
+  "checkpoint": "UNRESOLVED -- run_inference.py takes --model_dir at runtime and no Where2comm checkpoint is present under /mnt/h/opencood_project/pretrained_models/. Whether the products came from official weights or a local training is NOT RECORDED and MUST be established before the unseal (B-2).",
+  "collaborator_rule": "CATOSG_MAX_COLLAB=1, inference-time hook; NO retraining (the arm refuses to retrain at N=1, which would treat it differently from every other arm)",
+  "control_variable": "the communication THRESHOLD, not a sparsity s -- the rate is an OUTPUT, measured per frame as mask.sum()/(L*H*W)",
+  "payload": "counterfactual under the pre-registered sparse convention; the realised mean rate is what the budget match uses",
+  "cached_products": [
+   "culver_thr0.0.npz",
+   "culver_thr0.01.npz",
+   "culver_thr0.011.npz",
+   "culver_thr0.012.npz",
+   "... 37 files total"
+  ],
+  "delivered_products": {
+   "results/baselines/where2comm_v2/budget_match.csv": "b42f8f6b58e54c730b4dfd3625ef9c978b57dc2f43c48a8fafa0fec695a98c35",
+   "results/baselines/where2comm_v2/sparsity_payload.csv": "edc20444b7db6f852217f9ba43ab01505b44391e5e2c6dcee4031488d13e24ed"
+  }
+ },
+ "wording_rules_unchanged": "R60-2 stands: Where2comm is an external feature-content / communication-efficient baseline, NOT a channel-aware granularity selector isomorphic to CA-TOSG. Adjudication verbs remain forbidden everywhere, with no exemption (B-6).",
+ "DETERMINISTIC_REGENERATION_REQUIRED": {
+  "status": "TODO at WP12 -- these numbers are PROVISIONAL until then",
+  "why": "the existing Where2comm products were generated around R60-2, i.e. under the OLD non-deterministic shuffle_points() pipeline that V2-R16 found and fixed. V2-R16 E-3 requires any v1-derived baseline still used for a v2 comparison to be regenerated under the deterministic pipeline. Where2comm is now exactly such a baseline.",
+  "blocking_B6": false,
+  "RULE": "A freeze check may NEVER pass on the ground that the files already exist. Existence is not provenance, and a hash matching a non-deterministic product only proves the bytes have not moved since (C-4)."
+ }
+}

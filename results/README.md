@@ -19,7 +19,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 34 |
+| | `results/manifests/` | 35 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -28,7 +28,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
 | | `results/v2/` | 41 |
 | | `results/v2/diagnostic/` | 7 |
-| | `results/v2/sealed/` | 6 |
+| | `results/v2/sealed/` | 9 |
 
 ## `results/baselines/`
 
@@ -221,6 +221,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `V2_RUNTIME_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | runtime switches the products depend on (V2-R17 C) |
 | `V2_SEALED_HASHES.json` | `python tests/test_sealed_heldout.py --write-hashes` | sha256 of each sealed held-out file, compared at unseal time (V2-R6 A-2) |
 | `V2_SIBLING_DEPENDENCY.json` | `python tools/build_sibling_dependency_manifest.py` | V2-R20 D: sibling OpenCOOD base commit + per-file hashes |
+| `V2_TIERC_FREEZE.json` | `(frozen record; see docs/history/protocol_changelog.md)` | V2-R28/R32 freezes: primary selector+comparator, and the Tier C external baseline |
 | `candidate_walk_B010.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B020.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
 | `candidate_walk_B030.csv` | `python tools/train_selector.py` | freeze record + LOSO evidence chain |
@@ -424,7 +425,10 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `wp2_held_out_culver.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --held-out-eval` | SEALED held-out accuracy -- no tuning or selection step may read it (E-2) |
 | `wp2_held_out_test.json` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --held-out-eval` | SEALED held-out accuracy -- no tuning or selection step may read it (E-2) |
 | `wp34_e_l_test.csv` | **UNATTRIBUTED** |  |
+| `wp6_cues_test.csv` | **UNATTRIBUTED** |  |
+| `wp6_cues_test.json` | **UNATTRIBUTED** |  |
+| `wp6_range_decomposition_test.csv` | **UNATTRIBUTED** |  |
 
 ---
 
-295 files indexed, 1 unattributed.
+299 files indexed, 4 unattributed.

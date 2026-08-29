@@ -107,6 +107,9 @@ RULES = [
      '(frozen record; see docs/history/protocol_changelog.md V2-R28)',
      'V2-R28 B: frozen selector candidate 67 + primary comparator tau=16.5, model sha256, '
      'schema hash, tau* per budget, runtime switches'),
+    (r'^manifests/(V2_TIERC_FREEZE|V2_PRIMARY_FREEZE)\.json$',
+     '(frozen record; see docs/history/protocol_changelog.md)',
+     'V2-R28/R32 freezes: primary selector+comparator, and the Tier C external baseline'),
     (r'^manifests/V2_INT8_SCALES\.json$',
      'python projects/ca_tosg/evaluation/v2_int8_calibrate.py',
      'frozen per-branch symmetric int8 transmit scales (validate-calibrated)'),
