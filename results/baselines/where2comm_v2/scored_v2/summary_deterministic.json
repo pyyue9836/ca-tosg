@@ -1,0 +1,207 @@
+{
+ "schema": "catosg-w2c-v2-deterministic/1",
+ "n_points": 24,
+ "provenance": {
+  "opencood_commit": "31ba16025da27ffe4e336f011290dfbc66f9a1f1",
+  "checkpoint": "locally trained, epoch 50",
+  "checkpoint_sha256": "4928071fcbfadedcbd0d4309abf8f395b9a2a447a130d962f9eed52a5e203b82",
+  "CATOSG_EVAL_RNG": "1",
+  "CATOSG_MAX_COLLAB": "1",
+  "gt_reference": "results/v2/gt_audit_v2_corner.csv (v2 corner-filter convention)",
+  "payload": "N/A -- transmits FLOATING-POINT selected features and does not execute the locked v2 int8 path, so it carries no Msym value and enters no bit-level budget-matched claim"
+ },
+ "points": [
+  {
+   "split": "culver",
+   "threshold": 0.0,
+   "comm_rate": 1.0,
+   "ap_50": 0.84139,
+   "ap_70": 0.71694,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.01,
+   "comm_rate": 0.485078,
+   "ap_50": 0.84118,
+   "ap_70": 0.71832,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.011,
+   "comm_rate": 0.43314,
+   "ap_50": 0.84035,
+   "ap_70": 0.71761,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.012,
+   "comm_rate": 0.382536,
+   "ap_50": 0.83927,
+   "ap_70": 0.7177,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.013,
+   "comm_rate": 0.311724,
+   "ap_50": 0.83764,
+   "ap_70": 0.71664,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.015,
+   "comm_rate": 0.126359,
+   "ap_50": 0.83419,
+   "ap_70": 0.71643,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.02,
+   "comm_rate": 0.090778,
+   "ap_50": 0.83195,
+   "ap_70": 0.71588,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.025,
+   "comm_rate": 0.07297,
+   "ap_50": 0.83116,
+   "ap_70": 0.71523,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.03,
+   "comm_rate": 0.0608,
+   "ap_50": 0.82918,
+   "ap_70": 0.71432,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.04,
+   "comm_rate": 0.046342,
+   "ap_50": 0.82578,
+   "ap_70": 0.71057,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 0.05,
+   "comm_rate": 0.037854,
+   "ap_50": 0.82119,
+   "ap_70": 0.70771,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "culver",
+   "threshold": 1.1,
+   "comm_rate": 0.0,
+   "ap_50": 0.69374,
+   "ap_70": 0.58007,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.0,
+   "comm_rate": 1.0,
+   "ap_50": 0.92095,
+   "ap_70": 0.8302,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.01,
+   "comm_rate": 0.46483,
+   "ap_50": 0.92004,
+   "ap_70": 0.8317,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.011,
+   "comm_rate": 0.422182,
+   "ap_50": 0.91954,
+   "ap_70": 0.83177,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.012,
+   "comm_rate": 0.378591,
+   "ap_50": 0.91936,
+   "ap_70": 0.83162,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.013,
+   "comm_rate": 0.313043,
+   "ap_50": 0.91877,
+   "ap_70": 0.83116,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.015,
+   "comm_rate": 0.08021,
+   "ap_50": 0.91808,
+   "ap_70": 0.83076,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.02,
+   "comm_rate": 0.052057,
+   "ap_50": 0.91708,
+   "ap_70": 0.82989,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.025,
+   "comm_rate": 0.039238,
+   "ap_50": 0.91511,
+   "ap_70": 0.82861,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.03,
+   "comm_rate": 0.031412,
+   "ap_50": 0.91405,
+   "ap_70": 0.82904,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.04,
+   "comm_rate": 0.022739,
+   "ap_50": 0.91121,
+   "ap_70": 0.82588,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 0.05,
+   "comm_rate": 0.017895,
+   "ap_50": 0.90799,
+   "ap_70": 0.8236,
+   "payload_msym": "N/A"
+  },
+  {
+   "split": "test",
+   "threshold": 1.1,
+   "comm_rate": 0.0,
+   "ap_50": 0.79757,
+   "ap_70": 0.68224,
+   "payload_msym": "N/A"
+  }
+ ]
+}

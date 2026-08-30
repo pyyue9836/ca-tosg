@@ -99,3 +99,20 @@ Rules 1–3 are about a gate being *too weak*, *misdirected*, or *too noisy*. Ru
 being **unfalsifiable**, and it is invisible to every ordinary check: the suite is green, the gate is
 registered, the artefact exists, and none of that is evidence. The only thing that distinguishes a
 working gate from an unfalsifiable one is having watched it fail on purpose.
+
+---
+
+### A table with no generator (V2-R40 C-2)
+
+`results/baselines/where2comm_v2/sparsity_payload.csv` carried a `B_w2c_msym` column whose recorded
+provenance was *"`sweep.sh` then the accounting in the R55/R57 change-log"* — that is, **arithmetic
+done by hand in prose**. No generator owned it, so nothing could re-derive it, and nothing would have
+noticed it drifting.
+
+It went wrong twice over: the column was **hand-maintained**, and the convention it encoded
+(0.9155 bit/element) was **v1's**, which §3.3 had already reduced to a historical reference. The
+column is now retired outright rather than recomputed.
+
+**The rule this instance buys:** a number that no script can regenerate is not a result, it is a
+note. `docs/HANDOFF_V2.md`'s closing checklist exists for exactly this failure mode, and this is the
+case where the generator never existed at all.

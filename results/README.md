@@ -14,7 +14,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/baselines/importance_map_jscc/` | 9 |
 | | `results/baselines/two_gate_runs/` | 20 |
 | | `results/baselines/where2comm_v2/` | 2 |
-| | `results/baselines/where2comm_v2/scored_v2/` | 25 |
+| | `results/baselines/where2comm_v2/scored_v2/` | 26 |
 | | `results/channel/` | 8 |
 | | `results/diagnostic/` | 4 |
 | | `results/diagnostics/` | 15 |
@@ -120,6 +120,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `culver_thr0.05.json` | **UNATTRIBUTED** |  |
 | `culver_thr1.1.json` | **UNATTRIBUTED** |  |
 | `summary_deterministic.csv` | **UNATTRIBUTED** |  |
+| `summary_deterministic.json` | **UNATTRIBUTED** |  |
 | `test_thr0.0.json` | **UNATTRIBUTED** |  |
 | `test_thr0.01.json` | **UNATTRIBUTED** |  |
 | `test_thr0.011.json` | **UNATTRIBUTED** |  |
@@ -483,4 +484,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-345 files indexed, 50 unattributed.
+346 files indexed, 51 unattributed.

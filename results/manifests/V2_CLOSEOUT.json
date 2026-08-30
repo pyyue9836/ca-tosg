@@ -1,0 +1,47 @@
+{
+ "schema": "catosg-v2-closeout/1",
+ "closed_at": "2026-08-30T12:48:24Z",
+ "commit_at_close": "97b1d729630f58169056dbc6b84ad6e809e26060",
+ "status": "PERCEPTION EXPERIMENT CLOSED. All held-out sets unsealed; no further held-out evaluation or tuning exists. Remaining work is manuscript text and figures only.",
+ "primary_result": {
+  "test": {
+   "delta_f1_LCB95": -0.00738,
+   "saving": 0.9985,
+   "non_inferiority": false
+  },
+  "culver": {
+   "delta_f1_LCB95": -0.00541,
+   "saving": 0.997,
+   "non_inferiority": false
+  },
+  "verdict": "payload reduction demonstrated on both splits; accuracy non-inferiority NOT established on either. The joint primary criterion is NOT met."
+ },
+ "external_baseline": {
+  "arm": "Where2comm",
+  "payload": "N/A -- float features, no int8 path",
+  "points": 24,
+  "status": "reported as native comm_rate + AP; excluded from bit-level budget claims"
+ },
+ "gates": 30,
+ "manifests": {
+  "results/manifests/V2_CUE_SCHEMA.json": "0d70b8794402065a5276fa1045964c38e3cca74ee6a85be05b0461a45edd29dd",
+  "results/manifests/V2_FROZEN_MANIFEST.json": "e6063e68c2664ac5148d61edd7d893aa19a82ef20c030365c894d20284da76c0",
+  "results/manifests/V2_INT8_SCALES.json": "60be25169bab55435c9106b664aca6a359b7423e805f761711ec98a2a60eb88d",
+  "results/manifests/V2_PRIMARY_FREEZE.json": "2df5de94b4f4488f652beee4d340fba08a51b169339658fc02f1f3b7d5cf6ad0",
+  "results/manifests/V2_PROTOCOL_MANIFEST.json": "2aa07de584246c7baadb0607ed6c16851c6b447d27575a6ecec0d7456a419f2c",
+  "results/manifests/V2_RUNTIME_MANIFEST.json": "f1507c46949113fee97f886143e0a882476bbf8c1e3e6fa39feeccdc262f21d1",
+  "results/manifests/V2_SEALED_HASHES.json": "6896bb562e14d7cdf19ad2aa94912e468fef3d2f1066b54206cbe34ab68e925c",
+  "results/manifests/V2_SIBLING_DEPENDENCY.json": "f79117d9afb43dbecf29a6115defd1c6491a7b3d37e08197d12783508ba88581",
+  "results/manifests/V2_TIERC_FREEZE.json": "25a5ade48fe86f8d9cb17decb94f4bf902797d53c947a9f94de23bd5e0595f47",
+  "results/manifests/V2_UNSEAL_RECORD.json": "8fab42e85ae501afa20518c9445a6091c458d01f426b25a28b44e4389f5d6080"
+ },
+ "key_artefacts": {
+  "results/v2/v2_test_primary.json": "594ff0da06622272f4c87e4189e91273a8a6d6f235e991522985ce1c3dfcff77",
+  "results/v2/v2_culver_primary.json": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
+  "results/v2/gt_audit_v2_corner.csv": "04e7238181d119db29142486f9fb8c7f2524357387535c611b18745fd76383fc",
+  "results/baselines/where2comm_v2/scored_v2/summary_deterministic.csv": "142d169969d3a562d213d409947753f25bf3837179af368a92af8123455fd6dc",
+  "paper/v2_draft/SKELETON.md": "9c02c9ecbf5962b82f59a5c822e79829cce6444b28c891b3f332fc059132ad4e",
+  "paper/main.tex": "09ca4da58ae3dcd5b9eed936d20c6dd3015a2a0967d0ef0cd027eeeb3fd7e9f6",
+  "paper/main.pdf": "cb3b28ec12b47cf77d58a95c59caece8ec505320a155e98806f3993017917476"
+ }
+}
