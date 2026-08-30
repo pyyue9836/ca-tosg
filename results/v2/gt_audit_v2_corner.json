@@ -1,0 +1,40 @@
+{
+ "schema": "catosg-v2-gt-audit-corner/1",
+ "definition": "GT objects per frame under the FROZEN v2 convention: union over {ego, selected collaborator} of params[vehicles], projected into the ego frame, CORNER-filtered against GT_RANGE (every corner must lie inside), de-duplicated by object id.",
+ "fov": "GT_RANGE, x in [-140.8,140.8], y in [-40,40], z in [-3,1]",
+ "collaborator_rule": "sec 2, nearest by lidar_pose[0:2], ties by ascending id, COM_RANGE 70 m",
+ "source": "the frozen WP2 products, which ARE the v2 GT the E/L/F products were scored against",
+ "independent_corroboration": {
+  "method": "a third-party reconstruction from raw OPV2V yaml that imports NO dataset class from either side (V2-R37 C-1)",
+  "result_validate": 26.8283,
+  "wp2_validate": 26.8202,
+  "delta": 0.0081,
+  "agreement": "1961 of 1980 frames agree EXACTLY; 19 differ by +-1 (one by +2), 16 boxes net",
+  "cause_of_the_19": "boundary precision in the RECONSTRUCTION, not in WP2: 51 kept boxes lie within 0.10 m of the range edge and the reconstruction uses a 2-D yaw-only corner construction (no roll/pitch), which is easily ~0.1 m off on a rotated box. A handful of marginal boxes flip.",
+  "status": "CORROBORATES the aggregate convention; NOT precise enough to be a per-frame golden reference, and is not used as one (V2-R37 C-1)"
+ },
+ "v1_reference_untouched": "results/sensitivity/gt_object_stats.csv (mean_late_num_gt) is the v1 CENTRE-filter convention and is left exactly as it is. v1 is frozen; its historical definition stands. This file is a NEW v2 reference beside it, not a rewrite of it.",
+ "why_the_old_assertion_failed": "score_arm.py compared a v2 arm against the v1 CENTRE-filter reference -- a convention mismatch, not a data fault. Centre filtering gives 27.78, corner filtering 26.83, and the arm was judged against the wrong one.",
+ "inputs": {
+  "results/v2/wp2_per_agent_validate.csv": "ea5a44b971aa62c9e46b6a701ae574ae1d043b3362553ffc04cb7e70f7ed660e",
+  "results/v2/wp2_per_agent_test.csv": "725ec8a7339890c128d8507e4edeca800dbcc9c4804e593361c88b16b12f9a94",
+  "results/v2/wp2_per_agent_culver.csv": "41198a60498a98483b5737951defe57fd123dbb5ac326e0ca5ed73c3d8c10508"
+ },
+ "per_split": [
+  {
+   "split": "validate",
+   "n": 1980,
+   "mean_gt_corner": 26.8202
+  },
+  {
+   "split": "test",
+   "n": 2170,
+   "mean_gt_corner": 14.8608
+  },
+  {
+   "split": "culver",
+   "n": 550,
+   "mean_gt_corner": 41.5564
+  }
+ ]
+}

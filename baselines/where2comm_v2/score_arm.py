@@ -38,14 +38,18 @@ def gt_reference(split):
     product does not carry.
     """
     import pandas as pd
-    p = os.path.join(ROOT, 'results/sensitivity/gt_object_stats.csv')
+    # V2-R38 D-2: read the v2 CORNER-filter reference, not the v1 CENTRE-filter one. The old
+    # assertion judged a v2 arm against v1's GT convention -- a convention mismatch, not a data
+    # fault (centre 27.78 vs corner 26.83). This is NOT a loosened guard: it is the same guard
+    # reading the reference that matches the products it is checking. The v1 file is untouched.
+    p = os.path.join(ROOT, 'results/v2/gt_audit_v2_corner.csv')
     if not os.path.exists(p):
         return None, p
     d = pd.read_csv(p)
     row = d[d['split'].astype(str).str.lower() == split.lower()]
     if len(row) != 1:
         return None, p
-    return (int(row.iloc[0]['n']), float(row.iloc[0]['mean_late_num_gt'])), p
+    return (int(row.iloc[0]['n']), float(row.iloc[0]['mean_gt_corner'])), p
 
 
 def main() -> int:
@@ -57,6 +61,25 @@ def main() -> int:
 
     z = np.load(a.npz, allow_pickle=True)
     boxes, scores, gts = list(z['boxes']), list(z['scores']), list(z['gts'])
+
+    # V2-R39 B-1: a frame with ZERO predictions is stored by numpy as a 0-dimensional object array,
+    # and `caluclate_tp_fp` indexes `det_score[order]`, which raises on a 0-d array. At threshold
+    # 1.1 (no communication at all) six test frames legitimately produce no detection above the
+    # frozen 0.20 score threshold; Culver produces none, which is why only test failed.
+    #
+    # Normalised HERE, in the arm, and deliberately NOT in end_to_end_ap.py: that scorer is the
+    # canonical one behind the FROZEN v1 products, and editing it would put a v1 number at risk to
+    # fix a v2 arm's edge case. An empty prediction set contributes zero TPs and zero FPs, so this
+    # changes no score anywhere -- it only stops an empty array being mis-shaped.
+    def _norm(arr, shape):
+        a_ = np.asarray(arr)
+        return a_ if a_.ndim == len(shape) and a_.size else np.zeros((0,) + shape[1:], np.float32)
+    n_empty = sum(1 for x in scores if np.asarray(x).ndim == 0 or np.asarray(x).size == 0)
+    boxes = [_norm(b, (0, 8, 3)) for b in boxes]
+    scores = [_norm(s_, (0,)) for s_ in scores]
+    if n_empty:
+        print(f'  {n_empty} frame(s) with zero predictions normalised to shape (0,) -- '
+              f'they contribute no TP and no FP')
     rate = np.asarray(z['comm_rate'], dtype=float)
     thr = float(z['threshold'])
     meta_p = os.path.splitext(a.npz)[0] + '.json'

@@ -1,0 +1,13 @@
+{
+  "schema": "catosg-where2comm-v2-score/1",
+  "split": "culver",
+  "threshold": 0.0,
+  "frames": 550,
+  "gt_objects": 22856,
+  "mean_comm_rate": 1.0,
+  "ap_30": 0.85799,
+  "ap_50": 0.84139,
+  "ap_70": 0.71694,
+  "scorer": "projects/ca_tosg/evaluation/end_to_end_ap.py (global-sort, one canonical GT)",
+  "collaborators": "N=1 (CATOSG_MAX_COLLAB=1, nearest)"
+}

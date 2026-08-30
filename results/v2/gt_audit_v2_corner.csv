@@ -1,0 +1,4 @@
+split,n,mean_gt_corner
+validate,1980,26.8202
+test,2170,14.8608
+culver,550,41.5564
