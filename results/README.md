@@ -20,7 +20,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 36 |
+| | `results/manifests/` | 37 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -245,6 +245,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `R21A2_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `R21A_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `TAU_FEASIBLE_MANIFEST.json` | `python projects/ca_tosg/evaluation/tau_feasible.py` | R18-3: the budget-matched threshold reference |
+| `V2_CLOSEOUT.json` | **UNATTRIBUTED** |  |
 | `V2_CUE_SCHEMA.json` | `python tools/build_cue_schema_manifest.py` | V2-R24 B-2: the frozen v2_ego_local_23d schema -- fields, order, FOV, pinned dependencies |
 | `V2_FROZEN_MANIFEST.json` | `python projects/ca_tosg/models/v2_selector.py` | V2-R26: v2 selector LOSO folds + per-budget walk on v2_ego_local_23d (validate only) |
 | `V2_INT8_SCALES.json` | `python projects/ca_tosg/evaluation/v2_int8_calibrate.py` | frozen per-branch symmetric int8 transmit scales (validate-calibrated) |
@@ -484,4 +485,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-346 files indexed, 51 unattributed.
+347 files indexed, 52 unattributed.

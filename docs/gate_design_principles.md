@@ -113,6 +113,6 @@ It went wrong twice over: the column was **hand-maintained**, and the convention
 (0.9155 bit/element) was **v1's**, which §3.3 had already reduced to a historical reference. The
 column is now retired outright rather than recomputed.
 
-**The rule this instance buys:** a number that no script can regenerate is not a result, it is a
-note. `docs/HANDOFF_V2.md`'s closing checklist exists for exactly this failure mode, and this is the
+**The rule this instance buys, and it is a standing one (V2-R41 A-2): a number no script can
+regenerate is a NOTE, not a RESULT.** `docs/HANDOFF_V2.md`'s closing checklist exists for exactly this failure mode, and this is the
 case where the generator never existed at all.
