@@ -54,6 +54,14 @@ granularity; the selector's inputs are strictly ego-local and available \emph{be
 one ground truth, and a deterministic evaluation pipeline.
 \end{enumerate}
 
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{figures/fig1_system}
+\caption{Data flow as implemented. The cue vector and the channel estimate are ego-side and
+available before the request; the collaborator supplies message content only when asked. E issues no
+message and therefore never enters the transport chain.}
+\label{fig:system}
+\end{figure*}
+
 \section{Method}
 \subsection{Action space and the receiver-driven request}
 The ego selects one of three actions per frame and signals it with a fixed two-bit request, charged
@@ -118,10 +126,27 @@ Scenes            & \multicolumn{2}{c}{\TestScenes}    & \multicolumn{2}{c}{\Cul
 \end{tabular}
 \end{table}
 
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{figures/fig2_primary}
+\caption{Primary cell. Payload is drawn on a logarithmic axis and $\Delta F_1$ in its own panel:
+the two halves of the result differ by three orders of magnitude, and a shared scale would erase one
+of them. The right panel puts the preregistered margin and the bootstrap lower bound on one ruler.
+On both splits the point estimate lies inside the margin and the bound does not.}
+\label{fig:primary}
+\end{figure*}
+
 \subsection{Action mix}
 The frozen selector uses E on \TestRhoE{} and L on \TestRhoL{} of Test rows, and never requests F
 ($\rho_F=\TestRhoF$). Section~\ref{sec:limits} explains why this is a property of the sampled
 penalty grid rather than evidence that the feature action is useless.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{figures/fig3_recovery}
+\caption{Delivery regimes on the development split. Fragment-aware partial recovery degrades
+gracefully; all-or-nothing message delivery is governed by the survival probability $q$ rather than
+by how the feature action performs.}
+\label{fig:recovery}
+\end{figure}
 
 \subsection{Baselines}
 Fixed-E, Fixed-L and Fixed-F bound the action space. The internal decision rules are the SNR
@@ -135,6 +160,13 @@ communication threshold of $0.02$ it reaches AP@0.5 \WtwoCTestAPfifty{} on Test 
 \WtwoCCulverAPfifty{} on Culver-City while retaining \WtwoCTestRate\% and \WtwoCCulverRate\% of
 features. No adaptive-policy baseline met the reproducibility bar.
 
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{figures/fig4_where2comm}
+\caption{Where2comm on its native communication-rate axis. The horizontal axis is the fraction of
+features retained, not a bit budget.}
+\label{fig:w2c}
+\end{figure*}
+
 \section{Limitations}\label{sec:limits}
 \textbf{Accuracy non-inferiority was not established.} On both splits the point estimate lies inside
 the margin and the confidence bound does not. The margin was fixed in advance and the bound is what
@@ -143,6 +175,9 @@ it tests.
 \textbf{Proportion.} The saving is overwhelming; the shortfall is small. Neither may be reported
 without the other: stating only the saving packages a failed criterion as success, and stating only
 the shortfall discards a two-orders-of-magnitude result.
+
+Full-frame and collaborator-available payload savings differed by $0.000$ percentage points on both
+held-out splits.
 
 \textbf{Culver-City rests on \CulverScenes{} scenes.} The bootstrap resamples them, so its interval
 is coarse; the result has the same shape as Test on far less scene diversity. Culver-City is a

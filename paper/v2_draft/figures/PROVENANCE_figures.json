@@ -1,0 +1,81 @@
+{
+ "schema": "catosg-v2-figures/1",
+ "generator": "tools/build_v2_figures.py",
+ "commit": "ec1bb74c84e5f59df404690f5e17ff46a5aedc8e",
+ "palette": {
+  "hexes": [
+   "#2B62C4",
+   "#E06C1F",
+   "#009B6B",
+   "#8A4FC0"
+  ],
+  "validated": "dataviz validate_palette.js, light surface: all six checks PASS (lightness band, chroma floor, CVD separation, normal-vision floor, contrast)"
+ },
+ "v1_figures_reused": 0,
+ "figures": {
+  "fig1_system.pdf": {
+   "panel": "main",
+   "kind": "conceptual block diagram",
+   "inputs": [],
+   "note": "No result numbers. Every block is an implemented component; nothing unimplemented is drawn (B-1). Two factual corrections over the first draft: the channel estimate is an EGO-side input, not derived from the collaborator; and E issues no message so it does not reach the transport chain.",
+   "sha256": "704aeff3574a78bad34683dbd800c915e2bb70eab720008be27b8fd4683e734d"
+  },
+  "fig2_primary.pdf": {
+   "panel": "main",
+   "inputs": {
+    "results/v2/v2_test_primary.json": "594ff0da06622272f4c87e4189e91273a8a6d6f235e991522985ce1c3dfcff77",
+    "results/v2/v2_culver_primary.json": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988"
+   },
+   "fields": [
+    "RF.mean_payload",
+    "tau.mean_payload",
+    "delta_f1_point",
+    "delta_f1_LCB95",
+    "delta"
+   ],
+   "layout_rule": "payload on a LOG axis, dF1 in its OWN panel with the margin on the same ruler as the bound. A shared axis would erase one half of the result (V2-R43 B-2); two y-scales on one panel would be a dual-axis chart.",
+   "sha256": "d9c20d9f8d6448d015df3e3fac984f2899b07fa23b46c4a3edabb62b19870c04"
+  },
+  "fig3_recovery.pdf": {
+   "panel": "main",
+   "inputs": {
+    "results/v2/wp5_final_validate.csv": "9dbcffd78829d762b03191016c73e7d6b89bddf9a6782dbb8cbc0bd06bb48f31",
+    "results/v2/wp5_message_validate.json": "c876f9780aa77a6e7e8cade66d502f9a7e3902d680ad7dc2e454cecf976354c9"
+   },
+   "fields": [
+    "f1_{ideal,packet}_p*_r0..3 (replicate mean)",
+    "message_regime[p].per_frame_expected_f1_mean",
+    "q_message_survives"
+   ],
+   "split": "validate (mechanism result)",
+   "sha256": "c82c85db984ba061568e085c99e5942a93221f74b71ed55e3809f13b55dcaa7c"
+  },
+  "fig4_where2comm.pdf": {
+   "panel": "main",
+   "inputs": {
+    "results/baselines/where2comm_v2/scored_v2/summary_deterministic.csv": "142d169969d3a562d213d409947753f25bf3837179af368a92af8123455fd6dc"
+   },
+   "fields": [
+    "comm_rate",
+    "ap_50",
+    "ap_70"
+   ],
+   "axis_rule": "the x axis is the NATIVE communication rate. No Msym and no budget-matched language may appear in the figure or its caption (V2-R40 B-7).",
+   "sha256": "956919090486b9f998d8a321594ac61200ed1966d98d2f144e85584cb8a215a3"
+  },
+  "fig5_lambda.pdf": {
+   "panel": "supplementary",
+   "inputs": {
+    "results/v2/v2_lambda_fine_scan_validate.csv": "52314f0b2b6a306283f54cc159e26cf5fab7e06da2dd913829efdd267a21141e"
+   },
+   "fields": [
+    "lam",
+    "rho_E",
+    "rho_L",
+    "rho_F"
+   ],
+   "status": "EXPLORATORY, validate only. Did not replace the frozen candidate and explains no Test result (V2-R43 B-5).",
+   "sha256": "92ef55615fdac20bb9d9fa9870a49965bc7eef720546ea5980c5632226c3cc52"
+  }
+ }
+}

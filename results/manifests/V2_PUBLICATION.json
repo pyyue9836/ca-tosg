@@ -6,10 +6,15 @@
  "files": {
   "paper/v2_draft/DRAFT_P5.md": "bd58a709840d5c9aef29f643545ace57bfea943dc7025a6fb1d8e2acc04be2b5",
   "paper/v2_draft/SKELETON.md": "9c02c9ecbf5962b82f59a5c822e79829cce6444b28c891b3f332fc059132ad4e",
-  "paper/v2_draft/main.pdf": "51d318e2adc98a34bbf64285e125652d815c31afd7c74438d120df8d635eba9e",
-  "paper/v2_draft/main.tex": "3a23e5e6bd19a621b3f330a3a286e83da1dfb62479053fc3b1efb3861a69d9d8",
+  "paper/v2_draft/main.pdf": "b4974dd338ade27719c18a2e6b04d2cd0a27c7bfeb7813620ab4a4af71b3988c",
+  "paper/v2_draft/main.tex": "83888bb9f1c7e864300f27d5772b4887a52f694e1ab715c37128ae00c9d550f1",
   "paper/v2_draft/references.bib": "7605270eb905497ae1e5b610e1fd0d2431c377bb5c8fb9614af0b5d7230c9fc0",
-  "paper/v2_draft/tables/generated_numbers.tex": "d737f7a0a398be5f6626b57fea405ccb7e9bab925d6e12a89ceaf92f9167ae38"
+  "paper/v2_draft/tables/generated_numbers.tex": "d737f7a0a398be5f6626b57fea405ccb7e9bab925d6e12a89ceaf92f9167ae38",
+  "paper/v2_draft/figures/fig1_system.pdf": "704aeff3574a78bad34683dbd800c915e2bb70eab720008be27b8fd4683e734d",
+  "paper/v2_draft/figures/fig2_primary.pdf": "d9c20d9f8d6448d015df3e3fac984f2899b07fa23b46c4a3edabb62b19870c04",
+  "paper/v2_draft/figures/fig3_recovery.pdf": "c82c85db984ba061568e085c99e5942a93221f74b71ed55e3809f13b55dcaa7c",
+  "paper/v2_draft/figures/fig4_where2comm.pdf": "956919090486b9f998d8a321594ac61200ed1966d98d2f144e85584cb8a215a3",
+  "paper/v2_draft/figures/fig5_lambda.pdf": "92ef55615fdac20bb9d9fa9870a49965bc7eef720546ea5980c5632226c3cc52"
  },
- "n_files": 6
+ "n_files": 11
 }
