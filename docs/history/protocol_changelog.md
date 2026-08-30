@@ -5838,3 +5838,64 @@ Letting the primary result live in the open tree by adding it to an allow-list w
 **by name**. Instead `V2_UNSEAL_RECORD.json` records path, timestamp, commit, hash and scope, and
 gate 22 consults it. **The file is readable because a dated act made it so, not because someone
 edited a set literal.** Entered in `gate_design_principles.md`.
+
+## V2-R34/R35 — Culver closes the perception experiment; the cross-domain risk is retired by measurement
+
+### A · Culver, and what it does and does not settle
+
+| Culver @ β=0.20, 4 scenes, 12,100 rows | value |
+|---|---|
+| RF (candidate 67) | scene-equal F1 **0.87352**, payload **0.00147** |
+| τ = 16.5 | scene-equal F1 0.87813, payload 0.49850 |
+| ΔF1 point / **LCB95** | −0.00461 / **−0.00541** — outside −0.005, **non-inferiority NOT met** |
+| ΔB UCB95 / relative saving | −0.42272 / **99.70 %** — **met** |
+| action mix | E 0.407 / L 0.593 / **F 0.000** |
+
+**P1-3's pre-specified wording applies verbatim: communication saving transfers; cross-domain
+accuracy preservation is not established.** It does not rescue the test primary, and it never could —
+that was fixed in advance (C-1, C-5). **All held-out sets are now unsealed; no further held-out
+tuning or model selection may occur.**
+
+**Limitation, stated at the claim rather than left for a reader:** the Culver bootstrap resamples
+**4 scenes**. The interval is coarse, and the result is the same *shape* as test on far less scene
+diversity — a limitation, not corroboration.
+
+### A-3 · A pre-registered risk retired by measurement, which is the useful outcome
+
+V2-R6 B-5 warned that Culver's no-collaborator share — **13.09 % against test's 5.48 %, a factor
+2.4** — would inflate its apparent saving, because those frames cost every arm zero. **Measured, it
+does not:**
+
+| | no-collab share | full-frame saving | collaborator-available saving | difference |
+|---|---|---|---|---|
+| test | 5.48 % | 99.85 % | 99.85 % | **+0.000 pp** |
+| Culver | 13.09 % | 99.70 % | 99.70 % | **+0.000 pp** |
+
+Both arms cost zero on those frames, so the *ratio* is untouched. **The case is closed as
+"checked, and it does not hold" rather than left as a caveat** — and that transition, from a written
+worry to a measured negative, is worth more than the warning was.
+
+### B-4 · The ETA error account — three in one session, one root cause
+
+| miss | claimed | actual |
+|---|---|---|
+| WP5 test | 172 min (extrapolated from frame 0) | 91 min |
+| WP5 test mid-run | "the ETA is still falling" from three points | it rose again |
+| WP5 Culver | 23 min (extrapolated from **test's** 2.516 s/frame) | **66.4 min** (7.248 s/frame) |
+
+**The root cause is one thing: extrapolating per-frame cost across splits assumes equal scene
+density.** Measured, the same job runs at **5.987 / 2.516 / 7.248 s/frame** on validate / test /
+Culver — a **2.9×** spread.
+
+Same family as two earlier lessons, cross-referenced: `f_tail`'s "parameter count is the wrong proxy
+for compute", and the smoke-test that **did not amortise fixed overhead**. In all three a proxy was
+valid at one scale or on one distribution and silently invalid on another.
+
+### F-2 · What was actually wrong with the Where2comm runner
+
+`run_inference.py` never set `CATOSG_EVAL_RNG`, so every cached product came from the **unseeded
+global numpy RNG** — which is exactly why V2-R32 C marked them provisional. Two lines were missing
+and both are now present: the environment switch, set before the dataset module is used, and
+`ds.catosg_split`, without which the seed identity reads `'unknown'` and this arm would be
+deterministic **under a different seed space from every other v2 product** — a silent inconsistency
+rather than an error, and the harder of the two to notice.

@@ -39,6 +39,11 @@ REPO = os.environ.get('OPENCOOD_ROOT',
                       os.path.expanduser('~/cooperative_semantic_perception/OpenCOOD'))
 sys.path.insert(0, REPO)
 
+# V2-R35 F-2: the deterministic per-sample point shuffle. The products this script wrote before
+# V2-R16 came from the UNSEEDED global numpy RNG, which is why they are marked provisional -- see
+# V2_TIERC_FREEZE.json. Set BEFORE the dataset module is used, exactly as every v2 module does.
+os.environ.setdefault('CATOSG_EVAL_RNG', '1')
+
 from opencood.hypes_yaml import yaml_utils          # noqa: E402
 from opencood.tools import train_utils, inference_utils  # noqa: E402
 from opencood.data_utils.datasets import build_dataset   # noqa: E402
@@ -83,6 +88,10 @@ def main() -> int:
         return 1
 
     ds = build_dataset(hypes, visualize=False, train=False)
+    # part of the seed identity (split, scene, frame, cav) -- without it the identity says
+    # 'unknown' and this arm would be deterministic under a DIFFERENT seed space from every other
+    # v2 product, which is a silent inconsistency rather than an error.
+    ds.catosg_split = a.split
     n = len(ds)
     print(f'{a.split}: {n} frames | threshold={a.threshold} | N=1 | {root}', flush=True)
     loader = DataLoader(ds, batch_size=1, num_workers=4, collate_fn=ds.collate_batch_test,
