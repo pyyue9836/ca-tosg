@@ -22,7 +22,8 @@ Cooperative perception must choose \emph{what} to transmit, not only how much to
 formalise per-frame semantic granularity selection over three actions---ego-only (E), object-level
 (L) and feature-level (F)---and evaluate it under a single detector, a single field of view and a
 single ground truth, with communication charged through a measured LDPC/QAM chain rather than a
-declared budget. CA-TOSG reduced realised communication payload by \TestSaving\% on Test and
+declared budget. The resulting method, CA-TOSG (channel-aware task-oriented semantic
+granularity), reduced realised communication payload by \TestSaving\% on Test and
 \CulverSaving\% on Culver-City relative to the frozen comparator. However, the preregistered
 scene-level non-inferiority criterion was not met on either split, indicating that substantial
 communication reduction was achieved without statistically establishing accuracy preservation.
@@ -54,6 +55,11 @@ granularity; the selector's inputs are strictly ego-local and available \emph{be
 one ground truth, and a deterministic evaluation pipeline.
 \end{enumerate}
 
+The random forest used below is one instance of the selection layer, not the contribution. What is
+being offered is the granularity-control formulation and the accounting protocol that makes a
+payload claim checkable; any policy that consumes ego-local cues and emits a request slots into the
+same framework, and we report below that this particular instance does not beat a tuned threshold.
+
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{figures/fig1_system}
 \caption{Data flow as implemented. The cue vector and the channel estimate are ego-side and
@@ -64,8 +70,8 @@ message and therefore never enters the transport chain.}
 
 \section{Method}
 \subsection{Action space and the receiver-driven request}
-The ego selects one of three actions per frame and signals it with a fixed two-bit request, charged
-identically for every action. E transmits nothing. L transmits the collaborator's detected boxes. F
+The ego selects one of three actions per frame and signals it with a two-bit request. That request is a fixed control
+overhead, identical for all three actions, and is therefore not charged to any action's payload. E transmits nothing. L transmits the collaborator's detected boxes. F
 transmits the collaborator's quantised bottleneck tensor.
 
 \subsection{Communication accounting}
@@ -79,12 +85,15 @@ L is charged per frame through the identical chain from its own box count.
 \subsection{Transport}
 The message is fragmented into $N_{cw}$ codewords; each succeeds or fails at the frame's SNR, and
 the receiver reconstructs from what arrives, zero-filling failed blocks. All-or-nothing delivery is
-retained as a pessimistic sensitivity arm.
+retained as a pessimistic sensitivity arm. Three regimes are
+evaluated: fragment-aware recovery, packet-level loss, and all-or-nothing message delivery
+(Fig.~\ref{fig:recovery}).
 
 \subsection{Selector inputs}
-The cue vector is ego-local by construction: statistics of the ego's own sweep, its own detected box
-count, a binary collaborator-availability flag, and the channel estimate. Every field is computable
-before the request is issued.
+The cue vector has $23$ dimensions and is ego-local by construction: $19$ statistics of the ego's
+own sweep, its own detected box count, a binary collaborator-availability flag, and two channel
+fields. Every field is computable before the request is issued, so no input depends on a message the
+ego has not yet asked for.
 
 \section{Experimental Protocol}
 All experiments use OPV2V~\cite{xu2022opv2v} with a PointPillars
@@ -94,15 +103,21 @@ $(\text{split},\text{scene},\text{frame},\text{cav})$, and two independent proce
 bit for bit. The selector is fitted on the development split only and frozen---a random forest~\cite{breiman2001random}, candidate
 \CandIdx{} at $\lambda=\LambdaStar$---before either held-out set is opened. The comparator is likewise
 frozen: an SNR threshold at $\tau=\TauStar$, the best budget-feasible threshold at the primary cell.
-The confirmatory unit is the scene, not the frame.
+The confirmatory unit is the scene, not the frame: frames within a
+scene are consecutive samples of the same traffic and are far from independent. Intervals are
+scene-level bootstraps over \TestScenes{} Test scenes and \CulverScenes{} Culver-City scenes,
+covering \TestRows{} and \CulverRows{} evaluated rows respectively.
 
 \section{Results}
 \subsection{Primary comparison}
 Table~\ref{tab:primary} gives the primary cell. On Test the payload falls by \TestSaving\% and on
 Culver-City by \CulverSaving\%; on both splits the scene-level bootstrap lower bound on $\Delta F_1$
 lies outside the preregistered margin of $-\DeltaMargin$, so accuracy non-inferiority is not established.
-Both halves are stated together throughout: the saving is large and the shortfall on the bound is
-\TestShortfall{} (Test) and \CulverShortfall{} (Culver).
+Both halves are stated together throughout: the saving is large---a factor of \TestRatio{} and
+\CulverRatio{}---and the shortfall on the bound is \TestShortfall{} (Test) and \CulverShortfall{}
+(Culver). The Culver-City interval rests on only \CulverScenes{} scenes and is correspondingly
+coarse; it reproduces the shape of the Test result on much less scene diversity rather than
+independently corroborating it.
 
 \begin{table}[t]
 \caption{Primary cell. $\Delta$ is CA-TOSG minus the frozen comparator; the criterion is defined on
@@ -129,15 +144,15 @@ Scenes            & \multicolumn{2}{c}{\TestScenes}    & \multicolumn{2}{c}{\Cul
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{figures/fig2_primary}
 \caption{Primary cell. Payload is drawn on a logarithmic axis and $\Delta F_1$ in its own panel:
-the two halves of the result differ by three orders of magnitude, and a shared scale would erase one
-of them. The right panel puts the preregistered margin and the bootstrap lower bound on one ruler.
+the payload ratio is \TestRatio-fold while the $F_1$ shortfall on the bound is
+\TestShortfall, so a shared scale would erase one half of the result. The right panel puts the preregistered margin and the bootstrap lower bound on one ruler.
 On both splits the point estimate lies inside the margin and the bound does not.}
 \label{fig:primary}
 \end{figure*}
 
 \subsection{Action mix}
-The frozen selector uses E on \TestRhoE{} and L on \TestRhoL{} of Test rows, and never requests F
-($\rho_F=\TestRhoF$). Section~\ref{sec:limits} explains why this is a property of the sampled
+The frozen selector requests E on \TestRhoEPct\% of Test rows and L on \TestRhoLPct\%, and never
+requests F ($\rho_F=\TestRhoF$); the Culver-City mix is \CulverRhoEPct\% and \CulverRhoLPct\%. Section~\ref{sec:limits} explains why this is a property of the sampled
 penalty grid rather than evidence that the feature action is useless.
 
 \begin{figure}[t]
@@ -174,7 +189,7 @@ it tests.
 
 \textbf{Proportion.} The saving is overwhelming; the shortfall is small. Neither may be reported
 without the other: stating only the saving packages a failed criterion as success, and stating only
-the shortfall discards a two-orders-of-magnitude result.
+the shortfall discards a \TestRatio-fold reduction.
 
 Full-frame and collaborator-available payload savings differed by $0.000$ percentage points on both
 held-out splits.
@@ -205,9 +220,9 @@ ego--collaborator pair. A flat block-fading channel.
 
 \section{Conclusion}
 Three transmission granularities were placed under one detector, one field of view and one ground
-truth, and charged through one measured transport chain. Communication can be cut by roughly two
-orders of magnitude relative to a budget-matched threshold policy on both held-out sets, while
-accuracy non-inferiority is not established on either. The conditions are one dataset family, one
+truth, and charged through one measured transport chain. Communication falls by a factor of
+\TestRatio{} on Test and \CulverRatio{} on Culver-City relative to a budget-feasible threshold
+policy, while accuracy non-inferiority is not established on either. The conditions are one dataset family, one
 detector, a single ego--collaborator pair, and a flat block-fading channel.
 
 \bibliographystyle{IEEEtran}

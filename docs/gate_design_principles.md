@@ -116,3 +116,35 @@ column is now retired outright rather than recomputed.
 **The rule this instance buys, and it is a standing one (V2-R41 A-2): a number no script can
 regenerate is a NOTE, not a RESULT.** `docs/HANDOFF_V2.md`'s closing checklist exists for exactly this failure mode, and this is the
 case where the generator never existed at all.
+
+---
+
+## 5. The generate-then-verify chain breaks at the figure
+
+Every other artefact in this repository is checked by regenerating it and comparing. A figure cannot
+be checked that way: it regenerates byte-identically while being *wrong about the system it depicts*.
+
+**Bought by (V2-R44 A-1):** the first `fig1_system` drew the channel estimate as an output of the
+collaborator's LiDAR — it is an ego-side input — and ran an arrow from action E into the transport
+chain, when E sends no message at all. Both survived generation, provenance hashing and the whole
+33-gate suite, because **both are semantic errors, not numeric or lexical ones**. They were found by
+rendering the PDF to a raster and looking at it.
+
+**Same blind spot as R63** ("the gates check committed artefacts and none of them runs the
+generator"), one level further out: here the generator *does* run, and what it produces still has to
+be read by a person.
+
+**The rule:** a figure is not done when it is generated. It is done when someone has rendered it and
+looked at it against the thing it claims to describe.
+
+## 6. Never two y-scales on one panel
+
+**Bought by (V2-R44 A-2):** the primary result has a payload ratio of ~400× beside an $F_1$
+shortfall of 0.0024. The tempting layout is one panel with two y-axes.
+
+It must not be, and the reason is specific rather than aesthetic: **with two scales, the point where
+the curves cross is an artefact of the scaling choice**, and a reader cannot tell which ruler a mark
+belongs to. The claim here is precisely a crossing — the confidence bound crosses the preregistered
+margin — so it has to be *seen*, not asserted. That requires the bound and the margin on **one
+ruler**, which means a separate panel at its own scale, with the large-ratio quantity given a log
+axis of its own.

@@ -61,6 +61,11 @@ def build():
         mac(f'{tag}RhoF', f"{d['action_mix']['F']:.3f}")
         # the shortfall on the BOUND -- the quantity C-1 requires beside every saving
         mac(f'{tag}Shortfall', f"{abs(d['delta_f1_LCB95']) - t['delta']:.4f}")
+        # B-1 review: "two orders of magnitude" was wrong -- the ratio is emitted so the prose
+        # cannot drift from it.
+        mac(f'{tag}Ratio', f"{d['tau']['mean_payload'] / d['RF']['mean_payload']:.0f}")
+        for a in ('E', 'L', 'F'):
+            mac(f'{tag}Rho{a}Pct', f"{d['action_mix'][a] * 100:.1f}")
     mac('DeltaMargin', f"{t['delta']:.3f}")
     mac('TauStar', f"{fr['primary_comparator']['tau']}")
     mac('CandIdx', str(fr['selector']['candidate_index']))
