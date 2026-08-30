@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (15 of 29)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (16 of 30)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the fourteen artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 29 checks in total, 15 of which a clean clone can run.
+  GATE-COUNT-LINE: 30 checks in total, 16 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -116,6 +116,10 @@ GATES = [
     # on. ego_detected_box_count IS a detector output, so a schema frozen without pinning those
     # would be frozen against a moving input.
     ('artifacts', 'cue schema freeze',    [PY, 'tools/build_cue_schema_manifest.py', '--check']),
+    # V2-R36 A-3: the Where2comm validate sweep predates the deterministic pipeline and is kept only
+    # as a frozen tuning record. "We know not to cite it" is intent; this judges capability -- the
+    # files are still on disk and still look like the deterministic ones.
+    ('content',   'provisional exclusion', [PY, 'tests/test_provisional_exclusion.py']),
 ]
 
 

@@ -117,6 +117,55 @@ def frames_to_test(n=6):
     return d[:n]
 
 
+VALID_SPLITS = ('validate', 'test', 'culver')
+
+
+def check_split_identities():
+    """V2-R36 B-3: the seed identity must be WELL-FORMED, not merely consistent.
+
+    Everything else in this gate asks "does the same identity give the same seed?". None of it asks
+    whether the identity was built correctly in the first place. `catosg_eval_rng.sample_rng` falls
+    back to the string 'unknown' when a runner forgets `ds.catosg_split`, and the result is still
+    perfectly deterministic and perfectly reproducible -- of a DIFFERENT random experiment, in a seed
+    space no other v2 product shares. Nothing crashes and nothing warns.
+
+    That is exactly what happened to the Where2comm runner (V2-R35 F-2), and it is the same family as
+    `p_cw_F` (one name, two meanings) and the shared IoU matching (one decomposition, two thresholds):
+    no crash, no alarm, results that look entirely normal.
+
+    Every live evaluation script that sets catosg_split must set it to a REAL split.
+    """
+    import ast
+    fails, checked = [], 0
+    files = subprocess.check_output(['git', '-C', ROOT, 'ls-files'], text=True).split()
+    for rel in [f for f in files if f.endswith('.py')]:
+        try:
+            src = open(os.path.join(ROOT, rel), encoding='utf-8').read()
+        except OSError:
+            continue
+        if 'catosg_split' not in src:
+            continue
+        checked += 1
+        try:
+            tree = ast.parse(src)
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign):
+                continue
+            for t in node.targets:
+                if isinstance(t, ast.Attribute) and t.attr == 'catosg_split':
+                    v = node.value
+                    if isinstance(v, ast.Constant):
+                        if v.value not in VALID_SPLITS:
+                            fails.append(f'{rel}:{node.lineno}: catosg_split = {v.value!r}, '
+                                         f'not one of {VALID_SPLITS}')
+                    elif not isinstance(v, (ast.Name, ast.Attribute, ast.Subscript, ast.Call)):
+                        fails.append(f'{rel}:{node.lineno}: catosg_split assigned a form this '
+                                     f'gate cannot verify')
+    return fails, checked
+
+
 def main() -> int:
     self_test = '--self-test' in sys.argv
     fr = frames_to_test()
@@ -149,6 +198,25 @@ def main() -> int:
     ok5 = ok5a and ok5b
 
     # V2-R17 B: both halves of the RNG chain pinned -- identity->uint32 AND uint32->permutation
+    sid_fails, sid_n = check_split_identities()
+    print(f'C-5d seed-identity WELL-FORMEDNESS: {sid_n} file(s) set catosg_split, '
+          f'{len(sid_fails)} malformed')
+    for f in sid_fails:
+        print('    ' + f)
+    if self_test:
+        import ast as _ast
+        bad = _ast.parse("ds.catosg_split = 'unknown'")
+        node = bad.body[0]
+        fired = node.value.value not in VALID_SPLITS
+        print(f'    {"FIRES  " if fired else "SILENT "}  injection: catosg_split = \'unknown\'')
+        ok_empty = _ast.parse("ds.catosg_split = ''").body[0].value.value not in VALID_SPLITS
+        print(f'    {"FIRES  " if ok_empty else "SILENT "}  injection: catosg_split = \'\' (empty)')
+        if not (fired and ok_empty):
+            print('    SELF-TEST FAIL: an identity injection did not fire')
+            return 1
+    if sid_fails:
+        print('EVAL DETERMINISM GATE FAIL: a seed identity is not well-formed')
+        return 1
     print('C-5c RNG derivation self-test (seed + permutation digest):')
     ok5c = (rng_self_test() == 0)
     ok5 = ok5 and ok5c
