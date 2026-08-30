@@ -1,0 +1,10 @@
+{
+ "schema": "catosg-v1-freeze-witness/1",
+ "why": "V2-R42 C-3/D-3: v1 hashes recorded BEFORE the v2 LaTeX work and re-verified after. The v2 draft lives in paper/v2_draft/ and must not touch these files.",
+ "files": {
+  "paper/main.tex": "09ca4da58ae3dcd5b9eed936d20c6dd3015a2a0967d0ef0cd027eeeb3fd7e9f6",
+  "paper/supplementary.tex": "e2512a09adfc0f238e1ec964e79de694605b284c7a17c63fed0ff1470b745a84",
+  "paper/main.pdf": "cb3b28ec12b47cf77d58a95c59caece8ec505320a155e98806f3993017917476",
+  "paper/supplementary.pdf": "e0e80eca8503feff1259a24704cdf6716523b4a95c9f10be49a8c10d6ce13934"
+ }
+}

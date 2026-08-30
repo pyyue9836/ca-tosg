@@ -1,0 +1,15 @@
+{
+ "schema": "catosg-v2-publication/1",
+ "why": "The manuscript versions independently of the experiment. V2_CLOSEOUT.json fixes the experiment and does not move; this file moves with the paper.",
+ "experiment_closeout": "d34360bcba6a5eb3d8dd955590fc96a9bf9cdd2dfc0fed26e8847cec598527ef",
+ "v1_freeze_verified": true,
+ "files": {
+  "paper/v2_draft/DRAFT_P5.md": "bd58a709840d5c9aef29f643545ace57bfea943dc7025a6fb1d8e2acc04be2b5",
+  "paper/v2_draft/SKELETON.md": "9c02c9ecbf5962b82f59a5c822e79829cce6444b28c891b3f332fc059132ad4e",
+  "paper/v2_draft/main.pdf": "51d318e2adc98a34bbf64285e125652d815c31afd7c74438d120df8d635eba9e",
+  "paper/v2_draft/main.tex": "3a23e5e6bd19a621b3f330a3a286e83da1dfb62479053fc3b1efb3861a69d9d8",
+  "paper/v2_draft/references.bib": "7605270eb905497ae1e5b610e1fd0d2431c377bb5c8fb9614af0b5d7230c9fc0",
+  "paper/v2_draft/tables/generated_numbers.tex": "d737f7a0a398be5f6626b57fea405ccb7e9bab925d6e12a89ceaf92f9167ae38"
+ },
+ "n_files": 6
+}

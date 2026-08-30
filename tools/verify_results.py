@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (16 of 30)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (17 of 33)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
-  the fourteen artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
+  the sixteen artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 30 checks in total, 16 of which a clean clone can run.
+  GATE-COUNT-LINE: 33 checks in total, 17 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -120,6 +120,14 @@ GATES = [
     # as a frozen tuning record. "We know not to cite it" is intent; this judges capability -- the
     # files are still on disk and still look like the deterministic ones.
     ('content',   'provisional exclusion', [PY, 'tests/test_provisional_exclusion.py']),
+    # V2-R42 B-1: transcription is not rewriting. The failure this catches is a FLUENT one -- one
+    # smoother clause and the non-inferiority qualifier is gone, and the sentence still reads well.
+    ('content',   'conclusion fidelity',  [PY, 'tests/test_v2_conclusion_fidelity.py']),
+    # V2-R42 B-2: every v2 paper number is emitted by a generator, never typed.
+    ('artifacts', 'v2 paper numbers',     [PY, 'tools/build_v2_paper_numbers.py', '--check']),
+    # V2-R42 A-7/C-3: the manuscript versions separately from the closed-out experiment, and the
+    # v1 freeze witness is re-verified on every run.
+    ('artifacts', 'v2 publication',       [PY, 'tools/build_v2_publication_manifest.py', '--check']),
 ]
 
 

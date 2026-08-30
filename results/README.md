@@ -20,7 +20,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 37 |
+| | `results/manifests/` | 39 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -245,12 +245,14 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `R21A2_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `R21A_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `TAU_FEASIBLE_MANIFEST.json` | `python projects/ca_tosg/evaluation/tau_feasible.py` | R18-3: the budget-matched threshold reference |
+| `V1_FREEZE_WITNESS.json` | **UNATTRIBUTED** |  |
 | `V2_CLOSEOUT.json` | **UNATTRIBUTED** |  |
 | `V2_CUE_SCHEMA.json` | `python tools/build_cue_schema_manifest.py` | V2-R24 B-2: the frozen v2_ego_local_23d schema -- fields, order, FOV, pinned dependencies |
 | `V2_FROZEN_MANIFEST.json` | `python projects/ca_tosg/models/v2_selector.py` | V2-R26: v2 selector LOSO folds + per-budget walk on v2_ego_local_23d (validate only) |
 | `V2_INT8_SCALES.json` | `python projects/ca_tosg/evaluation/v2_int8_calibrate.py` | frozen per-branch symmetric int8 transmit scales (validate-calibrated) |
 | `V2_PRIMARY_FREEZE.json` | `(frozen record; see docs/history/protocol_changelog.md V2-R28)` | V2-R28 B: frozen selector candidate 67 + primary comparator tau=16.5, model sha256, schema hash, tau* per budget, runtime switches |
 | `V2_PROTOCOL_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | per-section hashes + lock state of docs/unified_branch_protocol_v2.md |
+| `V2_PUBLICATION.json` | **UNATTRIBUTED** |  |
 | `V2_RUNTIME_MANIFEST.json` | `python tools/build_v2_protocol_manifest.py` | runtime switches the products depend on (V2-R17 C) |
 | `V2_SEALED_HASHES.json` | `python tests/test_sealed_heldout.py --write-hashes` | sha256 of each sealed held-out file, compared at unseal time (V2-R6 A-2) |
 | `V2_SIBLING_DEPENDENCY.json` | `python tools/build_sibling_dependency_manifest.py` | V2-R20 D: sibling OpenCOOD base commit + per-file hashes |
@@ -485,4 +487,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-347 files indexed, 52 unattributed.
+349 files indexed, 54 unattributed.
