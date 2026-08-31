@@ -32,7 +32,7 @@ TEST_CSV = os.path.join(ROOT, 'data/dataset_test_v3.csv')
 CULVER_CSV = os.path.join(ROOT, 'data/dataset_culver_v3.csv')
 RF_PKL = os.path.join(ROOT, 'data/selector_rf.pkl')
 OUTDIR = os.path.join(ROOT, 'results/sensitivity/ablation')
-FIGDIR = os.path.join(ROOT, 'paper/figures')
+FIGDIR = os.path.join(ROOT, 'paper/archive/figures')
 os.makedirs(OUTDIR, exist_ok=True)
 
 PAYLOAD = {'L': 0.024, 'C16': 0.99, 'C256': 0.495}  # channel uses (Msym) at rate-1/2; corrected 2026-07-12

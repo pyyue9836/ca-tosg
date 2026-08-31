@@ -1,5 +1,33 @@
 # V2 HANDOFF — read this first, then `docs/unified_branch_protocol_v2.md`
 
+> ## ▶ CURRENT STATE (V2-R48) — the manuscript is written; read this block before the history below
+>
+> **The perception experiment is closed** (`results/manifests/V2_CLOSEOUT.json`). No further
+> held-out evaluation or tuning exists, and none may be added.
+>
+> **There is exactly one manuscript**, at `paper/main.tex` + `paper/supplementary.tex`, with
+> `paper/figures/`, `paper/tables/` and `paper/references.bib`. No `v2_draft/`, no version suffixes
+> (Josh's ruling, V2-R47 A-3, written into `docs/STOP_WORK_v1_freeze.md`).
+>
+> **The superseded documents are archived, not deleted**, under `paper/archive/`: the v1 manuscript
+> and supplementary, the 4-page results brief, both v1 PDFs, the 15 v1 figures, `refs.bib` and the
+> old drafting notes. Three `.tex` and two `.pdf` are pinned by their ORIGINAL hashes in
+> `V1_FREEZE_WITNESS.json`; a one-byte change to any of them fails the gate, whose `--self-test`
+> injects both a changed byte and a deletion.
+>
+> **Every number in both documents comes from `tools/build_v2_paper_numbers.py`** — 150 macros and
+> 7 generated table bodies — and gate 34 (`paper numbers macros`) enforces that the manuscript uses
+> them, with `tests/paper_literal_registry.md` listing the constants that are legitimately literal.
+>
+> **The gates stand at 35** (19 runnable on a clean clone). The two newest are 34
+> `paper numbers macros` (every result number in the manuscript comes from a generator) and
+> 35 `fingerprint coverage` (the retired-value sweep must cover every delivered document, and
+> its withdrawal exemption is injection-tested).
+>
+> Still awaiting Josh: the level-2 position-effect threshold (§3.1), whether Tier B starts, and
+> whether the sibling OpenCOOD checkout gets a fork (§3.9).
+
+
 Written at the end of the V2-R22 session. Everything below is checkable from the repository; nothing
 here is memory.
 

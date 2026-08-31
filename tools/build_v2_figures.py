@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FIG = os.path.join(ROOT, 'paper', 'v2_draft', 'figures')
+FIG = os.path.join(ROOT, 'paper', 'figures')
 PROV = os.path.join(FIG, 'PROVENANCE_figures.json')
 # validated with the dataviz palette validator (light surface): all six checks PASS
 C = {'rf': '#2B62C4', 'tau': '#E06C1F', 'w2c': '#009B6B', 'aux': '#8A4FC0',
@@ -122,6 +122,9 @@ def fig2_primary(prov):
         ax.set_title(name)
         for xi, v in zip(x, pay):
             ax.text(xi, v * 1.35, f'{v:.5f}', ha='center', fontsize=6.5, color=C['ink'])
+        # headroom above the tallest bar: without it the value label printed over the panel
+        # title on the Culver panel, which a page-by-page read caught (V2-R48 D-1).
+        ax.set_ylim(min(pay) / 3.5, max(pay) * 4.5)
         tidy(ax)
     axes[0].set_ylabel('Realised payload (Msym, log)')
     ax = axes[2]
@@ -172,11 +175,18 @@ def fig3_recovery(prov):
     ax.plot(rates, y, 's--', ms=3.5, lw=1.6, color=C['aux'], label='All-or-nothing (message)')
     q = mr['0.001']['q_message_survives']
     ax.axvspan(0.001, 0.9, color=C['aux'], alpha=0.06, zorder=0)
-    ax.text(0.02, min(y) + 0.004, f'$q$-dominated ($q$={q:.1e} at $p$=0.001)',
-            fontsize=6, color=C['aux'])
+    # The annotation goes in the empty band between the flat all-or-nothing line and the
+    # fragment-aware curve, and the legend moves out of that band entirely. Two page reads were
+    # needed: at 'lower left' the text overprinted the legend, and one nudge up was not enough
+    # (V2-R48 D-1).
+    ax.text(0.0012, max(y) + 0.018, f'$q$-dominated ($q$={q:.1e} at $p$=0.001)',
+            fontsize=6, color=C['aux'], va='bottom')
     ax.set_xscale('log'); ax.set_xlabel('Codeword loss rate $p$')
     ax.set_ylabel('Mean per-frame $F_1$'); tidy(ax)
-    ax.legend(frameon=False, loc='lower left')
+    # No corner of these axes is free: the curves occupy the top, the flat all-or-nothing line
+    # runs across the bottom, and the annotation takes the upper left. The legend goes outside.
+    ax.legend(frameon=False, ncol=3, fontsize=6, loc='upper center',
+              bbox_to_anchor=(0.5, -0.28))
     f.tight_layout(pad=0.3)
     p = os.path.join(FIG, 'fig3_recovery.pdf'); f.savefig(p, bbox_inches='tight'); plt.close(f)
     prov['fig3_recovery.pdf'] = {'panel': 'main',
@@ -195,7 +205,7 @@ def fig4_w2c(prov):
         ax.plot(s.comm_rate * 100, s.ap_50, 'o-', ms=3.5, lw=1.6, color=C['w2c'], label='AP@0.5')
         ax.plot(s.comm_rate * 100, s.ap_70, 's--', ms=3.5, lw=1.6, color=C['aux'], label='AP@0.7')
         ax.set_xscale('symlog', linthresh=1)
-        ax.set_xlabel('Native communication rate (\\% of features kept)')
+        ax.set_xlabel('Native communication rate (% of features kept)')
         ax.set_title(name); tidy(ax)
     axes[0].set_ylabel('AP'); axes[0].legend(frameon=False, loc='lower right')
     f.tight_layout(pad=0.3)

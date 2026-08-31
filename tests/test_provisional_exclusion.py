@@ -21,7 +21,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # the provisional artefacts, by name
 PROVISIONAL = re.compile(r'validate_thr[\d.]+\.(npz|json)|provisional_prefix_v2r16')
 # where a reported number may live
-REPORTED = ('paper/main.tex', 'paper/supplementary.tex')
+REPORTED = ('paper/archive/manuscript_frozen.tex',
+            'paper/archive/supplementary_frozen.tex')
 
 
 def scan(targets=REPORTED, root=None):

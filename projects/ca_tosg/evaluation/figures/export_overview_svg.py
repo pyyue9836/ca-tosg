@@ -22,7 +22,7 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     '..', '..', '..', '..'))
 SVG = os.path.join(ROOT, 'figs', 'ca_tosg_overview.svg')
-PDF = os.path.join(ROOT, 'paper', 'figures', 'ca_tosg_method_overview.pdf')
+PDF = os.path.join(ROOT, 'paper', 'archive', 'figures', 'ca_tosg_method_overview.pdf')
 
 
 def main() -> int:

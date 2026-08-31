@@ -29,7 +29,7 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SENS = os.path.join(ROOT, 'results/channel/payload_anchor_sensitivity.csv')
 CONV = os.path.join(ROOT, 'results/channel/payload_conventions.csv')
-MAIN = os.path.join(ROOT, 'paper/main.tex')
+MAIN = os.path.join(ROOT, 'paper/archive/manuscript_frozen.tex')
 LOG = os.path.join(ROOT, 'results/main/r10c_decision_log_{split}_B{b}.csv')
 TOL = 5e-6
 

@@ -17,7 +17,7 @@ register may only get shorter.
 
 Every remaining entry is a floor effect, not a finding.
 
-- `paper/main.tex:423` `0.58` -- below the verification floor; the claim row is bound to `r10c_missed_e_cost.csv` and the value is a DERIVED cost/delta ratio.
-- `paper/main.tex:423` `0.61` -- below the verification floor; same row as 0.58.
-- `paper/main.tex:423` `0.44` -- below the verification floor; same row as 0.58.
-- `paper/main.tex:423` `0.47` -- below the verification floor; same row as 0.58.
+- `paper/archive/manuscript_frozen.tex:423` `0.58` -- below the verification floor; the claim row is bound to `r10c_missed_e_cost.csv` and the value is a DERIVED cost/delta ratio.
+- `paper/archive/manuscript_frozen.tex:423` `0.61` -- below the verification floor; same row as 0.58.
+- `paper/archive/manuscript_frozen.tex:423` `0.44` -- below the verification floor; same row as 0.58.
+- `paper/archive/manuscript_frozen.tex:423` `0.47` -- below the verification floor; same row as 0.58.

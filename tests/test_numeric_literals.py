@@ -47,9 +47,9 @@ WHITELIST = os.path.join(ROOT, 'tests', 'structural_literals.md')
 REGISTER = os.path.join(ROOT, 'tests', 'uncovered_literals.md')   # the R23-15 debt register
 # the delivered text: the same targets the fingerprint sweep covers. Explanatory documents that
 # exist to quote superseded values (the corrigendum, the protocol change-log) are NOT delivered text.
-TARGETS = ('paper/main.tex',)
+TARGETS = ('paper/archive/manuscript_frozen.tex',)
 # documents that may quote the paper's numbers but must not introduce new ones
-ECHO_TARGETS = ('README.md', 'docs/model_zoo.md', 'paper/supplementary.tex')
+ECHO_TARGETS = ('README.md', 'docs/model_zoo.md', 'paper/archive/supplementary_frozen.tex')
 # R23-15: generator-written documents are held to the STRONGER guarantee -- re-running the generator
 # must reproduce them byte for byte -- rather than to literal binding, because their numbers are
 # computed at build time from canonical products and legitimately include derived values that appear
@@ -278,7 +278,7 @@ def main():
               % ('covered (silent)' if ok_bound else 'FALSE POSITIVE'))
         # the ratchet: an invented literal in a delivered file is NEW debt and must fail
         debt = registered_debt()
-        fires = ('paper/main.tex', '0.98765') not in debt and '0.98765' not in verified
+        fires = ('paper/archive/manuscript_frozen.tex', '0.98765') not in debt and '0.98765' not in verified
         print('SELF-TEST: an invented 0.98765 in main.tex -> %s'
               % ('FIRES' if fires else 'DOES NOT FIRE'))
         return 0 if (not leaks and ok_bound and fires) else 1

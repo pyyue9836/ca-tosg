@@ -5,12 +5,18 @@
 The commit above is where this file was last regenerated, not necessarily the tip: read the tip with `git ls-remote origin p1-phy-rebuild`, and regenerate this block with `python tools/build_handoff_header.py`.
 <!-- HANDOFF-HEADER:END -->
 
-## ⛔ STOP-WORK IN FORCE — read this before anything else (V2-R1)
+## ⛔ STOP-WORK IN FORCE — read this before anything else (V2-R1, amended V2-R47)
 
-**The v1 manuscript is frozen.** `docs/STOP_WORK_v1_freeze.md`, in force from `400bfb6d`.
-`paper/main.tex`, `paper/supplementary.tex`, the abstract, the headline tables, the results figures,
-the Conclusion and the page count take **zero changes** until plan A's re-freeze lands, and **no new
-gate may be added for a v1 result** (the suite stops at 21).
+**The v1 manuscript is frozen, and it now lives in `paper/archive/`.**
+`docs/STOP_WORK_v1_freeze.md`, in force from `400bfb6d`, amended by Josh at V2-R47.
+`paper/archive/manuscript_frozen.tex`, `paper/archive/supplementary_frozen.tex`,
+`paper/archive/results_brief.tex` and the two archived PDFs take **zero changes**: they are pinned
+by their ORIGINAL hashes in `V1_FREEZE_WITNESS.json` and the committed blobs are re-verified by
+`tools/build_publication_manifest.py` on every gate run.
+
+**`paper/main.tex` and `paper/supplementary.tex` now name the ONE official manuscript**, which is
+live and not frozen. There is exactly one manuscript under `paper/`; no `v2_draft/`, no version
+suffixes (V2-R47 A-3).
 
 **The work now is paper v2, plan A:** all three actions from ONE checkpoint, so the v1 L-vs-F
 comparison stops confounding trained weights, fusion architecture, feature codec and field of view.
@@ -195,7 +201,8 @@ budget-matched one — against which the selector is *ahead* on F1 by +0.00067.
 * **Retired-value fingerprints must be written `NUMBER(?![0-9])`**, never `NUMBER[^d]` — six
   collisions came from that (0.248, 27.5, 18.4, 0.895, 0.081, 0.888).
 * **Do not `git checkout paper/main.tex`** while other edits to it are uncommitted; that silently
-  reverted four completed edits in R20.
+  reverted four completed edits in R20. (The path now names the live v2 manuscript; the frozen v1
+  text is `paper/archive/manuscript_frozen.tex` and must never be checked out over it.)
 * Deployed products are read-only outside an authorised promotion; arm stages run behind
   `guarded()`, which hashes all deployed products before/after.
 

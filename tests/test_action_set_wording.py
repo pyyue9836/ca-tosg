@@ -21,7 +21,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEX = os.path.join(ROOT, 'paper', 'main.tex')
+TEX = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 
 # a sentence is "about the deployed set" if it says so in one of these ways
 TRIGGER = re.compile(r'(deployed (semantic )?action set|deployed classifier[^.]{0,40}class set|'
@@ -65,7 +65,7 @@ def violations(text):
 def delivered():
     """main.tex plus supplementary.tex (R40: the supplementary is delivered text)."""
     parts = [open(TEX, encoding='utf-8').read()]
-    supp = os.path.join(os.path.dirname(TEX), 'supplementary.tex')
+    supp = os.path.join(os.path.dirname(TEX), 'supplementary_frozen.tex')
     if os.path.exists(supp):
         parts.append(open(supp, encoding='utf-8').read())
     return '\n'.join(parts)
@@ -88,7 +88,7 @@ def main():
         return 0 if (fires and ok) else 1
     bad = violations(text)
     n = len(sentences(text))
-    print(f'action-set wording: {n} sentences scanned in main.tex + supplementary.tex')
+    print(f'action-set wording: {n} sentences scanned in the archived manuscript + supplementary')
     for ln, missing, s in bad:
         print(f'  main.tex:~{ln}: deployed action set named without {missing}: {s}')
     if bad:

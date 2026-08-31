@@ -31,7 +31,7 @@ import sys
 import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MAIN = os.path.join(ROOT, 'paper', 'main.tex')
+MAIN = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 LDPC = os.path.join(ROOT, 'projects', 'ca_tosg', 'communication', 'ldpc_qam.py')
 BLER = os.path.join(ROOT, 'results', 'channel', 'bler_sionna.csv')
 PROBE = {

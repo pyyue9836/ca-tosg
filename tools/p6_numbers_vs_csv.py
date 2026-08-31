@@ -169,9 +169,13 @@ def table_cells(corpus):
     # R42-1: tab:headline_agg moved to the supplementary, and with it 17 numeric cells that this
     # scan silently stopped covering (29 located -> 12). A table's cells are checked wherever the
     # table lives, the same rule R40 applied to the four text gates.
-    tex = '\n'.join(open(os.path.join(ROOT, f'paper/{n}.tex'), encoding='utf-8').read()
-                    for n in ('main', 'supplementary')
-                    if os.path.exists(os.path.join(ROOT, f'paper/{n}.tex')))
+    # V2-R47 B: the two documents this scan covers are the FROZEN archived ones -- same bytes,
+    # same cells, same verdict as before the move. The `if os.path.exists(...)` guard is gone
+    # with it: it would have degraded this gate to scanning an empty string, silently, the
+    # moment a path moved.
+    tex = '\n'.join(open(os.path.join(ROOT, 'paper/archive', f'{n}.tex'),
+                          encoding='utf-8').read()
+                    for n in ('manuscript_frozen', 'supplementary_frozen'))
     declared = _declared_derived()
     canon = canonical_corpus(corpus)
     found, missing, derived_cells, only_narrative = [], [], [], []

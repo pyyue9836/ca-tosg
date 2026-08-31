@@ -28,7 +28,7 @@ from audit_claims_evidence import (  # noqa: E402
 )
 from check_figure_consistency import appears, compatible, sentences_with, split_caption_body  # noqa: E402
 
-MAIN = os.path.join(ROOT, 'paper', 'main.tex')
+MAIN = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 PROV = os.path.join(ROOT, 'results', 'provenance', 'PROVENANCE_figures.json')
 OUT = os.path.join(ROOT, 'docs', 'p6_pending_rulings.md')
 

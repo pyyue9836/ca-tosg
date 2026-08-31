@@ -33,7 +33,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(HERE)
-TEX = os.path.join(P1, 'paper/main.tex')
+TEX = os.path.join(P1, 'paper/archive/manuscript_frozen.tex')
 OUT = os.path.join(P1, 'docs/claims.md')
 
 UNIT = r'(?:dB|ms|Msym(?:/frame)?|Mbit(?:/s)?|kbit|bps|Hz|MHz|QAM|-QAM|bit|bits|trees|frames|scenes)'

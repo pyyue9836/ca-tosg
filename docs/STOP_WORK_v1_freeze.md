@@ -63,3 +63,56 @@ while the freeze is in force.
 If a change would alter a byte of `paper/main.tex` or `paper/supplementary.tex`, or any number in a
 committed `results/main/**` product, it is inside the freeze: stop and ask Josh. Everything else is
 ordinary work.
+
+---
+
+## AMENDMENT — Josh's ruling, V2-R47 A (2026-08-31)
+
+**This supersedes nothing above; it relocates what the freeze protects and says so explicitly.**
+
+### A-1 — the frozen documents are archived, not deleted, and not edited
+
+| was | is now |
+|---|---|
+| `paper/main.tex` | `paper/archive/manuscript_frozen.tex` |
+| `paper/supplementary.tex` | `paper/archive/supplementary_frozen.tex` |
+| `paper/v2_draft/main.tex` (the 4-page brief) | `paper/archive/results_brief.tex` |
+| `paper/main.pdf` | `paper/archive/manuscript_frozen.pdf` |
+| `paper/supplementary.pdf` | `paper/archive/supplementary_frozen.pdf` |
+
+Moved with `git mv`, so the history follows the content.
+
+### A-2 — the protection level does not drop
+
+The three `.tex` files and the two PDFs stay **in HEAD** and stay **byte-for-byte unchangeable**.
+`V1_FREEZE_WITNESS.json` keeps its original SHA-256 values; only the paths it names change. A
+one-byte edit to any archived file is a gate FAILURE, exactly as before the move. The gate carries
+an injection self-test that proves it fires.
+
+**Why a path change is not a weakening:** the witness compares the **committed** blob. The content
+being verified, the hash it is verified against, and the failure it produces are all unchanged. What
+moved is where in the tree that content sits.
+
+### A-3 — one official manuscript, no version suffixes
+
+The journal-length manuscript is built under `paper/` with no version-suffixed names:
+`paper/main.tex`, `paper/supplementary.tex`, `paper/references.bib`, `paper/figures/`,
+`paper/tables/`. **There is exactly one manuscript under `paper/`.** No `v2_draft/`, no `v2_full/`,
+no parallel copy. `paper/archive/` holds superseded documents and is never a second live draft.
+
+### A-4 — what the archive may be used for
+
+The archived long-form manuscript is **structure and bibliography material only**. Every
+experimental number, figure, table and conclusion in the new manuscript comes from the closed-out
+products via `tools/build_v2_paper_numbers.py`. No number is copied out of the archive.
+
+### A-5 — naming
+
+New paper-side files carry no version suffix. The `V2_*` manifest filenames are referenced by gates
+and are **not** renamed this round; they are renamed together once the manuscript is final.
+
+### What this amendment does NOT lift
+
+The archived documents remain frozen under the original terms above. "Frozen" now means: present in
+HEAD at the archive path, hash-pinned, and never edited. The freeze on `results/main/**` is
+untouched.

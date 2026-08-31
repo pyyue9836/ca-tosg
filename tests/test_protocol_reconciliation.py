@@ -40,8 +40,8 @@ PAIRS = os.path.join(ROOT, 'tests', 'protocol_claims.md')
 # cannot be read must not silently satisfy an anchor check.
 PROTOCOL_PARTS = (os.path.join(ROOT, 'docs', 'experiment_protocol.md'),
                   os.path.join(ROOT, 'docs', 'history', 'protocol_changelog.md'))
-DOCS = (os.path.join(ROOT, 'paper', 'main.tex'),
-        os.path.join(ROOT, 'paper', 'supplementary.tex'))
+DOCS = (os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex'),
+        os.path.join(ROOT, 'paper', 'archive', 'supplementary_frozen.tex'))
 
 
 def protocol_text():

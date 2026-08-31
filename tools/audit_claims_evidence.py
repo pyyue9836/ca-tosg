@@ -44,7 +44,7 @@ from test_result_consistency import (  # noqa: E402  (path set above)
     clean_claim, claim_id, exact_values, is_index_only, sentences, strip_tex,
 )
 
-MAIN_TEX = os.path.join(ROOT, 'paper', 'main.tex')
+MAIN_TEX = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 CLAIMS = os.path.join(ROOT, 'docs', 'claims.md')
 RESULTS_INDEX = os.path.join(ROOT, 'results', 'README.md')
 OUT = os.path.join(ROOT, 'docs', 'claims_evidence_audit.md')

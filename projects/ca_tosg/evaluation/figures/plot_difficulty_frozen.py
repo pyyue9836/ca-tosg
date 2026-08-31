@@ -28,7 +28,7 @@ import pandas as pd
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     '..', '..', '..', '..'))
 IN_CSV = os.path.join(ROOT, 'results/sensitivity/difficulty_frozen.csv')
-OUT_FIG = os.path.join(ROOT, 'paper/figures/fig_difficulty.pdf')
+OUT_FIG = os.path.join(ROOT, 'paper/archive/figures/fig_difficulty.pdf')
 STRATA = ('easy', 'medium', 'hard')
 
 

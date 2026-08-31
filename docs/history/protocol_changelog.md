@@ -5899,3 +5899,231 @@ and both are now present: the environment switch, set before the dataset module 
 `ds.catosg_split`, without which the seed identity reads `'unknown'` and this arm would be
 deterministic **under a different seed space from every other v2 product** — a silent inconsistency
 rather than an error, and the harder of the two to notice.
+
+## V2-R47 — one official manuscript, the frozen documents archived rather than deleted, and five corrections to the executor's section plan
+
+### A-1 · The move, and why a path change is not a weakening
+
+Josh ruled: keep the superseded documents, move them, do not delete them, and do not lower their
+protection. Five files moved with `git mv`:
+
+| was | is now |
+|---|---|
+| `paper/main.tex` | `paper/archive/manuscript_frozen.tex` |
+| `paper/supplementary.tex` | `paper/archive/supplementary_frozen.tex` |
+| `paper/v2_draft/main.tex` | `paper/archive/results_brief.tex` |
+| `paper/main.pdf` | `paper/archive/manuscript_frozen.pdf` |
+| `paper/supplementary.pdf` | `paper/archive/supplementary_frozen.pdf` |
+
+`V1_FREEZE_WITNESS.json` keeps its original SHA-256 values verbatim and gains one entry (the brief,
+now witnessed as well: **three `.tex` and two `.pdf`**, per B-1). The gate still compares the
+**committed** blob. The content verified, the hash verified against, and the failure produced are
+all unchanged; only the path moved. `tools/build_publication_manifest.py --self-test` proves it
+fires on a changed byte AND on a deleted document — the second injection matters because "not in
+HEAD" was the failure mode the move itself could have introduced silently.
+
+The v1 figures moved to `paper/archive/figures/` with the documents they belong to. The archived
+`.tex` files carry `\graphicspath{{figures/}}`, which resolves relative to the document, so the
+archive stayed self-consistent **without editing a byte of a frozen file** — the deciding argument
+for that layout over any other.
+
+### A-3 · One manuscript, and what that cost in gate paths
+
+`paper/main.tex` and `paper/supplementary.tex` now name the ONE official manuscript. Fifteen
+tools and gates read those paths and every one of them was verifying **v1 content**, so all
+fifteen were repointed at the archive: same bytes in, same verdict out. Two silent-skip guards were
+removed on the way — `p6_numbers_vs_csv` scanned `paper/{main,supplementary}.tex`
+`if os.path.exists(...)`, and `build_paper_tables` read the supplementary the same way. Both would
+have degraded to "nothing to check" the moment a path moved, passing green. That is the
+gate-that-cannot-fail family, and it was found by moving a file rather than by reading the code.
+
+`build_paper_tables.py`'s **write** path is now closed: `--check` (what the gate runs) is unchanged
+and just as strict, but the only thing a write could do is edit a frozen archived document.
+
+**The fingerprint sweep did not follow the others.** It stayed on the live text. The archive exists
+to record what the superseded results WERE — the same reason `docs/p0_corrigendum.md` is not swept.
+
+### B-5 · The close-out's key artefacts: paths corrected, hashes untouched
+
+`V2_CLOSEOUT.json` records three artefacts that moved. Their paths were corrected and every hash
+compared equal before and after. The experiment is not touched by that edit, and nothing else in
+the file changed.
+
+### D-1 · The generator now emits what the long-form needs
+
+48 macros became **139 macros and 5 generated tables**, all read-only over closed-out products:
+fixed-action performance, the bit-by-bit payload chain, the frozen selector and its per-budget
+behaviour, the transport mechanism, the $\rho_F=0$ account, and the exploratory $\lambda$ scan.
+
+**What this found:** the 4-page brief contained hand-typed numbers — `56.2\%`, `0.01556`,
+`0.0048`, `0.534`, `0.152` — in the very section that explains $\rho_F=0$. Every one of them turned
+out to be derivable from a stored product (`v2_p12_comparison.json`,
+`V2_PRIMARY_FREEZE.json`, `v2_lambda_fine_scan_validate.json`), so they are macros now. The rule
+"no number is typed by hand" had a hole in it exactly where nobody re-read.
+
+**And one honesty point the macros exposed:** `int8_clean_delivery_validate.csv` covers **220**
+frames, not 1,980. The int8 quantisation cost is measured on a subsample and the manuscript must say
+so.
+
+### C-2 … C-6 · Five corrections to the executor's R46 section plan, recorded because the record must record
+
+Each of these was wrong in a way that would have survived into the manuscript.
+
+1. **C-2, transport.** The plan said "keep the ego-fallback structure" for the effective-utility
+   equation. That is the **retired v1 all-or-nothing mainline**. The v2 mainline is codeword-mask
+   partial recovery: failed codewords zero-fill their elements. Only the **message all-or-nothing
+   sensitivity arm** has an ego fallback. Mistaking the retired mainline for the live one is the
+   worst available error here, because the equation still reads plausibly.
+2. **C-3, budgets.** The plan said "delete the three budgets". What is retired is the **absolute**
+   budget and the old $\lambda^\star$ values. The **normalised** $\beta \in \{0.10, 0.20, 0.30\}$
+   stays, the primary cell is $\beta = 0.20$, and the manuscript must state that all three tiers
+   selected the same candidate and the budget never bound. The generated macros now make that
+   visible: `\RFPayAt{Tight,Primary,Loose}` are all `0.00131`.
+3. **C-4, the feasibility mask.** The plan said "keep it". `results/v2/v2_grid_validate_ideal.json`
+   carries the rule under `retired/`: `F_feasible = bler_F < 0.999` was retired at V2-R26 because it
+   contradicts partial recovery — it tested the per-**codeword** loss probability, not the
+   probability the message is unusable. v2 feasibility is structural only: a collaborator must be
+   available and a transport response defined. The executor had retired this rule itself and then
+   wrote "retain" in the plan.
+4. **C-5, LOSO.** The plan said the 9-fold LOSO was replaced by scene-level bootstrap. Those are
+   different things at different stages: LOSO on validate chose the candidate and $\lambda$; the
+   chosen candidate was refitted on full validate and frozen (candidate 67, $\lambda = 0.2$);
+   the scene-level bootstrap is the **evaluation** method on the held-out splits.
+   `results/manifests/v2_validate_loso_folds.csv` and `candidate_walk_B0*.csv` are on disk.
+5. **C-6, Where2comm.** "Dual accounting" means full-frame versus collaborator-available frames. It
+   is **not** a second payload convention for Where2comm, which reports native `comm_rate` and AP
+   only, in Msym never, and enters no budget-matched claim.
+
+## V2-R48 — the manuscript transcribed, and a gate for the hole the brief had in it
+
+### C-1 · The hand-typed numbers were in the one paragraph everybody had re-read
+
+**Recorded verbatim, because the location is the finding.** The five hand-typed numbers in the
+4-page brief — `56.2%`, `0.01556`, `0.0048`, `0.534`, `0.152` — sat in the paragraph explaining
+$\rho_F = 0$: the paragraph V2-R41 C-2 had singled out as *the one that most needed writing*, where
+four strands of evidence had to be strung together. It is text the supervisor, Josh and the executor
+had each read repeatedly.
+
+**Re-reading checks the meaning, not the provenance.** A number that is correct and well-placed
+reads exactly like a number that came from a generator, and nothing in a careful re-read
+distinguishes them. That is the whole argument for gate 34 (`paper numbers macros`), and it is why
+"we know to use macros" was never going to be enough.
+
+Two loopholes were found while building that gate, both by its own injections:
+
+* a registered exception matched anywhere in a $\pm 60$-character window excused the literal, so
+  `AP@0.5 of 0.86994` was excused by the row that legalises the *metric threshold* `0.5`. A hand
+  typed AP passed the gate the gate existed to catch. A pattern now excuses only the literal its own
+  match covers.
+* the derived-claim check accepted **any** control sequence as evidence that a phrase was backed by
+  a number, so `\section` counted and "two orders of magnitude" passed with nothing behind it. It
+  now requires one of the names the generator actually emits.
+
+Both were caught because the gate was made to fail on purpose before it was trusted.
+
+### C-2 · Two more members of the "gate that cannot fail" family (numbers six and seven)
+
+`p6_numbers_vs_csv` and `build_paper_tables` each read the manuscript
+`if os.path.exists(...) else`-skip. Both would have degraded, silently and green, to scanning an
+empty string the moment a path moved — which is exactly what V2-R47 A-1 then did. The guards are
+gone and a missing frozen document is a failure. Added to the instance table in
+`docs/gate_design_principles.md`.
+
+### C-3 · Why the archive layout is what it is
+
+The three archived `.tex` files use `\graphicspath{{figures/}}` and `\bibliography{refs}`, **both
+relative to their own directory**. Moving the 15 v1 figures and `refs.bib` into
+`paper/archive/figures/` and `paper/archive/refs.bib` therefore left the archived documents
+self-consistent **without editing a byte of a frozen file**. That is the reason for the layout —
+not tidiness. Any other arrangement would have required either editing frozen documents or
+accepting archived documents that no longer resolve their own includes.
+
+### C-4 · Ask what the new failure mode is before widening a change
+
+The freeze gate gained a second injection: *delete an archived document from HEAD → must FIRE*.
+The first injection (change a byte) was inherited from the pre-move gate and would still have
+passed while the archived files quietly vanished, because the old check only compared hashes of
+files it could find. **The move itself was what introduced that failure mode**, and it was found by
+asking what could now go wrong that could not go wrong before, rather than by re-running the old
+test.
+
+### A-2 · One macro became three, because its sign disagreed with itself
+
+`\ZeroTensorMinusEgo` was a single macro for the zero-tensor-versus-ego-only comparison, carrying
+the AP@0.5 delta. Measured across metrics the deltas disagree in sign: AP@0.5
+$\ZeroTensorMinusEgoAPFifty$, AP@0.7 $\ZeroTensorMinusEgoAPSeventy$, mean frame $F_1$
+$\ZeroTensorMinusEgoMeanFOne$. **One macro would have let the prose read "zero-tensor fusion is
+better" off whichever number was to hand.** Three macros, no alias, and the claim in the text is
+inequivalence rather than superiority.
+
+### D-1 · Two gates in direct conflict over one ruled sentence — STOPPED, awaiting a ruling
+
+The final suite came back **31 of 34 green**. One failure is a genuine conflict and the executor has
+not touched either side of it.
+
+* `conclusion fidelity` (ruled V2-R42 B-1) **requires** the sentence *"...not a demonstration that a
+  learned selector beats simple rules---at equal budget it does not."*
+* the block-exit fingerprint sweep (R23-2 family) **forbids**
+  `(beats|outperforms|better than|superior to)[^.\n]{0,60}(hand|simple|...) rule` anywhere in the
+  delivered text.
+
+The required sentence is a **withdrawal** of exactly the claim that pattern retires, and the pattern
+is not negation-aware, so it fires on the retraction.
+
+**The conflict is not new and was not created by the transcription.** The identical sentence sits in
+`paper/archive/results_brief.tex`. It never fired because the brief lived at
+`paper/v2_draft/main.tex`, which was never a fingerprint target; moving the sentence into
+`paper/main.tex`, which is one, is what exposed it. A pattern that was silent for two rounds because
+of where a file happened to live is a pattern nobody had tested against the text it governs.
+
+**Not resolved by the executor**, because every available fix is a tolerance change on one side or a
+ruled-wording change on the other. In particular, breaking the line between "beats" and "simple
+rules" WOULD silence the sweep — `[^.\n]` excludes newlines — and that was rejected outright: the
+reader still reads the same words, so it is a literally-true, read-false edit of exactly the kind
+the discipline forbids.
+
+### D-2 · Gate 22 fired on the new generator, correctly
+
+The first draft of `tbl_protocol` read `results/v2/sealed/v2_grid_{test,culver}_ideal.json` for the
+per-split row counts. `sealed held-out` judges **capability, not intent**: a live script may not
+name a sealed path, and it fired. Rebuilt from unsealed products — `wp2_per_agent_*.json` for the
+frame counts, and `n_rows` with `dual_accounting.no_collaborator_share` from the two primary
+products for the rest. **Identical values** (2,618 and 1,584 reproduce exactly), no sealed path in
+the file, gate green. The seal being lifted at close-out does not license naming the path: the ban
+is on capability and it stays.
+
+## V2-R49 — the withdrawal exemption, and the sweep's coverage becomes a gate
+
+### A · Josh's ruling: narrow the pattern, do not touch the sentence
+
+The ruled conclusion wording (V2-R42 B-1) stands unchanged. The `beats ... simple rule` fingerprint
+gains a withdrawal exemption: a fixed, enumerable list of lead-ins (`NEGATION_LEADINS`), matched
+only inside the sentence containing the hit. Whitespace is collapsed first — the very sentence this
+exists for wraps as `not a\ndemonstration that`, and the first implementation missed it and exempted
+nothing, which the injection caught immediately.
+
+Three injections (A-3), all behaving: *"CA-TOSG beats the hand rule"* **FIRES**; the ruled
+retraction **quiet**; the same sentence with the negation deleted **FIRES**.
+
+### B-1 · A shortcut that worked, and was refused
+
+`[^.\n]` excludes newlines, so breaking the line between "beats" and "simple rules" would have
+silenced the sweep outright — with the reader seeing the identical words. **Literally true, read
+false, aimed at the gate itself.** Recorded as a positive instance beside refusing an exemption and
+refusing to widen a tolerance: the tempting fix here was not a loosened threshold but a line break,
+which is exactly why it needed naming.
+
+### B-2/B-3 · The hole was in coverage, not in judgement
+
+The sentence had been in the brief for two rounds without ever being judged, because
+`paper/v2_draft/main.tex` was not a sweep target. **A rule that has never run against the text it
+governs has not been verified.** Gate 35 `fingerprint coverage` now requires the target list to
+cover every delivered document, and fires when one is removed.
+
+Two consequences followed immediately. The archived documents went **back onto** the sweep list —
+V2-R47 B had removed them on the reasoning that an archive records superseded values, which was
+wrong for these files: they are delivered text, they had been swept and passing right up to the
+move, and excluding them would have opened a hole in the same week one was found. And
+`paper/archive/tables/generated_numbers.tex` was added too: the brief's own `.tex` holds macro
+*names*, so every value a reader of the brief actually sees lives only in that file. Sweeping the
+document and not its numbers would have been the same shape of hole one level down.

@@ -49,8 +49,8 @@ import difflib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(HERE)
-DRAFTS = os.path.join(P1, 'paper/paragraph_drafts.md')
-TEX = os.path.join(P1, 'paper/main.tex')
+DRAFTS = os.path.join(P1, 'paper/archive/paragraph_drafts.md')
+TEX = os.path.join(P1, 'paper/archive/manuscript_frozen.tex')
 
 # ---- per-paragraph config -----------------------------------------------------------
 # body_first / body_last : unique substrings bounding the draft prose (footnote defs excluded).
@@ -304,7 +304,7 @@ def _delivered_text():
     the gate reads the delivered text as a whole -- the same rule R32 applied to the registry gate.
     """
     parts = [_read(TEX)]
-    supp = os.path.join(os.path.dirname(TEX), 'supplementary.tex')
+    supp = os.path.join(os.path.dirname(TEX), 'supplementary_frozen.tex')
     if os.path.exists(supp):
         parts.append(_read(supp))
     return '\n'.join(parts)

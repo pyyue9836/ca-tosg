@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-figures/1",
  "generator": "tools/build_v2_figures.py",
- "commit": "ec1bb74c84e5f59df404690f5e17ff46a5aedc8e",
+ "commit": "9089dc965df1c6c2bc700eda9da78fc0316dfb8b",
  "palette": {
   "hexes": [
    "#2B62C4",
@@ -18,7 +18,7 @@
    "kind": "conceptual block diagram",
    "inputs": [],
    "note": "No result numbers. Every block is an implemented component; nothing unimplemented is drawn (B-1). Two factual corrections over the first draft: the channel estimate is an EGO-side input, not derived from the collaborator; and E issues no message so it does not reach the transport chain.",
-   "sha256": "704aeff3574a78bad34683dbd800c915e2bb70eab720008be27b8fd4683e734d"
+   "sha256": "98188770b88e0654ce3a036c7467cad73a14e50a73b8c69884fe1c7063d1f7ec"
   },
   "fig2_primary.pdf": {
    "panel": "main",
@@ -34,7 +34,7 @@
     "delta"
    ],
    "layout_rule": "payload on a LOG axis, dF1 in its OWN panel with the margin on the same ruler as the bound. A shared axis would erase one half of the result (V2-R43 B-2); two y-scales on one panel would be a dual-axis chart.",
-   "sha256": "d9c20d9f8d6448d015df3e3fac984f2899b07fa23b46c4a3edabb62b19870c04"
+   "sha256": "df27fc9468f4a35a96a01a8572641cd1ee1fae8e91109f67e15ecd0341497254"
   },
   "fig3_recovery.pdf": {
    "panel": "main",
@@ -48,7 +48,7 @@
     "q_message_survives"
    ],
    "split": "validate (mechanism result)",
-   "sha256": "c82c85db984ba061568e085c99e5942a93221f74b71ed55e3809f13b55dcaa7c"
+   "sha256": "9d2cb3f61c4e73fd65d628edbca259038eb4e614435b4dd707fffb4b321b3498"
   },
   "fig4_where2comm.pdf": {
    "panel": "main",
@@ -61,7 +61,7 @@
     "ap_70"
    ],
    "axis_rule": "the x axis is the NATIVE communication rate. No Msym and no budget-matched language may appear in the figure or its caption (V2-R40 B-7).",
-   "sha256": "956919090486b9f998d8a321594ac61200ed1966d98d2f144e85584cb8a215a3"
+   "sha256": "b60c6d2a43c93540f1f52bdebcc7481c8a1705165db3d50828e096a418c25d83"
   },
   "fig5_lambda.pdf": {
    "panel": "supplementary",
@@ -75,7 +75,7 @@
     "rho_F"
    ],
    "status": "EXPLORATORY, validate only. Did not replace the frozen candidate and explains no Test result (V2-R43 B-5).",
-   "sha256": "92ef55615fdac20bb9d9fa9870a49965bc7eef720546ea5980c5632226c3cc52"
+   "sha256": "23e813f97cc261a7fabb669c6b3298b35d93fb8bf19fef5621c18bd607148ba4"
   }
  }
 }

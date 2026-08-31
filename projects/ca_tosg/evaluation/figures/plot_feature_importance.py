@@ -27,7 +27,7 @@ P1 = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.
 # The two differ materially (channel side 47.1% frozen vs 62.4% v3), so the figure must come from
 # the deployed artefact or it contradicts the table beside it.
 IN = os.path.join(P1, 'results/main/feature_importance_frozen.csv')
-OUT_DIR = os.path.join(P1, 'paper/figures')
+OUT_DIR = os.path.join(P1, 'paper/archive/figures')
 
 
 def main():

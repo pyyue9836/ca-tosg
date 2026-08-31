@@ -31,7 +31,7 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
 OPENCOOD = os.path.join(os.path.dirname(ROOT), 'OpenCOOD')
 GS = os.path.join(OPENCOOD, 'peiyi_work/paper1/gs_rerun')
 DATA = os.path.join(OPENCOOD, 'peiyi_work/paper1/data')
-OUT = os.path.join(ROOT, 'paper/figures/fig_qualitative_bev.pdf')
+OUT = os.path.join(ROOT, 'paper/archive/figures/fig_qualitative_bev.pdf')
 PROV = os.path.join(ROOT, 'results/provenance/PROVENANCE_qualitative.json')
 
 SPLIT, SAMPLE_ID = 'test', 1436

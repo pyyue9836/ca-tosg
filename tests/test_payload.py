@@ -25,7 +25,7 @@ import os, re, sys, csv
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.dirname(HERE)                                   # paper1
 REPLAY = os.path.join(P1, 'results/main/replay_summary.csv')     # frozen 200-realisation replay
-MAIN = os.path.join(P1, 'paper/main.tex')
+MAIN = os.path.join(P1, 'paper/archive/manuscript_frozen.tex')
 # external OpenCOOD-runtime inputs for the two UPSTREAM links (sibling checkout; skipped if absent)
 OPENCOOD = os.path.join(os.path.dirname(P1), 'OpenCOOD')
 JSCC_CFG = os.path.join(OPENCOOD, 'opencood/hypes_yaml/point_pillar_importance_map_jscc_awgn_learned.yaml')

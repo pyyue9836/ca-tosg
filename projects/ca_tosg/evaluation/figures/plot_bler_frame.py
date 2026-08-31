@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 HERE = os.path.dirname(os.path.abspath(__file__))
 P1 = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))
 CSV = os.path.join(P1, 'results/channel/bler_sionna.csv')
-FIG = os.path.join(P1, 'paper/figures')
+FIG = os.path.join(P1, 'paper/archive/figures')
 
 ROWS = list(csv.DictReader(open(CSV)))
 

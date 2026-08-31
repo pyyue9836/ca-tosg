@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.join(ROOT, 'projects/ca_tosg/utils'))
 sys.path.insert(0, os.path.join(ROOT, 'projects/ca_tosg/models'))
 sys.path.insert(0, ROOT)
 
-TEX = os.path.join(ROOT, 'paper/main.tex')
+TEX = os.path.join(ROOT, 'paper/archive/manuscript_frozen.tex')
 KNEE_DB = 10.0                       # the measured rho_F knee (Section true_e2e)
 PAY = {'E': 0.0, 'L': 0.024, 'F': 0.99}
 B_F = 0.99
@@ -315,8 +315,11 @@ def transform():
     raises through splice()/sub_once() in check mode too.
     """
     tex = open(TEX, encoding='utf-8').read()
-    supp_p = os.path.join(ROOT, 'paper/supplementary.tex')
-    supp = open(supp_p, encoding='utf-8').read() if os.path.exists(supp_p) else None
+    supp_p = os.path.join(ROOT, 'paper/archive/supplementary_frozen.tex')
+    # V2-R47 B: the archived supplementary is frozen and always present. The old
+    # `if os.path.exists(...) else None` silently degraded to 'nothing to check' if the file
+    # moved -- a gate that cannot fail. A missing frozen document is now a failure.
+    supp = open(supp_p, encoding='utf-8').read()
     hb, ab = headline_body(), agg_body()
     tex = splice(tex, 'tab:headline', hb)
     # R42-1: tab:headline_agg moved to the supplementary; splice it wherever it now lives, the same
@@ -369,7 +372,7 @@ def main() -> int:
                          'text (or no longer matches it); write nothing')
     a = ap.parse_args()
     tex, supp, cells = transform()                  # splice()/sub_once() raise on a non-1 match
-    supp_p = os.path.join(ROOT, 'paper/supplementary.tex')
+    supp_p = os.path.join(ROOT, 'paper/archive/supplementary_frozen.tex')
     cells_p = os.path.join(ROOT, 'results/provenance/DERIVED_TABLE_CELLS.json')
     if a.check:
         stale = [p for p, want in ((TEX, tex), (supp_p, supp),
@@ -383,15 +386,13 @@ def main() -> int:
         print('GENERATOR CHECK PASS [build_paper_tables]: every pattern matched exactly once and '
               'the delivered text already equals the generated text')
         return 0
-    open(TEX, 'w', encoding='utf-8').write(tex)
-    if supp is not None:
-        open(supp_p, 'w', encoding='utf-8').write(supp)
-    with open(cells_p, 'w') as f:
-        json.dump(cells, f, indent=2)
-        f.write('\n')
-    print('tab:headline, tab:headline_agg (incl. the masked-oracle row) and tab:ablation written '
-          'from the frozen CSVs; observation (iii) regenerated through sub_once()')
-    return 0
+    # V2-R47 B: TEX and supp_p are FROZEN archived documents. `--check` (what the gate runs)
+    # stays exactly as strict as before; the write path is closed, because the only thing it
+    # could now do is edit a document the stop-work amendment forbids editing.
+    print('REFUSING TO WRITE: %s and %s are frozen archived documents (see\n'
+          '  docs/STOP_WORK_v1_freeze.md, amendment V2-R47 A-2). Run with --check.'
+          % (os.path.relpath(TEX, ROOT), os.path.relpath(supp_p, ROOT)))
+    return 1
 
 
 if __name__ == '__main__':

@@ -70,7 +70,7 @@ def self_test():
     The file is restored in `finally`, byte for byte, because a self-test that leaves the paper
     edited is worse than no self-test.
     """
-    tex = os.path.join(ROOT, 'paper', 'main.tex')
+    tex = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
     original = open(tex, encoding='utf-8').read()
     probe = '(iii) Channel-averaged, the selector spends'
     if probe not in original:

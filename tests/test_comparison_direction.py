@@ -30,7 +30,7 @@ import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLAIMS = os.path.join(ROOT, 'tests', 'comparison_claims.md')
-TEX = os.path.join(ROOT, 'paper', 'main.tex')
+TEX = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 
 # how a policy name resolves to (csv, row filter, column) -- all canonical products
 SOURCES = {
@@ -165,7 +165,7 @@ def abstract_in_scope(tex):
 def delivered():
     """main.tex plus supplementary.tex (R40)."""
     parts = [open(TEX, encoding='utf-8').read()]
-    supp = os.path.join(os.path.dirname(TEX), 'supplementary.tex')
+    supp = os.path.join(os.path.dirname(TEX), 'supplementary_frozen.tex')
     if os.path.exists(supp):
         parts.append(open(supp, encoding='utf-8').read())
     return '\n'.join(parts)

@@ -23,7 +23,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MAIN = os.path.join(ROOT, 'paper', 'main.tex')
+MAIN = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 PROV = os.path.join(ROOT, 'results', 'provenance', 'PROVENANCE_figures.json')
 
 # numbers that are axis furniture or shared constants, not claims to be cross-checked

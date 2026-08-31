@@ -4,13 +4,13 @@
 
   python tools/verify_results.py                 every gate: needs the git-excluded data/p2/
                                                  artefacts and the sibling OpenCOOD checkout
-  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (17 of 33)
+  python tools/verify_results.py --content-only  only the checks a CLEAN CLONE can run (19 of 35)
 
   A clean clone CANNOT complete the full verification, and this script does not pretend otherwise:
   the sixteen artefact-tier gates fail loudly on missing data rather than skipping, because a gate that
   cannot verify must never report success. --content-only is the honest subset, not a softer run.
 
-  GATE-COUNT-LINE: 33 checks in total, 17 of which a clean clone can run.
+  GATE-COUNT-LINE: 35 checks in total, 19 of which a clean clone can run.
 
   python tools/verify_results.py
 """
@@ -125,19 +125,84 @@ GATES = [
     ('content',   'conclusion fidelity',  [PY, 'tests/test_v2_conclusion_fidelity.py']),
     # V2-R42 B-2: every v2 paper number is emitted by a generator, never typed.
     ('artifacts', 'v2 paper numbers',     [PY, 'tools/build_v2_paper_numbers.py', '--check']),
+    # V2-R48 B: the other half of that rule. The generator guarantees the macros are right; this
+    # guarantees the manuscript USES them. The 4-page brief passed every gate with five hand-typed
+    # numbers in the paragraph three people had re-read -- re-reading checks meaning, not
+    # provenance. Registered constants stay legal (tests/paper_literal_registry.md); results do not.
+    ('content',   'paper numbers macros', [PY, 'tests/test_paper_numbers_are_macros.py']),
+    # V2-R49 B-3: the sweep's COVERAGE, not its verdict. The ruled withdrawal sentence sat in the
+    # 4-page brief for two rounds without ever being judged -- not because the sweep cleared it, but
+    # because the brief's path was not on the target list. A rule that has never run against the
+    # text it governs has not been verified. Also carries the A-3 injections for the withdrawal
+    # exemption: affirmative FIRES, retraction quiet, negation deleted FIRES.
+    ('content',   'fingerprint coverage', [PY, 'tests/test_fingerprint_coverage.py']),
     # V2-R42 A-7/C-3: the manuscript versions separately from the closed-out experiment, and the
-    # v1 freeze witness is re-verified on every run.
-    ('artifacts', 'v2 publication',       [PY, 'tools/build_v2_publication_manifest.py', '--check']),
+    # freeze witness is re-verified on every run. V2-R47 B-1/B-4: the witnessed documents moved
+    # to paper/archive/ and the gate moved with them -- same hashes, same committed-blob
+    # comparison, same failure. `--self-test` injects a changed byte and a deletion.
+    ('artifacts', 'publication + freeze', [PY, 'tools/build_publication_manifest.py', '--check']),
 ]
 
 
 # R20 9c: the fingerprint sweep covers the reader-facing docs too. It read main.tex only, so a
 # retired number could (and did) survive in README and docs/ with every gate green.
-FINGERPRINT_TARGETS = ('paper/main.tex', 'paper/supplementary.tex', 'README.md', 'docs/model_zoo.md',
-                       'docs/milestone_summary.md')
+#
+# V2-R49 B-3: the archived documents are BACK IN. V2-R47 B had taken them out, reasoning that an
+# archive records what the retired values were. That reasoning was wrong for these files: they are
+# delivered text -- a reader opening the repository reads them -- and they were swept, and passing,
+# right up until the move. The exclusion would have created a hole exactly where one had just been
+# found (B-2). `tests/test_fingerprint_coverage.py` now fails if this tuple stops covering the
+# delivered set, so the list cannot silently fall behind the tree again.
+FINGERPRINT_TARGETS = ('paper/main.tex', 'paper/supplementary.tex',
+                       'paper/archive/manuscript_frozen.tex',
+                       'paper/archive/supplementary_frozen.tex',
+                       'paper/archive/results_brief.tex',
+                       # the frozen brief's macro file: the brief's own .tex holds macro NAMES, so
+                       # the values a reader sees are only ever in here. Sweeping the document and
+                       # not its numbers would be a hole of exactly the shape B-2 just cost us.
+                       'paper/archive/tables/generated_numbers.tex',
+                       'README.md', 'docs/model_zoo.md', 'docs/milestone_summary.md')
 # NOT swept, by design: docs/p0_corrigendum.md and docs/canonical_quantities.md exist to record what
 # the retired values WERE (old-vs-new tables, "which side flipped"), so a retired number is correct
 # content there. Sweeping them would force the record to delete its own evidence.
+
+# V2-R49 A-2: a retired CLAIM and its WITHDRAWAL are the same words in opposite directions, and a
+# verb-anchored pattern cannot tell them apart. The ruled sentence "...not a demonstration that a
+# learned selector beats simple rules---at equal budget it does not" is the withdrawal of the very
+# claim the `beats ... simple rule` pattern retires, so the pattern was firing on its own ally.
+#
+# The exemption is a FIXED, ENUMERABLE list of withdrawal lead-ins, not a general reading of
+# negation. A match is exempt only when one of these appears earlier in the SAME sentence.
+#
+# Why the text was not changed to suit the pattern instead: the pattern's intent is "no claim of an
+# F1 win over a hand or simple rule survives", and the sentence says exactly that. Editing a ruled
+# conclusion so a regex stops complaining lets the guard write the conclusion.
+NEGATION_LEADINS = (
+    'not a demonstration that',
+    'is not a demonstration that',
+    'rather than a demonstration that',
+    'does not show that',
+    'do not claim that',
+    'we do not claim',
+    'not evidence that',
+    'no evidence that',
+)
+
+
+def sentence_start(body, i):
+    """Start of the sentence containing offset `i`: after the last '.' or blank line before it."""
+    return max(body.rfind('.', 0, i), body.rfind('\n\n', 0, i)) + 1
+
+
+def is_withdrawal(body, i):
+    """Does an enumerated withdrawal lead-in precede offset `i` inside the same sentence?
+
+    Whitespace is collapsed first. LaTeX wraps prose wherever the line runs out, and the very
+    sentence this exists for is broken as "not a\ndemonstration that" -- a raw substring test
+    would have missed it and the exemption would have done nothing.
+    """
+    head = re.sub(r'\s+', ' ', body[sentence_start(body, i):i]).lower()
+    return any(lead in head for lead in NEGATION_LEADINS)
 
 
 def block_exit():
@@ -159,6 +224,8 @@ def block_exit():
             for m in re.finditer(p, body):
                 tail = body[m.end():m.end() + 1]
                 if tail.isdigit():
+                    continue
+                if is_withdrawal(body, m.start()):
                     continue
                 print('  STALE FINGERPRINT PRESENT in %s: %s' % (rel, p))
                 n += 1

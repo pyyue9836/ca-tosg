@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 
 from audit_claims_evidence import claims_by_section, ledger_rows, text_key  # noqa: E402
 
-MAIN = os.path.join(ROOT, 'paper', 'main.tex')
+MAIN = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 E2E = os.path.join(ROOT, 'results/main/true_e2e_ap.csv')
 FIXED = os.path.join(ROOT, 'results/main/fixed_references.csv')
 OUT = os.path.join(ROOT, 'docs', 'p6_cross_section_conflicts.md')
@@ -238,7 +238,7 @@ def self_test(tex):
 def _delivered():
     """main.tex plus supplementary.tex -- R40: the supplementary is delivered text too."""
     parts = [open(MAIN, encoding='utf-8').read()]
-    supp = os.path.join(os.path.dirname(MAIN), 'supplementary.tex')
+    supp = os.path.join(os.path.dirname(MAIN), 'supplementary_frozen.tex')
     if os.path.exists(supp):
         parts.append(open(supp, encoding='utf-8').read())
     return '\n'.join(parts)

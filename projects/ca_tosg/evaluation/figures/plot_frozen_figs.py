@@ -33,7 +33,7 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
 CURVES = os.path.join(ROOT, 'results/main/frozen_curves.csv')
 REPLAY = os.path.join(ROOT, 'results/main/replay_summary.csv')
 FIXED = os.path.join(ROOT, 'results/main/fixed_references.csv')
-FIGDIR = os.path.join(ROOT, 'paper/figures')
+FIGDIR = os.path.join(ROOT, 'paper/archive/figures')
 PROVDIR = os.path.join(ROOT, 'results/provenance')
 
 MAIN_BUDGET = 0.20

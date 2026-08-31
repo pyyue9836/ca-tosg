@@ -148,3 +148,55 @@ belongs to. The claim here is precisely a crossing — the confidence bound cros
 margin — so it has to be *seen*, not asserted. That requires the bound and the margin on **one
 ruler**, which means a separate panel at its own scale, with the large-ratio quantity given a log
 axis of its own.
+
+### Instances six and seven of "a gate that cannot fail" (V2-R48 C-2)
+
+`tools/p6_numbers_vs_csv.py` and `tools/build_paper_tables.py` both read the delivered manuscript
+behind `if os.path.exists(...)`. Neither would have raised when the path moved; both would have
+reported success over an empty string. The guards are removed and a missing frozen document is now
+a failure.
+
+**The general shape:** a fallback that turns "I cannot check this" into "there is nothing to
+check". It is invisible while the path is right, and it is exactly wrong at the moment the path
+stops being right — which is the only moment the check mattered.
+
+### Instance eight: the exception that excused its neighbour (V2-R48 C-1)
+
+`tests/test_paper_numbers_are_macros.py` searched for a registered exception pattern anywhere in a
+$\pm 60$-character window around a numeric literal. `AP@0.5 of 0.86994` was therefore excused by
+the row that legalises the metric threshold `0.5` — a hand-typed AP passing the gate written to
+catch hand-typed APs. A pattern now excuses only the literal its own match covers.
+
+**Bought by:** the gate's own injection self-test, on its first run. A whitelist scoped to a window
+rather than to the token is a whitelist that grows silently with the text around it.
+
+### Instance nine: a rule that had never been run against the text it governs (V2-R49 B-2)
+
+The ruled sentence *"...not a demonstration that a learned selector beats simple rules---at equal
+budget it does not"* matches the retired-claim pattern `beats ... simple rule` word for word. It sat
+in the 4-page brief for two rounds and never fired — **not because the sweep judged it and cleared
+it, but because the brief's path, `paper/v2_draft/main.tex`, was not on the target list.** Moving
+the same sentence into `paper/main.tex`, which is on the list, is what surfaced it.
+
+**A rule that has never run against the text it governs has not been verified.** This is the same
+family as "a gate that cannot fail" with a different cause: those fail because the judgement is
+self-consistent, this one because the coverage had a hole. `tests/test_fingerprint_coverage.py`
+(gate 35) closes it by requiring the target list to cover every delivered document, with an
+injection that removes one and checks it fires.
+
+### Why the pattern was narrowed and the text was not (V2-R49 A-4)
+
+The pattern's intent is *"no claim of an F1 win over a hand or simple rule survives."* The sentence
+it fired on **is that claim's withdrawal** — same words, opposite direction, and the pattern is
+verb-anchored so it cannot tell them apart. The fix is a fixed, enumerable list of withdrawal
+lead-ins (`NEGATION_LEADINS`), applied only within the sentence containing the match, with
+injections proving the affirmative form still fires and that deleting the negation restores the
+failure.
+
+**Editing the conclusion so the regex stops complaining would let the guard write the conclusion.**
+That is the line: a gate may constrain how a result is stated, and may never decide what the result
+is. The narrowing has an exact scope and three tests; the alternative had neither.
+
+**And one shortcut refused, recorded because it worked.** `[^.\n]` excludes newlines, so simply
+breaking the line between "beats" and "simple rules" would have silenced the sweep completely. The
+reader would see the identical words. Literally true, read false — against the gate itself.

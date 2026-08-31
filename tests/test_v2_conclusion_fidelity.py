@@ -16,7 +16,11 @@ from __future__ import annotations
 import os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEX = os.path.join(ROOT, 'paper', 'v2_draft', 'main.tex')
+# V2-R47 B-2: the ruled wording is checked in the ONE official manuscript. The archived
+# 4-page brief keeps its own check -- it is frozen, so this can only ever confirm it, but a
+# claim that was ruled once is checked wherever it is delivered.
+TEX = os.path.join(ROOT, 'paper', 'main.tex')
+BRIEF = os.path.join(ROOT, 'paper', 'archive', 'results_brief.tex')
 
 # (label, phrases that MUST be present, phrases that must NOT be, anchor for the forbidden scope)
 #
@@ -54,7 +58,8 @@ def norm(s):
 def check(text=None):
     if text is None:
         if not os.path.exists(TEX):
-            return ['paper/v2_draft/main.tex does not exist']
+            return ['paper/main.tex does not exist -- the official manuscript is the '
+                    'delivered text this gate judges']
         text = open(TEX, encoding='utf-8').read()
     n = norm(text)
     bad = []
@@ -74,6 +79,19 @@ def check(text=None):
     return bad
 
 
+def _inject(src, phrase, replacement, expect=1):
+    """Replace `phrase` in the SOURCE, tolerating the line wrapping LaTeX puts in it.
+
+    V2-R48: a plain str.replace() silently did nothing when the phrase happened to be wrapped
+    across two lines, so the injection tested nothing and the self-test reported SILENT -- a
+    self-test that cannot fail, inside the gate whose whole purpose is to fail on a fluent edit.
+    """
+    pat = r'\s+'.join(re.escape(w) for w in phrase.split())
+    out, n = re.subn(pat, replacement, src)
+    assert n == expect, ('injection matched %d times, not %d: %r' % (n, expect, phrase[:50]))
+    return out
+
+
 def self_test():
     base = check()
     print(f'  baseline: {len(base)} finding(s)' + (' -- clean' if not base else ''))
@@ -84,18 +102,19 @@ def self_test():
     src = open(TEX, encoding='utf-8').read()
     ok = True
     # the exact failure this exists for: a fluent edit that drops the qualifier
-    inj = src.replace('without statistically establishing accuracy preservation',
-                      'while preserving accuracy')
+    inj = _inject(src, 'without statistically establishing accuracy preservation',
+                  'while preserving accuracy')
     f = check(inj)
     print(f'  {"FIRES  " if f else "SILENT "}  the qualifier is smoothed away ("while preserving '
           f'accuracy")')
     ok &= bool(f)
-    inj2 = src.replace('excluded from bit-level budget-matched claims',
-                       'compared at a matched budget')
+    inj2 = _inject(src, 'excluded from bit-level budget-matched claims',
+                   'compared at a matched budget')
     f2 = check(inj2)
     print(f'  {"FIRES  " if f2 else "SILENT "}  Where2comm given a matched-budget reading')
     ok &= bool(f2)
-    inj3 = src.replace('\\TestSaving', 'ninety-nine')
+    # the macro appears in the abstract, the results and the conclusion; all three go
+    inj3 = _inject(src, '\\TestSaving', 'ninety-nine', expect=3)
     f3 = check(inj3)
     print(f'  {"quiet  " if not f3 else "FIRES  "}  a macro replaced by prose (content words '
           f'intact; must NOT fire)')
@@ -107,8 +126,14 @@ def self_test():
 def main():
     if '--self-test' in sys.argv:
         return self_test()
-    bad = check()
-    print(f'conclusion fidelity: {len(CLAIMS)} ruled claims checked in paper/v2_draft/main.tex')
+    # V2-R47 B-2: both delivered texts. The brief is frozen, so its half can only confirm --
+    # but a gate that stops looking at a document because it is frozen is a gate that would
+    # not notice the freeze being broken.
+    bad = ['[official] ' + b for b in check()]
+    bad += ['[archived brief] ' + b
+            for b in check(open(BRIEF, encoding='utf-8').read())]
+    print(f'conclusion fidelity: {len(CLAIMS)} ruled claims checked in paper/main.tex '
+          f'and in the archived brief')
     if bad:
         print('\nCONCLUSION FIDELITY GATE FAIL:')
         for b in bad:

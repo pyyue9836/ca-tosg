@@ -40,8 +40,9 @@
   "results/v2/v2_culver_primary.json": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
   "results/v2/gt_audit_v2_corner.csv": "04e7238181d119db29142486f9fb8c7f2524357387535c611b18745fd76383fc",
   "results/baselines/where2comm_v2/scored_v2/summary_deterministic.csv": "142d169969d3a562d213d409947753f25bf3837179af368a92af8123455fd6dc",
-  "paper/v2_draft/SKELETON.md": "9c02c9ecbf5962b82f59a5c822e79829cce6444b28c891b3f332fc059132ad4e",
-  "paper/main.tex": "09ca4da58ae3dcd5b9eed936d20c6dd3015a2a0967d0ef0cd027eeeb3fd7e9f6",
-  "paper/main.pdf": "cb3b28ec12b47cf77d58a95c59caece8ec505320a155e98806f3993017917476"
- }
+  "paper/archive/SKELETON.md": "9c02c9ecbf5962b82f59a5c822e79829cce6444b28c891b3f332fc059132ad4e",
+  "paper/archive/manuscript_frozen.tex": "09ca4da58ae3dcd5b9eed936d20c6dd3015a2a0967d0ef0cd027eeeb3fd7e9f6",
+  "paper/archive/manuscript_frozen.pdf": "cb3b28ec12b47cf77d58a95c59caece8ec505320a155e98806f3993017917476"
+ },
+ "key_artefacts_path_note": "V2-R47 B-5: three artefacts were relocated by git mv (see docs/STOP_WORK_v1_freeze.md amendment V2-R47 A-1). PATHS CORRECTED, HASHES UNCHANGED. The experiment is not touched by this edit."
 }

@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 r"""V2-R42 B-2 — write every v2 paper number into LaTeX from the closed-out products.
 
-**No number in paper/v2_draft/ is typed by hand.** They are emitted here, into
-`paper/v2_draft/tables/generated_numbers.tex` as `\newcommand` macros and into the result tables, and
-the manuscript references the macros. The reason is one round old: `sparsity_payload.csv` carried a
+**No number in the manuscript is typed by hand.** They are emitted here, into
+`paper/tables/generated_numbers.tex` as `\newcommand` macros and into the result tables, and
+the manuscript references the macros. (V2-R47 B-3: the target moved with the manuscript; the
+4-page brief's copy of this file is archived unchanged at
+`paper/archive/tables/generated_numbers.tex` so the frozen brief stays self-contained.) The reason is one round old: `sparsity_payload.csv` carried a
 column whose provenance was "the accounting in the change-log" -- arithmetic done in prose, which no
 script could re-derive. A number no script can regenerate is a NOTE, not a RESULT.
 
@@ -21,7 +23,7 @@ import argparse, hashlib, json, os, sys
 import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, 'paper', 'v2_draft', 'tables', 'generated_numbers.tex')
+OUT = os.path.join(ROOT, 'paper', 'tables', 'generated_numbers.tex')
 W2C = os.path.join(ROOT, 'results/baselines/where2comm_v2/scored_v2')
 
 
@@ -56,6 +58,8 @@ def build():
         mac(f'{tag}Scenes', str(d['n_scenes']))
         mac(f'{tag}Rows', f"{d['n_rows']:,}")
         mac(f'{tag}NoCollab', f"{d['dual_accounting']['no_collaborator_share'] * 100:.2f}")
+        mac(f'{tag}CollabShare',
+            f"{(1 - d['dual_accounting']['no_collaborator_share']) * 100:.2f}")
         mac(f'{tag}RhoE', f"{d['action_mix']['E']:.3f}")
         mac(f'{tag}RhoL', f"{d['action_mix']['L']:.3f}")
         mac(f'{tag}RhoF', f"{d['action_mix']['F']:.3f}")
@@ -75,26 +79,366 @@ def build():
         mac(f'WtwoC{tag}APfifty', f"{r.ap_50:.5f}")
         mac(f'WtwoC{tag}APseventy', f"{r.ap_70:.5f}")
         mac(f'WtwoC{tag}Rate', f"{r.comm_rate * 100:.1f}")
+
+    # ================================================================================
+    # V2-R47 D-1. Everything below is READ-ONLY over closed-out products. No held-out
+    # selection is computed here, nothing is re-fitted, and V2_CLOSEOUT.json is not touched.
+    # Groups are labelled MAIN / SUPPLEMENTARY (D-2) so the two documents cannot drift.
+    # ================================================================================
+    el = json.load(open(os.path.join(ROOT, 'results/v2/wp34_e_l_validate.json')))
+    pc = json.load(open(os.path.join(ROOT, 'results/v2/payload_chain.json')))
+    p12 = json.load(open(os.path.join(ROOT, 'results/v2/v2_p12_comparison.json')))
+    w5 = json.load(open(os.path.join(ROOT, 'results/v2/wp5_final_validate.json')))
+    msg = json.load(open(os.path.join(ROOT, 'results/v2/wp5_message_validate.json')))
+    pos = json.load(open(os.path.join(ROOT, 'results/v2/position_effect_level1_validate.json')))
+    lam = json.load(open(os.path.join(ROOT, 'results/v2/v2_lambda_fine_scan_validate.json')))
+    cue = json.load(open(os.path.join(ROOT, 'results/manifests/V2_CUE_SCHEMA.json')))
+    i8 = pd.read_csv(os.path.join(ROOT, 'results/v2/int8_clean_delivery_validate.csv'))
+
+    L.append('')
+    L.append(r'% ---- MAIN 6.1: fixed-action performance and communication cost -------------')
+    mac('ValFrames', f"{el['frames']:,}")
+    for tag, k in (('E', 'E'), ('L', 'L')):
+        mac(f'Fixed{tag}APfifty', f"{el[f'{k}_ap50']:.5f}")
+        mac(f'Fixed{tag}APseventy', f"{el[f'{k}_ap70']:.5f}")
+        mac(f'Fixed{tag}Fone', f"{el[f'{k}_f1_mean']:.5f}")
+    clean = w5['conditions']['clean|0.0|0']
+    mac('FixedFcleanAPfifty', f"{clean['ap50']:.5f}")
+    mac('FixedFcleanAPseventy', f"{clean['ap70']:.5f}")
+    # scene-equal F1, the confirmatory statistic, for the same three fixed arms
+    for name, tag in (('Fixed_E', 'E'), ('Fixed_L', 'L'), ('Fixed_F', 'F')):
+        mac(f'Fixed{tag}SceneFone', f"{p12['arms'][name]['scene_equal_f1']:.5f}")
+        mac(f'Fixed{tag}Pay', f"{p12['arms'][name]['mean_payload_msym']:.5f}")
+    # int8 is the transmitted form: what the quantisation costs on a clean channel
+    mac('IntEightFloatFone', f"{i8.f1_float.mean():.5f}")
+    mac('IntEightFone', f"{i8.f1_int8.mean():.5f}")
+    mac('IntEightDeltaFone', f"{i8.f1_int8.mean() - i8.f1_float.mean():+.5f}")
+    mac('IntEightFrames', f"{len(i8):,}")
+    # V2-R48 B-3: derived comparisons are macros too. Prose must never do the arithmetic.
+    aF, aL = p12['arms']['Fixed_F'], p12['arms']['Fixed_L']
+    mac('FixedFMinusLSceneFone', f"{aF['scene_equal_f1'] - aL['scene_equal_f1']:+.5f}")
+    mac('FixedFOverLPayRatio', f"{aF['mean_payload_msym'] / aL['mean_payload_msym']:,.0f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN 6.1: the payload chain, bit by bit ------------------------------')
+    mac('BFmsym', f"{pc['F']['msym']:.5f}")
+    mac('BFelements', f"{pc['F']['elements']:,}")
+    mac('BFinfobits', f"{pc['F']['info_bits']:,}")
+    mac('BFpackets', f"{pc['F']['packets']:,}")
+    mac('BFheaderbits', f"{pc['F']['header_bits']:,}")
+    mac('BFncw', f"{pc['F']['n_cw']:,}")
+    mac('BFdirectmsym', f"{pc['F']['direct_msym']:.4f}")
+    mac('QuantWidth', str(pc['constants']['w_bits']))
+    mac('PacketBits', f"{pc['constants']['P_bits']:,}")
+    mac('HeaderBits', str(pc['constants']['H_bits']))
+    mac('BoxBits', str(pc['constants']['B_box_bits']))
+    mac('LdpcK', str(pc['constants']['K']))
+    mac('LdpcN', str(pc['constants']['n']))
+    mac('QamM', str(pc['constants']['M']))
+    mac('BLmean', f"{el['B_L_mean']:.5f}")
+    mac('BLmin', f"{el['B_L_min']:.5f}")
+    mac('BLmax', f"{el['B_L_max']:.5f}")
+    mac('BLshareTightPct', f"{el['B_L_share_of_beta010_pct']:.2f}")
+    mac('NboxLmean', f"{el['n_box_L_mean']:.2f}")
+    mac('NcwLmean', f"{el['n_cw_L_mean']:.2f}")
+    mac('NcwLmin', str(el['n_cw_L_min']))
+    mac('NcwLmax', str(el['n_cw_L_max']))
+    for name, b in (('Tight', '0.10'), ('Primary', '0.20'), ('Loose', '0.30')):
+        mac(f'Budget{name}Beta', b)
+        mac(f'Budget{name}Msym', f"{pc['beta_tiers_msym'][b]:.5f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN 6.3: the frozen selector, and what the budget did ---------------')
+    mac('SelectorTrees', str(fr['selector']['hyperparameters']['n_estimators']))
+    mac('SelectorLeaf', str(fr['selector']['hyperparameters']['min_samples_leaf']))
+    mac('CueDim', str(cue['n_fields']))
+    mac('CueName', cue['name'].replace('_', r'\_'))
+    for name, b in (('Tight', '0.1'), ('Primary', '0.2'), ('Loose', '0.3')):
+        mac(f'Tau{name}', str(fr['tau_star_per_beta'][b]))
+        v = p12['verdict_per_budget'][b]
+        mac(f'RFPayAt{name}', f"{v['RF']['payload']:.5f}")
+        mac(f'RFSceneFoneAt{name}', f"{v['RF']['scene_equal_f1']:.5f}")
+    # how far the frozen policy sits below the TIGHTEST ceiling -- the reason the budget never binds
+    mac('BudgetHeadroomRatio',
+        f"{pc['beta_tiers_msym']['0.10'] / p12['verdict_per_budget']['0.1']['RF']['payload']:,.0f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN 6.4: transport mechanism ----------------------------------------')
+    mac('TransportReplicates', str(w5['replicates']))
+    mac('TransportRates', str(len(w5['rates'])))
+    mac('MsgReplays', str(msg['n_replays']))
+    # p = 1: a zero-filled feature tensor is NOT ego-only inference
+    mac('ZeroTensorAPfifty', f"{msg['baselines']['p1']['0.5']:.5f}")
+    mac('ZeroTensorAPseventy', f"{msg['baselines']['p1']['0.7']:.5f}")
+    mac('EgoAPfifty', f"{msg['baselines']['ego']['0.5']:.5f}")
+    mac('EgoAPseventy', f"{msg['baselines']['ego']['0.7']:.5f}")
+    # V2-R48 A-2: three separate deltas, never one. The AP@0.5 delta is POSITIVE and the AP@0.7
+    # and F1 deltas are NEGATIVE, so a single macro would let the prose read "zero-tensor fusion is
+    # better" off one number. The claim this supports is INEQUIVALENCE, not superiority.
+    pe = msg['p1_vs_ego']
+    mac('ZeroTensorMinusEgoAPFifty', f"{pe['ap50_p1'] - pe['ap50_ego']:+.5f}")
+    mac('ZeroTensorMinusEgoAPSeventy', f"{pe['ap70_p1'] - pe['ap70_ego']:+.5f}")
+    mac('ZeroTensorMinusEgoMeanFOne', f"{pe['f1_p1'] - pe['f1_ego']:+.5f}")
+    mac('ZeroTensorFone', f"{pe['f1_p1']:.5f}")
+    mac('EgoFone', f"{pe['f1_ego']:.5f}")
+    mac('ZeroTensorIdenticalFrames', str(pe['frames_with_identical_boxes']))
+    lo = f"{min(float(k) for k in msg['message_regime'] if float(k) > 0):g}"
+    mac('MsgLowestRate', lo)
+    # LaTeX scientific notation, not Python's: "3.463e-06" typesets as an italic e and a spaced
+    # minus inside maths, which reads as a variable rather than an exponent.
+    _q = msg['message_regime'][lo]['q_message_survives']
+    _m, _e = f"{_q:.4g}".split('e') if 'e' in f"{_q:.4g}" else (f"{_q:.4g}", None)
+    mac('MsgSurvivalAtLowest',
+        _m if _e is None else r'%s\times10^{%d}' % (_m, int(_e)))
+    mac('MsgFramesAtLowest', f"{msg['message_regime'][lo]['expected_frames_surviving']:.4g}")
+    for reg, tag in (('ideal', 'Ideal'), ('packet', 'Packet')):
+        e = pos['regimes'][reg]['equal_loss']
+        mac(f'Pos{tag}Pairs', f"{e['pairs']:,}")
+        mac(f'Pos{tag}Frames', f"{e['frames_involved']:,}")
+        mac(f'Pos{tag}Pct', f"{e['proportion_df1_nonzero'] * 100:.2f}")
+        mac(f'Pos{tag}WilsonLo', f"{e['wilson95_lo'] * 100:.2f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN 6.6: why rho_F = 0 ----------------------------------------------')
+    q1 = p12['F_collapse_question_1_learning']
+    mac('FBestRows', f"{q1['rows_where_F_is_best']:,}")
+    mac('FBestSharePct', f"{q1['share_of_grid'] * 100:.1f}")
+    mac('FBestNetGain', f"{q1['mean_net_gain_where_F_is_best']:.5f}")
+    be = fr['break_even_lambda']
+    mac('BreakEvenCond', f"{be['conditional_on_F_best_rows']['value']}")
+    mac('BreakEvenGrid', f"{be['grid_mean_over_ALL_rows']['value']}")
+    lbf = p12['F_collapse_question_2_design']['lambda_times_B_F']
+    mac('LambdaTimesBF', f"{lbf:.5f}")
+    # V2-R48 B-3/B-6: "orders of magnitude" is a derived RESULT. Emit the ratio it rests on so the
+    # phrase can never drift from the arithmetic.
+    mac('PenaltyOverGainRatio', f"{lbf / q1['mean_net_gain_where_F_is_best']:.1f}")
+
+    L.append('')
+    L.append(r'% ---- SUPPLEMENTARY: the exploratory lambda scan ---------------------------')
+    rows = sorted(lam['rows'], key=lambda r: r['lam'])
+    mac('LamScanPoints', str(len(rows)))
+    mac('LamScanLo', f"{rows[0]['lam']:g}")
+    mac('LamScanHi', f"{rows[-1]['lam']:g}")
+    mac('LamScanRhoFLo', f"{rows[0]['rho_F']:.3f}")
+    mac('LamScanRhoFHi', f"{rows[-1]['rho_F']:.3f}")
+    mac('LamScanPreregAt', lam['preregistered_at'])
+
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     return '\n'.join(L) + '\n'
+
+
+# ------------------------------------------------------------------------------------
+# V2-R47 D-1: generated TABLE BODIES. A table with no generator is a table nobody can
+# re-derive (docs/gate_design_principles.md). Each file is \input by the manuscript.
+# ------------------------------------------------------------------------------------
+HDR = (r'% GENERATED by tools/build_v2_paper_numbers.py -- do not edit by hand (V2-R47 D-1).')
+
+
+SPLIT_NAME = {'validate': 'validate (dev.)', 'test': 'Test', 'culver': 'Culver-City'}
+
+
+def tables():
+    T = {}
+    w5 = json.load(open(os.path.join(ROOT, 'results/v2/wp5_final_validate.json')))
+    msg = json.load(open(os.path.join(ROOT, 'results/v2/wp5_message_validate.json')))
+    pos = json.load(open(os.path.join(ROOT, 'results/v2/position_effect_level1_validate.json')))
+    lam = json.load(open(os.path.join(ROOT, 'results/v2/v2_lambda_fine_scan_validate.json')))
+    cue = json.load(open(os.path.join(ROOT, 'results/manifests/V2_CUE_SCHEMA.json')))
+    w = pd.read_csv(os.path.join(W2C, 'summary_deterministic.csv'))
+
+    # --- SUPPLEMENTARY: the complete loss-rate sweep, all three delivery regimes -------
+    R = [HDR, r'\begin{tabular}{lrrrrrr}', r'\toprule',
+         r'& \multicolumn{2}{c}{fragment-aware} & \multicolumn{2}{c}{packet loss} '
+         r'& \multicolumn{2}{c}{message (all-or-nothing)} \\',
+         r'\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}',
+         r'$p$ & AP@0.5 & AP@0.7 & AP@0.5 & AP@0.7 & $q$ & AP@0.5 \\', r'\midrule']
+    reps = w5['replicates']
+    for rate in [0.0] + list(w5['rates']):
+        cells = []
+        for reg in ('ideal', 'packet'):
+            keys = [f'{reg}|{rate}|{r}' for r in range(reps)]
+            keys = [k for k in keys if k in w5['conditions']]
+            if not keys:
+                keys = ['clean|0.0|0']
+            for m in ('ap50', 'ap70'):
+                cells.append('%.5f' % (sum(w5['conditions'][k][m] for k in keys) / len(keys)))
+        mk = ('%g' % rate) if ('%g' % rate) in msg['message_regime'] else None
+        if mk is None:
+            cells += ['--', '--']
+        else:
+            cells += ['%.4g' % msg['message_regime'][mk]['q_message_survives'],
+                      '%.5f' % msg['message_regime'][mk]['ap50_mc_mean']]
+        R.append('$%g$ & ' % rate + ' & '.join(cells) + r' \\')
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_transport.tex'] = '\n'.join(R) + '\n'
+
+    # --- SUPPLEMENTARY: loss POSITION at exactly equal codeword-loss counts -----------
+    R = [HDR, r'\begin{tabular}{lrrrrr}', r'\toprule',
+         r'regime & $p$ & pairs & frames & $\Pr(\Delta F_1 \neq 0)$ & Wilson 95\% lo \\',
+         r'\midrule']
+    for reg in ('ideal', 'packet'):
+        br = pos['regimes'][reg]['equal_loss']['by_rate']
+        for rate in sorted(br, key=float):
+            d = br[rate]
+            R.append(r'%s & $%g$ & %d & %d & %.4f & %.4f \\'
+                     % (reg, float(rate), d['pairs'], d['frames'], d['proportion'],
+                        d['wilson95_lo']))
+        e = pos['regimes'][reg]['equal_loss']
+        R.append(r'\textbf{%s, pooled} & --- & %d & %d & %.4f & %.4f \\'
+                 % (reg, e['pairs'], e['frames_involved'], e['proportion_df1_nonzero'],
+                    e['wilson95_lo']))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_position_effect.tex'] = '\n'.join(R) + '\n'
+
+    # --- SUPPLEMENTARY: Where2comm, all 24 evaluated thresholds ----------------------
+    # comm_rate is the fraction of features retained. It is NOT converted to Msym here or
+    # anywhere else: the evaluated implementation transmits floating-point selected
+    # features and does not execute the locked int8 path (V2-R42 B-1, claim 2).
+    R = [HDR, r'\begin{tabular}{lrrrr}', r'\toprule',
+         r'split & threshold & comm.\ rate & AP@0.5 & AP@0.7 \\', r'\midrule']
+    for _, r in w.sort_values(['split', 'threshold']).iterrows():
+        R.append(r'%s & %g & %.6f & %.5f & %.5f \\'
+                 % (SPLIT_NAME.get(r.split, r.split), r.threshold, r.comm_rate, r.ap_50, r.ap_70))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_where2comm_full.tex'] = '\n'.join(R) + '\n'
+
+    # --- SUPPLEMENTARY: the frozen cue schema, one row per field ---------------------
+    R = [HDR, r'\begin{tabular}{rll}', r'\toprule',
+         r'\# & field & source \\', r'\midrule']
+    for i, f in enumerate(cue['fields'], 1):
+        # the provenance strings are code locations; the column wants the callable, not a
+        # mid-word truncation of its argument list
+        # Two provenance forms exist: 'file.py:routine(...) <- source' and a bare
+        # 'file.py:LINE'. Splitting on ':' unconditionally turned the second into a bare
+        # line number in the table -- '46' and '47' were printed as the SOURCE of the two
+        # channel fields, which is not a source, it is a coordinate.
+        raw_prov = cue['field_provenance'][f][0]
+        src = raw_prov.split('<-')[-1].strip()
+        if src is raw_prov or '<-' not in raw_prov:
+            tail = raw_prov.rsplit(':', 1)[-1]
+            src = (os.path.basename(raw_prov.rsplit(':', 1)[0]) if tail.isdigit()
+                   else tail)
+        else:
+            src = src.split(':')[-1].strip()
+        src = src.split('(')[0].strip()
+        R.append(r'%d & \texttt{%s} & \texttt{%s} \\'
+                 % (i, f.replace('_', r'\_'), src.replace('_', r'\_')))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_cue_schema.tex'] = '\n'.join(R) + '\n'
+
+    # --- SUPPLEMENTARY: the EXPLORATORY lambda scan ----------------------------------
+    R = [HDR,
+         r'% EXPLORATORY DIAGNOSTIC, development split only. Enters no primary criterion;',
+         r'% the frozen candidate was not replaced on the strength of it.',
+         r'\begin{tabular}{rrrrrr}', r'\toprule',
+         r'$\lambda$ & oracle $F_1$ (scene-eq.) & payload (Msym) & $\rho_E$ & $\rho_L$ & '
+         r'$\rho_F$ \\', r'\midrule']
+    for r in sorted(lam['rows'], key=lambda x: x['lam']):
+        R.append(r'%g & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+                 % (r['lam'], r['oracle_scene_equal_f1'], r['oracle_payload'],
+                    r['rho_E'], r['rho_L'], r['rho_F']))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_lambda_scan.tex'] = '\n'.join(R) + '\n'
+
+    # --- MAIN: the experimental protocol, one row per split ---------------------------
+    # Gate 22 (`sealed held-out`) judges CAPABILITY, not intent: a live script may not so much as
+    # NAME a path under results/v2/sealed/. The first draft of this table read the two held-out
+    # grids directly and the gate fired, correctly. Every figure below is reassembled from
+    # unsealed products instead -- identical values, no sealed path in this file.
+    prim = {'test': json.load(open(os.path.join(ROOT, 'results/v2/v2_test_primary.json'))),
+            'culver': json.load(open(os.path.join(ROOT, 'results/v2/v2_culver_primary.json')))}
+    grids = {'validate': json.load(
+        open(os.path.join(ROOT, 'results/v2/v2_grid_validate_ideal.json')))}
+    for sp in ('test', 'culver'):
+        wp2 = json.load(open(os.path.join(ROOT, f'results/v2/wp2_per_agent_{sp}.json')))
+        d = prim[sp]
+        share = d['dual_accounting']['no_collaborator_share']
+        grids[sp] = {'frames': wp2['frames'], 'rows': d['n_rows'],
+                     'no_collaborator_rows': round(share * d['n_rows'])}
+    R = [HDR, r'\begin{tabular}{lrrrrl}', r'\toprule',
+         r'split & frames & scenes & grid rows & no-collab.\ rows & role \\', r'\midrule']
+    roles = {'validate': 'development: candidate, $\\lambda$ and $\\tau$ chosen here',
+             'test': 'held out; opened once',
+             'culver': 'held out; opened once (domain shift)'}
+    for sp in ('validate', 'test', 'culver'):
+        g = grids[sp]
+        sc = prim[sp]['n_scenes'] if sp in prim else '---'
+        R.append(r'%s & %s & %s & %s & %s & %s \\'
+                 % (SPLIT_NAME[sp], f"{g['frames']:,}", sc, f"{g['rows']:,}",
+                    f"{g['no_collaborator_rows']:,}", roles[sp]))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_protocol.tex'] = '\n'.join(R) + '\n'
+
+    # --- MAIN: the complete arm table --------------------------------------------------
+    # Development-split arms come from v2_p12_comparison.json. The held-out columns carry
+    # ONLY the two frozen arms, because those are what the pre-registered held-out
+    # comparison evaluated -- deriving fixed-arm held-out numbers now would be a held-out
+    # evaluation after the close-out, which V2_CLOSEOUT.json forbids.
+    p12 = json.load(open(os.path.join(ROOT, 'results/v2/v2_p12_comparison.json')))
+    fr2 = json.load(open(os.path.join(ROOT, 'results/manifests/V2_PRIMARY_FREEZE.json')))
+    tau_star = fr2['primary_comparator']['tau']
+    R = [HDR, r'\begin{tabular}{lrrrrr}', r'\toprule',
+         r'arm & scene-eq.\ $F_1$ & payload (Msym) & $\rho_E$ & $\rho_L$ & $\rho_F$ \\',
+         r'\midrule',
+         r'\multicolumn{6}{l}{\emph{development split (validate) --- where every choice was made}} \\']
+    named = [('Fixed E (ego-only)', 'Fixed_E'), ('Fixed L (object-level)', 'Fixed_L'),
+             ('Fixed F (feature-level)', 'Fixed_F'),
+             ('CA-TOSG (frozen RF)', 'frozen_RF_cand67'),
+             ('budget-blind oracle', 'oracle_budget_blind')]
+    for label, key in named:
+        a = p12['arms'][key]
+        R.append(r'%s & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+                 % (label, a['scene_equal_f1'], a['mean_payload_msym'],
+                    a['mix']['E'], a['mix']['L'], a['mix']['F']))
+    ts = [r for r in p12['tau_sweep'] if abs(r['tau'] - tau_star) < 1e-9]
+    if ts:
+        R.append(r'SNR threshold $\tau=%g$ & %.5f & %.5f & --- & --- & --- \\'
+                 % (tau_star, ts[0]['scene_equal_f1'], ts[0]['mean_payload_msym']))
+    hb = max(p12['hand_rules'].items(), key=lambda kv: kv[1]['scene_equal_f1'])
+    R.append(r'best hand rule (\texttt{%s}) & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+             % (hb[0].replace('_', r'\_'), hb[1]['scene_equal_f1'],
+                hb[1]['mean_payload_msym'], hb[1]['mix']['E'], hb[1]['mix']['L'],
+                hb[1]['mix']['F']))
+    R.append(r'\midrule')
+    R.append(r'\multicolumn{6}{l}{\emph{held-out splits --- the two frozen arms, opened once}} \\')
+    for sp, nm in (('test', 'Test'), ('culver', 'Culver-City')):
+        d = prim[sp]
+        R.append(r'%s: CA-TOSG & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+                 % (nm, d['RF']['scene_equal_f1'], d['RF']['mean_payload'],
+                    d['action_mix']['E'], d['action_mix']['L'], d['action_mix']['F']))
+        R.append(r'%s: $\tau=%g$ & %.5f & %.5f & --- & --- & --- \\'
+                 % (nm, d['tau']['tau'], d['tau']['scene_equal_f1'], d['tau']['mean_payload']))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_baselines.tex'] = '\n'.join(R) + '\n'
+    return T
 
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--check', action='store_true')
     a = ap.parse_args()
     body = build()
+    out = {OUT: body}
+    for name, txt in tables().items():
+        out[os.path.join(ROOT, 'paper', 'tables', name)] = txt
     if a.check:
-        if not os.path.exists(OUT):
-            print('V2 PAPER NUMBERS FAIL: not generated'); return 1
-        cur = open(OUT).read()
-        if cur != body:
-            print('V2 PAPER NUMBERS FAIL: the committed macros are not what the generator writes '
-                  '-- re-run tools/build_v2_paper_numbers.py')
+        stale = []
+        for p_, want in sorted(out.items()):
+            if not os.path.exists(p_) or open(p_, encoding='utf-8').read() != want:
+                stale.append(os.path.relpath(p_, ROOT))
+        if stale:
+            print('V2 PAPER NUMBERS FAIL: not what the generator writes -- re-run '
+                  'tools/build_v2_paper_numbers.py:')
+            for x in stale:
+                print('  ' + x)
             return 1
-        print(f'v2 paper numbers: {body.count(chr(92) + "newcommand")} macros, byte-reproduced')
+        print(f'v2 paper numbers: {body.count(chr(92) + "newcommand")} macros and '
+              f'{len(out) - 1} generated tables, byte-reproduced')
         return 0
-    open(OUT, 'w').write(body)
-    print(f'wrote {os.path.relpath(OUT, ROOT)}  ({body.count(chr(92) + "newcommand")} macros)')
+    for p_, txt in sorted(out.items()):
+        os.makedirs(os.path.dirname(p_), exist_ok=True)
+        open(p_, 'w', encoding='utf-8').write(txt)
+    print(f'wrote {body.count(chr(92) + "newcommand")} macros and {len(out) - 1} generated '
+          f'tables into paper/tables/')
     return 0
 
 

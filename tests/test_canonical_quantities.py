@@ -27,7 +27,7 @@ import sys
 import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MAIN = os.path.join(ROOT, 'paper', 'main.tex')
+MAIN = os.path.join(ROOT, 'paper', 'archive', 'manuscript_frozen.tex')
 REGISTRY = os.path.join(ROOT, 'docs', 'canonical_quantities.md')
 
 
@@ -39,7 +39,7 @@ def tex():
     printed JSCC numbers report as missing. Scope follows the content.
     """
     parts = [open(MAIN, encoding='utf-8').read()]
-    supp = os.path.join(os.path.dirname(MAIN), 'supplementary.tex')
+    supp = os.path.join(os.path.dirname(MAIN), 'supplementary_frozen.tex')
     if os.path.exists(supp):
         parts.append(open(supp, encoding='utf-8').read())
     return '\n'.join(parts)
@@ -67,7 +67,8 @@ def q_feature_importance(text):
     missing = [w for w in want if not printed(w, text)]
     rc = check('feature importance', not missing,
                f'derived {want} from the frozen selector; ' +
-               ('all printed in main.tex' if not missing else f'NOT printed: {missing}'))
+               ('all printed in the archived manuscript' if not missing
+                else f'NOT printed: {missing}'))
     # the two sides must partition the model: a "dominance" reading is only defensible if the
     # channel side is actually the larger, and it is not.
     rc |= check('importance partition', abs(ch + per - 100) < 1e-6,
