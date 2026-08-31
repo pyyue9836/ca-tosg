@@ -20,7 +20,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/diagnostics/` | 15 |
 | | `results/latency/` | 2 |
 | | `results/main/` | 33 |
-| | `results/manifests/` | 39 |
+| | `results/manifests/` | 40 |
 | | `results/p4b/` | 13 |
 | | `results/p4b/manifests/` | 2 |
 | | `results/provenance/` | 34 |
@@ -242,6 +242,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `P4B_VERIFICATION_compression.json` | `python tools/verify_second_zoo_ap.py` | P4-B-c expectation E4: reproduces the model zoo's own published AP@0.7 with the converted weights (no-global-sort, the zoo's own convention) |
 | `P4B_VERIFICATION_late.json` | `python tools/verify_second_zoo_ap.py` | P4-B-c expectation E4: reproduces the model zoo's own published AP@0.7 with the converted weights (no-global-sort, the zoo's own convention) |
 | `P4C_MANIFEST.json` | `python projects/ca_tosg/evaluation/collaborator_scale.py` | P4-C arm caches -- "collaborator-scale arm, not deployed" |
+| `PUBLICATION.json` | **UNATTRIBUTED** |  |
 | `R21A2_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `R21A_MANIFEST.json` | `python tools/run_baselines.py two_gate --train [--arm dgate]` | R21-A / R21-A-2 hand-rule freeze record, not deployed |
 | `TAU_FEASIBLE_MANIFEST.json` | `python projects/ca_tosg/evaluation/tau_feasible.py` | R18-3: the budget-matched threshold reference |
@@ -487,4 +488,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-349 files indexed, 54 unattributed.
+350 files indexed, 55 unattributed.

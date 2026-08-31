@@ -52,3 +52,14 @@ without editing a byte.
 
 The archive may be used for structure and bibliography only. Every experimental number, figure,
 table and conclusion comes from the closed-out products (A-4).
+
+---
+
+**编译门禁会重写这两个 PDF。** `tests/test_compile.py` 每次运行都重建 `main.pdf` 与
+`supplementary.pdf`,字节不完全一致(tectonic 的元数据会变)。这两份现在是**活稿**、不在冻结名单里,
+所以重写本身无害;但跑完全套门禁后工作树会出现两处 PDF diff。内容没变时用
+`git restore paper/main.pdf paper/supplementary.pdf` 丢掉即可。
+
+**The compile gate rewrites both PDFs.** They are the live deliverable, not frozen, so the rewrite
+is harmless — but a full gate run leaves two PDF diffs in the tree. When the content has not
+changed, `git restore paper/main.pdf paper/supplementary.pdf`.
