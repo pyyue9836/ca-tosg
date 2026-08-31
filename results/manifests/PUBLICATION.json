@@ -1,0 +1,28 @@
+{
+ "schema": "catosg-publication/1",
+ "why": "The manuscript versions independently of the experiment. V2_CLOSEOUT.json fixes the experiment and does not move; this file moves with the paper.",
+ "supersedes": "results/manifests/V2_PUBLICATION.json",
+ "supersedes_note": "the 4-page brief, archived unchanged as paper/archive/results_brief.tex by V2-R47 A-1",
+ "experiment_closeout": "2751041fbb8e9ae9a9b5605ae62228c50e1147ee8f14cac9a461bde778ee1d99",
+ "archive_freeze_verified": true,
+ "files": {
+  "paper/figures/PROVENANCE_figures.json": "5f2a1982bf90b65be1cd73e307df492b4532136f7efdc1291e1d973df64d53ee",
+  "paper/figures/fig1_system.pdf": "98188770b88e0654ce3a036c7467cad73a14e50a73b8c69884fe1c7063d1f7ec",
+  "paper/figures/fig2_primary.pdf": "df27fc9468f4a35a96a01a8572641cd1ee1fae8e91109f67e15ecd0341497254",
+  "paper/figures/fig3_recovery.pdf": "9d2cb3f61c4e73fd65d628edbca259038eb4e614435b4dd707fffb4b321b3498",
+  "paper/figures/fig4_where2comm.pdf": "b60c6d2a43c93540f1f52bdebcc7481c8a1705165db3d50828e096a418c25d83",
+  "paper/figures/fig5_lambda.pdf": "23e813f97cc261a7fabb669c6b3298b35d93fb8bf19fef5621c18bd607148ba4",
+  "paper/main.tex": "f702050c9ad697742beebe495427b90e6d37d41f809dddf6d7a80274e694fd20",
+  "paper/references.bib": "7605270eb905497ae1e5b610e1fd0d2431c377bb5c8fb9614af0b5d7230c9fc0",
+  "paper/supplementary.tex": "2a1b7d5f7c8953e72bf44b0e324529b0f5a84af993fc3d90f0837ebe3a157cd0",
+  "paper/tables/generated_numbers.tex": "683922c4fb568538e9ca290d1baaa286af3c02c51b660d1ea487f10cf402839f",
+  "paper/tables/tbl_baselines.tex": "43db8c7f8ee5d970ff81bf9d7316d0a519b32a3f4143c011a0a2c8cd33aff1be",
+  "paper/tables/tbl_cue_schema.tex": "98874d03cbbb7324baeee8e74854d8428a2998ebe2627cf4635755aea99a8238",
+  "paper/tables/tbl_lambda_scan.tex": "1a5a8a6f667d6b949240f2446fe70cf18dc1db76394ba9b094bdb80a399cbfa4",
+  "paper/tables/tbl_position_effect.tex": "416c0be4560cf02df2d7ab5f25b4b0339438044ea1c84b994f33dceb510add7b",
+  "paper/tables/tbl_protocol.tex": "01de6c3fc328fa042d1778a6994f4f073cbec0242e59d042a99718431b122b98",
+  "paper/tables/tbl_transport.tex": "79aafaa3e0adbc476122b58af975b52d3bd33ddcb8fb6d58eb0a5b4b3c0386a0",
+  "paper/tables/tbl_where2comm_full.tex": "ea363a9af7b5b06a0e4576ae9b02346596d4e3dfa55b5fc566f6f308c75bed06"
+ },
+ "n_files": 17
+}
