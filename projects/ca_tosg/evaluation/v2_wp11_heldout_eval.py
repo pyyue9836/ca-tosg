@@ -32,10 +32,60 @@ OUT_T = os.path.join(ROOT, 'results', 'v2', 'v2_test_primary.json')
 B_F, DELTA, BETA, N_BOOT = 3.14175, 0.005, 0.20, 10000
 
 
+OUT_FA = os.path.join(ROOT, 'results', 'v2', 'v2_heldout_fixed_arms.json')
+
+
+def fixed_arms():
+    """V2-R55 A-1 — descriptive fixed-arm summaries from the frozen held-out grids.
+
+    **This is an aggregation, not an evaluation.** It loads no model, runs no inference and touches
+    no primary product: it reads `eff_{E,L,F}` and `B_{E,L,F}`, which are already IN the frozen
+    grid, and reduces them. Nothing here can change a frozen component, and nothing downstream may
+    select a comparator on the strength of it.
+
+    It lives in THIS module for one reason: gate 22 permits exactly one script to read the sealed
+    grid, and that is this one. Putting the aggregation in the paper generator would have meant
+    adding a second name to an allow-list -- which is precisely what `V2_UNSEAL_RECORD.json` says
+    must not happen ("the file being readable is the consequence of a dated act, not of someone
+    editing an allow-list"). So the licensed reader emits an unsealed product, and the product is
+    registered.
+
+    Statistic, per A-1: F1 is the mean over each scene's rows, then the equal-weight mean over
+    scenes; payload is the mean over all grid rows; full-frame accounting throughout.
+    """
+    out = {'schema': 'catosg-v2-heldout-fixed-arms/1',
+           'why': 'Descriptive secondary reference only (V2-R55 A-5). NOT used to select a '
+                  'comparator, and NOT a retest of the primary criterion, which remains the '
+                  'frozen tau rule.',
+           'statistic': 'F1: mean within scene over all SNR x channel rows, then equal-weight '
+                        'mean over scenes. Payload: mean over all grid rows. Full-frame.',
+           'splits': {}}
+    for sp in ('test', 'culver'):
+        g = pd.read_csv(os.path.join(SEALED, f'v2_grid_{sp}_ideal.csv'))
+        d = {'n_rows': int(len(g)), 'n_scenes': int(g.scene.nunique()), 'arms': {}}
+        for act in ('E', 'L', 'F'):
+            d['arms'][act] = {
+                'scene_equal_f1': float(g.groupby('scene')[f'eff_{act}'].mean().mean()),
+                'mean_payload': float(g[f'B_{act}'].mean())}
+        out['splits'][sp] = d
+    json.dump(out, open(OUT_FA, 'w'), indent=1)
+    print(f'wrote {os.path.relpath(OUT_FA, ROOT)}')
+    for sp, d in out['splits'].items():
+        for act, v in d['arms'].items():
+            print(f'  {sp:7s} Fixed {act}: scene-equal F1 = {v["scene_equal_f1"]:.5f}   '
+                  f'payload = {v["mean_payload"]:.5f}')
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--unseal', action='store_true')
     ap.add_argument('--split', default='test', choices=['test', 'culver'])
+    ap.add_argument('--fixed-arms', action='store_true',
+                    help='V2-R55 A-1: aggregate the frozen grids into the descriptive fixed-arm '
+                         'summary. Reads no model and writes no primary product.')
     a = ap.parse_args()
+    if a.fixed_arms:
+        return fixed_arms()
     if not a.unseal:
         raise SystemExit('this is the unseal step; pass --unseal deliberately')
     fr = json.load(open(FREEZE))

@@ -19,7 +19,7 @@ Sources, all post-close-out:
     python tools/build_v2_paper_numbers.py [--check]
 """
 from __future__ import annotations
-import argparse, hashlib, json, os, sys
+import argparse, hashlib, json, os, re, sys
 import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,6 +79,10 @@ def build():
         mac(f'WtwoC{tag}APfifty', f"{r.ap_50:.5f}")
         mac(f'WtwoC{tag}APseventy', f"{r.ap_70:.5f}")
         mac(f'WtwoC{tag}Rate', f"{r.comm_rate * 100:.1f}")
+    # the external arm's checkpoint epoch is a fact of ITS training run, recorded in its own
+    # product; it is a number the paper prints, so it comes from there rather than from typing
+    _w = json.load(open(os.path.join(W2C, 'summary_deterministic.json')))
+    mac('WtwoCEpoch', re.search(r'epoch\s*(\d+)', _w['provenance']['checkpoint']).group(1))
 
     # ================================================================================
     # V2-R47 D-1. Everything below is READ-ONLY over closed-out products. No held-out
@@ -220,6 +224,43 @@ def build():
     mac('PenaltyOverGainRatio', f"{lbf / q1['mean_net_gain_where_F_is_best']:.1f}")
 
     L.append('')
+    L.append(r'% ---- MAIN: descriptive secondary reference against Fixed L (V2-R55 A-5) -----')
+    fa = json.load(open(os.path.join(ROOT, 'results/v2/v2_heldout_fixed_arms.json')))
+    for tag, sp in (('Test', 'test'), ('Culver', 'culver')):
+        arm = fa['splits'][sp]['arms']['L']
+        d2 = t if sp == 'test' else c
+        mac(f'{tag}FixedLFone', f"{arm['scene_equal_f1']:.5f}")
+        mac(f'{tag}FixedLPay', f"{arm['mean_payload']:.5f}")
+        mac(f'{tag}SavingVsFixedL',
+            f"{(arm['mean_payload'] - d2['RF']['mean_payload']) / arm['mean_payload'] * 100:.2f}")
+        mac(f'{tag}DeltaFoneVsFixedL',
+            f"{d2['RF']['scene_equal_f1'] - arm['scene_equal_f1']:+.5f}")
+        for act in ('E', 'F'):
+            mac(f'{tag}Fixed{act}HeldFone',
+                f"{fa['splits'][sp]['arms'][act]['scene_equal_f1']:.5f}")
+            mac(f'{tag}Fixed{act}HeldPay',
+                f"{fa['splits'][sp]['arms'][act]['mean_payload']:.5f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN: the metric-dependent ordering of F against L (V2-R55 E) ----------')
+    # both differences from unrounded values: the F1 ordering and the AP@0.5 ordering disagree
+    mac('FixedFMinusLAPfifty', f"{el['F_ap50'] - el['L_ap50']:+.5f}"
+        if 'F_ap50' in el else f"{w5['conditions']['clean|0.0|0']['ap50'] - el['L_ap50']:+.5f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN: the working range of the per-codeword erasure probability --------')
+    gg = pd.read_csv(os.path.join(ROOT, 'results/v2/v2_grid_validate_ideal.csv'),
+                     usecols=['snr_db', 'channel', 'p_cw'])
+    pts = gg.groupby(['channel', 'snr_db'], as_index=False).p_cw.first()
+    for ch, tag, fmt in (('awgn', 'Awgn', '%g'), ('rayleigh', 'Rayleigh', '%.4f')):
+        r_ = pts[pts.channel == ch]
+        mac(f'Pcw{tag}Hi', fmt % r_.p_cw.max())
+        mac(f'Pcw{tag}Lo', fmt % r_.p_cw.min())
+    for snr, tag in ((6, 'Six'), (8, 'Eight')):
+        mac(f'PcwAwgnAt{tag}',
+            f"{float(pts[(pts.channel == 'awgn') & (pts.snr_db == snr)].p_cw.iloc[0]):.5f}")
+
+    L.append('')
     L.append(r'% ---- SUPPLEMENTARY: the exploratory lambda scan ---------------------------')
     rows = sorted(lam['rows'], key=lambda r: r['lam'])
     mac('LamScanPoints', str(len(rows)))
@@ -254,6 +295,25 @@ def dev_scenes():
 
 
 DEV_SCENES = None    # filled on first use by tables()
+
+
+def tau_requested_mix():
+    """V2-R55 D — the comparator's REQUESTED-action shares, recomputed from the frozen grid.
+
+    The rule is `request F when est_snr_db >= tau, else L`, and it is channel-agnostic: both AWGN
+    and Rayleigh rows above the threshold request F. Two of the eleven SNR points clear
+    tau = 16.5, on both channels, which is 4 of 22 cells rather than 2 -- the arithmetic is done
+    here against the grid's own snr_db column so the prose cannot drift from it.
+    """
+    fr = json.load(open(os.path.join(ROOT, 'results/manifests/V2_PRIMARY_FREEZE.json')))
+    tau = fr['primary_comparator']['tau']
+    # The SNR x channel grid is a property of the protocol and is identical on every split, so it
+    # is read from the DEVELOPMENT grid: no sealed path is named in this file.
+    g = pd.read_csv(os.path.join(ROOT, 'results/v2/v2_grid_validate_ideal.csv'),
+                    usecols=['snr_db', 'channel'])
+    cells = g.groupby(['snr_db', 'channel'], as_index=False).size()
+    f = float((cells.snr_db >= tau).mean())
+    return {sp: {'E': 0.0, 'L': 1.0 - f, 'F': f} for sp in ('test', 'culver')}
 
 
 def tables():
@@ -423,15 +483,29 @@ def tables():
                 hb[1]['mean_payload_msym'], hb[1]['mix']['E'], hb[1]['mix']['L'],
                 hb[1]['mix']['F']))
     R.append(r'\midrule')
-    R.append(r'\multicolumn{6}{l}{\emph{held-out splits --- the two frozen arms, evaluated '
-             r'after freezing}} \\')
+    # V2-R55 A-2: all three fixed arms, not only Fixed L. Reporting one of them would be a
+    # selective presentation of exactly the comparison the text goes on to make.
+    R.append(r'\multicolumn{6}{l}{\emph{held-out splits --- evaluated after freezing}} \\')
+    fa = json.load(open(os.path.join(ROOT, 'results/v2/v2_heldout_fixed_arms.json')))
+    tau_mix = tau_requested_mix()
     for sp, nm in (('test', 'Test'), ('culver', 'Culver-City')):
         d = prim[sp]
+        for act, lab in (('E', 'Fixed E'), ('L', 'Fixed L'), ('F', 'Fixed F')):
+            v = fa['splits'][sp]['arms'][act]
+            # A-3: requested-action shares. A fixed arm requests its own action on every frame;
+            # what happens on a collaborator-unavailable frame is EXECUTION, and is stated in the
+            # caption instead of being mixed into this column.
+            mix = {'E': 0.0, 'L': 0.0, 'F': 0.0}; mix[act] = 1.0
+            R.append(r'%s: %s & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+                     % (nm, lab, v['scene_equal_f1'], v['mean_payload'],
+                        mix['E'], mix['L'], mix['F']))
         R.append(r'%s: CA-TOSG & %.5f & %.5f & %.3f & %.3f & %.3f \\'
                  % (nm, d['RF']['scene_equal_f1'], d['RF']['mean_payload'],
                     d['action_mix']['E'], d['action_mix']['L'], d['action_mix']['F']))
-        R.append(r'%s: $\tau=%g$ & %.5f & %.5f & --- & --- & --- \\'
-                 % (nm, d['tau']['tau'], d['tau']['scene_equal_f1'], d['tau']['mean_payload']))
+        tm = tau_mix[sp]
+        R.append(r'%s: $\tau=%g$ & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+                 % (nm, d['tau']['tau'], d['tau']['scene_equal_f1'], d['tau']['mean_payload'],
+                    tm['E'], tm['L'], tm['F']))
     R += [r'\bottomrule', r'\end{tabular}']
     T['tbl_baselines.tex'] = '\n'.join(R) + '\n'
 

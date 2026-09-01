@@ -18,6 +18,15 @@
    "by": "projects/ca_tosg/evaluation/v2_wp11_heldout_eval.py --unseal --split culver",
    "sha256": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
    "scope": "the same ONE pre-specified comparison at beta=0.20, frozen RF candidate 67 vs frozen tau=16.5, applied cross-domain. THIS IS THE LAST HELD-OUT SET."
+  },
+  {
+   "path": "results/v2/v2_heldout_fixed_arms.json",
+   "unsealed_at": "2026-09-01T00:00:00Z",
+   "commit": "b4acef46a5406d5a62aeca4c79691a86b6b4c756",
+   "by": "projects/ca_tosg/evaluation/v2_wp11_heldout_eval.py --fixed-arms",
+   "sha256": "51150711533bf45eafc0b3fdad468ec4712a2d168d98cd2c7f20eb025d6bd3e8",
+   "scope": "DESCRIPTIVE fixed-arm summaries (Fixed E/L/F scene-equal F1 and mean payload) on both held-out splits, aggregated from the already-evaluated frozen grids. No model is loaded, no inference is run, no primary product is written, and no comparator is selected from it. Authorised by V2-R55 A-1.",
+   "note": "Emitted by the ONE module gate 22 licenses to read the sealed grid, so that the paper generator never names a sealed path. Registering it here is the dated act this record exists for -- the alternative was adding a second name to the gate allow-list, which this file explicitly forbids."
   }
  ],
  "status": "ALL HELD-OUT SETS NOW UNSEALED. No further held-out evaluation exists (V2-R34 C-5)."

@@ -13,10 +13,10 @@
 \newcommand{\method}{CA-TOSG}
 
 \begin{document}
-\title{Supplementary Material:\\Task-Oriented Semantic Granularity Selection for\\Bandwidth-Constrained V2V Cooperative Perception}
+\title{Supplementary Material:\\Channel-Aware Task-Oriented Semantic Granularity\\Selection for Bandwidth-Constrained\\V2V Cooperative Perception}
 \author{Peiyi~Yue}
 \markboth{IEEE Transactions on Vehicular Technology,~Vol.~XX, No.~X, 2026}
-{Yue: Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception}
+{Yue: Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception}
 \maketitle
 
 \section{Scope of this document}
@@ -78,7 +78,8 @@ integer number of codewords. We charge the padding, because the channel does.
 
 The object-level message is charged through the identical chain from each frame's own box count at
 $\BoxBits$~bits per box, ranging from $\BLmin$ to $\BLmax$~Msym, i.e.\ $\NcwLmin$ to $\NcwLmax$
-codewords. The collaborator transmits an average of $\NboxCollabMean$ boxes per frame, producing
+codewords. On the development split, the collaborator transmits an average of
+$\NboxCollabMean$ boxes per frame, producing
 $\NcwLmean$ LDPC codewords and $\BLmean$~Msym. The post-fusion late-detection output contains
 $\NboxLateOutputMean$ boxes on average, but this value is not used for payload accounting.
 At the tightest budget tier $\beta = \BudgetTightBeta$ the mean object-level payload is

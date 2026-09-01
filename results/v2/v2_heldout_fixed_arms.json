@@ -1,0 +1,43 @@
+{
+ "schema": "catosg-v2-heldout-fixed-arms/1",
+ "why": "Descriptive secondary reference only (V2-R55 A-5). NOT used to select a comparator, and NOT a retest of the primary criterion, which remains the frozen tau rule.",
+ "statistic": "F1: mean within scene over all SNR x channel rows, then equal-weight mean over scenes. Payload: mean over all grid rows. Full-frame.",
+ "splits": {
+  "test": {
+   "n_rows": 47740,
+   "n_scenes": 16,
+   "arms": {
+    "E": {
+     "scene_equal_f1": 0.8566617640283833,
+     "mean_payload": 0.0
+    },
+    "L": {
+     "scene_equal_f1": 0.8771528343207071,
+     "mean_payload": 0.0013641705069124424
+    },
+    "F": {
+     "scene_equal_f1": 0.8808454463614876,
+     "mean_payload": 2.9694604838709684
+    }
+   }
+  },
+  "culver": {
+   "n_rows": 12100,
+   "n_scenes": 4,
+   "arms": {
+    "E": {
+     "scene_equal_f1": 0.8464194192000225,
+     "mean_payload": 0.0
+    },
+    "L": {
+     "scene_equal_f1": 0.8748479819516934,
+     "mean_payload": 0.0025054545454545455
+    },
+    "F": {
+     "scene_equal_f1": 0.8942973658216727,
+     "mean_payload": 2.7304663636363644
+    }
+   }
+  }
+ }
+}

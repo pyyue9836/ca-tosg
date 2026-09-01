@@ -6255,3 +6255,78 @@ digital transport-accounting protocol. RefPtsFusion is **not** added — an arXi
 reviewed, and later than this work; the Related Work positioning stands on Where2comm, JSCC,
 SmartCooper and ML-Cooper. Josh or the supervisor may overturn that; no baseline experiment is
 added either way.
+
+## V2-R55 — held-out fixed arms added, and three review claims corrected against the products
+
+### A-7 · What the earlier review said, and what the products actually say
+
+The review reported a payload saving of **48 %** and a $\Delta F_1$ of **+0.002** for CA-TOSG
+against Fixed L on Test and Culver-City. Both were wrong, in two different ways:
+
+* those figures are **development-split** values, extrapolated across splits;
+* the **sign was reversed** — CA-TOSG's scene-equal $F_1$ is *lower* than Fixed L's, not higher.
+
+Recomputed from the frozen held-out grids: the saving is **40.68 %** (Test) and **41.30 %**
+(Culver-City), and the scene-equal $F_1$ differences are **−0.00036** and **−0.00133**.
+
+**The "τ is a straw man" characterisation is withdrawn.** τ = 16.5 was frozen on the development
+split, meets the β = 0.20 budget, is deployable as a one-line rule, and on **both** held-out splits
+reaches a higher scene-equal $F_1$ than Fixed L. A comparator that beats the strongest fixed arm on
+the held-out data is not a straw man.
+
+The Fixed-L comparison enters the paper as a **descriptive secondary reference only**. The
+confirmatory comparator is unchanged.
+
+### A-1 routing · How the summaries were produced without weakening gate 22
+
+The fixed-arm summaries can only come from `results/v2/sealed/v2_grid_{test,culver}_ideal.csv`, and
+gate 22 licenses exactly **one** module to read that directory. The instruction would have put the
+read in the paper generator, which would have meant adding a second name to an allow-list —
+precisely what `V2_UNSEAL_RECORD.json` says must not happen: *"the file being readable is the
+consequence of a dated act, not of someone editing an allow-list."*
+
+So the licensed reader (`v2_wp11_heldout_eval.py --fixed-arms`) emits
+`results/v2/v2_heldout_fixed_arms.json`, that product is **registered in the unseal record with a
+date, a commit and a hash**, and the paper generator reads the registered product. Gate 22 stays
+green on its own terms, and no allow-list was touched. The aggregation loads no model, runs no
+inference, and writes no primary product.
+
+All twelve values reproduce the instruction's figures exactly.
+
+### B-4 · Where2comm was ranked across splits, and the display risk is real anyway
+
+The earlier review ranked Where2comm's **Test** AP against the internal E/L/F arms' **development**
+AP. That ranking is withdrawn. The correction: Where2comm runs on the **same** Test and Culver-City
+splits, the same field of view, ground truth and metrics — what differs is the **checkpoint**, a
+separately trained epoch-50 model. The executor's own earlier phrasing, "same detector or split",
+was also wrong on this point and is corrected here.
+
+The presentation risk survives the correction, because a reader can perform the same cross-split
+ranking unprompted. §VI-E therefore states what the arm is: an end-to-end external system
+reference, not a controlled ablation of granularity.
+
+### C-6 / D-5 · Requested versus executed, in one table — the fifth same-name instance
+
+The batch that set out to fix the ρ definition introduced a **new** mixing of the two: CA-TOSG's row
+carried a requested-action mix while the fixed-arm rows would have carried executed shares. Both
+columns are now **requested** throughout, and the structural forcing to E on
+collaborator-unavailable frames is stated in the caption and in §VI-C rather than folded into a
+number.
+
+Fifth member of the near-identical-names-with-unrelated-meanings family (`p_cw_F`, the shared IoU
+threshold, the missing `catosg_split`, `n_box_collab` vs `n_box_L`, and now requested vs executed
+action shares). **The distinguishing feature this time: the error was introduced by the fix**, which
+is the family's most expensive form — a correction pass is exactly when nobody re-checks the
+definition being corrected.
+
+Verified rather than assumed: the comparator's requested mix is recomputed from the grid's own
+`snr_db` column. The rule is channel-agnostic (`snr_db >= τ`), so **both** channels request F above
+the threshold — 4 of 22 cells, not 2. E 0.000 / L 0.818 / F 0.182 on both splits.
+
+### E · The F-versus-L ordering reverses between metrics
+
+Feature-level fusion leads object-level by **+0.00652** in scene-equal $F_1$ and trails it by
+**−0.01857** in development-split AP@0.5. The paper now states the reversal and the two statistics'
+definitions, and offers **no** causal explanation — no calibration story, no NMS story. The measured
+fact is that F is not uniformly superior to L under this checkpoint, and its advantage is specific
+to the per-frame $F_1$ objective the selector optimises.

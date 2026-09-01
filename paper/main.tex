@@ -14,10 +14,10 @@
 \newcommand{\method}{CA-TOSG}
 
 \begin{document}
-\title{Task-Oriented Semantic Granularity Selection for\\Bandwidth-Constrained V2V Cooperative Perception}
+\title{Channel-Aware Task-Oriented Semantic Granularity\\Selection for Bandwidth-Constrained\\V2V Cooperative Perception}
 \author{Peiyi~Yue}
 \markboth{IEEE Transactions on Vehicular Technology,~Vol.~XX, No.~X, 2026}
-{Yue: Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception}
+{Yue: Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception}
 \maketitle
 
 \begin{abstract}
@@ -25,8 +25,8 @@ Cooperative perception must choose \emph{what} to transmit, not only how much to
 formalise per-frame semantic granularity selection over three actions---ego-only (E), object-level
 (L) and feature-level (F)---and evaluate it under a single detector, a single field of view and a
 single ground truth, with communication charged through a measured LDPC/QAM chain rather than a
-declared budget. The resulting method, \method{} (channel-aware task-oriented semantic
-granularity), reduced realised communication payload by \TestSaving\% on Test and
+declared budget. The resulting method, \method{} (channel-aware task-oriented semantic granularity
+selection), reduced realised communication payload by \TestSaving\% on Test and
 \CulverSaving\% on Culver-City relative to the frozen comparator. However, the preregistered
 scene-level non-inferiority criterion was not met on either split, indicating that substantial
 communication reduction was achieved without statistically establishing accuracy preservation.
@@ -145,7 +145,7 @@ actor--critic policy, and RBH~\cite{liu2024rbh} chooses hybrid fusion by spatial
 
 \emph{Relation to \method{}.} Where2comm selects \emph{which spatial positions} to send inside the
 feature level; importance-map and JSCC methods optimise \emph{how} the feature map is encoded and
-carried over the channel; SmartCooper adjusts the feature \emph{compression ratio}. ML-Cooper is the
+carried over the channel. ML-Cooper is the
 closest in spirit, in that it mixes levels, but it does so as a heavyweight learned resource-sharing
 policy with a different action mechanism. \method{} decides \emph{which semantic granularity this
 frame uses} at all, one level above the question those methods answer, and any of them can serve as
@@ -243,8 +243,11 @@ contrast, the primary feature-fusion regime performs codeword-level partial reco
 fall back to ego-only when only part of the feature message is lost.
 \end{quote}
 
-\subsection{Effective Task Utility under Channel Corruption}
-Let $F_t^{s}$ denote the realised frame $F_1$ when action $s$ is executed at frame $t$. For the
+\subsection{Effective Task Utility under Channel Corruption}\label{sec:effective_utility}
+Let $F_t^{s}$ denote the realised frame $F_1$ when action $s$ is executed at frame
+$t$.\footnote{Here, $F_t^{s}$ denotes the frame-level $F_1$ utility under action
+$s \in \{E, L, F\}$. Thus, $F_t^{F}$ is the frame-level $F_1$ obtained when the feature-level
+action $F$ is executed.} For the
 object-level action the message-level rule above gives
 \begin{align}
 F_t^{L}(p) &= q_{L,t}\,F_t^{L,\mathrm{clean}} + \bigl(1 - q_{L,t}\bigr) F_t^{\mathrm{ego}},
@@ -264,7 +267,7 @@ Payload accounting is deliberately kept separate from this expectation: \textbf{
 charged for the message that is attempted and is never multiplied by the success probability.} A
 failed delivery does not refund symbols already spent on the channel.
 
-\subsection{Communication Cost}
+\subsection{Communication Cost}\label{sec:communication_cost}
 Payload is a per-frame quantity, not a constant per action:
 \begin{equation}
 B_{t,s} =
@@ -282,8 +285,8 @@ which packetise into $\BFpackets$ packets carrying $\BFheaderbits$ header bits, 
 $N_{\mathrm{cw}} = \BFncw$ codewords and $B_F = \BFmsym$~Msym per frame. The direct route would have
 given $\BFdirectmsym$~Msym, a difference that is pure padding. The object-level payload is charged
 through the identical chain from each frame's own box count, at $\BoxBits$~bits per box, ranging
-from $\BLmin$ to $\BLmax$~Msym, i.e.\ $\NcwLmin$ to $\NcwLmax$ codewords. The collaborator
-transmits an average of $\NboxCollabMean$ boxes per frame, producing $\NcwLmean$ LDPC codewords and
+from $\BLmin$ to $\BLmax$~Msym, i.e.\ $\NcwLmin$ to $\NcwLmax$ codewords. On the development
+split, the collaborator transmits an average of $\NboxCollabMean$ boxes per frame, producing $\NcwLmean$ LDPC codewords and
 $\BLmean$~Msym. The post-fusion late-detection output contains $\NboxLateOutputMean$ boxes on
 average, but this value is not used for payload accounting.
 
@@ -408,6 +411,12 @@ BEV backbone~\cite{lang2019pointpillars}. \textbf{One checkpoint serves all thre
 field of view and ground truth are identical across them, so an $L$-versus-$F$ comparison is a
 comparison of granularity rather than of two separately trained pipelines. Exactly one collaborator
 is used, selected by a fixed rule, so the payload of a cooperative action is well defined.
+
+In the evaluation, collaborator availability is determined before action selection from the frame's
+vehicle identities, relative poses and the fixed communication-range rule. In deployment,
+equivalent neighbour identity and position information can be obtained from periodic
+cooperative-awareness broadcasts; determining availability therefore does not require receiving the
+requested perception payload.
 Table~\ref{tab:protocol} states the three splits and their roles.
 
 Evaluation is deterministic: the per-sample point shuffle is seeded on
@@ -425,10 +434,10 @@ and comparator freezing.}
 
 \subsection{Message Construction and Payload Accounting}
 Payload is measured, not declared, and the derivation is given in full in
-Section~\ref{sec:candidates} and expanded bit by bit in the supplementary material. Two properties
+Section~\ref{sec:communication_cost} and expanded bit by bit in the supplementary material. Two properties
 matter for reading the results. First, $B_F$ is a constant $\BFmsym$~Msym while $B_{L,t}$ varies per
 frame with the collaborator's box count, so the payload axis is not a two-point scale. Second,
-payload is charged for the attempt (Section~\ref{sec:derivation}), which is what makes an
+payload is charged for the attempt (Section~\ref{sec:effective_utility}), which is what makes an
 undelivered feature message expensive rather than free.
 
 \subsection{Channel Settings}
@@ -437,6 +446,11 @@ full deterministic grid of frames $\times$ SNR $\times$ channel type reported in
 Table~\ref{tab:protocol}. Transport is characterised at $\TransportRates$ per-codeword loss rates
 with $\TransportReplicates$ independent channel realisations each, and the message regime is
 evaluated by $\MsgReplays$ Monte-Carlo replays.
+
+Across the $11$ evaluated SNR points, $p_{\mathrm{cw}}$ ranges from $\PcwAwgnHi$ to $\PcwAwgnLo$
+under AWGN and from $\PcwRayleighHi$ to $\PcwRayleighLo$ under Rayleigh. The AWGN waterfall occurs
+between $6$ and $8$~dB, where the measured value falls from $\PcwAwgnAtSix$ to $\PcwAwgnAtEight$;
+the complete grid is reported in the supplementary material.
 
 \subsection{Selector Training and Freezing}\label{sec:training}
 Model selection is done \textbf{on the development split only}, in this order.
@@ -481,7 +495,7 @@ AP@0.5 and AP@0.7 characterise the fixed perception arms, transport responses an
 Where2comm reference. The confirmatory comparison between the frozen selector and its
 budget-feasible comparator uses scene-equal mean per-frame $F_1$, with scene-level bootstrap
 intervals. Communication cost is the mean per-frame channel use defined in
-Section~\ref{sec:candidates}.
+Section~\ref{sec:communication_cost}.
 
 The non-inferiority margin is $\delta = \DeltaMargin$ in absolute mean per-frame $F_1$. It is a
 \emph{preregistered engineering tolerance}---how much accuracy may be given up in exchange for a
@@ -509,9 +523,19 @@ $\FixedFMinusLSceneFone$ in scene-equal $F_1$ over object-level fusion, and pays
 $\FixedFOverLPayRatio\times$ the channel use for it. That ratio, not the accuracy gap, is why a
 per-frame granularity decision is worth making at all.
 
+The ordering is metric-dependent. Feature-level fusion exceeds object-level fusion by
+$\FixedFMinusLSceneFone$ in scene-equal mean per-frame $F_1$, but is lower by
+$\FixedFMinusLAPfifty$ in development-split AP@0.5. The former is the frozen selector utility,
+whereas AP globally ranks confidence-scored detections across the split. Therefore, under this
+checkpoint, F is not uniformly superior to L; its measured advantage is specific to the per-frame
+$F_1$ objective used for granularity selection.
+
 \begin{table*}[t]
-\caption{All evaluated arms. Development-split rows are where every choice was made; the held-out
-rows carry the two frozen arms, which are what the pre-registered held-out comparison evaluated.}
+\caption{All evaluated arms. Development-split rows are where every choice was made. $\rho_E$,
+$\rho_L$ and $\rho_F$ denote requested-action shares. On collaborator-unavailable frames, execution
+is structurally forced to E regardless of the request; the effective utility and realised payload
+already incorporate this rule. All ratios reported in the text are computed from the underlying
+unrounded values; table entries are rounded for display.}
 \label{tab:baselines}
 \centering\small\setlength{\tabcolsep}{3pt}
 \input{tables/tbl_baselines}
@@ -519,8 +543,8 @@ rows carry the two frozen arms, which are what the pre-registered held-out compa
 
 \subsection{Primary Held-Out Comparison}\label{sec:primary}
 Table~\ref{tab:primary} and Fig.~\ref{fig:primary} give the primary cell,
-$\beta = \BudgetPrimaryBeta$. On Test the realised payload falls by \TestSaving\% and on Culver-City
-by \CulverSaving\%; on both splits the scene-level bootstrap lower bound on $\Delta F_1$ lies outside
+$\beta = \BudgetPrimaryBeta$. Relative to the frozen threshold comparator, on Test the realised
+payload falls by \TestSaving\% and on Culver-City by \CulverSaving\%; on both splits the scene-level bootstrap lower bound on $\Delta F_1$ lies outside
 the preregistered margin of $-\DeltaMargin$, so accuracy non-inferiority is not established.
 
 Both halves are stated together throughout. The saving is large---a factor of \TestRatio{} and
@@ -533,6 +557,14 @@ reproduces the shape of the Test result on much less scene diversity rather than
 corroborating it. Under the second accounting---frames where a collaborator is available, which is
 \TestCollabShare\% of Test rows and \CulverCollabShare\% of Culver-City rows---the relative
 saving is unchanged, so none of it is an artefact of collaborator unavailability.
+
+As a descriptive secondary reference, \method{} reduces payload by \TestSavingVsFixedL\% on Test
+and \CulverSavingVsFixedL\% on Culver-City relative to Fixed L, with scene-equal $F_1$ differences
+of \TestDeltaFoneVsFixedL{} and \CulverDeltaFoneVsFixedL, respectively. These held-out fixed-arm
+summaries are reported only as descriptive references derived from the already unsealed frozen
+grids. They are not used to select a new comparator, retest the primary criterion, or modify any
+frozen component. The confirmatory comparator remains the $\tau = \TauStar$ rule frozen before
+either held-out split was evaluated.
 
 \begin{table}[t]
 \caption{Primary cell at $\beta = \BudgetPrimaryBeta$. $\Delta$ is \method{} minus the frozen
@@ -570,6 +602,11 @@ the bound does not.}
 The frozen selector requests E on \TestRhoEPct\% of Test rows and L on \TestRhoLPct\%, and never
 requests F ($\rho_F = \TestRhoF$); the Culver-City mix is \CulverRhoEPct\% and \CulverRhoLPct\%.
 Section~\ref{sec:limits} explains why the third figure is a property of the sampled penalty grid.
+
+The reported action proportions are the selector's requested actions. On the \TestNoCollab\% of
+Test frames and \CulverNoCollab\% of Culver-City frames without an available collaborator,
+execution is structurally forced to E regardless of the request; these rows incur zero cooperative
+payload.
 
 \textbf{All three budget tiers select the same candidate and the budget never binds.} At
 $\beta = \BudgetTightBeta$, $\BudgetPrimaryBeta$ and $\BudgetLooseBeta$ the frozen policy spends
@@ -621,6 +658,14 @@ Fig.~\ref{fig:w2c} places Where2comm on its native axis. At a communication thre
 reaches AP@0.5 \WtwoCTestAPfifty{} on Test and \WtwoCCulverAPfifty{} on Culver-City (AP@0.7
 \WtwoCTestAPseventy{} and \WtwoCCulverAPseventy{}) while retaining \WtwoCTestRate\% and
 \WtwoCCulverRate\% of features. The complete $24$-point sweep is in the supplementary material.
+
+Where2comm uses a separately trained epoch-\WtwoCEpoch{} checkpoint and is reported as an end-to-end external
+system reference rather than as a controlled ablation of semantic granularity. Its held-out AP
+values must not be numerically ranked against the development-split AP values of the E/L/F arms as
+though they came from the same split and checkpoint. The confirmatory \method{} comparison is
+instead defined on scene-equal $F_1$ against the frozen threshold policy. Where2comm answers a
+separate question: how much detection performance an external feature-content selection system
+retains at each native communication rate.
 
 \textbf{The horizontal axis is the fraction of features retained, not a bit budget}, and it is not
 converted into Msym anywhere in this paper. Doing so would require the quantisation, packetisation
@@ -688,6 +733,12 @@ latency, including any cost of keeping the cooperative pipeline resident, is not
 
 \emph{One dataset family and one detector.} Every result here is conditional on OPV2V and on a single
 PointPillars checkpoint.
+
+\emph{A collaborator-availability mismatch across splits.} The development split contains a
+collaborator on every frame, whereas \TestNoCollab\% of Test frames and \CulverNoCollab\% of
+Culver-City frames do not. These rows do not test learned action selection because execution is
+structurally forced to E and all cooperative actions have zero realised payload. Nevertheless, the
+difference limits interpretation of the cross-domain action proportions.
 
 \section{Conclusion}
 Three transmission granularities were placed under one detector, one field of view and one ground
