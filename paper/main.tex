@@ -62,11 +62,12 @@ predictions~\cite{xu2022opv2v}---compact and protectable, but discarding semanti
 context---while intermediate fusion sends feature maps~\cite{xu2022v2xvit,hu2022where2comm},
 richer at much higher cost, which recent work reduces by region selection, masking or
 compression~\cite{hu2022where2comm} and which semantic communication optimises for task
-performance~\cite{sheng2024importance,gan2026scomcp}. What these have in common is that they operate
-at a \emph{fixed} granularity: they answer \emph{which elements to transmit} rather than
-\emph{whether feature-level communication is needed for this frame}. On some frames local perception
-is already confident enough for the compact message; on occluded or ambiguous ones the richer
-message helps. The best granularity depends on the task state.
+performance~\cite{sheng2024importance,gan2026scomcp}. Prior work has considered
+multilevel or adaptive sharing, while CA-TOSG focuses specifically on receiver-driven per-frame
+E/L/F selection using strictly ego-local pre-request cues and a common digital
+transport-accounting protocol. On some frames local perception is already confident enough for the
+compact message; on occluded or ambiguous ones the richer message helps. The best granularity
+depends on the task state.
 
 The channel decides the same question from the other side. A denser feature message needs a more
 reliable link, so under poor SNR or fading it can arrive damaged and its payload is partly wasted,
@@ -280,9 +281,11 @@ codeword padding: $\BFelements$ elements at $\QuantWidth$~bits give $\BFinfobits
 which packetise into $\BFpackets$ packets carrying $\BFheaderbits$ header bits, hence
 $N_{\mathrm{cw}} = \BFncw$ codewords and $B_F = \BFmsym$~Msym per frame. The direct route would have
 given $\BFdirectmsym$~Msym, a difference that is pure padding. The object-level payload is charged
-through the identical chain from each frame's own box count, at $\BoxBits$~bits per box: over the
-development split it averages $\BLmean$~Msym and ranges from $\BLmin$ to $\BLmax$~Msym, i.e.
-$\NcwLmin$ to $\NcwLmax$ codewords for a mean of $\NboxLmean$ boxes.
+through the identical chain from each frame's own box count, at $\BoxBits$~bits per box, ranging
+from $\BLmin$ to $\BLmax$~Msym, i.e.\ $\NcwLmin$ to $\NcwLmax$ codewords. The collaborator
+transmits an average of $\NboxCollabMean$ boxes per frame, producing $\NcwLmean$ LDPC codewords and
+$\BLmean$~Msym. The post-fusion late-detection output contains $\NboxLateOutputMean$ boxes on
+average, but this value is not used for payload accounting.
 
 The mean cost over $T$ frames is $\bar B = (1/T)\sum_t B_{t,s_t}$.
 
@@ -343,7 +346,7 @@ per row is in the supplementary material.
 every field is computable before the request is issued. This is a direct consequence of the
 receiver-driven architecture: nothing in $z_t$ depends on a message the ego has not yet asked for.
 Ground truth, task metrics, oracle labels and delivery outcomes are excluded from the schema by
-construction and the exclusion is enforced mechanically rather than by review.
+construction, and the cue schema is verified against its code-defined sources.
 
 \subsection{Channel Quality Cue}
 The channel state is the estimated SNR $\hat\gamma_t \in \mathbb{R}$ in dB and a binary channel-type
@@ -377,12 +380,11 @@ uses realised task utility and is therefore not deployable; it supplies training
 
 \paragraph*{Feasibility} \textbf{Mainline feasibility is structural.} An action is feasible iff a
 collaborator is available and a transport response is defined; on a frame with no collaborator the
-executed action is forced to E. The v1 rule that removed F whenever a message-level block-error rate
-exceeded $0.999$ has been retired, for reasons of transport semantics rather than outcome: under
-partial recovery the quantity that threshold tested is the \emph{per-codeword} loss probability, not
-the probability that the feature message is unusable; the feature output is defined and measured at
-every loss rate including $p = 1$; and the channel damage is already inside $F_t^{F}(p)$, so masking
-on top of it charges the same loss twice. No $F_t^{F} - F_t^{\mathrm{ego}}$ safety threshold is added
+executed action is forced to E. We do not apply a message-level BLER feasibility mask because the
+quantity it thresholds is the per-codeword erasure probability rather than the probability that the
+feature message is unusable, and because channel impairment is already reflected in the
+partial-recovery effectiveness. The feature output is defined and measured at every loss rate,
+including $p = 1$. No $F_t^{F} - F_t^{\mathrm{ego}}$ safety threshold is added
 either: with $\lambda \ge 0$ and $B_F > 0$, $F_t^{F} \le F_t^{\mathrm{ego}}$ already implies
 $U_F \le U_E$, so the objective handles it and an extra threshold would only add a researcher degree
 of freedom.
@@ -414,7 +416,8 @@ run bit for bit. This is verified by a reconstruction-consistency bridge rather 
 
 \begin{table*}[t]
 \caption{Experimental protocol. The development split is where the candidate, the penalty $\lambda$
-and the comparator threshold were chosen; both held-out splits were opened once, after the freeze.}
+and the comparator threshold were chosen; both held-out splits were evaluated only after model
+and comparator freezing.}
 \label{tab:protocol}
 \centering\small\setlength{\tabcolsep}{3.5pt}
 \input{tables/tbl_protocol}
@@ -449,7 +452,8 @@ $\lambda = \LambdaStar$---is refitted on the full development split and frozen, 
 comparator: an SNR threshold at $\tau = \TauStar$~dB, the best budget-feasible threshold at the
 primary cell. Per-tier thresholds are $\TauTight$, $\TauPrimary$ and $\TauLoose$~dB for
 $\beta = \BudgetTightBeta$, $\BudgetPrimaryBeta$ and $\BudgetLooseBeta$.
-\item \emph{One-shot held-out evaluation.} Test and Culver-City are opened once, after the freeze.
+\item \emph{One-shot held-out evaluation.} Test and Culver-City are evaluated only after model
+and comparator freezing.
 \end{enumerate}
 
 LOSO is the \emph{training-time} selection procedure and the scene-level bootstrap of
@@ -473,9 +477,17 @@ bit-level budget-matched claims. No adaptive-policy baseline met the reproducibi
 inclusion as a policy comparator.
 
 \subsection{Evaluation Metrics}\label{sec:metrics}
-We report AP@0.5 and AP@0.7 for detection performance and mean per-frame $F_1$ for frame-level
-behaviour, with communication cost as the mean per-frame channel use defined in
-Section~\ref{sec:candidates}. \textbf{The confirmatory unit is the scene, not the
+AP@0.5 and AP@0.7 characterise the fixed perception arms, transport responses and the external
+Where2comm reference. The confirmatory comparison between the frozen selector and its
+budget-feasible comparator uses scene-equal mean per-frame $F_1$, with scene-level bootstrap
+intervals. Communication cost is the mean per-frame channel use defined in
+Section~\ref{sec:candidates}.
+
+The non-inferiority margin is $\delta = \DeltaMargin$ in absolute mean per-frame $F_1$. It is a
+\emph{preregistered engineering tolerance}---how much accuracy may be given up in exchange for a
+substantive communication reduction---fixed on 2026-08-09, before any evaluation on either held-out
+split. \textbf{It is not a safety-certified threshold}, and no statistical or regulatory standard is
+claimed for its value. \textbf{The confirmatory unit is the scene, not the
 frame.} The headline statistic is therefore the scene-equal mean $F_1$, and intervals are
 scene-level bootstraps with \TestScenes{} Test scenes and \CulverScenes{} Culver-City scenes,
 covering \TestRows{} and \CulverRows{} evaluated rows. Every payload figure is reported under two

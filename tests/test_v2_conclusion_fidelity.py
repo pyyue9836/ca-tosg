@@ -50,6 +50,38 @@ CLAIMS = [
 ]
 
 
+# V2-R53 G-1: internal project history and audit voice must not reach the delivered text. These are
+# phrases about OUR PROCESS -- version numbers, retirements, the gates themselves -- which read to a
+# referee as an internal log rather than as a paper. They are checked over the WHOLE document,
+# captions and table notes included, because that is where this voice survives longest: nobody
+# re-reads a caption for tone (V2-R53 F-4).
+#
+# Scoped to whole words and to the exact idioms, not to the topics: a paper may discuss a threshold
+# that some other work retired, and may cite IEEE 802.11bd without "bd" being a version token.
+INTERNAL_VOICE = [
+    (r'\ba gate (?:enforces|checks|verifies|catches)\b', 'names our own gate'),
+    (r'\bgate\s+\d+\b', 'names a gate by number'),
+    (r'\bopened once\b', 'internal sealing vocabulary'),
+    (r'\bthe (?:v1|v2) (?:rule|manuscript|protocol|selector|convention)\b',
+     'internal version history'),
+    (r'\bhas been retired\b|\bis retired\b|\bwas retired\b', 'internal retirement vocabulary'),
+    (r'\bpre-?registered as a risk\b', 'internal risk-register vocabulary'),
+    (r'\benforced mechanically rather than by review\b', 'audit voice'),
+    (r'\bself-test\b|\binjection test\b', 'names our own test apparatus'),
+    (r'\bwork package\b', 'internal plan vocabulary'),
+]
+
+
+def internal_voice(text):
+    """Findings for process language that must not appear in a delivered document."""
+    n = norm(text)
+    out = []
+    for pat, why in INTERNAL_VOICE:
+        for m in re.finditer(pat, n, re.I):
+            out.append('internal voice (%s): "%s"' % (why, n[max(0, m.start() - 40):m.end() + 40]))
+    return out
+
+
 def norm(s):
     s = re.sub(r'\\[a-zA-Z]+\{?|\}|\$|\\\\|~|%', ' ', s)
     return re.sub(r'\s+', ' ', s)
@@ -119,6 +151,26 @@ def self_test():
     print(f'  {"quiet  " if not f3 else "FIRES  "}  a macro replaced by prose (content words '
           f'intact; must NOT fire)')
     ok &= not f3
+    # G-3: the internal-voice sweep, injected INTO A CAPTION -- the place this language survives
+    # longest, because nobody re-reads a caption for tone.
+    cap = (r'\caption{Primary cell. Payload is drawn on a logarithmic axis; a gate enforces that '
+           r'the margin and the bound are reported together.}')
+    f4 = internal_voice(cap)
+    print(f'  {"FIRES  " if f4 else "SILENT "}  "a gate enforces" inside a \\caption{{...}}')
+    ok &= bool(f4)
+
+    f5 = internal_voice(r'\caption{Delivery regimes on the development split.}')
+    print(f'  {"quiet  " if not f5 else "FIRES  "}  an ordinary caption (must NOT fire)')
+    ok &= not f5
+
+    live = ''.join(open(os.path.join(ROOT, r), encoding='utf-8').read()
+                   for r in ('paper/main.tex', 'paper/supplementary.tex'))
+    f6 = internal_voice(live)
+    print(f'  {"quiet  " if not f6 else "FIRES  "}  the delivered documents as they stand')
+    for x in f6[:6]:
+        print('      ' + x)
+    ok &= not f6
+
     print('CONCLUSION FIDELITY SELF-TEST ' + ('PASS' if ok else 'FAIL'))
     return 0 if ok else 1
 
@@ -132,6 +184,20 @@ def main():
     bad = ['[official] ' + b for b in check()]
     bad += ['[archived brief] ' + b
             for b in check(open(BRIEF, encoding='utf-8').read())]
+    # G-1: the internal-voice sweep runs on the LIVE documents only. The archived brief is frozen
+    # and cannot be edited, so flagging it would be a permanent failure with no available fix.
+    # V2-R53: the generated table bodies are delivered text too. "opened once" survived a full
+    # pass INSIDE a generated table's row label, because the sweep read only the two .tex files
+    # that \input them -- the same coverage shape as the fingerprint hole one round earlier, and
+    # it was a page-by-page read that caught it, not a gate.
+    live = [os.path.join(ROOT, r) for r in ('paper/main.tex', 'paper/supplementary.tex')]
+    tdir = os.path.join(ROOT, 'paper', 'tables')
+    live += [os.path.join(tdir, f) for f in sorted(os.listdir(tdir)) if f.endswith('.tex')] \
+        if os.path.isdir(tdir) else []
+    for pth in live:
+        if os.path.exists(pth):
+            bad += ['[%s] %s' % (os.path.relpath(pth, ROOT), b)
+                    for b in internal_voice(open(pth, encoding='utf-8').read())]
     print(f'conclusion fidelity: {len(CLAIMS)} ruled claims checked in paper/main.tex '
           f'and in the archived brief')
     if bad:

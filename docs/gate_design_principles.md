@@ -200,3 +200,36 @@ is. The narrowing has an exact scope and three tests; the alternative had neithe
 **And one shortcut refused, recorded because it worked.** `[^.\n]` excludes newlines, so simply
 breaking the line between "beats" and "simple rules" would have silenced the sweep completely. The
 reader would see the identical words. Literally true, read false — against the gate itself.
+
+### Near-identical names with unrelated meanings — the fourth instance (V2-R53 A-3)
+
+`n_box_collab` is what the collaborator **transmits**, and is what the object-level payload is
+billed on. `n_box_L` is the **post-fusion late-detection output**, and is never charged. The paper's
+payload paragraph quoted the second while describing the first. The billing itself was always
+correct; only the sentence was wrong.
+
+Confirmed by re-deriving rather than by reading the code: pushing each candidate count through the
+real chain (184 bit/box → 8000-bit packets with 320-bit headers → LDPC $K=500$) and comparing the
+predicted codeword count against the recorded one, frame by frame —
+
+| count | exact per-frame match | mean predicted $N_{cw}$ |
+|---|---|---|
+| `n_box_collab` (24.08) | **94.85 %** | 10.049 |
+| `n_box_L` (28.40) | 15.05 % | 11.691 |
+| `n_box_ego` (22.56) | 31.06 % | 9.484 |
+
+against a recorded mean of 10.101.
+
+**The family, now four deep:**
+
+1. `p_cw` versus `p_cw_F` — a per-codeword probability read as a per-message one;
+2. one IoU threshold reused for two different comparisons that needed different values;
+3. `catosg_split` missing, so a seed identity silently read `'unknown'` and the arm ran under a
+   different seed space from every other product;
+4. `n_box_collab` versus `n_box_L` — this one.
+
+**What makes the family dangerous is the shared shape, not the shared topic:** the names differ by
+one token, the meanings do not overlap, taking the wrong one raises nothing, and the number that
+comes out is the right order of magnitude. Nothing in a re-read distinguishes them. The fix is the
+same each time — **give the two quantities names that cannot be confused, and delete the ambiguous
+one without leaving an alias**, because an alias preserves exactly the confusion being removed.

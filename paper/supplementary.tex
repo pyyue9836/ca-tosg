@@ -28,16 +28,16 @@ analysis is labelled as such wherever it appears.
 
 \section{The frozen cue schema}
 Table~\ref{tab:cues} lists all $\CueDim$ fields of the frozen schema \CueName{} in order, with the
-code location each is computed at. Two properties are enforced mechanically rather than by review.
+code location each is computed at. Two properties hold of the schema by construction.
 
 First, \emph{every field is ego-local}: it is computed from the ego vehicle's own LiDAR sweep or its
 own detection output, so the vector exists before the request is issued and no field depends on a
 message the ego has not yet asked for.
 
 Second, \emph{no ground truth, task metric, oracle label, delivery outcome or future information
-reaches the schema}. This is checked by a gate that reads the field definitions at their code
-locations, not by name matching---a wrong implementation would also rename its fields, so a name
-check would prove nothing.
+reaches the schema}. The cue schema is verified against its code-defined
+sources, not by name matching---a wrong implementation would also rename its fields, so a name check
+would prove nothing.
 
 The field of view over which the statistics are defined, the point source, and the detector
 checkpoint the box count depends on are all pinned in the schema manifest, because a schema frozen
@@ -77,11 +77,36 @@ from $\BFmsym$ is codeword padding: the direct route silently assumes the inform
 integer number of codewords. We charge the padding, because the channel does.
 
 The object-level message is charged through the identical chain from each frame's own box count at
-$\BoxBits$~bits per box. Over the development split it averages $\BLmean$~Msym across
-$\NboxLmean$ boxes, ranging from $\BLmin$ to $\BLmax$~Msym, i.e. $\NcwLmin$ to $\NcwLmax$ codewords.
+$\BoxBits$~bits per box, ranging from $\BLmin$ to $\BLmax$~Msym, i.e.\ $\NcwLmin$ to $\NcwLmax$
+codewords. The collaborator transmits an average of $\NboxCollabMean$ boxes per frame, producing
+$\NcwLmean$ LDPC codewords and $\BLmean$~Msym. The post-fusion late-detection output contains
+$\NboxLateOutputMean$ boxes on average, but this value is not used for payload accounting.
 At the tightest budget tier $\beta = \BudgetTightBeta$ the mean object-level payload is
 $\BLshareTightPct$\% of the ceiling, which is why the object-level action is effectively free at
 every tier studied here.
+
+\section{The operating grid}
+Table~\ref{tab:chgrid} gives the per-codeword erasure probability $p_{\mathrm{cw}}$ at every point
+of the operating grid: $11$ SNR points crossed with the two channel types. These are the values the
+selector's channel cue indexes and the transport model consumes.
+
+\textbf{Two AWGN points are marked \emph{squeeze}.} They were absent from the link-level sweep and
+were filled under a \emph{preregistered table-completion rule}: a point is filled only when both
+bracketing table entries are exactly equal, which is arithmetic on the table. \textbf{This states
+what the table implies, not that the physical error rate is exactly zero at those points.} Every
+other kind of gap raises rather than interpolating---AWGN falls from $0.74650$ to $0.00013$ between
+$6$ and $8$~dB, and a linear fill through that region would manufacture a plausible-looking number
+that was never measured. $\SqueezePoints$ of the $22$ grid points are completed this way; the rest
+are measured.
+
+\begin{table*}[t]
+\caption{The operating grid: per-codeword erasure probability at each SNR point and channel type.
+\emph{squeeze} marks a point filled under the preregistered completion rule because both bracketing
+entries were exactly equal; it is a statement about the table, not about the channel.}
+\label{tab:chgrid}
+\centering\small\setlength{\tabcolsep}{5pt}
+\input{tables/tbl_channel_grid}
+\end{table*}
 
 \section{The complete transport sweep}
 Table~\ref{tab:transport} gives all $\TransportRates$ evaluated per-codeword loss rates in the three
@@ -144,8 +169,7 @@ included because it answers a different and worthwhile question---how much task 
 feature-content selection under the same splits, field of view, ground truth and metrics.
 
 An earlier development-split sweep of this arm predates the deterministic evaluation pipeline and is
-retained only as a frozen tuning record. It reaches no delivered table, figure or sentence, and a
-gate enforces that by capability rather than by intent.
+retained only as a frozen tuning record. No result reported here is derived from it.
 
 \begin{table*}[t]
 \caption{Where2comm, all $24$ evaluated points. The rate column is the fraction of features
@@ -197,8 +221,8 @@ payloads---and could in principle inflate an apparent relative saving.
 
 Measured, it does not. Collaborators are available on \TestCollabShare\% of Test rows and
 \CulverCollabShare\% of Culver-City rows, and the relative saving is identical under both
-accountings on both splits. The concern was pre-registered as a risk and is retired by measurement
-rather than carried as a caveat.
+accountings on both splits. The concern was stated in advance and is settled by measurement rather
+than carried as a caveat.
 
 \textbf{Note that this is not a second payload convention for the external baseline.} Dual
 accounting is full-frame versus collaborator-available frames within \method{}'s single payload

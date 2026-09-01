@@ -13,17 +13,18 @@
   "paper/figures/fig3_recovery.pdf": "9d2cb3f61c4e73fd65d628edbca259038eb4e614435b4dd707fffb4b321b3498",
   "paper/figures/fig4_where2comm.pdf": "b60c6d2a43c93540f1f52bdebcc7481c8a1705165db3d50828e096a418c25d83",
   "paper/figures/fig5_lambda.pdf": "23e813f97cc261a7fabb669c6b3298b35d93fb8bf19fef5621c18bd607148ba4",
-  "paper/main.tex": "f702050c9ad697742beebe495427b90e6d37d41f809dddf6d7a80274e694fd20",
+  "paper/main.tex": "9571fa547fcf51761ff952c3721823349445ee26930d192e06f6c7299bc407ad",
   "paper/references.bib": "7605270eb905497ae1e5b610e1fd0d2431c377bb5c8fb9614af0b5d7230c9fc0",
-  "paper/supplementary.tex": "2a1b7d5f7c8953e72bf44b0e324529b0f5a84af993fc3d90f0837ebe3a157cd0",
-  "paper/tables/generated_numbers.tex": "683922c4fb568538e9ca290d1baaa286af3c02c51b660d1ea487f10cf402839f",
-  "paper/tables/tbl_baselines.tex": "43db8c7f8ee5d970ff81bf9d7316d0a519b32a3f4143c011a0a2c8cd33aff1be",
+  "paper/supplementary.tex": "a09f02d6182a6b186a575533639b918eb2bb9eb504235eb0be486d36b89f3e4b",
+  "paper/tables/generated_numbers.tex": "712042d6a5cf914c5f16bbea26fd5d74840e781070f12c2d54d6f9521c9dfd39",
+  "paper/tables/tbl_baselines.tex": "c9c631b097d18df592266d3c9e957e858e51b4c771f406461e4d40ec61231fed",
+  "paper/tables/tbl_channel_grid.tex": "67da84481bee64a8cc6a6b9058be9673141a4a9a696358bc3489831468e515aa",
   "paper/tables/tbl_cue_schema.tex": "98874d03cbbb7324baeee8e74854d8428a2998ebe2627cf4635755aea99a8238",
   "paper/tables/tbl_lambda_scan.tex": "1a5a8a6f667d6b949240f2446fe70cf18dc1db76394ba9b094bdb80a399cbfa4",
   "paper/tables/tbl_position_effect.tex": "416c0be4560cf02df2d7ab5f25b4b0339438044ea1c84b994f33dceb510add7b",
-  "paper/tables/tbl_protocol.tex": "01de6c3fc328fa042d1778a6994f4f073cbec0242e59d042a99718431b122b98",
+  "paper/tables/tbl_protocol.tex": "ea4499cffb723ac823c692917d2072aa3f10af0151e46d7ee2a77f4df539bdd1",
   "paper/tables/tbl_transport.tex": "79aafaa3e0adbc476122b58af975b52d3bd33ddcb8fb6d58eb0a5b4b3c0386a0",
   "paper/tables/tbl_where2comm_full.tex": "ea363a9af7b5b06a0e4576ae9b02346596d4e3dfa55b5fc566f6f308c75bed06"
  },
- "n_files": 17
+ "n_files": 18
 }

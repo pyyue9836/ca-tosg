@@ -6191,3 +6191,67 @@ does not report a normal rebuild as an anomaly. What is stable — and what the 
 verifies — is page count, zero LaTeX errors, zero undefined references and zero overfull boxes.
 **The archived PDFs are the exception**: they are never rebuilt, so their digests in
 `V1_FREEZE_WITNESS.json` are exact, and a mismatch there is a breach.
+
+## V2-R53 — the manuscript's final pass: one wrong count, one narrowed claim, and the audit voice out
+
+### A · The payload sentence named the wrong box count
+
+Billing was always on `n_box_collab`; the prose quoted `n_box_L`, the post-fusion output. Verified
+by re-derivation (94.85 % exact per-frame agreement for the collaborator count against 15.05 % for
+the late-detection output). `NboxLmean` is deleted with **no alias**, replaced by
+`NboxCollabMean` and `NboxLateOutputMean`. **No payload number changes.** Fourth instance of
+near-identical names with unrelated meanings; the family is tabulated in
+`docs/gate_design_principles.md`.
+
+### C · The metrics promise now matches the results table
+
+The manuscript promised AP as its detection metric and then ran its confirmatory comparison on
+scene-equal $F_1$. The promise is rewritten to say what is actually done: AP characterises the fixed
+arms, the transport responses and the external reference; the confirmatory comparison uses
+scene-equal mean per-frame $F_1$ with scene-level bootstrap intervals.
+
+**Every AP-bearing sentence in both documents was then enumerated and judged** — seven in total.
+None is a selector-versus-comparator comparison; the one that flagged on a keyword scan turned out
+to be Where2comm's own communication threshold, not the SNR comparator. No result was recomputed and
+none needed to be.
+
+### D · The operating grid is now printed
+
+11 SNR points × 2 channel types, generated from the frozen Sionna sweep and the frozen grid. Two
+AWGN points (14 and 18 dB) are marked **squeeze**: absent from the sweep and filled under the
+preregistered completion rule of protocol §9.3(r), which fills only when both bracketing entries are
+exactly equal. The table and the text both say what that means — **a statement about the table, not
+a claim that the physical error rate is zero there.**
+
+### F/G · The audit voice is out of the paper, and a gate keeps it out
+
+Seven sites carried internal process language: "the v1 rule ... has been retired", "opened once",
+"a gate enforces that by capability rather than by intent", "enforced mechanically rather than by
+review", "pre-registered as a risk and is retired by measurement". All rewritten as statements about
+the system rather than about our procedure.
+
+`conclusion fidelity` gains an `INTERNAL_VOICE` sweep over the whole live document — **no new gate,
+the count stays at 35** — and it is injected **inside a `\caption{}`, which is where this voice
+survives longest because nobody re-reads a caption for tone.**
+
+The sweep is scoped to idioms, not topics: a paper may discuss a threshold that other work retired,
+and may cite IEEE 802.11bd without "bd" reading as a version token. It runs on the live documents
+only — the archived brief is frozen, so flagging it would be a permanent failure with no available
+fix.
+
+### H · The margin says what it is
+
+$\delta = 0.005$ is a preregistered engineering tolerance, fixed 2026-08-09 before any held-out
+evaluation (`docs/experiment_protocol.md:436`). The paper now says exactly that, and says
+explicitly that it is **not** a safety-certified threshold and that no statistical or regulatory
+standard is claimed for it.
+
+### E · The novelty claim is narrowed
+
+"All of them work at a fixed granularity" is replaced by a claim that survives contact with the
+literature: prior work has considered multilevel and adaptive sharing; what is specific here is
+receiver-driven per-frame E/L/F selection on strictly ego-local pre-request cues under a common
+digital transport-accounting protocol. RefPtsFusion is **not** added — an arXiv preprint, not peer
+reviewed, and later than this work; the Related Work positioning stands on Where2comm, JSCC,
+SmartCooper and ML-Cooper. Josh or the supervisor may overturn that; no baseline experiment is
+added either way.

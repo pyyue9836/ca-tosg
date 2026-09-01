@@ -57,3 +57,7 @@ RX \b95\b(?=\\?%\s*(?:lower|confidence|CI))
 RX \b23\b(?=-dimensional|-d\b|\s+dimensions?\b|\s+fields?\b)
     the cue-vector width stated as a protocol definition. The schema is frozen at this size by
     design; the field listing itself is a generated table.
+RX (?<![\d-])\d{4}(?=-\d{2}-\d{2})|(?<=\d{4}-)\d{2}(?=-\d{2}\b)|(?<=\d{4}-\d{2}-)\d{2}\b
+    an ISO calendar date. Dates are provenance -- when a value was fixed, and against what it was
+    fixed in advance of -- not measurements, and the only one in the delivered text is the
+    preregistration date of the non-inferiority margin.
