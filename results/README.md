@@ -27,7 +27,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 6 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
-| | `results/v2/` | 45 |
+| | `results/v2/` | 46 |
 | | `results/v2/diagnostic/` | 7 |
 | | `results/v2/sealed/` | 25 |
 
@@ -422,6 +422,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `v2_grid_validate_ideal.json` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
 | `v2_grid_validate_packet.csv` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
 | `v2_grid_validate_packet.json` | `python projects/ca_tosg/evaluation/v2_build_grid.py --split <split> --regime <regime>` | V2-R25: the v2 oracle/feasibility grid -- eff_E/eff_L/eff_F and the per-frame payload matrix per (frame, SNR, channel), protocol §9.3. ideal = mainline, packet = sensitivity only |
+| `v2_heldout_fixed_arms.json` | **UNATTRIBUTED** |  |
 | `v2_lambda_fine_scan_validate.csv` | `exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md` | V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim |
 | `v2_lambda_fine_scan_validate.json` | `exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md` | V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim |
 | `v2_p12_comparison.json` | `python projects/ca_tosg/evaluation/v2_p12_comparison.py` | V2-R27 E-1: P1-2 test -- frozen RF vs budget-matched tau, hand rules and Fixed E/L/F, plus the F-collapse two-question diagnostic |
@@ -488,4 +489,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-350 files indexed, 55 unattributed.
+351 files indexed, 56 unattributed.
