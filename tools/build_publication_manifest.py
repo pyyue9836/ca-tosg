@@ -79,6 +79,15 @@ def build():
     return {'schema': 'catosg-publication/1',
             'why': 'The manuscript versions independently of the experiment. V2_CLOSEOUT.json fixes '
                    'the experiment and does not move; this file moves with the paper.',
+            'pdf_hash_note': 'V2-R50 C-4: the .pdf hashes below are NOT a stable identity. tectonic '
+                             'writes different metadata on every build, so rebuilding an unchanged '
+                             '.tex yields a different digest. What is stable, and what the compile '
+                             'gate verifies, is the CONTENT: page count, zero LaTeX errors, zero '
+                             'undefined references, zero overfull boxes. A .pdf digest that differs '
+                             'from the one recorded here is the normal result of a rebuild and is '
+                             'not, on its own, an anomaly. The ARCHIVED pdfs are the exception: '
+                             'they are never rebuilt, so their digests in V1_FREEZE_WITNESS.json '
+                             'are exact and a mismatch there IS a breach.',
             'supersedes': SUPERSEDED,
             'supersedes_note': 'the 4-page brief, archived unchanged as paper/archive/'
                                'results_brief.tex by V2-R47 A-1',

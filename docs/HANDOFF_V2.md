@@ -111,20 +111,21 @@ predictions, E/L products, payload, WP5 transport — all confirmed unaffected (
 
 ## 3. Open rulings — these need Josh, not work
 
-1. **The level-2 position-effect threshold.** V2-R11 B-2 asked for a proportion threshold to be
-   written into the protocol *before* the data was seen. It never was. Level 1 ("loss position
-   affects task performance") is **supported and reported**, and V2-R19 B strengthened it to the
-   equal-codeword-count form; level 2 ("position matters more than amount") is **still not
-   adjudicable**, and defining the threshold now would be choosing it after seeing the numbers.
-   Either pre-register one for a future run or drop the claim. **Reaffirmed unchanged in V2-R19
-   B-4.**
+1. ~~The level-2 position-effect threshold~~ — **CLOSED, V2-R50 B-1. Josh declined to rule, and
+   that is the ruling.** Level 1 ("loss position affects task performance") is supported, reported
+   and strengthened to the equal-codeword-count form. Level 2 ("position matters *more* than
+   amount") is **not claimed** — the threshold it would need was never pre-registered, and setting
+   one now would be setting it with the data on screen. **Closed, not carried as future work**: it
+   is not on any backlog, because leaving it open would keep inviting the claim it forbids.
 2. ~~WP3/WP4 on test and Culver~~ — **EXPIRED AND RESOLVED, V2-R29 D.** The two options
    ("boxes and counts only" vs "wait for WP11") collapsed into one once the Test primary needed the
    accuracy side: **generate the accuracy, but seal it strictly and unseal once at the end.**
    WP3/WP4 on **test** are done and written straight into `results/v2/sealed/` (V2-R29 C-1);
    **Culver is untouched** and stays independent. Logged as expired rather than left hanging.
-3. **Tier B** is approved at ≈10 h typical, to start after Tier A is accepted. **Tier C** is not
-   approved, pending the ML-Cooper / SmartCooper selection report.
+3. **Tier B — NOT STARTING (V2-R50 B-2).** The paper is a closed loop as it stands, and nothing is
+   added to the experiment before the supervisor sees it. Registered as an **optional follow-up
+   with no schedule**; the earlier "≈10 h typical, after Tier A" estimate stands if it is ever
+   revived. **Tier C** remains unapproved, pending the ML-Cooper / SmartCooper selection report.
 4. **NEW (V2-R19) — should the alignment audit become gate 24?** `v2_alignment_audit.py` is
    currently a script that must be run, not a registered check. Making it a gate would catch a
    future misindexing automatically; the stop-work order forbids new gates *for v1 results* and this
@@ -151,22 +152,21 @@ predictions, E/L products, payload, WP5 transport — all confirmed unaffected (
    *prospective* hazard: v2 runs `IntermediateFusionDataset`, where `origin_lidar` **is** the
    all-CAV stack. **The amendment stands; one of its two stated grounds does not.**
 
-> ### ▶ THE ONE OPEN QUESTION — start here next session
+> ### ▶ NOTHING IS BLOCKING (V2-R50)
 >
-> **Proceed to E-1 (regenerate oracle/feasibility, refit RF / threshold / hand rule on the new
-> `v2_ego_local_23d` schema), or revisit the schema first?**
+> The question that stood here — proceed to E-1 or revisit the schema — was answered by proceeding.
+> E-1 ran, candidate 67 was frozen with the comparator at $\lambda = 0.2$, both held-out splits were opened once,
+> and the experiment is closed (`results/manifests/V2_CLOSEOUT.json`). The manuscript is written and
+> all 35 gates pass.
 >
-> V2-R22 stopped before any refit, per H-3, because an amendment ground was withdrawn. The
-> executor's recommendation is **proceed**: the surviving grounds (GT leak, FOV change, prospective
-> hazard) are sufficient and the schema itself did not change as a result of the correction. But the
-> premise was rewritten after Josh wrote the instruction, so it is his to confirm.
->
-> Everything E-1 needs already exists: `results/v2/wp6_cues_validate.csv`,
-> `wp6_distribution_compare_validate.json` (D-1, produced and reported), and the frozen
-> §9.2 schema. **Zero GPU** — E-2 of V2-R21 confirmed WP2/E/L/payload/WP5 all stay as they are.
-9. **NEW (V2-R20) — should the sibling live in a fork?** The modifications travel as patches
-   because there is no writable OpenCOOD remote (§0). A fork under Josh's account would give them
-   pushed, dated history. Creating one is an outward-facing act and is Josh's to authorise.
+> **Of the items below, none blocks work.** 1 and 3 are closed; 9 is deferred with a stated trigger.
+
+9. **Should the sibling live in a fork? — DEFERRED to the pre-submission reproducibility pass
+   (V2-R50 B-3).** The modifications travel as patches because there is no writable OpenCOOD remote
+   (§0); a fork under Josh's account would give them pushed, dated history. It **does not block the
+   paper or the supervisor review**, so it stays open here with an explicit trigger: decide it when
+   the reproducibility material is assembled for submission. Creating one is an outward-facing act
+   and remains Josh's to authorise.
 
 ---
 
@@ -252,6 +252,17 @@ checklist, so it could be skipped for a whole session:
   (V2-R25: adding the grid moved the located-cell count 297 → 300 and the gate caught the stale
   report. Third member of the same family as `results_index.py` and `apply_opencood_patches --export`
   — a generated artefact whose generator nobody re-ran.)
+
+**A fourth member, and it fails differently (V2-R47 E-1 / V2-R50 C-3).** `results/README.md`
+enumerates **git-tracked** files. Running `results_index.py --write` on a *new, untracked* product
+therefore produces no change at all — the generator runs, reports success, and the index stays
+stale until that product is committed. It failed the numeric-literals gate one run later.
+
+**The distinction matters because the fix does.** The first three are *"nobody re-ran it"*, and a
+checklist repairs that. This one is *"it was re-run at the wrong moment"*, and a checklist does
+**not** repair it — an ordering rule does: **re-run the index AFTER the commit that adds the file,
+not before.** Putting an ordering fault on a checklist produces a step that gets ticked while
+doing nothing, which is how it hid in the first place.
 
 `tests/test_eval_determinism.py` enumerates **all 17,905 identities** for seed collisions on every
 run — 0 collisions now, but that is a property of *this* identity set, not of the derivation, and the

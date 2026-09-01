@@ -6127,3 +6127,67 @@ move, and excluding them would have opened a hole in the same week one was found
 `paper/archive/tables/generated_numbers.tex` was added too: the brief's own `.tex` holds macro
 *names*, so every value a reader of the brief actually sees lives only in that file. Sweeping the
 document and not its numbers would have been the same shape of hole one level down.
+
+## V2-R50 — pushed; the three standing questions closed, deferred or declined
+
+### B · What Josh did with the open rulings
+
+* **Level-2 position effect: declined, and the declining is the ruling.** Level 1 stands and is
+  reported. Level 2 is not claimed and is **not carried as future work** — leaving it on a backlog
+  would keep inviting the claim it forbids.
+* **Tier B: not starting.** The paper is a closed loop; nothing is added to the experiment before
+  the supervisor sees it. Optional, unscheduled.
+* **The OpenCOOD fork: deferred with a trigger** — decided during the pre-submission
+  reproducibility pass, because it blocks neither the paper nor the review.
+
+`docs/HANDOFF_V2.md` §3 now carries all three in their settled form, and the stale
+"THE ONE OPEN QUESTION" box at the head of that section is replaced: the question it asked was
+answered by proceeding, and a resolved instruction sitting at the top of the open list is a trap
+for the next reader.
+
+### C-1 · An instruction of Josh's that was wrong, and what the executor did with it
+
+V2-R47 B told the executor to keep `paper/archive/**` **out** of the retired-value fingerprint
+sweep, by analogy with `docs/p0_corrigendum.md` (a document that exists to record what the retired
+values were). The analogy does not hold: **the archived documents are delivered text** — a reader
+opening the repository reads them — and they had been swept, and passing, right up until the move
+renamed them.
+
+The exclusion was reverted at V2-R49. It would have opened a coverage hole **in the same week a
+coverage hole had just cost a red gate**, which is the whole reason it is recorded rather than
+quietly fixed.
+
+`paper/archive/tables/generated_numbers.tex` went in with them, on a related argument one level
+down: the brief's own `.tex` holds macro *names*, so every value a reader of the brief actually
+sees lives only in that macro file. **Sweeping the document and not its numbers is the same shape
+of hole, one level down.**
+
+### C-2 · The injection self-test caught what two rounds of discussion had not
+
+The withdrawal exemption's first implementation did nothing at all: the sentence it exists for
+wraps as `not a\ndemonstration that`, and a raw substring test missed the lead-in. **Its own
+injection caught that on the first run.**
+
+The irony is worth the line. Two rounds were spent on whether a line break could be used to *evade*
+the sweep — it can, and it was refused (V2-R49 B-1). Then a line break broke the exemption anyway,
+in the opposite direction, without anyone intending it. **That is exactly what an injection test is
+for: it does not depend on the author having imagined the right failure direction.** A review can
+only check the failures its reviewer thought of.
+
+### C-3 · The fourth checklist member fails differently, so it needs a different fix
+
+`results/README.md` enumerates **git-tracked** files, so running its generator on a new but
+uncommitted product changes nothing and looks done. Recorded in `docs/HANDOFF_V2.md` §5 beside the
+other three, with the distinction stated: the first three are *"nobody re-ran it"* and a checklist
+repairs them; this one is *"it was re-run at the wrong moment"* and **only an ordering rule
+repairs it**. Putting an ordering fault on a checklist yields a step that is ticked while doing
+nothing — which is how it hid.
+
+### C-4 · A PDF digest is not a stable identity
+
+`tectonic` writes different metadata on every build, so rebuilding an unchanged `.tex` gives a
+different `.pdf` digest. `PUBLICATION.json` now says so in the file itself, so that a future reader
+does not report a normal rebuild as an anomaly. What is stable — and what the compile gate actually
+verifies — is page count, zero LaTeX errors, zero undefined references and zero overfull boxes.
+**The archived PDFs are the exception**: they are never rebuilt, so their digests in
+`V1_FREEZE_WITNESS.json` are exact, and a mismatch there is a breach.
