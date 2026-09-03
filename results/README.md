@@ -27,7 +27,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | | `results/sensitivity/` | 35 |
 | | `results/sensitivity/ablation/` | 6 |
 | | `results/sensitivity/feature_ablation_runs/` | 8 |
-| | `results/v2/` | 46 |
+| | `results/v2/` | 47 |
 | | `results/v2/diagnostic/` | 7 |
 | | `results/v2/sealed/` | 25 |
 
@@ -425,6 +425,7 @@ listed as **UNATTRIBUTED** rather than omitted.
 | `v2_heldout_fixed_arms.json` | **UNATTRIBUTED** |  |
 | `v2_lambda_fine_scan_validate.csv` | `exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md` | V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim |
 | `v2_lambda_fine_scan_validate.json` | `exploratory diagnostic; pre-registered in docs/v2_r27_lambda_scan_preregistration.md` | V2-R27 D: EXPLORATORY ONLY -- does NOT replace candidate 67 and enters no headline claim |
+| `v2_matched_payload.json` | **UNATTRIBUTED** |  |
 | `v2_p12_comparison.json` | `python projects/ca_tosg/evaluation/v2_p12_comparison.py` | V2-R27 E-1: P1-2 test -- frozen RF vs budget-matched tau, hand rules and Fixed E/L/F, plus the F-collapse two-question diagnostic |
 | `v2_test_primary.json` | **UNATTRIBUTED** |  |
 | `wp2_per_agent_culver.csv` | `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py` | work package 2: per-agent inference under CATOSG_MAX_COLLAB=1 |
@@ -489,4 +490,4 @@ listed as **UNATTRIBUTED** rather than omitted.
 
 ---
 
-351 files indexed, 56 unattributed.
+352 files indexed, 57 unattributed.
