@@ -122,6 +122,8 @@ def build():
     aF, aL = p12['arms']['Fixed_F'], p12['arms']['Fixed_L']
     mac('FixedFMinusLSceneFone', f"{aF['scene_equal_f1'] - aL['scene_equal_f1']:+.5f}")
     mac('FixedFOverLPayRatio', f"{aF['mean_payload_msym'] / aL['mean_payload_msym']:,.0f}")
+    mac('FixedFOverBudgetRatio',
+        f"{aF['mean_payload_msym'] / pc['beta_tiers_msym']['0.20']:.1f}")
 
     L.append('')
     L.append(r'% ---- MAIN 6.1: the payload chain, bit by bit ------------------------------')
@@ -259,6 +261,41 @@ def build():
     for snr, tag in ((6, 'Six'), (8, 'Eight')):
         mac(f'PcwAwgnAt{tag}',
             f"{float(pts[(pts.channel == 'awgn') & (pts.snr_db == snr)].p_cw.iloc[0]):.5f}")
+
+    L.append('')
+    L.append(r'% ---- MAIN: matched-realised-payload comparison, SECONDARY (V2-R56 A / R58) --')
+    mpj = json.load(open(os.path.join(ROOT, 'results/v2/v2_matched_payload.json')))
+    NAMES = (('random_el', 'Random'), ('task_only', 'TaskOnly'), ('snr_only', 'SnrOnly'),
+             ('ca_tosg', 'CaTosg'), ('oracle_el', 'Oracle'))
+    resid = 0.0
+    for tag, sp in (('Test', 'test'), ('Culver', 'culver')):
+        d3 = mpj['splits'][sp]
+        mac(f'{tag}MatchedTarget', f"{d3['target_payload']:.5f}")
+        for key, nm in NAMES:
+            v = d3['policies'][key]
+            mac(f'{tag}MP{nm}Fone', f"{v['scene_equal_f1']:.5f}")
+            resid = max(resid, abs(v['payload_residual_vs_target']))
+            if key == 'ca_tosg':
+                continue
+            w = d3['vs_ca_tosg'][key]
+            mac(f'{tag}MP{nm}Delta', f"{w['delta_f1_point']:+.5f}")
+            mac(f'{tag}MP{nm}LCB', f"{w['delta_f1_LCB95']:+.5f}")
+        # eta: the share of the attainable E/L selection gain that is recovered. NOT an
+        # "optimality ratio" -- the ceiling is not deployable, and the quantity depends on the
+        # action set, the payload matching and the split (V2-R58 C-1).
+        rnd = d3['policies']['random_el']['scene_equal_f1']
+        orc = d3['policies']['oracle_el']['scene_equal_f1']
+        ca = d3['policies']['ca_tosg']['scene_equal_f1']
+        mac(f'{tag}Eta', f"{(ca - rnd) / (orc - rnd) * 100:.1f}")
+        # C-2: against Fixed L, which is NOT payload-matched
+        fl = d3['vs_fixed_L']
+        mac(f'{tag}VsFixedLLCB', f"{fl['delta_f1_LCB95']:+.5f}")
+    # the largest residual payload mismatch over every matched policy and split: the matching is
+    # numerical, not exact, and the paper says so rather than claiming equality (A-2).
+    # LaTeX scientific notation, like the survival probability: a bare 'e-07' typesets as an
+    # italic variable inside maths.
+    _rm, _re = ('%.1e' % resid).split('e')
+    mac('MatchedPayloadResidual', r'%s\times10^{%d}' % (_rm, int(_re)))
 
     L.append('')
     L.append(r'% ---- SUPPLEMENTARY: the exploratory lambda scan ---------------------------')
@@ -460,32 +497,42 @@ def tables():
     p12 = json.load(open(os.path.join(ROOT, 'results/v2/v2_p12_comparison.json')))
     fr2 = json.load(open(os.path.join(ROOT, 'results/manifests/V2_PRIMARY_FREEZE.json')))
     tau_star = fr2['primary_comparator']['tau']
-    R = [HDR, r'\begin{tabular}{lrrrrr}', r'\toprule',
-         r'arm & scene-eq.\ $F_1$ & payload (Msym) & $\rho_E$ & $\rho_L$ & $\rho_F$ \\',
+    # V2-R56 D-5: a feasibility column, so that an arm which cannot be deployed at the primary
+    # budget cannot be read as a competitor to one that can. beta * B_F is the ceiling.
+    ceil_ = json.load(open(os.path.join(ROOT, 'results/v2/payload_chain.json')))[
+        'beta_tiers_msym']['0.20']
+
+    def feas(pay):
+        return r'\checkmark' if pay <= ceil_ else r'$\times$'
+
+    R = [HDR, r'\begin{tabular}{lrrrrrc}', r'\toprule',
+         r'arm & scene-eq.\ $F_1$ & payload (Msym) & $\rho_E$ & $\rho_L$ & $\rho_F$ & '
+         r'feasible at $\beta=0.20$ \\',
          r'\midrule',
-         r'\multicolumn{6}{l}{\emph{development split (validate) --- where every choice was made}} \\']
+         r'\multicolumn{7}{l}{\emph{development split (validate) --- where every choice was made}} \\']
     named = [('Fixed E (ego-only)', 'Fixed_E'), ('Fixed L (object-level)', 'Fixed_L'),
              ('Fixed F (feature-level)', 'Fixed_F'),
              ('CA-TOSG (frozen RF)', 'frozen_RF_cand67'),
              ('budget-blind oracle', 'oracle_budget_blind')]
     for label, key in named:
         a = p12['arms'][key]
-        R.append(r'%s & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+        R.append(r'%s & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
                  % (label, a['scene_equal_f1'], a['mean_payload_msym'],
-                    a['mix']['E'], a['mix']['L'], a['mix']['F']))
+                    a['mix']['E'], a['mix']['L'], a['mix']['F'], feas(a['mean_payload_msym'])))
     ts = [r for r in p12['tau_sweep'] if abs(r['tau'] - tau_star) < 1e-9]
     if ts:
-        R.append(r'SNR threshold $\tau=%g$ & %.5f & %.5f & --- & --- & --- \\'
-                 % (tau_star, ts[0]['scene_equal_f1'], ts[0]['mean_payload_msym']))
+        R.append(r'SNR threshold $\tau=%g$ & %.5f & %.5f & --- & --- & --- & %s \\'
+                 % (tau_star, ts[0]['scene_equal_f1'], ts[0]['mean_payload_msym'],
+                    feas(ts[0]['mean_payload_msym'])))
     hb = max(p12['hand_rules'].items(), key=lambda kv: kv[1]['scene_equal_f1'])
-    R.append(r'best hand rule (\texttt{%s}) & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+    R.append(r'best hand rule (\texttt{%s}) & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
              % (hb[0].replace('_', r'\_'), hb[1]['scene_equal_f1'],
                 hb[1]['mean_payload_msym'], hb[1]['mix']['E'], hb[1]['mix']['L'],
-                hb[1]['mix']['F']))
+                hb[1]['mix']['F'], feas(hb[1]['mean_payload_msym'])))
     R.append(r'\midrule')
     # V2-R55 A-2: all three fixed arms, not only Fixed L. Reporting one of them would be a
     # selective presentation of exactly the comparison the text goes on to make.
-    R.append(r'\multicolumn{6}{l}{\emph{held-out splits --- evaluated after freezing}} \\')
+    R.append(r'\multicolumn{7}{l}{\emph{held-out splits --- evaluated after freezing}} \\')
     fa = json.load(open(os.path.join(ROOT, 'results/v2/v2_heldout_fixed_arms.json')))
     tau_mix = tau_requested_mix()
     for sp, nm in (('test', 'Test'), ('culver', 'Culver-City')):
@@ -496,16 +543,17 @@ def tables():
             # what happens on a collaborator-unavailable frame is EXECUTION, and is stated in the
             # caption instead of being mixed into this column.
             mix = {'E': 0.0, 'L': 0.0, 'F': 0.0}; mix[act] = 1.0
-            R.append(r'%s: %s & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+            R.append(r'%s: %s & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
                      % (nm, lab, v['scene_equal_f1'], v['mean_payload'],
-                        mix['E'], mix['L'], mix['F']))
-        R.append(r'%s: CA-TOSG & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+                        mix['E'], mix['L'], mix['F'], feas(v['mean_payload'])))
+        R.append(r'%s: CA-TOSG & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
                  % (nm, d['RF']['scene_equal_f1'], d['RF']['mean_payload'],
-                    d['action_mix']['E'], d['action_mix']['L'], d['action_mix']['F']))
+                    d['action_mix']['E'], d['action_mix']['L'], d['action_mix']['F'],
+                    feas(d['RF']['mean_payload'])))
         tm = tau_mix[sp]
-        R.append(r'%s: $\tau=%g$ & %.5f & %.5f & %.3f & %.3f & %.3f \\'
+        R.append(r'%s: $\tau=%g$ & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
                  % (nm, d['tau']['tau'], d['tau']['scene_equal_f1'], d['tau']['mean_payload'],
-                    tm['E'], tm['L'], tm['F']))
+                    tm['E'], tm['L'], tm['F'], feas(d['tau']['mean_payload'])))
     R += [r'\bottomrule', r'\end{tabular}']
     T['tbl_baselines.tex'] = '\n'.join(R) + '\n'
 
@@ -540,6 +588,31 @@ def tables():
     R += [r'\bottomrule', r'\end{tabular}']
     T['tbl_channel_grid.tex'] = '\n'.join(R) + '\n'
     T['_n_squeeze'] = n_squeeze
+
+    # --- MAIN: the matched-realised-payload comparison (V2-R56 A) ---------------------
+    # F1 and realised payload are shown TOGETHER, never F1 alone: ranking on a single accuracy
+    # column is what this table exists to make impossible (V2-R56 G-10).
+    mpj = json.load(open(os.path.join(ROOT, 'results/v2/v2_matched_payload.json')))
+    R = [HDR, r'\begin{tabular}{llrrrrc}', r'\toprule',
+         r'split & policy & scene-eq.\ $F_1$ & payload (Msym) & $\Delta F_1$ & LCB95 & '
+         r'deployable \\', r'\midrule']
+    ROWS = (('random_el', 'Random E/L'), ('task_only', 'Task-only E/L'),
+            ('snr_only', 'SNR-only E/L'), ('ca_tosg', r'\textbf{CA-TOSG}'),
+            ('oracle_el', 'Oracle E/L'))
+    for sp, nm in (('test', 'Test'), ('culver', 'Culver-City')):
+        d3 = mpj['splits'][sp]
+        for i, (key, lab) in enumerate(ROWS):
+            v = d3['policies'][key]
+            w = d3['vs_ca_tosg'].get(key)
+            dd = '%+.5f' % w['delta_f1_point'] if w else '---'
+            lc = '%+.5f' % w['delta_f1_LCB95'] if w else '---'
+            R.append(r'%s & %s & %.5f & %.5f & %s & %s & %s \\'
+                     % (nm if i == 0 else '', lab, v['scene_equal_f1'], v['mean_payload'],
+                        dd, lc, r'\checkmark' if v['deployable'] else '---'))
+        if sp == 'test':
+            R.append(r'\midrule')
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_matched_payload.tex'] = '\n'.join(R) + '\n'
     return T
 
 

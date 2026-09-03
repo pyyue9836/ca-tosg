@@ -76,7 +76,7 @@ def fig1_block(prov):
     ax.text(1, 12.5, 'COLLABORATOR', fontsize=7, color=C['muted'], weight='bold')
     box(1, 30, 17, 9, 'Ego LiDAR\n(own sweep)')
     box(1, 18, 17, 8, 'Channel\nestimate')
-    box(21, 26, 16, 13, 'Ego-local cues\n(21 scene + 2\nchannel, all\npre-request)')
+    box(21, 26, 16, 13, 'Ego-local cues\n(21 task/availability\n+ 2 channel, all\npre-request)')
     box(41, 27, 13, 11, 'RF selector\n(frozen)', col=C['rf'])
     box(58, 34, 15, 7, 'E: no message', col=C['muted'])
     box(58, 25, 15, 7, 'L: boxes', col=C['tau'])
@@ -109,54 +109,71 @@ def fig1_block(prov):
 
 
 def fig2_primary(prov):
+    """V2-R56 G-10 / R58 D-2 — F1 AND realised payload on one plane, never F1 alone.
+
+    A single accuracy column invites a ranking; this figure makes the trade-off the object. Each
+    panel is one held-out split: x is realised payload, y is scene-equal F1. The budget ceiling is
+    drawn, so an over-budget arm is visibly not a competitor rather than a footnote.
+
+    The x axis is SYMLOG, not log: Fixed E spends exactly zero and a log axis cannot show zero.
+    Dropping the point or nudging it to a small positive value would both be fabrications
+    (the sibling of V2-R56 G-3, which struck 0 off Fig. 4's log axis).
+    """
     src = {k: os.path.join(ROOT, f'results/v2/v2_{k}_primary.json') for k in ('test', 'culver')}
     d = {k: json.load(open(v)) for k, v in src.items()}
-    f, axes = plt.subplots(1, 3, figsize=(W2, 2.2),
-                           gridspec_kw={'width_ratios': [1, 1, 1.15]})
-    for ax, k, name in zip(axes[:2], ('test', 'culver'), ('Test', 'Culver-City')):
-        x = np.arange(2)
-        pay = [d[k]['RF']['mean_payload'], d[k]['tau']['mean_payload']]
-        ax.bar(x, pay, width=0.55, color=[C['rf'], C['tau']], zorder=3)
-        ax.set_yscale('log')          # a ~400x ratio is only legible on a log axis
-        ax.set_xticks(x); ax.set_xticklabels(['CA-TOSG', f"$\\tau$={d[k]['tau']['tau']}"])
+    fa = json.load(open(os.path.join(ROOT, 'results/v2/v2_heldout_fixed_arms.json')))
+    mp = json.load(open(os.path.join(ROOT, 'results/v2/v2_matched_payload.json')))
+    ceil_ = json.load(open(os.path.join(ROOT, 'results/v2/payload_chain.json')))[
+        'beta_tiers_msym']['0.20']
+
+    f, axes = plt.subplots(1, 2, figsize=(W2, 2.5), sharey=False)
+    for ax, k, name in zip(axes, ('test', 'culver'), ('Test', 'Culver-City')):
+        arms = fa['splits'][k]['arms']
+        pol = mp['splits'][k]['policies']
+        pts = [
+            ('Fixed E', arms['E']['mean_payload'], arms['E']['scene_equal_f1'], C['muted'], 'o'),
+            ('Fixed L', arms['L']['mean_payload'], arms['L']['scene_equal_f1'], C['muted'], 's'),
+            ('Fixed F', arms['F']['mean_payload'], arms['F']['scene_equal_f1'], C['muted'], 'D'),
+            (f"$\\tau$={d[k]['tau']['tau']}", d[k]['tau']['mean_payload'],
+             d[k]['tau']['scene_equal_f1'], C['tau'], '^'),
+            ('CA-TOSG', d[k]['RF']['mean_payload'], d[k]['RF']['scene_equal_f1'], C['rf'], '*'),
+        ]
+        # the matched-payload diagnostics sit at CA-TOSG's own x
+        for key, lab, mk in (('random_el', 'Random', 'v'), ('task_only', 'Task-only', 'x'),
+                             ('snr_only', 'SNR-only', 'P'), ('oracle_el', 'Oracle', '+')):
+            v = pol[key]
+            pts.append((lab, v['mean_payload'], v['scene_equal_f1'], C['aux'], mk))
+        ax.axvspan(ceil_, 10, color=C['tau'], alpha=0.07, zorder=0)
+        ax.axvline(ceil_, color=C['tau'], lw=0.9, ls=':', zorder=1)
+        # Inline labels were tried first and were unreadable: five of the nine points sit within
+        # a factor of two on x and within 0.005 on y, so their labels overprinted each other
+        # (found by looking at the rendered figure, not by reading the code). A legend identifies
+        # them without competing for space inside the cluster.
+        for lab, x, y, col, mk in pts:
+            ax.plot(x, y, mk, ms=7 if mk == '*' else 4.5, color=col, zorder=3,
+                    mew=1.2 if mk in ('x', '+', 'P') else 0.6,
+                    label=lab if ax is axes[0] else None)
+        ax.set_xscale('symlog', linthresh=1e-3)
+        ax.set_xlim(-2e-4, 8)
+        ax.set_xlabel('Realised payload (Msym, symlog)')
         ax.set_title(name)
-        for xi, v in zip(x, pay):
-            ax.text(xi, v * 1.35, f'{v:.5f}', ha='center', fontsize=6.5, color=C['ink'])
-        # headroom above the tallest bar: without it the value label printed over the panel
-        # title on the Culver panel, which a page-by-page read caught (V2-R48 D-1).
-        ax.set_ylim(min(pay) / 3.5, max(pay) * 4.5)
         tidy(ax)
-    axes[0].set_ylabel('Realised payload (Msym, log)')
-    ax = axes[2]
-    ks, labs = ('test', 'culver'), ('Test', 'Culver-City')
-    y = np.arange(2)
-    pts = [d[k]['delta_f1_point'] for k in ks]
-    lcb = [d[k]['delta_f1_LCB95'] for k in ks]
-    for i, (pt, lo) in enumerate(zip(pts, lcb)):
-        ax.plot([lo, pt], [i, i], color=C['muted'], lw=1.4, zorder=2)
-        ax.plot(pt, i, 'o', ms=5, color=C['rf'], zorder=3)
-        ax.plot(lo, i, '|', ms=9, mew=1.6, color=C['rf'], zorder=3)
-        ax.text(pt, i + 0.18, f'{pt:+.5f}', ha='center', fontsize=6.5, color=C['ink'])
-        ax.text(lo, i - 0.28, f'LCB {lo:+.5f}', ha='center', fontsize=6.5, color=C['ink'])
-    m = -d['test']['delta']
-    ax.axvline(m, color=C['tau'], lw=1.1, ls='--', zorder=1)
-    ax.text(m, 1.55, f'margin {m:+.3f}', color=C['tau'], fontsize=6.5, ha='center')
-    ax.set_yticks(y); ax.set_yticklabels(labs)
-    ax.set_xlabel('$\\Delta F_1$ (CA-TOSG $-$ comparator)')
-    ax.set_title('Non-inferiority')
-    ax.set_ylim(-0.6, 1.9)
-    for s in ('top', 'right', 'left'):
-        ax.spines[s].set_visible(False)
-    ax.grid(True, axis='x', alpha=0.7); ax.set_axisbelow(True)
+    axes[0].set_ylabel('Scene-equal $F_1$')
+    axes[0].text(ceil_ * 1.6, axes[0].get_ylim()[0], ' over the $\\beta=0.20$ budget',
+                 fontsize=5.5, color=C['tau'], rotation=90, va='bottom')
+    h, l = axes[0].get_legend_handles_labels()
+    f.legend(h, l, frameon=False, fontsize=6, ncol=5, loc='upper center',
+             bbox_to_anchor=(0.5, 0.02))
     f.tight_layout(pad=0.3)
     p = os.path.join(FIG, 'fig2_primary.pdf'); f.savefig(p, bbox_inches='tight'); plt.close(f)
     prov['fig2_primary.pdf'] = {'panel': 'main',
-        'inputs': {os.path.relpath(v, ROOT): sha(v) for v in src.values()},
-        'fields': ['RF.mean_payload', 'tau.mean_payload', 'delta_f1_point', 'delta_f1_LCB95',
-                   'delta'],
-        'layout_rule': 'payload on a LOG axis, dF1 in its OWN panel with the margin on the same '
-                       'ruler as the bound. A shared axis would erase one half of the result '
-                       '(V2-R43 B-2); two y-scales on one panel would be a dual-axis chart.',
+        'inputs': {os.path.relpath(v, ROOT): sha(v) for v in list(src.values()) + [
+            os.path.join(ROOT, 'results/v2/v2_heldout_fixed_arms.json'),
+            os.path.join(ROOT, 'results/v2/v2_matched_payload.json')]},
+        'fields': ['RF.mean_payload', 'RF.scene_equal_f1', 'tau.*', 'arms.*', 'policies.*'],
+        'layout_rule': 'F1 AND realised payload together on one plane, with the budget ceiling '
+                       'drawn. SYMLOG x, because Fixed E spends exactly zero and a log axis '
+                       'cannot show zero (V2-R56 G-3/G-10).',
         'sha256': sha(p)}
 
 
@@ -205,7 +222,10 @@ def fig4_w2c(prov):
         ax.plot(s.comm_rate * 100, s.ap_50, 'o-', ms=3.5, lw=1.6, color=C['w2c'], label='AP@0.5')
         ax.plot(s.comm_rate * 100, s.ap_70, 's--', ms=3.5, lw=1.6, color=C['aux'], label='AP@0.7')
         ax.set_xscale('symlog', linthresh=1)
-        ax.set_xlabel('Native communication rate (% of features kept)')
+        # G-3: the axis is SYMLOG, and it says so. The sweep includes rate 0, which a log
+        # axis cannot show; leaving the scale unnamed invites the reader to read the 0 tick
+        # as sitting on a log axis.
+        ax.set_xlabel('Native communication rate (% of features kept, symlog)')
         ax.set_title(name); tidy(ax)
     axes[0].set_ylabel('AP'); axes[0].legend(frameon=False, loc='lower right')
     f.tight_layout(pad=0.3)

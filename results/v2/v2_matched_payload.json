@@ -1,0 +1,158 @@
+{
+ "schema": "catosg-v2-matched-payload/1",
+ "status": "SECONDARY ANALYSIS. Not the preregistered primary test, which remains the non-inferiority comparison against the frozen tau rule and is unchanged.",
+ "criterion": "g*(B) = argmax_g scene-equal F1(g) s.t. mean realised payload <= B, with B set to CA-TOSG's OWN realised payload on that split.",
+ "task_rule_direction": "request L when ego_detected_box_count is low (fixed on validate, r=-0.2234)",
+ "random_repeats": 200,
+ "boot": 10000,
+ "splits": {
+  "test": {
+   "target_payload": 0.0008091642228739005,
+   "n_rows": 47740,
+   "n_scenes": 16,
+   "policies": {
+    "snr_only": {
+     "scene_equal_f1": 0.875990701824853,
+     "mean_payload": 0.0008091537494763302,
+     "share_L": 0.593108504398827,
+     "deployable": true,
+     "payload_residual_vs_target": -1.0473397570216758e-08
+    },
+    "task_only": {
+     "scene_equal_f1": 0.8710430370249493,
+     "mean_payload": 0.0008091589861751153,
+     "share_L": 0.7613741097612066,
+     "deployable": true,
+     "payload_residual_vs_target": -5.236698785108379e-09
+    },
+    "oracle_el": {
+     "scene_equal_f1": 0.8812082846863905,
+     "mean_payload": 0.0008091170925848346,
+     "share_L": 0.5408881441139506,
+     "deployable": false,
+     "payload_residual_vs_target": -4.713028906586699e-08
+    },
+    "random_el": {
+     "scene_equal_f1": 0.8688120895059765,
+     "scene_equal_f1_lo": 0.8685160845705396,
+     "scene_equal_f1_hi": 0.8690513511243151,
+     "mean_payload": 0.000809146051529116,
+     "share_L": null,
+     "deployable": true,
+     "payload_residual_vs_target": -1.817134478445618e-08
+    },
+    "ca_tosg": {
+     "scene_equal_f1": 0.8767948327946947,
+     "mean_payload": 0.0008091642228739005,
+     "share_L": 0.5969627147046502,
+     "deployable": true,
+     "payload_residual_vs_target": 0.0
+    }
+   },
+   "vs_ca_tosg": {
+    "snr_only": {
+     "delta_f1_point": 0.0008041309698417834,
+     "delta_f1_LCB95": 0.0002847665352824566,
+     "delta_f1_UCB95": 0.0012964700683206077
+    },
+    "task_only": {
+     "delta_f1_point": 0.005751795769745417,
+     "delta_f1_LCB95": 0.001417156281470938,
+     "delta_f1_UCB95": 0.011053188089895924
+    },
+    "oracle_el": {
+     "delta_f1_point": -0.004413451891695605,
+     "delta_f1_LCB95": -0.00737977536025689,
+     "delta_f1_UCB95": -0.001950877239142124
+    },
+    "random_el": {
+     "delta_f1_point": 0.00805933357704855,
+     "delta_f1_LCB95": 0.004694308150763625,
+     "delta_f1_UCB95": 0.01149606133535296
+    }
+   },
+   "vs_fixed_L": {
+    "delta_f1_point": -0.0003580015260123484,
+    "delta_f1_LCB95": -0.000783443677361987,
+    "delta_f1_UCB95": 4.913429993904901e-05,
+    "fixed_L_scene_equal_f1": 0.8771528343207071,
+    "fixed_L_mean_payload": 0.0013641705069124424,
+    "note": "C-2 secondary: Fixed L is NOT payload-matched; it spends more."
+   }
+  },
+  "culver": {
+   "target_payload": 0.001470702479338843,
+   "n_rows": 12100,
+   "n_scenes": 4,
+   "policies": {
+    "snr_only": {
+     "scene_equal_f1": 0.8730479550598231,
+     "mean_payload": 0.0014705165289256202,
+     "share_L": 0.5868595041322314,
+     "deployable": true,
+     "payload_residual_vs_target": -1.85950413222934e-07
+    },
+    "task_only": {
+     "scene_equal_f1": 0.8660594432043283,
+     "mean_payload": 0.001470681818181818,
+     "share_L": 0.6357024793388429,
+     "deployable": true,
+     "payload_residual_vs_target": -2.0661157025059565e-08
+    },
+    "oracle_el": {
+     "scene_equal_f1": 0.8749631074314336,
+     "mean_payload": 0.0014704752066115707,
+     "share_L": 0.5107438016528926,
+     "deployable": false,
+     "payload_residual_vs_target": -2.272727272724026e-07
+    },
+    "random_el": {
+     "scene_equal_f1": 0.8630859183568887,
+     "scene_equal_f1_lo": 0.862737002570552,
+     "scene_equal_f1_hi": 0.8634369524533251,
+     "mean_payload": 0.0014705620867768595,
+     "share_L": null,
+     "deployable": true,
+     "payload_residual_vs_target": -1.4039256198360682e-07
+    },
+    "ca_tosg": {
+     "scene_equal_f1": 0.8735225956465954,
+     "mean_payload": 0.001470702479338843,
+     "share_L": 0.5926446280991735,
+     "deployable": true,
+     "payload_residual_vs_target": 0.0
+    }
+   },
+   "vs_ca_tosg": {
+    "snr_only": {
+     "delta_f1_point": 0.0004746405867722958,
+     "delta_f1_LCB95": -0.0010206125637227115,
+     "delta_f1_UCB95": 0.001969893737267303
+    },
+    "task_only": {
+     "delta_f1_point": 0.007463152442267085,
+     "delta_f1_LCB95": 0.001738255847069603,
+     "delta_f1_UCB95": 0.013188049037464566
+    },
+    "oracle_el": {
+     "delta_f1_point": -0.0014405117848382276,
+     "delta_f1_LCB95": -0.002751515668475313,
+     "delta_f1_UCB95": -0.00012950790120114242
+    },
+    "random_el": {
+     "delta_f1_point": 0.01064075477158588,
+     "delta_f1_LCB95": 0.00793427915367595,
+     "delta_f1_UCB95": 0.013668385330788957
+    }
+   },
+   "vs_fixed_L": {
+    "delta_f1_point": -0.0013253863050980697,
+    "delta_f1_LCB95": -0.0025203652845590674,
+    "delta_f1_UCB95": -0.00013040732563707191,
+    "fixed_L_scene_equal_f1": 0.8748479819516934,
+    "fixed_L_mean_payload": 0.0025054545454545455,
+    "note": "C-2 secondary: Fixed L is NOT payload-matched; it spends more."
+   }
+  }
+ }
+}

@@ -14,28 +14,42 @@
 \newcommand{\method}{CA-TOSG}
 
 \begin{document}
-\title{Channel-Aware Task-Oriented Semantic Granularity\\Selection for Bandwidth-Constrained\\V2V Cooperative Perception}
+\title{Channel- and Task-Aware Object-Level\\Communication for Bandwidth-Constrained\\V2V Cooperative Perception}
 \author{Peiyi~Yue}
 \markboth{IEEE Transactions on Vehicular Technology,~Vol.~XX, No.~X, 2026}
-{Yue: Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception}
+{Yue: Channel- and Task-Aware Object-Level Communication for V2V Cooperative Perception}
 \maketitle
 
 \begin{abstract}
-Cooperative perception must choose \emph{what} to transmit, not only how much to compress. We
-formalise per-frame semantic granularity selection over three actions---ego-only (E), object-level
-(L) and feature-level (F)---and evaluate it under a single detector, a single field of view and a
-single ground truth, with communication charged through a measured LDPC/QAM chain rather than a
-declared budget. The resulting method, \method{} (channel-aware task-oriented semantic granularity
-selection), reduced realised communication payload by \TestSaving\% on Test and
-\CulverSaving\% on Culver-City relative to the frozen comparator. However, the preregistered
-scene-level non-inferiority criterion was not met on either split, indicating that substantial
-communication reduction was achieved without statistically establishing accuracy preservation.
-Three mechanism results follow from the unified branch: partial recovery is necessary, since
-all-or-nothing delivery of a $\BFncw$-codeword message is effectively dead at realistic loss
-rates; \emph{where} a loss falls changes the task outcome even when \emph{how much} is lost is held
-exactly fixed; and fusing a zeroed feature tensor is not equivalent to ego-only inference. In the
-frozen policy the feature action is never selected, and we show this follows from the cost structure
-and the sampled penalty grid rather than from a failure to learn.
+Cooperative perception must choose \emph{what} to transmit, not only how much to compress. Under a
+per-frame bandwidth budget, the practical choice on a vehicular link is between transmitting nothing
+and transmitting a compact object-level message; a feature-level message costs
+$\FixedFOverBudgetRatio\times$ the budget. We therefore study per-frame selection between ego-only (E) and object-level (L)
+communication, driven by the receiver from strictly ego-local cues and an estimated channel state,
+and charged through a measured LDPC/QAM chain rather than a declared budget. The resulting method,
+\method{} (channel-aware task-oriented semantic granularity selection), is evaluated on two held-out
+splits under a single detector, a single field of view and a single ground truth.
+
+In a secondary analysis at matched realised payload, on Test \method{} achieves a higher
+scene-equal $F_1$ than each evaluated deployable comparator, with every pairwise $95\%$ bootstrap
+lower confidence bound above zero; on Culver-City it has the highest point estimate among the same
+deployable policies, although the interval against the SNR-only rule includes zero. Against
+always-transmitting object-level communication it uses \TestSavingVsFixedL\% and
+\CulverSavingVsFixedL\% less realised payload, at observed scene-equal $F_1$ differences of
+\TestDeltaFoneVsFixedL{} and \CulverDeltaFoneVsFixedL.
+
+The preregistered comparison is a separate question and its outcome is unchanged. Against the
+frozen threshold comparator \method{} reduced realised communication payload by \TestSaving\% on
+Test and \CulverSaving\% on Culver-City, but the preregistered scene-level non-inferiority
+criterion was not met on either split, so that reduction was achieved without statistically
+establishing accuracy preservation.
+
+Feature-level transmission is retained as an over-budget accuracy upper bound and as the object of
+the transport study. On the development split, three mechanism results follow: partial recovery is
+necessary, since all-or-nothing delivery of a $\BFncw$-codeword message is effectively dead at
+realistic loss rates; \emph{where} a loss falls changes the task outcome even when \emph{how much}
+is lost is held exactly fixed; and fusing a zeroed feature tensor is not equivalent to ego-only
+inference.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -63,8 +77,8 @@ context---while intermediate fusion sends feature maps~\cite{xu2022v2xvit,hu2022
 richer at much higher cost, which recent work reduces by region selection, masking or
 compression~\cite{hu2022where2comm} and which semantic communication optimises for task
 performance~\cite{sheng2024importance,gan2026scomcp}. Prior work has considered
-multilevel or adaptive sharing, while CA-TOSG focuses specifically on receiver-driven per-frame
-E/L/F selection using strictly ego-local pre-request cues and a common digital
+multilevel or adaptive sharing, while \method{} focuses specifically on receiver-driven per-frame
+E/L selection using strictly ego-local pre-request cues and a common digital
 transport-accounting protocol. On some frames local perception is already confident enough for the
 compact message; on occluded or ambiguous ones the richer message helps. The best granularity
 depends on the task state.
@@ -76,33 +90,40 @@ communication therefore does not always mean better perception; granularity depe
 cues and channel quality.
 
 This paper treats the choice itself as the object of study. \method{} lets the ego receiver select
-one message granularity per frame from $\mathcal{S} = \{E, L, F\}$ using strictly ego-local cues and
-an estimated channel state, and signal it with a two-bit request; the collaborator complies
-(Fig.~\ref{fig:system}). Our contributions are three.
+one message granularity per frame from the deployed set $\mathcal{S} = \{E, L\}$ using strictly
+ego-local cues and an estimated channel state, and signal it with a request; the collaborator
+complies (Fig.~\ref{fig:system}). The feature-level message F is measured throughout and is retained
+as an accuracy upper bound and as the object of the transport study, but it is not part of the
+deployed policy: at $\FixedFOverLPayRatio\times$ the object-level cost on the development split it
+exceeds the $\beta = \BudgetPrimaryBeta$ budget by $\FixedFOverBudgetRatio\times$
+(Section~\ref{sec:no_feature}). Our contributions are three.
 
 \begin{itemize}
 \item \textbf{Problem formalisation.} We pose per-frame granularity selection as a
-budget-constrained action choice over $\{E, L, F\}$, with payload charged \emph{per frame} through
-the transport chain the messages actually traverse rather than through a declared constant. The
-formulation is the Lagrangian relaxation of a constrained perception--communication problem
-(Section~\ref{sec:derivation}).
+budget-constrained action choice, with payload charged \emph{per frame} through the transport chain
+the messages actually traverse rather than through a declared constant. The formulation is the
+Lagrangian relaxation of a constrained perception--communication problem
+(Section~\ref{sec:derivation}); under the primary budget its deployable action set is
+$\{E, L\}$.
 \item \textbf{A receiver-driven method.} The ego evaluates its own scene and channel and requests a
 granularity. Every selector input is ego-local and available \emph{before} the request is issued, so
 no input depends on a message the ego has not yet asked for---which removes the causality problem
 that a sender-side policy would face.
 \item \textbf{Experimental findings under a unified protocol.} One checkpoint, one field of view,
-one ground truth and a deterministic evaluation pipeline. Under that protocol we report a large
-communication reduction whose accuracy non-inferiority is \emph{not} established, together with
-three mechanism results---the necessity of partial recovery, the effect of loss \emph{position} at
-fixed loss \emph{amount}, and the inequivalence of zero-tensor fusion and ego-only
-inference---and an account of why the frozen policy never selects the feature action.
+one ground truth and a deterministic evaluation pipeline. Under that protocol we compare deployable
+policies \emph{at matched realised payload}, report the preregistered non-inferiority outcome
+against the frozen threshold policy, and establish three mechanism results on the development
+split---the necessity of partial recovery, the effect of loss \emph{position} at fixed loss
+\emph{amount}, and the inequivalence of zero-tensor fusion and ego-only inference.
 \end{itemize}
 
 The random forest used below is one instance of the selection layer, not the contribution. What is
 offered is the granularity-control formulation and the accounting protocol that makes a payload
 claim checkable; any policy that consumes ego-local cues and emits a request slots into the same
-framework, and we report below that this particular instance does not beat a tuned threshold at
-equal budget.
+framework. Under the same budget ceiling the two feasible policies occupy different operating
+points: the threshold rule attains higher scene-equal $F_1$, whereas \method{} uses substantially
+less realised payload. At matched realised payload the ordering is reported in
+Section~\ref{sec:matched}.
 
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{fig1_system}
@@ -193,12 +214,18 @@ when the ego selects E; what E removes is the cooperative perception payload, no
 \subsection{Message Candidates}\label{sec:candidates}
 The ego selects one action per frame,
 \begin{equation}
-s_t \in \mathcal{S} = \{E, L, F\},
+s_t \in \mathcal{S} = \{E, L\},
 \label{eq:action_set}
 \end{equation}
 where E is ego-only operation---the collaborator transmits no cooperative perception payload and the
-ego detects from its own LiDAR---L is the collaborator's detected boxes, and F is the collaborator's
-quantised bottleneck feature tensor.
+ego detects from its own LiDAR---and L is the collaborator's detected boxes.
+
+A third granularity, the collaborator's quantised bottleneck feature tensor F, is defined, measured
+and charged through the identical chain throughout this paper. It is \emph{not} in the deployed set:
+its payload is $\FixedFOverLPayRatio\times$ that of L on the development split, which places it
+$\FixedFOverBudgetRatio\times$ beyond the primary budget. We retain it as an accuracy upper bound and as the object of the transport
+study of Section~\ref{sec:transport}, and Section~\ref{sec:no_feature} states the cost structure
+that excludes it.
 
 E is a first-class action, not merely a failure mode. It costs no perception payload and cannot fail
 in transit, which is right both where the ego's own detection already suffices and where the channel
@@ -278,7 +305,11 @@ B_F, & s = F,
 \end{cases}
 \label{eq:payload}
 \end{equation}
-in channel-use-equivalent mega-symbols (Msym). The feature payload follows from the codeword count
+in channel-use-equivalent mega-symbols (Msym). \textbf{$B_E = 0$ is the cooperative perception
+payload, not the total channel use of the frame}: the request itself is a fixed control overhead
+that every action pays identically (Section~\ref{sec:system}), so it cancels from every comparison
+in this paper and is excluded from $B_{t,s}$ throughout. The feature payload follows from the
+codeword count
 rather than from $(\text{info} + \text{header})/R/\log_2 M$, because the direct route ignores
 codeword padding: $\BFelements$ elements at $\QuantWidth$~bits give $\BFinfobits$ information bits,
 which packetise into $\BFpackets$ packets carrying $\BFheaderbits$ header bits, hence
@@ -339,10 +370,11 @@ the $2$-bit request, and the collaborator complies. Fig.~\ref{fig:system} shows 
 implemented, including which quantities exist before the request is issued.
 
 \subsection{Ego-Side Online Task Cues}\label{sec:cues}
-The cue vector is $z_t \in \mathbb{R}^{\CueDim}$ under the frozen schema \CueName{}: $19$ statistics
-of the ego's own LiDAR sweep (point counts, range statistics, near/mid/far and per-sector
-occupancies, and three range densities), the ego's own detected box count, a binary
-collaborator-availability flag, and two channel fields. The complete field list with a code location
+The cue vector is $z_t \in \mathbb{R}^{\CueDim}$ under the frozen schema \CueName{}: $21$
+ego-local task and availability cues---$19$ statistics of the ego's own LiDAR sweep (point counts,
+range statistics, near/mid/far and per-sector occupancies, and three range densities), the ego's own
+detected box count, and a binary collaborator-availability flag---together with $2$ channel
+cues. The complete field list with a code location
 per row is in the supplementary material.
 
 \emph{Every cue is computed from the ego vehicle's own observation and its own detection stream}, and
@@ -520,7 +552,7 @@ while the int8 feature message under clean delivery reaches $\FixedFcleanAPfifty
 
 \textbf{The cost asymmetry is the whole setting.} Feature-level fusion buys
 $\FixedFMinusLSceneFone$ in scene-equal $F_1$ over object-level fusion, and pays
-$\FixedFOverLPayRatio\times$ the channel use for it. That ratio, not the accuracy gap, is why a
+$\FixedFOverLPayRatio\times$ the channel use for it on that split. That ratio, not the accuracy gap, is why a
 per-frame granularity decision is worth making at all.
 
 The ordering is metric-dependent. Feature-level fusion exceeds object-level fusion by
@@ -590,13 +622,64 @@ Scenes            & \multicolumn{2}{c}{\TestScenes}    & \multicolumn{2}{c}{\Cul
 
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{fig2_primary}
-\caption{Primary cell. Payload is drawn on a logarithmic axis and $\Delta F_1$ in its own panel:
-the payload ratio is \TestRatio-fold while the $F_1$ shortfall on the bound is \TestShortfall, so a
-shared scale would erase one half of the result. The right panel puts the preregistered margin and
-the bootstrap lower bound on one ruler. On both splits the point estimate lies inside the margin and
-the bound does not.}
+\caption{Scene-equal $F_1$ against realised payload on each held-out split. Both quantities are
+shown together, because ranking on either alone misrepresents the trade-off: the arms differ by up
+to $\FixedFOverLPayRatio\times$ in payload and by hundredths in $F_1$. The dotted line is the
+$\beta = \BudgetPrimaryBeta$ ceiling and the shaded region is over budget, so Fixed F is visibly
+not a competitor at the primary budget. The x axis is symlog rather than logarithmic: Fixed E
+spends exactly zero, which a logarithmic axis cannot show. Random, Task-only, SNR-only and Oracle
+are the matched-payload policies of Table~\ref{tab:matched} and sit at \method{}'s own payload;
+Oracle is not deployable.}
 \label{fig:primary}
 \end{figure*}
+
+\subsection{Comparison at Matched Realised Payload}\label{sec:matched}
+The preregistered comparison answers whether \method{} is non-inferior to one frozen rule. It does
+not answer what else could have been done with the payload \method{} actually spent. This
+subsection answers that, and is a \textbf{secondary analysis}: it was not preregistered, and it does
+not replace the criterion above.
+
+Every deployable policy in Table~\ref{tab:matched} is put on \method{}'s \emph{own} realised
+payload---$\TestMatchedTarget$~Msym on Test and $\CulverMatchedTarget$~Msym on
+Culver-City---rather than on a shared nominal ceiling. Matching is numerical, not exact: the largest
+residual deviation over all policies and both splits is $\MatchedPayloadResidual$~Msym, and no claim
+of exact equality is made. Each policy is a per-frame rule over $\{E, L\}$: a random selection at
+the matched rate, a threshold on the estimated SNR alone, a threshold on the ego's own detected box
+count alone, and \method{}, which uses both. A non-deployable oracle that sees the realised
+per-frame outcome bounds what selection can buy at that payload.
+
+On Test, \method{} achieves a higher scene-equal $F_1$ than each evaluated deployable comparator at
+matched realised payload, with every pairwise $95\%$ bootstrap lower confidence bound above zero. On
+Culver-City, \method{} has the highest point estimate among the same deployable policies, although
+the interval against the SNR-only rule includes zero. Culver-City carries \CulverScenes{} scenes, so
+its intervals are correspondingly coarse.
+
+Relative to the matched-payload random floor and the non-deployable E/L oracle ceiling, \method{}
+recovers \TestEta\% of the attainable selection gain on Test and \CulverEta\% on Culver-City.
+
+\begin{table*}[t]
+\caption{Deployable E/L policies at \method{}'s own realised payload, with the non-deployable
+oracle as a ceiling. $\Delta F_1$ and its bound are \method{} minus that policy, from a
+scene-level bootstrap. Secondary analysis: not preregistered. Payload is matched numerically to
+within $\MatchedPayloadResidual$~Msym, not exactly.}
+\label{tab:matched}
+\centering\small\setlength{\tabcolsep}{4pt}
+\input{tables/tbl_matched_payload}
+\end{table*}
+
+Against always-transmitting object-level communication, a second secondary question is how little
+payload suffices. Among the naturally operating arms that satisfy the primary
+$\beta = \BudgetPrimaryBeta$ budget and lie within the prespecified $\delta = \DeltaMargin$
+tolerance of Fixed L, \method{} achieves the lowest realised payload on both held-out splits. Its
+scene-level bootstrap lower confidence bounds relative to Fixed L are $\TestVsFixedLLCB$ on Test and
+$\CulverVsFixedLLCB$ on Culver-City, both above the $-\DeltaMargin$ tolerance boundary. This is
+reported as a secondary analysis rather than as a replacement for the preregistered comparison.
+
+That comparison set is deliberately narrow. Fixed F, the budget-blind oracle and the hand rules are
+excluded because they exceed the primary budget and so are not deployable alternatives at it. The
+random, task-only and SNR-only policies are excluded because they are diagnostic constructions
+calibrated to \method{}'s payload after the fact, not policies that arrive at that payload on their
+own.
 
 \subsection{Action Distribution}
 The frozen selector requests E on \TestRhoEPct\% of Test rows and L on \TestRhoLPct\%, and never
@@ -612,8 +695,8 @@ payload.
 $\beta = \BudgetTightBeta$, $\BudgetPrimaryBeta$ and $\BudgetLooseBeta$ the frozen policy spends
 $\RFPayAtTight$, $\RFPayAtPrimary$ and $\RFPayAtLoose$~Msym for scene-equal $F_1$
 $\RFSceneFoneAtTight$, $\RFSceneFoneAtPrimary$ and $\RFSceneFoneAtLoose$---three identical operating
-points, because the tightest ceiling $\BudgetTightMsym$~Msym is still
-$\BudgetHeadroomRatio\times$ what the policy actually spends. There are therefore not three distinct
+points, because on the development split the tightest ceiling $\BudgetTightMsym$~Msym is still
+$\BudgetHeadroomRatio\times$ the $\RFPayAtPrimary$~Msym the policy actually spends there. There are therefore not three distinct
 budget points in this study, and this is reported as a limitation of the design rather than as a
 robustness result.
 
@@ -621,14 +704,16 @@ robustness result.
 Fig.~\ref{fig:recovery} and the full sweep in the supplementary material characterise the three
 delivery regimes.
 
-\emph{Partial recovery is necessary, not a refinement.} Under all-or-nothing message delivery the
+\emph{Partial recovery is necessary, not a refinement} (development split). Under all-or-nothing
+message delivery the
 survival probability of a $\BFncw$-codeword message is $q = \MsgSurvivalAtLowest$ even at the
 \emph{lowest} evaluated loss rate $p = \MsgLowestRate$, i.e. an expectation of
 $\MsgFramesAtLowest$ surviving frames over the whole development split. That regime therefore
 measures $q$, not how the feature action performs, and any conclusion drawn from it would be a
 conclusion about message length.
 
-\emph{Where a loss falls matters, at fixed loss amount.} Conditioning on \emph{exactly equal}
+\emph{Where a loss falls matters, at fixed loss amount} (development split). Conditioning on
+\emph{exactly equal}
 codeword-loss counts across replicates, $\Delta F_1 \neq 0$ on \PosIdealPct\% of matched pairs under
 fragment-aware recovery (\PosIdealPairs{} pairs over \PosIdealFrames{} frames; Wilson 95\% lower
 bound \PosIdealWilsonLo\%) and on \PosPacketPct\% under packet loss (\PosPacketPairs{} pairs,
@@ -637,7 +722,8 @@ fixed before the selection ran. We report this at the level it supports---loss p
 performance---and do not claim the stronger form, that position matters \emph{more} than amount,
 because no threshold for that comparison was preregistered.
 
-\emph{Zero-tensor fusion is not ego-only inference.} At $p = 1$ every codeword is lost and the fused
+\emph{Zero-tensor fusion is not ego-only inference} (development split). At $p = 1$ every codeword
+is lost and the fused
 tensor is all zeros, yet the result differs from ego-only detection in both directions:
 AP@0.5 moves by $\ZeroTensorMinusEgoAPFifty$, AP@0.7 by $\ZeroTensorMinusEgoAPSeventy$ and mean frame
 $F_1$ by $\ZeroTensorMinusEgoMeanFOne$ (from $\EgoFone$ to $\ZeroTensorFone$), and the two outputs
@@ -687,36 +773,44 @@ it tests.
 
 \textbf{Proportion.} The saving is overwhelming; the shortfall is small. Neither may be reported
 without the other: stating only the saving packages a failed criterion as success, and stating only
-the shortfall discards a \TestRatio-fold reduction.
+the shortfall discards a \TestRatio-fold payload reduction against that comparator on Test.
 
 \textbf{No three distinct budget points.} All three budgets select the same candidate and the
 budget never binds. The contribution is therefore a granularity-control framework, not a
-demonstration that a learned selector beats simple rules---at equal budget it does not.
+demonstration that a learned selector beats simple rules---under the same budget ceiling it does
+not. That ceiling is not an equality: the threshold rule spends far more of it
+(Section~\ref{sec:matched} reports the comparison at matched realised payload instead).
 
-\subsection{Why This Remains a Three-Action Method Although $\rho_F = 0$}
-Four measurements belong together.
+\subsection{Why Feature-Level Transmission Is Excluded from the Deployed Policy}
+\label{sec:no_feature}
+The exclusion is a consequence of the cost structure, not of a selector that failed to find the
+action.
 
-First, F is genuinely the best action on \FBestSharePct\% of grid rows (\FBestRows{} rows), where its
-realised utility exceeds both E and L by a mean net gain of $\FBestNetGain$. This is not an action
-that never helps.
+The feature message costs $\FixedFOverLPayRatio\times$ the object-level message
+($\BFmsym$~Msym against $\BLmean$~Msym on the development split), which places Fixed F at
+$\FixedFOverBudgetRatio\times$ the $\beta = \BudgetPrimaryBeta$ ceiling of
+$\BudgetPrimaryMsym$~Msym. It is therefore
+not a competitor at the primary budget; it is an upper bound, and Table~\ref{tab:baselines} marks it
+so.
 
-Second, the break-even penalty falls in a gap in the sampled grid. Conditional on the rows where F is
-best it is $\BreakEvenCond$; averaged over the whole grid it is $\BreakEvenGrid$---each value
-carrying its conditioning set, and neither usable as a bare number. The frozen candidate carries
-$\lambda = \LambdaStar$, hence $\lambda B_F = \LambdaTimesBF$~Msym of penalty against a mean net gain
-of $\FBestNetGain$---a penalty-to-gain ratio of $\PenaltyOverGainRatio$. The preregistered grid
-samples $\lambda$ coarsely on either side of that break-even point, so no candidate could have been
-selected in the region where a mixed policy exists.
+That cost dominates what the action buys, and the two must not be confused. F is the
+utility-maximising action on \FBestSharePct\% of development-split grid rows (\FBestRows{} rows),
+where it exceeds both E and L by a mean net gain of $\FBestNetGain$: it \emph{is not an action that
+never helps}. Against that gain the frozen penalty charges $\lambda B_F = \LambdaTimesBF$~Msym, a
+penalty-to-gain ratio of $\PenaltyOverGainRatio$. The break-even penalty---$\BreakEvenCond$
+conditional on the rows where F is best, $\BreakEvenGrid$ averaged over the whole grid, each value
+carrying its conditioning set and neither usable as a bare number---falls between two points of the
+preregistered penalty grid, so no candidate could have been selected in the region where a mixed
+policy exists.
 
-Third, a finer $\lambda$ scan, registered before it produced any number, shows a genuine three-action
-trade-off across that interval: over $\LamScanPoints$ points from $\lambda = \LamScanLo$ to
-$\LamScanHi$, $\rho_F$ falls smoothly from $\LamScanRhoFLo$ to $\LamScanRhoFHi$.
+The exclusion is therefore a statement about cost at this budget, and \textbf{not evidence that the
+feature action is worthless}.
 
-Fourth, all of this is an exploratory diagnostic on the development split. It enters no primary
-criterion and the frozen candidate was not replaced on the strength of it.
-
-Taken together, $\rho_F = 0$ is a property of where the penalty grid sampled, not evidence that the
-feature action is worthless.
+An exploratory scan of the intervening interval is reported in the supplementary material. It is a
+development-split diagnostic: it enters no criterion, and the frozen candidate was not replaced on
+the strength of it. Development-split diagnostics associate the absence of feature-level requests
+with the feature branch's transport cost and the sampled penalty grid; they do not establish how a
+retrained selector would behave in the identified break-even region.
 
 \subsection{Other Limitations}
 \emph{Culver-City rests on \CulverScenes{} scenes.} The bootstrap resamples them, so its interval is
@@ -725,8 +819,17 @@ coarse, and Culver-City is a \emph{simulated} domain shift rather than real-road
 \emph{One ego--collaborator pair.} The payload of a cooperative action is defined against exactly one
 collaborator; a deployment serving several would have to re-derive both the payload and the budget.
 
-\emph{A flat block-fading channel.} Each codeword sees its own realisation with perfect receiver
-channel state information; correlated fading and imperfect estimation are not modelled.
+\emph{An independent codeword-erasure abstraction.} Each codeword succeeds or fails independently
+at the frame's operating point; correlated fading, burst erasures and imperfect channel estimation
+are not modelled.
+
+\emph{The recovery asymmetry between L and F is a modelling choice.} The object-level message is
+delivered at message level, so a single lost codeword costs the whole message, whereas the
+feature message is recovered codeword by codeword. That asymmetry follows from how each message is
+framed here, not from a property of object-level data: encoding the boxes as independently
+decodable groups would make L degrade gracefully too, which would change its effective utility, the
+oracle labels derived from it, and therefore the selector's decisions. That transport design is not
+evaluated in this paper.
 
 \emph{Selector-only latency.} The selector's own inference cost is measured; total end-to-end system
 latency, including any cost of keeping the cooperative pipeline resident, is not.
@@ -742,10 +845,18 @@ difference limits interpretation of the cross-domain action proportions.
 
 \section{Conclusion}
 Three transmission granularities were placed under one detector, one field of view and one ground
-truth, and charged through one measured transport chain. Communication falls by a factor of
-\TestRatio{} on Test and \CulverRatio{} on Culver-City relative to a budget-feasible threshold
-policy, while accuracy non-inferiority is not established on either. The conditions are one dataset
-family, one detector, a single ego--collaborator pair, and a flat block-fading channel.
+truth, and charged through one measured transport chain. Under the per-frame budget the deployable
+choice is between ego-only and object-level communication, and \method{} makes that choice per
+frame from ego-local cues and an estimated channel state; feature-level transmission is retained as
+an over-budget upper bound.
+
+In a secondary analysis at matched realised payload, \method{} achieves a higher scene-equal $F_1$
+than each evaluated deployable comparator on Test, with every pairwise bound above zero, and the
+highest point estimate on Culver-City, where the interval against the SNR-only rule includes zero.
+Against the frozen threshold comparator communication falls by a factor of \TestRatio{} on Test and
+\CulverRatio{} on Culver-City, while the preregistered accuracy non-inferiority is not established
+on either. The conditions are one dataset family, one detector, a single ego--collaborator pair,
+and an independent codeword-erasure abstraction.
 
 The mechanism results are the part most likely to transfer. Partial recovery is not an optimisation
 but a precondition for studying feature-level transport at realistic message lengths; loss position

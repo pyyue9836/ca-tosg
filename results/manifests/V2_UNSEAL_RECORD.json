@@ -27,6 +27,15 @@
    "sha256": "51150711533bf45eafc0b3fdad468ec4712a2d168d98cd2c7f20eb025d6bd3e8",
    "scope": "DESCRIPTIVE fixed-arm summaries (Fixed E/L/F scene-equal F1 and mean payload) on both held-out splits, aggregated from the already-evaluated frozen grids. No model is loaded, no inference is run, no primary product is written, and no comparator is selected from it. Authorised by V2-R55 A-1.",
    "note": "Emitted by the ONE module gate 22 licenses to read the sealed grid, so that the paper generator never names a sealed path. Registering it here is the dated act this record exists for -- the alternative was adding a second name to the gate allow-list, which this file explicitly forbids."
+  },
+  {
+   "path": "results/v2/v2_matched_payload.json",
+   "unsealed_at": "2026-09-03T00:00:00Z",
+   "commit": "3286cfd4d68d741b235eb9d50390ccee028290b7",
+   "by": "projects/ca_tosg/evaluation/v2_wp11_heldout_eval.py --matched-payload",
+   "sha256": "c7e7379f879cec364e77d5c25bce3f61fac2ac6d2682490fb837c1edda0c8591",
+   "scope": "SECONDARY ANALYSIS (V2-R56 A / V2-R58). E/L policies evaluated at CA-TOSG's own realised payload on both held-out splits, computed per row from the already-evaluated frozen grids. The frozen forest is loaded ONLY to re-derive its action sequence, and the run asserts that the replay reproduces the published primary scene-equal F1 and payload to 1e-12 before writing anything. No retraining, no GPU, no perception re-evaluation, and no frozen component changes.",
+   "note": "NOT the preregistered primary test, which remains the non-inferiority comparison against the frozen tau rule and is unchanged. Emitted by the one module gate 22 licenses to read the sealed grid, and registered here as a dated act."
   }
  ],
  "status": "ALL HELD-OUT SETS NOW UNSEALED. No further held-out evaluation exists (V2-R34 C-5)."

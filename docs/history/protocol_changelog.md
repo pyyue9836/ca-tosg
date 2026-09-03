@@ -6330,3 +6330,66 @@ Feature-level fusion leads object-level by **+0.00652** in scene-equal $F_1$ and
 definitions, and offers **no** causal explanation — no calibration story, no NMS story. The measured
 fact is that F is not uniformly superior to L under this checkpoint, and its advantage is specific
 to the per-frame $F_1$ objective the selector optimises.
+
+## V2-R56/R58 — the comparison the preregistered test could not make, and the action space narrowed
+
+### A · Matched realised payload, computed per row rather than estimated
+
+The preregistered test asks whether CA-TOSG is non-inferior to one frozen rule. It cannot ask what
+else that payload could have bought. A secondary analysis now does: every deployable E/L policy is
+placed on CA-TOSG's **own** realised payload — 0.00081 Msym on Test, 0.00147 on Culver-City — and
+compared with a scene-level bootstrap.
+
+**The closed-form shortcut was refused, and it mattered less than expected — which is not a defence
+of it.** Multiplying each arm's split-wide mean $F_1$ by an action share assumes a randomly chosen
+frame scores that arm's average; CA-TOSG's entire claim is that the frames it picks are not random,
+so the estimate can err in either direction. Run per row, the random baseline came out at 0.86881
+against the estimate's 0.86889 on Test — close, by outcome. A method that happens to land near the
+truth once is still a method that cannot be checked.
+
+**Replay integrity.** The frozen forest is loaded only to re-derive its action sequence, and the run
+**asserts** that the replay reproduces the published primary scene-equal $F_1$ and payload to
+1e-12 before writing anything. Both splits reproduce exactly. Without that assertion the analysis
+would rest on a policy that merely resembles the published one.
+
+Result: on Test CA-TOSG is above each deployable comparator with every pairwise LCB95 above zero;
+on Culver-City it has the highest point estimate but the interval against the SNR-only rule includes
+zero, on 4 scenes. Both halves are stated.
+
+### C · $\eta$, and the name it is not given
+
+$\eta = (F_1^{\mathrm{CA}} - F_1^{\mathrm{Random}}) / (F_1^{\mathrm{Oracle}} - F_1^{\mathrm{Random}})$
+= 64.4 % (Test) and 87.9 % (Culver-City). It is called *the fraction of the attainable E/L selection
+gain recovered*, **not** an optimality ratio: the ceiling is not deployable, and the quantity
+depends on the action set, the payload matching and the split.
+
+### D · Three places where the instruction met a standing ruling
+
+Recorded because each was resolved by judgment and each is reversible in one line.
+
+1. **E-1 would have deleted a gate-protected sentence.** "…not a demonstration that a learned
+   selector beats simple rules---at equal budget it does not" is ruled wording (V2-R42 B-1,
+   reaffirmed V2-R49 A-1), and E-2 bans "equal budget" because the two arms do not spend equally.
+   Resolved by keeping every ruled content word and replacing only the false half: "under the same
+   budget ceiling it does not", followed by a sentence saying the ceiling is not an equality and
+   pointing at the matched-payload section. Both constraints hold; no gate was weakened.
+2. **D-3 would have deleted the $\rho_F$ ruled claim with the section that carried it.** The claim
+   exists to stop "F is excluded" being read as "F is worthless" — which is precisely the new
+   section's failure mode, so the guard is *more* relevant, not less. All four ruled phrases are
+   carried into the rewritten section.
+3. **A verbatim-supplied sentence said "E/L/F" after the action space became $\{E, L\}$.** The
+   action space governs: leaving it would have contradicted the abstract, the problem statement and
+   Table II on the same page. Changed to E/L. The separate "E/L/F arms" in the Where2comm paragraph
+   is correct and untouched — it refers to the three fixed arms, which do include F.
+
+### G · Consistency items, and one the page read caught
+
+"flat block-fading channel" became "independent codeword-erasure abstraction" — the model never had
+a fading process, only independent erasures. The L/F recovery asymmetry is now named as a
+**modelling choice** with its consequence stated: independently decodable box groups would change
+L's effective utility, the oracle labels and therefore the selector's decisions.
+
+**Fig. 2's caption described a figure that no longer existed.** The figure became a 2-D
+$F_1$-versus-payload plane (G-10), and the caption still described the old bar panels and the
+$\Delta F_1$ ruler. Nothing flagged it: captions are prose, and no gate reads them for whether they
+match their own figure. Found by looking at the page.

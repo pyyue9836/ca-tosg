@@ -74,6 +74,7 @@
 \newcommand{\IntEightFrames}{220}
 \newcommand{\FixedFMinusLSceneFone}{+0.00652}
 \newcommand{\FixedFOverLPayRatio}{1,244}
+\newcommand{\FixedFOverBudgetRatio}{5.0}
 
 % ---- MAIN 6.1: the payload chain, bit by bit ------------------------------
 \newcommand{\BFmsym}{3.14175}
@@ -185,6 +186,41 @@
 \newcommand{\PcwRayleighLo}{0.0400}
 \newcommand{\PcwAwgnAtSix}{0.74650}
 \newcommand{\PcwAwgnAtEight}{0.00013}
+
+% ---- MAIN: matched-realised-payload comparison, SECONDARY (V2-R56 A / R58) --
+\newcommand{\TestMatchedTarget}{0.00081}
+\newcommand{\TestMPRandomFone}{0.86881}
+\newcommand{\TestMPRandomDelta}{+0.00806}
+\newcommand{\TestMPRandomLCB}{+0.00469}
+\newcommand{\TestMPTaskOnlyFone}{0.87104}
+\newcommand{\TestMPTaskOnlyDelta}{+0.00575}
+\newcommand{\TestMPTaskOnlyLCB}{+0.00142}
+\newcommand{\TestMPSnrOnlyFone}{0.87599}
+\newcommand{\TestMPSnrOnlyDelta}{+0.00080}
+\newcommand{\TestMPSnrOnlyLCB}{+0.00028}
+\newcommand{\TestMPCaTosgFone}{0.87679}
+\newcommand{\TestMPOracleFone}{0.88121}
+\newcommand{\TestMPOracleDelta}{-0.00441}
+\newcommand{\TestMPOracleLCB}{-0.00738}
+\newcommand{\TestEta}{64.4}
+\newcommand{\TestVsFixedLLCB}{-0.00078}
+\newcommand{\CulverMatchedTarget}{0.00147}
+\newcommand{\CulverMPRandomFone}{0.86309}
+\newcommand{\CulverMPRandomDelta}{+0.01064}
+\newcommand{\CulverMPRandomLCB}{+0.00793}
+\newcommand{\CulverMPTaskOnlyFone}{0.86606}
+\newcommand{\CulverMPTaskOnlyDelta}{+0.00746}
+\newcommand{\CulverMPTaskOnlyLCB}{+0.00174}
+\newcommand{\CulverMPSnrOnlyFone}{0.87305}
+\newcommand{\CulverMPSnrOnlyDelta}{+0.00047}
+\newcommand{\CulverMPSnrOnlyLCB}{-0.00102}
+\newcommand{\CulverMPCaTosgFone}{0.87352}
+\newcommand{\CulverMPOracleFone}{0.87496}
+\newcommand{\CulverMPOracleDelta}{-0.00144}
+\newcommand{\CulverMPOracleLCB}{-0.00275}
+\newcommand{\CulverEta}{87.9}
+\newcommand{\CulverVsFixedLLCB}{-0.00252}
+\newcommand{\MatchedPayloadResidual}{2.3\times10^{-7}}
 
 % ---- SUPPLEMENTARY: the exploratory lambda scan ---------------------------
 \newcommand{\LamScanPoints}{19}
