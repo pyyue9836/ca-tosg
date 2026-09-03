@@ -6393,3 +6393,58 @@ L's effective utility, the oracle labels and therefore the selector's decisions.
 $F_1$-versus-payload plane (G-10), and the caption still described the old bar panels and the
 $\Delta F_1$ ruler. Nothing flagged it: captions are prose, and no gate reads them for whether they
 match their own figure. Found by looking at the page.
+
+## V2-R59 — a mean budget is not a per-frame cap, and one table row built from two objects
+
+### A · The logical slide, and the three statements that must stay apart
+
+V2-R56 D-3 and the review it came from both slid from "Fixed F is infeasible" to "F is not
+deployable". Those are different claims, and §III-G says why: the budget constrains the **mean**
+payload, **not** each frame. Written into the protocol as a three-way distinction, and the paper may
+assert only the third:
+
+1. **Fixed F is infeasible as an always-on policy** — arithmetic: $5.0\times$ the $\beta = 0.20$
+   ceiling.
+2. **Occasional feature transmission is not excluded by the budget** — a policy requesting F on one
+   frame in a hundred still satisfies a mean constraint.
+3. **The frozen policy nevertheless selects only E and L** under the chosen development protocol.
+
+The abstract now says "mean per-frame communication budget"; the claim that the budget determines
+the deployable action set is gone; §VII-A is retitled *Why the Frozen Policy Operates over E/L* and
+opens by saying what it does **not** establish. A wording gate fires on "F is not deployable" and on
+"deployable action set is {E, L}" (A-4), with injections.
+
+### B · One table row, two randomisations
+
+The random-policy row averaged its $F_1$ over 200 draws but bootstrapped **draw 0 only**, so its
+columns did not subtract: $0.87679 - 0.86881 = 0.00798$ against a printed $0.00806$ (Culver-City:
+$0.01044$ against $0.01064$).
+
+**It passed every gate**, because the gates verify that a number came from a generator and not that
+three cells of one row describe one object. Now one per-row mean vector feeds the summary, the
+difference and the bootstrap, and the generator **asserts** that every row subtracts to within
+1e-9 before writing anything.
+
+**Corrected values, as predicted, move nothing:** Test $+0.00798$ (LCB $+0.00475$), Culver-City
+$+0.01044$ (LCB $+0.00766$). Both bounds remain above zero and no conclusion changes. What was
+repaired is internal consistency, not a result.
+
+Its own injection test then reproduced the fault one level down: `\TestSaving` is a **prefix** of
+`\TestSavingVsFixedL`, so the injection rewrote five macros where three were meant. Macro names are
+now anchored as whole tokens.
+
+### C/D/E · Narrative, provenance and defensibility
+
+Three Related Work sentences still described a live three-action selector ("keeps all three
+representations available", "the feature branch that CA-TOSG activates"); all now say that
+feature-level transmission is retained as a fixed-action upper bound and transport-analysis branch
+and is **not activated by the frozen policy**. A gate fires on the retired phrasings.
+
+§VI-B now states that the preregistered comparator belongs to the original L/F-capable formulation
+and is retained unchanged for protocol integrity.
+
+The defensibility statement is explicit about what is *not* claimed: the random forest is not a
+contribution. And the boundary against the channel-only rule is stated as measured — never worse,
+a small supported gain on Test ($+0.00080$, LCB $+0.00028$), and on Culver-City a point estimate of
+$+0.00047$ whose interval includes zero. **We do not claim the task cues produce a stable
+cross-domain advantage.** What they clearly beat is cutting the transmission rate at random.

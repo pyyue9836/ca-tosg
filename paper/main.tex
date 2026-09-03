@@ -22,11 +22,12 @@
 
 \begin{abstract}
 Cooperative perception must choose \emph{what} to transmit, not only how much to compress. Under a
-per-frame bandwidth budget, the practical choice on a vehicular link is between transmitting nothing
-and transmitting a compact object-level message; a feature-level message costs
-$\FixedFOverBudgetRatio\times$ the budget. We therefore study per-frame selection between ego-only (E) and object-level (L)
-communication, driven by the receiver from strictly ego-local cues and an estimated channel state,
-and charged through a measured LDPC/QAM chain rather than a declared budget. The resulting method,
+\emph{mean} per-frame communication budget, transmitting a feature-level message on every frame is
+infeasible---Fixed F costs $\FixedFOverBudgetRatio\times$ the budget---while transmitting one
+occasionally is not ruled out by the budget alone. The policy frozen here nevertheless selects only
+ego-only (E) and object-level (L) actions, so it is evaluated as an E/L policy, driven by the
+receiver from strictly ego-local cues and an estimated channel state and charged through a measured
+LDPC/QAM chain rather than a declared budget. The resulting method,
 \method{} (channel-aware task-oriented semantic granularity selection), is evaluated on two held-out
 splits under a single detector, a single field of view and a single ground truth.
 
@@ -92,19 +93,20 @@ cues and channel quality.
 This paper treats the choice itself as the object of study. \method{} lets the ego receiver select
 one message granularity per frame from the deployed set $\mathcal{S} = \{E, L\}$ using strictly
 ego-local cues and an estimated channel state, and signal it with a request; the collaborator
-complies (Fig.~\ref{fig:system}). The feature-level message F is measured throughout and is retained
-as an accuracy upper bound and as the object of the transport study, but it is not part of the
-deployed policy: at $\FixedFOverLPayRatio\times$ the object-level cost on the development split it
-exceeds the $\beta = \BudgetPrimaryBeta$ budget by $\FixedFOverBudgetRatio\times$
-(Section~\ref{sec:no_feature}). Our contributions are three.
+complies (Fig.~\ref{fig:system}). Fixed F is infeasible as an always-on policy---at
+$\FixedFOverLPayRatio\times$ the object-level cost on the development split it sits
+$\FixedFOverBudgetRatio\times$ beyond the $\beta = \BudgetPrimaryBeta$ budget. The frozen policy
+nevertheless selects only E and L under the chosen development protocol; the deployed policy is
+therefore evaluated as an E/L policy, while F is retained as an over-budget fixed-action reference
+and transport-analysis branch (Section~\ref{sec:no_feature}). Our contributions are three.
 
 \begin{itemize}
 \item \textbf{Problem formalisation.} We pose per-frame granularity selection as a
 budget-constrained action choice, with payload charged \emph{per frame} through the transport chain
 the messages actually traverse rather than through a declared constant. The formulation is the
 Lagrangian relaxation of a constrained perception--communication problem
-(Section~\ref{sec:derivation}); under the primary budget its deployable action set is
-$\{E, L\}$.
+(Section~\ref{sec:derivation}), and the budget it imposes is a constraint on the \emph{mean}
+payload, not a per-frame cap.
 \item \textbf{A receiver-driven method.} The ego evaluates its own scene and channel and requests a
 granularity. Every selector input is ego-local and available \emph{before} the request is issued, so
 no input depends on a message the ego has not yet asked for---which removes the causality problem
@@ -116,6 +118,15 @@ against the frozen threshold policy, and establish three mechanism results on th
 split---the necessity of partial recovery, the effect of loss \emph{position} at fixed loss
 \emph{amount}, and the inequivalence of zero-tensor fusion and ego-only inference.
 \end{itemize}
+
+To be explicit about what is and is not claimed: the random forest is \emph{not} a contribution---it
+is one instance of the selection layer. What is offered is the receiver-driven pre-request causal
+architecture, in which every selector input exists before the request and therefore cannot depend on
+the message being requested; the measured transport accounting, which makes a payload claim
+checkable rather than declared; the matched-payload evidence that \emph{which} frames are worth
+transmitting on beats reducing the transmission rate at random; and three findings at the
+communication--perception interface (partial recovery, loss position at fixed loss amount, and the
+inequivalence of zero-tensor fusion and ego-only inference).
 
 The random forest used below is one instance of the selection layer, not the contribution. What is
 offered is the granularity-control formulation and the accounting protocol that makes a payload
@@ -150,8 +161,9 @@ a much larger message size. Benchmarks such as OPV2V and OpenCOOD~\cite{xu2022op
 datasets and protocols for comparing these strategies.
 
 \emph{Relation to \method{}.} These works fix the representation and study fusion within it.
-\method{} keeps all three representations available and decides, per frame, which one this frame
-should use.
+\method{} controls whether object-level cooperation is requested on each frame. Feature-level
+transmission is retained in the unified evaluation framework as a fixed-action upper bound and
+transport-analysis branch, but is not activated by the frozen deployed policy.
 
 \subsection{Communication-Efficient Cooperative Perception}
 To reduce the communication burden of intermediate fusion, many methods transmit only task-relevant
@@ -168,9 +180,10 @@ actor--critic policy, and RBH~\cite{liu2024rbh} chooses hybrid fusion by spatial
 feature level; importance-map and JSCC methods optimise \emph{how} the feature map is encoded and
 carried over the channel. ML-Cooper is the
 closest in spirit, in that it mixes levels, but it does so as a heavyweight learned resource-sharing
-policy with a different action mechanism. \method{} decides \emph{which semantic granularity this
-frame uses} at all, one level above the question those methods answer, and any of them can serve as
-the feature branch that \method{} activates.
+policy with a different action mechanism. \method{} acts one level above the question those methods
+answer: it controls whether object-level cooperation is requested on each frame. Feature-level
+transmission is retained in the unified evaluation framework as a fixed-action upper bound and
+transport-analysis branch, but is not activated by the frozen deployed policy.
 
 \subsection{Semantic and Channel-Aware Communication for Vehicular Perception}
 Semantic communication optimises the transmitted representation for task performance rather than for
@@ -188,10 +201,11 @@ converter so that learned features traverse a standard digital V2X bitstream, an
 corrupted by decoding failures at the receiver.
 
 \emph{Relation to \method{}.} All of these adapt the encoding, the repair or the rate \emph{within}
-feature-level transmission. \method{} acts before that: it decides whether a feature message is
-requested at all, and otherwise falls back to the compact object-level message or to no cooperative
-payload. The two are complementary---a digital semantic codec can be the feature branch that
-\method{} activates.
+feature-level transmission. \method{} acts before that. \method{} controls whether object-level cooperation is requested on each frame. Feature-level
+transmission is retained in the unified evaluation framework as a fixed-action upper bound and
+transport-analysis branch, but is not activated by the frozen deployed policy. The two lines of work are
+therefore complementary rather than competing: a digital semantic codec would occupy the
+feature branch this paper measures as an upper bound.
 
 \section{System Model and Problem Formulation}\label{sec:system}
 
@@ -221,11 +235,13 @@ where E is ego-only operation---the collaborator transmits no cooperative percep
 ego detects from its own LiDAR---and L is the collaborator's detected boxes.
 
 A third granularity, the collaborator's quantised bottleneck feature tensor F, is defined, measured
-and charged through the identical chain throughout this paper. It is \emph{not} in the deployed set:
-its payload is $\FixedFOverLPayRatio\times$ that of L on the development split, which places it
-$\FixedFOverBudgetRatio\times$ beyond the primary budget. We retain it as an accuracy upper bound and as the object of the transport
-study of Section~\ref{sec:transport}, and Section~\ref{sec:no_feature} states the cost structure
-that excludes it.
+and charged through the identical chain throughout this paper. Its payload is
+$\FixedFOverLPayRatio\times$ that of L on the development split, so Fixed F is infeasible as an
+always-on policy, sitting $\FixedFOverBudgetRatio\times$ beyond the primary budget. \textbf{That
+arithmetic does not by itself exclude requesting F occasionally}, because the budget constrains the
+mean payload rather than each frame; what leaves it out here is that the frozen policy does not
+select it (Section~\ref{sec:no_feature}). F is retained as an over-budget fixed-action reference and
+as the object of the transport study of Section~\ref{sec:transport}.
 
 E is a first-class action, not merely a failure mode. It costs no perception payload and cannot fail
 in transit, which is right both where the ego's own detection already suffices and where the channel
@@ -574,6 +590,10 @@ unrounded values; table entries are rounded for display.}
 \end{table*}
 
 \subsection{Primary Held-Out Comparison}\label{sec:primary}
+The preregistered comparator belongs to the original L/F-capable formulation and is retained
+unchanged for protocol integrity; the matched-payload E/L comparisons in
+Section~\ref{sec:matched} address the deployed policy's direct comparator question.
+
 Table~\ref{tab:primary} and Fig.~\ref{fig:primary} give the primary cell,
 $\beta = \BudgetPrimaryBeta$. Relative to the frozen threshold comparator, on Test the realised
 payload falls by \TestSaving\% and on Culver-City by \CulverSaving\%; on both splits the scene-level bootstrap lower bound on $\Delta F_1$ lies outside
@@ -775,23 +795,39 @@ it tests.
 without the other: stating only the saving packages a failed criterion as success, and stating only
 the shortfall discards a \TestRatio-fold payload reduction against that comparator on Test.
 
+\textbf{Most of the decision is carried by the channel state.} At matched realised payload the
+channel-only rule reaches $\TestMPSnrOnlyFone$ on Test and $\CulverMPSnrOnlyFone$ on Culver-City
+against \method{}'s $\TestMPCaTosgFone$ and $\CulverMPCaTosgFone$. Adding the $21$ ego-local task
+cues to the channel state is therefore never worse and yields a small, statistically supported gain
+on Test ($\TestMPSnrOnlyDelta$, LCB95 $\TestMPSnrOnlyLCB$); on Culver-City the point estimate is
+$\CulverMPSnrOnlyDelta$ but the interval reaches $\CulverMPSnrOnlyLCB$ and therefore includes zero.
+\textbf{We do not claim that the task cues produce a stable cross-domain advantage.} What the task
+cues clearly do beat is selecting the same number of frames at random
+($\TestMPRandomDelta$ and $\CulverMPRandomDelta$, both bounds above zero).
+
 \textbf{No three distinct budget points.} All three budgets select the same candidate and the
 budget never binds. The contribution is therefore a granularity-control framework, not a
 demonstration that a learned selector beats simple rules---under the same budget ceiling it does
 not. That ceiling is not an equality: the threshold rule spends far more of it
 (Section~\ref{sec:matched} reports the comparison at matched realised payload instead).
 
-\subsection{Why Feature-Level Transmission Is Excluded from the Deployed Policy}
+\subsection{Why the Frozen Policy Operates over E/L}
 \label{sec:no_feature}
-The exclusion is a consequence of the cost structure, not of a selector that failed to find the
-action.
+The frozen policy operates over E/L because the selected penalty makes the feature action
+unattractive relative to its measured transport cost. This does not establish that occasional
+feature transmission is infeasible under the mean budget.
 
-The feature message costs $\FixedFOverLPayRatio\times$ the object-level message
-($\BFmsym$~Msym against $\BLmean$~Msym on the development split), which places Fixed F at
+Three statements must be kept apart. \textbf{(i)} Fixed F is infeasible \emph{as an always-on
+policy}: the feature message costs $\FixedFOverLPayRatio\times$ the object-level message
+($\BFmsym$~Msym against $\BLmean$~Msym on the development split), placing Fixed F at
 $\FixedFOverBudgetRatio\times$ the $\beta = \BudgetPrimaryBeta$ ceiling of
-$\BudgetPrimaryMsym$~Msym. It is therefore
-not a competitor at the primary budget; it is an upper bound, and Table~\ref{tab:baselines} marks it
-so.
+$\BudgetPrimaryMsym$~Msym, and Table~\ref{tab:baselines} marks it so. \textbf{(ii)} Because the
+budget constrains the \emph{mean} payload rather than each frame (Section~\ref{sec:derivation}),
+selecting F on a small fraction of frames is \emph{not} excluded by the budget: a policy requesting
+F on one frame in a hundred would still satisfy it. \textbf{(iii)} The policy frozen here
+nevertheless selects only E and L under the chosen development protocol. Only \textbf{(iii)} is a
+finding about this policy; \textbf{(i)} is arithmetic and \textbf{(ii)} is what the constraint
+says.
 
 That cost dominates what the action buys, and the two must not be confused. F is the
 utility-maximising action on \FBestSharePct\% of development-split grid rows (\FBestRows{} rows),

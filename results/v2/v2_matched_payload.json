@@ -33,9 +33,10 @@
      "payload_residual_vs_target": -4.713028906586699e-08
     },
     "random_el": {
-     "scene_equal_f1": 0.8688120895059765,
-     "scene_equal_f1_lo": 0.8685160845705396,
-     "scene_equal_f1_hi": 0.8690513511243151,
+     "scene_equal_f1": 0.8688120895059761,
+     "draw_lo": 0.8685160845705396,
+     "draw_hi": 0.8690513511243151,
+     "draw_spread_note": "draw_lo/draw_hi are percentiles ACROSS DRAWS, a different quantity from the scene bootstrap; the two are never mixed.",
      "mean_payload": 0.000809146051529116,
      "share_L": null,
      "deployable": true,
@@ -66,9 +67,9 @@
      "delta_f1_UCB95": -0.001950877239142124
     },
     "random_el": {
-     "delta_f1_point": 0.00805933357704855,
-     "delta_f1_LCB95": 0.004694308150763625,
-     "delta_f1_UCB95": 0.01149606133535296
+     "delta_f1_point": 0.007982743288718598,
+     "delta_f1_LCB95": 0.004747043895235395,
+     "delta_f1_UCB95": 0.011257933404991224
     }
    },
    "vs_fixed_L": {
@@ -107,9 +108,10 @@
      "payload_residual_vs_target": -2.272727272724026e-07
     },
     "random_el": {
-     "scene_equal_f1": 0.8630859183568887,
-     "scene_equal_f1_lo": 0.862737002570552,
-     "scene_equal_f1_hi": 0.8634369524533251,
+     "scene_equal_f1": 0.8630859183568885,
+     "draw_lo": 0.862737002570552,
+     "draw_hi": 0.8634369524533251,
+     "draw_spread_note": "draw_lo/draw_hi are percentiles ACROSS DRAWS, a different quantity from the scene bootstrap; the two are never mixed.",
      "mean_payload": 0.0014705620867768595,
      "share_L": null,
      "deployable": true,
@@ -140,9 +142,9 @@
      "delta_f1_UCB95": -0.00012950790120114242
     },
     "random_el": {
-     "delta_f1_point": 0.01064075477158588,
-     "delta_f1_LCB95": 0.00793427915367595,
-     "delta_f1_UCB95": 0.013668385330788957
+     "delta_f1_point": 0.010436677289706903,
+     "delta_f1_LCB95": 0.007659073431525221,
+     "delta_f1_UCB95": 0.014047384267757479
     }
    },
    "vs_fixed_L": {

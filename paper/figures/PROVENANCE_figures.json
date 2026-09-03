@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-figures/1",
  "generator": "tools/build_v2_figures.py",
- "commit": "3286cfd4d68d741b235eb9d50390ccee028290b7",
+ "commit": "87a00cfe2b7b6e14fbaf723905ba2106b0df6749",
  "palette": {
   "hexes": [
    "#2B62C4",
@@ -18,7 +18,7 @@
    "kind": "conceptual block diagram",
    "inputs": [],
    "note": "No result numbers. Every block is an implemented component; nothing unimplemented is drawn (B-1). Two factual corrections over the first draft: the channel estimate is an EGO-side input, not derived from the collaborator; and E issues no message so it does not reach the transport chain.",
-   "sha256": "92120f145bb0fac79d756843d0b5413c4f5feb62e96c250b9b33843808bb6c35"
+   "sha256": "4024c8628e1fecd98e9c3c6e0ceefd878777f65931f5d65af71b69d62a324735"
   },
   "fig2_primary.pdf": {
    "panel": "main",
@@ -26,7 +26,7 @@
     "results/v2/v2_test_primary.json": "594ff0da06622272f4c87e4189e91273a8a6d6f235e991522985ce1c3dfcff77",
     "results/v2/v2_culver_primary.json": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
     "results/v2/v2_heldout_fixed_arms.json": "51150711533bf45eafc0b3fdad468ec4712a2d168d98cd2c7f20eb025d6bd3e8",
-    "results/v2/v2_matched_payload.json": "c7e7379f879cec364e77d5c25bce3f61fac2ac6d2682490fb837c1edda0c8591"
+    "results/v2/v2_matched_payload.json": "4fd6a35191f38b68f0196aa92b660b2767e6ade0bfe9cfb393e562638bf171e5"
    },
    "fields": [
     "RF.mean_payload",
@@ -36,7 +36,7 @@
     "policies.*"
    ],
    "layout_rule": "F1 AND realised payload together on one plane, with the budget ceiling drawn. SYMLOG x, because Fixed E spends exactly zero and a log axis cannot show zero (V2-R56 G-3/G-10).",
-   "sha256": "718cec7e3b30e0fa3dbdf9ff03a58a0c2c4b8ada9241bd41182db73dabf044d9"
+   "sha256": "c53b1bf3f4cbd013201cb88866832609aee5594993f7aa4b37a6950f414c8a30"
   },
   "fig3_recovery.pdf": {
    "panel": "main",
@@ -50,7 +50,7 @@
     "q_message_survives"
    ],
    "split": "validate (mechanism result)",
-   "sha256": "68df90dfd24e6f0985922b91f0b1d501a5430cedd89f08d5de6af9313a22079d"
+   "sha256": "f667c17cdcd44de7400c6dd7e007fac1586ab584743d8fa1c46b875662abd1b5"
   },
   "fig4_where2comm.pdf": {
    "panel": "main",
@@ -63,7 +63,7 @@
     "ap_70"
    ],
    "axis_rule": "the x axis is the NATIVE communication rate. No Msym and no budget-matched language may appear in the figure or its caption (V2-R40 B-7).",
-   "sha256": "b317de8a5522458fa2d0c81d1a7cd815a18819a172b1a8805a30364c44131e04"
+   "sha256": "93376cd41296134f5b5433f2790b66e6e0398d85681b6bceaf1dac339f783c81"
   },
   "fig5_lambda.pdf": {
    "panel": "supplementary",
@@ -77,7 +77,7 @@
     "rho_F"
    ],
    "status": "EXPLORATORY, validate only. Did not replace the frozen candidate and explains no Test result (V2-R43 B-5).",
-   "sha256": "456cb304d802c0a52da75add13f504d256321c081c5f055f00a5f6eef20059d2"
+   "sha256": "4d334dc994398a2c99f1e008373836a0651666aee9eb00453183115ae27bbf40"
   }
  }
 }

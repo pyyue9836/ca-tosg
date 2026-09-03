@@ -233,3 +233,27 @@ one token, the meanings do not overlap, taking the wrong one raises nothing, and
 comes out is the right order of magnitude. Nothing in a re-read distinguishes them. The fix is the
 same each time — **give the two quantities names that cannot be confused, and delete the ambiguous
 one without leaving an alias**, because an alias preserves exactly the confusion being removed.
+
+### Instance ten: three columns of one row, from two different objects (V2-R59 B)
+
+Table IV's random-policy row reported a scene-equal $F_1$ averaged over 200 draws, a $\Delta F_1$
+computed from **draw 0 only**, and a bootstrap interval also from draw 0. The columns therefore did
+not subtract: $0.87679 - 0.86881 = 0.00798$ against a printed $0.00806$.
+
+**Every gate passed.** Nothing crashed, no interval was absurd, and the numbers-are-macros gate was
+satisfied because every figure genuinely came from the generator — they were simply not the *same*
+number twice. The existing gates verify **provenance** (did this come from a product?) and not
+**internal consistency** (do these three cells describe one object?).
+
+The repair is both: one per-row mean vector feeds the summary, the difference and the bootstrap;
+and the generator now **asserts** that every row's columns subtract to within 1e-9 before writing.
+
+**Family:** the shared IoU threshold, `p_cw` versus `p_cw_F`, and the `ap50_mc_std = 1.11e-16`
+float residual — defects that do not crash, do not warn, and produce values of the right order of
+magnitude. The only thing that catches them is an assertion that states the relationship the
+numbers are supposed to have.
+
+**And the fix had the same shape one level down.** The injection self-test written for it replaced
+`\TestSaving`, which is a *prefix* of `\TestSavingVsFixedL`, so it rewrote five macros where three
+were intended and corrupted one. Macro names are now anchored as whole tokens — the identical
+anchoring failure the retired-fingerprint sweep hit when `0.888` matched a per-class F1 of `0.8883`.

@@ -195,22 +195,30 @@ def matched_payload():
             pol[key] = {'scene_equal_f1': _scene_equal(f1, scenes, uniq),
                         'mean_payload': float(np.where(take, b_l, 0.0).mean()),
                         'share_L': float(take.mean()), 'deployable': dep, '_f1': f1}
-        # random at CA-TOSG's own action rate, repeated
-        rf1, rpay = [], []
-        keep = None
+        # Random at CA-TOSG's own rate, repeated. V2-R59 B-2: the reported F1, the difference and
+        # the bootstrap must all come from ONE object -- the per-row mean over the repeats. The
+        # first version averaged the summary over 200 draws but bootstrapped only draw 0, so a
+        # single table row carried two different randomisations and its columns did not subtract
+        # (0.87679 - 0.86881 = 0.00798 against a printed 0.00806). Nothing crashed and no gate
+        # fired, because every number WAS generator-produced -- they were just not the same number
+        # twice.
+        acc_f1 = np.zeros(len(g)); rpay = []; per_draw = []
         for k in range(N_RANDOM_REPEATS):
             rng = np.random.default_rng(20260903 + k)
             take = _greedy_match(rng.random(len(g)), b_l, target, rng)
             f1 = np.where(take, eff_l, eff_e)
-            rf1.append(_scene_equal(f1, scenes, uniq))
+            acc_f1 += f1
+            per_draw.append(_scene_equal(f1, scenes, uniq))
             rpay.append(float(np.where(take, b_l, 0.0).mean()))
-            if k == 0:
-                keep = f1
-        pol['random_el'] = {'scene_equal_f1': float(np.mean(rf1)),
-                            'scene_equal_f1_lo': float(np.percentile(rf1, 2.5)),
-                            'scene_equal_f1_hi': float(np.percentile(rf1, 97.5)),
+        mean_f1 = acc_f1 / N_RANDOM_REPEATS
+        pol['random_el'] = {'scene_equal_f1': _scene_equal(mean_f1, scenes, uniq),
+                            'draw_lo': float(np.percentile(per_draw, 2.5)),
+                            'draw_hi': float(np.percentile(per_draw, 97.5)),
+                            'draw_spread_note': 'draw_lo/draw_hi are percentiles ACROSS DRAWS, a '
+                                                'different quantity from the scene bootstrap; the '
+                                                'two are never mixed.',
                             'mean_payload': float(np.mean(rpay)),
-                            'share_L': None, 'deployable': True, '_f1': keep}
+                            'share_L': None, 'deployable': True, '_f1': mean_f1}
         pol['ca_tosg'] = {'scene_equal_f1': got_f1, 'mean_payload': target,
                           'share_L': float((rf_pred == 1).mean()), 'deployable': True,
                           '_f1': f1_rf}
@@ -227,6 +235,18 @@ def matched_payload():
             pt, lo, hi = _boot_diff(pol['ca_tosg']['_f1'], v['_f1'], scenes, uniq, 20260903)
             d['vs_ca_tosg'][k] = {'delta_f1_point': pt, 'delta_f1_LCB95': lo,
                                   'delta_f1_UCB95': hi}
+        # V2-R59 B-4: every row of the table must subtract. Asserted rather than trusted, because
+        # the defect it catches passed every existing gate: those verify that a number came from a
+        # generator, not that three columns of one row came from the same vector.
+        ca_f1 = d['policies']['ca_tosg']['scene_equal_f1']
+        for k_, v_ in d['policies'].items():
+            if k_ == 'ca_tosg':
+                continue
+            gap = abs((ca_f1 - v_['scene_equal_f1']) - d['vs_ca_tosg'][k_]['delta_f1_point'])
+            if gap > 1e-9:
+                raise SystemExit(f'{sp}/{k_}: the column difference disagrees with the reported '
+                                 f'delta by {gap:.2e} -- the row is built from more than one '
+                                 f'object; refusing to write')
         pt, lo, hi = _boot_diff(pol['ca_tosg']['_f1'], f1_fixed_l, scenes, uniq, 20260903)
         d['vs_fixed_L'] = {'delta_f1_point': pt, 'delta_f1_LCB95': lo, 'delta_f1_UCB95': hi,
                            'fixed_L_scene_equal_f1': _scene_equal(f1_fixed_l, scenes, uniq),

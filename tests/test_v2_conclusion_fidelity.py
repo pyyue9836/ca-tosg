@@ -69,6 +69,19 @@ INTERNAL_VOICE = [
     (r'\benforced mechanically rather than by review\b', 'audit voice'),
     (r'\bself-test\b|\binjection test\b', 'names our own test apparatus'),
     (r'\bwork package\b', 'internal plan vocabulary'),
+    # V2-R59 A-4: the budget constrains the MEAN payload, so it cannot by itself make an action
+    # undeployable. "Fixed F is infeasible as an always-on policy" is arithmetic; "F is not
+    # deployable" is a different and unsupported claim, and the slide between them is one word.
+    (r'\bF is not deployable\b|\bfeature (?:action|transmission) is not deployable\b',
+     'confuses an always-on infeasibility with an action-level one (V2-R59 A)'),
+    # matched against the NORMALISED text, where norm() has already stripped $, \{ and }
+    (r'deployable action set is[^.]{0,24}E\s*,\s*L',
+     'derives the action set from the budget, which constrains only the mean'),
+    # V2-R59 C-3: leftovers of the three-action narrative
+    (r'\bthree representations\b', 'retired three-action framing'),
+    (r'which one this frame should use', 'retired three-action framing'),
+    (r'activates the feature branch|feature branch that [A-Za-z-]+ activates',
+     'the frozen policy does not activate a feature branch'),
 ]
 
 
@@ -119,6 +132,12 @@ def _inject(src, phrase, replacement, expect=1):
     self-test that cannot fail, inside the gate whose whole purpose is to fail on a fluent edit.
     """
     pat = r'\s+'.join(re.escape(w) for w in phrase.split())
+    # V2-R59: a LaTeX macro name is a whole token, not a prefix of a longer one. Without this,
+    # injecting on `\TestSaving` also rewrote `\TestSavingVsFixedL` -- five matches where three
+    # were meant, and a corrupted macro in the injected copy. Same anchoring failure the retired-
+    # fingerprint sweep hit when `0.888` matched a per-class F1 of `0.8883`.
+    if phrase.startswith('\\\\') or phrase.startswith('\\'):
+        pat += r'(?![A-Za-z])' 
     out, n = re.subn(pat, replacement, src)
     assert n == expect, ('injection matched %d times, not %d: %r' % (n, expect, phrase[:50]))
     return out
@@ -165,6 +184,18 @@ def self_test():
 
     live = ''.join(open(os.path.join(ROOT, r), encoding='utf-8').read()
                    for r in ('paper/main.tex', 'paper/supplementary.tex'))
+    # V2-R59 A-4 / C-3: the two claims this batch retired must not come back
+    for probe, label in (
+            ('Under the primary budget its deployable action set is $\\{E, L\\}$.',
+             '"deployable action set is {E, L}"'),
+            ('The feature action is not deployable at this budget.', '"F is not deployable"'),
+            ('CA-TOSG keeps all three representations available.', '"three representations"'),
+            ('a codec can be the feature branch that CA-TOSG activates.',
+             '"feature branch that ... activates"')):
+        fx = internal_voice(probe)
+        print(f'  {"FIRES  " if fx else "SILENT "}  {label}')
+        ok &= bool(fx)
+
     f6 = internal_voice(live)
     print(f'  {"quiet  " if not f6 else "FIRES  "}  the delivered documents as they stand')
     for x in f6[:6]:
