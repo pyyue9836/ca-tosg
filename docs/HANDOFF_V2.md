@@ -111,6 +111,24 @@ predictions, E/L products, payload, WP5 transport — all confirmed unaffected (
 
 ## 3. Open rulings — these need Josh, not work
 
+0. ~~M1 (mean budget vs. per-frame cap) and M3 (the preregistered comparator's relation to the
+   matched-payload comparison)~~ — **CLOSED at V2-R60, and they must not be reopened.** Both were
+   raised against `8583c18`, which already answers them: §VII-A carries the three-way distinction
+   (Fixed F infeasible as an always-on policy / occasional F not excluded by a mean budget / the
+   frozen policy selects only E and L), and §VI-B states that the preregistered comparator belongs
+   to the original L/F-capable formulation and is retained for protocol integrity. Josh's own
+   ruling: the questions were duplicates of text already in the manuscript, not defects.
+
+   **Also ruled at V2-R60:** the size of the learned selector's gain is **not** grounds for
+   rejection. The Test result is a valid positive ($+0.00080$, LCB95 $+0.00028$), Culver-City
+   establishes no statistical advantage and the paper does not claim one, and the contribution does
+   not rest on that gain alone. Whether it affects competitiveness at a particular venue is a
+   submission-strategy decision for the supervisor, not a defect in the work.
+
+   **No experiment reopens.** No re-freezing, no channel-only RF arm, no forcing F to appear, no
+   further use of the held-out data. `8583c18` was reviewed and no new factual error was found; the
+   frozen experiments stand as they are.
+
 1. ~~The level-2 position-effect threshold~~ — **CLOSED, V2-R50 B-1. Josh declined to rule, and
    that is the ruling.** Level 1 ("loss position affects task performance") is supported, reported
    and strengthened to the equal-codeword-count form. Level 2 ("position matters *more* than

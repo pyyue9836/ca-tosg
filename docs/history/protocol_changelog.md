@@ -6448,3 +6448,25 @@ contribution. And the boundary against the channel-only rule is stated as measur
 a small supported gain on Test ($+0.00080$, LCB $+0.00028$), and on Culver-City a point estimate of
 $+0.00047$ whose interval includes zero. **We do not claim the task cues produce a stable
 cross-domain advantage.** What they clearly beat is cutting the transmission rate at random.
+
+
+## V2-R60 — two questions closed as already-answered, and the experiment stays frozen
+
+Josh reviewed `8583c18` and closed M1 and M3 himself: both were raised against text that already
+answers them, and he recorded the re-raising as his own duplication rather than as a defect in the
+paper. Nothing in the manuscript changes.
+
+**The gain size is not a defect.** CA-TOSG leads the channel-only rule by $+0.00080$ on Test with a
+bootstrap lower bound of $+0.00028$ — a valid positive result — and establishes no statistical
+advantage on Culver-City, which the paper says. The contribution does not rest on that number
+alone: the receiver-driven pre-request architecture, the measured transport accounting, the
+matched-payload evidence that *which* frames are worth transmitting on beats cutting the rate at
+random, and the three transport findings all stand independently of it. Venue competitiveness is a
+submission decision, not a correctness one.
+
+**No experiment reopens** — no re-freeze, no channel-only RF arm, no forcing F to appear, no further
+use of the held-out data. `8583c18` was reviewed and no new factual error was found.
+
+**Recorded because closure decays.** Two rounds ago the same instinct — reopening something the
+record had already settled — cost a full batch. A ruling that is not written down is a ruling that
+gets re-litigated by the next reader, including when the next reader is the person who made it.
