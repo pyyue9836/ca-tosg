@@ -7,16 +7,18 @@
  "experiment_closeout": "2751041fbb8e9ae9a9b5605ae62228c50e1147ee8f14cac9a461bde778ee1d99",
  "archive_freeze_verified": true,
  "files": {
-  "paper/figures/PROVENANCE_figures.json": "2df002086a45bad19d1adac6d374433a506215b615a43d4e425177e47fd0ad7c",
-  "paper/figures/fig1_system.pdf": "4024c8628e1fecd98e9c3c6e0ceefd878777f65931f5d65af71b69d62a324735",
-  "paper/figures/fig2_primary.pdf": "c53b1bf3f4cbd013201cb88866832609aee5594993f7aa4b37a6950f414c8a30",
-  "paper/figures/fig3_recovery.pdf": "f667c17cdcd44de7400c6dd7e007fac1586ab584743d8fa1c46b875662abd1b5",
-  "paper/figures/fig4_where2comm.pdf": "93376cd41296134f5b5433f2790b66e6e0398d85681b6bceaf1dac339f783c81",
-  "paper/figures/fig5_lambda.pdf": "4d334dc994398a2c99f1e008373836a0651666aee9eb00453183115ae27bbf40",
-  "paper/main.tex": "003df3a048273b67b4947ee5caf21fa2eb584f59776e4ea7f6b7f6e22a33b0c5",
+  "paper/figures/PROVENANCE_figures.json": "37787bffd3e5cc8a42c264cf2d97825d51042c2694746ef016c0a36880ac2bae",
+  "paper/figures/fig1_system.pdf": "9952478acd4834b5e445d518dffd05370c40d884d9b594ae81b0f6de761e8434",
+  "paper/figures/fig2_primary.pdf": "85aa486ec32be76fcde43fef9e22029cc0b3b7c1d403d199e22fd1f902b8c38c",
+  "paper/figures/fig3_recovery.pdf": "71fd996de198bdce6c7cb48a6188aedab3b0dbc2c126a554c693a49ad5caa411",
+  "paper/figures/fig4_where2comm.pdf": "dc5481741c60540619b48b19a4f084fccebe0b11fbbde38473e0b0f5f3951f13",
+  "paper/figures/fig5_lambda.pdf": "45dc703c51084f2760e0bdaff38b5e3f50c0575017197c4d2171dbd6c53bf840",
+  "paper/figures/fig6_matched_forest.pdf": "2c0d20aacb7e8aad384f993713994af40b28ea9911c9584ababf8b6379f0ad81",
+  "paper/figures/fig7_action_heatmap.pdf": "43c478953de05d41eca79a1e01e8aeca74ac2d271daad046f1cb25768f4df961",
+  "paper/main.tex": "74e050fb232704ac08348f3072d0e0d4cf1a215dc232dc0b401d5e317e7b7072",
   "paper/references.bib": "7605270eb905497ae1e5b610e1fd0d2431c377bb5c8fb9614af0b5d7230c9fc0",
   "paper/supplementary.tex": "ea3b8081ef64d4f51912e798fd6569d72b4e9b59480a4af5bef359faa49383f0",
-  "paper/tables/generated_numbers.tex": "b4dc8a702740f6a77d6dd7e2b68099e7fddc074e0d6211c4a4c0e16af42c5910",
+  "paper/tables/generated_numbers.tex": "6e553fc8498a0e5766a15682bdfaebd46a03b2f556e043a4339dd5461176cda8",
   "paper/tables/tbl_baselines.tex": "2db85b54ef2b9f580cec924061caec10a1a7b265a5a7a892b35a9e4b67a7afe3",
   "paper/tables/tbl_channel_grid.tex": "67da84481bee64a8cc6a6b9058be9673141a4a9a696358bc3489831468e515aa",
   "paper/tables/tbl_cue_schema.tex": "98874d03cbbb7324baeee8e74854d8428a2998ebe2627cf4635755aea99a8238",
@@ -27,5 +29,5 @@
   "paper/tables/tbl_transport.tex": "79aafaa3e0adbc476122b58af975b52d3bd33ddcb8fb6d58eb0a5b4b3c0386a0",
   "paper/tables/tbl_where2comm_full.tex": "ea363a9af7b5b06a0e4576ae9b02346596d4e3dfa55b5fc566f6f308c75bed06"
  },
- "n_files": 19
+ "n_files": 21
 }

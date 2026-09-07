@@ -257,3 +257,32 @@ numbers are supposed to have.
 `\TestSaving`, which is a *prefix* of `\TestSavingVsFixedL`, so it rewrote five macros where three
 were intended and corrupted one. Macro names are now anchored as whole tokens — the identical
 anchoring failure the retired-fingerprint sweep hit when `0.888` matched a per-class F1 of `0.8883`.
+
+### A known hole, stated rather than patched: maths mode hides literals (V2-R62)
+
+`tests/test_paper_numbers_are_macros.py` blanks `$...$` before scanning, because inline maths is
+full of indices, exponents and unit literals that are not results. The consequence is exact and
+worth writing down: **a result number written inside `$...$` is not scanned.** During V2-R62 a
+figure-eyeballed threshold, "below roughly $7$~dB", passed the gate for precisely this reason.
+
+The sentence was rewritten to remove the number rather than leave it hiding in maths — but the hole
+is a property of the gate, not of that sentence, and it will not announce itself next time.
+
+**Not patched here, deliberately.** Scanning inside maths would fire on every subscript and unit in
+the paper, and a gate with a large false-positive rate teaches people to skip it (the rule bought
+at V2-R19). The honest position is a stated limitation: this gate catches results in prose, and a
+result deliberately or accidentally placed in maths mode is outside its reach.
+
+### A frozen document cannot be held to a moving standard (V2-R61)
+
+`conclusion fidelity` checks ruled sentences in both the live manuscript and the archived 4-page
+brief. When two of those sentences were re-ruled, the brief---frozen, uneditable---could no longer
+satisfy them. That is a guaranteed failure with no available fix, which is the worst kind of gate:
+it must either be switched off or worked around, and both teach people to ignore it.
+
+Re-ruled claims are now marked and checked on the live text only. Every claim that has not been
+re-ruled is still checked in both documents, so the archive keeps exactly the protection it had.
+
+**The general rule:** when a check spans a mutable and an immutable artefact, a change to the
+standard must be scoped, or the immutable artefact will fail forever for having been correct at the
+time.

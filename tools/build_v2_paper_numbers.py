@@ -296,6 +296,12 @@ def build():
     # italic variable inside maths.
     _rm, _re = ('%.1e' % resid).split('e')
     mac('MatchedPayloadResidual', r'%s\times10^{%d}' % (_rm, int(_re)))
+    # V2-R61 B-3: the payload span Fig. 2 draws is a HELD-OUT quantity; the 1,244x figure it used
+    # to quote is a development-split ratio. Emitted as the smaller of the two splits, so the
+    # caption's "more than three orders of magnitude" is true on both panels.
+    _span = min(fa['splits'][sp]['arms']['F']['mean_payload']
+                / fa['splits'][sp]['arms']['L']['mean_payload'] for sp in ('test', 'culver'))
+    mac('HeldOutFOverLRatioMin', f"{_span:,.0f}")
 
     L.append('')
     L.append(r'% ---- SUPPLEMENTARY: the exploratory lambda scan ---------------------------')

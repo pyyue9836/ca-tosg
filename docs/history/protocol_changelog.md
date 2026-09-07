@@ -6470,3 +6470,80 @@ use of the held-out data. `8583c18` was reviewed and no new factual error was fo
 **Recorded because closure decays.** Two rounds ago the same instinct — reopening something the
 record had already settled — cost a full batch. A ruling that is not written down is a ruling that
 gets re-litigated by the next reader, including when the next reader is the person who made it.
+
+## V2-R62 — two figures, and a hole in the numbers gate
+
+### B/C · The forest plot and the action surface
+
+Fig.~6 draws the matched-payload differences with their scene-level bootstrap intervals, and
+**asserts value by value that every point and every lower bound equals the macro Table IV prints**
+(tolerance 1e-9). A figure and a table computing the same quantity separately will eventually
+disagree, and the reader has no way to tell which is wrong. The non-deployable oracle is excluded:
+on the same axis as three deployable rules it reads as a fourth competitor.
+
+Fig.~7 is the frozen policy's requested-L share over the 11 SNR grid points and the pooled held-out
+box-count quartiles, per channel. Bins are fixed in the product before anything is plotted, and
+the rendering is nearest-neighbour: a smoothed heat map would invent structure between grid points
+that were never evaluated. It shows the mechanism the paper argues for — the channel state sets
+where the E/L boundary lies and the task cues move it, visibly under Rayleigh.
+
+### A hole found in a gate this project wrote
+
+The numbers-are-macros gate blanks inline maths before scanning, so **a result inside `$...$` is
+invisible to it**. A figure-eyeballed "below roughly $7$~dB" passed. The sentence was rewritten to
+drop the number rather than leave it hiding in maths, and the limitation is now stated in
+`docs/gate_design_principles.md` rather than patched: scanning inside maths would fire on every
+subscript and unit, and a gate with a large false-positive rate is one people learn to skip.
+
+**Stating a gate's reach is part of the gate.** A check whose blind spot is undocumented is trusted
+past where it looks.
+
+## V2-R61 — candidate set versus support, and six sentence-level residues
+
+### A-1 · The distinction that restores internal consistency
+
+Narrowing $\mathcal{S}$ to $\{E, L\}$ in Eq.~(1) left the paper contradicting itself: Eq.~(6) and
+its tie-break $E \succ L \succ F$ range over three actions. The fix separates two things that were
+being conflated:
+
+* the **candidate set** $\mathcal{A} = \{E, L, F\}$, over which the objective and the tie-break are
+  defined; and
+* the **support** of the frozen policy, $\{E, L\}$, which is an empirical outcome of the
+  development protocol.
+
+Eq.~(1) is back on $\mathcal{A}$, the introduction says "from the candidate set, of which the frozen
+policy uses $\{E, L\}$", and Fig.~1 labels the F box *candidate/analysis branch; zero selections
+under the frozen policy*.
+
+**This is the third pass over the same sentence family**, and the reason is worth naming: the first
+narrowing (V2-R56) was correct about the finding and wrong about the formalism, and each subsequent
+round found another place where "what the policy did" had been written as "what the method is".
+
+### A-3 · A payload claim that was broader than the accounting
+
+"the request cancels from every comparison in this paper" was too strong: it cancels from
+**absolute** payload differences, and the reported relative savings are over cooperative-perception
+payload only. Stated as such.
+
+### B-5 / A-4 · Two ruled sentences rewritten, and the gate moved with them
+
+Both sentences were locked by `conclusion fidelity`. Their replacements keep what the rulings
+protect---no superiority claim over simple rules, and no reading of "F absent" as "F useless"---so
+the locked wording was updated to the new sentences and the superiority guard moved into an explicit
+forbidden list, where it is now stated rather than implied by one sentence's survival.
+
+**That exposed a gate that could no longer pass.** The archived 4-page brief is frozen and still
+carries the old wording, so checking it against a re-ruled sentence is a guaranteed failure with no
+available fix. Re-ruled claims are now scoped to the live manuscript; every claim that has *not*
+been re-ruled is still checked in both documents, so the archive keeps the protection it had.
+A frozen document cannot be held to a moving standard.
+
+### B-3 · A development-split ratio in a held-out figure's caption
+
+Fig.~2 draws held-out arms and its caption quoted the development-split $1{,}244\times$. Replaced
+by the span the figure actually shows, backed by a macro computed over both held-out splits.
+
+Writing that macro **inside** `$...$` left the derived-claim check unable to see it --- the same
+maths-mode blind spot recorded at V2-R62, now observed in the opposite direction: the check cannot
+see a *justification* in maths either, not only a violation. The macro sits outside the maths and
+renders identically.

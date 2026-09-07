@@ -154,6 +154,7 @@ def matched_payload():
            'task_rule_direction': TASK_RULE_DIRECTION,
            'random_repeats': N_RANDOM_REPEATS, 'boot': N_BOOT, 'splits': {}}
 
+    hm_pred, hm_nbox, hm_snr, hm_ch = {}, {}, {}, {}
     for sp in ('test', 'culver'):
         g = pd.read_csv(os.path.join(SEALED, f'v2_grid_{sp}_ideal.csv'))
         cues = pd.read_csv(os.path.join(SEALED, f'wp6_cues_{sp}.csv'))
@@ -173,6 +174,11 @@ def matched_payload():
         eff3 = g[['eff_E', 'eff_L', 'eff_F']].to_numpy()
         b3 = g[['B_E', 'B_L', 'B_F']].to_numpy()
         f1_rf, b_rf = eff3[r, rf_pred], b3[r, rf_pred]
+
+        hm_pred[sp] = rf_pred
+        hm_nbox[sp] = nbox
+        hm_snr[sp] = snr
+        hm_ch[sp] = g.channel.to_numpy()
 
         pub = json.load(open(os.path.join(ROOT, f'results/v2/v2_{sp}_primary.json')))
         got_f1 = _scene_equal(f1_rf, scenes, uniq)
@@ -253,6 +259,32 @@ def matched_payload():
                            'fixed_L_mean_payload': float(b_l.mean()),
                            'note': 'C-2 secondary: Fixed L is NOT payload-matched; it spends more.'}
         out['splits'][sp] = d
+
+    # --- V2-R62 C: the descriptive action-selection surface -------------------------
+    # Pure summary of the frozen policy's REQUESTED actions. Nothing is tuned, nothing is
+    # re-selected, and the bins are fixed before anything is plotted: the SNR axis is the 11 grid
+    # points, and the box-count axis is the quartiles of the POOLED held-out population, computed
+    # once here and reused for both channels. No smoothing and no interpolation.
+    pooled = np.concatenate([hm_nbox[sp] for sp in ('test', 'culver')])
+    edges = [float(x) for x in np.quantile(pooled, [0.0, 0.25, 0.5, 0.75, 1.0])]
+    heat = {'schema': 'requested-L share by SNR point and ego box-count quartile',
+            'bins_note': 'box-count edges are quartiles of the POOLED held-out rows, fixed before '
+                         'plotting; SNR axis is the 11 protocol grid points; no smoothing, no '
+                         'interpolation.',
+            'nbox_edges': edges, 'cells': {}}
+    all_nb = pooled
+    all_pred = np.concatenate([hm_pred[sp] for sp in ('test', 'culver')])
+    all_snr = np.concatenate([hm_snr[sp] for sp in ('test', 'culver')])
+    all_ch = np.concatenate([hm_ch[sp] for sp in ('test', 'culver')])
+    qidx = np.clip(np.searchsorted(edges[1:-1], all_nb, side='right'), 0, 3)
+    for ch in ('awgn', 'rayleigh'):
+        for si, sv in enumerate(sorted(set(all_snr.tolist()))):
+            for q in range(4):
+                m = (all_ch == ch) & (all_snr == sv) & (qidx == q)
+                heat['cells'][f'{ch}|{sv:g}|{q}'] = {
+                    'n': int(m.sum()),
+                    'share_L': float((all_pred[m] == 1).mean()) if m.sum() else None}
+    out['action_heatmap'] = heat
 
     json.dump(out, open(OUT_MP, 'w'), indent=1)
     print(f'wrote {os.path.relpath(OUT_MP, ROOT)}\n')

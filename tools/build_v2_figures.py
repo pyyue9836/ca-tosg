@@ -80,7 +80,8 @@ def fig1_block(prov):
     box(41, 27, 13, 11, 'RF selector\n(frozen)', col=C['rf'])
     box(58, 34, 15, 7, 'E: no message', col=C['muted'])
     box(58, 25, 15, 7, 'L: boxes', col=C['tau'])
-    box(58, 16, 15, 7, 'F: int8\nbottleneck', col=C['rf'])
+    box(58, 15, 15, 9, 'F: int8 bottleneck\ncandidate/analysis branch;\nzero selections under\nthe frozen policy',
+        col=C['rf'], fs=4.6)
     box(1, 1, 17, 9, 'Collaborator\nLiDAR')
     box(21, 1, 16, 9, 'Same checkpoint\n(per-agent\ninference)')
     box(78, 14, 25, 14, 'packetise $\\rightarrow$ LDPC/QAM\n$\\rightarrow$ per-codeword loss\n'
@@ -258,10 +259,124 @@ def fig5_lambda(prov):
                   'no Test result (V2-R43 B-5).', 'sha256': sha(p)}
 
 
+MACROS = os.path.join(ROOT, 'paper', 'tables', 'generated_numbers.tex')
+
+
+def _macro(name):
+    """Read one generated macro's value, so the figure can be checked against the table."""
+    import re as _re
+    m = _re.search(r'\\newcommand\{\\%s\}\{([^}]*)\}' % name,
+                   open(MACROS, encoding='utf-8').read())
+    if not m:
+        raise SystemExit(f'macro \\{name} not found -- run tools/build_v2_paper_numbers.py first')
+    return float(m.group(1).replace(',', ''))
+
+
+def fig6_matched_forest(prov):
+    """V2-R62 B — the matched-payload differences as a forest plot.
+
+    Same source and same numbers as Table IV, and that is ASSERTED rather than intended: a figure
+    and a table that compute the same quantity separately will eventually disagree, and the reader
+    has no way to tell which one is wrong. Every point and every interval end is checked against
+    the generated macro the table prints.
+
+    The oracle is deliberately absent: it is not deployable, and putting it on the same axis as
+    three deployable rules invites reading it as a fourth competitor.
+    """
+    src = os.path.join(ROOT, 'results/v2/v2_matched_payload.json')
+    d = json.load(open(src))
+    ROWS = (('random_el', 'Random E/L', 'Random'),
+            ('task_only', 'Task-only E/L', 'TaskOnly'),
+            ('snr_only', 'SNR-only E/L', 'SnrOnly'))
+    f, axes = plt.subplots(1, 2, figsize=(W2, 1.9), sharey=True)
+    for ax, sp, name, tag in zip(axes, ('test', 'culver'), ('Test', 'Culver-City'),
+                                 ('Test', 'Culver')):
+        v = d['splits'][sp]['vs_ca_tosg']
+        for i, (key, lab, mac) in enumerate(ROWS):
+            pt = v[key]['delta_f1_point']; lo = v[key]['delta_f1_LCB95']
+            hi = v[key]['delta_f1_UCB95']
+            # B-1: the figure must print the table's numbers, not its own
+            for got, want_macro in ((pt, f'{tag}MP{mac}Delta'), (lo, f'{tag}MP{mac}LCB')):
+                if abs(float('%+.5f' % got) - _macro(want_macro)) > 1e-9:
+                    raise SystemExit(f'{sp}/{key}: plotted {got!r} disagrees with macro '
+                                     f'\\{want_macro} -- figure and table would print different '
+                                     f'numbers for the same quantity')
+            if not (lo <= pt <= hi):
+                raise SystemExit(f'{sp}/{key}: point estimate outside its own interval')
+            y = len(ROWS) - 1 - i
+            ax.plot([lo, hi], [y, y], color=C['muted'], lw=1.4, zorder=2)
+            ax.plot(pt, y, 'o', ms=5, color=C['rf'], zorder=3)
+            ax.plot([lo, hi], [y, y], '|', ms=7, mew=1.4, color=C['rf'], zorder=3)
+        ax.axvline(0.0, color=C['tau'], lw=1.0, ls='--', zorder=1)
+        ax.set_yticks(range(len(ROWS)))
+        ax.set_yticklabels([r[1] for r in ROWS][::-1])
+        ax.set_ylim(-0.6, len(ROWS) - 0.4)
+        ax.set_xlabel('$\\Delta F_1$ (CA-TOSG $-$ baseline)')
+        ax.set_title(name)
+        for sd in ('top', 'right', 'left'):
+            ax.spines[sd].set_visible(False)
+        ax.grid(True, axis='x', alpha=0.7); ax.set_axisbelow(True)
+    f.tight_layout(pad=0.3)
+    q = os.path.join(FIG, 'fig6_matched_forest.pdf')
+    f.savefig(q, bbox_inches='tight'); plt.close(f)
+    prov['fig6_matched_forest.pdf'] = {'panel': 'main',
+        'inputs': {os.path.relpath(src, ROOT): sha(src),
+                   os.path.relpath(MACROS, ROOT): sha(MACROS)},
+        'fields': ['vs_ca_tosg.*.delta_f1_point', '.delta_f1_LCB95', '.delta_f1_UCB95'],
+        'layout_rule': 'Same vector and same bootstrap as Table IV, asserted value by value '
+                       'against the printed macros. Oracle excluded: not deployable.',
+        'sha256': sha(q)}
+
+
+def fig7_action_heatmap(prov):
+    """V2-R62 C — where the frozen policy requests object-level cooperation.
+
+    Descriptive only. The bins are fixed in the product, not here: the SNR axis is the 11 protocol
+    grid points and the box-count axis is the quartiles of the pooled held-out rows. No smoothing
+    and no interpolation -- a smoothed heat map would invent structure between grid points that
+    were never evaluated.
+    """
+    src = os.path.join(ROOT, 'results/v2/v2_matched_payload.json')
+    h = json.load(open(src))['action_heatmap']
+    edges = h['nbox_edges']
+    snrs = sorted({float(k.split('|')[1]) for k in h['cells']})
+    f, axes = plt.subplots(1, 2, figsize=(W2, 1.9), sharey=True)
+    im = None
+    for ax, ch, name in zip(axes, ('awgn', 'rayleigh'), ('AWGN', 'Rayleigh')):
+        M = np.full((4, len(snrs)), np.nan)
+        for j, sv in enumerate(snrs):
+            for q in range(4):
+                c = h['cells'].get(f'{ch}|{sv:g}|{q}')
+                if c and c['share_L'] is not None:
+                    M[q, j] = c['share_L']
+        im = ax.imshow(M, aspect='auto', origin='lower', vmin=0, vmax=1,
+                       cmap='viridis', interpolation='nearest')
+        ax.set_xticks(range(len(snrs)))
+        ax.set_xticklabels([f'{s:g}' for s in snrs], fontsize=5.5)
+        ax.set_yticks(range(4))
+        ax.set_yticklabels([f'{edges[q]:g}--{edges[q+1]:g}' for q in range(4)], fontsize=5.5)
+        ax.set_xlabel('Estimated SNR (dB)')
+        ax.set_title(name)
+        for sd in ('top', 'right'):
+            ax.spines[sd].set_visible(False)
+    axes[0].set_ylabel('Ego detected boxes\n(held-out quartiles)', fontsize=6)
+    cb = f.colorbar(im, ax=axes, fraction=0.03, pad=0.02)
+    cb.set_label('Requested-L share', fontsize=6); cb.ax.tick_params(labelsize=5.5)
+    q = os.path.join(FIG, 'fig7_action_heatmap.pdf')
+    f.savefig(q, bbox_inches='tight'); plt.close(f)
+    prov['fig7_action_heatmap.pdf'] = {'panel': 'main',
+        'inputs': {os.path.relpath(src, ROOT): sha(src)},
+        'fields': ['action_heatmap.cells.*.share_L', 'action_heatmap.nbox_edges'],
+        'layout_rule': 'Bins fixed in the product before plotting; nearest-neighbour rendering, no '
+                       'smoothing or interpolation between evaluated grid points.',
+        'sha256': sha(q)}
+
+
 def main():
     os.makedirs(FIG, exist_ok=True)
     prov = {}
     fig1_block(prov); fig2_primary(prov); fig3_recovery(prov); fig4_w2c(prov); fig5_lambda(prov)
+    fig6_matched_forest(prov); fig7_action_heatmap(prov)
     import subprocess
     out = {'schema': 'catosg-v2-figures/1',
            'generator': 'tools/build_v2_figures.py',

@@ -42,11 +42,18 @@ CLAIMS = [
      ['the bound is what it tests'], [], None),
     ('both halves together',
      ['Neither may be reported without the other'], [], None),
+    # V2-R61 A-4 / B-5: both sentences were rewritten by ruling, so the locked wording moves with
+    # them. What is protected is unchanged -- that the absence of F is not read as F being useless,
+    # and that no superiority over simple rules is claimed -- and the forbidden lists now carry
+    # that second guard explicitly, since the sentence that used to state it in words is gone.
     ('rho_F explanation',
-     ['is not an action that never helps', 'conditioning set',
-      'no candidate could', 'not evidence that the feature action is worthless'], [], None),
+     ['is not an action that never helps', 'conditioning set', 'no candidate could',
+      'does not\nimply that occasional feature-level transmission is infeasible'], [], None,
+     'live'),
     ('no learned-selector superiority',
-     ['not a demonstration that\na learned selector beats simple rules', 'it does not'], [], None),
+     ['granularity-control framework', 'occupy different operating points'],
+     ['beats simple rules', 'outperforms the threshold', 'better than the threshold rule',
+      'superior to simple rules'], None, 'live'),
 ]
 
 
@@ -100,7 +107,15 @@ def norm(s):
     return re.sub(r'\s+', ' ', s)
 
 
-def check(text=None):
+def check(text=None, scope='live'):
+    """Check the ruled claims. `scope` is 'live' for the manuscript, 'frozen' for the archive.
+
+    V2-R61: two claims were re-ruled after the 4-page brief was frozen. The brief cannot be edited,
+    so checking it against the NEW wording is a gate that can never pass -- a guaranteed false
+    positive, which is worse than no gate (V2-R19). Those claims are marked `live` and are checked
+    only where a fix is possible; every claim that has not been re-ruled is still checked in both
+    documents, so the archive keeps the protection it had.
+    """
     if text is None:
         if not os.path.exists(TEX):
             return ['paper/main.tex does not exist -- the official manuscript is the '
@@ -108,7 +123,10 @@ def check(text=None):
         text = open(TEX, encoding='utf-8').read()
     n = norm(text)
     bad = []
-    for label, must, mustnot, anchor in CLAIMS:
+    for entry in CLAIMS:
+        label, must, mustnot, anchor = entry[:4]
+        if len(entry) > 4 and entry[4] == 'live' and scope != 'live':
+            continue
         # scope the forbidden check to a window after the anchor, if one is given
         if anchor:
             i = n.find(norm(anchor).strip())
@@ -214,7 +232,7 @@ def main():
     # not notice the freeze being broken.
     bad = ['[official] ' + b for b in check()]
     bad += ['[archived brief] ' + b
-            for b in check(open(BRIEF, encoding='utf-8').read())]
+            for b in check(open(BRIEF, encoding='utf-8').read(), scope='frozen')]
     # G-1: the internal-voice sweep runs on the LIVE documents only. The archived brief is frozen
     # and cannot be edited, so flagging it would be a permanent failure with no available fix.
     # V2-R53: the generated table bodies are delivered text too. "opened once" survived a full

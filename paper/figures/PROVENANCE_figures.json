@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-figures/1",
  "generator": "tools/build_v2_figures.py",
- "commit": "87a00cfe2b7b6e14fbaf723905ba2106b0df6749",
+ "commit": "a29145874bc732671879f015b59df94894f14c9b",
  "palette": {
   "hexes": [
    "#2B62C4",
@@ -18,7 +18,7 @@
    "kind": "conceptual block diagram",
    "inputs": [],
    "note": "No result numbers. Every block is an implemented component; nothing unimplemented is drawn (B-1). Two factual corrections over the first draft: the channel estimate is an EGO-side input, not derived from the collaborator; and E issues no message so it does not reach the transport chain.",
-   "sha256": "4024c8628e1fecd98e9c3c6e0ceefd878777f65931f5d65af71b69d62a324735"
+   "sha256": "9952478acd4834b5e445d518dffd05370c40d884d9b594ae81b0f6de761e8434"
   },
   "fig2_primary.pdf": {
    "panel": "main",
@@ -26,7 +26,7 @@
     "results/v2/v2_test_primary.json": "594ff0da06622272f4c87e4189e91273a8a6d6f235e991522985ce1c3dfcff77",
     "results/v2/v2_culver_primary.json": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
     "results/v2/v2_heldout_fixed_arms.json": "51150711533bf45eafc0b3fdad468ec4712a2d168d98cd2c7f20eb025d6bd3e8",
-    "results/v2/v2_matched_payload.json": "4fd6a35191f38b68f0196aa92b660b2767e6ade0bfe9cfb393e562638bf171e5"
+    "results/v2/v2_matched_payload.json": "3c2fafdc973ba4d919af75b0bfedb7f97137735b30e58a2ce6b32293864806d9"
    },
    "fields": [
     "RF.mean_payload",
@@ -36,7 +36,7 @@
     "policies.*"
    ],
    "layout_rule": "F1 AND realised payload together on one plane, with the budget ceiling drawn. SYMLOG x, because Fixed E spends exactly zero and a log axis cannot show zero (V2-R56 G-3/G-10).",
-   "sha256": "c53b1bf3f4cbd013201cb88866832609aee5594993f7aa4b37a6950f414c8a30"
+   "sha256": "85aa486ec32be76fcde43fef9e22029cc0b3b7c1d403d199e22fd1f902b8c38c"
   },
   "fig3_recovery.pdf": {
    "panel": "main",
@@ -50,7 +50,7 @@
     "q_message_survives"
    ],
    "split": "validate (mechanism result)",
-   "sha256": "f667c17cdcd44de7400c6dd7e007fac1586ab584743d8fa1c46b875662abd1b5"
+   "sha256": "71fd996de198bdce6c7cb48a6188aedab3b0dbc2c126a554c693a49ad5caa411"
   },
   "fig4_where2comm.pdf": {
    "panel": "main",
@@ -63,7 +63,7 @@
     "ap_70"
    ],
    "axis_rule": "the x axis is the NATIVE communication rate. No Msym and no budget-matched language may appear in the figure or its caption (V2-R40 B-7).",
-   "sha256": "93376cd41296134f5b5433f2790b66e6e0398d85681b6bceaf1dac339f783c81"
+   "sha256": "dc5481741c60540619b48b19a4f084fccebe0b11fbbde38473e0b0f5f3951f13"
   },
   "fig5_lambda.pdf": {
    "panel": "supplementary",
@@ -77,7 +77,33 @@
     "rho_F"
    ],
    "status": "EXPLORATORY, validate only. Did not replace the frozen candidate and explains no Test result (V2-R43 B-5).",
-   "sha256": "4d334dc994398a2c99f1e008373836a0651666aee9eb00453183115ae27bbf40"
+   "sha256": "45dc703c51084f2760e0bdaff38b5e3f50c0575017197c4d2171dbd6c53bf840"
+  },
+  "fig6_matched_forest.pdf": {
+   "panel": "main",
+   "inputs": {
+    "results/v2/v2_matched_payload.json": "3c2fafdc973ba4d919af75b0bfedb7f97137735b30e58a2ce6b32293864806d9",
+    "paper/tables/generated_numbers.tex": "b4dc8a702740f6a77d6dd7e2b68099e7fddc074e0d6211c4a4c0e16af42c5910"
+   },
+   "fields": [
+    "vs_ca_tosg.*.delta_f1_point",
+    ".delta_f1_LCB95",
+    ".delta_f1_UCB95"
+   ],
+   "layout_rule": "Same vector and same bootstrap as Table IV, asserted value by value against the printed macros. Oracle excluded: not deployable.",
+   "sha256": "2c0d20aacb7e8aad384f993713994af40b28ea9911c9584ababf8b6379f0ad81"
+  },
+  "fig7_action_heatmap.pdf": {
+   "panel": "main",
+   "inputs": {
+    "results/v2/v2_matched_payload.json": "3c2fafdc973ba4d919af75b0bfedb7f97137735b30e58a2ce6b32293864806d9"
+   },
+   "fields": [
+    "action_heatmap.cells.*.share_L",
+    "action_heatmap.nbox_edges"
+   ],
+   "layout_rule": "Bins fixed in the product before plotting; nearest-neighbour rendering, no smoothing or interpolation between evaluated grid points.",
+   "sha256": "43c478953de05d41eca79a1e01e8aeca74ac2d271daad046f1cb25768f4df961"
   }
  }
 }
