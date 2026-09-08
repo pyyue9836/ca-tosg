@@ -527,9 +527,13 @@ def tables():
                     a['mix']['E'], a['mix']['L'], a['mix']['F'], feas(a['mean_payload_msym'])))
     ts = [r for r in p12['tau_sweep'] if abs(r['tau'] - tau_star) < 1e-9]
     if ts:
-        R.append(r'SNR threshold $\tau=%g$ & %.5f & %.5f & --- & --- & --- & %s \\'
+        # V2-R63 A-4: the development split uses the same 11 x 2 grid and the same rule, so
+        # the comparator's requested mix is the same here as on the held-out rows. Printing
+        # "---" implied it was unavailable.
+        tm0 = tau_requested_mix()['test']
+        R.append(r'SNR threshold $\tau=%g$ & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
                  % (tau_star, ts[0]['scene_equal_f1'], ts[0]['mean_payload_msym'],
-                    feas(ts[0]['mean_payload_msym'])))
+                    tm0['E'], tm0['L'], tm0['F'], feas(ts[0]['mean_payload_msym'])))
     hb = max(p12['hand_rules'].items(), key=lambda kv: kv[1]['scene_equal_f1'])
     R.append(r'best hand rule (\texttt{%s}) & %.5f & %.5f & %.3f & %.3f & %.3f & %s \\'
              % (hb[0].replace('_', r'\_'), hb[1]['scene_equal_f1'],

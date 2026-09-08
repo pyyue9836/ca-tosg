@@ -354,7 +354,8 @@ def fig7_action_heatmap(prov):
         ax.set_xticks(range(len(snrs)))
         ax.set_xticklabels([f'{s:g}' for s in snrs], fontsize=5.5)
         ax.set_yticks(range(4))
-        ax.set_yticklabels([f'{edges[q]:g}--{edges[q+1]:g}' for q in range(4)], fontsize=5.5)
+        # A-7: an en-dash, not two hyphens -- matplotlib renders the literal characters
+        ax.set_yticklabels([f'{edges[q]:g}\u2013{edges[q+1]:g}' for q in range(4)], fontsize=5.5)
         ax.set_xlabel('Estimated SNR (dB)')
         ax.set_title(name)
         for sd in ('top', 'right'):

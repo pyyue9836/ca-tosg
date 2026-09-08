@@ -6547,3 +6547,41 @@ Writing that macro **inside** `$...$` left the derived-claim check unable to see
 maths-mode blind spot recorded at V2-R62, now observed in the opposite direction: the check cannot
 see a *justification* in maths either, not only a violation. The macro sits outside the maths and
 renders identically.
+
+## V2-R64 — the manuscript rewritten to a research-paper register
+
+Each sentence must define the problem, describe the method, give a reproduction condition, report a
+result, explain a mechanism or bound a conclusion. Sentences doing none of those were deleted; the
+main text went from 13 pages to 12.
+
+### What was removed, and what replaced it
+
+The paper had accumulated a defensive register: paragraphs announcing what was *not* being claimed,
+explaining why an old comparison was retained, telling the reader which two things must not be
+conflated, and justifying the inclusion of a result. That voice is an artefact of how the work was
+produced --- each paragraph was written to settle an argument --- and none of it is a research
+finding. Necessary facts inside those paragraphs were rewritten as method definitions or protocol
+statements: the matched-payload comparison set is now *defined* rather than *defended*.
+
+### The guard that became a check instead of a sentence
+
+Two locked claims were "the payload saving may never appear without the non-inferiority failure"
+and, literally, the sentence *"Neither may be reported without the other."* The first is a rule; the
+second was the paper telling the reader the rule. The sentence is gone and the rule is now enforced
+by the gate, anchored on the saving so the pairing is structural.
+
+**A paper should state its results; the checks should enforce how they are stated.** Where those
+were confused, the manuscript carried the machinery of its own review.
+
+### The new bans caught a live instance immediately
+
+`conclusion fidelity` gained patterns for the deleted forms --- "not a contribution", "we do not
+claim", "must be kept apart", "neither may be reported", "it is reported because", "answers the
+obvious question" --- and fired at once on the supplementary's exploratory-scan section, which still
+carried *"It is reported because it answers the obvious question ... and suppressing it would leave
+that question answered only by assertion."* The main text had been cleaned by hand; the
+supplementary had not, and nothing but the new patterns would have found it.
+
+Seven further rhetorical constructions were removed by a manual sweep ("is the whole setting",
+"which is precisely why", "measured rather than assumed", "deliberately kept separate"). No number,
+table, figure or frozen artefact changed: 210 macros and 9 generated tables reproduce byte for byte.

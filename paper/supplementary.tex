@@ -183,8 +183,7 @@ retained, not a bit budget.}
 \section{Exploratory penalty scan}
 \textbf{This section is an exploratory diagnostic on the development split.} It was registered
 before it produced any number, it enters no primary criterion, and the frozen candidate was
-\emph{not} replaced on the strength of it. It is reported because it answers the obvious question
-about $\rho_F = 0$, and suppressing it would leave that question answered only by assertion.
+\emph{not} replaced on the strength of it.
 
 Fig.~\ref{fig:lambda} and Table~\ref{tab:lambda} scan $\lambda$ over $\LamScanPoints$ points from
 $\LamScanLo$ to $\LamScanHi$. Across that interval $\rho_F$ falls smoothly from $\LamScanRhoFLo$ to
@@ -194,9 +193,8 @@ $\lambda = \LambdaStar$ lies far outside that region, at $\lambda B_F = \LambdaT
 a mean net gain of $\FBestNetGain$ on the rows where F is best---a ratio of
 $\PenaltyOverGainRatio$.
 
-\textbf{This is a statement about grid resolution, not about whether the feature action is worth its
-cost.} The two must not be merged: the first says no candidate could have selected F, the second
-would be a claim about the action itself, and only the first is supported.
+This is a statement about the resolution of the sampled grid: no candidate on that grid selects F.
+It is not a measurement of whether the feature action is worth its cost.
 
 \begin{figure}[t]
 \centering\includegraphics[width=\columnwidth]{fig5_lambda}
@@ -225,9 +223,8 @@ Measured, it does not. Collaborators are available on \TestCollabShare\% of Test
 accountings on both splits. The concern was stated in advance and is settled by measurement rather
 than carried as a caveat.
 
-\textbf{Note that this is not a second payload convention for the external baseline.} Dual
-accounting is full-frame versus collaborator-available frames within \method{}'s single payload
-definition; Where2comm is reported on its native communication rate only and enters neither
+Dual accounting is full-frame versus collaborator-available frames within \method{}'s single
+payload definition; Where2comm is reported on its native communication rate only and enters neither
 accounting.
 
 \section{Reproducibility}

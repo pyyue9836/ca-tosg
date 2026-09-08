@@ -28,20 +28,27 @@ BRIEF = os.path.join(ROOT, 'paper', 'archive', 'results_brief.tex')
 # legitimate word in this paper -- it is CA-TOSG's payload unit -- and only becomes wrong beside
 # Where2comm. A document-global ban would fire on the correct usage, which is failure mode 3.
 CLAIMS = [
-    ('abstract primary result',
-     ['reduced realised communication payload by', 'on Test', 'on Culver-City',
-      'preregistered scene-level non-inferiority criterion was not met on either split',
-      'without statistically establishing accuracy preservation'],
-     ['maintains accuracy', 'no loss of accuracy', 'at the same accuracy'], None),
+    # V2-R64 G-1: the preregistered outcome is now reported once, where the comparison is made,
+    # rather than restated in the abstract. What the ruling protects is unchanged and is what the
+    # check enforces: the payload saving against the frozen comparator may never appear without
+    # the non-inferiority failure beside it. Anchored on the saving so the pairing is structural
+    # rather than a sentence someone must remember to keep.
+    ('preregistered outcome reported with its failure',
+     ['the realised\npayload falls by', 'on Culver-City by',
+      'the preregistered margin of', 'accuracy non-inferiority is not established'],
+     ['maintains accuracy', 'no loss of accuracy', 'at the same accuracy'],
+     'Relative to the frozen threshold comparator', 'live'),
     ('Where2comm exclusion',
      ['same data splits, field of view, ground truth and detection metrics',
       'native communication rate', 'floating-point selected features',
       'does not execute the locked', 'excluded from bit-level budget-matched claims'],
      ['matched budget', 'same budget', 'Msym'], 'Where2comm is included as'),
     ('criterion is on the bound',
-     ['the bound is what it tests'], [], None),
-    ('both halves together',
-     ['Neither may be reported without the other'], [], None),
+     ['The criterion is defined on the\nbound'], [], None, 'live'),
+    # The 'both halves' guard was a SENTENCE telling the reader the rule; it is now the check
+    # above, which enforces the rule instead of announcing it.
+    ('the shortfall accompanies the ratio',
+     ['the shortfall on the bound is'], [], None, 'live'),
     # V2-R61 A-4 / B-5: both sentences were rewritten by ruling, so the locked wording moves with
     # them. What is protected is unchanged -- that the absence of F is not read as F being useless,
     # and that no superiority over simple rules is claimed -- and the forbidden lists now carry
@@ -76,6 +83,17 @@ INTERNAL_VOICE = [
     (r'\benforced mechanically rather than by review\b', 'audit voice'),
     (r'\bself-test\b|\binjection test\b', 'names our own test apparatus'),
     (r'\bwork package\b', 'internal plan vocabulary'),
+    # V2-R64 G-2: defensive and meta forms. Each announces a rule, defends a choice or tells the
+    # reader what is not being claimed, instead of defining, measuring, reporting or bounding.
+    (r'\bnot a contribution\b', 'meta-commentary on the contribution list'),
+    (r'\bwe do not claim\b', 'defensive framing; state what was measured instead'),
+    (r'\bmust be kept apart\b', 'announces a distinction instead of making it'),
+    (r'\bto be explicit about what is and is not claimed\b', 'meta-commentary'),
+    (r'\bneither may be reported without the other\b',
+     'states a reporting rule; the gate enforces it instead'),
+    (r'\bit is reported because\b', 'defends the inclusion of a result'),
+    (r'\banswers the obvious question\b', 'rhetorical framing'),
+    (r'\bsuppressing it would\b', 'defends the inclusion of a result'),
     # V2-R59 A-4: the budget constrains the MEAN payload, so it cannot by itself make an action
     # undeployable. "Fixed F is infeasible as an always-on policy" is arithmetic; "F is not
     # deployable" is a different and unsupported claim, and the slide between them is one word.
@@ -171,8 +189,11 @@ def self_test():
     src = open(TEX, encoding='utf-8').read()
     ok = True
     # the exact failure this exists for: a fluent edit that drops the qualifier
-    inj = _inject(src, 'without statistically establishing accuracy preservation',
-                  'while preserving accuracy')
+    # V2-R64: the preregistered outcome moved out of the abstract into the section that reports
+    # the comparison, so the injection follows it. The failure it probes is unchanged: a fluent
+    # edit that turns "not established" into a preservation claim.
+    inj = _inject(src, 'so accuracy non-inferiority is not established',
+                  'so accuracy is maintains accuracy')
     f = check(inj)
     print(f'  {"FIRES  " if f else "SILENT "}  the qualifier is smoothed away ("while preserving '
           f'accuracy")')
@@ -183,7 +204,7 @@ def self_test():
     print(f'  {"FIRES  " if f2 else "SILENT "}  Where2comm given a matched-budget reading')
     ok &= bool(f2)
     # the macro appears in the abstract, the results and the conclusion; all three go
-    inj3 = _inject(src, '\\TestSaving', 'ninety-nine', expect=3)
+    inj3 = _inject(src, '\\TestSaving', 'ninety-nine', expect=2)
     f3 = check(inj3)
     print(f'  {"quiet  " if not f3 else "FIRES  "}  a macro replaced by prose (content words '
           f'intact; must NOT fire)')
@@ -204,6 +225,11 @@ def self_test():
                    for r in ('paper/main.tex', 'paper/supplementary.tex'))
     # V2-R59 A-4 / C-3: the two claims this batch retired must not come back
     for probe, label in (
+            ('The random forest is not a contribution.', '"not a contribution"'),
+            ('We do not claim that the cues help.', '"we do not claim"'),
+            ('Three statements must be kept apart.', '"must be kept apart"'),
+            ('Neither may be reported without the other.',
+             '"neither may be reported without the other"'),
             ('Under the primary budget its deployable action set is $\\{E, L\\}$.',
              '"deployable action set is {E, L}"'),
             ('The feature action is not deployable at this budget.', '"F is not deployable"'),
