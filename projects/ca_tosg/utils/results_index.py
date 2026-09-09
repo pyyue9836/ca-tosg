@@ -250,7 +250,11 @@ RULES = [
     (r'^sensitivity/f1_ap_decoupling_culver\.(csv|md)$',
      'python projects/ca_tosg/evaluation/true_e2e_global.py', 'Culver F1-vs-AP decoupling note'),
     (r'^latency/(selector_latency|system_timing)\.csv$',
-     'python tools/benchmark_latency.py', 'batch-1 online operating point'),
+     'python tools/benchmark_latency.py', 'v1 candidates only; not cited by the manuscript'),
+    (r'^latency/selector_latency_candidate67\.json$',
+     'python tools/time_selector_candidate67.py --trials 1000 --cue-frames 100',
+     'frozen candidate 67, pinned to one core, n_jobs=1'),
+    (r'^latency/README\.md$', 'hand-written', 'what each file in this directory is'),
     # R53: the common-volume diagnostic track. Not a frozen product: it re-scores the SAME cached
     # outputs inside the branches' intersection volume and reports the delta per cell.
     (r'^diagnostics/common_volume_ap\.csv$',

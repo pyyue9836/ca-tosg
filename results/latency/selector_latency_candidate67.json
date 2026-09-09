@@ -1,28 +1,177 @@
 {
- "schema": "catosg-v2-selector-latency/1",
+ "schema": "catosg-v2-selector-latency/2",
  "what": "Property of the FROZEN artefact. No accuracy, action or utility field is read and no held-out result is touched.",
  "candidate_index": 67,
  "model_sha256": "87d990f68698732edb747d3ef06fdd3f89e905f2548d7fc691cb03fd5107ff7d",
  "n_estimators": 400,
  "inference_batch1": {
-  "median_ms": 55.40266551543027,
-  "p5_ms": 45.54848613333888,
-  "p95_ms": 59.02973442571238,
+  "median_ms": 7.0582035004918,
+  "p5_ms": 6.615527148278488,
+  "p95_ms": 8.256407100270735,
   "n": 1000
  },
- "cue_statistics": {
-  "median_ms": 1.1738600442185998,
-  "p5_ms": 1.1186123418156058,
-  "p95_ms": 1.3820310705341399,
-  "n": 100
+ "inference_per_channel_cell": {
+  "snr0_awgn": {
+   "median_ms": 7.01799799753644,
+   "n": 46
+  },
+  "snr2_awgn": {
+   "median_ms": 7.080723502440378,
+   "n": 46
+  },
+  "snr4_awgn": {
+   "median_ms": 6.984388499404304,
+   "n": 46
+  },
+  "snr6_awgn": {
+   "median_ms": 7.084283999574836,
+   "n": 46
+  },
+  "snr8_awgn": {
+   "median_ms": 7.092001500495826,
+   "n": 46
+  },
+  "snr10_awgn": {
+   "median_ms": 6.987889999436447,
+   "n": 46
+  },
+  "snr12_awgn": {
+   "median_ms": 6.957211002372787,
+   "n": 46
+  },
+  "snr14_awgn": {
+   "median_ms": 7.115737500498653,
+   "n": 46
+  },
+  "snr16_awgn": {
+   "median_ms": 7.032892499410082,
+   "n": 46
+  },
+  "snr18_awgn": {
+   "median_ms": 6.999662500675186,
+   "n": 46
+  },
+  "snr20_awgn": {
+   "median_ms": 7.0188839999900665,
+   "n": 45
+  },
+  "snr0_rayleigh": {
+   "median_ms": 7.142129001294961,
+   "n": 45
+  },
+  "snr2_rayleigh": {
+   "median_ms": 7.098964997567236,
+   "n": 45
+  },
+  "snr4_rayleigh": {
+   "median_ms": 7.037769999442389,
+   "n": 45
+  },
+  "snr6_rayleigh": {
+   "median_ms": 7.0418839968624525,
+   "n": 45
+  },
+  "snr8_rayleigh": {
+   "median_ms": 7.071195999742486,
+   "n": 45
+  },
+  "snr10_rayleigh": {
+   "median_ms": 7.09013999949093,
+   "n": 45
+  },
+  "snr12_rayleigh": {
+   "median_ms": 7.004172999586444,
+   "n": 45
+  },
+  "snr14_rayleigh": {
+   "median_ms": 7.129142999474425,
+   "n": 45
+  },
+  "snr16_rayleigh": {
+   "median_ms": 7.065297999361064,
+   "n": 45
+  },
+  "snr18_rayleigh": {
+   "median_ms": 7.152696998673491,
+   "n": 45
+  },
+  "snr20_rayleigh": {
+   "median_ms": 7.065107998641906,
+   "n": 45
+  }
  },
- "cue_points_used": 53815,
+ "inference_cell_median_spread_ms": {
+  "min": 6.957211002372787,
+  "max": 7.152696998673491
+ },
+ "input_conditions": {
+  "perception_rows": "real frozen cue rows from results/v2/wp6_cues_validate.csv",
+  "snr_grid_db": [
+   0.0,
+   2.0,
+   4.0,
+   6.0,
+   8.0,
+   10.0,
+   12.0,
+   14.0,
+   16.0,
+   18.0,
+   20.0
+  ],
+  "channel_types": [
+   "awgn",
+   "rayleigh"
+  ],
+  "cells": 22,
+  "batch_size": 1
+ },
+ "thread_configuration": {
+  "n_jobs_forced": 1,
+  "n_jobs_in_pickle": -1,
+  "cpu_affinity": [
+   0
+  ],
+  "blas_env": {
+   "OMP_NUM_THREADS": "1",
+   "OPENBLAS_NUM_THREADS": "1",
+   "MKL_NUM_THREADS": "1"
+  },
+  "process_threads_observed": [
+   1
+  ]
+ },
+ "cue_statistics": {
+  "median_ms": 0.5072754993307171,
+  "p5_ms": 0.47684589935670374,
+  "p95_ms": 0.6782191496313316,
+  "n": 1000
+ },
+ "cue_provenance": {
+  "timed": true,
+  "frames_loaded": 100,
+  "points_per_frame": {
+   "median": 54069.5,
+   "min": 53683,
+   "max": 55854
+  },
+  "function": "extract_pcd_features -- the production extractor, imported by v2_wp6_generate_cues from the v1 definition file",
+  "covers": "the 19 point statistics of the cue vector",
+  "excludes": "point-cloud loading and the ego pose transform, which the ego perception stack performs for its own detection regardless"
+ },
+ "detector_dependency": {
+  "field": "ego_detected_box_count",
+  "source": "the ego-only detector output of the deterministic WP2 run; the cue generator copies it and asserts equality with WP2 n_box_ego",
+  "timed_here": false,
+  "consequence": "the cue vector is not complete until the ego detector this system already runs has produced its own detections; that detector time is not included in either number above and is not measured"
+ },
  "hardware": {
   "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
   "processor": "x86_64",
+  "cpu_model": "12th Gen Intel(R) Core(TM) i5-12600K",
   "python": "3.10.18",
-  "threads": 16
+  "cpus_visible": 16
  },
- "command": "python tools/time_selector_candidate67.py --trials 1000",
+ "command": "python tools/time_selector_candidate67.py --trials 1000 --cue-frames 100",
  "note": "results/latency/selector_latency.csv measures the v1 candidates (2, 1, 56) and does not describe candidate 67."
 }

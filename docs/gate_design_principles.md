@@ -305,3 +305,33 @@ label is a claim, and the only check on it is someone reading the definition nex
 same lesson as `FRAME-ALIGNMENT CHECK` (V2-R19), which computed a coordinate-frame overlap. That
 this recurred after the earlier instance is the point worth recording: the class of defect survives
 its own lesson, because each instance looks like a naming quibble until the name is load-bearing.
+
+### Equations are prose about code, and no gate reads them (V2-R69 F-1)
+
+Three equations in the manuscript did not describe what the implementation does.
+
+Eq.~(2) wrote the reconstruction as $q \odot (E M_t)$ with $E$ a $\{0,1\}$ element-by-codeword
+matrix. Over the reals that product **sums** the codeword indicators covering an element, so an
+element carried by two codewords of which one decodes would take the value $1$ — kept — where the
+code zeroes it. The implementation has always been `cw_lo`/`cw_hi` with "zero if *either* fails".
+The equation is now the elementwise product $\prod_{k \in \mathcal{C}(i)} M_{t,k}$, and the 5,914
+straddling elements it exists to describe are named in the text.
+
+Algorithm 1 ended in a single line, $\hat Y_t \gets D(\Psi(F_{\text{ego},t}, m_t^{s_t}))$, applied
+to all three actions. Only the $F$ branch executes that expression; $L$ is object-level fusion with
+a message-level fallback to the ego result, and $E$ is the ego result. One line implied one code
+path where there are three.
+
+The training text said the forest *minimises* a class-weighted misclassification risk. A random
+forest does no such thing: it grows trees by greedy Gini splitting on bootstrap resamples. The risk
+is a target the labels and weights express, not the objective the implementation solves, and it now
+says so.
+
+None of the three was catchable by any gate here. Gates check that a number came from a product and
+that a document is byte-reproduced by its generator — both are questions about *provenance*. Whether
+an equation means what the code does is a question about *semantics*, and nothing in this repository
+reads an equation. The mitigation is not another gate but the equation-to-code map in the supplementary: it
+names, for every numbered equation, the symbol and file that execute it, and generation fails if the
+symbol or file is absent. That makes the map cheap for a human to check and impossible to leave
+pointing at a deleted function. It still cannot certify that the named code computes the stated
+equation. That check is a reading, and it has no substitute.

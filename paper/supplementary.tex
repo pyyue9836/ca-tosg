@@ -216,6 +216,25 @@ Dual accounting is full-frame versus collaborator-available frames within \metho
 payload definition; Where2comm is reported on its native communication rate only and enters neither
 accounting.
 
+\section{Equations and the code that executes them}
+A verification gate can check that a printed number came from a product, and that a document is
+byte-reproduced by its generator. It cannot check that an equation says what the code does: that is
+a question about meaning, and the two can drift apart while every gate stays green. Table~\ref{tab:eqmap}
+exists so that a reader can perform that check by hand. Each row names the symbol in the source that
+executes the equation and the file it lives in. The table is generated, and generation fails if a
+named file or symbol is absent, so a rename or a move breaks the build rather than leaving the paper
+pointing at something that is no longer there. It does not, and cannot, certify that the named code
+computes what the equation states---only a reading of both can do that.
+
+\begin{table*}[t]
+\caption{Every numbered equation of the main paper and the code that executes it. Paths are
+relative to the repository root; those without a leading directory of their own sit under
+\texttt{projects/ca\_tosg/}, except \texttt{opencood/}, which is the detector codebase.}
+\label{tab:eqmap}
+\centering\footnotesize\setlength{\tabcolsep}{5pt}
+\input{tables/tbl_eq_code_map}
+\end{table*}
+
 \section{Reproducibility}
 \emph{Determinism.} The per-sample point shuffle is seeded on
 $(\text{split}, \text{scene}, \text{frame}, \text{cav})$. Before this fix the shuffle drew from a

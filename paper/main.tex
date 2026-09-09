@@ -236,14 +236,23 @@ pessimistic sensitivity arm for the feature message.
 \end{itemize}
 
 Under partial recovery, let $M_t \in \{0,1\}^{N_{\mathrm{cw}}}$ mark the codewords that decode and
-let $E \in \{0,1\}^{N \times N_{\mathrm{cw}}}$ map each codeword to the tensor elements it carries.
-The receiver reconstructs
+let $\mathcal{C}(i)$ be the set of codewords carrying the eight bits of element $i$. An element
+survives only if every codeword carrying it decodes, so the receiver forms the elementwise keep
+vector $r_t$ and reconstructs
 \begin{equation}
-\hat F_{j,t} = \mathrm{Dequant}\bigl(q_{j,t} \odot (E M_t)\bigr),
+r_{t,i} = \prod_{k \in \mathcal{C}(i)} M_{t,k}, \qquad
+\hat F_{j,t} = \mathrm{Dequant}\bigl(q_{j,t} \odot r_t\bigr),
 \label{eq:recon}
 \end{equation}
-where $q_{j,t}$ is the quantised tensor and $\odot$ is elementwise. Elements carried by a failed
-codeword take the dequantised zero code point, which is exact for a symmetric int8 code.
+where $q_{j,t}$ is the quantised tensor and $\odot$ is elementwise. Elements that do not survive
+take the dequantised zero code point, which is exact for a symmetric int8 code.
+
+The product matters because the element grid and the codeword grid are not aligned: a codeword
+carries $K=500$ information bits, which is not a multiple of the $8$-bit element width, so
+$\NStraddling$ of the $\BFelements$ elements---$\StraddlePct$\%, eight in each full packet and two
+in the tail---have their bits split across two codewords. Such an element is zeroed if
+\emph{either} codeword fails. Reconstructing half of it would produce a value that is neither the
+transmitted one nor the zero code point.
 
 The delivery semantics of the two cooperative actions are not the same, and the distinction is
 load-bearing:
@@ -363,7 +372,7 @@ the most useful message under communication constraints.}
 
 \subsection{Overview}
 Instead of transmitting a fixed representation on every frame, the ego constructs an ego-local cue
-vector, reads its channel estimate, runs a lightweight selector, signals the chosen granularity with
+vector, reads its channel estimate, runs the frozen selector, signals the chosen granularity with
 the $2$-bit request, and the collaborator complies. Fig.~\ref{fig:system} shows the data flow as
 implemented, including which quantities exist before the request is issued.
 
@@ -425,15 +434,21 @@ selection layer, not the contribution.}
 
 The selector is trained to imitate the utility-maximising action of Eq.~\eqref{eq:lagrangian}. That
 action uses realised task utility and is not deployable; it supplies labels only. Writing
-$s_t^{\star}(\lambda)$ for the label of grid row $t$, the forest minimises the class-weighted
-misclassification risk
+$s_t^{\star}(\lambda)$ for the label of grid row $t$, a class-weighted random forest is fitted to
+the labels $s_t^{\star}(\lambda)$; splits use the Gini criterion and each class is weighted by the
+inverse of its frequency in the label set.
+
+The learning target those weights encode is the class-weighted misclassification risk
 \begin{equation}
 \min_{g}\; \frac{1}{T}\sum_{t=1}^{T} w_{s_t^{\star}(\lambda)}\,
 \mathbf{1}\bigl[g(x_t) \neq s_t^{\star}(\lambda)\bigr],
 \label{eq:train}
 \end{equation}
-with $w$ the inverse class frequencies of the label set and $x_t$ the input of
-Eq.~\eqref{eq:cue}.
+with $w$ the inverse class frequencies and $x_t$ the input of Eq.~\eqref{eq:cue}.
+Eq.~\eqref{eq:train} is stated as the target the labels and weights express and is
+\emph{not the objective the implementation solves directly}: each tree is grown by greedy Gini
+splitting on a bootstrap resample, which is a heuristic for this risk rather than a minimiser of
+it.
 
 \paragraph*{Feasibility} \textbf{Mainline feasibility is structural.} An action is feasible iff a
 collaborator is available and a transport response is defined; on a frame with no collaborator the
@@ -446,10 +461,20 @@ with $\lambda \ge 0$ and $B_F > 0$, $F_t^{F} \le F_t^{\mathrm{ego}}$ implies $U_
 objective already excludes those rows.
 
 \subsection{Receiver-Side Fusion and Detection}
-The ego fuses the received message with its local feature and detects,
-$\hat Y_t = D\bigl(\Psi(F_{\mathrm{ego},t}, m_t^{s_t})\bigr)$, with $D$ the detection head. For
-$s_t = F$, $\Psi$ is the attentive fusion of the backbone: at each BEV cell the ego feature and the
-received feature form a two-element sequence that attends over itself,
+What the ego does with the frame depends on which action was executed, and the three paths are
+not instances of one expression. Write $D$ for the detection head.
+
+\textbf{Action $E$.} No message is received and the ego detects from its own feature alone,
+$\hat Y_t = D(F_{\mathrm{ego},t})$.
+
+\textbf{Action $L$.} Delivery is message-level. If all $N_{\mathrm{cw},L,t}$ codewords decode, the
+received boxes are fused with the ego's own detections at the object level; otherwise the frame
+falls back to the ego-only result. No feature-level operation takes place on either outcome.
+
+\textbf{Action $F$.} The ego reconstructs $\hat F_{j,t}$ by Eq.~\eqref{eq:recon} and fuses at the
+feature level, $\hat Y_t = D\bigl(\Psi(F_{\mathrm{ego},t}, \hat F_{j,t})\bigr)$, where $\Psi$ is
+the attentive fusion of the backbone: at each BEV cell the ego feature and the received feature
+form a two-element sequence that attends over itself,
 \begin{align}
 \Psi(F_{\mathrm{ego},t}, \hat F_{j,t})
 &= \mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d}}\right) V, \notag \\
@@ -458,8 +483,8 @@ Q = K = V &= \bigl[\,F_{\mathrm{ego},t};\; \hat F_{j,t}\,\bigr],
 \end{align}
 where $d$ is the channel dimension and $\hat F_{j,t}$ is the reconstruction of
 Eq.~\eqref{eq:recon}. Because the softmax is taken over both elements, a received tensor of zeros
-still contributes weight. For $s_t = L$ the receiver performs object-level fusion of the received
-boxes with its own; for $s_t = E$ it detects from $F_{\mathrm{ego},t}$ alone.
+still contributes weight. Eq.~\eqref{eq:fusion} is the $F$ branch only; it is not evaluated on a
+frame that executes $E$ or $L$.
 
 \textbf{A zeroed collaborator tensor is not the same input as no collaborator at all.} The fusion
 module attends over both branches, so a zero tensor participates and dilutes the ego features. The
@@ -477,11 +502,20 @@ difference is measured in Section~\ref{sec:transport}.
   \State $s_t \gets E$ \Comment{structural: no collaborator}
 \EndIf
 \State ego transmits $s_t$ as a two-bit request
-\If{$s_t \neq E$}
-  \State collaborator packetises, codes and modulates $m_t^{s_t}$; charge $B_{t,s_t}$
-  \State ego reconstructs by Eq.~\eqref{eq:recon} from the codewords that decode
+\If{$s_t = E$}
+  \State $\hat Y_t \gets$ ego-only detections \Comment{nothing is transmitted}
+\ElsIf{$s_t = L$}
+  \State collaborator sends $m_t^L$ over the chain; charge $B_{t,L}$
+  \If{all $N_{\mathrm{cw},L,t}$ codewords decode}
+    \State $\hat Y_t \gets$ object-level fusion of ego and received boxes
+  \Else
+    \State $\hat Y_t \gets$ ego-only detections \Comment{message-level fallback}
+  \EndIf
+\Else \Comment{$s_t = F$}
+  \State collaborator sends $m_t^F$ over the chain; charge $B_{t,F}$
+  \State $\hat F_{j,t} \gets \mathrm{Dequant}(q_{j,t} \odot r_t)$ \Comment{Eq.~\eqref{eq:recon}}
+  \State $\hat Y_t \gets D(\Psi(F_{\mathrm{ego},t}, \hat F_{j,t}))$ \Comment{Eq.~\eqref{eq:fusion}}
 \EndIf
-\State $\hat Y_t \gets D(\Psi(F_{\mathrm{ego},t}, m_t^{s_t}))$ \Comment{Eq.~\eqref{eq:fusion}}
 \end{algorithmic}
 \end{algorithm}
 
@@ -578,7 +612,7 @@ stages and neither replaces the other. Algorithm~\ref{alg:train} states the proc
 \ForAll{$(c, \lambda) \in \mathcal{C} \times \Lambda$}
   \State label each row by $s_t^{\star}(\lambda)$ from Eq.~\eqref{eq:lagrangian}
   \ForAll{scenes $u \in \mathcal{S}$}
-    \State fit $g_{c}$ on $\mathcal{S} \setminus \{u\}$ by Eq.~\eqref{eq:train}; predict on $u$
+    \State fit the class-weighted forest $g_{c}$ on $\mathcal{S} \setminus \{u\}$; predict on $u$
   \EndFor
   \State record held-out-fold utility and mean payload $\bar B(c,\lambda)$
 \EndFor
@@ -711,8 +745,9 @@ $\beta = \BudgetPrimaryBeta$ ceiling and the shaded region is over budget, so Fi
 not a competitor at the primary budget. The x axis is symlog rather than logarithmic: Fixed E
 spends exactly zero, which a logarithmic axis cannot show. Random, Task-only, SNR-only and the
 greedy reference
-are the matched-payload policies of Table~\ref{tab:matched} and sit at \method{}'s own payload;
-the greedy reference is not deployable and is not a proven optimum.}
+are the matched-payload policies of Table~\ref{tab:matched} and sit at \method{}'s own payload. The
+plotted reference is the gain-per-cost one of the two in Table~\ref{tab:matched}; it is not
+deployable and is not a proven optimum.}
 \label{fig:primary}
 \end{figure*}
 
@@ -731,7 +766,9 @@ per-frame outcome and select greedily up to the payload limit: one orders frames
 $F_t^{L} - F_t^{E}$, the other by gain per unit payload. \textbf{Neither is a proven optimum}:
 both ignore the scene-equal weighting the objective uses, and the first also ignores that
 $B_{L,t}$ varies per frame. They agree to within $\CulverGreedyRefAgree$ in scene-equal $F_1$
-despite selecting different frames.
+despite selecting different frames. That agreement says only that two orderings of the same frames
+give nearly the same result on this data; it is not evidence that either is close to the best
+attainable $E/L$ policy, which is not computed anywhere in this paper.
 
 On Test, \method{} achieves a higher scene-equal $F_1$ than each evaluated deployable comparator at
 matched realised payload, with every pairwise $95\%$ bootstrap lower confidence bound above zero. On
@@ -745,8 +782,8 @@ Between the matched-payload random selector and a greedy outcome-aware reference
 optimum.
 
 \begin{table*}[t]
-\caption{Deployable E/L policies at \method{}'s own realised payload, with the non-deployable
-oracle as a ceiling. $\Delta F_1$ and its bound are \method{} minus that policy, from a
+\caption{Deployable E/L policies at \method{}'s own realised payload, with two non-deployable
+greedy outcome-aware references. $\Delta F_1$ and its bound are \method{} minus that policy, from a
 scene-level bootstrap. Secondary analysis: not preregistered. Payload is matched numerically to
 within $\MatchedPayloadResidual$~Msym, not exactly.}
 \label{tab:matched}
@@ -928,11 +965,20 @@ decodable groups would make L degrade gracefully too, which would change its eff
 oracle labels derived from it, and therefore the selector's decisions. That transport design is not
 evaluated in this paper.
 
-\emph{Selector-only latency.} On one CPU core the frozen forest predicts a single frame in
+\emph{Selector-only latency.} The frozen forest predicts a single frame in
 $\SelectorLatencyMed$~ms (5th--95th percentile $\SelectorLatencyLo$--$\SelectorLatencyHi$~ms over
 $\LatencyTrials$ trials), and the point statistics that build the cue vector take
-$\CueLatencyMed$~ms. Total end-to-end system latency, including any cost of keeping the cooperative
-pipeline resident, is not measured.
+$\CueLatencyMed$~ms, measured with the production extractor on $\CueFrames$ real ego point clouds
+of median size $\CuePointsMed$ points. Conditions: on one core of a \LatencyCpu{}, the process is pinned to
+$\LatencyCores$ CPU core with the forest forced to a single worker and the BLAS thread limits set to one, and
+$\LatencyThreads$ thread is observed in the process throughout; batch size is one; the inputs are
+real frozen cue rows crossed with all $\LatencyCells$ channel cells of the
+$\LatencySnrPoints$-point SNR grid and both channel types, over which the per-cell medians span
+only $\LatencyCellLo$--$\LatencyCellHi$~ms. Together the two numbers are $\LatencyDutyPct$\% of the
+$\FramePeriodMs$~ms period of a $\FrameRateHz$~Hz sensor. The cue vector also carries the ego's detected box
+count, which the ego's own detector produces; that detector runs whether or not cooperation is
+requested, and its time is not included above. Total end-to-end system latency, including any cost
+of keeping the cooperative pipeline resident, is not measured.
 
 \emph{One dataset family and one detector.} Every result here is conditional on OPV2V and on a single
 PointPillars checkpoint.

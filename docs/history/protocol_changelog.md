@@ -6631,3 +6631,29 @@ saving, and the preregistered outcome with its failure. It now points at `V2_CLO
 The matched-rate baselines are additionally qualified as calibrated **on the full evaluation split**,
 after the fact: that supports a same-cost comparison and does not validate a threshold frozen
 online.
+
+## V2-R69 — equations and algorithm aligned to the implementation; latency re-measured
+
+* **A-1** Eq. (2), the reconstruction, was $q \odot (E M_t)$ with $E$ an element-by-codeword
+  $\{0,1\}$ matrix. That product sums codeword indicators; the code zeroes an element if *either*
+  covering codeword fails. Replaced by the elementwise product over $\mathcal{C}(i)$, with the
+  5,914 straddling elements named. Both new numbers come from `boundary_elements` in
+  `results/v2/wp5_final_validate.json`, which already derived them.
+* **B** Algorithm 1 and the fusion subsection branch three ways, as the implementation does. The
+  attention equation is marked as the $F$ branch only.
+* **C** The forest is described as *fitted* to the labels with Gini splits and inverse-frequency
+  class weights. The risk expression is retained as the target the labels express, explicitly not
+  the objective the implementation solves.
+* **D** Latency re-measured. The previous run left the pickled `n_jobs=-1` in place, held the
+  channel input at 10 dB AWGN and timed cue construction on a synthetic cloud. Re-measured pinned
+  to one CPU with `n_jobs=1` and BLAS limits at one, over real cue rows crossed with all 22 channel
+  cells, and with the production extractor on 100 real ego point clouds: **7.2 ms** median
+  (6.7--8.2) and **0.51 ms** cue statistics, against the previous 55.4 ms and 1.17 ms. The paper
+  now states the thread configuration, the input conditions and the duty fraction against a 10 Hz
+  period, and "lightweight" is removed from the method overview.
+* **E** The matched-payload caption names two greedy outcome-aware references rather than an
+  oracle ceiling; the agreement between the two references is stated as agreement between two
+  orderings, not as evidence of near-optimality.
+* **F** The supplementary gains an equation-to-code map, generated with an existence check on
+  every named symbol and file. Recorded in `docs/gate_design_principles.md`: gates check
+  provenance, not semantics; nothing here reads an equation.

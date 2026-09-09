@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-figures/1",
  "generator": "tools/build_v2_figures.py",
- "commit": "c5a7fa4bb05a3eab8f0c200c29b48915fd91607f",
+ "commit": "520074310711fd2c9a95de320569fea7a99da5f3",
  "palette": {
   "hexes": [
    "#2B62C4",
@@ -18,7 +18,7 @@
    "kind": "conceptual block diagram",
    "inputs": [],
    "note": "No result numbers. Every block is an implemented component; nothing unimplemented is drawn (B-1). Two factual corrections over the first draft: the channel estimate is an EGO-side input, not derived from the collaborator; and E issues no message so it does not reach the transport chain.",
-   "sha256": "69aacc6214bb8e416e458378d5bab2ddae9e5acebcfc0c534181bd6b0bfded10"
+   "sha256": "79c45b181697810800989c14969dbeccef6fe28a9bb025cfda88fe60039038c6"
   },
   "fig2_primary.pdf": {
    "panel": "main",
@@ -36,7 +36,7 @@
     "policies.*"
    ],
    "layout_rule": "F1 AND realised payload together on one plane, with the budget ceiling drawn. SYMLOG x, because Fixed E spends exactly zero and a log axis cannot show zero (V2-R56 G-3/G-10).",
-   "sha256": "10ff0a5fe329c81454c1fed6d4976c0f31ddbb2035987a806834aa327d66c5e4"
+   "sha256": "aa573c0c58872a1770d877da45380c2b65ad9d10bcde02eb183b6529fabee4e4"
   },
   "fig3_recovery.pdf": {
    "panel": "main",
@@ -50,7 +50,7 @@
     "q_message_survives"
    ],
    "split": "validate (mechanism result)",
-   "sha256": "962c7dda83208c7424394e2f1203bd5c12677d67964d353a0d576a1a15b42907"
+   "sha256": "9cc2fd10a63d46d209d7abba45fa4a80e168efddeab60c3d877788adcdbfe299"
   },
   "fig4_where2comm.pdf": {
    "panel": "main",
@@ -63,7 +63,7 @@
     "ap_70"
    ],
    "axis_rule": "the x axis is the NATIVE communication rate. No Msym and no budget-matched language may appear in the figure or its caption (V2-R40 B-7).",
-   "sha256": "68eacd6f79af072b653e70a25875ffc500ff1ae87a81f8e5479d6408a165f822"
+   "sha256": "9f3faa3b48bc5e807d65c4144f30494b20e07758396964196c9e8fd1b767247f"
   },
   "fig5_lambda.pdf": {
    "panel": "supplementary",
@@ -77,13 +77,13 @@
     "rho_F"
    ],
    "status": "EXPLORATORY, validate only. Did not replace the frozen candidate and explains no Test result (V2-R43 B-5).",
-   "sha256": "4cd3e6442098702064c5912ef03636ee83b9432848b16c0e7bc1ae00c66a2944"
+   "sha256": "91788c449189fc834b4ed6d64d01114cf1960e3720f271e99544e709c69902b5"
   },
   "fig6_matched_forest.pdf": {
    "panel": "main",
    "inputs": {
     "results/v2/v2_matched_payload.json": "d590267ff66b9472774e3300a28b2f8e6c23dac1316421fc2d524841824c4a74",
-    "paper/tables/generated_numbers.tex": "2965ac196c1cb74a0843b5ff730d1909e42e52fc849aac676025ee4b9ef8eabe"
+    "paper/tables/generated_numbers.tex": "b33b0e27006a5f06c04b8da181f8b892084ac39669db816c4b546dbbba750f06"
    },
    "fields": [
     "vs_ca_tosg.*.delta_f1_point",
@@ -91,7 +91,7 @@
     ".delta_f1_UCB95"
    ],
    "layout_rule": "Same vector and same bootstrap as Table IV, asserted value by value against the printed macros. The greedy outcome-aware references are excluded: not deployable, and not proven optima.",
-   "sha256": "04373a80e08e2309a9af22340ef0aa6f2010eb68a7f57a36e05a5f554ba475aa"
+   "sha256": "3abbfae661a6473ae7bc27fb8df108505d0573a437671eedb8c4819788c98458"
   },
   "fig7_action_heatmap.pdf": {
    "panel": "main",
@@ -103,7 +103,7 @@
     "action_heatmap.nbox_edges"
    ],
    "layout_rule": "Bins fixed in the product before plotting; nearest-neighbour rendering, no smoothing or interpolation between evaluated grid points.",
-   "sha256": "78fc2a75e0efcee606d37451f359712bf79002bcfa60652d831db1f152e81d48"
+   "sha256": "f5b77e1f259def3821415e9216463b49c365f557b2c2b6124d4c9c59d7d66dca"
   },
   "fig8_channel_utility.pdf": {
    "panel": "main",
@@ -119,7 +119,7 @@
     "channel"
    ],
    "layout_rule": "Both panels share the SNR axis so the erasure curve and the utility curves can be read against each other. Utility is averaged over the two channels at each SNR point, matching how the grid is swept.",
-   "sha256": "ec807c6f94eafec4fd6c7b88d062139809461ac123ad37fc3db53a294724474e"
+   "sha256": "c5435fa5ac957fa414ff73ba01146309017ecf0738386e03e239f6f3c84beca2"
   }
  }
 }

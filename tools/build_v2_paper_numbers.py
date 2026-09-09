@@ -137,6 +137,12 @@ def build():
     mac('BFpackets', f"{pc['F']['packets']:,}")
     mac('BFheaderbits', f"{pc['F']['header_bits']:,}")
     mac('BFncw', f"{pc['F']['n_cw']:,}")
+    # V2-R69 A-1: the element grid and the codeword grid are not aligned, so some elements are
+    # split across two codewords and are zeroed if either fails. Read from the product that
+    # derives the mapping, not recomputed here -- one mapping, one number.
+    _be = w5['boundary_elements']
+    mac('NStraddling', f"{_be['n_straddling']:,}")
+    mac('StraddlePct', f"{_be['pct_of_elements']:.2f}")
     mac('BFdirectmsym', f"{pc['F']['direct_msym']:.4f}")
     mac('QuantWidth', str(pc['constants']['w_bits']))
     mac('PacketBits', f"{pc['constants']['P_bits']:,}")
@@ -178,6 +184,30 @@ def build():
     mac('SelectorLatencyHi', f"{lat['inference_batch1']['p95_ms']:.1f}")
     mac('CueLatencyMed', f"{lat['cue_statistics']['median_ms']:.2f}")
     mac('LatencyTrials', f"{lat['inference_batch1']['n']:,}")
+    # V2-R69 D-4: the paper must state the conditions the timing was taken under, not just the
+    # number. Every one of these is read from the timing product, including the frame period the
+    # duty fraction is taken against.
+    _ic, _tc = lat['input_conditions'], lat['thread_configuration']
+    mac('LatencySnrPoints', str(len(_ic['snr_grid_db'])))
+    mac('LatencyCells', str(_ic['cells']))
+    mac('LatencyCellLo', f"{lat['inference_cell_median_spread_ms']['min']:.1f}")
+    mac('LatencyCellHi', f"{lat['inference_cell_median_spread_ms']['max']:.1f}")
+    mac('LatencyCores', str(len(_tc['cpu_affinity'])))
+    # D-4 asks the paper to name the hardware, not just the core count
+    mac('LatencyCpu', lat['hardware']['cpu_model'].replace('(R)', '').replace('(TM)', '')
+        .replace('  ', ' ').strip())
+    mac('LatencyThreads', str(max(_tc['process_threads_observed'])))
+    mac('CueFrames', str(lat['cue_provenance']['frames_loaded']))
+    mac('CuePointsMed', f"{lat['cue_provenance']['points_per_frame']['median']:,.0f}")
+    # OPV2V is sampled at 10 Hz (docs/unified_branch_protocol_v2.md, the same fact the scene-level
+    # bootstrap rests on). The rate is declared once here; the period and the duty fraction are
+    # derived from it, so the paper cannot print a rate and a period that disagree.
+    _rate_hz = 10.0
+    _period_ms = 1000.0 / _rate_hz
+    mac('FrameRateHz', f"{_rate_hz:.0f}")
+    mac('FramePeriodMs', f"{_period_ms:.0f}")
+    mac('LatencyDutyPct',
+        f"{(lat['inference_batch1']['median_ms'] + lat['cue_statistics']['median_ms']) / _period_ms * 100:.1f}")
     mac('SelectorTrees', str(fr['selector']['hyperparameters']['n_estimators']))
     mac('SelectorLeaf', str(fr['selector']['hyperparameters']['min_samples_leaf']))
     mac('CueDim', str(cue['n_fields']))
@@ -669,6 +699,52 @@ def tables():
         R.append(r'%s & %s & %s \\' % (a_, b_, c_))
     R += [r'\bottomrule', r'\end{tabular}']
     T['tbl_payload_chain.tex'] = '\n'.join(R) + '\n'
+
+    # --- SUPPLEMENTARY: every numbered equation, and the code that executes it (V2-R69 F-1) ------
+    # A gate can check that a number came from a product; it cannot check that an equation says
+    # what the code does. This table exists so a reader can perform that check by hand. It is
+    # generated rather than typed so that a renamed function or a moved file fails here, loudly,
+    # instead of leaving the paper pointing at something that no longer exists.
+    EQ_MAP = [
+        ('1', 'the candidate action set',
+         'ACTIONS', 'projects/ca_tosg/models/v2_selector.py'),
+        ('2', 'reconstruction under partial recovery',
+         'element_to_codeword', 'projects/ca_tosg/evaluation/v2_wp5_f_products.py'),
+        ('3', 'message-level delivery of the object message',
+         'q_L', 'projects/ca_tosg/evaluation/v2_build_grid.py'),
+        ('4', 'per-frame communication cost',
+         'f_chain', 'tools/v2_payload_chain.py'),
+        ('5', 'the selector map',
+         'realised', 'projects/ca_tosg/models/v2_selector.py'),
+        ('6', 'the budget-constrained problem',
+         'parse_candidates', 'projects/ca_tosg/models/v2_selector.py'),
+        ('7', 'the pointwise relaxed optimum, used as the label',
+         'lam_labels', 'projects/ca_tosg/models/v2_selector.py'),
+        ('8', 'the cue vector',
+         'extract_pcd_features', 'projects/ca_tosg/evaluation/v2_wp6_generate_cues.py'),
+        ('9', 'the class-weighted learning target',
+         'RandomForestClassifier', 'projects/ca_tosg/models/v2_selector.py'),
+        ('10', 'attentive fusion at the ego',
+         'AttFusion', 'opencood/models/fuse_modules/self_attn.py'),
+    ]
+    OC = os.path.join(os.path.dirname(ROOT), 'OpenCOOD')
+    R = [HDR, r'\begin{tabular}{clll}', r'\toprule',
+         r'Eq. & quantity & symbol in code & file \\', r'\midrule']
+    for num, what, sym, rel in EQ_MAP:
+        f = os.path.join(ROOT, rel)
+        if not os.path.exists(f):
+            f = os.path.join(OC, rel)
+        if not os.path.exists(f):
+            raise SystemExit(f'EQ MAP: {rel} does not exist -- fix the map, not the paper')
+        if sym not in open(f, encoding='utf-8', errors='replace').read():
+            raise SystemExit(f'EQ MAP: {sym!r} not found in {rel} -- fix the map, not the paper')
+        # the repeated projects/ca_tosg/ prefix is declared in the caption instead of set eleven
+        # times: at full column width the untrimmed paths overflow the measure
+        short = rel[len('projects/ca_tosg/'):] if rel.startswith('projects/ca_tosg/') else rel
+        R.append(r'%s & %s & \texttt{%s} & \texttt{%s} \\'
+                 % (num, what, sym.replace('_', r'\_'), short.replace('_', r'\_')))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_eq_code_map.tex'] = '\n'.join(R) + '\n'
     return T
 
 
