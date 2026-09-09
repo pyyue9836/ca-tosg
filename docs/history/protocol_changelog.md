@@ -6585,3 +6585,49 @@ supplementary had not, and nothing but the new patterns would have found it.
 Seven further rhetorical constructions were removed by a manual sweep ("is the whole setting",
 "which is precisely why", "measured rather than assumed", "deliberately kept separate"). No number,
 table, figure or frozen artefact changed: 210 macros and 9 generated tables reproduce byte for byte.
+
+## V2-R67/R68 — an unearned name, a measured latency, and the repository entry point
+
+### A · "Oracle" was the wrong word, and no gate could have said so
+
+The matched-payload ceiling was labelled *Oracle E/L*. It is an unweighted greedy selection by
+realised gain up to the payload limit: it ignores that $B_{L,t}$ varies per frame, and it ignores
+the scene-equal weighting the objective uses. Neither makes the number wrong; both make "oracle"
+the wrong name, because that word claims a proven bound.
+
+Renamed to **greedy outcome-aware reference**, with both omissions stated, and $\eta$ downgraded to
+"covers X% of the gap ... the reference is not a proven optimum" — "attainable" removed.
+
+**A second reference was added** (A-3), ordered by gain per unit payload, which is the right order
+for a budgeted selection. The two agree to $9\times10^{-8}$ in scene-equal $F_1$ on Culver-City and
+$1\times10^{-11}$ on Test **while selecting different frames** — so the reference value is not an
+artefact of which greedy ordering was chosen. That is a stronger statement than the original single
+reference could make.
+
+Recorded in `docs/gate_design_principles.md`: gates verify provenance and internal consistency, and
+cannot verify that a name is earned.
+
+### B · The latency the paper claimed but did not have
+
+The Limitations said "the selector's own inference cost is measured". It was not — for *this*
+selector. `results/latency/selector_latency.csv` measures the v1 candidates (2, 1, 56), and quoting
+those for candidate 67 would have been a cross-version substitution.
+
+Measured under a protocol that makes it a property of the frozen artefact rather than an experiment:
+the model hash is asserted before timing, and the timing reads no accuracy, action or utility field.
+Candidate 67 predicts one frame in **55.4 ms** (5th–95th percentile 45.5–59.0 ms over 1,000 trials)
+on one CPU core; the point statistics behind the cue vector take **1.17 ms**. Registered as
+`results/latency/selector_latency_candidate67.json` with hardware and command; the old CSV is now
+labelled v1-only in `results/latency/README.md` and is cited nowhere.
+
+### C · The repository entry point had not moved with the work
+
+`README.md` still described three deployed granularities, three budget tiers and the v1 fixed
+payloads (0.024 / 0.99 Msym) — the state before the plan-A rebuild. Rewritten from the closed-out
+products: the candidate set with its `{E, L}` support, the matched-payload table, the Fixed L
+saving, and the preregistered outcome with its failure. It now points at `V2_CLOSEOUT.json` and
+`PUBLICATION.json`.
+
+The matched-rate baselines are additionally qualified as calibrated **on the full evaluation split**,
+after the fact: that supports a same-cost comparison and does not validate a threshold frozen
+online.

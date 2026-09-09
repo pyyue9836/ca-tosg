@@ -1,11 +1,12 @@
-# CA-TOSG (Channel-Aware Task-Oriented Semantic Granularity Selection for V2V Cooperative Perception)
+# CA-TOSG — Channel- and Task-Aware Object-Level Communication for Bandwidth-Constrained V2V Cooperative Perception
 
 _All mainline results use the single-collaborator protocol; exceptions (SECOND appendix, Where2comm reference) are labeled where they appear. Tag `pre-p0-corrigendum` marks the pre-correction state._
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-Per-frame selection of *how much semantics to transmit* in vehicle-to-vehicle cooperative
-perception, under a prespecified average communication budget.
+Per-frame, receiver-driven selection of *what the collaborator transmits* in vehicle-to-vehicle
+cooperative perception, under a mean per-frame communication budget, with every message charged
+through a measured LDPC/QAM chain.
 
 ## Overview
 
@@ -13,51 +14,51 @@ perception, under a prespecified average communication budget.
 
 ## Main idea
 
-The ego vehicle decides, **once per frame**, between three message granularities, using only what
-it already has on the ego side — task cues from its own detection, an estimated SNR, and the
-channel state:
+The ego vehicle decides, **once per frame**, which representation its collaborator should send,
+using only what it already has on the ego side: ego-local perception and availability cues plus an
+estimated SNR and channel type. It signals the choice with a two-bit request and the collaborator
+complies.
 
-| Action | Message | Channel use |
-|---|---|---|
-| **E** | ego-only, transmit nothing | 0 |
-| **L** | object-level (boxes + scores) | 0.024 Msym |
-| **F** | feature-level (compressed BEV features) | 0.99 Msym |
+| Action | Message |
+|---|---|
+| **E** | ego-only, transmit nothing |
+| **L** | object-level (boxes + scores) |
+| **F** | feature-level (int8 bottleneck) |
 
-A feature message is worth its 41× cost only when the channel will actually deliver it *and* the
-frame is one where cooperation helps. A random forest over 23 ego-side cues makes that call per
-frame; the physical layer (5G-LDPC rate-1/2 + 16/256-QAM, Sionna frame-level BLER) decides whether the
-chosen high-payload message is delivered, with ego-only as the failure fallback; the 2-bit request
-itself rides the protected low-rate path and is not what the BLER model gates. One model is frozen per budget.
+The candidate action set is {E, L, F}. **The policy frozen on the development split has support
+{E, L}**: as an always-on policy Fixed F costs several times the primary budget, and the frozen
+selector never requests it. F is retained as an over-budget fixed-action reference and as the
+object of the transport study.
+
+Every message is packetised, LDPC-coded and modulated, and charged in channel uses — payload is
+measured, not declared.
 
 ## Results
 
-Held-out **test** split, 200-realisation deployment (per frame SNR ~ U[0,20] dB, Rayleigh with
-probability 0.5), against the nominal SNR-threshold policy tuned to the same budget. Payload in
-Msym/frame. All numbers regenerated from the frozen products by `tools/build_paper_tables.py`
-and re-derived at gate time by `tests/test_canonical_quantities.py`.
+The paper reports three measured results, all under one detector, one field of view and one ground
+truth:
 
-| B_max | policy | F1 | payload | AP@0.5 |
-|---|---|---|---|---|
-| 0.10 | CA-TOSG | 0.8915 | **0.0368** | 0.8697 |
-| 0.10 | SNR-threshold (nominal) | 0.8925 | 0.0724 | -- |
-| 0.20 | CA-TOSG | 0.8969 | **0.1414** | 0.8742 |
-| 0.20 | SNR-threshold (nominal) | 0.8970 | 0.2168 | -- |
-| 0.30 | CA-TOSG | 0.8978 | **0.2120** | 0.8742 |
-| 0.30 | SNR-threshold (nominal) | 0.8990 | 0.3125 | -- |
+1. **At matched realised payload**, the selector exceeds a random selector, an ego-cue threshold and
+   an SNR threshold on the Test split, with every pairwise 95% scene-level bootstrap lower bound
+   above zero. On Culver-City it has the highest point estimate and the interval against the SNR
+   threshold includes zero.
+2. **Against always transmitting object level**, it uses substantially less cooperative-perception
+   payload at a small scene-equal F1 difference.
+3. **Loss position at fixed loss amount** changes the detection outcome, so transport loss affects
+   perception through where it falls and not only how much is lost.
 
-Reference points on the same split: Fixed-L AP@0.5 = 0.8691, feature-ceiling =
-0.8931, ego-only = 0.7350 (headroom 0.0240).
+The **preregistered** comparison against the frozen SNR-threshold policy is reported with its
+outcome: a large payload reduction for which the scene-level non-inferiority criterion was **not**
+met on either held-out split.
 
-**Channel-use saving at B_max = 0.20, on two tracks.** Against the *nominal* threshold the
-selector spends **34.8% less** channel use -- but that
-threshold is itself over budget (0.2168 > 0.20 Msym). Against
-`tau_feasible`, the strictly budget-matched threshold, the saving is
-**26.6%** and the F1 comparison turns in the
-selector's favour (+0.00067). Quote both or neither.
+**Where the numbers live.** Every figure in the manuscript is emitted by
+`tools/build_v2_paper_numbers.py` from the closed-out products; none is typed by hand. This README
+deliberately carries no result cells, so it cannot drift from them.
 
-Sources: `results/main/replay_summary.csv`, `results/main/true_e2e_ap.csv`,
-`results/main/tau_feasible.csv`, `results/main/fixed_references.csv`. Every number in the
-manuscript is indexed by `docs/claims.md`; every result file by `results/README.md`.
+* `results/manifests/V2_CLOSEOUT.json` — the closed experiment.
+* `results/manifests/PUBLICATION.json` — the manuscript and its inputs, hashed.
+* `paper/main.pdf`, `paper/supplementary.pdf` — the results themselves.
+* `results/README.md` — an index of every result file.
 
 ## Installation
 

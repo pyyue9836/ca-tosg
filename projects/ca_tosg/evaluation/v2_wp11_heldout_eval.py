@@ -192,10 +192,17 @@ def matched_payload():
         target = got_b
         pol = {}
         # deployable matched-rate baselines
+        # V2-R67 A-1/A-3: two outcome-aware references, both greedy and NEITHER a proven optimum.
+        # `greedy_gain` ranks by raw realised gain and ignores that B_{L,t} varies per frame;
+        # `greedy_gain_per_cost` ranks by gain per unit payload, which is the right order for a
+        # budgeted knapsack and is the stronger of the two references. Both ignore the scene-equal
+        # weighting the objective actually uses, so neither bounds what a policy could achieve.
         for key, score, dep in (
                 ('snr_only', snr, True),
                 ('task_only', -nbox, True),
-                ('oracle_el', eff_l - eff_e, False)):
+                ('greedy_gain', eff_l - eff_e, False),
+                ('greedy_gain_per_cost',
+                 np.divide(eff_l - eff_e, np.maximum(b_l, 1e-12)), False)):
             take = _greedy_match(score, b_l, target, np.random.default_rng(20260903))
             f1 = np.where(take, eff_l, eff_e)
             pol[key] = {'scene_equal_f1': _scene_equal(f1, scenes, uniq),
@@ -285,6 +292,22 @@ def matched_payload():
                     'n': int(m.sum()),
                     'share_L': float((all_pred[m] == 1).mean()) if m.sum() else None}
     out['action_heatmap'] = heat
+
+    # --- V2-R66 B-2: the frozen selector's size, read from the frozen model itself -----------
+    # Structure only. No timing is recorded here: no latency measurement of THIS selector exists,
+    # and results/latency/selector_latency.csv measures the v1 selectors (candidates 2, 1 and 56),
+    # not candidate 67. Quoting those numbers for this model would be a cross-version substitution.
+    nodes = int(sum(e.tree_.node_count for e in rf.estimators_))
+    leaves = int(sum(e.get_n_leaves() for e in rf.estimators_))
+    out['selector_profile'] = {
+        'candidate_index': fr['selector']['candidate_index'],
+        'n_estimators': len(rf.estimators_),
+        'total_nodes': nodes, 'total_leaves': leaves,
+        'max_depth_realised': int(max(e.tree_.max_depth for e in rf.estimators_)),
+        'n_features': int(rf.n_features_in_),
+        'model_bytes': os.path.getsize(os.path.join(ROOT, fr['selector']['model_path'])),
+        'latency': 'NOT MEASURED for this selector; results/latency/selector_latency.csv covers '
+                   'the v1 candidates (2, 1, 56) and does not describe candidate 67.'}
 
     json.dump(out, open(OUT_MP, 'w'), indent=1)
     print(f'wrote {os.path.relpath(OUT_MP, ROOT)}\n')

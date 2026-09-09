@@ -9,7 +9,7 @@
 \newcommand{\TestUCBPay}{-0.49987}
 \newcommand{\TestSaving}{99.85}
 \newcommand{\TestScenes}{16}
-\newcommand{\TestRows}{47,740}
+\newcommand{\TestRows}{47{,}740}
 \newcommand{\TestNoCollab}{5.48}
 \newcommand{\TestCollabShare}{94.52}
 \newcommand{\TestRhoE}{0.403}
@@ -29,7 +29,7 @@
 \newcommand{\CulverUCBPay}{-0.42272}
 \newcommand{\CulverSaving}{99.70}
 \newcommand{\CulverScenes}{4}
-\newcommand{\CulverRows}{12,100}
+\newcommand{\CulverRows}{12{,}100}
 \newcommand{\CulverNoCollab}{13.09}
 \newcommand{\CulverCollabShare}{86.91}
 \newcommand{\CulverRhoE}{0.407}
@@ -53,7 +53,7 @@
 \newcommand{\WtwoCEpoch}{50}
 
 % ---- MAIN 6.1: fixed-action performance and communication cost -------------
-\newcommand{\ValFrames}{1,980}
+\newcommand{\ValFrames}{1{,}980}
 \newcommand{\FixedEAPfifty}{0.72055}
 \newcommand{\FixedEAPseventy}{0.59996}
 \newcommand{\FixedEFone}{0.78929}
@@ -73,19 +73,19 @@
 \newcommand{\IntEightDeltaFone}{+0.00020}
 \newcommand{\IntEightFrames}{220}
 \newcommand{\FixedFMinusLSceneFone}{+0.00652}
-\newcommand{\FixedFOverLPayRatio}{1,244}
+\newcommand{\FixedFOverLPayRatio}{1{,}244}
 \newcommand{\FixedFOverBudgetRatio}{5.0}
 
 % ---- MAIN 6.1: the payload chain, bit by bit ------------------------------
 \newcommand{\BFmsym}{3.14175}
-\newcommand{\BFelements}{739,200}
-\newcommand{\BFinfobits}{5,913,600}
+\newcommand{\BFelements}{739{,}200}
+\newcommand{\BFinfobits}{5{,}913{,}600}
 \newcommand{\BFpackets}{740}
-\newcommand{\BFheaderbits}{236,800}
-\newcommand{\BFncw}{12,567}
+\newcommand{\BFheaderbits}{236{,}800}
+\newcommand{\BFncw}{12{,}567}
 \newcommand{\BFdirectmsym}{3.0752}
 \newcommand{\QuantWidth}{8}
-\newcommand{\PacketBits}{8,000}
+\newcommand{\PacketBits}{8{,}000}
 \newcommand{\HeaderBits}{320}
 \newcommand{\BoxBits}{184}
 \newcommand{\LdpcK}{500}
@@ -108,6 +108,15 @@
 \newcommand{\BudgetLooseMsym}{0.94252}
 
 % ---- MAIN 6.3: the frozen selector, and what the budget did ---------------
+\newcommand{\SelectorNodes}{1{,}085{,}158}
+\newcommand{\SelectorLeaves}{542{,}779}
+\newcommand{\SelectorMaxDepth}{39}
+\newcommand{\SelectorSizeMB}{83}
+\newcommand{\SelectorLatencyMed}{55.4}
+\newcommand{\SelectorLatencyLo}{45.5}
+\newcommand{\SelectorLatencyHi}{59.0}
+\newcommand{\CueLatencyMed}{1.17}
+\newcommand{\LatencyTrials}{1{,}000}
 \newcommand{\SelectorTrees}{400}
 \newcommand{\SelectorLeaf}{2}
 \newcommand{\CueDim}{23}
@@ -140,8 +149,8 @@
 \newcommand{\MsgLowestRate}{0.001}
 \newcommand{\MsgSurvivalAtLowest}{3.463\times10^{-6}}
 \newcommand{\MsgFramesAtLowest}{0.006857}
-\newcommand{\PosIdealPairs}{1,731}
-\newcommand{\PosIdealFrames}{1,201}
+\newcommand{\PosIdealPairs}{1{,}731}
+\newcommand{\PosIdealFrames}{1{,}201}
 \newcommand{\PosIdealPct}{28.48}
 \newcommand{\PosIdealWilsonLo}{26.40}
 \newcommand{\PosPacketPairs}{704}
@@ -150,7 +159,7 @@
 \newcommand{\PosPacketWilsonLo}{22.48}
 
 % ---- MAIN 6.6: why rho_F = 0 ----------------------------------------------
-\newcommand{\FBestRows}{24,502}
+\newcommand{\FBestRows}{24{,}502}
 \newcommand{\FBestSharePct}{56.2}
 \newcommand{\FBestNetGain}{0.04890}
 \newcommand{\BreakEvenCond}{0.01556}
@@ -199,10 +208,14 @@
 \newcommand{\TestMPSnrOnlyDelta}{+0.00080}
 \newcommand{\TestMPSnrOnlyLCB}{+0.00028}
 \newcommand{\TestMPCaTosgFone}{0.87679}
-\newcommand{\TestMPOracleFone}{0.88121}
-\newcommand{\TestMPOracleDelta}{-0.00441}
-\newcommand{\TestMPOracleLCB}{-0.00738}
+\newcommand{\TestMPGreedyGainFone}{0.88121}
+\newcommand{\TestMPGreedyGainDelta}{-0.00441}
+\newcommand{\TestMPGreedyGainLCB}{-0.00738}
+\newcommand{\TestMPGreedyPerCostFone}{0.88121}
+\newcommand{\TestMPGreedyPerCostDelta}{-0.00441}
+\newcommand{\TestMPGreedyPerCostLCB}{-0.00738}
 \newcommand{\TestEta}{64.4}
+\newcommand{\TestGreedyRefAgree}{1\times10^{-11}}
 \newcommand{\TestVsFixedLLCB}{-0.00078}
 \newcommand{\CulverMatchedTarget}{0.00147}
 \newcommand{\CulverMPRandomFone}{0.86309}
@@ -215,13 +228,17 @@
 \newcommand{\CulverMPSnrOnlyDelta}{+0.00047}
 \newcommand{\CulverMPSnrOnlyLCB}{-0.00102}
 \newcommand{\CulverMPCaTosgFone}{0.87352}
-\newcommand{\CulverMPOracleFone}{0.87496}
-\newcommand{\CulverMPOracleDelta}{-0.00144}
-\newcommand{\CulverMPOracleLCB}{-0.00275}
+\newcommand{\CulverMPGreedyGainFone}{0.87496}
+\newcommand{\CulverMPGreedyGainDelta}{-0.00144}
+\newcommand{\CulverMPGreedyGainLCB}{-0.00275}
+\newcommand{\CulverMPGreedyPerCostFone}{0.87496}
+\newcommand{\CulverMPGreedyPerCostDelta}{-0.00144}
+\newcommand{\CulverMPGreedyPerCostLCB}{-0.00275}
 \newcommand{\CulverEta}{87.9}
+\newcommand{\CulverGreedyRefAgree}{9\times10^{-8}}
 \newcommand{\CulverVsFixedLLCB}{-0.00252}
 \newcommand{\MatchedPayloadResidual}{2.3\times10^{-7}}
-\newcommand{\HeldOutFOverLRatioMin}{1,090}
+\newcommand{\HeldOutFOverLRatioMin}{1{,}090}
 
 % ---- SUPPLEMENTARY: the exploratory lambda scan ---------------------------
 \newcommand{\LamScanPoints}{19}

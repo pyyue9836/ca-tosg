@@ -44,6 +44,10 @@ def build():
     # clash then fails loudly at generation review rather than at compile time.
     def mac(name, val):
         assert not any(ch.isdigit() for ch in name), name
+        # A bare thousands comma typesets as punctuation inside maths: $739,200$ comes out as
+        # "739, 200". Braced, it is an ordinary character in both modes, so the same macro reads
+        # correctly in a sentence and in a table cell (V2-R68 page read).
+        val = re.sub(r'(?<=\d),(?=\d\d\d)', '{,}', val)
         L.append(r'\newcommand{\%s}{%s}' % (name, val))
 
     for tag, d in (('Test', t), ('Culver', c)):
@@ -161,6 +165,19 @@ def build():
 
     L.append('')
     L.append(r'% ---- MAIN 6.3: the frozen selector, and what the budget did ---------------')
+    sp = mpj0['selector_profile'] if (mpj0 := json.load(open(os.path.join(
+        ROOT, 'results/v2/v2_matched_payload.json')))) else {}
+    mac('SelectorNodes', f"{sp['total_nodes']:,}")
+    mac('SelectorLeaves', f"{sp['total_leaves']:,}")
+    mac('SelectorMaxDepth', str(sp['max_depth_realised']))
+    mac('SelectorSizeMB', f"{sp['model_bytes'] / 1024 / 1024:.0f}")
+    lat = json.load(open(os.path.join(
+        ROOT, 'results/latency/selector_latency_candidate67.json')))
+    mac('SelectorLatencyMed', f"{lat['inference_batch1']['median_ms']:.1f}")
+    mac('SelectorLatencyLo', f"{lat['inference_batch1']['p5_ms']:.1f}")
+    mac('SelectorLatencyHi', f"{lat['inference_batch1']['p95_ms']:.1f}")
+    mac('CueLatencyMed', f"{lat['cue_statistics']['median_ms']:.2f}")
+    mac('LatencyTrials', f"{lat['inference_batch1']['n']:,}")
     mac('SelectorTrees', str(fr['selector']['hyperparameters']['n_estimators']))
     mac('SelectorLeaf', str(fr['selector']['hyperparameters']['min_samples_leaf']))
     mac('CueDim', str(cue['n_fields']))
@@ -266,7 +283,8 @@ def build():
     L.append(r'% ---- MAIN: matched-realised-payload comparison, SECONDARY (V2-R56 A / R58) --')
     mpj = json.load(open(os.path.join(ROOT, 'results/v2/v2_matched_payload.json')))
     NAMES = (('random_el', 'Random'), ('task_only', 'TaskOnly'), ('snr_only', 'SnrOnly'),
-             ('ca_tosg', 'CaTosg'), ('oracle_el', 'Oracle'))
+             ('ca_tosg', 'CaTosg'), ('greedy_gain', 'GreedyGain'),
+             ('greedy_gain_per_cost', 'GreedyPerCost'))
     resid = 0.0
     for tag, sp in (('Test', 'test'), ('Culver', 'culver')):
         d3 = mpj['splits'][sp]
@@ -284,9 +302,14 @@ def build():
         # "optimality ratio" -- the ceiling is not deployable, and the quantity depends on the
         # action set, the payload matching and the split (V2-R58 C-1).
         rnd = d3['policies']['random_el']['scene_equal_f1']
-        orc = d3['policies']['oracle_el']['scene_equal_f1']
+        # V2-R67 A-2: the ceiling is a greedy outcome-aware REFERENCE, not a proven optimum.
+        orc = d3['policies']['greedy_gain_per_cost']['scene_equal_f1']
         ca = d3['policies']['ca_tosg']['scene_equal_f1']
         mac(f'{tag}Eta', f"{(ca - rnd) / (orc - rnd) * 100:.1f}")
+        # same reason as MsgSurvivalAtLowest: "9e-08" typesets as an italic e and a spaced
+        # minus inside maths, which reads as a variable rather than an exponent (V2-R68).
+        _am, _ae = f"{abs(d3['policies']['greedy_gain']['scene_equal_f1'] - orc):.0e}".split('e')
+        mac(f'{tag}GreedyRefAgree', r'%s\times10^{%d}' % (_am, int(_ae)))
         # C-2: against Fixed L, which is NOT payload-matched
         fl = d3['vs_fixed_L']
         mac(f'{tag}VsFixedLLCB', f"{fl['delta_f1_LCB95']:+.5f}")
@@ -608,7 +631,8 @@ def tables():
          r'deployable \\', r'\midrule']
     ROWS = (('random_el', 'Random E/L'), ('task_only', 'Task-only E/L'),
             ('snr_only', 'SNR-only E/L'), ('ca_tosg', r'\textbf{CA-TOSG}'),
-            ('oracle_el', 'Oracle E/L'))
+            ('greedy_gain', 'Greedy outcome-aware (gain)'),
+            ('greedy_gain_per_cost', 'Greedy outcome-aware (gain/cost)'))
     for sp, nm in (('test', 'Test'), ('culver', 'Culver-City')):
         d3 = mpj['splits'][sp]
         for i, (key, lab) in enumerate(ROWS):
@@ -623,6 +647,28 @@ def tables():
             R.append(r'\midrule')
     R += [r'\bottomrule', r'\end{tabular}']
     T['tbl_matched_payload.tex'] = '\n'.join(R) + '\n'
+
+    # --- MAIN: the payload chain, one row per step (V2-R66 B-2) -----------------------
+    pc2 = json.load(open(os.path.join(ROOT, 'results/v2/payload_chain.json')))
+    F, K = pc2['F'], pc2['constants']
+    STEPS = [
+        ('bottleneck elements', f"{F['elements']:,}", 'dummy forward through the checkpoint'),
+        ('quantisation width', f"{K['w_bits']} bit", 'int8, symmetric'),
+        ('information bits', f"{F['info_bits']:,}", 'elements $\\times$ width'),
+        ('packets', f"{F['packets']:,}",
+         f"{K['P_bits']:,}-bit payload, {K['H_bits']}-bit header"),
+        ('header bits', f"{F['header_bits']:,}", 'packets $\\times$ header'),
+        ('LDPC codewords', f"{F['n_cw']:,}", f"rate $1/2$, $K={K['K']}$, $n={K['n']}$"),
+        ('channel uses', f"{F['msym']:.5f} Msym", f"${K['M']}$-QAM"),
+        ('direct route, for contrast', f"{F['direct_msym']:.4f} Msym",
+         'ignores codeword padding'),
+    ]
+    R = [HDR, r'\begin{tabular}{llll}', r'\toprule',
+         r'step & value & basis \\', r'\midrule']
+    for a_, b_, c_ in STEPS:
+        R.append(r'%s & %s & %s \\' % (a_, b_, c_))
+    R += [r'\bottomrule', r'\end{tabular}']
+    T['tbl_payload_chain.tex'] = '\n'.join(R) + '\n'
     return T
 
 

@@ -84,8 +84,10 @@ def strip(tex):
                  r'graphicspath|newcommand|providecommand|renewcommand|bibliography\w*|'
                  r'markboth|title|author|texttt|url)'
                  r'(?:\[[^\]]*\])?(?:\{[^{}]*\})?', _blank, tex)
-    # environment markers themselves
-    tex = re.sub(r'\\(?:begin|end)\{[^}]*\}', _blank, tex)
+    # environment markers, including an environment's option: `\begin{algorithmic}[1]` numbers
+    # lines, it does not report a result. Blanked here rather than added to the exception list,
+    # because it is formatting and an exception row would imply a judgement was made about it.
+    tex = re.sub(r'\\(?:begin|end)\{[^}]*\}(?:\[[^\]]*\])?', _blank, tex)
     return tex
 
 

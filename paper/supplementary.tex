@@ -27,30 +27,19 @@ apparatus. \textbf{Nothing here changes a conclusion in the main paper}, and the
 analysis is labelled as such wherever it appears.
 
 \section{The frozen cue schema}
-Table~\ref{tab:cues} lists all $\CueDim$ fields of the frozen schema \CueName{} in order, with the
-code location each is computed at. Two properties hold of the schema by construction.
+The field list is given in the main paper's cue-schema table. Two properties hold of the schema by construction.
 
-First, \emph{every field is ego-local}: it is computed from the ego vehicle's own LiDAR sweep or its
-own detection output, so the vector exists before the request is issued and no field depends on a
+First, every field is ego-local: it is computed from the ego vehicle's own LiDAR sweep or its own
+detection output, so the vector exists before the request is issued and no field depends on a
 message the ego has not yet asked for.
 
-Second, \emph{no ground truth, task metric, oracle label, delivery outcome or future information
-reaches the schema}. The cue schema is verified against its code-defined
-sources, not by name matching---a wrong implementation would also rename its fields, so a name check
-would prove nothing.
+Second, no ground truth, task metric, oracle label, delivery outcome or future information reaches
+the schema. The cue schema is verified against its code-defined sources, not by name matching---a
+wrong implementation would also rename its fields, so a name check would prove nothing.
 
 The field of view over which the statistics are defined, the point source, and the detector
 checkpoint the box count depends on are all pinned in the schema manifest, because a schema frozen
 without pinning its inputs would be frozen against a moving input.
-
-\begin{table*}[t]
-\caption{The frozen cue schema \CueName{}: $\CueDim$ fields in order, with the routine each is
-computed by. The last two fields are the channel state; the rest are ego-local perception
-statistics.}
-\label{tab:cues}
-\centering\footnotesize\setlength{\tabcolsep}{3pt}
-\input{tables/tbl_cue_schema}
-\end{table*}
 
 \section{Payload derivation, bit by bit}
 The feature message is the encoder's bottleneck tensor. Every step below is a counted quantity, not

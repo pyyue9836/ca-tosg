@@ -1,0 +1,28 @@
+{
+ "schema": "catosg-v2-selector-latency/1",
+ "what": "Property of the FROZEN artefact. No accuracy, action or utility field is read and no held-out result is touched.",
+ "candidate_index": 67,
+ "model_sha256": "87d990f68698732edb747d3ef06fdd3f89e905f2548d7fc691cb03fd5107ff7d",
+ "n_estimators": 400,
+ "inference_batch1": {
+  "median_ms": 55.40266551543027,
+  "p5_ms": 45.54848613333888,
+  "p95_ms": 59.02973442571238,
+  "n": 1000
+ },
+ "cue_statistics": {
+  "median_ms": 1.1738600442185998,
+  "p5_ms": 1.1186123418156058,
+  "p95_ms": 1.3820310705341399,
+  "n": 100
+ },
+ "cue_points_used": 53815,
+ "hardware": {
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "processor": "x86_64",
+  "python": "3.10.18",
+  "threads": 16
+ },
+ "command": "python tools/time_selector_candidate67.py --trials 1000",
+ "note": "results/latency/selector_latency.csv measures the v1 candidates (2, 1, 56) and does not describe candidate 67."
+}

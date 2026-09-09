@@ -25,12 +25,19 @@
      "deployable": true,
      "payload_residual_vs_target": -5.236698785108379e-09
     },
-    "oracle_el": {
+    "greedy_gain": {
      "scene_equal_f1": 0.8812082846863905,
      "mean_payload": 0.0008091170925848346,
      "share_L": 0.5408881441139506,
      "deployable": false,
      "payload_residual_vs_target": -4.713028906586699e-08
+    },
+    "greedy_gain_per_cost": {
+     "scene_equal_f1": 0.8812082847012583,
+     "mean_payload": 0.0008091642228739005,
+     "share_L": 0.5418726434855468,
+     "deployable": false,
+     "payload_residual_vs_target": 0.0
     },
     "random_el": {
      "scene_equal_f1": 0.8688120895059761,
@@ -61,10 +68,15 @@
      "delta_f1_LCB95": 0.001417156281470938,
      "delta_f1_UCB95": 0.011053188089895924
     },
-    "oracle_el": {
+    "greedy_gain": {
      "delta_f1_point": -0.004413451891695605,
      "delta_f1_LCB95": -0.00737977536025689,
      "delta_f1_UCB95": -0.001950877239142124
+    },
+    "greedy_gain_per_cost": {
+     "delta_f1_point": -0.0044134519065636285,
+     "delta_f1_LCB95": -0.007379775357569167,
+     "delta_f1_UCB95": -0.0019508772703034402
     },
     "random_el": {
      "delta_f1_point": 0.007982743288718598,
@@ -100,12 +112,19 @@
      "deployable": true,
      "payload_residual_vs_target": -2.0661157025059565e-08
     },
-    "oracle_el": {
+    "greedy_gain": {
      "scene_equal_f1": 0.8749631074314336,
      "mean_payload": 0.0014704752066115707,
      "share_L": 0.5107438016528926,
      "deployable": false,
      "payload_residual_vs_target": -2.272727272724026e-07
+    },
+    "greedy_gain_per_cost": {
+     "scene_equal_f1": 0.8749631930009658,
+     "mean_payload": 0.0014706611570247936,
+     "share_L": 0.5118181818181818,
+     "deployable": false,
+     "payload_residual_vs_target": -4.132231404946861e-08
     },
     "random_el": {
      "scene_equal_f1": 0.8630859183568885,
@@ -136,10 +155,15 @@
      "delta_f1_LCB95": 0.001738255847069603,
      "delta_f1_UCB95": 0.013188049037464566
     },
-    "oracle_el": {
+    "greedy_gain": {
      "delta_f1_point": -0.0014405117848382276,
      "delta_f1_LCB95": -0.002751515668475313,
      "delta_f1_UCB95": -0.00012950790120114242
+    },
+    "greedy_gain_per_cost": {
+     "delta_f1_point": -0.0014405973543704098,
+     "delta_f1_LCB95": -0.002751576872718431,
+     "delta_f1_UCB95": -0.00012961783602238874
     },
     "random_el": {
      "delta_f1_point": 0.010436677289706903,
@@ -521,5 +545,15 @@
     "share_L": 0.9394773039889959
    }
   }
+ },
+ "selector_profile": {
+  "candidate_index": 67,
+  "n_estimators": 400,
+  "total_nodes": 1085158,
+  "total_leaves": 542779,
+  "max_depth_realised": 39,
+  "n_features": 23,
+  "model_bytes": 86940535,
+  "latency": "NOT MEASURED for this selector; results/latency/selector_latency.csv covers the v1 candidates (2, 1, 56) and does not describe candidate 67."
  }
 }

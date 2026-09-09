@@ -286,3 +286,22 @@ re-ruled is still checked in both documents, so the archive keeps exactly the pr
 **The general rule:** when a check spans a mutable and an immutable artefact, a change to the
 standard must be scoped, or the immutable artefact will fail forever for having been correct at the
 time.
+
+### A definition no gate can check (V2-R67 A-4)
+
+The matched-payload table carried a row labelled **"Oracle E/L"**. Every gate passed it: the number
+came from the generator, the row's columns subtracted, the product was registered and hashed, and
+the figure was asserted equal to the table. What none of that examines is whether the row's
+*definition* supports its *name*.
+
+It did not. The row was an unweighted greedy selection by realised gain $F^L_t - F^E_t$ up to the
+payload limit. It ignores that $B_{L,t}$ varies per frame, and it ignores the scene-equal weighting
+the objective actually uses. Neither omission makes the value wrong; both make "oracle" — a proven
+upper bound — the wrong word for it. It is now a *greedy outcome-aware reference*, with both
+omissions stated, and a second reference ordered by gain-per-cost reported beside it.
+
+**Gates verify provenance and internal consistency. They cannot verify that a name is earned.** A
+label is a claim, and the only check on it is someone reading the definition next to the word — the
+same lesson as `FRAME-ALIGNMENT CHECK` (V2-R19), which computed a coordinate-frame overlap. That
+this recurred after the earlier instance is the point worth recording: the class of defect survives
+its own lesson, because each instance looks like a naming quibble until the name is load-bearing.

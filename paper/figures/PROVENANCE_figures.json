@@ -1,7 +1,7 @@
 {
  "schema": "catosg-v2-figures/1",
  "generator": "tools/build_v2_figures.py",
- "commit": "51c915696a77672af124e5558e7b14643b7d5d53",
+ "commit": "c5a7fa4bb05a3eab8f0c200c29b48915fd91607f",
  "palette": {
   "hexes": [
    "#2B62C4",
@@ -18,7 +18,7 @@
    "kind": "conceptual block diagram",
    "inputs": [],
    "note": "No result numbers. Every block is an implemented component; nothing unimplemented is drawn (B-1). Two factual corrections over the first draft: the channel estimate is an EGO-side input, not derived from the collaborator; and E issues no message so it does not reach the transport chain.",
-   "sha256": "3389d5c1e41b55ac442e85f971cce1437c8ad2aade158925fcd955a019e0d017"
+   "sha256": "69aacc6214bb8e416e458378d5bab2ddae9e5acebcfc0c534181bd6b0bfded10"
   },
   "fig2_primary.pdf": {
    "panel": "main",
@@ -26,7 +26,7 @@
     "results/v2/v2_test_primary.json": "594ff0da06622272f4c87e4189e91273a8a6d6f235e991522985ce1c3dfcff77",
     "results/v2/v2_culver_primary.json": "eb66015120d85a45e5c606de677329afdba3b6a25e537dc7dee2cc2a79a7d988",
     "results/v2/v2_heldout_fixed_arms.json": "51150711533bf45eafc0b3fdad468ec4712a2d168d98cd2c7f20eb025d6bd3e8",
-    "results/v2/v2_matched_payload.json": "3c2fafdc973ba4d919af75b0bfedb7f97137735b30e58a2ce6b32293864806d9"
+    "results/v2/v2_matched_payload.json": "d590267ff66b9472774e3300a28b2f8e6c23dac1316421fc2d524841824c4a74"
    },
    "fields": [
     "RF.mean_payload",
@@ -36,7 +36,7 @@
     "policies.*"
    ],
    "layout_rule": "F1 AND realised payload together on one plane, with the budget ceiling drawn. SYMLOG x, because Fixed E spends exactly zero and a log axis cannot show zero (V2-R56 G-3/G-10).",
-   "sha256": "86da44848970c6551f2525e0a18cc795df3a19215cbae5a909ceb878692639f9"
+   "sha256": "10ff0a5fe329c81454c1fed6d4976c0f31ddbb2035987a806834aa327d66c5e4"
   },
   "fig3_recovery.pdf": {
    "panel": "main",
@@ -50,7 +50,7 @@
     "q_message_survives"
    ],
    "split": "validate (mechanism result)",
-   "sha256": "a192de835f65845a1cefd04b349db5322047538ffcb23ee498a8b228e14dfb11"
+   "sha256": "962c7dda83208c7424394e2f1203bd5c12677d67964d353a0d576a1a15b42907"
   },
   "fig4_where2comm.pdf": {
    "panel": "main",
@@ -63,7 +63,7 @@
     "ap_70"
    ],
    "axis_rule": "the x axis is the NATIVE communication rate. No Msym and no budget-matched language may appear in the figure or its caption (V2-R40 B-7).",
-   "sha256": "019e61f079db01ba5a2bed23959f86cef33976e6e660a2ba19c46a2dbe4721cb"
+   "sha256": "68eacd6f79af072b653e70a25875ffc500ff1ae87a81f8e5479d6408a165f822"
   },
   "fig5_lambda.pdf": {
    "panel": "supplementary",
@@ -77,33 +77,49 @@
     "rho_F"
    ],
    "status": "EXPLORATORY, validate only. Did not replace the frozen candidate and explains no Test result (V2-R43 B-5).",
-   "sha256": "dc4773a8a77c8a8c392aa7f99dcaf3140e6f60105343b777df8cea2f55de8c01"
+   "sha256": "4cd3e6442098702064c5912ef03636ee83b9432848b16c0e7bc1ae00c66a2944"
   },
   "fig6_matched_forest.pdf": {
    "panel": "main",
    "inputs": {
-    "results/v2/v2_matched_payload.json": "3c2fafdc973ba4d919af75b0bfedb7f97137735b30e58a2ce6b32293864806d9",
-    "paper/tables/generated_numbers.tex": "6e553fc8498a0e5766a15682bdfaebd46a03b2f556e043a4339dd5461176cda8"
+    "results/v2/v2_matched_payload.json": "d590267ff66b9472774e3300a28b2f8e6c23dac1316421fc2d524841824c4a74",
+    "paper/tables/generated_numbers.tex": "2965ac196c1cb74a0843b5ff730d1909e42e52fc849aac676025ee4b9ef8eabe"
    },
    "fields": [
     "vs_ca_tosg.*.delta_f1_point",
     ".delta_f1_LCB95",
     ".delta_f1_UCB95"
    ],
-   "layout_rule": "Same vector and same bootstrap as Table IV, asserted value by value against the printed macros. Oracle excluded: not deployable.",
-   "sha256": "c73bb9ab310fd411684dfe6dbe1bd90d477e15b40c7f8696fa52d16f82077993"
+   "layout_rule": "Same vector and same bootstrap as Table IV, asserted value by value against the printed macros. The greedy outcome-aware references are excluded: not deployable, and not proven optima.",
+   "sha256": "04373a80e08e2309a9af22340ef0aa6f2010eb68a7f57a36e05a5f554ba475aa"
   },
   "fig7_action_heatmap.pdf": {
    "panel": "main",
    "inputs": {
-    "results/v2/v2_matched_payload.json": "3c2fafdc973ba4d919af75b0bfedb7f97137735b30e58a2ce6b32293864806d9"
+    "results/v2/v2_matched_payload.json": "d590267ff66b9472774e3300a28b2f8e6c23dac1316421fc2d524841824c4a74"
    },
    "fields": [
     "action_heatmap.cells.*.share_L",
     "action_heatmap.nbox_edges"
    ],
    "layout_rule": "Bins fixed in the product before plotting; nearest-neighbour rendering, no smoothing or interpolation between evaluated grid points.",
-   "sha256": "48ebb8fd4d6b5b366eeb5d07fee84d049e742e90d2dba2a456b882a5e17ea45b"
+   "sha256": "78fc2a75e0efcee606d37451f359712bf79002bcfa60652d831db1f152e81d48"
+  },
+  "fig8_channel_utility.pdf": {
+   "panel": "main",
+   "inputs": {
+    "results/v2/v2_grid_validate_ideal.csv": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064"
+   },
+   "fields": [
+    "p_cw",
+    "eff_E",
+    "eff_L",
+    "eff_F",
+    "snr_db",
+    "channel"
+   ],
+   "layout_rule": "Both panels share the SNR axis so the erasure curve and the utility curves can be read against each other. Utility is averaged over the two channels at each SNR point, matching how the grid is swept.",
+   "sha256": "ec807c6f94eafec4fd6c7b88d062139809461ac123ad37fc3db53a294724474e"
   }
  }
 }

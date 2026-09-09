@@ -61,3 +61,6 @@ RX (?<![\d-])\d{4}(?=-\d{2}-\d{2})|(?<=\d{4}-)\d{2}(?=-\d{2}\b)|(?<=\d{4}-\d{2}-
     an ISO calendar date. Dates are provenance -- when a value was fixed, and against what it was
     fixed in advance of -- not measurements, and the only one in the delivered text is the
     preregistration date of the non-inferiority margin.
+RX \b\d+(?=th\b)
+    an ordinal naming a quantile ("5th", "95th percentile"). This states WHICH quantiles are
+    reported, like the 95% of a confidence bound; the values at them are macros.

@@ -80,8 +80,8 @@ def fig1_block(prov):
     box(41, 27, 13, 11, 'RF selector\n(frozen)', col=C['rf'])
     box(58, 34, 15, 7, 'E: no message', col=C['muted'])
     box(58, 25, 15, 7, 'L: boxes', col=C['tau'])
-    box(58, 15, 15, 9, 'F: int8 bottleneck\ncandidate/analysis branch;\nzero selections under\nthe frozen policy',
-        col=C['rf'], fs=4.6)
+    box(58, 15, 15, 9, 'F: int8 feature tensor\n(candidate set only;\nnever requested)',
+        col=C['rf'], fs=5.6)
     box(1, 1, 17, 9, 'Collaborator\nLiDAR')
     box(21, 1, 16, 9, 'Same checkpoint\n(per-agent\ninference)')
     box(78, 14, 25, 14, 'packetise $\\rightarrow$ LDPC/QAM\n$\\rightarrow$ per-codeword loss\n'
@@ -97,9 +97,6 @@ def fig1_block(prov):
     arr(37, 5.5, 58, 26, col=C['muted'], ls=':')
     arr(73, 28.5, 78, 24)
     arr(73, 19.5, 78, 21)
-    ax.text(66, 12.5, 'E sends nothing', fontsize=6, color=C['muted'], ha='center', style='italic')
-    ax.text(47, 9, 'content supplied on request', fontsize=6, color=C['muted'],
-            ha='center', style='italic')
     f.tight_layout(pad=0.2)
     p = os.path.join(FIG, 'fig1_system.pdf'); f.savefig(p, bbox_inches='tight'); plt.close(f)
     prov['fig1_system.pdf'] = {'panel': 'main', 'kind': 'conceptual block diagram',
@@ -141,7 +138,8 @@ def fig2_primary(prov):
         ]
         # the matched-payload diagnostics sit at CA-TOSG's own x
         for key, lab, mk in (('random_el', 'Random', 'v'), ('task_only', 'Task-only', 'x'),
-                             ('snr_only', 'SNR-only', 'P'), ('oracle_el', 'Oracle', '+')):
+                             ('snr_only', 'SNR-only', 'P'),
+                             ('greedy_gain_per_cost', 'Greedy ref.', '+')):
             v = pol[key]
             pts.append((lab, v['mean_payload'], v['scene_equal_f1'], C['aux'], mk))
         ax.axvspan(ceil_, 10, color=C['tau'], alpha=0.07, zorder=0)
@@ -324,7 +322,8 @@ def fig6_matched_forest(prov):
                    os.path.relpath(MACROS, ROOT): sha(MACROS)},
         'fields': ['vs_ca_tosg.*.delta_f1_point', '.delta_f1_LCB95', '.delta_f1_UCB95'],
         'layout_rule': 'Same vector and same bootstrap as Table IV, asserted value by value '
-                       'against the printed macros. Oracle excluded: not deployable.',
+                       'against the printed macros. The greedy outcome-aware references are '
+                       'excluded: not deployable, and not proven optima.',
         'sha256': sha(q)}
 
 
@@ -373,11 +372,49 @@ def fig7_action_heatmap(prov):
         'sha256': sha(q)}
 
 
+def fig8_channel_utility(prov):
+    """V2-R66 B-1 — the two curves the selector's channel cue indexes.
+
+    Left: the per-codeword erasure probability at each grid point, the quantity the transport model
+    consumes. Right: the development-split effective utility of each action against the same axis,
+    which is what the selector trades against payload. Plotted on the SAME x so the reader can read
+    one against the other; the AWGN waterfall and the point where L overtakes F line up there.
+    """
+    g = pd.read_csv(os.path.join(ROOT, 'results/v2/v2_grid_validate_ideal.csv'),
+                    usecols=['snr_db', 'channel', 'p_cw', 'eff_E', 'eff_L', 'eff_F'])
+    f, axes = plt.subplots(1, 2, figsize=(W2, 2.1))
+    ax = axes[0]
+    for ch, lab, col, mk in (('awgn', 'AWGN', C['rf'], 'o'), ('rayleigh', 'Rayleigh', C['tau'], 's')):
+        d = g[g.channel == ch].groupby('snr_db', as_index=False).p_cw.first()
+        ax.plot(d.snr_db, d.p_cw, mk + '-', ms=3.5, lw=1.5, color=col, label=lab)
+    ax.set_xlabel('Estimated SNR (dB)'); ax.set_ylabel('$p_{\\mathrm{cw}}$')
+    ax.set_title('Per-codeword erasure'); ax.legend(frameon=False, fontsize=6); tidy(ax)
+    ax = axes[1]
+    for act, lab, col, mk in (('eff_E', 'E', C['muted'], 'o'), ('eff_L', 'L', C['rf'], 's'),
+                              ('eff_F', 'F', C['aux'], '^')):
+        d = g.groupby('snr_db', as_index=False)[act].mean()
+        ax.plot(d.snr_db, d[act], mk + '-', ms=3.5, lw=1.5, color=col, label=lab)
+    ax.set_xlabel('Estimated SNR (dB)'); ax.set_ylabel('Effective per-frame $F_1$')
+    ax.set_title('Action utility (development split)')
+    ax.legend(frameon=False, fontsize=6); tidy(ax)
+    f.tight_layout(pad=0.3)
+    q = os.path.join(FIG, 'fig8_channel_utility.pdf')
+    f.savefig(q, bbox_inches='tight'); plt.close(f)
+    prov['fig8_channel_utility.pdf'] = {'panel': 'main',
+        'inputs': {'results/v2/v2_grid_validate_ideal.csv':
+                   sha(os.path.join(ROOT, 'results/v2/v2_grid_validate_ideal.csv'))},
+        'fields': ['p_cw', 'eff_E', 'eff_L', 'eff_F', 'snr_db', 'channel'],
+        'layout_rule': 'Both panels share the SNR axis so the erasure curve and the utility curves '
+                       'can be read against each other. Utility is averaged over the two channels '
+                       'at each SNR point, matching how the grid is swept.',
+        'sha256': sha(q)}
+
+
 def main():
     os.makedirs(FIG, exist_ok=True)
     prov = {}
     fig1_block(prov); fig2_primary(prov); fig3_recovery(prov); fig4_w2c(prov); fig5_lambda(prov)
-    fig6_matched_forest(prov); fig7_action_heatmap(prov)
+    fig6_matched_forest(prov); fig7_action_heatmap(prov); fig8_channel_utility(prov)
     import subprocess
     out = {'schema': 'catosg-v2-figures/1',
            'generator': 'tools/build_v2_figures.py',

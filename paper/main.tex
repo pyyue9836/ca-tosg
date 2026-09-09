@@ -7,6 +7,8 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{cite}
 \usepackage{url}
 \graphicspath{{figures/}}
@@ -154,7 +156,10 @@ granularity: SmartCooper~\cite{zhang2024smartcooper} adjusts the compression rat
 channel state, and AccBEV~\cite{accbev2025} conditions a feature-repair module on the SNR.
 CoDS~\cite{gan2025cods} pairs a task-oriented semantic codec with a semantic analog-to-digital
 converter so that learned features traverse a standard digital V2X bitstream, and discards features
-corrupted by decoding failures at the receiver.
+corrupted by decoding failures at the receiver. Sheng \emph{et al.}~\cite{sheng2026tccn} train the
+feature encoder and decoder jointly with the channel so that the transmitted representation degrades
+gracefully; that codec would occupy the feature branch this paper measures, whereas \method{}
+decides whether the branch is requested.
 
 \emph{Relation to \method{}.} All of these adapt the encoding, the repair or the rate \emph{within}
 feature-level transmission. \method{} acts before that: it controls whether object-level
@@ -197,15 +202,10 @@ set and in the unified evaluation framework.
 
 F's payload is $\FixedFOverLPayRatio\times$ that of L on the development split, so Fixed F is
 infeasible as an always-on policy, sitting at $\FixedFOverBudgetRatio\times$ the primary
-budget. \textbf{That arithmetic does not by itself exclude requesting F occasionally}, because the
-budget constrains the mean payload rather than each frame; what leaves it out here is that the
-frozen policy does not select it (Section~\ref{sec:no_feature}). F is measured and charged through
-the identical chain throughout, as an over-budget fixed-action reference and as the object of the
-transport study of Section~\ref{sec:transport}.
+budget. F is measured and charged through the identical chain throughout, as an over-budget
+fixed-action reference and as the object of the transport study of Section~\ref{sec:transport}.
 
-E is a first-class action, not merely a failure mode. It costs no perception payload and cannot fail
-in transit, which is right both where the ego's own detection already suffices and where the channel
-is too poor for a message to be worth its cost.
+E transmits no cooperative payload and cannot fail in transit.
 
 The object-level message is a compact set of local detections,
 $m_t^{L} = \{(b_k, c_k, p_k)\}_{k=1}^{N_t}$, with $b_k$ the 3D box, $c_k$ the class and $p_k$ the
@@ -234,6 +234,16 @@ sensitivity;
 \item \textbf{message all-or-nothing}: the message is usable only if all of its codewords decode, a
 pessimistic sensitivity arm for the feature message.
 \end{itemize}
+
+Under partial recovery, let $M_t \in \{0,1\}^{N_{\mathrm{cw}}}$ mark the codewords that decode and
+let $E \in \{0,1\}^{N \times N_{\mathrm{cw}}}$ map each codeword to the tensor elements it carries.
+The receiver reconstructs
+\begin{equation}
+\hat F_{j,t} = \mathrm{Dequant}\bigl(q_{j,t} \odot (E M_t)\bigr),
+\label{eq:recon}
+\end{equation}
+where $q_{j,t}$ is the quantised tensor and $\odot$ is elementwise. Elements carried by a failed
+codeword take the dequantised zero code point, which is exact for a symmetric int8 code.
 
 The delivery semantics of the two cooperative actions are not the same, and the distinction is
 load-bearing:
@@ -299,7 +309,17 @@ split, the collaborator transmits an average of $\NboxCollabMean$ boxes per fram
 $\BLmean$~Msym. The post-fusion late-detection output contains $\NboxLateOutputMean$ boxes on
 average, but this value is not used for payload accounting.
 
-The mean cost over $T$ frames is $\bar B = (1/T)\sum_t B_{t,s_t}$.
+The mean cost over $T$ frames is $\bar B = (1/T)\sum_t B_{t,s_t}$. Table~\ref{tab:payload_chain}
+gives the feature message step by step.
+
+\begin{table*}[t]
+\caption{The feature message's payload, step by step. Every entry is a counted quantity; the last
+row is the direct route $(\text{info}+\text{header})/R/\log_2 M$, which differs because it assumes
+the information bits fill an integer number of codewords.}
+\label{tab:payload_chain}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\input{tables/tbl_payload_chain}
+\end{table*}
 
 \subsection{Task--Communication Objective}
 Let $z_t$ be the ego-side cue vector and $(\hat\gamma_t, c_t)$ the estimated channel state. The
@@ -348,12 +368,25 @@ the $2$-bit request, and the collaborator complies. Fig.~\ref{fig:system} shows 
 implemented, including which quantities exist before the request is issued.
 
 \subsection{Ego-Side Online Task Cues}\label{sec:cues}
-The cue vector is $z_t \in \mathbb{R}^{\CueDim}$ under the frozen schema \CueName{}: $21$
-ego-local task and availability cues---$19$ statistics of the ego's own LiDAR sweep (point counts,
-range statistics, near/mid/far and per-sector occupancies, and three range densities), the ego's own
-detected box count, and a binary collaborator-availability flag---together with $2$ channel
-cues. The complete field list with a code location
-per row is in the supplementary material.
+The selector input is the concatenation of three ego-local groups and the channel state,
+\begin{equation}
+x_t = \bigl[\,\underbrace{p_t}_{19},\; \underbrace{n_t}_{1},\; \underbrace{a_t}_{1},\;
+\underbrace{\hat\gamma_t,\, c_t}_{2}\,\bigr] \in \mathbb{R}^{\CueDim},
+\label{eq:cue}
+\end{equation}
+where $p_t$ are $19$ statistics of the ego's own LiDAR sweep (point counts, range statistics,
+near/mid/far and per-sector occupancies, and three range densities), $n_t$ is the ego's own detected
+box count, $a_t \in \{0,1\}$ indicates collaborator availability, $\hat\gamma_t$ is the estimated
+SNR in dB and $c_t \in \{0,1\}$ the channel-type indicator. Table~\ref{tab:cues_main} lists the
+frozen schema \CueName{} field by field.
+
+\begin{table*}[t]
+\caption{The frozen cue schema \CueName{}. Fields $1$--$21$ are ego-local; $22$--$23$ are the
+channel state. The source column gives the routine each field is computed by.}
+\label{tab:cues_main}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\input{tables/tbl_cue_schema}
+\end{table*}
 
 \emph{Every cue is computed from the ego vehicle's own observation and its own detection stream}, and
 every field is computable before the request is issued. This is a direct consequence of the
@@ -383,13 +416,24 @@ result for the full split.
 
 \subsection{Channel-Aware Semantic Granularity Selector}\label{sec:selector}
 The policy $g(\cdot)$ is instantiated as a random forest~\cite{breiman2001random} with
-$\SelectorTrees$ trees and a minimum of $\SelectorLeaf$ samples per leaf, operating purely on tabular
-cues. It adds no learnable parameters to the perception backbone and requires no retraining of the
+$\SelectorTrees$ trees and a minimum of $\SelectorLeaf$ samples per leaf, operating on the
+$\CueDim$ tabular features of Eq.~\eqref{eq:cue}. The frozen forest holds $\SelectorNodes$ nodes
+of which $\SelectorLeaves$ are leaves, with a realised maximum depth of $\SelectorMaxDepth$ and a
+serialised size of $\SelectorSizeMB$~MB. It adds no learnable parameters to the perception backbone and requires no retraining of the
 detector, which is why a tabular learner is a natural fit; \emph{the forest is one realisation of the
 selection layer, not the contribution.}
 
-The selector is trained to imitate the utility-maximising action of Eq.~\eqref{eq:lagrangian}, which
-uses realised task utility and is therefore not deployable; it supplies training labels only.
+The selector is trained to imitate the utility-maximising action of Eq.~\eqref{eq:lagrangian}. That
+action uses realised task utility and is not deployable; it supplies labels only. Writing
+$s_t^{\star}(\lambda)$ for the label of grid row $t$, the forest minimises the class-weighted
+misclassification risk
+\begin{equation}
+\min_{g}\; \frac{1}{T}\sum_{t=1}^{T} w_{s_t^{\star}(\lambda)}\,
+\mathbf{1}\bigl[g(x_t) \neq s_t^{\star}(\lambda)\bigr],
+\label{eq:train}
+\end{equation}
+with $w$ the inverse class frequencies of the label set and $x_t$ the input of
+Eq.~\eqref{eq:cue}.
 
 \paragraph*{Feasibility} \textbf{Mainline feasibility is structural.} An action is feasible iff a
 collaborator is available and a transport response is defined; on a frame with no collaborator the
@@ -397,21 +441,49 @@ executed action is forced to E. We do not apply a message-level BLER feasibility
 quantity it thresholds is the per-codeword erasure probability rather than the probability that the
 feature message is unusable, and because channel impairment is already reflected in the
 partial-recovery effectiveness. The feature output is defined and measured at every loss rate,
-including $p = 1$. No $F_t^{F} - F_t^{\mathrm{ego}}$ safety threshold is added
-either: with $\lambda \ge 0$ and $B_F > 0$, $F_t^{F} \le F_t^{\mathrm{ego}}$ already implies
-$U_F \le U_E$, so the objective handles it and an extra threshold would only add a researcher degree
-of freedom.
+including $p = 1$. No $F_t^{F} - F_t^{\mathrm{ego}}$ safety threshold is added:
+with $\lambda \ge 0$ and $B_F > 0$, $F_t^{F} \le F_t^{\mathrm{ego}}$ implies $U_F \le U_E$, so the
+objective already excludes those rows.
 
 \subsection{Receiver-Side Fusion and Detection}
-The ego fuses the received message with its local feature,
-$\hat Y_t = D\bigl(\Psi(F_{\mathrm{ego},t}, m_t^{s_t})\bigr)$, where $\Psi$ is the fusion module and
-$D$ the detection head. If $s_t = L$ the receiver performs object-level fusion; if $s_t = F$ it
-dequantises the received tensor---zero-filling the elements whose codewords were lost---and performs
-intermediate fusion.
+The ego fuses the received message with its local feature and detects,
+$\hat Y_t = D\bigl(\Psi(F_{\mathrm{ego},t}, m_t^{s_t})\bigr)$, with $D$ the detection head. For
+$s_t = F$, $\Psi$ is the attentive fusion of the backbone: at each BEV cell the ego feature and the
+received feature form a two-element sequence that attends over itself,
+\begin{align}
+\Psi(F_{\mathrm{ego},t}, \hat F_{j,t})
+&= \mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d}}\right) V, \notag \\
+Q = K = V &= \bigl[\,F_{\mathrm{ego},t};\; \hat F_{j,t}\,\bigr],
+\label{eq:fusion}
+\end{align}
+where $d$ is the channel dimension and $\hat F_{j,t}$ is the reconstruction of
+Eq.~\eqref{eq:recon}. Because the softmax is taken over both elements, a received tensor of zeros
+still contributes weight. For $s_t = L$ the receiver performs object-level fusion of the received
+boxes with its own; for $s_t = E$ it detects from $F_{\mathrm{ego},t}$ alone.
 
 \textbf{A zeroed collaborator tensor is not the same input as no collaborator at all.} The fusion
 module attends over both branches, so a zero tensor participates and dilutes the ego features. The
 difference is measured in Section~\ref{sec:transport}.
+
+\begin{algorithm}[t]
+\caption{Per-frame operation at inference}
+\label{alg:infer}
+\begin{algorithmic}[1]
+\State ego computes $p_t, n_t, a_t$ from its own sweep and detections
+\State ego reads $\hat\gamma_t, c_t$ from the receiver's link estimate
+\State $x_t \gets [\,p_t, n_t, a_t, \hat\gamma_t, c_t\,]$ \Comment{Eq.~\eqref{eq:cue}}
+\State $s_t \gets g(x_t)$ \Comment{frozen selector}
+\If{$a_t = 0$}
+  \State $s_t \gets E$ \Comment{structural: no collaborator}
+\EndIf
+\State ego transmits $s_t$ as a two-bit request
+\If{$s_t \neq E$}
+  \State collaborator packetises, codes and modulates $m_t^{s_t}$; charge $B_{t,s_t}$
+  \State ego reconstructs by Eq.~\eqref{eq:recon} from the codewords that decode
+\EndIf
+\State $\hat Y_t \gets D(\Psi(F_{\mathrm{ego},t}, m_t^{s_t}))$ \Comment{Eq.~\eqref{eq:fusion}}
+\end{algorithmic}
+\end{algorithm}
 
 \section{Experimental Protocol}\label{sec:exp}
 
@@ -443,8 +515,8 @@ and comparator freezing.}
 \end{table*}
 
 \subsection{Message Construction and Payload Accounting}
-Payload is measured, not declared, and the derivation is given in full in
-Section~\ref{sec:communication_cost} and expanded bit by bit in the supplementary material. Two properties
+The payload derivation is given in Section~\ref{sec:communication_cost} and expanded bit by bit in
+the supplementary material. Two properties
 matter for reading the results. First, $B_F$ is a constant $\BFmsym$~Msym while $B_{L,t}$ varies per
 frame with the collaborator's box count, so the payload axis is not a two-point scale. Second,
 payload is charged for the attempt (Section~\ref{sec:effective_utility}), which is what makes an
@@ -453,7 +525,9 @@ undelivered feature message expensive rather than free.
 \subsection{Channel Settings}\label{sec:channel_settings}
 The estimated SNR is swept over an $11$-point grid and crossed with two channel types, giving the
 full deterministic grid of frames $\times$ SNR $\times$ channel type reported in
-Table~\ref{tab:protocol}. Transport is characterised at $\TransportRates$ per-codeword loss rates
+Table~\ref{tab:protocol}. Fig.~\ref{fig:chan_util} shows the resulting erasure probability and the
+effective utility of each action across that axis. Transport is characterised at
+$\TransportRates$ per-codeword loss rates
 with $\TransportReplicates$ independent channel realisations each, and the message regime is
 evaluated by $\MsgReplays$ Monte-Carlo replays.
 
@@ -461,6 +535,17 @@ Across the $11$ evaluated SNR points, $p_{\mathrm{cw}}$ ranges from $\PcwAwgnHi$
 under AWGN and from $\PcwRayleighHi$ to $\PcwRayleighLo$ under Rayleigh. The AWGN waterfall occurs
 between $6$ and $8$~dB, where the measured value falls from $\PcwAwgnAtSix$ to $\PcwAwgnAtEight$;
 the complete grid is reported in the supplementary material.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{fig8_channel_utility}
+\caption{The two quantities the channel cue indexes, on a shared SNR axis. Left: the per-codeword
+erasure probability at each grid point. Right: the effective per-frame $F_1$ of each action on the
+development split, averaged over the two channel types at each point. Below about $6$~dB the feature
+action scores below ego-only, because a heavily damaged tensor still enters fusion; above the AWGN
+waterfall it is the highest-utility action, at $\FixedFOverLPayRatio\times$ the object-level
+payload.}
+\label{fig:chan_util}
+\end{figure*}
 
 \subsection{Selector Training and Freezing}\label{sec:training}
 Model selection is done \textbf{on the development split only}, in this order.
@@ -482,7 +567,27 @@ and comparator freezing.
 
 LOSO is the \emph{training-time} selection procedure and the scene-level bootstrap of
 Section~\ref{sec:metrics} is the \emph{evaluation-time} interval procedure; they operate at different
-stages and neither replaces the other.
+stages and neither replaces the other. Algorithm~\ref{alg:train} states the procedure.
+
+\begin{algorithm}[t]
+\caption{Selector selection and freezing (development split)}
+\label{alg:train}
+\begin{algorithmic}[1]
+\Require grid rows $\{(x_t, F_t^{E}, F_t^{L}, F_t^{F}, B_{t,\cdot})\}$, scenes $\mathcal{S}$,
+  candidates $\mathcal{C}$, penalties $\Lambda$, budget $\beta$
+\ForAll{$(c, \lambda) \in \mathcal{C} \times \Lambda$}
+  \State label each row by $s_t^{\star}(\lambda)$ from Eq.~\eqref{eq:lagrangian}
+  \ForAll{scenes $u \in \mathcal{S}$}
+    \State fit $g_{c}$ on $\mathcal{S} \setminus \{u\}$ by Eq.~\eqref{eq:train}; predict on $u$
+  \EndFor
+  \State record held-out-fold utility and mean payload $\bar B(c,\lambda)$
+\EndFor
+\State $(c^{\star}, \lambda^{\star}) \gets$ best utility among $\{\bar B(c,\lambda) \le \beta B_F\}$
+\State refit $g_{c^{\star}}$ on all scenes; \textbf{freeze} $g$, $\lambda^{\star}$ and the
+  comparator $\tau^{\star}$
+\State \Return frozen $g$ \Comment{held-out splits are opened only after this point}
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Baselines}
 \textbf{Fixed E}, \textbf{Fixed L} and \textbf{Fixed F} bound the action space. The internal decision
@@ -571,11 +676,8 @@ saving is unchanged, so none of it is an artefact of collaborator unavailability
 
 As a descriptive secondary reference, \method{} reduces payload by \TestSavingVsFixedL\% on Test
 and \CulverSavingVsFixedL\% on Culver-City relative to Fixed L, with scene-equal $F_1$ differences
-of \TestDeltaFoneVsFixedL{} and \CulverDeltaFoneVsFixedL, respectively. These held-out fixed-arm
-summaries are reported only as descriptive references derived from the already unsealed frozen
-grids. They are not used to select a new comparator, retest the primary criterion, or modify any
-frozen component. The confirmatory comparator remains the $\tau = \TauStar$ rule frozen before
-either held-out split was evaluated.
+of \TestDeltaFoneVsFixedL{} and \CulverDeltaFoneVsFixedL, respectively. Fixed-arm held-out values
+are descriptive; the confirmatory comparator is $\tau = \TauStar$.
 
 \begin{table}[t]
 \caption{Primary cell at $\beta = \BudgetPrimaryBeta$. $\Delta$ is \method{} minus the frozen
@@ -607,9 +709,10 @@ than three orders of magnitude in payload---at least \HeldOutFOverLRatioMin$\tim
 Fixed L and Fixed F on either split---and by hundredths in $F_1$. The dotted line is the
 $\beta = \BudgetPrimaryBeta$ ceiling and the shaded region is over budget, so Fixed F is visibly
 not a competitor at the primary budget. The x axis is symlog rather than logarithmic: Fixed E
-spends exactly zero, which a logarithmic axis cannot show. Random, Task-only, SNR-only and Oracle
+spends exactly zero, which a logarithmic axis cannot show. Random, Task-only, SNR-only and the
+greedy reference
 are the matched-payload policies of Table~\ref{tab:matched} and sit at \method{}'s own payload;
-Oracle is not deployable.}
+the greedy reference is not deployable and is not a proven optimum.}
 \label{fig:primary}
 \end{figure*}
 
@@ -623,8 +726,12 @@ payload---$\TestMatchedTarget$~Msym on Test and $\CulverMatchedTarget$~Msym on C
 matching is numerical: the largest residual deviation over all policies and both splits is
 $\MatchedPayloadResidual$~Msym. Each policy is a per-frame rule over $\{E, L\}$: a random selection at
 the matched rate, a threshold on the estimated SNR alone, a threshold on the ego's own detected box
-count alone, and \method{}, which uses both. A non-deployable oracle that sees the realised
-per-frame outcome bounds what selection can buy at that payload.
+count alone, and \method{}, which uses both. Two non-deployable references see the realised
+per-frame outcome and select greedily up to the payload limit: one orders frames by realised gain
+$F_t^{L} - F_t^{E}$, the other by gain per unit payload. \textbf{Neither is a proven optimum}:
+both ignore the scene-equal weighting the objective uses, and the first also ignores that
+$B_{L,t}$ varies per frame. They agree to within $\CulverGreedyRefAgree$ in scene-equal $F_1$
+despite selecting different frames.
 
 On Test, \method{} achieves a higher scene-equal $F_1$ than each evaluated deployable comparator at
 matched realised payload, with every pairwise $95\%$ bootstrap lower confidence bound above zero. On
@@ -633,8 +740,9 @@ the interval against the SNR-only rule includes zero. Culver-City carries \Culve
 its intervals are correspondingly coarse. Fig.~\ref{fig:forest} draws the same differences and
 their intervals.
 
-Relative to the matched-payload random floor and the non-deployable E/L oracle ceiling, \method{}
-recovers \TestEta\% of the attainable selection gain on Test and \CulverEta\% on Culver-City.
+Between the matched-payload random selector and a greedy outcome-aware reference, \method{} covers
+\TestEta\% of the gap on Test and \CulverEta\% on Culver-City. The reference is not a proven
+optimum.
 
 \begin{table*}[t]
 \caption{Deployable E/L policies at \method{}'s own realised payload, with the non-deployable
@@ -653,7 +761,7 @@ and each deployable baseline at matched realised payload, with $95\%$ scene-leve
 intervals and a dashed line at zero. Secondary analysis, not preregistered. Payload is matched
 numerically to within $\MatchedPayloadResidual$~Msym, not exactly. Culver-City carries
 \CulverScenes{} scenes, so its intervals are coarse---visibly so against the SNR-only rule, whose
-interval crosses zero. The non-deployable oracle is not shown.}
+interval crosses zero. The non-deployable greedy references are not shown.}
 \label{fig:forest}
 \end{figure*}
 
@@ -680,7 +788,8 @@ reported as a secondary analysis rather than as a replacement for the preregiste
 The comparison set for this second question is the naturally operating arms that satisfy the primary
 budget: Fixed E, Fixed L, the $\tau = \TauStar$ rule and \method{}. Fixed F, the budget-blind
 oracle and the hand rules exceed that budget; the random, task-only and SNR-only policies are
-calibrated to \method{}'s payload rather than arriving at it.
+calibrated to \method{}'s payload on the full evaluation split, after the fact. That supports a
+same-cost comparison; it does not validate a threshold frozen online.
 
 \subsection{Action Distribution}
 The frozen selector requests E on \TestRhoEPct\% of Test rows and L on \TestRhoLPct\%, and never
@@ -725,9 +834,8 @@ codeword-loss counts across replicates, $\Delta F_1 \neq 0$ on \PosIdealPct\% of
 fragment-aware recovery (\PosIdealPairs{} pairs over \PosIdealFrames{} frames; Wilson 95\% lower
 bound \PosIdealWilsonLo\%) and on \PosPacketPct\% under packet loss (\PosPacketPairs{} pairs,
 \PosPacketFrames{} frames, lower bound \PosPacketWilsonLo\%). The sufficiency rule for this test was
-fixed before the selection ran. We report this at the level it supports---loss position affects task
-performance---and do not claim the stronger form, that position matters \emph{more} than amount,
-because no threshold for that comparison was preregistered.
+fixed before the selection ran. No threshold for position-versus-amount was preregistered, so only
+the weaker statement is made: loss position affects task performance.
 
 \emph{Zero-tensor fusion is not ego-only inference} (development split). At $p = 1$ every codeword
 is lost and the fused
@@ -820,8 +928,11 @@ decodable groups would make L degrade gracefully too, which would change its eff
 oracle labels derived from it, and therefore the selector's decisions. That transport design is not
 evaluated in this paper.
 
-\emph{Selector-only latency.} The selector's own inference cost is measured; total end-to-end system
-latency, including any cost of keeping the cooperative pipeline resident, is not.
+\emph{Selector-only latency.} On one CPU core the frozen forest predicts a single frame in
+$\SelectorLatencyMed$~ms (5th--95th percentile $\SelectorLatencyLo$--$\SelectorLatencyHi$~ms over
+$\LatencyTrials$ trials), and the point statistics that build the cue vector take
+$\CueLatencyMed$~ms. Total end-to-end system latency, including any cost of keeping the cooperative
+pipeline resident, is not measured.
 
 \emph{One dataset family and one detector.} Every result here is conditional on OPV2V and on a single
 PointPillars checkpoint.
