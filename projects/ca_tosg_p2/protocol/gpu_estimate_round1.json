@@ -1,0 +1,62 @@
+{
+ "schema": "catosg-p2-gpu-estimate-round1/1",
+ "kind": "EXTRAPOLATION from a 60-frame probe of the locked per-frame workload",
+ "probe": {
+  "frames": 60,
+  "every": 33,
+  "rand_reps_run": 2,
+  "sec_per_frame_measured": 19.675,
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "identity_vs_P1_f1_clean_max_abs_diff": 1.1102230246251565e-16,
+  "identity_control_all_ok": true
+ },
+ "per_frame_components_s": {
+  "load": 0.043412486712137856,
+  "record_forward": 0.07327211697896321,
+  "collaborator_forward_gpu": 0.008476344744364421,
+  "collaborator_forward_cpu": 2.1166849931081138,
+  "masked_forward_mean": 0.058216712245574356,
+  "masked_forward_median": 0.05767207543055217
+ },
+ "forwards_per_frame": {
+  "locked_design": 1453,
+  "probe_run": 265,
+  "formula": "(2 + R_rand) variants x (1 clean + 8 x 4 x 2 + p=1) + 1 identity control"
+ },
+ "per_frame_s": {
+  "locked_design": 84.714043841255,
+  "probe_measured_total": 19.67457469701767,
+  "probe_model_residual_s": 4.121985003504998
+ },
+ "per_split": {
+  "validate": {
+   "frames": 1980,
+   "gpu_hours_locked_design": 46.59272411269025,
+   "authorised": true
+  },
+  "test": {
+   "frames": 2170,
+   "gpu_hours_locked_design": 51.063743093200934,
+   "authorised": false
+  },
+  "culver": {
+   "frames": 550,
+   "gpu_hours_locked_design": 12.94242336463618,
+   "authorised": false
+  }
+ },
+ "information_only_reduced_design": {
+  "description": "random: full loss sweep on 4 of 20 repeats, the other 16 clean only; this is an amendment, not a choice made here",
+  "forwards_per_frame": 429,
+  "validate_gpu_hours": 13.805071775982777
+ },
+ "bias": [
+  "probe frames are every 33rd frame (60 across all 9 scenes), not a contiguous stretch; a full run reads frames sequentially, so data-loading cost may differ in either direction",
+  "the first frames include CUDA warm-up and allocator growth, which pushes the probe mean UP",
+  "the extrapolation to 20 random repeats is linear in forward count, which is exact for the GPU work; it does not add data-loading cost, which is per frame",
+  "the GPU was shared with a desktop session during the probe (utilisation not exclusive), pushing times UP",
+  "nothing else -- per-agent inference for E and L is not repeated (P1 products reused)"
+ ],
+ "lock_K_F": 23,
+ "command": "python projects/ca_tosg_p2/protocol/gpu_estimate_round1.py"
+}

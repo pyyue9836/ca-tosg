@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+r"""P2-R4 E-2 — GPU cost of the LOCKED round-1 design, extrapolated from the 60-frame timing probe.
+
+Inputs: the probe summary written by evaluation/p2_f_block_eval.py --probe and the locked constants.
+Nothing here is a measurement beyond the probe; the extrapolation and its bias directions are stated.
+
+    python projects/ca_tosg_p2/protocol/gpu_estimate_round1.py [--check]
+"""
+from __future__ import annotations
+import argparse, json, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+P2 = os.path.dirname(HERE)
+ROOT = os.path.dirname(os.path.dirname(P2))
+PROBE = os.path.join(P2, 'results', 'probe', 'f_block_eval_validate.json')
+LOCK = os.path.join(HERE, 'round1_lock.json')
+OUT_JSON = os.path.join(HERE, 'gpu_estimate_round1.json')
+OUT_MD = os.path.join(HERE, 'gpu_estimate_round1.md')
+SPLIT_FRAMES = {'validate': 1980, 'test': 2170, 'culver': 550}     # P1 products; only validate is authorised
+AUTHORISED = ('validate',)
+
+
+def build():
+    p = json.load(open(PROBE))
+    lock = json.load(open(LOCK))
+    t = p['timing']
+    n_var_locked = 2 + p['rand_reps_locked']
+    n_var_run = len(p['variants_run'])
+    per_var = p['conditions_per_variant']
+    fwd_locked = n_var_locked * per_var + 1                 # + the C-1 identity control
+    fwd_run = n_var_run * per_var + 1
+    t_fwd = t['t_masked_fwd_mean_s']['mean']
+    fixed = t['t_load_s']['mean'] + t['t_record_fwd_s']['mean'] + t['t_collab_fwd_gpu_s']['mean']
+    per_frame_locked = fixed + fwd_locked * t_fwd
+    per_frame_run = t['t_frame_total_s']['mean']
+    # the probe's own per-frame total should agree with fixed + fwd_run * t_fwd; report the residual
+    residual = per_frame_run - (fixed + fwd_run * t_fwd)
+    per_split = {s: {'frames': n, 'gpu_hours_locked_design': n * per_frame_locked / 3600,
+                     'authorised': s in AUTHORISED} for s, n in SPLIT_FRAMES.items()}
+    # information only: the cost if random's loss sweep ran on 4 of the 20 repeats (an amendment, not chosen)
+    fwd_reduced = 2 * per_var + 4 * per_var + 16 * 2 + 1
+    per_frame_reduced = fixed + fwd_reduced * t_fwd
+    return {
+        'schema': 'catosg-p2-gpu-estimate-round1/1',
+        'kind': 'EXTRAPOLATION from a 60-frame probe of the locked per-frame workload',
+        'probe': {'frames': p['frames'], 'every': p['every'], 'rand_reps_run': p['rand_reps_run'],
+                  'sec_per_frame_measured': p['sec_per_frame'], 'gpu': p['device']['gpu'],
+                  'identity_vs_P1_f1_clean_max_abs_diff': p['identity_vs_P1_f1_clean']['max_abs_diff'],
+                  'identity_control_all_ok': p['identity_control_all_ok']},
+        'per_frame_components_s': {'load': t['t_load_s']['mean'], 'record_forward': t['t_record_fwd_s']['mean'],
+                                   'collaborator_forward_gpu': t['t_collab_fwd_gpu_s']['mean'],
+                                   'collaborator_forward_cpu': t['t_collab_fwd_cpu_s']['mean'],
+                                   'masked_forward_mean': t_fwd, 'masked_forward_median': t['t_masked_fwd_median_s']['mean']},
+        'forwards_per_frame': {'locked_design': fwd_locked, 'probe_run': fwd_run,
+                               'formula': '(2 + R_rand) variants x (1 clean + 8 x 4 x 2 + p=1) + 1 identity control'},
+        'per_frame_s': {'locked_design': per_frame_locked, 'probe_measured_total': per_frame_run,
+                        'probe_model_residual_s': residual},
+        'per_split': per_split,
+        'information_only_reduced_design': {'description': 'random: full loss sweep on 4 of 20 repeats, the other 16 clean only; '
+                                                           'this is an amendment, not a choice made here',
+                                            'forwards_per_frame': fwd_reduced,
+                                            'validate_gpu_hours': SPLIT_FRAMES['validate'] * per_frame_reduced / 3600},
+        'bias': [
+            'probe frames are every 33rd frame (60 across all 9 scenes), not a contiguous stretch; a full run reads '
+            'frames sequentially, so data-loading cost may differ in either direction',
+            'the first frames include CUDA warm-up and allocator growth, which pushes the probe mean UP',
+            'the extrapolation to 20 random repeats is linear in forward count, which is exact for the GPU work; '
+            'it does not add data-loading cost, which is per frame',
+            'the GPU was shared with a desktop session during the probe (utilisation not exclusive), pushing times UP',
+            'nothing else -- per-agent inference for E and L is not repeated (P1 products reused)'],
+        'lock_K_F': lock['A3_budget']['K_F'],
+        'command': 'python projects/ca_tosg_p2/protocol/gpu_estimate_round1.py'}
+
+
+def markdown(m):
+    c, f, s = m['per_frame_components_s'], m['forwards_per_frame'], m['per_frame_s']
+    L = ['<!-- GENERATED by projects/ca_tosg_p2/protocol/gpu_estimate_round1.py -- do not edit by hand -->',
+         '# GPU cost of the locked round-1 design (P2-R4 E-2)', '', f"**{m['kind']}.** GPU: {m['probe']['gpu']}.", '',
+         f"Probe: {m['probe']['frames']} frames (every {m['probe']['every']}th), {m['probe']['rand_reps_run']} random repeats run, "
+         f"{m['probe']['sec_per_frame_measured']:.1f} s/frame measured. Identity against P1's `f1_clean`: max |Δ| = "
+         f"{m['probe']['identity_vs_P1_f1_clean_max_abs_diff']:.2e}; C-1 identity control all frames: "
+         f"{'yes' if m['probe']['identity_control_all_ok'] else 'NO'}.", '',
+         '| per-frame component | seconds |', '|---|---:|',
+         f"| data loading | {c['load']:.3f} |", f"| full-F recording forward | {c['record_forward']:.3f} |",
+         f"| collaborator single-vehicle forward, GPU (B-4) | {c['collaborator_forward_gpu']:.3f} |",
+         f"| collaborator single-vehicle forward, CPU (B-4) | {c['collaborator_forward_cpu']:.3f} |",
+         f"| one masked forward, mean / median | {c['masked_forward_mean']:.3f} / {c['masked_forward_median']:.3f} |", '',
+         f"Forwards per frame: locked design **{f['locked_design']:,}** ({f['formula']}); probe ran {f['probe_run']:,}. "
+         f"Per frame: locked design **{s['locked_design']:.1f} s**; probe measured {s['probe_measured_total']:.1f} s "
+         f"(model residual {s['probe_model_residual_s']:+.2f} s).", '',
+         '| split | frames | GPU-hours, locked design | authorised |', '|---|---:|---:|:---:|']
+    for k, v in m['per_split'].items():
+        L.append(f"| {k} | {v['frames']:,} | {v['gpu_hours_locked_design']:.1f} | {'yes' if v['authorised'] else 'no — information only'} |")
+    r = m['information_only_reduced_design']
+    L += ['', f"Information only — {r['description']}: {r['forwards_per_frame']:,} forwards per frame, "
+          f"**{r['validate_gpu_hours']:.1f} GPU-hours on validate**.", '', '**Direction of bias:**', '']
+    L += [f'* {b}' for b in m['bias']]
+    return '\n'.join(L) + '\n'
+
+
+def main():
+    ap = argparse.ArgumentParser(); ap.add_argument('--check', action='store_true')
+    a = ap.parse_args()
+    m = build()
+    js, md = json.dumps(m, indent=1) + '\n', markdown(m)
+    if a.check:
+        ok = os.path.exists(OUT_JSON) and open(OUT_JSON).read() == js and os.path.exists(OUT_MD) and open(OUT_MD).read() == md
+        print('gpu estimate round1:', 'reproduced' if ok else 'FAIL -- not what the generator writes'); return 0 if ok else 1
+    open(OUT_JSON, 'w').write(js); open(OUT_MD, 'w').write(md); print(md); return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
