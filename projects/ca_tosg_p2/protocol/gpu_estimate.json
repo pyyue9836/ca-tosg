@@ -1,0 +1,55 @@
+{
+ "schema": "catosg-p2-gpu-estimate/1",
+ "kind": "ESTIMATE -- nothing was run on the GPU",
+ "gpu": "NVIDIA GeForce RTX 5070, 12227 MiB",
+ "measured_inputs": {
+  "wp2_per_agent_sec_per_frame": {
+   "validate": 1.148,
+   "test": 0.323,
+   "culver": 0.364
+  },
+  "wp2_note": "P1 per-agent inference (ego and collaborator forwards, data loading and writing included). The validate figure is several times the other two; the cause is not established, so the range keeps it rather than discarding it.",
+  "wp5_f_products_sec_per_frame_validate": 5.987,
+  "wp5_note": "P1 F products on validate: every loss rate, regime and replicate, per frame",
+  "checkpoint_train_params": {
+   "epoches": 20,
+   "batch_size": 4
+  }
+ },
+ "assumptions": {
+  "v2v4real_frames": {
+   "train": 14210,
+   "validate": 2000,
+   "test": 3986
+  },
+  "train_step_over_inference": [
+   2.0,
+   3.0
+  ],
+  "v2v4real_frame_cost_equals_p1_frame_cost": true,
+  "gpu_memory_for_batch_size_verified": false
+ },
+ "components_gpu_hours": {
+  "train_unified_checkpoint": [
+   50.998111111111115,
+   271.88466666666665
+  ],
+  "per_agent_inference_val_plus_test": [
+   0.5370772222222222,
+   1.908868888888889
+  ],
+  "f_products_val_plus_test_one_F_variant": 9.955050555555555
+ },
+ "total_gpu_hours_one_F_variant": [
+  61.490238888888896,
+  283.7485861111111
+ ],
+ "not_included": [
+  "checkpoint-selection evaluation passes",
+  "failed or repeated runs",
+  "each additional F variant (block size, ranking, receiver rule) repeats the F-product component",
+  "any fusion adaptation of P2-R3 C-6"
+ ],
+ "first_gpu_step_after_approval": "a one-epoch timing probe on V2V4Real train, which replaces the training row of this estimate",
+ "command": "python projects/ca_tosg_p2/protocol/gpu_estimate.py"
+}

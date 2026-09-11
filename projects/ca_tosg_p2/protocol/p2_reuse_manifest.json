@@ -1,0 +1,123 @@
+{
+ "schema": "catosg-p2-reuse-manifest/1",
+ "split": "validate (development) only; no sealed or held-out product is listed or read",
+ "files": [
+  {
+   "role": "utility_grid_primary",
+   "path": "results/v2/v2_grid_validate_ideal.csv",
+   "sha256": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+   "bytes": 6183667,
+   "p2_takes": "eff_E, eff_L, eff_F per (frame, SNR, channel) under fragment-aware partial recovery; B_E, B_L, B_F per row"
+  },
+  {
+   "role": "utility_grid_primary_meta",
+   "path": "results/v2/v2_grid_validate_ideal.json",
+   "sha256": "263cb5916a92d4516e0d53f774d8842316e9bb071d3be717f054e9de7dc58774",
+   "bytes": 1522,
+   "p2_takes": "the definitions of eff_L and eff_F and the payload contract the grid was built under"
+  },
+  {
+   "role": "utility_grid_packet_sensitivity",
+   "path": "results/v2/v2_grid_validate_packet.csv",
+   "sha256": "ac74902e18d6f0b618d78fa5a88c41d5951bed4230dd6ab8c353b6b71543618a",
+   "bytes": 6187986,
+   "p2_takes": "the same columns under packet-level recovery; sensitivity only, as in P1"
+  },
+  {
+   "role": "utility_grid_packet_sensitivity_meta",
+   "path": "results/v2/v2_grid_validate_packet.json",
+   "sha256": "4cdee44a495e2da1381ed565784b1a5da04823d68d70e3c2ab7151e5234d8a70",
+   "bytes": 1525,
+   "p2_takes": "definitions for the packet grid"
+  },
+  {
+   "role": "grid_builder",
+   "path": "projects/ca_tosg/evaluation/v2_build_grid.py",
+   "sha256": "fa327111251f8916fae3e4caabe7d638563a3fc787eefb041f3e71e0016b490f",
+   "bytes": 12191,
+   "p2_takes": "the code that applies the P1 \u00a79.3 interpolation rule and the message-level rule for L"
+  },
+  {
+   "role": "interpolation_rule",
+   "path": "docs/unified_branch_protocol_v2.md",
+   "sha256": "d1ed607aa98524e5123ee4ee47ec4c1e3aa8d5158d50bbc491c27230a724031a",
+   "bytes": 73293,
+   "p2_takes": "\u00a79.3 (a)-(g): replicate averaging, piecewise-linear in raw p, locked endpoints, no monotone correction, ideal regime mainline"
+  },
+  {
+   "role": "payload_chain_code",
+   "path": "tools/v2_payload_chain.py",
+   "sha256": "24ae0b78ada62dcd1469d6627f520520748762420fedb3d9ba30453cf6ec5709",
+   "bytes": 8373,
+   "p2_takes": "f_chain / l_chain: packetisation, headers, LDPC codeword count, channel uses"
+  },
+  {
+   "role": "payload_chain_product",
+   "path": "results/v2/payload_chain.json",
+   "sha256": "ad9a4f0ceeb5bc4df394d38ebe8af283cfa5d76e4b7452c836fb3d5de6f04690",
+   "bytes": 829,
+   "p2_takes": "B_F = N_cw,F channel uses"
+  },
+  {
+   "role": "per_frame_L_payload",
+   "path": "results/v2/wp34_e_l_validate.csv",
+   "sha256": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02",
+   "bytes": 116520,
+   "p2_takes": "n_box_collab, n_cw_L, B_L_msym per validate frame"
+  },
+  {
+   "role": "per_frame_L_payload_meta",
+   "path": "results/v2/wp34_e_l_validate.json",
+   "sha256": "c252f5d283c525e4e3931d8df11387d34cdcd2b2546a9558c0cde682a4c43837",
+   "bytes": 1238,
+   "p2_takes": "provenance of the above"
+  }
+ ],
+ "verification": {
+  "payload_chain_F": {
+   "B_F_msym_recomputed": 3.14175,
+   "B_F_msym_recorded": 3.14175,
+   "N_cw_F_recomputed": 12567,
+   "N_cw_F_recorded": 12567,
+   "match": true
+  },
+  "payload_chain_L": {
+   "frames": 1980,
+   "max_abs_B_L_diff_msym": 0.0,
+   "n_cw_L_mismatches": 0,
+   "match": true
+  },
+  "C7_symbol_count_independent_of_channel": {
+   "rows": 43560,
+   "frames": 1980,
+   "cells_per_frame": 22,
+   "frames_where_B_L_varies_with_channel": 0,
+   "frames_where_B_F_varies_with_channel": 0,
+   "frames_where_B_E_varies_with_channel": 0,
+   "B_F_distinct_values": [
+    3.14175
+   ],
+   "grid_B_L_equals_wp34_B_L": true,
+   "columns_read": [
+    "sample_id",
+    "snr_db",
+    "channel",
+    "B_E",
+    "B_L",
+    "B_F"
+   ],
+   "holds": true
+  },
+  "all_pass": true
+ },
+ "L_payload_distribution": {
+  "frames": 1980,
+  "mean_msym": 0.002525126262626263,
+  "min_msym": 0.0005,
+  "p05_msym": 0.00075,
+  "p50_msym": 0.002,
+  "p95_msym": 0.00475,
+  "max_msym": 0.00525
+ },
+ "command": "python projects/ca_tosg_p2/protocol/build_reuse_manifest.py"
+}

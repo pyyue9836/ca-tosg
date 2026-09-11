@@ -1,0 +1,460 @@
+{
+ "schema": "catosg-p2-f-block-budget/1",
+ "what": "payload arithmetic only; no perception output is read and no network is run",
+ "transmitted_grid": [
+  25,
+  88
+ ],
+ "transmitted_channels_per_branch": [
+  16,
+  64,
+  256
+ ],
+ "pre_compression_shapes": [
+  [
+   64,
+   100,
+   352
+  ],
+  [
+   128,
+   50,
+   176
+  ],
+  [
+   256,
+   25,
+   88
+  ]
+ ],
+ "head_grid": [
+  100,
+  352
+ ],
+ "bev_extent_m": [
+  80,
+  281.6
+ ],
+ "transmitted_cell_m": [
+  3.2,
+  3.2
+ ],
+ "voxel_size_m": [
+  0.4,
+  0.4
+ ],
+ "quant_param_bits_per_frame": 0,
+ "capacity_note": "capacities are the link_scenarios.json values; the upper-bound rows overstate any real link, so k_max there is an upper bound on blocks sent",
+ "inputs": {
+  "probe": "results/manifests/P4B_PROBE_pointpillar_compression.json",
+  "probe_sha256": "91a9340ef1e773de9a42bd4fb66d472ab2e29414c520639e8ec90a55def56009",
+  "checkpoint_config": "/mnt/h/opencood_project/pretrained_models/pointpillar_attentive_fusion/pointpillar_attentive_fusion_compression/config.yaml",
+  "checkpoint_config_sha256": "9348a20f236ab17c30e5a28e41f805fb1dc33e0eb06b2615f78f38a15bd84b3c",
+  "link_scenarios_sha256": "b891d7d44125f18fcc69c188c98291de96b466b976e900df3c8f9c80046763d0"
+ },
+ "blocks": [
+  {
+   "name": "primary",
+   "rows_x_cols_cells": [
+    5,
+    8
+   ],
+   "bev_size_m": [
+    16.0,
+    25.6
+   ],
+   "n_blocks": 55,
+   "elements_per_block_per_branch": [
+    640,
+    2560,
+    10240
+   ],
+   "elements_per_block": 13440,
+   "bits_per_block": 107520,
+   "mask_bitmap_bits": 55,
+   "index_list_bits_per_selected_block": 6,
+   "head_cells_per_block": [
+    20,
+    32
+   ],
+   "mapping": [
+    {
+     "branch": 0,
+     "transmitted_cells": [
+      5,
+      8
+     ],
+     "decoded_grid": [
+      100,
+      352
+     ],
+     "decoded_cells_per_block": [
+      20,
+      32
+     ]
+    },
+    {
+     "branch": 1,
+     "transmitted_cells": [
+      5,
+      8
+     ],
+     "decoded_grid": [
+      50,
+      176
+     ],
+     "decoded_cells_per_block": [
+      10,
+      16
+     ]
+    },
+    {
+     "branch": 2,
+     "transmitted_cells": [
+      5,
+      8
+     ],
+     "decoded_grid": [
+      25,
+      88
+     ],
+     "decoded_cells_per_block": [
+      5,
+      8
+     ]
+    }
+   ],
+   "budget": [
+    {
+     "technology": "IEEE 802.11bd",
+     "configuration": "20 MHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.35,
+     "k_max_blocks": 23,
+     "fraction_of_blocks": 0.41818181818181815,
+     "N_sym_at_k_max_msym": 1.314
+    },
+    {
+     "technology": "IEEE 802.11bd",
+     "configuration": "20 MHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.675,
+     "k_max_blocks": 11,
+     "fraction_of_blocks": 0.2,
+     "N_sym_at_k_max_msym": 0.6285
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.4688,
+     "k_max_blocks": 25,
+     "fraction_of_blocks": 0.45454545454545453,
+     "N_sym_at_k_max_msym": 1.42825
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.7344,
+     "k_max_blocks": 12,
+     "fraction_of_blocks": 0.21818181818181817,
+     "N_sym_at_k_max_msym": 0.68575
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "minus mandatory minimum PHY overhead",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.2984,
+     "k_max_blocks": 22,
+     "fraction_of_blocks": 0.4,
+     "N_sym_at_k_max_msym": 1.25675
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "minus mandatory minimum PHY overhead",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.6492,
+     "k_max_blocks": 11,
+     "fraction_of_blocks": 0.2,
+     "N_sym_at_k_max_msym": 0.6285
+    }
+   ]
+  },
+  {
+   "name": "finer",
+   "rows_x_cols_cells": [
+    5,
+    4
+   ],
+   "bev_size_m": [
+    16.0,
+    12.8
+   ],
+   "n_blocks": 110,
+   "elements_per_block_per_branch": [
+    320,
+    1280,
+    5120
+   ],
+   "elements_per_block": 6720,
+   "bits_per_block": 53760,
+   "mask_bitmap_bits": 110,
+   "index_list_bits_per_selected_block": 7,
+   "head_cells_per_block": [
+    20,
+    16
+   ],
+   "mapping": [
+    {
+     "branch": 0,
+     "transmitted_cells": [
+      5,
+      4
+     ],
+     "decoded_grid": [
+      100,
+      352
+     ],
+     "decoded_cells_per_block": [
+      20,
+      16
+     ]
+    },
+    {
+     "branch": 1,
+     "transmitted_cells": [
+      5,
+      4
+     ],
+     "decoded_grid": [
+      50,
+      176
+     ],
+     "decoded_cells_per_block": [
+      10,
+      8
+     ]
+    },
+    {
+     "branch": 2,
+     "transmitted_cells": [
+      5,
+      4
+     ],
+     "decoded_grid": [
+      25,
+      88
+     ],
+     "decoded_cells_per_block": [
+      5,
+      4
+     ]
+    }
+   ],
+   "budget": [
+    {
+     "technology": "IEEE 802.11bd",
+     "configuration": "20 MHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.35,
+     "k_max_blocks": 47,
+     "fraction_of_blocks": 0.42727272727272725,
+     "N_sym_at_k_max_msym": 1.3425
+    },
+    {
+     "technology": "IEEE 802.11bd",
+     "configuration": "20 MHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.675,
+     "k_max_blocks": 23,
+     "fraction_of_blocks": 0.20909090909090908,
+     "N_sym_at_k_max_msym": 0.657
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.4688,
+     "k_max_blocks": 51,
+     "fraction_of_blocks": 0.4636363636363636,
+     "N_sym_at_k_max_msym": 1.45675
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.7344,
+     "k_max_blocks": 25,
+     "fraction_of_blocks": 0.22727272727272727,
+     "N_sym_at_k_max_msym": 0.71425
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "minus mandatory minimum PHY overhead",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.2984,
+     "k_max_blocks": 45,
+     "fraction_of_blocks": 0.4090909090909091,
+     "N_sym_at_k_max_msym": 1.2855
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "minus mandatory minimum PHY overhead",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.6492,
+     "k_max_blocks": 22,
+     "fraction_of_blocks": 0.2,
+     "N_sym_at_k_max_msym": 0.6285
+    }
+   ]
+  },
+  {
+   "name": "finest",
+   "rows_x_cols_cells": [
+    1,
+    1
+   ],
+   "bev_size_m": [
+    3.2,
+    3.2
+   ],
+   "n_blocks": 2200,
+   "elements_per_block_per_branch": [
+    16,
+    64,
+    256
+   ],
+   "elements_per_block": 336,
+   "bits_per_block": 2688,
+   "mask_bitmap_bits": 2200,
+   "index_list_bits_per_selected_block": 12,
+   "head_cells_per_block": [
+    4,
+    4
+   ],
+   "mapping": [
+    {
+     "branch": 0,
+     "transmitted_cells": [
+      1,
+      1
+     ],
+     "decoded_grid": [
+      100,
+      352
+     ],
+     "decoded_cells_per_block": [
+      4,
+      4
+     ]
+    },
+    {
+     "branch": 1,
+     "transmitted_cells": [
+      1,
+      1
+     ],
+     "decoded_grid": [
+      50,
+      176
+     ],
+     "decoded_cells_per_block": [
+      2,
+      2
+     ]
+    },
+    {
+     "branch": 2,
+     "transmitted_cells": [
+      1,
+      1
+     ],
+     "decoded_grid": [
+      25,
+      88
+     ],
+     "decoded_cells_per_block": [
+      1,
+      1
+     ]
+    }
+   ],
+   "budget": [
+    {
+     "technology": "IEEE 802.11bd",
+     "configuration": "20 MHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.35,
+     "k_max_blocks": 944,
+     "fraction_of_blocks": 0.4290909090909091,
+     "N_sym_at_k_max_msym": 1.34925
+    },
+    {
+     "technology": "IEEE 802.11bd",
+     "configuration": "20 MHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.675,
+     "k_max_blocks": 471,
+     "fraction_of_blocks": 0.21409090909090908,
+     "N_sym_at_k_max_msym": 0.674
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.4688,
+     "k_max_blocks": 1027,
+     "fraction_of_blocks": 0.4668181818181818,
+     "N_sym_at_k_max_msym": 1.468
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "zero-overhead upper bound",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.7344,
+     "k_max_blocks": 513,
+     "fraction_of_blocks": 0.23318181818181818,
+     "N_sym_at_k_max_msym": 0.73375
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "minus mandatory minimum PHY overhead",
+     "D_comm_ms": 100.0,
+     "capacity_msym": 1.2984,
+     "k_max_blocks": 908,
+     "fraction_of_blocks": 0.4127272727272727,
+     "N_sym_at_k_max_msym": 1.298
+    },
+    {
+     "technology": "NR sidelink",
+     "configuration": "20 MHz / 30 kHz",
+     "capacity_variant": "minus mandatory minimum PHY overhead",
+     "D_comm_ms": 50.0,
+     "capacity_msym": 0.6492,
+     "k_max_blocks": 453,
+     "fraction_of_blocks": 0.2059090909090909,
+     "N_sym_at_k_max_msym": 0.64825
+    }
+   ]
+  }
+ ],
+ "command": "python projects/ca_tosg_p2/protocol/f_block_budget.py"
+}
