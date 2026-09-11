@@ -17,11 +17,11 @@ writes.
 |---|---|---|
 | `p2_reuse_manifest.json` | `build_reuse_manifest.py` | P1 artefacts P2 reuses, by path and sha256; chain and C-7 verification (payload columns only) |
 | `link_scenarios.md` / `.json` | `link_scenarios.py` | C-6 resource table, A-2 facts, B-3 reference column, D-1 L bound |
-| `f_block_budget.md` / `.json` | `f_block_budget.py` | block mapping and budget for `f_block_selection_draft.md` |
+| `f_block_budget.md` / `.json` | `f_block_budget.py` | block mapping and budget for `f_block_selection.md` |
 | `gpu_estimate.md` / `.json` | `gpu_estimate.py` | GPU-time estimate for `data_plan.md` (an estimate; nothing run) |
 
-Drafts beside it: `f_block_selection_draft.md` (P2-R3 C, **UNLOCKED**) and `data_plan.md` (P2-R3 E,
-reported only).
+Beside it: `f_block_selection.md` (round-1 development experiment, **LOCKED** under P2-R4, with
+`round1_lock.py` → `round1_lock.md`) and `data_plan.md` (P2-R3 E, reported only).
 
 ---
 
@@ -90,7 +90,7 @@ Ties — `|Q_t(a) − Q_t(a')| ≤ TOL`, **`TOL = 1e-9`, preregistered** — go 
 
 **Reuse of P1.** `Q_t(E)`, `Q_t(L)`, `Q_t(F)` are P1's `eff_E`, `eff_L`, `eff_F` under P1 §9.3 (a)–(g),
 pinned in `p2_reuse_manifest.json`. For any **new** F representation they are **not** reused: its
-`eff_F` is regenerated in full (`f_block_selection_draft.md` C-7). Whether P1's replicate average and
+`eff_F` is regenerated in full (`f_block_selection.md` C-7). Whether P1's replicate average and
 closed form are the estimator of the expectation over `ω` that P2 locks is a C-10 item.
 
 **Tie order.** On every validate frame `B_E = 0 < B_L,t < B_F`, so "smallest payload" is the fixed order
@@ -220,10 +220,9 @@ No outcome may reopen the objective, the admissibility rule or the data rules.
 * 最终评价数据
 * F1 匹配规则与难帧细则
 
-**Decisions pending with Josh and the supervisor (P2-R3 F-3):**
-
-* the **ranking basis** for spatial blocks (`f_block_selection_draft.md` C-3);
-* the **data plan** (`data_plan.md`).
+**Decided by P2-R4:** the block-ranking question is settled by running three rankings at the same
+payload (`f_block_selection.md`, **LOCKED**, B-1 to B-3). **Still pending:** the **data plan**
+(`data_plan.md`).
 
 **Raised by the drafts — listed so they are decided rather than defaulted:**
 
@@ -232,7 +231,7 @@ No outcome may reopen the objective, the admissibility rule or the data rules.
    and truncation evaluated in development (C-3).
 3. **`δ_NI` and the superiority criterion** have no values (C-9).
 4. **The τ comparator's definition under `A_feas,t`** (C-9).
-5. **Receiver rule, block granularity and fusion adaptation** for the new F (`f_block_selection_draft.md`
+5. **Receiver rule, block granularity and fusion adaptation** for the new F (`f_block_selection.md`
    C-2, C-5, C-6).
 6. **Unverified facts:** 802.11bd tone count rests on patent text (IEEE 802.11bd-2022 paywalled; no public
    secondary source located for 20 MHz); DAIR-V2X data terms; V2V4Real and V2X-Real data licences;

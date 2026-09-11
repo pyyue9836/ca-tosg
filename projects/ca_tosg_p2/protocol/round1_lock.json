@@ -1,0 +1,216 @@
+{
+ "schema": "catosg-p2-round1-lock/1",
+ "what": "payload arithmetic, frozen E-branch boxes and channel constants only; no F output read, no network run",
+ "A1_block": {
+  "transmitted_grid": [
+   25,
+   88
+  ],
+  "channels_per_branch": [
+   16,
+   64,
+   256
+  ],
+  "block_cells": [
+   5,
+   8
+  ],
+  "block_bev_m": [
+   16.0,
+   25.6
+  ],
+  "n_blocks": 55,
+  "elements_per_block_per_branch": [
+   640,
+   2560,
+   10240
+  ],
+  "elements_per_block": 13440,
+  "head_grid": [
+   100,
+   352
+  ],
+  "head_cells_per_block": [
+   20,
+   32
+  ],
+  "block_index": "raster: index = row_block * (W / cols) + col_block, row-major, 0-based"
+ },
+ "A2_bitstream": {
+  "layout": "[mask bitmap][block 0..K-1 in ascending block index; within a block branch 0, 1, 2; within a branch channel-major C x rows x cols]; then P1 packetisation (8,000-bit payload + 320-bit header per packet), LDPC K=500 n=1000, 16-QAM",
+  "overhead_bits_per_frame": {
+   "mask_bitmap": 55,
+   "index_list": 0,
+   "quantisation_parameters": 0,
+   "packet_headers": "320 per packet, charged by the P1 chain",
+   "ldpc_padding": "charged by the P1 chain",
+   "request": "not charged (identical for every action)"
+  },
+  "mask_loss_semantics": "not modelled -- the layout is assumed known at the receiver, as P1 assumes for packet-header contents; the mask bits are still charged as payload",
+  "bits_per_block": 107520
+ },
+ "A3_budget": {
+  "link_row": {
+   "technology": "IEEE 802.11bd",
+   "configuration": "20 MHz",
+   "capacity_variant": "zero-overhead upper bound",
+   "D_comm_ms": 100.0
+  },
+  "B_available_msym": 1.35,
+  "why_upper_bound": "whole channel to one link, every data resource element, continuously; preamble, midambles, MAC, contention, queueing and the request are excluded, so a real link carries less and K_F is an upper bound on blocks sent",
+  "K_F": 23,
+  "share_of_blocks": 0.41818181818181815,
+  "bits_at_K_F": 2473015,
+  "n_cw_at_K_F": 5256,
+  "N_sym_at_K_F_msym": 1.314,
+  "straddling_elements_at_K_F": 5255,
+  "ladder": [
+   {
+    "K": 21,
+    "bits": 2257975,
+    "n_cw": 4799,
+    "N_sym_msym": 1.19975,
+    "fits": true
+   },
+   {
+    "K": 22,
+    "bits": 2365495,
+    "n_cw": 5027,
+    "N_sym_msym": 1.25675,
+    "fits": true
+   },
+   {
+    "K": 23,
+    "bits": 2473015,
+    "n_cw": 5256,
+    "N_sym_msym": 1.314,
+    "fits": true
+   },
+   {
+    "K": 24,
+    "bits": 2580535,
+    "n_cw": 5484,
+    "N_sym_msym": 1.371,
+    "fits": false
+   },
+   {
+    "K": 25,
+    "bits": 2688055,
+    "n_cw": 5713,
+    "N_sym_msym": 1.42825,
+    "fits": false
+   }
+  ],
+  "reference_value_from_draft": 23,
+  "reference_note": "kept as reference only (P2-R4 A-3); K_F above is the locked value"
+ },
+ "A4_L_bound": {
+  "observed_validate_max_boxes": 51,
+  "N_sym_L_at_max_msym": 0.00525,
+  "fits_B_available": true,
+  "K_max_boxes_under_B_available": 13810,
+  "p99_boxes": 49.0,
+  "expected_truncation_share": 0.0,
+  "rule": "no truncation if the observed maximum fits; otherwise the collaborator sends the top min(N_box, K_max) boxes by confidence, and every policy using L follows the same rule"
+ },
+ "C2_attfusion": {
+  "trainable_parameters_by_dim": {
+   "16": 0,
+   "64": 0,
+   "256": 0
+  },
+  "checkpoint_keys": 214,
+  "checkpoint_keys_containing_fuse": [],
+  "checkpoint_file": "latest.pth"
+ },
+ "D2_cells": {
+  "primary": [
+   {
+    "channel": "awgn",
+    "snr_db": 8,
+    "p_cw": 0.00013
+   },
+   {
+    "channel": "awgn",
+    "snr_db": 10,
+    "p_cw": 0.0
+   },
+   {
+    "channel": "awgn",
+    "snr_db": 12,
+    "p_cw": 0.0
+   },
+   {
+    "channel": "awgn",
+    "snr_db": 14,
+    "p_cw": 0.0
+   },
+   {
+    "channel": "awgn",
+    "snr_db": 16,
+    "p_cw": 0.0
+   },
+   {
+    "channel": "awgn",
+    "snr_db": 18,
+    "p_cw": 0.0
+   },
+   {
+    "channel": "awgn",
+    "snr_db": 20,
+    "p_cw": 0.0
+   }
+  ],
+  "rule": "AWGN at 8 dB and above; p_cw from the P1 grid product"
+ },
+ "D2_hard_subset": {
+  "rule": "frozen E branch misses >= 1 ground-truth object at IoU 0.5, canonical union GT (C-5)",
+  "primary": {
+   "min_missed": 1,
+   "frames": 1889,
+   "share": 0.954040404040404,
+   "scenes_with_frames": 9,
+   "min_frames_in_a_scene": 28
+  },
+  "scenes_total": 9,
+  "exploratory_ladder": [
+   {
+    "min_missed": 3,
+    "frames": 1478,
+    "share": 0.7464646464646465,
+    "scenes_with_frames": 8,
+    "min_frames_in_a_scene": 0
+   },
+   {
+    "min_missed": 5,
+    "frames": 1165,
+    "share": 0.5883838383838383,
+    "scenes_with_frames": 6,
+    "min_frames_in_a_scene": 0
+   },
+   {
+    "min_missed": 8,
+    "frames": 852,
+    "share": 0.4303030303030303,
+    "scenes_with_frames": 4,
+    "min_frames_in_a_scene": 0
+   }
+  ],
+  "missed_quantiles_p25_p50_p75_p90": [
+   2.0,
+   6.0,
+   10.0,
+   15.100000000000136
+  ]
+ },
+ "inputs": {
+  "probe_sha256": "91a9340ef1e773de9a42bd4fb66d472ab2e29414c520639e8ec90a55def56009",
+  "chain_sha256": "ad9a4f0ceeb5bc4df394d38ebe8af283cfa5d76e4b7452c836fb3d5de6f04690",
+  "link_scenarios_sha256": "b891d7d44125f18fcc69c188c98291de96b466b976e900df3c8f9c80046763d0",
+  "wp34_sha256": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02",
+  "grid_sha256": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+  "wp2_npz_sha256": "26d503df52fc8fc9a42ae567ba564b05fe4d96322601f3ce18d07ed010f4073a",
+  "checkpoint_sha256": "897fd516a3548f0a8250b5aab9a619520fba2bcea709bacccfd5eab1cd732344"
+ },
+ "command": "python projects/ca_tosg_p2/protocol/round1_lock.py"
+}
