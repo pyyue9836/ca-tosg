@@ -1,0 +1,309 @@
+{
+ "schema": "catosg-p2-amendment1/1",
+ "reads": "round1_lock.json, probe summary, P1 WP5 constants, P1 grid p_cw and scenes; no F1 value",
+ "A1_locked_decomposition": {
+  "rows": [
+   {
+    "ranking": "confidence",
+    "masks": 1,
+    "clean_per_mask": 1,
+    "damaged_per_mask": 64,
+    "p1_per_mask": 1,
+    "identity_control": 1,
+    "forwards": 67
+   },
+   {
+    "ranking": "norm",
+    "masks": 1,
+    "clean_per_mask": 1,
+    "damaged_per_mask": 64,
+    "p1_per_mask": 1,
+    "identity_control": 0,
+    "forwards": 66
+   },
+   {
+    "ranking": "random",
+    "masks": 20,
+    "clean_per_mask": 1,
+    "damaged_per_mask": 64,
+    "p1_per_mask": 1,
+    "identity_control": 0,
+    "forwards": 1320
+   }
+  ],
+  "masked_forwards_per_frame": 1453,
+  "shared_forwards_per_frame": {
+   "full_F_recording_forward": 1,
+   "collaborator_single_vehicle_forward": 1
+  },
+  "executed_forwards_per_frame": 1455,
+  "damaged_per_mask_formula": "8 rates x 4 realisations x 2 regimes (ideal, packet) = 64",
+  "formula": "(2 + R_rand) x (1 clean + damaged + 1 p=1) + 1 identity control",
+  "probe_validation": {
+   "variants": 4,
+   "timed_derived": 260,
+   "timed_recorded": 260.0,
+   "untimed_derived": 5,
+   "total": 265
+  }
+ },
+ "A2_pairing": {
+  "draws": "one codeword-erasure draw per (frame, rate, realisation), computed once per frame before the variant loop (p2_f_block_eval.py line 278, seed [20260809, 3, frame, rate, realisation]) and reused by every variant (line 297); the packet regime is derived deterministically from the same draw",
+  "same_count": "N_cw = 5256 for every variant, because every variant sends K_F = 23 blocks",
+  "what_pairing_does_not_mean": "codeword k carries the k-th chunk of each variant's own message, so the same draw erases different BEV regions under different selections; the channel realisation is paired, the spatial loss is not",
+  "random_layer": "random masks are drawn per (frame, repeat) with seed [20260809, 2, frame, repeat] (line 274), independently of the codeword draws; every random mask sees the same codeword draws"
+ },
+ "A3_cache": [
+  {
+   "item": "collaborator float bottleneck (all three branches)",
+   "computed": "once per frame (full-F recording forward)",
+   "reused_by": "norm ranking",
+   "status": "cached"
+  },
+  {
+   "item": "collaborator confidence map",
+   "computed": "once per frame (single-vehicle forward)",
+   "reused_by": "confidence ranking",
+   "status": "cached"
+  },
+  {
+   "item": "codeword-erasure draws",
+   "computed": "once per (frame, rate, realisation)",
+   "reused_by": "every variant and regime",
+   "status": "cached"
+  },
+  {
+   "item": "clean result of a variant",
+   "computed": "once per variant",
+   "reused_by": "every cell with p_cw = 0 (no forward)",
+   "status": "by interpolation"
+  },
+  {
+   "item": "E branch (ego-only)",
+   "computed": "P1 WP2/WP34 products",
+   "reused_by": "every comparison",
+   "status": "no forward"
+  },
+  {
+   "item": "L branch (object-level)",
+   "computed": "P1 WP34 products and grid eff_L",
+   "reused_by": "every comparison",
+   "status": "no forward"
+  },
+  {
+   "item": "pre-wire features: pillar encoder, scatter, backbone blocks, AutoEncoder encoders, branch-2 block output (ego and collaborator)",
+   "computed": "currently recomputed in every masked forward",
+   "reused_by": "identical across all conditions of a frame",
+   "status": "NOT cached; caching would cut time per condition, not the forward count, and needs an identity check against the full path before use"
+  }
+ ],
+ "A4_withdrawn": "running the loss sweep on only 4 of 20 random masks and the clean condition on the other 16 is withdrawn: it raises the precision of the random baseline under a clean channel only and does not replace repetitions under a damaged channel",
+ "B2_margin": {
+  "B_available_msym": 1.35,
+  "N_sym_at_K_F_msym": 1.314,
+  "margin_msym": 0.03600000000000003,
+  "margin_percent": 2.6666666666666687
+ },
+ "cells_to_nodes": {
+  "cells": [
+   {
+    "cell": "AWGN 8 dB",
+    "p_cw": 0.00013,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.12999999999999998,
+    "nodes_used": [
+     0.0,
+     0.001
+    ]
+   },
+   {
+    "cell": "AWGN 10 dB",
+    "p_cw": 0.0,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.0,
+    "nodes_used": [
+     0.0
+    ]
+   },
+   {
+    "cell": "AWGN 12 dB",
+    "p_cw": 0.0,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.0,
+    "nodes_used": [
+     0.0
+    ]
+   },
+   {
+    "cell": "AWGN 14 dB",
+    "p_cw": 0.0,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.0,
+    "nodes_used": [
+     0.0
+    ]
+   },
+   {
+    "cell": "AWGN 16 dB",
+    "p_cw": 0.0,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.0,
+    "nodes_used": [
+     0.0
+    ]
+   },
+   {
+    "cell": "AWGN 18 dB",
+    "p_cw": 0.0,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.0,
+    "nodes_used": [
+     0.0
+    ]
+   },
+   {
+    "cell": "AWGN 20 dB",
+    "p_cw": 0.0,
+    "lower_node": 0.0,
+    "upper_node": 0.001,
+    "weight_upper": 0.0,
+    "nodes_used": [
+     0.0
+    ]
+   }
+  ],
+  "nodes_needed": [
+   0.0,
+   0.001
+  ],
+  "damaged_nodes_needed": [
+   0.001
+  ]
+ },
+ "C1_stage1": {
+  "frames": 60,
+  "frame_ids_rule": "the 60 probe frames (every 33rd validate frame)",
+  "frames_per_scene": {
+   "2021_08_20_21_48_35": 4,
+   "2021_08_21_17_30_41": 5,
+   "2021_08_22_13_37_16": 4,
+   "2021_08_22_22_01_17": 6,
+   "2021_08_23_10_51_24": 2,
+   "2021_08_23_13_17_21": 1,
+   "2021_08_23_19_42_07": 2,
+   "2021_09_09_19_27_35": 14,
+   "2021_09_11_00_33_16": 22
+  },
+  "scenes": 9,
+  "min_frames_in_a_scene": 1,
+  "random_masks": 8,
+  "conditions_per_mask": 9,
+  "rows": [
+   {
+    "ranking": "confidence",
+    "masks": 1,
+    "clean_per_mask": 1,
+    "damaged_per_mask": 8,
+    "identity_control": 1,
+    "forwards": 10
+   },
+   {
+    "ranking": "norm",
+    "masks": 1,
+    "clean_per_mask": 1,
+    "damaged_per_mask": 8,
+    "identity_control": 0,
+    "forwards": 9
+   },
+   {
+    "ranking": "random",
+    "masks": 8,
+    "clean_per_mask": 1,
+    "damaged_per_mask": 8,
+    "identity_control": 0,
+    "forwards": 72
+   }
+  ],
+  "masked_forwards_per_frame": 91,
+  "executed_forwards_per_frame": 93,
+  "time": {
+   "upper_s_per_frame": 6.802012776368819,
+   "lower_s_per_frame": 4.322833117449059,
+   "upper_gpu_minutes": 6.8020127763688185,
+   "lower_gpu_minutes": 4.322833117449059
+  },
+  "time_model_upper": {
+   "fixed_s": 0.1251609484354655,
+   "forward_s": 0.058216712245574356,
+   "overhead_per_condition_s": 0.015155285863583374,
+   "per_condition_s": 0.07337199810915773
+  },
+  "time_model_lower": {
+   "fixed_s": 0.05861508846282959,
+   "forward_s": 0.03445892746631916,
+   "overhead_per_condition_s": 0.012400611313749291,
+   "per_condition_s": 0.046859538780068447
+  }
+ },
+ "B1_stage2": {
+  "frames": 1980,
+  "formula": "masked forwards per frame = (2 + n2) x 66 + 1",
+  "rule": "n2 = the smallest n in [4, 8, 12, 16, 20] with SD_mask / sqrt(n) <= 0.1 x HW_scene; if none, n2 = 20",
+  "rule_terms": {
+   "SD_mask": "standard deviation (ddof = 1) across the stage-1 random masks of the scene-equal F1 of random ranking, averaged over the seven locked cells, all stage-1 frames",
+   "HW_scene": "half-width of the scene-level bootstrap 95 % interval (10,000 resamples) of the scene-equal F1 of random ranking averaged over the stage-1 masks, same cells and frames",
+   "why": "a Monte Carlo SE at most 0.1 of the scene half-width widens the combined half-width by at most 0.5 %; the rule uses the random baseline only and cannot depend on whether confidence ranking wins"
+  },
+  "candidates": [
+   {
+    "n2": 4,
+    "masked_forwards_per_frame": 397,
+    "gpu_hours_upper": 16.089614308774095,
+    "gpu_hours_lower": 10.264018591282502
+   },
+   {
+    "n2": 8,
+    "masked_forwards_per_frame": 661,
+    "gpu_hours_upper": 26.743228434223795,
+    "gpu_hours_lower": 17.06802362214844
+   },
+   {
+    "n2": 12,
+    "masked_forwards_per_frame": 925,
+    "gpu_hours_upper": 37.39684255967351,
+    "gpu_hours_lower": 23.872028653014382
+   },
+   {
+    "n2": 16,
+    "masked_forwards_per_frame": 1189,
+    "gpu_hours_upper": 48.05045668512321,
+    "gpu_hours_lower": 30.676033683880316
+   },
+   {
+    "n2": 20,
+    "masked_forwards_per_frame": 1453,
+    "gpu_hours_upper": 58.70407081057291,
+    "gpu_hours_lower": 37.48003871474626
+   }
+  ]
+ },
+ "estimate_correction": {
+  "previous_validate_gpu_hours": 46.59272411269025,
+  "previous_reason": "omitted per-condition CPU work (mask construction and F1 scoring) that the probe residual shows",
+  "corrected_validate_gpu_hours_upper_at_20": 58.70407081057291,
+  "corrected_validate_gpu_hours_lower_at_20": 37.48003871474626
+ },
+ "bias": [
+  "upper: probe means, including CUDA warm-up and a GPU shared with a desktop session -> pushes UP",
+  "lower: component medians combined; not the median of a sum, can understate",
+  "one-time dataset build and model load are not included",
+  "stage 1 reuses frames and seeds of the probe, so its confidence, norm, random 0 and random 1 values must reproduce the probe CSV bit for bit -- a free determinism check, run programmatically"
+ ],
+ "command": "python projects/ca_tosg_p2/protocol/amendment1.py"
+}

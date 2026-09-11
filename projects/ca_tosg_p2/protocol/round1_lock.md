@@ -20,7 +20,7 @@ Layout: [mask bitmap][block 0..K-1 in ascending block index; within a block bran
 | ldpc padding | charged by the P1 chain |
 | request | not charged (identical for every action) |
 
-Bits per block: 107,520. Mask loss: not modelled -- the layout is assumed known at the receiver, as P1 assumes for packet-header contents; the mask bits are still charged as payload.
+Bits per block: 107,520. Mask loss: not modelled -- the receiver is assumed to obtain the 55-bit mask correctly and results are conditional on that assumption; metadata corruption is not evaluated (Amendment 1, B-3); the mask bits are still charged as payload.
 
 ## A-3 Budget and K_F
 

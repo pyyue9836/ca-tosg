@@ -38,9 +38,6 @@ def build():
     residual = per_frame_run - (fixed + fwd_run * t_fwd)
     per_split = {s: {'frames': n, 'gpu_hours_locked_design': n * per_frame_locked / 3600,
                      'authorised': s in AUTHORISED} for s, n in SPLIT_FRAMES.items()}
-    # information only: the cost if random's loss sweep ran on 4 of the 20 repeats (an amendment, not chosen)
-    fwd_reduced = 2 * per_var + 4 * per_var + 16 * 2 + 1
-    per_frame_reduced = fixed + fwd_reduced * t_fwd
     return {
         'schema': 'catosg-p2-gpu-estimate-round1/1',
         'kind': 'EXTRAPOLATION from a 60-frame probe of the locked per-frame workload',
@@ -57,10 +54,11 @@ def build():
         'per_frame_s': {'locked_design': per_frame_locked, 'probe_measured_total': per_frame_run,
                         'probe_model_residual_s': residual},
         'per_split': per_split,
-        'information_only_reduced_design': {'description': 'random: full loss sweep on 4 of 20 repeats, the other 16 clean only; '
-                                                           'this is an amendment, not a choice made here',
-                                            'forwards_per_frame': fwd_reduced,
-                                            'validate_gpu_hours': SPLIT_FRAMES['validate'] * per_frame_reduced / 3600},
+        'withdrawn': 'P2-R5 A-4: the option of running the loss sweep on 4 of 20 random masks and only the clean condition '
+                     'on the other 16 is withdrawn -- it improves the random baseline under a clean channel only and does not '
+                     'replace damaged-channel repetitions',
+        'superseded': 'P2-R5: this estimate omits per-condition CPU work (mask construction, F1 scoring) visible in the '
+                      'probe residual; the corrected figure is in amendment1.md',
         'bias': [
             'probe frames are every 33rd frame (60 across all 9 scenes), not a contiguous stretch; a full run reads '
             'frames sequentially, so data-loading cost may differ in either direction',
@@ -92,9 +90,7 @@ def markdown(m):
          '| split | frames | GPU-hours, locked design | authorised |', '|---|---:|---:|:---:|']
     for k, v in m['per_split'].items():
         L.append(f"| {k} | {v['frames']:,} | {v['gpu_hours_locked_design']:.1f} | {'yes' if v['authorised'] else 'no — information only'} |")
-    r = m['information_only_reduced_design']
-    L += ['', f"Information only — {r['description']}: {r['forwards_per_frame']:,} forwards per frame, "
-          f"**{r['validate_gpu_hours']:.1f} GPU-hours on validate**.", '', '**Direction of bias:**', '']
+    L += ['', f"**Superseded.** {m['superseded']}.", '', f"**Withdrawn.** {m['withdrawn']}.", '', '**Direction of bias:**', '']
     L += [f'* {b}' for b in m['bias']]
     return '\n'.join(L) + '\n'
 

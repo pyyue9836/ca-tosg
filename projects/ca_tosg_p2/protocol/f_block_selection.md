@@ -203,3 +203,132 @@ It does not say, and may not be read to say, that F cannot be transmitted.
 * **E-2** After the lock: a 60-frame timing probe of the exact per-frame workload, extrapolated per
   split with the direction of bias stated, reported before D-1 runs; D-1 runs on approval.
 * **E-3** No selector training; V2V4Real not started; stop and report when results exist.
+
+---
+
+## Amendment 1 (P2-R5)
+
+**The LOCKED text above is unchanged.** This amendment adds rules and qualifies wording; where it
+supersedes a sentence above, it says which. Every number below is derived by `amendment1.py` and
+recorded in `amendment1.md`; `amendment1.py --check` fails if this text states different numbers.
+The commit that introduces this amendment is recorded in `../README.md`.
+
+**Why an amendment.** The locked design runs 1,453 masked forwards per frame on all 1,980 frames
+before anything about the representation is known. P2-R5 asks for a small development diagnostic
+first, with the number of random repetitions for the full run set by that diagnostic's timing and
+random variability — and set by a rule fixed now, so that it cannot follow whether confidence ranking
+wins.
+
+### Am1-A What the locked design repeats
+
+Per frame, each mask runs 1 clean forward, **64 damaged** forwards (8 codeword-loss rates × 4
+realisations × 2 regimes, fragment-aware and packet) and 1 forward at p = 1:
+
+| ranking | masks | forwards per frame |
+|---|---:|---:|
+| confidence | 1 | 66 + 1 identity control = 67 |
+| norm | 1 | 66 |
+| random | 20 | 20 × 66 = 1,320 |
+| **masked total** | | **1,453** |
+
+plus one full-F recording forward and one collaborator single-vehicle forward. The count is checked
+against the probe, which executed exactly the derived number for its four variants.
+
+* **Paired damage.** Every ranking and every random mask sees the same number of damaged repetitions
+  and the **same codeword-erasure draws**: one draw per (frame, rate, realisation), seeded
+  `[20260809, 3, frame, rate, realisation]`, computed once per frame and reused by every variant.
+  Every variant sends K_F blocks, so every variant has the same codeword count. What is paired is the
+  channel realisation; because codeword *k* carries the *k*-th chunk of each variant's own message, the
+  same draw erases different BEV regions under different selections.
+* **Random masks are an independent layer**, seeded `[20260809, 2, frame, mask]`, crossed with the
+  shared draws.
+* **Computed once and reused:** the collaborator's float bottleneck, its confidence map, the codeword
+  draws, each variant's clean result (which is also the value at every p_cw = 0 cell), and the E and L
+  branches (P1 products, no forward). **Not cached:** the pre-wire features (pillar encoder to
+  AutoEncoder encoders) are recomputed in every masked forward; caching them would cut time per
+  condition, not the forward count, and would first need an identity check against the full path.
+* **Withdrawn:** running the loss sweep on only 4 of the 20 random masks and the clean condition on the
+  other 16. It improves the random baseline's precision under a clean channel only and does not replace
+  repetitions under a damaged channel.
+
+### Am1-B1 The development experiment runs in two stages
+
+**Stage 1 — development diagnostic.**
+
+* **Frames:** the 60 probe frames (every 33rd validate frame), spanning all 9 scenes but unevenly —
+  14 and 22 frames in two scenes, 1 or 2 in three. The scene-equal mean gives a scene with one frame
+  weight 1/9; stage 1 is read with that in mind.
+* **Rankings:** confidence, norm, and random with **n1 = 8** masks.
+* **Cells:** the seven locked cells, AWGN 8–20 dB. Under the locked §9.3 interpolation they depend on
+  two nodes only: at 10–20 dB p_cw is exactly 0, so `eff_F` equals the clean F1; at 8 dB p_cw = 0.00013,
+  a weight of 0.13 on the p = 0.001 node. Stage 1 therefore runs, per mask, **clean plus p = 0.001 × 4
+  realisations × 2 regimes**, 9 conditions — **91 masked forwards per frame** with the identity
+  control, 93 executed. Estimated 4.3–6.8 GPU-minutes (`amendment1.md`, bias stated there).
+* **F1 is read.** All three rankings are reported. Stage 1 is a development diagnostic, **not a
+  significance test**; its intervals are descriptive.
+* **Outputs:** for each ranking, clean F1 and F1 at each of the seven cells, beside E and L on the same
+  frames; the paired differences confidence − random and norm − random with scene-level bootstrap
+  intervals; the width of those intervals and the across-mask standard deviation at n = 2, 4 and 8
+  masks (nested: the first 2, the first 4, all 8); and the stage-2 mask count by the rule below.
+* **Determinism check:** stage 1 reuses the probe's frames and seeds, so its confidence, norm, random 0
+  and random 1 values must reproduce the probe file exactly; this is checked programmatically.
+
+**Stage 2 — full development run.** All 1,980 frames with the locked conditions (66 per mask), and
+`n2` random masks, where
+
+> **n2 = the smallest n in {4, 8, 12, 16, 20} with SD_mask / √n ≤ 0.1 × HW_scene; if none, n2 = 20.**
+
+`SD_mask` is the standard deviation (ddof = 1) across the stage-1 random masks of the scene-equal F1 of
+random ranking over the seven cells; `HW_scene` is the half-width of the scene-level bootstrap 95 %
+interval (10,000 resamples) of that F1 averaged over the stage-1 masks. A Monte Carlo error of at most
+0.1 of the scene half-width widens the combined half-width by at most 0.5 %. **The rule uses the random
+baseline only; it cannot depend on whether confidence ranking wins.** The GPU cost at each candidate is
+in `amendment1.md`; stage 2 runs only on approval.
+
+**Stage-1 results may not change** the ranking rules, the block count, the block size or the
+aggregation. A problem found in stage 1 stops the work and is reported.
+
+### Am1-B2 What K_F = 23 shows, and what it does not
+
+K_F = 23 fits the zero-overhead upper bound with a margin of **0.0360 Msym (2.7 %)**. This round
+evaluates the value of a sparse representation under an idealised resource upper bound; **it does not
+show that a real 802.11bd link meets a 100 ms deadline.** If the representation is effective, the next
+stage must re-evaluate it under the smaller budget left after real overhead is deducted. *Supersedes the
+last sentence of A-3 above.*
+
+### Am1-B3 The mask assumption
+
+The receiver is assumed to obtain the 55-bit block mask correctly. **Results are conditional on that
+assumption; corruption of this metadata is not evaluated.** A deployment analysis must account for how
+the mask is protected and what that costs. *Supersedes the justification given in A-2 above* — the
+earlier text grounded the assumption in P1's treatment of packet headers, which is not a reason.
+`round1_lock.py`'s description of the mask was reworded accordingly and `round1_lock.md` regenerated; no
+number changed.
+
+### Am1-B4 L is not truncated — on this data
+
+The observed validate maximum is 51 boxes. **That is not a guarantee on new data**: the detection
+post-processing has no cap on predicted boxes (`link_scenarios.md` [S13]), so the bound must be checked
+on any new data before the no-truncation statement is reused.
+
+### Am1-B5 The hard-frame subset discriminates little
+
+The C-5 definition stands. At 95.4 % of validate, the subset is close to the whole split and its power
+to separate frames is limited. The ≥ 3, ≥ 5 and ≥ 8 missed-object subsets remain exploratory.
+
+### Am1-B6 The 8 ms figure
+
+The per-frame GPU time of the collaborator's additional local detection forward, measured on this
+machine (median 7.3 ms; 2.1 s on CPU over 3 frames). **It is not system latency and not full-run
+throughput.**
+
+### Am1-B7 Checks
+
+`amendment1.py --check` re-derives every number of this amendment and fails if this text differs;
+`round1_lock.py --check` still asserts K_F and the LOCKED status.
+
+### Am1-C Estimate correction
+
+The earlier estimate for the locked design (46.6 GPU-hours on validate) omitted per-condition CPU work —
+mask construction and F1 scoring — that the probe residual shows. The corrected range at 20 masks is in
+`amendment1.md`; `gpu_estimate_round1.md` is marked superseded.

@@ -21,7 +21,9 @@ Forwards per frame: locked design **1,453** ((2 + R_rand) variants x (1 clean + 
 | test | 2,170 | 51.1 | no — information only |
 | culver | 550 | 12.9 | no — information only |
 
-Information only — random: full loss sweep on 4 of 20 repeats, the other 16 clean only; this is an amendment, not a choice made here: 429 forwards per frame, **13.8 GPU-hours on validate**.
+**Superseded.** P2-R5: this estimate omits per-condition CPU work (mask construction, F1 scoring) visible in the probe residual; the corrected figure is in amendment1.md.
+
+**Withdrawn.** P2-R5 A-4: the option of running the loss sweep on 4 of 20 random masks and only the clean condition on the other 16 is withdrawn -- it improves the random baseline under a clean channel only and does not replace damaged-channel repetitions.
 
 **Direction of bias:**
 

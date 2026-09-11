@@ -204,8 +204,9 @@ def build():
                                         'quantisation_parameters': QUANT_PARAM_BITS,
                                         'packet_headers': '320 per packet, charged by the P1 chain',
                                         'ldpc_padding': 'charged by the P1 chain', 'request': 'not charged (identical for every action)'},
-            'mask_loss_semantics': 'not modelled -- the layout is assumed known at the receiver, as P1 assumes for '
-                                   'packet-header contents; the mask bits are still charged as payload',
+            'mask_loss_semantics': 'not modelled -- the receiver is assumed to obtain the 55-bit mask correctly and results '
+                                   'are conditional on that assumption; metadata corruption is not evaluated (Amendment 1, '
+                                   'B-3); the mask bits are still charged as payload',
             'bits_per_block': e_block * pcm.W_BITS},
         'A3_budget': {'link_row': dict(zip(('technology', 'configuration', 'capacity_variant', 'D_comm_ms'), LINK_ROW)),
                       'B_available_msym': B_avail,
