@@ -1,0 +1,155 @@
+{
+ "schema": "catosg-p2-round1-eval/1",
+ "mode": "stage1",
+ "rates_used": [
+  0.001
+ ],
+ "p1_condition_run": false,
+ "split": "validate",
+ "frames": 60,
+ "every": 33,
+ "frame_ids": [
+  0,
+  33,
+  66,
+  99,
+  132,
+  165,
+  198,
+  231,
+  264,
+  297,
+  330,
+  363,
+  396,
+  429,
+  462,
+  495,
+  528,
+  561,
+  594,
+  627,
+  660,
+  693,
+  726,
+  759,
+  792,
+  825,
+  858,
+  891,
+  924,
+  957,
+  990,
+  1023,
+  1056,
+  1089,
+  1122,
+  1155,
+  1188,
+  1221,
+  1254,
+  1287,
+  1320,
+  1353,
+  1386,
+  1419,
+  1452,
+  1485,
+  1518,
+  1551,
+  1584,
+  1617,
+  1650,
+  1683,
+  1716,
+  1749,
+  1782,
+  1815,
+  1848,
+  1881,
+  1914,
+  1947
+ ],
+ "rand_reps_run": 8,
+ "rand_reps_locked": 20,
+ "variants_run": [
+  "conf",
+  "norm",
+  "rand0",
+  "rand1",
+  "rand2",
+  "rand3",
+  "rand4",
+  "rand5",
+  "rand6",
+  "rand7"
+ ],
+ "conditions_per_variant": 9,
+ "K_F": 23,
+ "n_blocks": 55,
+ "n_cw": 5256,
+ "lock_sha256_inputs": {
+  "probe_sha256": "91a9340ef1e773de9a42bd4fb66d472ab2e29414c520639e8ec90a55def56009",
+  "chain_sha256": "ad9a4f0ceeb5bc4df394d38ebe8af283cfa5d76e4b7452c836fb3d5de6f04690",
+  "link_scenarios_sha256": "b891d7d44125f18fcc69c188c98291de96b466b976e900df3c8f9c80046763d0",
+  "wp34_sha256": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02",
+  "grid_sha256": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+  "wp2_npz_sha256": "26d503df52fc8fc9a42ae567ba564b05fe4d96322601f3ce18d07ed010f4073a",
+  "checkpoint_sha256": "897fd516a3548f0a8250b5aab9a619520fba2bcea709bacccfd5eab1cd732344"
+ },
+ "seconds": 419.9,
+ "sec_per_frame": 6.999,
+ "identity_vs_P1_f1_clean": {
+  "max_abs_diff": 1.1102230246251565e-16,
+  "frames_compared": 60
+ },
+ "identity_control_all_ok": true,
+ "timing": {
+  "t_load_s": {
+   "mean": 0.03989141782124837,
+   "median": 0.007000565528869629,
+   "n": 60
+  },
+  "t_record_fwd_s": {
+   "mean": 0.07404272158940634,
+   "median": 0.04456663131713867,
+   "n": 60
+  },
+  "t_collab_fwd_gpu_s": {
+   "mean": 0.007919828097025553,
+   "median": 0.006739377975463867,
+   "n": 60
+  },
+  "t_collab_fwd_cpu_s": {
+   "mean": NaN,
+   "median": NaN,
+   "n": 0
+  },
+  "n_masked_fwd": {
+   "mean": 90.0,
+   "median": 90.0,
+   "n": 60
+  },
+  "t_masked_fwd_mean_s": {
+   "mean": 0.05990415754141631,
+   "median": 0.0378488924768236,
+   "n": 60
+  },
+  "t_masked_fwd_median_s": {
+   "mean": 0.05932544072469075,
+   "median": 0.036355793476104736,
+   "n": 60
+  },
+  "t_frame_total_s": {
+   "mean": 6.998562101523081,
+   "median": 4.5856475830078125,
+   "n": 60
+  }
+ },
+ "device": {
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "cpu_threads_torch": 8,
+  "cpu_frames_timed": 0
+ },
+ "command": "projects/ca_tosg_p2/evaluation/p2_f_block_eval.py --stage1"
+}

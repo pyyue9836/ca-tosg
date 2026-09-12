@@ -186,11 +186,22 @@ def main():
     ap.add_argument('--rand-reps', type=int, default=R_RAND_LOCKED)
     ap.add_argument('--cpu-frames', type=int, default=3)
     ap.add_argument('--probe', action='store_true', help='60 frames spread over the split, 2 random repeats; timings')
+    ap.add_argument('--stage1', action='store_true',
+                    help='Amendment 1 stage 1: the probe frames, 8 random masks, and only the nodes the seven '
+                         'locked cells use (clean and p = 0.001)')
     ap.add_argument('--tag', default='')
     a = ap.parse_args()
     if a.probe:
         a.every, a.limit, a.rand_reps = 33, 60, 2
-    out_dir = os.path.join(RESULTS, 'probe' if a.probe else 'round1')
+    if a.stage1:
+        if a.probe:
+            raise SystemExit('--stage1 and --probe are different runs')
+        a.every, a.limit, a.rand_reps, a.cpu_frames = 33, 60, 8, 0
+    # stage 1 needs only the interpolation nodes the seven locked cells use: p_cw is exactly 0 at
+    # AWGN 10-20 dB (clean) and 0.00013 at 8 dB, which interpolates between clean and p = 0.001.
+    rates_used = (0.001,) if a.stage1 else RATES
+    run_p1 = not a.stage1
+    out_dir = os.path.join(RESULTS, 'stage1' if a.stage1 else ('probe' if a.probe else 'round1'))
     os.makedirs(out_dir, exist_ok=True)
     lock = json.load(open(LOCK))
 
@@ -216,8 +227,12 @@ def main():
     tr = BlockTransport(model.backbone, scales, lock).to_device(dev)
     p1 = pd.read_csv(os.path.join(ROOT, 'results', 'v2', f'wp5_final_{a.split}.csv'), usecols=['frame', 'f1_clean'])
     p1_clean = dict(zip(p1.frame.astype(int), p1.f1_clean))
+    if a.stage1:
+        probe_ids = json.load(open(os.path.join(RESULTS, 'probe', f'f_block_eval_{a.split}.json')))['frame_ids']
+        if idx != probe_ids:
+            raise SystemExit('stage 1 frames differ from the probe frames -- the determinism check would be vacuous')
     variants = list(VARIANTS_FIXED) + [f'rand{r}' for r in range(a.rand_reps)]
-    n_cond = 1 + len(RATES) * R_REPS * len(REGIMES) + 1
+    n_cond = 1 + len(rates_used) * R_REPS * len(REGIMES) + (1 if run_p1 else 0)
     print(f'{a.split}: {len(idx)} frames | K_F={tr.K} of {tr.n_blocks} blocks | N_cw={tr.n_cw} | '
           f'{len(variants)} variants x {n_cond} conditions (+1 identity control)', flush=True)
 
@@ -275,8 +290,8 @@ def main():
             rec['blocks_conf'] = ' '.join(map(str, sel['conf'])); rec['blocks_norm'] = ' '.join(map(str, sel['norm']))
             rec['overlap_conf_norm'] = int(len(set(sel['conf']) & set(sel['norm'])))
             # 4. the shared codeword draws
-            draws = {(ri, rep): np.random.default_rng(draw_seed(frame, ri, rep)).random(tr.n_cw) < p
-                     for ri, p in enumerate(RATES) for rep in range(R_REPS)}
+            draws = {(RATES.index(p), rep): np.random.default_rng(draw_seed(frame, RATES.index(p), rep)).random(tr.n_cw) < p
+                     for p in rates_used for rep in range(R_REPS)}
             t_fwds = []
             for v in variants:
                 tr.set_blocks(sel[v])
@@ -291,7 +306,8 @@ def main():
                     with tr.patched():
                         Bc, _ = fwd(pack)
                     rec['identity_control_ok'] = int(Bc.shape == B.shape and (B.size == 0 or np.abs(Bc - B).max() == 0))
-                for ri, p in enumerate(RATES):
+                for p in rates_used:
+                    ri = RATES.index(p)          # the seed index is the position in P1's full rate list
                     for rep in range(R_REPS):
                         for reg in REGIMES:
                             tr.set_dead(draws[(ri, rep)], reg)
@@ -302,10 +318,11 @@ def main():
                             rec[f'f1_{v}_{reg}_p{p}_r{rep}'] = f1_from_boxes(B, G)
                             if v == 'conf':
                                 rec[f'cw_{reg}_p{p}_r{rep}'] = tr.n_lost_cw
-                tr.set_dead(np.ones(tr.n_cw, bool), 'ideal')
-                with tr.patched():
-                    B1, _ = fwd(pack)
-                rec[f'f1_{v}_p1.0'] = f1_from_boxes(B1, G)
+                if run_p1:
+                    tr.set_dead(np.ones(tr.n_cw, bool), 'ideal')
+                    with tr.patched():
+                        B1, _ = fwd(pack)
+                    rec[f'f1_{v}_p1.0'] = f1_from_boxes(B1, G)
         rows.append(rec)
         timing.append({'frame': frame, 't_load_s': t_load, 't_record_fwd_s': t_rec, 't_collab_fwd_gpu_s': t_col,
                        't_collab_fwd_cpu_s': t_cpu, 'n_masked_fwd': len(t_fwds), 't_masked_fwd_mean_s': float(np.mean(t_fwds)),
@@ -320,7 +337,9 @@ def main():
     tag = f'_{a.tag}' if a.tag else ''
     pd.DataFrame(rows).to_csv(os.path.join(out_dir, f'f_block_rows_{a.split}{tag}.csv'), index=False)
     T = pd.DataFrame(timing)
-    summ = {'schema': 'catosg-p2-round1-eval/1', 'mode': 'probe' if a.probe else 'full', 'split': a.split,
+    summ = {'schema': 'catosg-p2-round1-eval/1',
+            'mode': 'stage1' if a.stage1 else ('probe' if a.probe else 'full'),
+            'rates_used': list(rates_used), 'p1_condition_run': run_p1, 'split': a.split,
             'frames': len(rows), 'every': a.every, 'frame_ids': idx, 'rand_reps_run': a.rand_reps,
             'rand_reps_locked': R_RAND_LOCKED, 'variants_run': variants, 'conditions_per_variant': n_cond,
             'K_F': tr.K, 'n_blocks': tr.n_blocks, 'n_cw': tr.n_cw, 'lock_sha256_inputs': lock['inputs'],
