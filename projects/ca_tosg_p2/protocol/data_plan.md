@@ -10,7 +10,7 @@
 **Two datasets, two jobs.**
 
 1. **OPV2V answers the F-representation question.** Development on OPV2V `validate` with the P1
-   checkpoint, under `f_block_selection.md` stage 1. `test` and Culver-City stay prohibited
+   checkpoint, under the (now closed) sparse-line protocol, archived in `archive/p2-sparse-exploratory/`. `test` and Culver-City stay prohibited
    (`p2_protocol.md` C-8).
 2. **V2V4Real carries the final system.** One **unified checkpoint is trained on V2V4Real**, and every
    action and every baseline uses that one checkpoint — so a comparison between actions is never also a
@@ -32,10 +32,9 @@
   counts per split). The confirmatory statistic is a scene-level bootstrap, so the number of test
   scenes decides how coarse the intervals will be. It must be counted from the downloaded directory
   structure before lock.
-* **The block definitions of `f_block_selection.md` C-2 carry over only if the V2V4Real
-  checkpoint uses the same detection range, voxel size and backbone strides.** A different range changes
-  the transmitted grid and therefore every block count. The V2V4Real training configuration must be
-  fixed to match, or C-2 re-derived for it.
+* **A V2V4Real checkpoint must keep the same detection range, voxel size and backbone strides** if any
+  measurement made on the OPV2V checkpoint is to carry over; a different range changes the transmitted
+  tensor and every payload figure derived from it.
 * **Data licence:** no data licence is stated on the V2V4Real download page (see `p2_protocol.md` C-8);
   confirm with the provider.
 

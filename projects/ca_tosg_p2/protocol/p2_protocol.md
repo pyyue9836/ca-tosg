@@ -17,11 +17,9 @@ writes.
 |---|---|---|
 | `p2_reuse_manifest.json` | `build_reuse_manifest.py` | P1 artefacts P2 reuses, by path and sha256; chain and C-7 verification (payload columns only) |
 | `link_scenarios.md` / `.json` | `link_scenarios.py` | C-6 resource table, A-2 facts, B-3 reference column, D-1 L bound |
-| `f_block_budget.md` / `.json` | `f_block_budget.py` | block mapping and budget for `f_block_selection.md` |
 | `gpu_estimate.md` / `.json` | `gpu_estimate.py` | GPU-time estimate for `data_plan.md` (an estimate; nothing run) |
 
-Beside it: `f_block_selection.md` (round-1 development experiment, **LOCKED** under P2-R4, with
-`round1_lock.py` → `round1_lock.md`) and `data_plan.md` (P2-R3 E, reported only).
+Beside it: `data_plan.md` (P2-R3 E, reported only) and `full_f_feasibility.md` (P2-R9, the complete-F transmission audit). The sparse-selection line is closed and archived under `archive/p2-sparse-exploratory/`.
 
 ---
 
@@ -89,8 +87,8 @@ a*_t   ∈ argmax_{a ∈ A_feas,t} Q_t(a)
 Ties — `|Q_t(a) − Q_t(a')| ≤ TOL`, **`TOL = 1e-9`, preregistered** — go to the smallest payload.
 
 **Reuse of P1.** `Q_t(E)`, `Q_t(L)`, `Q_t(F)` are P1's `eff_E`, `eff_L`, `eff_F` under P1 §9.3 (a)–(g),
-pinned in `p2_reuse_manifest.json`. For any **new** F representation they are **not** reused: its
-`eff_F` is regenerated in full (`f_block_selection.md` C-7). Whether P1's replicate average and
+pinned in `p2_reuse_manifest.json`. For any **new** F representation they would **not** be reused: its `eff_F` would be regenerated in
+full. No new F representation is in scope (P2-R9 item 2). Whether P1's replicate average and
 closed form are the estimator of the expectation over `ω` that P2 locks is a C-10 item.
 
 **Tie order.** On every validate frame `B_E = 0 < B_L,t < B_F`, so "smallest payload" is the fixed order
@@ -220,8 +218,8 @@ No outcome may reopen the objective, the admissibility rule or the data rules.
 * 最终评价数据
 * F1 匹配规则与难帧细则
 
-**Decided by P2-R4:** the block-ranking question is settled by running three rankings at the same
-payload (`f_block_selection.md`, **LOCKED**, B-1 to B-3). **Still pending:** the **data plan**
+**Closed by P2-R9:** the block-ranking question and the sparse line as a whole are closed; the
+result is in `archive/p2-sparse-exploratory/README.md`. **Still pending:** the **data plan**
 (`data_plan.md`).
 
 **Raised by the drafts — listed so they are decided rather than defaulted:**
@@ -231,8 +229,8 @@ payload (`f_block_selection.md`, **LOCKED**, B-1 to B-3). **Still pending:** the
    and truncation evaluated in development (C-3).
 3. **`δ_NI` and the superiority criterion** have no values (C-9).
 4. **The τ comparator's definition under `A_feas,t`** (C-9).
-5. **Receiver rule, block granularity and fusion adaptation** for the new F (`f_block_selection.md`
-   C-2, C-5, C-6).
+5. ~~Receiver rule, block granularity and fusion adaptation for a sparse F~~ — closed with the sparse
+   line (P2-R9); see `archive/p2-sparse-exploratory/README.md`.
 6. **Unverified facts:** 802.11bd tone count rests on patent text (IEEE 802.11bd-2022 paywalled; no public
    secondary source located for 20 MHz); DAIR-V2X data terms; V2V4Real and V2X-Real data licences;
    V2V4Real scenes per split.
@@ -257,3 +255,30 @@ NOTE 10); N_RB now from the primary table (TS 38.101-1 Table 5.3.2-1); collabora
   https://thudair.baai.ac.cn/index (unreachable at the time of writing).
 
 C-6 sources are quoted in `link_scenarios.md`.
+
+
+---
+
+## P2-R9 — the sparse line is closed, and the subject of this batch is fixed
+
+**Item 1. Closed.** The sparse-selection line (K_F = 23 of 55 blocks, three rankings) is stopped. Its
+commits and every product are preserved unchanged in `archive/p2-sparse-exploratory/`, which records the
+conclusion: the pre-registered benefit condition was not met (confidence − L = −0.00280, interval
+spanning zero) while the complete F did beat L (+0.01444), and the ranking itself worked
+(confidence − random = +0.06349). It is an exploratory side branch. **No new block-selection, recovery-network
+or sparse-selector experiment is started.**
+
+**Item 2. The subject of this batch is fixed.**
+
+* **F** is the **complete bottleneck of the current model — all 55 blocks** — with the existing
+  compression and int8 quantisation unchanged.
+* **L** is the object-level message.
+* **E** is ego-only perception.
+
+**The content, precision and detection range of F do not change without an explicit decision.** No
+sparse F, no transmission spread across frames and no lower sending rate is adopted or proposed here.
+
+**Items 3–5** are answered in `full_f_feasibility.md`: the payload chain re-derived and checked, the
+time to send the complete F on every configuration already listed in `link_scenarios.md`, and the
+verdict — **no examined configuration delivers the complete F inside a 100 ms frame period**, so there
+is no candidate for a degradation experiment yet, and the deficit sits in the message size.
