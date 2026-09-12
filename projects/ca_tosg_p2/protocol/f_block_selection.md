@@ -332,3 +332,73 @@ throughput.**
 The earlier estimate for the locked design (46.6 GPU-hours on validate) omitted per-condition CPU work —
 mask construction and F1 scoring — that the probe residual shows. The corrected range at 20 masks is in
 `amendment1.md`; `gpu_estimate_round1.md` is marked superseded.
+
+---
+
+## Amendment 2 (P2-R7)
+
+**The LOCKED text and Amendment 1 above are unchanged.** Numbers here are derived by `amendment2.py`
+(and, for the subsets, by `../evaluation/p2_stage1_report.py`); `amendment2.py --check` fails if this
+text states different ones. The commit introducing this amendment is recorded in `../README.md`.
+
+### Am2-A The hard-frame subset, recomputed on the 60 stage-1 frames
+
+The split-wide 95.4 % is **not** carried over. On these 60 frames, under the locked C-5 rule (the frozen
+E branch misses at least one ground-truth object at IoU 0.5):
+
+| subset | frames | share of the 60 | scenes included |
+|---|---:|---:|---:|
+| **locked (E misses ≥ 1)** | **57** | 95.0 % | 9 of 9 |
+| exploratory (≥ 3) | 43 | 71.7 % | 5 of 9 |
+| exploratory (≥ 5) | 37 | 61.7 % | 5 of 9 |
+| exploratory (≥ 8) | 25 | 41.7 % | 4 of 9 |
+
+**A scene with no frame in a subset is dropped from the scene-equal mean** — no zero is substituted and
+no reweighting is applied — and the number of scenes actually included is reported with every figure.
+The exploratory subsets are exploratory: they may not carry a confirmatory claim in this round.
+
+### Am2-B1 The number of random masks becomes n2 = 8
+
+**This is a precision correction made after stage-1 results were seen. It is not the value the
+pre-registered rule of Amendment 1 produced — that rule gave 4 — and it is not a pre-registered
+quantity.** It is recorded as such so that no later reading can mistake it for one.
+
+### Am2-B2 What the mask count is sized against
+
+The planning basis is the half-width of the **confidence − random** difference, **0.01525**, with
+ρ = 0.1 as before. The Monte Carlo error of the random masks enters only comparisons **against the
+random baseline**; confidence − L and norm − L carry none of it, so the difference against random is
+the quantity the mask count has to be sized for. For comparison, with SD_mask = 0.00388:
+
+| basis | half-width | threshold | smallest n meeting it |
+|---|---:|---:|---:|
+| confidence − random (**used**) | 0.01525 | 0.00152 | **8** |
+| norm − random | 0.02491 | 0.00249 | 4 |
+| absolute level (Amendment 1's basis) | 0.05826 | 0.00583 | 2 |
+
+### Am2-B3 Status of the number
+
+n2 = 8 is a **basis for cost planning, not a guarantee of precision**: SD_mask is itself estimated from
+8 masks on 60 frames. After stage 2 the same check is repeated with the SD_mask measured there, and the
+outcome is reported whether or not it meets the threshold.
+
+### Am2-C A clean-only stage 2, costed
+
+Scope: validate, 1,980 frames; confidence, norm and random at n2 = 8; **the clean condition only, no
+loss sweep**; E, L and full F taken from existing P1 products at matched frames.
+
+Per frame: **10 masked forwards** (confidence, norm, 8 random) plus 2 shared (the full-F recording
+forward and the collaborator's own detection forward) = 12. At the stage-1 measured 75.6 ms per
+condition: **0.88 s per frame, 0.5 GPU-hours** for the split.
+
+**The 27.5 GPU-hours of the full damaged sweep at the same n2 is not the cost of this plan**, and
+neither figure may be quoted for the other.
+
+**What a clean-only run does and does not cover.** Six of the seven locked cells have p_cw exactly 0,
+so the clean forward *is* their value. The 8 dB cell needs the p = 0.001 node, which a clean-only run
+does not produce; substituting the clean value there is an approximation whose size stage 1 measured:
+at most 0.00006 in scene-equal F1. Bias directions for the time estimate are in `amendment2.md`.
+
+### Am2-D What is retained
+
+The three scenes with a negative confidence − L difference are reported as they are, in every table.

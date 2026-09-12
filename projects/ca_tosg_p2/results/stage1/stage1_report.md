@@ -7,6 +7,77 @@ Determinism against the probe: 2,940 values over 49 shared columns, all identica
 
 60 frames, 9 scenes, K_F = 23 of 55 blocks, 8 random masks, damaged node p = 0.001.
 
+## A Hard-frame subsets of these 60 frames
+
+Rule: the frozen E branch misses at least one ground-truth object at IoU 0.5 (C-5), recomputed on these 60 frames -- the split-wide 95.4 % is not carried over. a scene with no frame in the subset is dropped from the scene-equal mean; no zero is substituted and no reweighting is applied.
+
+| subset | frames | share of the 60 | scenes included | frames per scene |
+|---|---:|---:|---:|---|
+| locked (E misses ≥ 1) | 57 | 95.0 % | 9 of 9 | 4, 5, 3, 5, 1, 1, 2, 14, 22 |
+| exploratory (≥ 3) | 43 | 71.7 % | 5 of 9 | 2, 5, 1, 14, 21 |
+| exploratory (≥ 5) | 37 | 61.7 % | 5 of 9 | 2, 4, 1, 14, 16 |
+| exploratory (≥ 8) | 25 | 41.7 % | 4 of 9 | 1, 1, 14, 9 |
+
+### locked hard subset (E misses ≥ 1): 57 frames, 9 of 9 scenes
+
+| E | L | full_F_P1 | sparse_F_confidence | sparse_F_norm | sparse_F_random_mean |
+|---:|---:|---:|---:|---:|---:|
+| 0.80547 | 0.89744 | 0.91895 | 0.89790 | 0.88381 | 0.82831 |
+
+| difference | mean | 95 % interval |
+|---|---:|---|
+| confidence_minus_L | +0.00046 | [-0.00863, +0.00964] |
+| norm_minus_L | -0.01363 | [-0.03354, +0.01084] |
+| random_minus_L | -0.06913 | [-0.08187, -0.05489] |
+| confidence_minus_random | +0.06959 | [+0.05585, +0.08586] |
+| confidence_minus_norm | +0.01409 | [-0.00809, +0.03131] |
+| norm_minus_random | +0.05550 | [+0.03484, +0.08246] |
+
+### exploratory subset (E misses ≥ 3): 43 frames, 5 of 9 scenes — dropped: 2021_08_22_13_37_16, 2021_08_22_22_01_17, 2021_08_23_13_17_21, 2021_08_23_19_42_07
+
+| E | L | full_F_P1 | sparse_F_confidence | sparse_F_norm | sparse_F_random_mean |
+|---:|---:|---:|---:|---:|---:|
+| 0.76419 | 0.88388 | 0.88933 | 0.89389 | 0.87147 | 0.82354 |
+
+| difference | mean | 95 % interval |
+|---|---:|---|
+| confidence_minus_L | +0.01001 | [-0.00680, +0.02325] |
+| norm_minus_L | -0.01241 | [-0.01835, -0.00647] |
+| random_minus_L | -0.06034 | [-0.08101, -0.03999] |
+| confidence_minus_random | +0.07035 | [+0.04628, +0.10130] |
+| confidence_minus_norm | +0.02242 | [+0.00843, +0.03640] |
+| norm_minus_random | +0.04793 | [+0.03248, +0.06680] |
+
+### exploratory subset (E misses ≥ 5): 37 frames, 5 of 9 scenes — dropped: 2021_08_22_13_37_16, 2021_08_22_22_01_17, 2021_08_23_13_17_21, 2021_08_23_19_42_07
+
+| E | L | full_F_P1 | sparse_F_confidence | sparse_F_norm | sparse_F_random_mean |
+|---:|---:|---:|---:|---:|---:|
+| 0.75773 | 0.87904 | 0.88379 | 0.88886 | 0.86627 | 0.81900 |
+
+| difference | mean | 95 % interval |
+|---|---:|---|
+| confidence_minus_L | +0.00982 | [-0.00645, +0.02272] |
+| norm_minus_L | -0.01277 | [-0.01835, -0.00720] |
+| random_minus_L | -0.06004 | [-0.08175, -0.03863] |
+| confidence_minus_random | +0.06985 | [+0.04509, +0.10130] |
+| confidence_minus_norm | +0.02259 | [+0.00917, +0.03601] |
+| norm_minus_random | +0.04726 | [+0.02971, +0.06698] |
+
+### exploratory subset (E misses ≥ 8): 25 frames, 4 of 9 scenes — dropped: 2021_08_21_17_30_41, 2021_08_22_13_37_16, 2021_08_22_22_01_17, 2021_08_23_13_17_21, 2021_08_23_19_42_07
+
+| E | L | full_F_P1 | sparse_F_confidence | sparse_F_norm | sparse_F_random_mean |
+|---:|---:|---:|---:|---:|---:|
+| 0.73008 | 0.86743 | 0.87195 | 0.87432 | 0.84884 | 0.78009 |
+
+| difference | mean | 95 % interval |
+|---|---:|---|
+| confidence_minus_L | +0.00689 | [-0.01286, +0.02134] |
+| norm_minus_L | -0.01859 | [-0.02739, -0.00996] |
+| random_minus_L | -0.08734 | [-0.10959, -0.06510] |
+| confidence_minus_random | +0.09423 | [+0.05890, +0.12957] |
+| confidence_minus_norm | +0.02548 | [+0.00856, +0.04239] |
+| norm_minus_random | +0.06876 | [+0.05033, +0.08718] |
+
 ## B-1 Scene-equal F1
 
 | arm | AWGN 8 dB | AWGN 10 dB | AWGN 12 dB | AWGN 14 dB | AWGN 16 dB | AWGN 18 dB | AWGN 20 dB | seven-cell average |
@@ -32,11 +103,13 @@ Determinism against the probe: 2,940 values over 49 shared columns, all identica
 | random_mean_minus_L, regime ideal | -0.06538 | [-0.07848, -0.05171] | 0.01339 |
 | confidence_minus_random, regime ideal | +0.07115 | [+0.05711, +0.08761] | 0.01525 |
 | confidence_minus_norm, regime ideal | +0.01606 | [-0.00613, +0.03224] | 0.01918 |
+| norm_minus_random, regime ideal | +0.05508 | [+0.03288, +0.08270] | 0.02491 |
 | confidence_minus_L, regime packet | +0.00577 | [-0.00108, +0.01262] | 0.00685 |
 | norm_minus_L, regime packet | -0.01029 | [-0.02817, +0.01261] | 0.02039 |
 | random_mean_minus_L, regime packet | -0.06538 | [-0.07848, -0.05171] | 0.01339 |
 | confidence_minus_random, regime packet | +0.07115 | [+0.05711, +0.08760] | 0.01525 |
 | confidence_minus_norm, regime packet | +0.01606 | [-0.00613, +0.03224] | 0.01918 |
+| norm_minus_random, regime packet | +0.05508 | [+0.03289, +0.08270] | 0.02491 |
 
 ## B-3 Per scene (fragment-aware regime)
 

@@ -1,0 +1,73 @@
+{
+ "schema": "catosg-p2-amendment2/1",
+ "reads": "stage1_report.json, amendment1.json, the stage-1 run summary; no new measurement",
+ "B1_n2": {
+  "n2": 8,
+  "provenance": "a precision correction chosen AFTER stage-1 results were seen; it is NOT the value the pre-registered rule of Amendment 1 produced (that rule gave 4) and it is not a pre-registered quantity",
+  "amendment1_rule_value": 4
+ },
+ "B2_basis": {
+  "sd_mask": 0.0038804408210469147,
+  "rho": 0.1,
+  "chosen_basis": "half-width of the confidence - random difference",
+  "hw_confidence_minus_random": 0.015249160771395362,
+  "threshold_confidence_minus_random": 0.0015249160771395364,
+  "n_from_confidence_minus_random": 8,
+  "hw_norm_minus_random": 0.024906376028933457,
+  "threshold_norm_minus_random": 0.002490637602893346,
+  "n_from_norm_minus_random": 4,
+  "hw_level_amendment1": 0.05825734661477444,
+  "threshold_level": 0.005825734661477445,
+  "n_from_level": 2,
+  "why": "the Monte Carlo error of the random masks enters only comparisons against the random baseline; confidence - L and norm - L carry none of it, so the difference against random is the quantity the mask count has to be sized for",
+  "mc_se_by_n": {
+   "2": 0.0027438860185553674,
+   "4": 0.0019402204105234573,
+   "8": 0.0013719430092776837,
+   "12": 0.0011201867763029243,
+   "16": 0.0009701102052617287,
+   "20": 0.0008676929458525998
+  }
+ },
+ "B3_status": "n2 = 8 is a basis for cost planning, not a guarantee of precision: SD_mask is itself estimated from 8 masks on 60 frames. After stage 2 the check is repeated with the SD_mask measured there, and the result is reported whether or not it meets the threshold",
+ "C_clean_only_stage2": {
+  "scope": "validate, 1,980 frames; confidence, norm and random; clean condition only; no loss sweep. E, L and full F come from existing P1 products at matched frames",
+  "masked_forwards_per_frame": 10,
+  "shared_forwards_per_frame": 2,
+  "forwards_per_frame_total": 12,
+  "identity_control_included": false,
+  "per_condition_s_measured_stage1": 0.0755682212529165,
+  "fixed_s_per_frame": 0.12185396750768027,
+  "sec_per_frame": 0.8775361800368453,
+  "gpu_hours": 0.4826448990202649,
+  "gpu_hours_if_identity_control_kept": 0.524207420709369,
+  "not_this_number": {
+   "full_loss_sweep_at_n2_gpu_hours": 27.53984651862702,
+   "note": "the full damaged sweep at the same n2 costs this much and is NOT the cost of the clean-only plan; the two must not be quoted for each other"
+  },
+  "cell_coverage": {
+   "exact_cells": [
+    "AWGN 10 dB",
+    "AWGN 12 dB",
+    "AWGN 14 dB",
+    "AWGN 16 dB",
+    "AWGN 18 dB",
+    "AWGN 20 dB"
+   ],
+   "approximated_cell": "AWGN 8 dB",
+   "why": "six of the seven locked cells have p_cw exactly 0, so the clean forward IS their value; the 8 dB cell needs the p = 0.001 node, which a clean-only run does not produce and would have to substitute with the clean value",
+   "substitution_error_measured_in_stage1": {
+    "sparse_F_confidence": 4.866990988539044e-05,
+    "sparse_F_norm": 3.8407290577913145e-06,
+    "sparse_F_random_mean": 6.02142562501351e-05
+   }
+  },
+  "bias": [
+   "stage-1 timing included CUDA warm-up and a GPU shared with a desktop session -> the per-condition figure is probably HIGH",
+   "stage 1 read every 33rd frame; a full run reads frames consecutively, so caching may make data loading cheaper -> the estimate may be HIGH on that count too",
+   "against both: a full run holds 1,980 frames of results in memory and writes a larger file, which stage 1 did not exercise -> the estimate may be LOW on that count",
+   "no per-frame cost was measured on a machine free of other load"
+  ]
+ },
+ "command": "python projects/ca_tosg_p2/protocol/amendment2.py"
+}

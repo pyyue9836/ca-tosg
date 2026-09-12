@@ -24,6 +24,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P2 = os.path.dirname(HERE)
+sys.path.insert(0, os.path.join(P2, 'protocol'))
 ROOT = os.path.dirname(os.path.dirname(P2))
 STAGE1 = os.path.join(P2, 'results', 'stage1')
 PROBE = os.path.join(P2, 'results', 'probe')
@@ -34,6 +35,7 @@ OUT_JSON = os.path.join(STAGE1, 'stage1_report.json')
 OUT_MD = os.path.join(STAGE1, 'stage1_report.md')
 
 N_BOOT, BOOT_SEED = 10000, 20260809              # P1's resample count
+MISS_LADDER = (1, 3, 5, 8)                        # 1 = the locked hard-frame rule; the rest exploratory
 RATE = 0.001
 REGIMES = ('ideal', 'packet')
 N2_CANDIDATES = (4, 8, 12, 16, 20)
@@ -140,6 +142,7 @@ def build():
         b2[f'random_mean_minus_L|{reg}'] = boot_ci(avg(rand_mean[reg]) - avg(ref['L']), scenes)
         b2[f'confidence_minus_random|{reg}'] = boot_ci(avg(eff[reg]['conf']) - avg(rand_mean[reg]), scenes)
         b2[f'confidence_minus_norm|{reg}'] = boot_ci(avg(eff[reg]['conf']) - avg(eff[reg]['norm']), scenes)
+        b2[f'norm_minus_random|{reg}'] = boot_ci(avg(eff[reg]['norm']) - avg(rand_mean[reg]), scenes)
 
     # B-3
     b3 = []
@@ -218,7 +221,43 @@ def build():
                   'seven-cell average with weight ' + f'{w[eight]:.2f}/7. It is estimated here on its own and is '
                   'NOT covered by the number of random masks, which is a different source of variance')
 
-    return {'schema': 'catosg-p2-stage1-report/1',
+    # ---- P2-R7 A: hard-frame subsets of these 60 frames ---------------------------------------
+    from round1_lock import hard_frames                                         # noqa: E402
+    missed_all, _ = hard_frames()
+    missed = missed_all[frames]
+    reg0 = 'ideal'
+    arms = {'E': avg(ref['E']), 'L': avg(ref['L']), 'full_F_P1': avg(ref['full_F_P1']),
+            'sparse_F_confidence': avg(eff[reg0]['conf']), 'sparse_F_norm': avg(eff[reg0]['norm']),
+            'sparse_F_random_mean': avg(rand_mean[reg0])}
+    diffs = {'confidence_minus_L': arms['sparse_F_confidence'] - arms['L'],
+             'norm_minus_L': arms['sparse_F_norm'] - arms['L'],
+             'random_minus_L': arms['sparse_F_random_mean'] - arms['L'],
+             'confidence_minus_random': arms['sparse_F_confidence'] - arms['sparse_F_random_mean'],
+             'confidence_minus_norm': arms['sparse_F_confidence'] - arms['sparse_F_norm'],
+             'norm_minus_random': arms['sparse_F_norm'] - arms['sparse_F_random_mean']}
+    subsets = []
+    for k in MISS_LADDER:
+        sel = missed >= k
+        sc_sel = scenes[sel]
+        inc = np.unique(sc_sel)
+        subsets.append({
+            'min_missed': int(k), 'locked_rule': k == 1, 'exploratory': k > 1,
+            'frames': int(sel.sum()), 'share_of_the_60': float(sel.mean()),
+            'scenes_included': int(len(inc)), 'scenes_total': int(len(np.unique(scenes))),
+            'scenes_dropped': [str(x) for x in np.unique(scenes) if x not in inc],
+            'frames_per_scene': {str(x): int((sc_sel == x).sum()) for x in inc},
+            'scene_equal_f1': {a: scene_equal(v[sel], sc_sel) for a, v in arms.items()},
+            'differences': {a: boot_ci(v[sel], sc_sel) for a, v in diffs.items()},
+            'regime': reg0})
+    a_hard = {'rule': 'the frozen E branch misses at least one ground-truth object at IoU 0.5 (C-5), recomputed '
+                      'on these 60 frames -- the split-wide 95.4 % is not carried over',
+              'scene_equal_rule': 'a scene with no frame in the subset is dropped from the scene-equal mean; no '
+                                  'zero is substituted and no reweighting is applied',
+              'missed_per_frame_quantiles_p25_p50_p75_p90': [float(x) for x in np.percentile(missed, [25, 50, 75, 90])],
+              'subsets': subsets}
+
+    return {'schema': 'catosg-p2-stage1-report/2',
+            'A_hard_subsets': a_hard,
             'status': 'development diagnostic; intervals are descriptive; not a significance test (D-1)',
             'determinism_vs_probe': det,
             'design': {'frames': int(len(frames)), 'scenes': int(len(np.unique(scenes))),
@@ -231,6 +270,26 @@ def build():
             'command': 'python projects/ca_tosg_p2/evaluation/p2_stage1_report.py'}
 
 
+def hard_md(m):
+    ah = m['A_hard_subsets']
+    L = ['## A Hard-frame subsets of these 60 frames', '', f"Rule: {ah['rule']}. {ah['scene_equal_rule']}.", '',
+         '| subset | frames | share of the 60 | scenes included | frames per scene |', '|---|---:|---:|---:|---|']
+    for s in ah['subsets']:
+        tag = 'locked (E misses ≥ 1)' if s['locked_rule'] else f"exploratory (≥ {s['min_missed']})"
+        L.append(f"| {tag} | {s['frames']} | {s['share_of_the_60'] * 100:.1f} % | {s['scenes_included']} of "
+                 f"{s['scenes_total']} | {', '.join(str(v) for v in s['frames_per_scene'].values())} |")
+    for s in ah['subsets']:
+        tag = ('locked hard subset (E misses ≥ 1)' if s['locked_rule']
+               else f"exploratory subset (E misses ≥ {s['min_missed']})")
+        drop = '' if not s['scenes_dropped'] else f" — dropped: {', '.join(s['scenes_dropped'])}"
+        L += ['', f"### {tag}: {s['frames']} frames, {s['scenes_included']} of {s['scenes_total']} scenes{drop}", '',
+              '| ' + ' | '.join(s['scene_equal_f1']) + ' |', '|---:' * len(s['scene_equal_f1']) + '|',
+              '| ' + ' | '.join(f'{v:.5f}' for v in s['scene_equal_f1'].values()) + ' |', '',
+              '| difference | mean | 95 % interval |', '|---|---:|---|']
+        L += [f"| {k} | {v['mean']:+.5f} | [{v['lcb95']:+.5f}, {v['ucb95']:+.5f}] |" for k, v in s['differences'].items()]
+    return L + ['']
+
+
 def markdown(m):
     d, b1, b2, b4, b5, b6, c1, c2 = (m[k] for k in ('design', 'B1_scene_equal_f1', 'B2_differences',
                                                     'B4_mask_spread', 'B5_regimes', 'B6_time',
@@ -241,7 +300,7 @@ def markdown(m):
          f"{m['determinism_vs_probe']['columns_compared']} shared columns, all identical.", '',
          f"{d['frames']} frames, {d['scenes']} scenes, K_F = {d['K_F']} of {d['n_blocks']} blocks, "
          f"{d['random_masks']} random masks, damaged node p = {d['rate_node']}.", '',
-         '## B-1 Scene-equal F1', '', '| arm | ' + ' | '.join(d['cells']) + ' | seven-cell average |',
+         *hard_md(m), '## B-1 Scene-equal F1', '', '| arm | ' + ' | '.join(d['cells']) + ' | seven-cell average |',
          '|---' * (len(d['cells']) + 2) + '|']
     for k in b1['seven_cell_average']:
         L.append('| ' + k + ' | ' + ' | '.join(f"{b1['per_cell'][k][c]:.5f}" for c in d['cells'])
