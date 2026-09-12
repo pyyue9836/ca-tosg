@@ -282,3 +282,28 @@ sparse F, no transmission spread across frames and no lower sending rate is adop
 time to send the complete F on every configuration already listed in `link_scenarios.md`, and the
 verdict — **no examined configuration delivers the complete F inside a 100 ms frame period**, so there
 is no candidate for a degradation experiment yet, and the deficit sits in the message size.
+
+
+---
+
+## P2-R10 A — how the 100 ms result is used from here
+
+**A-1. The 100 ms period is no longer a threshold that excludes F.** `full_f_feasibility.md` stands as
+an independent record of the transmission-time audit; it is not a gate on the study object. The
+limitation, in the wording to be quoted in the paper:
+
+> 在所检 27 个配置下,完整 F 均不能在一个 10 Hz 帧周期内发完;本文以分析信道研究信道驱动的降级,
+> 通信开销按 QAM 数据符号报告,逐帧时延可行性为独立限制。
+
+In English, for the manuscript: *In all 27 configurations examined, the complete F message cannot be
+delivered within one 10 Hz frame period. This paper studies channel-driven degradation over an
+analytical channel; communication cost is reported in QAM data symbols, and per-frame latency
+feasibility is a separate limitation.*
+
+Two things follow, and neither is optional. Communication cost is reported in **QAM data symbols**
+throughout, never as a delivery time, unless the audit is being quoted. And the latency limitation is
+stated wherever a deployment reading could be taken from a result, rather than being left to the
+reader to find in the appendix.
+
+**A-2. The study object is unchanged:** the complete F (all 55 blocks, existing compression and int8),
+L, and E — as fixed in the P2-R9 section above.

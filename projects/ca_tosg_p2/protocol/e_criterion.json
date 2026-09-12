@@ -1,0 +1,946 @@
+{
+ "schema": "catosg-p2-e-criterion/1",
+ "what": "P1 products read on CPU. No model is fitted, no selector is trained, no threshold is optimised against an outcome",
+ "C1": {
+  "p1_record": {
+   "quotes": [
+    {
+     "quote": "**E is not reachable by a monotone threshold on these cues.** The frozen forest reaches it \u2014 barely, and only on validate (`rho_E` 0.0107 / 0.0112 / 0.0120) and essentially not at all on test (0.0004 / 0.0012 / 0.0010) or Culver (0.0000).",
+     "covers": [
+      "a monotone rule never reaches E",
+      "the frozen forest's rho_E on validate"
+     ]
+    },
+    {
+     "quote": "* **E2 refuted, unambiguously.** `rho_E = 0.00000` in every split x budget cell.",
+     "covers": [
+      "the two-gate rule's rho_E"
+     ]
+    }
+   ],
+   "source": "docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17)"
+  },
+  "oracle_on_the_current_grid": {
+   "definition": "budget-blind argmax of eff over {E, L, F} per (frame, cell); ties within 1e-12 go to the smaller payload, i.e. E before L before F",
+   "product": "results/v2/v2_grid_validate_ideal.csv",
+   "sha256": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+   "overall": {
+    "E": 0.21062901744719925,
+    "L": 0.22695133149678604,
+    "F": 0.5624196510560147
+   },
+   "per_channel": {
+    "awgn": {
+     "E": 0.26000918273645546,
+     "L": 0.31239669421487604,
+     "F": 0.4275941230486685,
+     "rows": 21780
+    },
+    "rayleigh": {
+     "E": 0.16124885215794307,
+     "L": 0.14150596877869606,
+     "F": 0.6972451790633609,
+     "rows": 21780
+    }
+   },
+   "per_cell": [
+    {
+     "channel": "awgn",
+     "snr_db": 0,
+     "rho_E": 0.7646464646464647,
+     "rho_L": 0.0,
+     "rho_F": 0.23535353535353534
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 2,
+     "rho_E": 0.7646464646464647,
+     "rho_L": 0.0,
+     "rho_F": 0.23535353535353534
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 4,
+     "rho_E": 0.7646464646464647,
+     "rho_L": 0.0,
+     "rho_F": 0.23535353535353534
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 6,
+     "rho_E": 0.17373737373737375,
+     "rho_L": 0.31565656565656564,
+     "rho_F": 0.5106060606060606
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 8,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.2601010101010101,
+     "rho_F": 0.6838383838383838
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 10,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.4767676767676768,
+     "rho_F": 0.4671717171717172
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 12,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.4767676767676768,
+     "rho_F": 0.4671717171717172
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 14,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.4767676767676768,
+     "rho_F": 0.4671717171717172
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 16,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.4767676767676768,
+     "rho_F": 0.4671717171717172
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 18,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.4767676767676768,
+     "rho_F": 0.4671717171717172
+    },
+    {
+     "channel": "awgn",
+     "snr_db": 20,
+     "rho_E": 0.05606060606060606,
+     "rho_L": 0.4767676767676768,
+     "rho_F": 0.4671717171717172
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 0,
+     "rho_E": 0.5545454545454546,
+     "rho_L": 0.15151515151515152,
+     "rho_F": 0.29393939393939394
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 2,
+     "rho_E": 0.40505050505050505,
+     "rho_L": 0.2818181818181818,
+     "rho_F": 0.31313131313131315
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 4,
+     "rho_E": 0.27424242424242423,
+     "rho_L": 0.28535353535353536,
+     "rho_F": 0.4404040404040404
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 6,
+     "rho_E": 0.0898989898989899,
+     "rho_L": 0.31414141414141417,
+     "rho_F": 0.5959595959595959
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 8,
+     "rho_E": 0.08333333333333333,
+     "rho_L": 0.1505050505050505,
+     "rho_F": 0.7661616161616162
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 10,
+     "rho_E": 0.0803030303030303,
+     "rho_L": 0.08636363636363636,
+     "rho_F": 0.8333333333333334
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 12,
+     "rho_E": 0.06515151515151515,
+     "rho_L": 0.06161616161616162,
+     "rho_F": 0.8732323232323232
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 14,
+     "rho_E": 0.0601010101010101,
+     "rho_L": 0.04292929292929293,
+     "rho_F": 0.896969696969697
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 16,
+     "rho_E": 0.05555555555555555,
+     "rho_L": 0.046464646464646465,
+     "rho_F": 0.897979797979798
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 18,
+     "rho_E": 0.052525252525252523,
+     "rho_L": 0.05454545454545454,
+     "rho_F": 0.8929292929292929
+    },
+    {
+     "channel": "rayleigh",
+     "snr_db": 20,
+     "rho_E": 0.05303030303030303,
+     "rho_L": 0.08131313131313131,
+     "rho_F": 0.8656565656565657
+    }
+   ]
+  }
+ },
+ "C2_cue_differences": {
+  "rayleigh": {
+   "frames_with_any_E_cell": 1111,
+   "frames_with_no_E_cell": 869,
+   "cells_per_frame": 11,
+   "dimensions": [
+    {
+     "cue": "ego_detected_box_count",
+     "mean_E_frames": 29.445544554455445,
+     "mean_other_frames": 13.75258918296893,
+     "q25_q50_q75_E": [
+      16.0,
+      35.0,
+      40.0
+     ],
+     "q25_q50_q75_other": [
+      9.0,
+      12.0,
+      15.0
+     ],
+     "standardised_difference": 1.4628925747047856
+    },
+    {
+     "cue": "ego_origin_lidar_shape_0",
+     "mean_E_frames": 51555.846984698466,
+     "mean_other_frames": 54472.68584579977,
+     "q25_q50_q75_E": [
+      49720.0,
+      49818.0,
+      54075.5
+     ],
+     "q25_q50_q75_other": [
+      53888.0,
+      54968.0,
+      55944.0
+     ],
+     "standardised_difference": -1.340699100693699
+    },
+    {
+     "cue": "ego_pcd_num_points",
+     "mean_E_frames": 51555.846984698466,
+     "mean_other_frames": 54472.68584579977,
+     "q25_q50_q75_E": [
+      49720.0,
+      49818.0,
+      54075.5
+     ],
+     "q25_q50_q75_other": [
+      53888.0,
+      54968.0,
+      55944.0
+     ],
+     "standardised_difference": -1.340699100693699
+    },
+    {
+     "cue": "ego_pcd_left_points",
+     "mean_E_frames": 25829.96399639964,
+     "mean_other_frames": 27400.851553509783,
+     "q25_q50_q75_E": [
+      24919.5,
+      24987.0,
+      27123.5
+     ],
+     "q25_q50_q75_other": [
+      27186.0,
+      27772.0,
+      28078.0
+     ],
+     "standardised_difference": -1.3213492260433557
+    },
+    {
+     "cue": "ego_pcd_front_points",
+     "mean_E_frames": 25550.63816381638,
+     "mean_other_frames": 27033.194476409666,
+     "q25_q50_q75_E": [
+      24595.0,
+      24665.0,
+      26771.5
+     ],
+     "q25_q50_q75_other": [
+      26729.0,
+      27329.0,
+      27713.0
+     ],
+     "standardised_difference": -1.3158715012489806
+    },
+    {
+     "cue": "ego_pcd_back_points",
+     "mean_E_frames": 26005.20882088209,
+     "mean_other_frames": 27439.491369390104,
+     "q25_q50_q75_E": [
+      25118.0,
+      25186.0,
+      27275.5
+     ],
+     "q25_q50_q75_other": [
+      27032.0,
+      27684.0,
+      28260.0
+     ],
+     "standardised_difference": -1.2955223884085652
+    },
+    {
+     "cue": "ego_pcd_right_points",
+     "mean_E_frames": 25725.88298829883,
+     "mean_other_frames": 27071.83429228999,
+     "q25_q50_q75_E": [
+      24788.0,
+      24876.0,
+      26732.5
+     ],
+     "q25_q50_q75_other": [
+      26571.0,
+      27400.0,
+      27934.0
+     ],
+     "standardised_difference": -1.1901217780388833
+    },
+    {
+     "cue": "ego_pcd_near_20m",
+     "mean_E_frames": 44744.44284428443,
+     "mean_other_frames": 47466.134637514384,
+     "q25_q50_q75_E": [
+      42941.0,
+      43087.0,
+      46774.5
+     ],
+     "q25_q50_q75_other": [
+      45346.0,
+      48089.0,
+      50184.0
+     ],
+     "standardised_difference": -0.9417103496989742
+    },
+    {
+     "cue": "ego_pcd_density_0_20",
+     "mean_E_frames": 35.606496272803255,
+     "mean_other_frames": 37.772349785129215,
+     "q25_q50_q75_E": [
+      34.17136205654539,
+      34.28754516500247,
+      37.22196442825929
+     ],
+     "q25_q50_q75_other": [
+      36.08520024722543,
+      38.268010291730775,
+      39.93515832061838
+     ],
+     "standardised_difference": -0.9417103496989739
+    },
+    {
+     "cue": "ego_pcd_std_range",
+     "mean_E_frames": 11.76149857741664,
+     "mean_other_frames": 10.915790059624113,
+     "q25_q50_q75_E": [
+      11.361918449401855,
+      12.369414329528809,
+      12.646284103393555
+     ],
+     "q25_q50_q75_other": [
+      8.963227272033691,
+      10.867507934570312,
+      12.619154930114746
+     ],
+     "standardised_difference": 0.560674184545318
+    },
+    {
+     "cue": "ego_pcd_front_far_50m",
+     "mean_E_frames": 562.2376237623762,
+     "mean_other_frames": 469.33831990794016,
+     "q25_q50_q75_E": [
+      401.0,
+      669.0,
+      700.0
+     ],
+     "q25_q50_q75_other": [
+      184.0,
+      361.0,
+      687.0
+     ],
+     "standardised_difference": 0.3417864875672131
+    },
+    {
+     "cue": "ego_pcd_max_range",
+     "mean_E_frames": 118.56732791656852,
+     "mean_other_frames": 117.4297223019792,
+     "q25_q50_q75_E": [
+      118.06392288208008,
+      119.4536590576172,
+      119.95451736450195
+     ],
+     "q25_q50_q75_other": [
+      116.14704895019533,
+      119.39795684814452,
+      119.90048217773438
+     ],
+     "standardised_difference": 0.32379587278813016
+    },
+    {
+     "cue": "ego_pcd_very_far_80m",
+     "mean_E_frames": 164.016201620162,
+     "mean_other_frames": 146.45339470655927,
+     "q25_q50_q75_E": [
+      154.0,
+      168.0,
+      179.0
+     ],
+     "q25_q50_q75_other": [
+      77.0,
+      158.0,
+      188.0
+     ],
+     "standardised_difference": 0.252630905545338
+    },
+    {
+     "cue": "ego_pcd_density_20_50",
+     "mean_E_frames": 0.8815744487941107,
+     "mean_other_frames": 0.9234518824484855,
+     "q25_q50_q75_E": [
+      0.8325319285068906,
+      0.853373647245115,
+      0.8736090614382275
+     ],
+     "q25_q50_q75_other": [
+      0.8041114029547665,
+      0.8459464165674933,
+      1.033446097143374
+     ],
+     "standardised_difference": -0.23072697099080988
+    },
+    {
+     "cue": "ego_pcd_mid_20_50m",
+     "mean_E_frames": 5816.050405040504,
+     "mean_other_frames": 6092.330264672037,
+     "q25_q50_q75_E": [
+      5492.5,
+      5630.0,
+      5763.5
+     ],
+     "q25_q50_q75_other": [
+      5305.0,
+      5581.0,
+      6818.0
+     ],
+     "standardised_difference": -0.23072697099080905
+    },
+    {
+     "cue": "ego_pcd_density_50_80",
+     "mean_E_frames": 0.06785203993573076,
+     "mean_other_frames": 0.0626635900277251,
+     "q25_q50_q75_E": [
+      0.05464319712821735,
+      0.0750884859715608,
+      0.0809649761780308
+     ],
+     "q25_q50_q75_other": [
+      0.0293824510323499,
+      0.0515825251456809,
+      0.0846377825570745
+     ],
+     "standardised_difference": 0.18345934369116743
+    },
+    {
+     "cue": "ego_pcd_far_50_80m",
+     "mean_E_frames": 831.3375337533753,
+     "mean_other_frames": 767.7675489067894,
+     "q25_q50_q75_E": [
+      669.5,
+      920.0,
+      992.0
+     ],
+     "q25_q50_q75_other": [
+      360.0,
+      632.0,
+      1037.0
+     ],
+     "standardised_difference": 0.18345934369116726
+    },
+    {
+     "cue": "ego_pcd_front_far_30m",
+     "mean_E_frames": 1678.3330333033302,
+     "mean_other_frames": 1627.0552359033372,
+     "q25_q50_q75_E": [
+      1446.0,
+      1790.0,
+      1872.0
+     ],
+     "q25_q50_q75_other": [
+      961.0,
+      1539.0,
+      2153.0
+     ],
+     "standardised_difference": 0.08919187087755852
+    },
+    {
+     "cue": "ego_pcd_mean_range",
+     "mean_E_frames": 11.662514520914677,
+     "mean_other_frames": 11.734727619157974,
+     "q25_q50_q75_E": [
+      11.350268363952637,
+      11.692606925964355,
+      11.812457084655762
+     ],
+     "q25_q50_q75_other": [
+      10.94808864593506,
+      11.383806228637695,
+      13.043980598449709
+     ],
+     "standardised_difference": -0.07915818585857819
+    },
+    {
+     "cue": "has_collaborator",
+     "mean_E_frames": 1.0,
+     "mean_other_frames": 1.0,
+     "q25_q50_q75_E": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "q25_q50_q75_other": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "standardised_difference": 0.0
+    },
+    {
+     "cue": "ego_origin_lidar_shape_1",
+     "mean_E_frames": 4.0,
+     "mean_other_frames": 4.0,
+     "q25_q50_q75_E": [
+      4.0,
+      4.0,
+      4.0
+     ],
+     "q25_q50_q75_other": [
+      4.0,
+      4.0,
+      4.0
+     ],
+     "standardised_difference": 0.0
+    }
+   ]
+  },
+  "awgn": {
+   "frames_with_any_E_cell": 1517,
+   "frames_with_no_E_cell": 463,
+   "cells_per_frame": 11,
+   "dimensions": [
+    {
+     "cue": "ego_pcd_std_range",
+     "mean_E_frames": 11.787089036024945,
+     "mean_other_frames": 10.090350785471708,
+     "q25_q50_q75_E": [
+      11.048223495483398,
+      12.367722511291504,
+      12.680533409118652
+     ],
+     "q25_q50_q75_other": [
+      8.817098617553711,
+      9.075915336608888,
+      11.463624954223633
+     ],
+     "standardised_difference": 1.1876559931839754
+    },
+    {
+     "cue": "ego_pcd_front_far_50m",
+     "mean_E_frames": 583.5662491760053,
+     "mean_other_frames": 317.99352051835854,
+     "q25_q50_q75_E": [
+      380.0,
+      667.0,
+      713.0
+     ],
+     "q25_q50_q75_other": [
+      153.0,
+      240.0,
+      422.5
+     ],
+     "standardised_difference": 1.1290722131626403
+    },
+    {
+     "cue": "ego_pcd_near_20m",
+     "mean_E_frames": 45216.74225444957,
+     "mean_other_frames": 48305.28941684665,
+     "q25_q50_q75_E": [
+      42948.0,
+      43202.0,
+      47440.0
+     ],
+     "q25_q50_q75_other": [
+      47340.0,
+      50062.0,
+      50259.0
+     ],
+     "standardised_difference": -1.0709260173972357
+    },
+    {
+     "cue": "ego_pcd_density_0_20",
+     "mean_E_frames": 35.98234020153911,
+     "mean_other_frames": 38.44012794087882,
+     "q25_q50_q75_E": [
+      34.17693247955361,
+      34.37905925728031,
+      37.751552501397576
+     ],
+     "q25_q50_q75_other": [
+      37.67197502985162,
+      39.83807380533232,
+      39.99484142427784
+     ],
+     "standardised_difference": -1.0709260173972341
+    },
+    {
+     "cue": "ego_pcd_density_50_80",
+     "mean_E_frames": 0.07169910952007591,
+     "mean_other_frames": 0.045509129504826856,
+     "q25_q50_q75_E": [
+      0.0520722326628867,
+      0.0751701038910951,
+      0.0837399854421972
+     ],
+     "q25_q50_q75_other": [
+      0.0272603851244579,
+      0.0371361533881089,
+      0.0661513237825544
+     ],
+     "standardised_difference": 1.066371486706107
+    },
+    {
+     "cue": "ego_pcd_far_50_80m",
+     "mean_E_frames": 878.4726433750824,
+     "mean_other_frames": 557.5874730021599,
+     "q25_q50_q75_E": [
+      638.0,
+      921.0,
+      1026.0
+     ],
+     "q25_q50_q75_other": [
+      334.0,
+      455.0,
+      810.5
+     ],
+     "standardised_difference": 1.0663714867061063
+    },
+    {
+     "cue": "ego_origin_lidar_shape_0",
+     "mean_E_frames": 52306.52867501648,
+     "mean_other_frames": 54570.85529157667,
+     "q25_q50_q75_E": [
+      49754.0,
+      51835.0,
+      54902.0
+     ],
+     "q25_q50_q75_other": [
+      54159.5,
+      55662.0,
+      56035.5
+     ],
+     "standardised_difference": -0.9572830214509064
+    },
+    {
+     "cue": "ego_pcd_num_points",
+     "mean_E_frames": 52306.52867501648,
+     "mean_other_frames": 54570.85529157667,
+     "q25_q50_q75_E": [
+      49754.0,
+      51835.0,
+      54902.0
+     ],
+     "q25_q50_q75_other": [
+      54159.5,
+      55662.0,
+      56035.5
+     ],
+     "standardised_difference": -0.9572830214509064
+    },
+    {
+     "cue": "ego_pcd_back_points",
+     "mean_E_frames": 26369.742913645354,
+     "mean_other_frames": 27502.81857451404,
+     "q25_q50_q75_E": [
+      25142.0,
+      25982.0,
+      27638.0
+     ],
+     "q25_q50_q75_other": [
+      27188.5,
+      28117.0,
+      28317.5
+     ],
+     "standardised_difference": -0.9486341856935387
+    },
+    {
+     "cue": "ego_pcd_right_points",
+     "mean_E_frames": 26053.29861568886,
+     "mean_other_frames": 27179.32181425486,
+     "q25_q50_q75_E": [
+      24819.0,
+      25762.0,
+      27372.0
+     ],
+     "q25_q50_q75_other": [
+      26706.5,
+      27860.0,
+      28009.0
+     ],
+     "standardised_difference": -0.9381399415866051
+    },
+    {
+     "cue": "ego_pcd_front_far_30m",
+     "mean_E_frames": 1770.9268292682927,
+     "mean_other_frames": 1278.7105831533477,
+     "q25_q50_q75_E": [
+      1478.0,
+      1813.0,
+      1900.0
+     ],
+     "q25_q50_q75_other": [
+      942.0,
+      980.0,
+      1664.0
+     ],
+     "standardised_difference": 0.9373219128533964
+    },
+    {
+     "cue": "ego_pcd_front_points",
+     "mean_E_frames": 25936.785761371128,
+     "mean_other_frames": 27068.036717062634,
+     "q25_q50_q75_E": [
+      24619.0,
+      25808.0,
+      27283.0
+     ],
+     "q25_q50_q75_other": [
+      26842.0,
+      27655.0,
+      27742.0
+     ],
+     "standardised_difference": -0.9275472490794187
+    },
+    {
+     "cue": "ego_pcd_left_points",
+     "mean_E_frames": 26253.23005932762,
+     "mean_other_frames": 27391.533477321813,
+     "q25_q50_q75_E": [
+      24944.0,
+      25575.0,
+      27562.0
+     ],
+     "q25_q50_q75_other": [
+      27345.5,
+      27992.0,
+      28084.0
+     ],
+     "standardised_difference": -0.8760100578930239
+    },
+    {
+     "cue": "ego_pcd_mean_range",
+     "mean_E_frames": 11.838356018066406,
+     "mean_other_frames": 11.221913292392541,
+     "q25_q50_q75_E": [
+      11.335698127746582,
+      11.71814250946045,
+      12.3510103225708
+     ],
+     "q25_q50_q75_other": [
+      10.903459548950195,
+      11.03149700164795,
+      11.506265640258787
+     ],
+     "standardised_difference": 0.7723099240245814
+    },
+    {
+     "cue": "ego_pcd_very_far_80m",
+     "mean_E_frames": 167.41595253790376,
+     "mean_other_frames": 119.91360691144709,
+     "q25_q50_q75_E": [
+      152.0,
+      168.0,
+      181.0
+     ],
+     "q25_q50_q75_other": [
+      71.0,
+      80.0,
+      176.5
+     ],
+     "standardised_difference": 0.6883273523712105
+    },
+    {
+     "cue": "ego_detected_box_count",
+     "mean_E_frames": 24.29004614370468,
+     "mean_other_frames": 16.883369330453565,
+     "q25_q50_q75_E": [
+      12.0,
+      21.0,
+      38.0
+     ],
+     "q25_q50_q75_other": [
+      11.0,
+      14.0,
+      18.0
+     ],
+     "standardised_difference": 0.6169722048975422
+    },
+    {
+     "cue": "ego_pcd_density_20_50",
+     "mean_E_frames": 0.9161106803200239,
+     "mean_other_frames": 0.8470172708693623,
+     "q25_q50_q75_E": [
+      0.8316982597573617,
+      0.8577693551971769,
+      0.9749377085400674
+     ],
+     "q25_q50_q75_other": [
+      0.8044903432954615,
+      0.8276057040778558,
+      0.8568598983795089
+     ],
+     "standardised_difference": 0.4175002476818721
+    },
+    {
+     "cue": "ego_pcd_mid_20_50m",
+     "mean_E_frames": 6043.897824653922,
+     "mean_other_frames": 5588.064794816415,
+     "q25_q50_q75_E": [
+      5487.0,
+      5659.0,
+      6432.0
+     ],
+     "q25_q50_q75_other": [
+      5307.5,
+      5460.0,
+      5653.0
+     ],
+     "standardised_difference": 0.4175002476818719
+    },
+    {
+     "cue": "ego_pcd_max_range",
+     "mean_E_frames": 118.11168188850739,
+     "mean_other_frames": 117.92507250726094,
+     "q25_q50_q75_E": [
+      117.99862670898438,
+      119.21314239501952,
+      119.93721771240234
+     ],
+     "q25_q50_q75_other": [
+      118.0525016784668,
+      119.7767562866211,
+      119.94763565063477
+     ],
+     "standardised_difference": 0.049942117249208454
+    },
+    {
+     "cue": "has_collaborator",
+     "mean_E_frames": 1.0,
+     "mean_other_frames": 1.0,
+     "q25_q50_q75_E": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "q25_q50_q75_other": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "standardised_difference": 0.0
+    },
+    {
+     "cue": "ego_origin_lidar_shape_1",
+     "mean_E_frames": 4.0,
+     "mean_other_frames": 4.0,
+     "q25_q50_q75_E": [
+      4.0,
+      4.0,
+      4.0
+     ],
+     "q25_q50_q75_other": [
+      4.0,
+      4.0,
+      4.0
+     ],
+     "standardised_difference": 0.0
+    }
+   ]
+  },
+  "note": "means, quantiles and a standardised difference only. Nothing is fitted, no threshold is optimised against these labels, and the ordering by standardised difference is a way of reading the table, not a selection"
+ },
+ "C3_candidate_rules": {
+  "rules": [
+   {
+    "rule": "E if ego_detected_box_count >= 37",
+    "cue": "ego_detected_box_count",
+    "direction": "high values -> E",
+    "threshold": 37.0,
+    "threshold_source": "the 75% quantile of ego_detected_box_count over all 1,980 validate frames -- a quantile of the cue distribution itself, NOT a value fitted against the oracle labels",
+    "direction_source": "the sign of the standardised difference in C-2 (Rayleigh)",
+    "available_before_the_request": true,
+    "expected_trigger_share": 0.251010101010101,
+    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains"
+   },
+   {
+    "rule": "E if ego_pcd_num_points <= 49778",
+    "cue": "ego_pcd_num_points",
+    "direction": "low values -> E",
+    "threshold": 49778.0,
+    "threshold_source": "the 25% quantile of ego_pcd_num_points over all 1,980 validate frames -- a quantile of the cue distribution itself, NOT a value fitted against the oracle labels",
+    "direction_source": "the sign of the standardised difference in C-2 (Rayleigh)",
+    "available_before_the_request": true,
+    "expected_trigger_share": 0.2515151515151515,
+    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains"
+   },
+   {
+    "rule": "E if ego_pcd_left_points <= 24961",
+    "cue": "ego_pcd_left_points",
+    "direction": "low values -> E",
+    "threshold": 24961.0,
+    "threshold_source": "the 25% quantile of ego_pcd_left_points over all 1,980 validate frames -- a quantile of the cue distribution itself, NOT a value fitted against the oracle labels",
+    "direction_source": "the sign of the standardised difference in C-2 (Rayleigh)",
+    "available_before_the_request": true,
+    "expected_trigger_share": 0.25202020202020203,
+    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains"
+   }
+  ],
+  "quantile_used": 0.75,
+  "why_rayleigh": "the candidates are read off the Rayleigh side because that is where the oracle sends anything to E at all; the AWGN table is reported beside it",
+  "all_cues_are_pre_request": "every cue used is ego-local and exists before the request is issued, by the frozen cue schema"
+ },
+ "C4_two_situations": {
+  "structural_E": {
+   "meaning": "no collaborator is available, so E is forced and nothing is transmitted",
+   "rows_on_validate": 0,
+   "status": "already handled: it is a feasibility condition, not a decision"
+  },
+  "discretionary_E": {
+   "meaning": "a collaborator IS available and could send, but the frame does not need it; E is chosen rather than forced",
+   "status": "the subject of this section -- no rule for it exists yet"
+  },
+  "why_they_must_not_be_pooled": "a share of E that mixes the two measures availability, not judgement; on this split the structural case is absent, so every E here is discretionary"
+ },
+ "command": "python projects/ca_tosg_p2/protocol/e_criterion.py"
+}
