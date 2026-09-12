@@ -307,3 +307,41 @@ reader to find in the appendix.
 
 **A-2. The study object is unchanged:** the complete F (all 55 blocks, existing compression and int8),
 L, and E — as fixed in the P2-R9 section above.
+
+
+---
+
+## P2-R11 A — the accounting, LOCKED
+
+This section is **locked**. It replaces the open question of `message_regime.md` B-5; that document
+stays as the costing that informed the choice.
+
+**A-1 F is all-or-nothing.** The feature message is usable only if the whole message decodes:
+
+```
+q_F      = (1 - p_cw) ** 12567
+eff_F    = q_F * F1_clean + (1 - q_F) * F1_ego
+```
+
+A failure falls back to **E**. **L is not sent instead after a failure** — there is no automatic
+second attempt at another granularity. The form of this rule is P1's own message-level rule for L,
+applied to F; the column it produces is constructed, not a stored P1 product, and is labelled so
+wherever it appears.
+
+**A-2 L is all-or-nothing on the same terms.** `q_L,t = (1 - p_cw) ** N_cw,L,t`, and a failure falls
+back to E. This is P1's existing `eff_L`, unchanged.
+
+**A-3 Communication is charged for the attempt, never multiplied by the success probability.** F costs
+**3.14175 Msym** per request; L costs its own frame's `N_cw,L,t`; E costs nothing. A message that fails
+has still occupied the channel.
+
+**A-4 Partial recovery and packet-level accounting are removed from the candidate set.** P1's
+partial-recovery results remain in the record as P1 results and **enter no table in this line of
+work**.
+
+**A-5 The scope sentence** (superseding the B-5 wording of `message_regime.md`):
+
+> 不同信道模型下完整 F 的适用区间可能不同,甚至在所考察范围内不存在。
+
+*The range of channel conditions in which the complete F is useful may differ under a different
+channel model, and may not exist at all within the range examined.*

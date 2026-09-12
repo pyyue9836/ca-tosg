@@ -15,6 +15,8 @@ From docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17):
 
 *(carries: the two-gate rule's rho_E)*
 
+**Correction (P2-R11 B-1).** the 0.0107 / 0.0112 / 0.0120 figures quoted above are the v1-era forest of the R21 change-log. They do NOT describe the current frozen selector, and citing them for it understated its E share by a factor of about 40. The current frozen selector, on validate under the ideal regime at λ = 0.2, takes **E on 45.7 %** of rows (L 54.3 %, F 0.0 %), at scene-equal F1 0.86050 and 0.00131 Msym. Source: results/v2/v2_p12_comparison.json, arms.frozen_RF_cand67 (also printed as the CA-TOSG (frozen RF) row of paper/tables/tbl_baselines.tex). kept above as a historical record of the v1 forest, not withdrawn from the changelog, and not to be read as the current selector.
+
 On the current grid (results/v2/v2_grid_validate_ideal.csv), with the oracle defined as budget-blind argmax of eff over {E, L, F} per (frame, cell); ties within 1e-12 go to the smaller payload, i.e. E before L before F:
 
 | channel | ρ_E | ρ_L | ρ_F | rows |
@@ -46,6 +48,17 @@ On the current grid (results/v2/v2_grid_validate_ideal.csv), with the oracle def
 | rayleigh | 16 | 5.56 % | 4.65 % | 89.80 % |
 | rayleigh | 18 | 5.25 % | 5.45 % | 89.29 % |
 | rayleigh | 20 | 5.30 % | 8.13 % | 86.57 % |
+
+*Utility accounting behind that table: P1's PARTIAL-RECOVERY eff_F -- the grid column. This is not the accounting locked in P2-R11 A.*
+
+**Under the locked all-or-nothing accounting** (constructed: CONSTRUCTED: eff_F replaced by q_F * f1_clean + (1 - q_F) * f1_ego, q_F = (1 - p_cw) ** 12567; eff_E and eff_L unchanged):
+
+| channel | ρ_E | ρ_L | ρ_F |
+|---|---:|---:|---:|
+| awgn | 32.89 % | 41.02 % | 26.09 % |
+| rayleigh | 21.28 % | 78.72 % | 0.00 % |
+
+**What the low-SNR E cells mean.** at low SNR the oracle picks E mostly because L and F have both failed and their fallback IS E, so the three actions tie and the tie goes to the cheapest. That is "the channel removed the benefit of cooperating", not "this frame did not need cooperation". The two are different questions and are not pooled: the second is examined on RELIABLE cells only, in the E phase, which is deferred.
 
 ## C-2 How the oracle-E frames differ, cue by cue
 
@@ -81,7 +94,9 @@ means, quantiles and a standardised difference only. Nothing is fitted, no thres
 
 (top 8 of 21 cues by absolute standardised difference; the full list is in the JSON)
 
-## C-3 Candidate rules
+## C-3 Candidate rules — WITHDRAWN
+
+**WITHDRAWN as a set (P2-R11 B-4). The rules below are recorded, not proposed: their directions were read off development-split oracle labels, which is exactly the dependence an E criterion must not have. The E phase is deferred and will start from reliable cells.**
 
 the candidates are read off the Rayleigh side because that is where the oracle sends anything to E at all; the AWGN table is reported beside it. every cue used is ego-local and exists before the request is issued, by the frozen cue schema.
 

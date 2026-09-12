@@ -57,10 +57,12 @@ def quote(text, needle, label):
 
 def build():
     g = pd.read_csv(GRID, usecols=['sample_id', 'scene', 'snr_db', 'channel', 'eff_E', 'eff_L', 'eff_F',
-                                   'has_collaborator'])
+                                   'has_collaborator', 'p_cw'])
     cues = pd.read_csv(CUES)
     fields = json.load(open(SCHEMA))['fields']
     log = open(CHANGELOG, encoding='utf-8').read()
+    p12 = json.load(open(os.path.join(V2, 'v2_p12_comparison.json')))
+    rf = p12['arms']['frozen_RF_cand67']
 
     # --- oracle on the current grid: budget-blind argmax, ties to the smaller payload (E > L > F) ----
     eff = g[['eff_E', 'eff_L', 'eff_F']].to_numpy()
@@ -89,15 +91,53 @@ def build():
             hit['covers'].append(label)
         else:
             quotes.append({'quote': q, 'covers': [label]})
+    # B-2: the oracle depends on WHICH utility it maximises. The grid's eff_F is P1's partial-recovery
+    # column; under the locked all-or-nothing accounting F is a different quantity, so both are reported
+    # and the second is marked as constructed.
+    w5 = pd.read_csv(os.path.join(V2, 'wp5_final_validate.csv'), usecols=['frame', 'f1_clean', 'f1_ego']).set_index('frame')
+    n_cw_F = json.load(open(os.path.join(V2, 'payload_chain.json')))['F']['n_cw']
+    q_F = (1.0 - g.p_cw.to_numpy()) ** n_cw_F
+    eff_F_msg = q_F * w5.f1_clean.loc[g.sample_id].to_numpy() + (1 - q_F) * w5.f1_ego.loc[g.sample_id].to_numpy()
+    eff_msg = np.column_stack([g.eff_E.to_numpy(), g.eff_L.to_numpy(), eff_F_msg])
+    best_msg = eff_msg.max(axis=1)
+    lab_msg = np.where(eff_msg[:, 0] >= best_msg - TIE, 'E',
+                       np.where(eff_msg[:, 1] >= best_msg - TIE, 'L', 'F'))
+    oracle_msg = {ch: {a: float((lab_msg[(g.channel == ch).to_numpy()] == a).mean()) for a in ('E', 'L', 'F')}
+                  for ch in ('awgn', 'rayleigh')}
+
     c1 = {'p1_record': {
               'quotes': quotes,
-              'source': 'docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17)'},
+              'source': 'docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17)',
+              'correction_P2R11_B1': {
+                  'what_was_wrong': 'the 0.0107 / 0.0112 / 0.0120 figures quoted above are the v1-era forest of the '
+                                    'R21 change-log. They do NOT describe the current frozen selector, and citing '
+                                    'them for it understated its E share by a factor of about 40',
+                  'current_frozen_forest': {
+                      'rho_E': rf['mix']['E'], 'rho_L': rf['mix']['L'], 'rho_F': rf['mix']['F'],
+                      'scene_equal_f1': rf['scene_equal_f1'], 'mean_payload_msym': rf['mean_payload_msym'],
+                      'split': p12['split'], 'regime': p12['regime'], 'lambda': p12['lambda'],
+                      'source': 'results/v2/v2_p12_comparison.json, arms.frozen_RF_cand67 (also printed as the '
+                                'CA-TOSG (frozen RF) row of paper/tables/tbl_baselines.tex)'},
+                  'status_of_the_old_numbers': 'kept above as a historical record of the v1 forest, not withdrawn '
+                                               'from the changelog, and not to be read as the current selector'}},
           'oracle_on_the_current_grid': {
               'definition': 'budget-blind argmax of eff over {E, L, F} per (frame, cell); ties within 1e-12 go to '
                             'the smaller payload, i.e. E before L before F',
               'product': 'results/v2/v2_grid_validate_ideal.csv', 'sha256': sha(GRID),
+              'utility_accounting': "P1's PARTIAL-RECOVERY eff_F -- the grid column. This is not the "
+                                    'accounting locked in P2-R11 A',
               'overall': {a: float((g.oracle == a).mean()) for a in ('E', 'L', 'F')},
-              'per_channel': per_channel, 'per_cell': per_cell}}
+              'per_channel': per_channel, 'per_cell': per_cell},
+          'oracle_under_the_locked_all_or_nothing_accounting': {
+              'status': 'CONSTRUCTED: eff_F replaced by q_F * f1_clean + (1 - q_F) * f1_ego, '
+                        f'q_F = (1 - p_cw) ** {n_cw_F}; eff_E and eff_L unchanged',
+              'per_channel': oracle_msg},
+          'what_the_low_SNR_E_cells_mean': 'at low SNR the oracle picks E mostly because L and F have both failed '
+                                           'and their fallback IS E, so the three actions tie and the tie goes to '
+                                           'the cheapest. That is "the channel removed the benefit of cooperating", '
+                                           'not "this frame did not need cooperation". The two are different '
+                                           'questions and are not pooled: the second is examined on RELIABLE cells '
+                                           'only, in the E phase, which is deferred'}
 
     # --- C-2: how the oracle-E frames differ, cue by cue -------------------------------------------
     cue_by_frame = cues.set_index('frame')
@@ -155,7 +195,13 @@ def build():
             'expected_trigger_share': trig,
             'effect_not_evaluated': 'this reports how often the rule would fire, and nothing about what it costs '
                                     'or gains'})
-    c3 = {'rules': rules, 'quantile_used': QUANTILE_FOR_RULES,
+    for r in rules:
+        r['status'] = ('WITHDRAWN (P2-R11 B-4): exploratory, derived by reading development results, NOT adopted. '
+                       'It is kept visible rather than deleted so that the reasoning can be audited')
+    c3 = {'status': 'WITHDRAWN as a set (P2-R11 B-4). The rules below are recorded, not proposed: their directions '
+                    'were read off development-split oracle labels, which is exactly the dependence an E criterion '
+                    'must not have. The E phase is deferred and will start from reliable cells',
+          'rules': rules, 'quantile_used': QUANTILE_FOR_RULES,
           'why_rayleigh': 'the candidates are read off the Rayleigh side because that is where the oracle sends '
                           'anything to E at all; the AWGN table is reported beside it',
           'all_cues_are_pre_request': 'every cue used is ego-local and exists before the request is issued, by the '
@@ -187,14 +233,28 @@ def markdown(m):
          '## C-1 What is already on the record', '', f"From {c1['p1_record']['source']}:", '']
     for q in c1['p1_record']['quotes']:
         L += [f"> {q['quote']}", '', f"*(carries: {'; '.join(q['covers'])})*", '']
-    L += [f"On the current grid ({o['product']}), with the oracle defined as {o['definition']}:", '',
+    corr = c1['p1_record']['correction_P2R11_B1']
+    cf = corr['current_frozen_forest']
+    L += ['**Correction (P2-R11 B-1).** ' + corr['what_was_wrong'] + '. The current frozen selector, on '
+          f"{cf['split']} under the {cf['regime']} regime at λ = {cf['lambda']}, takes **E on "
+          f"{cf['rho_E'] * 100:.1f} %** of rows (L {cf['rho_L'] * 100:.1f} %, F {cf['rho_F'] * 100:.1f} %), at "
+          f"scene-equal F1 {cf['scene_equal_f1']:.5f} and {cf['mean_payload_msym']:.5f} Msym. Source: "
+          f"{cf['source']}. {corr['status_of_the_old_numbers']}.", '',
+          f"On the current grid ({o['product']}), with the oracle defined as {o['definition']}:", '',
           '| channel | ρ_E | ρ_L | ρ_F | rows |', '|---|---:|---:|---:|---:|']
     for ch, v in o['per_channel'].items():
         L.append(f"| {ch} | {v['E'] * 100:.2f} % | {v['L'] * 100:.2f} % | {v['F'] * 100:.2f} % | {v['rows']:,} |")
     L += ['', '| channel | SNR | ρ_E | ρ_L | ρ_F |', '|---|---:|---:|---:|---:|']
     for r in o['per_cell']:
         L.append(f"| {r['channel']} | {r['snr_db']} | {r['rho_E'] * 100:.2f} % | {r['rho_L'] * 100:.2f} % | {r['rho_F'] * 100:.2f} % |")
-    L += ['', '## C-2 How the oracle-E frames differ, cue by cue', '', f"{c2['note']}.", '']
+    L += ['', f"*Utility accounting behind that table: {o['utility_accounting']}.*", '',
+          '**Under the locked all-or-nothing accounting** (constructed: '
+          + m['C1']['oracle_under_the_locked_all_or_nothing_accounting']['status'] + '):', '',
+          '| channel | ρ_E | ρ_L | ρ_F |', '|---|---:|---:|---:|']
+    for ch, v in m['C1']['oracle_under_the_locked_all_or_nothing_accounting']['per_channel'].items():
+        L.append(f"| {ch} | {v['E'] * 100:.2f} % | {v['L'] * 100:.2f} % | {v['F'] * 100:.2f} % |")
+    L += ['', f"**What the low-SNR E cells mean.** {m['C1']['what_the_low_SNR_E_cells_mean']}.", '',
+          '## C-2 How the oracle-E frames differ, cue by cue', '', f"{c2['note']}.", '']
     for ch in ('rayleigh', 'awgn'):
         d = c2[ch]
         L += [f"### {ch}: {d['frames_with_any_E_cell']:,} frames with at least one E cell, "
@@ -208,7 +268,8 @@ def markdown(m):
                      f"{' / '.join(f'{y:.4g}' for y in x['q25_q50_q75_other'])} |")
         L += ['', f"(top 8 of {len(d['dimensions'])} cues by absolute standardised difference; the full list is in "
               'the JSON)', '']
-    L += ['## C-3 Candidate rules', '', f"{c3['why_rayleigh']}. {c3['all_cues_are_pre_request']}.", '',
+    L += ['## C-3 Candidate rules — WITHDRAWN', '', f"**{c3['status']}.**", '',
+          f"{c3['why_rayleigh']}. {c3['all_cues_are_pre_request']}.", '',
           '| candidate | direction | threshold | where the threshold comes from | would fire on |',
           '|---|---|---:|---|---:|']
     for r in c3['rules']:

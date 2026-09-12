@@ -18,12 +18,28 @@
      ]
     }
    ],
-   "source": "docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17)"
+   "source": "docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17)",
+   "correction_P2R11_B1": {
+    "what_was_wrong": "the 0.0107 / 0.0112 / 0.0120 figures quoted above are the v1-era forest of the R21 change-log. They do NOT describe the current frozen selector, and citing them for it understated its E share by a factor of about 40",
+    "current_frozen_forest": {
+     "rho_E": 0.4573002754820937,
+     "rho_L": 0.5426997245179064,
+     "rho_F": 0.0,
+     "scene_equal_f1": 0.8605023965388785,
+     "mean_payload_msym": 0.001309067952249771,
+     "split": "validate",
+     "regime": "ideal",
+     "lambda": 0.2,
+     "source": "results/v2/v2_p12_comparison.json, arms.frozen_RF_cand67 (also printed as the CA-TOSG (frozen RF) row of paper/tables/tbl_baselines.tex)"
+    },
+    "status_of_the_old_numbers": "kept above as a historical record of the v1 forest, not withdrawn from the changelog, and not to be read as the current selector"
+   }
   },
   "oracle_on_the_current_grid": {
    "definition": "budget-blind argmax of eff over {E, L, F} per (frame, cell); ties within 1e-12 go to the smaller payload, i.e. E before L before F",
    "product": "results/v2/v2_grid_validate_ideal.csv",
    "sha256": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+   "utility_accounting": "P1's PARTIAL-RECOVERY eff_F -- the grid column. This is not the accounting locked in P2-R11 A",
    "overall": {
     "E": 0.21062901744719925,
     "L": 0.22695133149678604,
@@ -199,7 +215,23 @@
      "rho_F": 0.8656565656565657
     }
    ]
-  }
+  },
+  "oracle_under_the_locked_all_or_nothing_accounting": {
+   "status": "CONSTRUCTED: eff_F replaced by q_F * f1_clean + (1 - q_F) * f1_ego, q_F = (1 - p_cw) ** 12567; eff_E and eff_L unchanged",
+   "per_channel": {
+    "awgn": {
+     "E": 0.32892561983471075,
+     "L": 0.41019283746556473,
+     "F": 0.2608815426997245
+    },
+    "rayleigh": {
+     "E": 0.2127640036730946,
+     "L": 0.7872359963269054,
+     "F": 0.0
+    }
+   }
+  },
+  "what_the_low_SNR_E_cells_mean": "at low SNR the oracle picks E mostly because L and F have both failed and their fallback IS E, so the three actions tie and the tie goes to the cheapest. That is \"the channel removed the benefit of cooperating\", not \"this frame did not need cooperation\". The two are different questions and are not pooled: the second is examined on RELIABLE cells only, in the E phase, which is deferred"
  },
  "C2_cue_differences": {
   "rayleigh": {
@@ -891,6 +923,7 @@
   "note": "means, quantiles and a standardised difference only. Nothing is fitted, no threshold is optimised against these labels, and the ordering by standardised difference is a way of reading the table, not a selection"
  },
  "C3_candidate_rules": {
+  "status": "WITHDRAWN as a set (P2-R11 B-4). The rules below are recorded, not proposed: their directions were read off development-split oracle labels, which is exactly the dependence an E criterion must not have. The E phase is deferred and will start from reliable cells",
   "rules": [
    {
     "rule": "E if ego_detected_box_count >= 37",
@@ -901,7 +934,8 @@
     "direction_source": "the sign of the standardised difference in C-2 (Rayleigh)",
     "available_before_the_request": true,
     "expected_trigger_share": 0.251010101010101,
-    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains"
+    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains",
+    "status": "WITHDRAWN (P2-R11 B-4): exploratory, derived by reading development results, NOT adopted. It is kept visible rather than deleted so that the reasoning can be audited"
    },
    {
     "rule": "E if ego_pcd_num_points <= 49778",
@@ -912,7 +946,8 @@
     "direction_source": "the sign of the standardised difference in C-2 (Rayleigh)",
     "available_before_the_request": true,
     "expected_trigger_share": 0.2515151515151515,
-    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains"
+    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains",
+    "status": "WITHDRAWN (P2-R11 B-4): exploratory, derived by reading development results, NOT adopted. It is kept visible rather than deleted so that the reasoning can be audited"
    },
    {
     "rule": "E if ego_pcd_left_points <= 24961",
@@ -923,7 +958,8 @@
     "direction_source": "the sign of the standardised difference in C-2 (Rayleigh)",
     "available_before_the_request": true,
     "expected_trigger_share": 0.25202020202020203,
-    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains"
+    "effect_not_evaluated": "this reports how often the rule would fire, and nothing about what it costs or gains",
+    "status": "WITHDRAWN (P2-R11 B-4): exploratory, derived by reading development results, NOT adopted. It is kept visible rather than deleted so that the reasoning can be audited"
    }
   ],
   "quantile_used": 0.75,
