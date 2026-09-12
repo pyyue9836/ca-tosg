@@ -186,6 +186,8 @@ def main():
     ap.add_argument('--rand-reps', type=int, default=R_RAND_LOCKED)
     ap.add_argument('--cpu-frames', type=int, default=3)
     ap.add_argument('--probe', action='store_true', help='60 frames spread over the split, 2 random repeats; timings')
+    ap.add_argument('--stage2-clean', dest='stage2_clean', action='store_true',
+                    help='Amendment 2 C: every validate frame, clean condition only, no loss sweep')
     ap.add_argument('--stage1', action='store_true',
                     help='Amendment 1 stage 1: the probe frames, 8 random masks, and only the nodes the seven '
                          'locked cells use (clean and p = 0.001)')
@@ -197,11 +199,19 @@ def main():
         if a.probe:
             raise SystemExit('--stage1 and --probe are different runs')
         a.every, a.limit, a.rand_reps, a.cpu_frames = 33, 60, 8, 0
+    if a.stage2_clean:
+        if a.probe or a.stage1:
+            raise SystemExit('--stage2-clean is its own run')
+        a.every, a.limit, a.rand_reps, a.cpu_frames = 1, 0, 8, 0
     # stage 1 needs only the interpolation nodes the seven locked cells use: p_cw is exactly 0 at
     # AWGN 10-20 dB (clean) and 0.00013 at 8 dB, which interpolates between clean and p = 0.001.
-    rates_used = (0.001,) if a.stage1 else RATES
-    run_p1 = not a.stage1
-    out_dir = os.path.join(RESULTS, 'stage1' if a.stage1 else ('probe' if a.probe else 'round1'))
+    # stage 2 (clean only) runs no damaged condition at all: the six locked cells with p_cw exactly 0
+    # ARE the clean forward, and the 8 dB cell is reported as not computed rather than substituted.
+    rates_used = () if a.stage2_clean else ((0.001,) if a.stage1 else RATES)
+    run_p1 = not (a.stage1 or a.stage2_clean)
+    run_identity = not a.stage2_clean          # the costed clean-only plan excludes the C-1 control
+    out_dir = os.path.join(RESULTS, 'stage2_clean' if a.stage2_clean else
+                           ('stage1' if a.stage1 else ('probe' if a.probe else 'round1')))
     os.makedirs(out_dir, exist_ok=True)
     lock = json.load(open(LOCK))
 
@@ -241,6 +251,17 @@ def main():
         f = lambda t, shp: t.cpu().numpy() if t is not None and len(t) > 0 else np.zeros(shp, np.float32)
         return f(pb, (0, 8, 3)), f(g, (0, 8, 3))
 
+    def counts(pred, gt, iou=0.5):
+        import torch as _t
+        from opencood.utils import eval_utils as _eu
+        pred = np.asarray(pred, np.float32); gt = np.asarray(gt, np.float32)
+        pt = _t.from_numpy(pred) if pred.size else _t.zeros((0, 8, 3))
+        gt_t = _t.from_numpy(gt) if gt.size else _t.zeros((0, 8, 3))
+        rs = {iou: {'tp': [], 'fp': [], 'gt': 0, 'score': []}}
+        _eu.caluclate_tp_fp(pt, _t.ones(len(pt)), gt_t, rs, iou)
+        tp = int(sum(rs[iou]['tp'])); fp = int(sum(rs[iou]['fp']))
+        return tp, fp, int(rs[iou]['gt'])
+
     def sync():
         if dev.type == 'cuda':
             torch.cuda.synchronize()
@@ -264,6 +285,7 @@ def main():
             sync(); t_rec = time.time() - t0
             tr.recording = False
             rec['f1_full_clean'] = f1_from_boxes(Bf, G)
+            rec['tp_full'], rec['fp_full'], rec['n_gt'] = counts(Bf, G)
             d_ident = abs(rec['f1_full_clean'] - p1_clean[frame]) if frame in p1_clean else np.nan
             ident.append(d_ident)
             for k in range(3):
@@ -301,7 +323,9 @@ def main():
                     B, _ = fwd(pack)
                 sync(); t_fwds.append(time.time() - t0)
                 rec[f'f1_{v}_clean'] = f1_from_boxes(B, G)
-                if v == 'conf':                                   # C-1 identity control, once per frame
+                if v == 'conf':
+                    rec['tp_conf'], rec['fp_conf'], _ = counts(B, G)
+                if v == 'conf' and run_identity:                  # C-1 identity control, once per frame
                     tr.set_dead(np.zeros(tr.n_cw, bool), 'ideal')
                     with tr.patched():
                         Bc, _ = fwd(pack)
@@ -338,14 +362,16 @@ def main():
     pd.DataFrame(rows).to_csv(os.path.join(out_dir, f'f_block_rows_{a.split}{tag}.csv'), index=False)
     T = pd.DataFrame(timing)
     summ = {'schema': 'catosg-p2-round1-eval/1',
-            'mode': 'stage1' if a.stage1 else ('probe' if a.probe else 'full'),
+            'mode': 'stage2_clean' if a.stage2_clean else ('stage1' if a.stage1 else ('probe' if a.probe else 'full')),
+            'identity_control_run': run_identity,
             'rates_used': list(rates_used), 'p1_condition_run': run_p1, 'split': a.split,
             'frames': len(rows), 'every': a.every, 'frame_ids': idx, 'rand_reps_run': a.rand_reps,
             'rand_reps_locked': R_RAND_LOCKED, 'variants_run': variants, 'conditions_per_variant': n_cond,
             'K_F': tr.K, 'n_blocks': tr.n_blocks, 'n_cw': tr.n_cw, 'lock_sha256_inputs': lock['inputs'],
             'seconds': round(dt, 1), 'sec_per_frame': round(dt / max(len(rows), 1), 3),
             'identity_vs_P1_f1_clean': {'max_abs_diff': float(np.nanmax(ident)), 'frames_compared': int(np.sum(~np.isnan(ident)))},
-            'identity_control_all_ok': bool(all(r.get('identity_control_ok', 0) for r in rows)),
+            'identity_control_all_ok': (bool(all(r.get('identity_control_ok', 0) for r in rows))
+                                        if run_identity else None),
             'timing': {c: {'mean': float(T[c].mean()), 'median': float(T[c].median()), 'n': int(T[c].notna().sum())}
                        for c in T.columns if c != 'frame'},
             'device': {'gpu': torch.cuda.get_device_name(0) if dev.type == 'cuda' else 'none',
