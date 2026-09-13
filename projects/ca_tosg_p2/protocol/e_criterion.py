@@ -110,8 +110,9 @@ def build():
               'source': 'docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17)',
               'correction_P2R11_B1': {
                   'what_was_wrong': 'the 0.0107 / 0.0112 / 0.0120 figures quoted above are the v1-era forest of the '
-                                    'R21 change-log. They do NOT describe the current frozen selector, and citing '
-                                    'them for it understated its E share by a factor of about 40',
+                                    'R21 change-log. They do NOT describe the current frozen selector. The current '
+                                    'value is given below; the two are different selectors and the comparison '
+                                    'between them is a version note, not a finding',
                   'current_frozen_forest': {
                       'rho_E': rf['mix']['E'], 'rho_L': rf['mix']['L'], 'rho_F': rf['mix']['F'],
                       'scene_equal_f1': rf['scene_equal_f1'], 'mean_payload_msym': rf['mean_payload_msym'],
@@ -132,6 +133,12 @@ def build():
               'status': 'CONSTRUCTED: eff_F replaced by q_F * f1_clean + (1 - q_F) * f1_ego, '
                         f'q_F = (1 - p_cw) ** {n_cw_F}; eff_E and eff_L unchanged',
               'per_channel': oracle_msg},
+          'not_comparable': 'the frozen forest\'s E share and the oracle E shares are NOT comparable and are not '
+                            'compared here. The forest was fitted against P1\'s partial-recovery utility under a '
+                            'lambda-penalised budget objective; the oracle rows maximise a utility with no budget '
+                            'term, and the third table changes the utility again to the locked all-or-nothing '
+                            'accounting. Three different objectives over three different quantities: they are '
+                            'listed side by side and nothing is inferred from the differences between them',
           'what_the_low_SNR_E_cells_mean': 'at low SNR the oracle picks E mostly because L and F have both failed '
                                            'and their fallback IS E, so the three actions tie and the tie goes to '
                                            'the cheapest. That is "the channel removed the benefit of cooperating", '
@@ -253,7 +260,8 @@ def markdown(m):
           '| channel | ρ_E | ρ_L | ρ_F |', '|---|---:|---:|---:|']
     for ch, v in m['C1']['oracle_under_the_locked_all_or_nothing_accounting']['per_channel'].items():
         L.append(f"| {ch} | {v['E'] * 100:.2f} % | {v['L'] * 100:.2f} % | {v['F'] * 100:.2f} % |")
-    L += ['', f"**What the low-SNR E cells mean.** {m['C1']['what_the_low_SNR_E_cells_mean']}.", '',
+    L += ['', f"**Not comparable.** {m['C1']['not_comparable']}.", '',
+          f"**What the low-SNR E cells mean.** {m['C1']['what_the_low_SNR_E_cells_mean']}.", '',
           '## C-2 How the oracle-E frames differ, cue by cue', '', f"{c2['note']}.", '']
     for ch in ('rayleigh', 'awgn'):
         d = c2[ch]

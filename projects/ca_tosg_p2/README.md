@@ -6,6 +6,7 @@
 | `protocol/full_f_feasibility.md` | complete-F transmission audit (P2-R9) |
 | `protocol/link_scenarios.md` | resource table, sources quoted |
 | `protocol/four_arm_eval.md` | four arms under the **locked** accounting (P2-R11 C) |
+| `protocol/awgn_fill_plan.md` | pre-registered plan to measure AWGN 8.5/9.0/9.5 dB (P2-R12 B) — **not run, awaiting approval** |
 | `protocol/message_regime.md` | the costing that informed the ruling (P2-R10 B); the accounting is now locked in `p2_protocol.md` |
 | `protocol/e_criterion.md` | candidates for a "no cooperation needed → E" rule (P2-R10 C) |
 | `protocol/rule_prototype_plan.md` | rule-based prototype evaluation (P2-R10 D) — **plan only, not run** |

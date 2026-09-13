@@ -15,7 +15,7 @@ From docs/history/protocol_changelog.md, change-log R21-A-run (2026-08-17):
 
 *(carries: the two-gate rule's rho_E)*
 
-**Correction (P2-R11 B-1).** the 0.0107 / 0.0112 / 0.0120 figures quoted above are the v1-era forest of the R21 change-log. They do NOT describe the current frozen selector, and citing them for it understated its E share by a factor of about 40. The current frozen selector, on validate under the ideal regime at λ = 0.2, takes **E on 45.7 %** of rows (L 54.3 %, F 0.0 %), at scene-equal F1 0.86050 and 0.00131 Msym. Source: results/v2/v2_p12_comparison.json, arms.frozen_RF_cand67 (also printed as the CA-TOSG (frozen RF) row of paper/tables/tbl_baselines.tex). kept above as a historical record of the v1 forest, not withdrawn from the changelog, and not to be read as the current selector.
+**Correction (P2-R11 B-1).** the 0.0107 / 0.0112 / 0.0120 figures quoted above are the v1-era forest of the R21 change-log. They do NOT describe the current frozen selector. The current value is given below; the two are different selectors and the comparison between them is a version note, not a finding. The current frozen selector, on validate under the ideal regime at λ = 0.2, takes **E on 45.7 %** of rows (L 54.3 %, F 0.0 %), at scene-equal F1 0.86050 and 0.00131 Msym. Source: results/v2/v2_p12_comparison.json, arms.frozen_RF_cand67 (also printed as the CA-TOSG (frozen RF) row of paper/tables/tbl_baselines.tex). kept above as a historical record of the v1 forest, not withdrawn from the changelog, and not to be read as the current selector.
 
 On the current grid (results/v2/v2_grid_validate_ideal.csv), with the oracle defined as budget-blind argmax of eff over {E, L, F} per (frame, cell); ties within 1e-12 go to the smaller payload, i.e. E before L before F:
 
@@ -57,6 +57,8 @@ On the current grid (results/v2/v2_grid_validate_ideal.csv), with the oracle def
 |---|---:|---:|---:|
 | awgn | 32.89 % | 41.02 % | 26.09 % |
 | rayleigh | 21.28 % | 78.72 % | 0.00 % |
+
+**Not comparable.** the frozen forest's E share and the oracle E shares are NOT comparable and are not compared here. The forest was fitted against P1's partial-recovery utility under a lambda-penalised budget objective; the oracle rows maximise a utility with no budget term, and the third table changes the utility again to the locked all-or-nothing accounting. Three different objectives over three different quantities: they are listed side by side and nothing is inferred from the differences between them.
 
 **What the low-SNR E cells mean.** at low SNR the oracle picks E mostly because L and F have both failed and their fallback IS E, so the three actions tie and the tie goes to the cheapest. That is "the channel removed the benefit of cooperating", not "this frame did not need cooperation". The two are different questions and are not pooled: the second is examined on RELIABLE cells only, in the E phase, which is deferred.
 

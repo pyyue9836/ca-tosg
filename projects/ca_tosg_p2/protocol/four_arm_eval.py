@@ -117,7 +117,21 @@ def build():
             row[c] = summarise(eff, pay, rF, rL, rE, ch_mask[c])
             row[c]['requested_share_F'] = float(sel[ch_mask[c]].mean())
         sweep.append(row)
-    best = {c: max(sweep, key=lambda r: r[c]['scene_equal_f1']) for c in CHANNELS}
+    # A-1: many tau values request exactly the same actions on an 11-point SNR grid, so a single
+    # "best tau" is an artefact of the sampling. The equivalence classes are reported instead.
+    best_val = {c: max(r[c]['scene_equal_f1'] for r in sweep) for c in CHANNELS}
+    tau_opt = {c: [r['tau_db'] for r in sweep if r[c]['scene_equal_f1'] >= best_val[c] - 1e-12]
+               for c in CHANNELS}
+    tau_classes = {}
+    for c in CHANNELS:
+        cls = {}
+        for r in sweep:
+            key = tuple(sorted(set(snr[(snr >= r['tau_db']) & ch_mask[c]].tolist())))
+            cls.setdefault(key, []).append(r['tau_db'])
+        tau_classes[c] = [{'requested_F_at_snr': list(k), 'tau_values': v,
+                           'scene_equal_f1': next(r[c]['scene_equal_f1'] for r in sweep if r['tau_db'] == v[0])}
+                          for k, v in cls.items()]
+    best = {c: next(r for r in sweep if r['tau_db'] == tau_opt[c][0]) for c in CHANNELS}
 
     # C-3: per cell
     cells = []
@@ -159,24 +173,52 @@ def build():
     for c in CHANNELS:
         m = ch_mask[c]
         sc = g.scene.to_numpy()[m]
-        tau_star = best[c]['tau_db']
+        tau_star = tau_opt[c][0]           # any member of the set requests the same actions (A-1)
         sel = snr >= tau_star
         eff_r, pay_r, rF, rL, rE = arm_rows(sel)
         d_FL = (g.eff_F.to_numpy() - g.eff_L.to_numpy())[m]
         d_RL = (eff_r - g.eff_L.to_numpy())[m]
+        d_RF = (eff_r - g.eff_F.to_numpy())[m]
         per_scene[c] = [{'scene': str(s), 'rows': int((sc == s).sum()),
                          'Fixed E': float(g.eff_E.to_numpy()[m][sc == s].mean()),
                          'Fixed L': float(g.eff_L.to_numpy()[m][sc == s].mean()),
                          'Fixed F': float(g.eff_F.to_numpy()[m][sc == s].mean()),
                          'rule_at_tau_star': float(eff_r[m][sc == s].mean()),
                          'F_minus_L': float(d_FL[sc == s].mean()),
-                         'rule_minus_L': float(d_RL[sc == s].mean())} for s in np.unique(sc)]
-        diffs[c] = {'tau_star_db': tau_star,
+                         'rule_minus_L': float(d_RL[sc == s].mean()),
+                         'rule_minus_F': float(d_RF[sc == s].mean())} for s in np.unique(sc)]
+        diffs[c] = {'tau_used_db': tau_star, 'tau_equivalent_set': tau_opt[c],
+                    'payload_is_not_a_criterion': 'payload is reported beside F1 and is not used here to prefer '
+                                                  'one arm over another',
                     'Fixed_F_minus_Fixed_L': boot(d_FL, sc), 'rule_minus_Fixed_L': boot(d_RL, sc),
+                    'rule_minus_Fixed_F': boot(d_RF, sc),
                     'scenes_negative_F_minus_L': [x['scene'] for x in per_scene[c] if x['F_minus_L'] < 0],
                     'scenes_negative_rule_minus_L': [x['scene'] for x in per_scene[c] if x['rule_minus_L'] < 0]}
 
-    return {'schema': 'catosg-p2-four-arm/1',
+    # A-5: invert q_F = (1 - p) ** N, and solve eff_F > eff_L for the q_F it would take on AWGN
+    def p_for_q(q):
+        return float(1.0 - np.exp(np.log(q) / n_cw_F))
+    hi = g[(g.channel == 'awgn') & (g.snr_db >= 10)]
+    sc_hi = hi.scene.to_numpy()
+    se_clean, se_ego = scene_equal(hi.f1_clean.to_numpy(), sc_hi), scene_equal(hi.f1_ego.to_numpy(), sc_hi)
+    se_L = scene_equal(hi.eff_L.to_numpy(), sc_hi)
+    q_star = (se_L - se_ego) / (se_clean - se_ego)
+    a5 = {'q_to_p': {str(q): p_for_q(q) for q in (0.9, 0.5, 0.1)},
+          'awgn_break_even': {
+              'derivation': 'eff_F = q_F * F1_clean + (1 - q_F) * F1_ego exceeds eff_L when q_F > '
+                            '(eff_L - F1_ego) / (F1_clean - F1_ego); evaluated on the scene-equal AWGN values at '
+                            '10 dB and above, where q_L is 1 to reporting precision',
+              'scene_equal_f1_clean': se_clean, 'scene_equal_f1_ego': se_ego, 'scene_equal_eff_L': se_L,
+              'q_F_threshold': q_star, 'p_cw_threshold': p_for_q(q_star),
+              'reading': 'F only overtakes L once the per-codeword loss is below this p_cw. The 8 dB measurement '
+                         'is 0.00013, an order of magnitude above it, which is why 8 dB takes L'},
+          'note': 'these are properties of the accounting and the frozen per-frame F1 values, not new measurements'}
+
+    return {'schema': 'catosg-p2-four-arm/2',
+            'shares_are_expectations': 'every executed share and every eff value here is an expectation under the '
+                                       'analytic success probability q. No transmission was sampled in this round, '
+                                       'so nothing here reports how many messages did or did not arrive',
+            'A5_break_even': a5,
             'accounting': 'LOCKED all-or-nothing (p2_protocol.md P2-R11 A): a message is usable only if the whole '
                           'message decodes, a failure falls back to E, and payload is charged for the attempt',
             'constructed_column': 'eff_F = q_F * F1_clean + (1 - q_F) * F1_ego with q_F = (1 - p_cw) ** '
@@ -184,8 +226,15 @@ def build():
             'guard': {'p1_eff_L_reproduces_the_locked_rule': True, 'max_abs_diff': d_L},
             'inputs': {'grid': sha(GRID), 'wp5': sha(WP5), 'wp34': sha(WP34), 'bler': sha(BLER)},
             'payload_units': 'QAM data symbols; F = %.0f per request, L = per-frame N_cw,L x 250, E = 0' % B_F_sym,
-            'fixed_arms': fixed, 'tau_sweep': {'step_db': TAU_STEP, 'rows': sweep,
-                                               'best_by_scene_equal_f1': {c: best[c]['tau_db'] for c in CHANNELS}},
+            'fixed_arms': fixed,
+            'tau_sweep': {'step_db': TAU_STEP, 'rows': sweep,
+                          'optimal_tau_set': tau_opt, 'equivalence_classes': tau_classes,
+                          'reading': 'on this grid a tau is only identified up to the set of SNR points it puts on '
+                                     'the F side. Every tau in an optimal set requests exactly the same actions and '
+                                     'scores identically; a single "best tau" would be an artefact of the 11-point '
+                                     'sampling, so none is quoted',
+                          'conclusion': 'at the sampled points, 8 dB takes L and 10 dB and above take F on AWGN; '
+                                        'the exact crossing is undetermined. On Rayleigh no sampled point takes F'},
             'cells': cells, 'C4': c4, 'per_scene': per_scene, 'differences': diffs,
             'command': 'python projects/ca_tosg_p2/protocol/four_arm_eval.py'}
 
@@ -195,7 +244,10 @@ def markdown(m):
          '# Four arms under the locked all-or-nothing accounting (P2-R11 C)', '',
          f"**Accounting.** {m['accounting']}.", '', f"**Constructed column.** {m['constructed_column']}.", '',
          f"**Guard.** P1's stored `eff_L` reproduces the locked A-2 rule to {m['guard']['max_abs_diff']:.1e}.", '',
-         f"**Payload.** {m['payload_units']}.", '', '## Fixed arms', '',
+         f"**Payload.** {m['payload_units']}.", '',
+          f"**Everything here is an expectation.** {m['shares_are_expectations']}. On Rayleigh at 20 dB, "
+          f"q_F = (1 − 0.04) ** 12567 ≈ 1.6e-223: the success probability is negligible and the expected "
+          f"perception outcome equals E at reporting precision.", '', '## Fixed arms', '',
          '| channel | arm | scene-equal F1 | QAM symbols / frame | executed E | executed L | executed F |',
          '|---|---|---:|---:|---:|---:|---:|']
     for c in CHANNELS:
@@ -204,9 +256,19 @@ def markdown(m):
             L.append(f"| {c} | {a} | {v['scene_equal_f1']:.5f} | {v['qam_symbols_scene_equal']:,.0f} | "
                      f"{v['executed_share_E'] * 100:.1f} % | {v['executed_share_L'] * 100:.1f} % | "
                      f"{v['executed_share_F'] * 100:.1f} % |")
-    L += ['', '## C-2 The τ sweep, 0.5 dB steps, channels apart', '',
-          'The rule requests F when SNR ≥ τ and L otherwise; both fall back to E on failure. Executed shares are '
-          'expectations under the locked accounting.', '']
+    a5 = m['A5_break_even']
+    bk = a5['awgn_break_even']
+    L += ['', '## A-5 What q_F would have to be', '', f"{bk['derivation']}.", '',
+          '| q_F | p_cw that gives it |', '|---:|---:|']
+    for q, p_ in a5['q_to_p'].items():
+        L.append(f"| {float(q):.1f} | {p_:.3g} |")
+    L += ['', f"On AWGN at 10 dB and above the scene-equal values are F1_clean {bk['scene_equal_f1_clean']:.5f}, "
+          f"F1_ego {bk['scene_equal_f1_ego']:.5f}, eff_L {bk['scene_equal_eff_L']:.5f}, so F overtakes L at "
+          f"**q_F > {bk['q_F_threshold']:.4f}**, i.e. **p_cw < {bk['p_cw_threshold']:.3g}**. {bk['reading']}. "
+          f"{a5['note']}.", '',
+          '## C-2 The τ sweep, 0.5 dB steps, channels apart', '',
+          'The rule requests F when SNR ≥ τ and L otherwise; both fall back to E on failure. '
+          + m['shares_are_expectations'] + '.', '']
     for c in CHANNELS:
         L += [f"### {c}", '', '| τ (dB) | scene-equal F1 | QAM symbols / frame | requested F | executed E | '
               'executed L | executed F |', '|---:|---:|---:|---:|---:|---:|---:|']
@@ -215,7 +277,9 @@ def markdown(m):
             L.append(f"| {r['tau_db']:.1f} | {v['scene_equal_f1']:.5f} | {v['qam_symbols_scene_equal']:,.0f} | "
                      f"{v['requested_share_F'] * 100:.1f} % | {v['executed_share_E'] * 100:.1f} % | "
                      f"{v['executed_share_L'] * 100:.1f} % | {v['executed_share_F'] * 100:.1f} % |")
-        L += ['', f"Highest scene-equal F1 at τ = {m['tau_sweep']['best_by_scene_equal_f1'][c]:.1f} dB.", '']
+        opt = m['tau_sweep']['optimal_tau_set'][c]
+        L += ['', f"Highest scene-equal F1 is reached by **every τ in {{{', '.join(f'{x:.1f}' for x in opt)}}} dB** "
+              '— they request identical actions and score identically.', '']
     L += ['## C-3 Per cell', '', '| channel | SNR | p_cw | q_F | Fixed E | Fixed L | Fixed F | F − L | F beats L |',
           '|---|---:|---:|---:|---:|---:|---:|---:|:---:|']
     for r in m['cells']:
@@ -239,16 +303,21 @@ def markdown(m):
           '## C-5 Per scene and intervals', '']
     for c in CHANNELS:
         d = m['differences'][c]
-        L += [f"### {c} (rule at τ = {d['tau_star_db']:.1f} dB)", '',
-              '| scene | rows | Fixed E | Fixed L | Fixed F | rule | F − L | rule − L |',
-              '|---|---:|---:|---:|---:|---:|---:|---:|']
+        L += [f"### {c} (rule at τ = {d['tau_used_db']:.1f} dB; any τ in "
+              f"{{{', '.join(f'{x:.1f}' for x in d['tau_equivalent_set'])}}} gives the same actions)", '',
+              '| scene | rows | Fixed E | Fixed L | Fixed F | rule | F − L | rule − L | rule − F |',
+              '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
         for r in m['per_scene'][c]:
             L.append(f"| {r['scene']} | {r['rows']:,} | {r['Fixed E']:.5f} | {r['Fixed L']:.5f} | {r['Fixed F']:.5f} | "
-                     f"{r['rule_at_tau_star']:.5f} | {r['F_minus_L']:+.5f} | {r['rule_minus_L']:+.5f} |")
+                     f"{r['rule_at_tau_star']:.5f} | {r['F_minus_L']:+.5f} | {r['rule_minus_L']:+.5f} | "
+                     f"{r['rule_minus_F']:+.5f} |")
         L += ['', f"Scene-level bootstrap: Fixed F − Fixed L = {d['Fixed_F_minus_Fixed_L']['mean']:+.5f} "
               f"[{d['Fixed_F_minus_Fixed_L']['lcb95']:+.5f}, {d['Fixed_F_minus_Fixed_L']['ucb95']:+.5f}]; "
               f"rule − Fixed L = {d['rule_minus_Fixed_L']['mean']:+.5f} "
-              f"[{d['rule_minus_Fixed_L']['lcb95']:+.5f}, {d['rule_minus_Fixed_L']['ucb95']:+.5f}].",
+              f"[{d['rule_minus_Fixed_L']['lcb95']:+.5f}, {d['rule_minus_Fixed_L']['ucb95']:+.5f}]; "
+              f"**rule − Fixed F = {d['rule_minus_Fixed_F']['mean']:+.5f} "
+              f"[{d['rule_minus_Fixed_F']['lcb95']:+.5f}, {d['rule_minus_Fixed_F']['ucb95']:+.5f}]**. "
+              f"{d['payload_is_not_a_criterion']}.",
               '', f"Scenes with a negative F − L: "
               + (', '.join(d['scenes_negative_F_minus_L']) if d['scenes_negative_F_minus_L'] else 'none')
               + f". With a negative rule − L: "

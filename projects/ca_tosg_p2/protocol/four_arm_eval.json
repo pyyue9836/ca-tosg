@@ -1,5 +1,23 @@
 {
- "schema": "catosg-p2-four-arm/1",
+ "schema": "catosg-p2-four-arm/2",
+ "shares_are_expectations": "every executed share and every eff value here is an expectation under the analytic success probability q. No transmission was sampled in this round, so nothing here reports how many messages did or did not arrive",
+ "A5_break_even": {
+  "q_to_p": {
+   "0.9": 8.383868384864712e-06,
+   "0.5": 5.515461647576103e-05,
+   "0.1": 0.00018320793830028936
+  },
+  "awgn_break_even": {
+   "derivation": "eff_F = q_F * F1_clean + (1 - q_F) * F1_ego exceeds eff_L when q_F > (eff_L - F1_ego) / (F1_clean - F1_ego); evaluated on the scene-equal AWGN values at 10 dB and above, where q_L is 1 to reporting precision",
+   "scene_equal_f1_clean": 0.9167521370851005,
+   "scene_equal_f1_ego": 0.8256674842513136,
+   "scene_equal_eff_L": 0.9023108896262207,
+   "q_F_threshold": 0.8414524619725735,
+   "p_cw_threshold": 1.3736339089076566e-05,
+   "reading": "F only overtakes L once the per-codeword loss is below this p_cw. The 8 dB measurement is 0.00013, an order of magnitude above it, which is why 8 dB takes L"
+  },
+  "note": "these are properties of the accounting and the frozen per-frame F1 values, not new measurements"
+ },
  "accounting": "LOCKED all-or-nothing (p2_protocol.md P2-R11 A): a message is usable only if the whole message decodes, a failure falls back to E, and payload is charged for the attempt",
  "constructed_column": "eff_F = q_F * F1_clean + (1 - q_F) * F1_ego with q_F = (1 - p_cw) ** 12567; constructed by P1's message rule, not a stored product",
  "guard": {
@@ -884,10 +902,409 @@
     }
    }
   ],
-  "best_by_scene_equal_f1": {
-   "awgn": 8.5,
-   "rayleigh": 20.5
-  }
+  "optimal_tau_set": {
+   "awgn": [
+    8.5,
+    9.0,
+    9.5,
+    10.0
+   ],
+   "rayleigh": [
+    20.5
+   ]
+  },
+  "equivalence_classes": {
+   "awgn": [
+    {
+     "requested_F_at_snr": [
+      0.0,
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      -0.5,
+      0.0
+     ],
+     "scene_equal_f1": 0.876966222382157
+    },
+    {
+     "requested_F_at_snr": [
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      0.5,
+      1.0,
+      1.5,
+      2.0
+     ],
+     "scene_equal_f1": 0.876966222382157
+    },
+    {
+     "requested_F_at_snr": [
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      2.5,
+      3.0,
+      3.5,
+      4.0
+     ],
+     "scene_equal_f1": 0.876966222382157
+    },
+    {
+     "requested_F_at_snr": [
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      4.5,
+      5.0,
+      5.5,
+      6.0
+     ],
+     "scene_equal_f1": 0.876966222382157
+    },
+    {
+     "requested_F_at_snr": [
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      6.5,
+      7.0,
+      7.5,
+      8.0
+     ],
+     "scene_equal_f1": 0.876977716335442
+    },
+    {
+     "requested_F_at_snr": [
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      8.5,
+      9.0,
+      9.5,
+      10.0
+     ],
+     "scene_equal_f1": 0.8823223277875526
+    },
+    {
+     "requested_F_at_snr": [
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      10.5,
+      11.0,
+      11.5,
+      12.0
+     ],
+     "scene_equal_f1": 0.8810094871094726
+    },
+    {
+     "requested_F_at_snr": [
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      12.5,
+      13.0,
+      13.5,
+      14.0
+     ],
+     "scene_equal_f1": 0.8796966464313926
+    },
+    {
+     "requested_F_at_snr": [
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      14.5,
+      15.0,
+      15.5,
+      16.0
+     ],
+     "scene_equal_f1": 0.8783838057533127
+    },
+    {
+     "requested_F_at_snr": [
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      16.5,
+      17.0,
+      17.5,
+      18.0
+     ],
+     "scene_equal_f1": 0.8770709650752326
+    },
+    {
+     "requested_F_at_snr": [
+      20.0
+     ],
+     "tau_values": [
+      18.5,
+      19.0,
+      19.5,
+      20.0
+     ],
+     "scene_equal_f1": 0.8757581243971527
+    },
+    {
+     "requested_F_at_snr": [],
+     "tau_values": [
+      20.5
+     ],
+     "scene_equal_f1": 0.8744452837190727
+    }
+   ],
+   "rayleigh": [
+    {
+     "requested_F_at_snr": [
+      0.0,
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      -0.5,
+      0.0
+     ],
+     "scene_equal_f1": 0.8256674842513136
+    },
+    {
+     "requested_F_at_snr": [
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      0.5,
+      1.0,
+      1.5,
+      2.0
+     ],
+     "scene_equal_f1": 0.825667488395197
+    },
+    {
+     "requested_F_at_snr": [
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      2.5,
+      3.0,
+      3.5,
+      4.0
+     ],
+     "scene_equal_f1": 0.8256676308855752
+    },
+    {
+     "requested_F_at_snr": [
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      4.5,
+      5.0,
+      5.5,
+      6.0
+     ],
+     "scene_equal_f1": 0.8256716983430104
+    },
+    {
+     "requested_F_at_snr": [
+      8.0,
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      6.5,
+      7.0,
+      7.5,
+      8.0
+     ],
+     "scene_equal_f1": 0.8257041496480523
+    },
+    {
+     "requested_F_at_snr": [
+      10.0,
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      8.5,
+      9.0,
+      9.5,
+      10.0
+     ],
+     "scene_equal_f1": 0.8259103545204893
+    },
+    {
+     "requested_F_at_snr": [
+      12.0,
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      10.5,
+      11.0,
+      11.5,
+      12.0
+     ],
+     "scene_equal_f1": 0.8264297114964458
+    },
+    {
+     "requested_F_at_snr": [
+      14.0,
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      12.5,
+      13.0,
+      13.5,
+      14.0
+     ],
+     "scene_equal_f1": 0.8276711530002924
+    },
+    {
+     "requested_F_at_snr": [
+      16.0,
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      14.5,
+      15.0,
+      15.5,
+      16.0
+     ],
+     "scene_equal_f1": 0.8297177593474567
+    },
+    {
+     "requested_F_at_snr": [
+      18.0,
+      20.0
+     ],
+     "tau_values": [
+      16.5,
+      17.0,
+      17.5,
+      18.0
+     ],
+     "scene_equal_f1": 0.832961566437008
+    },
+    {
+     "requested_F_at_snr": [
+      20.0
+     ],
+     "tau_values": [
+      18.5,
+      19.0,
+      19.5,
+      20.0
+     ],
+     "scene_equal_f1": 0.8374572086223775
+    },
+    {
+     "requested_F_at_snr": [],
+     "tau_values": [
+      20.5
+     ],
+     "scene_equal_f1": 0.8426407194814666
+    }
+   ]
+  },
+  "reading": "on this grid a tau is only identified up to the set of SNR points it puts on the F side. Every tau in an optimal set requests exactly the same actions and scores identically; a single \"best tau\" would be an artefact of the 11-point sampling, so none is quoted",
+  "conclusion": "at the sampled points, 8 dB takes L and 10 dB and above take F on AWGN; the exact crossing is undetermined. On Rayleigh no sampled point takes F"
  },
  "cells": [
   {
@@ -1240,7 +1657,8 @@
     "Fixed F": 0.8925307719649775,
     "rule_at_tau_star": 0.8980024188432817,
     "F_minus_L": -0.00255756460983111,
-    "rule_minus_L": 0.002914082268473239
+    "rule_minus_L": 0.002914082268473239,
+    "rule_minus_F": 0.0054716468783043495
    },
    {
     "scene": "2021_08_21_17_30_41",
@@ -1250,7 +1668,8 @@
     "Fixed F": 0.9091266764090558,
     "rule_at_tau_star": 0.9148252602728038,
     "F_minus_L": -0.008222667823120543,
-    "rule_minus_L": -0.002524083959372411
+    "rule_minus_L": -0.002524083959372411,
+    "rule_minus_F": 0.005698583863748133
    },
    {
     "scene": "2021_08_22_13_37_16",
@@ -1260,7 +1679,8 @@
     "Fixed F": 0.9641325855959444,
     "rule_at_tau_star": 0.9669037552264232,
     "F_minus_L": 0.0017989977021253293,
-    "rule_minus_L": 0.004570167332604294
+    "rule_minus_L": 0.004570167332604294,
+    "rule_minus_F": 0.002771169630478964
    },
    {
     "scene": "2021_08_22_22_01_17",
@@ -1270,7 +1690,8 @@
     "Fixed F": 0.9517205632771304,
     "rule_at_tau_star": 0.9573033067249754,
     "F_minus_L": -0.0032169525701148858,
-    "rule_minus_L": 0.0023657908777303086
+    "rule_minus_L": 0.0023657908777303086,
+    "rule_minus_F": 0.005582743447845194
    },
    {
     "scene": "2021_08_23_10_51_24",
@@ -1280,7 +1701,8 @@
     "Fixed F": 0.8720643409729224,
     "rule_at_tau_star": 0.8781468270334226,
     "F_minus_L": -0.0012058444968846024,
-    "rule_minus_L": 0.004876641563615426
+    "rule_minus_L": 0.004876641563615426,
+    "rule_minus_F": 0.006082486060500028
    },
    {
     "scene": "2021_08_23_13_17_21",
@@ -1290,7 +1712,8 @@
     "Fixed F": 0.8866402047913822,
     "rule_at_tau_star": 0.8892818161261904,
     "F_minus_L": 0.01637466465108245,
-    "rule_minus_L": 0.01901627598589054
+    "rule_minus_L": 0.01901627598589054,
+    "rule_minus_F": 0.0026416113348080895
    },
    {
     "scene": "2021_08_23_19_42_07",
@@ -1300,7 +1723,8 @@
     "Fixed F": 0.8430100443611019,
     "rule_at_tau_star": 0.8423886589610768,
     "F_minus_L": 0.022449768222353117,
-    "rule_minus_L": 0.021828382822328053
+    "rule_minus_L": 0.021828382822328053,
+    "rule_minus_F": -0.0006213854000250646
    },
    {
     "scene": "2021_09_09_19_27_35",
@@ -1310,7 +1734,8 @@
     "Fixed F": 0.6884723455295539,
     "rule_at_tau_star": 0.7051974581461598,
     "F_minus_L": -0.0038860019199149607,
-    "rule_minus_L": 0.012839110696690812
+    "rule_minus_L": 0.012839110696690812,
+    "rule_minus_F": 0.016725112616605777
    },
    {
     "scene": "2021_09_11_00_33_16",
@@ -1320,7 +1745,8 @@
     "Fixed F": 0.8849984685373457,
     "rule_at_tau_star": 0.888851448753639,
     "F_minus_L": 0.0011540488120651378,
-    "rule_minus_L": 0.005007029028358422
+    "rule_minus_L": 0.005007029028358422,
+    "rule_minus_F": 0.0038529802162932843
    }
   ],
   "rayleigh": [
@@ -1332,7 +1758,8 @@
     "Fixed F": 0.8466378495099317,
     "rule_at_tau_star": 0.861989200861777,
     "F_minus_L": -0.015351351351845276,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.015351351351845276
    },
    {
     "scene": "2021_08_21_17_30_41",
@@ -1342,7 +1769,8 @@
     "Fixed F": 0.8684972431734098,
     "rule_at_tau_star": 0.8860613102285667,
     "F_minus_L": -0.017564067055156982,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.017564067055156982
    },
    {
     "scene": "2021_08_22_13_37_16",
@@ -1352,7 +1780,8 @@
     "Fixed F": 0.9369900133861487,
     "rule_at_tau_star": 0.9480681390672399,
     "F_minus_L": -0.011078125681091204,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.011078125681091204
    },
    {
     "scene": "2021_08_22_22_01_17",
@@ -1362,7 +1791,8 @@
     "Fixed F": 0.9062994348885439,
     "rule_at_tau_star": 0.9319201848760227,
     "F_minus_L": -0.025620749987478843,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.025620749987478843
    },
    {
     "scene": "2021_08_23_10_51_24",
@@ -1372,7 +1802,8 @@
     "Fixed F": 0.8189718738437215,
     "rule_at_tau_star": 0.8399429021568494,
     "F_minus_L": -0.02097102831312809,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.02097102831312809
    },
    {
     "scene": "2021_08_23_13_17_21",
@@ -1382,7 +1813,8 @@
     "Fixed F": 0.8418968924391594,
     "rule_at_tau_star": 0.8528488814248276,
     "F_minus_L": -0.010951988985668099,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.010951988985668099
    },
    {
     "scene": "2021_08_23_19_42_07",
@@ -1392,7 +1824,8 @@
     "Fixed F": 0.819795864739861,
     "rule_at_tau_star": 0.8202832721200501,
     "F_minus_L": -0.00048740738018935773,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.00048740738018935773
    },
    {
     "scene": "2021_09_09_19_27_35",
@@ -1402,7 +1835,8 @@
     "Fixed F": 0.5430899208707138,
     "rule_at_tau_star": 0.5886077200119753,
     "F_minus_L": -0.045517799141261486,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.045517799141261486
    },
    {
     "scene": "2021_09_11_00_33_16",
@@ -1412,13 +1846,21 @@
     "Fixed F": 0.8488282654103326,
     "rule_at_tau_star": 0.8540448645858905,
     "F_minus_L": -0.00521659917555779,
-    "rule_minus_L": 0.0
+    "rule_minus_L": 0.0,
+    "rule_minus_F": 0.00521659917555779
    }
   ]
  },
  "differences": {
   "awgn": {
-   "tau_star_db": 8.5,
+   "tau_used_db": 8.5,
+   "tau_equivalent_set": [
+    8.5,
+    9.0,
+    9.5,
+    10.0
+   ],
+   "payload_is_not_a_criterion": "payload is reported beside F1 and is not used here to prefer one arm over another",
    "Fixed_F_minus_Fixed_L": {
     "mean": 0.0025209386630844367,
     "lcb95": -0.0029929109341367715,
@@ -1428,6 +1870,11 @@
     "mean": 0.007877044068479853,
     "lcb95": 0.0031516385696744365,
     "ucb95": 0.013303162154626302
+   },
+   "rule_minus_Fixed_F": {
+    "mean": 0.005356105405395418,
+    "lcb95": 0.0028521169233642176,
+    "ucb95": 0.008756438089489692
    },
    "scenes_negative_F_minus_L": [
     "2021_08_20_21_48_35",
@@ -1441,7 +1888,11 @@
    ]
   },
   "rayleigh": {
-   "tau_star_db": 20.5,
+   "tau_used_db": 20.5,
+   "tau_equivalent_set": [
+    20.5
+   ],
+   "payload_is_not_a_criterion": "payload is reported beside F1 and is not used here to prefer one arm over another",
    "Fixed_F_minus_Fixed_L": {
     "mean": -0.016973235230153014,
     "lcb95": -0.025913576546628216,
@@ -1451,6 +1902,11 @@
     "mean": 0.0,
     "lcb95": 0.0,
     "ucb95": 0.0
+   },
+   "rule_minus_Fixed_F": {
+    "mean": 0.016973235230153014,
+    "lcb95": 0.00965177679260743,
+    "ucb95": 0.025913576546628212
    },
    "scenes_negative_F_minus_L": [
     "2021_08_20_21_48_35",

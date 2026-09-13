@@ -9,6 +9,8 @@
 
 **Payload.** QAM data symbols; F = 3141750 per request, L = per-frame N_cw,L x 250, E = 0.
 
+**Everything here is an expectation.** every executed share and every eff value here is an expectation under the analytic success probability q. No transmission was sampled in this round, so nothing here reports how many messages did or did not arrive. On Rayleigh at 20 dB, q_F = (1 − 0.04) ** 12567 ≈ 1.6e-223: the success probability is negligible and the expected perception outcome equals E at reporting precision.
+
 ## Fixed arms
 
 | channel | arm | scene-equal F1 | QAM symbols / frame | executed E | executed L | executed F |
@@ -20,9 +22,21 @@
 | rayleigh | Fixed L | 0.84264 | 1,774 | 81.1 % | 18.9 % | 0.0 % |
 | rayleigh | Fixed F | 0.82567 | 3,141,750 | 100.0 % | 0.0 % | 0.0 % |
 
+## A-5 What q_F would have to be
+
+eff_F = q_F * F1_clean + (1 - q_F) * F1_ego exceeds eff_L when q_F > (eff_L - F1_ego) / (F1_clean - F1_ego); evaluated on the scene-equal AWGN values at 10 dB and above, where q_L is 1 to reporting precision.
+
+| q_F | p_cw that gives it |
+|---:|---:|
+| 0.9 | 8.38e-06 |
+| 0.5 | 5.52e-05 |
+| 0.1 | 0.000183 |
+
+On AWGN at 10 dB and above the scene-equal values are F1_clean 0.91675, F1_ego 0.82567, eff_L 0.90231, so F overtakes L at **q_F > 0.8415**, i.e. **p_cw < 1.37e-05**. F only overtakes L once the per-codeword loss is below this p_cw. The 8 dB measurement is 0.00013, an order of magnitude above it, which is why 8 dB takes L. these are properties of the accounting and the frozen per-frame F1 values, not new measurements.
+
 ## C-2 The τ sweep, 0.5 dB steps, channels apart
 
-The rule requests F when SNR ≥ τ and L otherwise; both fall back to E on failure. Executed shares are expectations under the locked accounting.
+The rule requests F when SNR ≥ τ and L otherwise; both fall back to E on failure. every executed share and every eff value here is an expectation under the analytic success probability q. No transmission was sampled in this round, so nothing here reports how many messages did or did not arrive.
 
 ### awgn
 
@@ -72,7 +86,7 @@ The rule requests F when SNR ≥ τ and L otherwise; both fall back to E on fail
 | 20.0 | 0.87576 | 287,227 | 9.1 % | 36.4 % | 54.6 % | 9.1 % |
 | 20.5 | 0.87445 | 1,774 | 0.0 % | 36.4 % | 63.6 % | 0.0 % |
 
-Highest scene-equal F1 at τ = 8.5 dB.
+Highest scene-equal F1 is reached by **every τ in {8.5, 9.0, 9.5, 10.0} dB** — they request identical actions and score identically.
 
 ### rayleigh
 
@@ -122,7 +136,7 @@ Highest scene-equal F1 at τ = 8.5 dB.
 | 20.0 | 0.83746 | 287,227 | 9.1 % | 87.2 % | 12.8 % | 0.0 % |
 | 20.5 | 0.84264 | 1,774 | 0.0 % | 81.1 % | 18.9 % | 0.0 % |
 
-Highest scene-equal F1 at τ = 20.5 dB.
+Highest scene-equal F1 is reached by **every τ in {20.5} dB** — they request identical actions and score identically.
 
 ## C-3 Per cell
 
@@ -162,39 +176,39 @@ the crossing is reported as lying between the two sampled points. No value is in
 
 ## C-5 Per scene and intervals
 
-### awgn (rule at τ = 8.5 dB)
+### awgn (rule at τ = 8.5 dB; any τ in {8.5, 9.0, 9.5, 10.0} gives the same actions)
 
-| scene | rows | Fixed E | Fixed L | Fixed F | rule | F − L | rule − L |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| 2021_08_20_21_48_35 | 1,232 | 0.84664 | 0.89509 | 0.89253 | 0.89800 | -0.00256 | +0.00291 |
-| 2021_08_21_17_30_41 | 1,727 | 0.86850 | 0.91735 | 0.90913 | 0.91483 | -0.00822 | -0.00252 |
-| 2021_08_22_13_37_16 | 1,485 | 0.93699 | 0.96233 | 0.96413 | 0.96690 | +0.00180 | +0.00457 |
-| 2021_08_22_22_01_17 | 2,222 | 0.90630 | 0.95494 | 0.95172 | 0.95730 | -0.00322 | +0.00237 |
-| 2021_08_23_10_51_24 | 704 | 0.81897 | 0.87327 | 0.87206 | 0.87815 | -0.00121 | +0.00488 |
-| 2021_08_23_13_17_21 | 528 | 0.84190 | 0.87027 | 0.88664 | 0.88928 | +0.01637 | +0.01902 |
-| 2021_08_23_19_42_07 | 627 | 0.81980 | 0.82056 | 0.84301 | 0.84239 | +0.02245 | +0.02183 |
-| 2021_09_09_19_27_35 | 5,049 | 0.54309 | 0.69236 | 0.68847 | 0.70520 | -0.00389 | +0.01284 |
-| 2021_09_11_00_33_16 | 8,206 | 0.84883 | 0.88384 | 0.88500 | 0.88885 | +0.00115 | +0.00501 |
+| scene | rows | Fixed E | Fixed L | Fixed F | rule | F − L | rule − L | rule − F |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2021_08_20_21_48_35 | 1,232 | 0.84664 | 0.89509 | 0.89253 | 0.89800 | -0.00256 | +0.00291 | +0.00547 |
+| 2021_08_21_17_30_41 | 1,727 | 0.86850 | 0.91735 | 0.90913 | 0.91483 | -0.00822 | -0.00252 | +0.00570 |
+| 2021_08_22_13_37_16 | 1,485 | 0.93699 | 0.96233 | 0.96413 | 0.96690 | +0.00180 | +0.00457 | +0.00277 |
+| 2021_08_22_22_01_17 | 2,222 | 0.90630 | 0.95494 | 0.95172 | 0.95730 | -0.00322 | +0.00237 | +0.00558 |
+| 2021_08_23_10_51_24 | 704 | 0.81897 | 0.87327 | 0.87206 | 0.87815 | -0.00121 | +0.00488 | +0.00608 |
+| 2021_08_23_13_17_21 | 528 | 0.84190 | 0.87027 | 0.88664 | 0.88928 | +0.01637 | +0.01902 | +0.00264 |
+| 2021_08_23_19_42_07 | 627 | 0.81980 | 0.82056 | 0.84301 | 0.84239 | +0.02245 | +0.02183 | -0.00062 |
+| 2021_09_09_19_27_35 | 5,049 | 0.54309 | 0.69236 | 0.68847 | 0.70520 | -0.00389 | +0.01284 | +0.01673 |
+| 2021_09_11_00_33_16 | 8,206 | 0.84883 | 0.88384 | 0.88500 | 0.88885 | +0.00115 | +0.00501 | +0.00385 |
 
-Scene-level bootstrap: Fixed F − Fixed L = +0.00252 [-0.00299, +0.00943]; rule − Fixed L = +0.00788 [+0.00315, +0.01330].
+Scene-level bootstrap: Fixed F − Fixed L = +0.00252 [-0.00299, +0.00943]; rule − Fixed L = +0.00788 [+0.00315, +0.01330]; **rule − Fixed F = +0.00536 [+0.00285, +0.00876]**. payload is reported beside F1 and is not used here to prefer one arm over another.
 
 Scenes with a negative F − L: 2021_08_20_21_48_35, 2021_08_21_17_30_41, 2021_08_22_22_01_17, 2021_08_23_10_51_24, 2021_09_09_19_27_35. With a negative rule − L: 2021_08_21_17_30_41.
 
-### rayleigh (rule at τ = 20.5 dB)
+### rayleigh (rule at τ = 20.5 dB; any τ in {20.5} gives the same actions)
 
-| scene | rows | Fixed E | Fixed L | Fixed F | rule | F − L | rule − L |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| 2021_08_20_21_48_35 | 1,232 | 0.84664 | 0.86199 | 0.84664 | 0.86199 | -0.01535 | +0.00000 |
-| 2021_08_21_17_30_41 | 1,727 | 0.86850 | 0.88606 | 0.86850 | 0.88606 | -0.01756 | +0.00000 |
-| 2021_08_22_13_37_16 | 1,485 | 0.93699 | 0.94807 | 0.93699 | 0.94807 | -0.01108 | +0.00000 |
-| 2021_08_22_22_01_17 | 2,222 | 0.90630 | 0.93192 | 0.90630 | 0.93192 | -0.02562 | +0.00000 |
-| 2021_08_23_10_51_24 | 704 | 0.81897 | 0.83994 | 0.81897 | 0.83994 | -0.02097 | +0.00000 |
-| 2021_08_23_13_17_21 | 528 | 0.84190 | 0.85285 | 0.84190 | 0.85285 | -0.01095 | +0.00000 |
-| 2021_08_23_19_42_07 | 627 | 0.81980 | 0.82028 | 0.81980 | 0.82028 | -0.00049 | +0.00000 |
-| 2021_09_09_19_27_35 | 5,049 | 0.54309 | 0.58861 | 0.54309 | 0.58861 | -0.04552 | +0.00000 |
-| 2021_09_11_00_33_16 | 8,206 | 0.84883 | 0.85404 | 0.84883 | 0.85404 | -0.00522 | +0.00000 |
+| scene | rows | Fixed E | Fixed L | Fixed F | rule | F − L | rule − L | rule − F |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2021_08_20_21_48_35 | 1,232 | 0.84664 | 0.86199 | 0.84664 | 0.86199 | -0.01535 | +0.00000 | +0.01535 |
+| 2021_08_21_17_30_41 | 1,727 | 0.86850 | 0.88606 | 0.86850 | 0.88606 | -0.01756 | +0.00000 | +0.01756 |
+| 2021_08_22_13_37_16 | 1,485 | 0.93699 | 0.94807 | 0.93699 | 0.94807 | -0.01108 | +0.00000 | +0.01108 |
+| 2021_08_22_22_01_17 | 2,222 | 0.90630 | 0.93192 | 0.90630 | 0.93192 | -0.02562 | +0.00000 | +0.02562 |
+| 2021_08_23_10_51_24 | 704 | 0.81897 | 0.83994 | 0.81897 | 0.83994 | -0.02097 | +0.00000 | +0.02097 |
+| 2021_08_23_13_17_21 | 528 | 0.84190 | 0.85285 | 0.84190 | 0.85285 | -0.01095 | +0.00000 | +0.01095 |
+| 2021_08_23_19_42_07 | 627 | 0.81980 | 0.82028 | 0.81980 | 0.82028 | -0.00049 | +0.00000 | +0.00049 |
+| 2021_09_09_19_27_35 | 5,049 | 0.54309 | 0.58861 | 0.54309 | 0.58861 | -0.04552 | +0.00000 | +0.04552 |
+| 2021_09_11_00_33_16 | 8,206 | 0.84883 | 0.85404 | 0.84883 | 0.85404 | -0.00522 | +0.00000 | +0.00522 |
 
-Scene-level bootstrap: Fixed F − Fixed L = -0.01697 [-0.02591, -0.00965]; rule − Fixed L = +0.00000 [+0.00000, +0.00000].
+Scene-level bootstrap: Fixed F − Fixed L = -0.01697 [-0.02591, -0.00965]; rule − Fixed L = +0.00000 [+0.00000, +0.00000]; **rule − Fixed F = +0.01697 [+0.00965, +0.02591]**. payload is reported beside F1 and is not used here to prefer one arm over another.
 
 Scenes with a negative F − L: 2021_08_20_21_48_35, 2021_08_21_17_30_41, 2021_08_22_13_37_16, 2021_08_22_22_01_17, 2021_08_23_10_51_24, 2021_08_23_13_17_21, 2021_08_23_19_42_07, 2021_09_09_19_27_35, 2021_09_11_00_33_16. With a negative rule − L: none.
 
