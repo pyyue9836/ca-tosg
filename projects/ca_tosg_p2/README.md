@@ -13,6 +13,8 @@
 | `protocol/training_plan.md` | draft training plan for a joint selector (P2-R14 C) — **written, not run** |
 | `protocol/rf_round1.md` | first RF round, 9-fold LOSO on validate (P2-R15 C) — **the joint forest does not beat the channel-only rule**; development validation only |
 | `protocol/rf_diagnostics.md` | why that forest declines F (P2-R16 C) — diagnosis only, nothing refitted |
+| `protocol/rf_round2.md` | round 2, the same forest at max_depth 8 (P2-R17) — **still below the channel rule; no pre-registered rule fires** |
+| `results/rf/rf_round2_rows.csv.gz` | both rounds, training and held-out rows, per-row actions and class probabilities (20.8 MB) |
 | `results/rf/rf_round1_oof.csv` | the per-row out-of-fold record: labels, every arm's action, and the forest's class probabilities |
 | `protocol/p1_limitations_addendum.md` | sentence drafted for P1's Limitations about its empirical zeros (P2-R14 A-2) — **not inserted** |
 | `protocol/message_regime.md` | the costing that informed the ruling (P2-R10 B); the accounting is now locked in `p2_protocol.md` |
