@@ -1,0 +1,190 @@
+{
+ "schema": "catosg-p2-awgn-fill/1",
+ "what": "Channel measurement only. No perception inference, no model, no held-out split.",
+ "registered_in": "projects/ca_tosg_p2/protocol/p2_protocol.md, Amendment 3 (P2-R13)",
+ "config": {
+  "qam": 16,
+  "bits_per_symbol": 4,
+  "channel": "awgn",
+  "K": 500,
+  "n": 1000,
+  "coderate": 0.5,
+  "num_iter": 20,
+  "batch": 2000,
+  "n_new_points": 1000000,
+  "n_recheck_points": 100000,
+  "early_stop": false,
+  "seed_base": 20260913
+ },
+ "implementation_check": [
+  {
+   "item": "information bits K",
+   "value": 500,
+   "expected": 500,
+   "ok": true,
+   "source": "ldpc_qam.K"
+  },
+  {
+   "item": "codeword length n",
+   "value": 1000,
+   "expected": 1000,
+   "ok": true,
+   "source": "ldpc_qam.N"
+  },
+  {
+   "item": "code rate",
+   "value": 0.5,
+   "expected": 0.5,
+   "ok": true,
+   "source": "derived from ldpc_qam.K / ldpc_qam.N"
+  },
+  {
+   "item": "decoder iterations",
+   "value": 20,
+   "expected": 20,
+   "ok": true,
+   "source": "ldpc_qam.NUM_ITER"
+  },
+  {
+   "item": "batch size",
+   "value": 2000,
+   "expected": 2000,
+   "ok": true,
+   "source": "ldpc_qam.BATCH"
+  },
+  {
+   "item": "bits per symbol",
+   "value": 4,
+   "expected": 4,
+   "ok": true,
+   "source": "log2 of the constellation order"
+  },
+  {
+   "item": "noise normalisation N0 = 10^(-EsN0/10)",
+   "value": "verified at 8, 9.5, 10 dB",
+   "expected": "exact",
+   "ok": true,
+   "source": "ldpc_qam.esno_to_no vs the definition"
+  },
+  {
+   "item": "Es/N0 -> Eb/N0 = Es/N0 - 10log10(R*bps)",
+   "value": "verified at 8, 9.5, 10 dB",
+   "expected": "exact",
+   "ok": true,
+   "source": "ldpc_qam.esno_to_no vs the definition"
+  },
+  {
+   "item": "encoder/decoder/mapper construction",
+   "value": "verbatim match",
+   "expected": "verbatim match",
+   "ok": true,
+   "source": "inspect.getsource(ldpc_qam.sweep_channel)"
+  },
+  {
+   "item": "AWGN branch and fixed-N loop",
+   "value": "verbatim match",
+   "expected": "verbatim match",
+   "ok": true,
+   "source": "inspect.getsource(ldpc_qam.bler_point)"
+  }
+ ],
+ "versions": {
+  "python": "3.10.18",
+  "tensorflow": "2.19.0",
+  "sionna": "1.1.0",
+  "numpy": "1.26.4",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "cpu_count": 16
+ },
+ "rows": [
+  {
+   "qam": 16,
+   "channel": "awgn",
+   "esno_db": 8.0,
+   "ebno_db": 4.9897,
+   "n_cw": 100000,
+   "n_err": 12,
+   "p_hat": 0.00012,
+   "wilson95_lo": 6.864888073994729e-05,
+   "wilson95_hi": 0.0002097550126960724,
+   "zero_error": false,
+   "one_sided_upper95": null,
+   "seed": 20260993,
+   "seconds": 128.4251880645752
+  },
+  {
+   "qam": 16,
+   "channel": "awgn",
+   "esno_db": 8.5,
+   "ebno_db": 5.4897,
+   "n_cw": 1000000,
+   "n_err": 4,
+   "p_hat": 4e-06,
+   "wilson95_lo": 1.5555229483848642e-06,
+   "wilson95_hi": 1.0285890384007566e-05,
+   "zero_error": false,
+   "one_sided_upper95": null,
+   "seed": 20260998,
+   "seconds": 1248.6310017108917
+  },
+  {
+   "qam": 16,
+   "channel": "awgn",
+   "esno_db": 9.0,
+   "ebno_db": 5.9897,
+   "n_cw": 1000000,
+   "n_err": 1,
+   "p_hat": 1e-06,
+   "wilson95_lo": 1.765245767453709e-07,
+   "wilson95_hi": 5.664911804311442e-06,
+   "zero_error": false,
+   "one_sided_upper95": null,
+   "seed": 20261003,
+   "seconds": 1241.4477632045746
+  },
+  {
+   "qam": 16,
+   "channel": "awgn",
+   "esno_db": 9.5,
+   "ebno_db": 6.4897,
+   "n_cw": 1000000,
+   "n_err": 0,
+   "p_hat": 0.0,
+   "wilson95_lo": 0.0,
+   "wilson95_hi": 3.841444063944942e-06,
+   "zero_error": true,
+   "one_sided_upper95": 2.9957277863923437e-06,
+   "seed": 20261008,
+   "seconds": 1241.2725129127502
+  },
+  {
+   "qam": 16,
+   "channel": "awgn",
+   "esno_db": 10.0,
+   "ebno_db": 6.9897,
+   "n_cw": 100000,
+   "n_err": 0,
+   "p_hat": 0.0,
+   "wilson95_lo": 0.0,
+   "wilson95_hi": 3.841311258303963e-05,
+   "zero_error": true,
+   "one_sided_upper95": 2.995687401941005e-05,
+   "seed": 20261013,
+   "seconds": 128.20892119407654
+  }
+ ],
+ "committed_reference": {
+  "8.0": {
+   "bler_cw": 0.00013,
+   "n_cw": 100000,
+   "n_err": 13
+  },
+  "10.0": {
+   "bler_cw": 0.0,
+   "n_cw": 100000,
+   "n_err": 0
+  }
+ },
+ "p_threshold": 1.37e-05,
+ "wall_minutes": 66.46941150029501
+}

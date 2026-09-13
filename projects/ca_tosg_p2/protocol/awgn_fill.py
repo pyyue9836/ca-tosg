@@ -300,8 +300,12 @@ def render(d):
     w('')
     w('| Es/N0 (dB) | committed k/N | committed bler_cw | new k/N | new estimate | consistent? |')
     w('|---:|---|---|---|---|---|')
-    for e in sorted(d['committed_reference']):
-        cr = d['committed_reference'][e]
+    # JSON object keys come back as strings, so a reload does not give the float keys the run used.
+    # Normalising here is what makes --check able to re-render at all; without it the check only
+    # ever "passed" by short-circuiting when no measurement file existed.
+    cref = {float(k): v for k, v in d['committed_reference'].items()}
+    for e in sorted(cref):
+        cr = cref[e]
         nr = next(r for r in d['rows'] if abs(r['esno_db'] - e) < 1e-9)
         lo, hi = nr['wilson95_lo'], nr['wilson95_hi']
         cons = 'yes' if lo <= cr['bler_cw'] <= hi else 'the committed value lies outside the new interval'
@@ -312,14 +316,19 @@ def render(d):
     w('committed run cannot be replayed. This run fixes its own seeds and records them, which makes')
     w('*this* measurement replayable in *this* environment.')
     w('')
-    w('## Per-point verdict (D-1)')
+    w('## Per-point reading against the A-5 threshold (indicative)')
+    w('')
+    w('**The authoritative D-1 verdict is in `awgn_fill_eval.md`**, which recomputes both arms from')
+    w('these same measurements. This table is the quicker reading: it compares each interval against')
+    w('the A-5 threshold, which was derived with q_L held at 1. The two agree here, but where they')
+    w('ever disagreed the recomputation would be the one to believe.')
     w('')
     w(f'The complete F overtakes L on AWGN only when `p_cw < {d["p_threshold"]:.2e}`')
     w('(`four_arm_eval.md` A-5). That threshold is an **average-performance crossing estimate under the')
     w('current data, scene weights and message model** — not a per-frame reliability rule and not a')
     w('link-layer requirement. Each point is judged by its interval, not by its point estimate.')
     w('')
-    w('| Es/N0 (dB) | verdict | basis |')
+    w('| Es/N0 (dB) | indicative reading | basis |')
     w('|---:|---|---|')
     for r in d['rows']:
         v, why = verdict(r, d['p_threshold'])
