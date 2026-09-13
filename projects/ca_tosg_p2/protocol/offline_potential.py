@@ -44,7 +44,9 @@ OUT_MD = os.path.join(HERE, 'offline_potential.md')
 
 TOL = 1e-9                                   # C-2 of the P2 protocol
 N_BOOT, BOOT_SEED = 10000, 20260809          # P1's settings
-Q_F_CLEAN = 0.99                             # B-5 threshold
+Q_F_CLEAN = 0.99                             # B-5 threshold, applied to the q_F POINT ESTIMATE
+CLEAN_LABEL = 'B-5 high-reliability cells by point estimate (q_F point estimate >= 0.99)'
+CLEAN_SAMPLED_LABEL = 'B-5 high-reliability cells that have a sample of their own'
 ACTIONS = ('E', 'L', 'F')                    # also the payload order: 0 < B_L < B_F
 
 
@@ -158,10 +160,16 @@ def analyse(g, rep, label, mask):
                  'explanation': 'any negative entry is at most TOL and comes from the cheaper-payload '
                                 'tie rule, never from the rule outperforming the per-frame optimum'}
 
+    # A-2: every share in the main tables is scene-equal, the same weighting as every F1 here.
+    # The row average is kept in its own field and labelled, never mixed into the main numbers.
+    star_arr = t.a_star.to_numpy()
+    se_share = {a: scene_equal((star_arr == a).astype(float), sc) for a in ACTIONS}
+    row_share = {a: float((star_arr == a).mean()) for a in ACTIONS}
     out = {'label': label, 'rows': int(len(t)), 'frames': int(t.sample_id.nunique()),
            'cells': int(t.groupby(['channel', 'snr_db']).ngroups), 'tie_slack': tie_slack,
-           'optimal_share': {a: float((t.a_star == a).mean()) for a in ACTIONS},
-           'rule_share_F': float(rule_F.mean()),
+           'optimal_share': se_share, 'optimal_share_row_average': row_share,
+           'rule_share_F': scene_equal(rule_F.astype(float), sc),
+           'rule_share_F_row_average': float(rule_F.mean()),
            'G_task': boot(gain, sc),
            'vs_Fixed_L': boot(t.Q_star_taken.to_numpy() - t.Q_L.to_numpy(), sc),
            'vs_Fixed_F': boot(t.Q_star_taken.to_numpy() - t.Q_F.to_numpy(), sc),
@@ -171,7 +179,42 @@ def analyse(g, rep, label, mask):
                            'Q_Fixed_F': scene_equal(t.Q_F.to_numpy(), sc),
                            'Q_Fixed_E': scene_equal(t.Q_E.to_numpy(), sc)},
            'payload_sym_scene_equal': {'optimal': scene_equal(t.B_star_sym.to_numpy(), sc),
-                                       'rule': scene_equal(B_rule, sc)}}
+                                       'rule': scene_equal(B_rule, sc)},
+           'payload_sym_row_average': {'optimal': float(t.B_star_sym.mean()),
+                                       'rule': float(B_rule.mean())}}
+    # A-2: the payload figure and the action shares must not be multiplied across weightings. Both
+    # naive products are recorded so the gap is visible rather than left for a reader to trip over.
+    B_F_sym = float(t.B_F_sym.iloc[0])
+    out['payload_reconciliation'] = {
+        'scene_equal_payload': out['payload_sym_scene_equal']['optimal'],
+        'row_average_payload': out['payload_sym_row_average']['optimal'],
+        'row_share_F_times_B_F': row_share['F'] * B_F_sym,
+        'scene_share_F_times_B_F': se_share['F'] * B_F_sym,
+        'implied_scene_equal_F_share': out['payload_sym_scene_equal']['optimal'] / B_F_sym,
+        'note': 'the payload column is scene-equal; multiplying it against a row-averaged action '
+                'share mixes two weightings and does not reconcile. Under one consistent weighting '
+                'the F share implied by the scene-equal payload is the last field above, and the '
+                'small residual against the scene-equal F share is the L payload, which is three '
+                'orders of magnitude smaller than F and not zero'}
+
+    # A-1: split the rows where L is optimal into a strict win and a tie taken on payload
+    total_gain = float(gain.sum())
+    dLF = (t.Q_L.to_numpy() - t.Q_F.to_numpy())
+    is_L = star_arr == 'L'
+    strict = is_L & (dLF > TOL)
+    tie = is_L & (np.abs(dLF) <= TOL)
+    if int((is_L & ~strict & ~tie).sum()):
+        raise SystemExit('a row has L optimal while F beats it by more than TOL -- argmax is wrong')
+    out['A1_L_split'] = {
+        k: {'rows': int(mm.sum()), 'row_share': float(mm.mean()),
+            'scene_equal_share': scene_equal(mm.astype(float), sc),
+            'gain_sum': float(gain[mm].sum()),
+            'gain_share': float(gain[mm].sum() / total_gain) if total_gain > 0 else 0.0}
+        for k, mm in (('L_strictly_above_F', strict), ('L_tied_with_F_taken_on_payload', tie))}
+    out['A1_note'] = ('"L is optimal" is two different situations: one where the object-level message '
+                      'is genuinely worth more than the complete feature message, and one where the '
+                      'two are within TOL and L is taken only because it is cheaper. They are '
+                      'separated here because only the first is a statement about perception')
 
     # B-3: three mutually exclusive buckets. "E was right" takes precedence, so the other two
     # buckets are genuine F/L disagreements and nothing is counted twice.
@@ -182,7 +225,6 @@ def analyse(g, rep, label, mask):
     covered = buckets['rule_F_but_L_is_right'] | buckets['rule_L_but_F_is_right'] | buckets['E_is_right']
     agree = (star == rule_act)
     leftover = ~covered & ~agree
-    total_gain = float(gain.sum())
     out['B3_sources'] = {k: {'rows': int(m.sum()), 'row_share': float(m.mean()),
                              'gain_sum': float(gain[m].sum()),
                              'gain_share': (float(gain[m].sum() / total_gain) if total_gain > 0 else 0.0),
@@ -198,6 +240,15 @@ def analyse(g, rep, label, mask):
     out['B3_note'] = ('the buckets are mutually exclusive: a frame where E is right is counted only '
                       'there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where '
                       'the rule already agrees with the optimum contribute no gain by construction')
+    out['B3_structural'] = (
+        'the rule requests F on every row of this subset, so "rule took L where F was right" cannot '
+        'occur here. Its zero is a property of the rule, not evidence that F is never missed'
+        if out['rule_share_F_row_average'] == 1.0 else
+        'the rule requests L on every row of this subset, so "rule took F where L was right" cannot '
+        'occur here. Its zero is a property of the rule, not evidence that F is never over-requested'
+        if out['rule_share_F_row_average'] == 0.0 else
+        'the rule requests both actions somewhere in this subset, so neither disagreement bucket is '
+        'structurally excluded')
 
     # B-4: how concentrated the potential is
     per_scene = []
@@ -247,6 +298,9 @@ def build():
     rep = rule_tau()
     bl = pd.read_csv(BLER); bl = bl[bl.qam == 16]
     sampled = {(r.channel, float(r.esno_db)) for r in bl.itertuples()}
+    counts = {(r.channel, float(r.esno_db)): (int(r.n_err), int(r.n_cw)) for r in bl.itertuples()}
+    sys.path.insert(0, HERE)
+    from awgn_fill import cp_upper                                          # noqa: E402
 
     clean_cells = sorted({(c, int(s)) for c, s in zip(g.channel, g.snr_db)
                           if float(g[(g.channel == c) & (g.snr_db == s)].q_F.iloc[0]) >= Q_F_CLEAN})
@@ -263,8 +317,8 @@ def build():
     subsets = [('all 22 cells', np.ones(len(g), bool)),
                ('AWGN only', (g.channel == 'awgn').to_numpy()),
                ('Rayleigh only', (g.channel == 'rayleigh').to_numpy()),
-               (f'B-5 clean cells (q_F >= {Q_F_CLEAN})', clean_mask),
-               ('B-5 clean cells with a sample of their own', clean_measured_mask)]
+               (CLEAN_LABEL, clean_mask),
+               (CLEAN_SAMPLED_LABEL, clean_measured_mask)]
     analyses = [a for a in (analyse(g, rep, lab, m) for lab, m in subsets) if a]
 
     return {'schema': 'catosg-p2-offline-potential/1',
@@ -282,14 +336,33 @@ def build():
             'rule_tau': rep,
             'grid': {'frames': int(g.sample_id.nunique()), 'cells': int(g.groupby(['channel', 'snr_db']).ngroups),
                      'scenes': int(g.scene.nunique()), 'rows': int(len(g))},
-            'clean_cells': [{'channel': c, 'snr_db': s, 'sampled': (c, float(s)) in sampled}
+            'clean_cells': [{'channel': c, 'snr_db': s, 'sampled': (c, float(s)) in sampled,
+                             'q_F_point_estimate': float((1.0 - float(
+                                 g[(g.channel == c) & (g.snr_db == s)].p_cw.iloc[0])) ** n_cw_F),
+                             'p_cw_upper95': (cp_upper(*counts[(c, float(s))])
+                                              if (c, float(s)) in counts else None),
+                             'q_F_lower_bound': (float((1.0 - cp_upper(*counts[(c, float(s))])) ** n_cw_F)
+                                                 if (c, float(s)) in counts else None)}
                             for c, s in clean_cells],
+            'clean_cells_note': 'the set is defined by the q_F POINT ESTIMATE. The last two columns say '
+                                'what the same cells look like under the one-sided 95 % upper limit on '
+                                'p_cw: the reliability that survives the sampling uncertainty is far '
+                                'lower, and two cells have no sample of their own so no bound exists '
+                                'for them at all',
             'clean_cells_without_a_sample': [{'channel': c, 'snr_db': s} for c, s in clean_unsampled],
             'per_cell': per_cell(g, rep),
             'analyses': analyses,
             'inputs': {'grid': sha(GRID), 'wp5': sha(WP5), 'wp34': sha(WP34), 'bler': sha(BLER),
                        'four_arm': sha(FOUR_ARM), 'fill_eval': sha(FILL_EVAL)},
             'command': 'python projects/ca_tosg_p2/protocol/offline_potential.py'}
+
+
+def cap1(t):
+    """Uppercase the first character and leave the rest alone.
+
+    str.capitalize() lowercases the remainder, which turns q_F into q_f and B_F into b_f. That went
+    out in a report once already; this exists so it cannot happen again."""
+    return t[:1].upper() + t[1:]
 
 
 def markdown(m):
@@ -320,10 +393,14 @@ def markdown(m):
     for a in m['analyses']:
         g_, vl, vf = a['G_task'], a['vs_Fixed_L'], a['vs_Fixed_F']
         L += [f"### {a['label']}", '',
-              f"{a['rows']:,} rows over {a['cells']} cell(s). Optimal action shares: "
+              f"{a['rows']:,} rows over {a['cells']} cell(s). **Scene-equal** optimal action shares: "
               f"E {a['optimal_share']['E'] * 100:.1f} %, L {a['optimal_share']['L'] * 100:.1f} %, "
-              f"F {a['optimal_share']['F'] * 100:.1f} %. The rule requests F on "
-              f"{a['rule_share_F'] * 100:.1f} % of rows.", '',
+              f"F {a['optimal_share']['F'] * 100:.1f} %; the rule requests F on "
+              f"{a['rule_share_F'] * 100:.1f} %. Row-averaged, for comparison only: "
+              f"E {a['optimal_share_row_average']['E'] * 100:.1f} %, "
+              f"L {a['optimal_share_row_average']['L'] * 100:.1f} %, "
+              f"F {a['optimal_share_row_average']['F'] * 100:.1f} %, rule "
+              f"{a['rule_share_F_row_average'] * 100:.1f} %.", '',
               '| comparison | scene-equal mean | bootstrap 95 % |', '|---|---:|---|',
               f"| **G_task = Q(a\\*) − Q(rule_τ)** | **{g_['mean']:+.5f}** | "
               f"[{g_['lcb95']:+.5f}, {g_['ucb95']:+.5f}] |",
@@ -333,9 +410,29 @@ def markdown(m):
               f"Scene-equal F1: optimum {a['scene_equal']['Q_star']:.5f}, rule "
               f"{a['scene_equal']['Q_rule']:.5f}, Fixed L {a['scene_equal']['Q_Fixed_L']:.5f}, Fixed F "
               f"{a['scene_equal']['Q_Fixed_F']:.5f}, Fixed E {a['scene_equal']['Q_Fixed_E']:.5f}. "
-              f"Payload, reported and not used as a criterion: optimum "
+              f"Payload, reported and not used as a criterion, **scene-equal**: optimum "
               f"{a['payload_sym_scene_equal']['optimal']:,.0f} QAM symbols per frame against the rule's "
-              f"{a['payload_sym_scene_equal']['rule']:,.0f}.", '',
+              f"{a['payload_sym_scene_equal']['rule']:,.0f}. Row-averaged: "
+              f"{a['payload_sym_row_average']['optimal']:,.0f} against "
+              f"{a['payload_sym_row_average']['rule']:,.0f}.", '',
+              f"*Weighting check (A-2).* {cap1(a['payload_reconciliation']['note'])}. "
+              f"Row share of F times B_F is {a['payload_reconciliation']['row_share_F_times_B_F']:,.0f}; "
+              f"scene-equal share of F times B_F is "
+              f"{a['payload_reconciliation']['scene_share_F_times_B_F']:,.0f}; the scene-equal payload "
+              f"actually reported is {a['payload_reconciliation']['scene_equal_payload']:,.0f}, which "
+              f"implies a scene-equal F share of "
+              f"{a['payload_reconciliation']['implied_scene_equal_F_share'] * 100:.1f} %.", '',
+              '**A-1 When L is optimal, which kind of optimal.**', '',
+              '| case | rows | scene-equal share | gain sum | share of all gain |',
+              '|---|---:|---:|---:|---:|']
+        for k, v in a['A1_L_split'].items():
+            L.append(f"| `{k}` | {v['rows']:,} | {v['scene_equal_share'] * 100:.1f} % | "
+                     f"{v['gain_sum']:+.3f} | {v['gain_share'] * 100:.1f} % |")
+        L += ['', f"{a['A1_note']}.", '',
+              'Gain accrues only on rows where the channel-only rule disagrees with the optimum, so '
+              'the gain column above is carried by a subset of the rows listed beside it: the tied '
+              'rows contribute **+0.000** by construction, because taking L rather than F there '
+              'changes the payload and not the perception.', '',
               '**B-3 Where the potential comes from.**', '',
               '| source | rows | row share | gain sum | share of all gain | mean gain when it happens |',
               '|---|---:|---:|---:|---:|---:|']
@@ -344,6 +441,7 @@ def markdown(m):
             L.append(f"| `{k}` | {b['rows']:,} | {b['row_share'] * 100:.1f} % | {b['gain_sum']:+.3f} | "
                      f"{b['gain_share'] * 100:.1f} % | {b['mean_gain_when_it_happens']:+.5f} |")
         L += ['', f"{a['B3_note']}. Unclassified rows: {a['B3_unclassified_rows']:,}.", '',
+              f"**Structurally excluded here:** {a['B3_structural']}.", '',
               '**B-4 How it is distributed.**', '']
         d = a['B4_distribution']
         L += [f"**{d['rows_with_any_gain']:,} of {a['rows']:,} rows carry any gain at all "
@@ -362,10 +460,21 @@ def markdown(m):
                      f"{x['gain_share'] * 100:.1f} % |")
         L.append('')
     cc = m['clean_cells']
-    L += ['## B-5 The cells where the channel is not the variable', '',
-          f"`q_F >= {Q_F_CLEAN}` holds in {len(cc)} cells, all of them AWGN: "
-          + ', '.join(f"{c['snr_db']} dB" for c in cc) + '. There is **no Rayleigh cell** in this set — '
-          'the best Rayleigh cell in the grid reaches q_F ≈ 1.6e-223.', '']
+    L += ['## B-5 High-reliability cells, by point estimate', '',
+          f"The subset is defined by the **q_F point estimate** reaching {Q_F_CLEAN}. That holds in "
+          f"{len(cc)} cells, all of them AWGN. There is **no Rayleigh cell** in this set — the best "
+          'Rayleigh cell in the grid reaches q_F ≈ 1.6e-223.', '',
+          f"{cap1(m['clean_cells_note'])}.", '',
+          '| cell | q_F (point estimate) | p_cw_upper95 | q_F lower bound |', '|---|---:|---:|---:|']
+    for c in cc:
+        up = f"{c['p_cw_upper95']:.3g}" if c['p_cw_upper95'] is not None else '**no sample**'
+        lb = f"{c['q_F_lower_bound']:.3f}" if c['q_F_lower_bound'] is not None else '**none exists**'
+        L.append(f"| AWGN {c['snr_db']} dB | {c['q_F_point_estimate']:.4f} | {up} | {lb} |")
+    L += ['', 'The right-hand column is the point of A-3: a cell selected for q_F = 1 on the point '
+          'estimate can only be shown to reach about 0.69 once the sampling uncertainty is carried, '
+          'which is below the 0.8415 that F needs to beat L. The subset is a useful place to read the '
+          'task cues with the channel held still; it is **not** a demonstration that the channel is '
+          'reliable there.', '']
     if m['clean_cells_without_a_sample']:
         L += ['**Two of those cells were never measured.** '
               + ', '.join(f"AWGN {c['snr_db']} dB" for c in m['clean_cells_without_a_sample'])

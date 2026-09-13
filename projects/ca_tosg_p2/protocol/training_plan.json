@@ -4,7 +4,7 @@
  "inputs": {
   "cue_meta": "e91a8620725caaf3c9c4ba68189a1f7acdb74d6c394a81fd3753e375a683157b",
   "grid": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
-  "potential": "c748f8d59d2970015882902e8e0fb8ea7d294b1ceba369be81c81f11aed8cd11"
+  "potential": "885555a958e93b17946c0c1d119d58321934c1d511d1acdd8376c90cfe942de7"
  },
  "feature_space": {
   "perception_fields": 21,
@@ -59,9 +59,9 @@
    "ucb95": 0.0034272256502400848
   },
   "all_cells_optimal_share": {
-   "E": 0.3100550964187328,
-   "L": 0.5595041322314049,
-   "F": 0.13044077134986226
+   "E": 0.32957240907080343,
+   "L": 0.563281850791118,
+   "F": 0.10714574013807841
   },
   "clean_cells_G_task": {
    "mean": 0.006073225821359781,
@@ -69,9 +69,9 @@
    "ucb95": 0.007803605326831043
   },
   "clean_cells_optimal_share": {
-   "E": 0.05606060606060606,
-   "L": 0.4767676767676768,
-   "F": 0.4671717171717172
+   "E": 0.11753148972487569,
+   "L": 0.50423566739172,
+   "F": 0.3782328428834043
   },
   "reading": "these are the offline potentials from offline_potential.md. They bound what any predictor could recover and are the reason this plan is worth reviewing at all"
  },
@@ -90,45 +90,45 @@
   "reference_shares": {
    "all 22 cells": {
     "optimal_share": {
-     "E": 0.3100550964187328,
-     "L": 0.5595041322314049,
-     "F": 0.13044077134986226
+     "E": 0.32957240907080343,
+     "L": 0.563281850791118,
+     "F": 0.10714574013807841
     },
     "rows": 43560,
     "rule_share_F": 0.2727272727272727
    },
    "AWGN only": {
     "optimal_share": {
-     "E": 0.3467401285583104,
-     "L": 0.3923783287419651,
-     "F": 0.2608815426997245
+     "E": 0.3723513432080686,
+     "L": 0.41335717651577447,
+     "F": 0.21429148027615683
     },
     "rows": 21780,
     "rule_share_F": 0.5454545454545454
    },
    "Rayleigh only": {
     "optimal_share": {
-     "E": 0.27337006427915517,
-     "L": 0.7266299357208448,
+     "E": 0.28679347493353824,
+     "L": 0.7132065250664616,
      "F": 0.0
     },
     "rows": 21780,
     "rule_share_F": 0.0
    },
-   "B-5 clean cells (q_F >= 0.99)": {
+   "B-5 high-reliability cells by point estimate (q_F point estimate >= 0.99)": {
     "optimal_share": {
-     "E": 0.05606060606060606,
-     "L": 0.4767676767676768,
-     "F": 0.4671717171717172
+     "E": 0.11753148972487569,
+     "L": 0.50423566739172,
+     "F": 0.3782328428834043
     },
     "rows": 11880,
     "rule_share_F": 1.0
    },
-   "B-5 clean cells with a sample of their own": {
+   "B-5 high-reliability cells that have a sample of their own": {
     "optimal_share": {
-     "E": 0.05606060606060606,
-     "L": 0.4767676767676768,
-     "F": 0.4671717171717172
+     "E": 0.11753148972487569,
+     "L": 0.50423566739172,
+     "F": 0.3782328428834043
     },
     "rows": 7920,
     "rule_share_F": 1.0

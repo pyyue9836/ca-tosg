@@ -108,11 +108,11 @@ happen to flatter.
 
 | subset | rows | offline reference: E | L | F | rule requests F |
 |---|---:|---:|---:|---:|---:|
-| all 22 cells | 43,560 | 31.0 % | 56.0 % | 13.0 % | 27.3 % |
-| AWGN only | 21,780 | 34.7 % | 39.2 % | 26.1 % | 54.5 % |
-| Rayleigh only | 21,780 | 27.3 % | 72.7 % | 0.0 % | 0.0 % |
-| B-5 clean cells (q_F >= 0.99) | 11,880 | 5.6 % | 47.7 % | 46.7 % | 100.0 % |
-| B-5 clean cells with a sample of their own | 7,920 | 5.6 % | 47.7 % | 46.7 % | 100.0 % |
+| all 22 cells | 43,560 | 33.0 % | 56.3 % | 10.7 % | 27.3 % |
+| AWGN only | 21,780 | 37.2 % | 41.3 % | 21.4 % | 54.5 % |
+| Rayleigh only | 21,780 | 28.7 % | 71.3 % | 0.0 % | 0.0 % |
+| B-5 high-reliability cells by point estimate (q_F point estimate >= 0.99) | 11,880 | 11.8 % | 50.4 % | 37.8 % | 100.0 % |
+| B-5 high-reliability cells that have a sample of their own | 7,920 | 11.8 % | 50.4 % | 37.8 % | 100.0 % |
 
 The trained selector's shares go in a matching column beside these.
 
@@ -166,4 +166,4 @@ work exists to avoid.
 |---|---|
 | cue_meta | `e91a8620725caaf3…` |
 | grid | `4e83047ab8c81cf4…` |
-| potential | `c748f8d59d297001…` |
+| potential | `885555a958e93b17…` |

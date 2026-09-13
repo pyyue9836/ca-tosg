@@ -11,6 +11,7 @@
 | `protocol/awgn_fill_eval.md` | both arms recomputed from it; the F-vs-L crossing bracketed at 8.0–8.5 dB |
 | `protocol/offline_potential.md` | offline potential of a per-frame choice over the channel-only rule (P2-R14 B) — **not a deployment result** |
 | `protocol/training_plan.md` | draft training plan for a joint selector (P2-R14 C) — **written, not run** |
+| `protocol/rf_round1.md` | first RF round, 9-fold LOSO on validate (P2-R15 C) — **the joint forest does not beat the channel-only rule**; development validation only |
 | `protocol/p1_limitations_addendum.md` | sentence drafted for P1's Limitations about its empirical zeros (P2-R14 A-2) — **not inserted** |
 | `protocol/message_regime.md` | the costing that informed the ruling (P2-R10 B); the accounting is now locked in `p2_protocol.md` |
 | `protocol/e_criterion.md` | candidates for a "no cooperation needed → E" rule (P2-R10 C) |

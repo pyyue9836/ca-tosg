@@ -45,7 +45,7 @@
 
 ### all 22 cells
 
-43,560 rows over 22 cell(s). Optimal action shares: E 31.0 %, L 56.0 %, F 13.0 %. The rule requests F on 27.3 % of rows.
+43,560 rows over 22 cell(s). **Scene-equal** optimal action shares: E 33.0 %, L 56.3 %, F 10.7 %; the rule requests F on 27.3 %. Row-averaged, for comparison only: E 31.0 %, L 56.0 %, F 13.0 %, rule 27.3 %.
 
 | comparison | scene-equal mean | bootstrap 95 % |
 |---|---:|---|
@@ -53,7 +53,20 @@
 | Q(a\*) − Q(Fixed L) | +0.00637 | [+0.00340, +0.00995] |
 | Q(a\*) − Q(Fixed F) | +0.01359 | [+0.00909, +0.01952] |
 
-Scene-equal F1: optimum 0.86491, rule 0.86248, Fixed L 0.85854, Fixed F 0.85132, Fixed E 0.82567. Payload, reported and not used as a criterion: optimum 337,593 QAM symbols per frame against the rule's 858,131.
+Scene-equal F1: optimum 0.86491, rule 0.86248, Fixed L 0.85854, Fixed F 0.85132, Fixed E 0.82567. Payload, reported and not used as a criterion, **scene-equal**: optimum 337,593 QAM symbols per frame against the rule's 858,131. Row-averaged: 411,128 against 858,677.
+
+*Weighting check (A-2).* The payload column is scene-equal; multiplying it against a row-averaged action share mixes two weightings and does not reconcile. Under one consistent weighting the F share implied by the scene-equal payload is the last field above, and the small residual against the scene-equal F share is the L payload, which is three orders of magnitude smaller than F and not zero. Row share of F times B_F is 409,812; scene-equal share of F times B_F is 336,625; the scene-equal payload actually reported is 337,593, which implies a scene-equal F share of 10.7 %.
+
+**A-1 When L is optimal, which kind of optimal.**
+
+| case | rows | scene-equal share | gain sum | share of all gain |
+|---|---:|---:|---:|---:|
+| `L_strictly_above_F` | 21,774 | 47.9 % | +64.018 | 76.8 % |
+| `L_tied_with_F_taken_on_payload` | 2,598 | 8.4 % | +0.000 | 0.0 % |
+
+"L is optimal" is two different situations: one where the object-level message is genuinely worth more than the complete feature message, and one where the two are within TOL and L is taken only because it is cheaper. They are separated here because only the first is a statement about perception.
+
+Gain accrues only on rows where the channel-only rule disagrees with the optimum, so the gain column above is carried by a subset of the rows listed beside it: the tied rows contribute **+0.000** by construction, because taking L rather than F there changes the payload and not the perception.
 
 **B-3 Where the potential comes from.**
 
@@ -65,6 +78,8 @@ Scene-equal F1: optimum 0.86491, rule 0.86248, Fixed L 0.85854, Fixed F 0.85132,
 | `agreement` | 24,258 | 55.7 % | +0.000 | 0.0 % | +0.00000 |
 
 the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction. Unclassified rows: 0.
+
+**Structurally excluded here:** the rule requests both actions somewhere in this subset, so neither disagreement bucket is structurally excluded.
 
 **B-4 How it is distributed.**
 
@@ -86,7 +101,7 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 
 ### AWGN only
 
-21,780 rows over 11 cell(s). Optimal action shares: E 34.7 %, L 39.2 %, F 26.1 %. The rule requests F on 54.5 % of rows.
+21,780 rows over 11 cell(s). **Scene-equal** optimal action shares: E 37.2 %, L 41.3 %, F 21.4 %; the rule requests F on 54.5 %. Row-averaged, for comparison only: E 34.7 %, L 39.2 %, F 26.1 %, rule 54.5 %.
 
 | comparison | scene-equal mean | bootstrap 95 % |
 |---|---:|---|
@@ -94,7 +109,20 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | Q(a\*) − Q(Fixed L) | +0.01165 | [+0.00657, +0.01758] |
 | Q(a\*) − Q(Fixed F) | +0.00913 | [+0.00639, +0.01276] |
 
-Scene-equal F1: optimum 0.88610, rule 0.88232, Fixed L 0.87445, Fixed F 0.87697, Fixed E 0.82567. Payload, reported and not used as a criterion: optimum 673,946 QAM symbols per frame against the rule's 1,714,488.
+Scene-equal F1: optimum 0.88610, rule 0.88232, Fixed L 0.87445, Fixed F 0.87697, Fixed E 0.82567. Payload, reported and not used as a criterion, **scene-equal**: optimum 673,946 QAM symbols per frame against the rule's 1,714,488. Row-averaged: 820,517 against 1,714,830.
+
+*Weighting check (A-2).* The payload column is scene-equal; multiplying it against a row-averaged action share mixes two weightings and does not reconcile. Under one consistent weighting the F share implied by the scene-equal payload is the last field above, and the small residual against the scene-equal F share is the L payload, which is three orders of magnitude smaller than F and not zero. Row share of F times B_F is 819,625; scene-equal share of F times B_F is 673,250; the scene-equal payload actually reported is 673,946, which implies a scene-equal F share of 21.5 %.
+
+**A-1 When L is optimal, which kind of optimal.**
+
+| case | rows | scene-equal share | gain sum | share of all gain |
+|---|---:|---:|---:|---:|
+| `L_strictly_above_F` | 5,948 | 24.5 % | +64.018 | 85.7 % |
+| `L_tied_with_F_taken_on_payload` | 2,598 | 16.9 % | +0.000 | 0.0 % |
+
+"L is optimal" is two different situations: one where the object-level message is genuinely worth more than the complete feature message, and one where the two are within TOL and L is taken only because it is cheaper. They are separated here because only the first is a statement about perception.
+
+Gain accrues only on rows where the channel-only rule disagrees with the optimum, so the gain column above is carried by a subset of the rows listed beside it: the tied rows contribute **+0.000** by construction, because taking L rather than F there changes the payload and not the perception.
 
 **B-3 Where the potential comes from.**
 
@@ -106,6 +134,8 @@ Scene-equal F1: optimum 0.88610, rule 0.88232, Fixed L 0.87445, Fixed F 0.87697,
 | `agreement` | 8,432 | 38.7 % | +0.000 | 0.0 % | +0.00000 |
 
 the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction. Unclassified rows: 0.
+
+**Structurally excluded here:** the rule requests both actions somewhere in this subset, so neither disagreement bucket is structurally excluded.
 
 **B-4 How it is distributed.**
 
@@ -127,7 +157,7 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 
 ### Rayleigh only
 
-21,780 rows over 11 cell(s). Optimal action shares: E 27.3 %, L 72.7 %, F 0.0 %. The rule requests F on 0.0 % of rows.
+21,780 rows over 11 cell(s). **Scene-equal** optimal action shares: E 28.7 %, L 71.3 %, F 0.0 %; the rule requests F on 0.0 %. Row-averaged, for comparison only: E 27.3 %, L 72.7 %, F 0.0 %, rule 0.0 %.
 
 | comparison | scene-equal mean | bootstrap 95 % |
 |---|---:|---|
@@ -135,7 +165,20 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | Q(a\*) − Q(Fixed L) | +0.00108 | [+0.00014, +0.00240] |
 | Q(a\*) − Q(Fixed F) | +0.01806 | [+0.01138, +0.02650] |
 
-Scene-equal F1: optimum 0.84372, rule 0.84264, Fixed L 0.84264, Fixed F 0.82567, Fixed E 0.82567. Payload, reported and not used as a criterion: optimum 1,241 QAM symbols per frame against the rule's 1,774.
+Scene-equal F1: optimum 0.84372, rule 0.84264, Fixed L 0.84264, Fixed F 0.82567, Fixed E 0.82567. Payload, reported and not used as a criterion, **scene-equal**: optimum 1,241 QAM symbols per frame against the rule's 1,774. Row-averaged: 1,738 against 2,525.
+
+*Weighting check (A-2).* The payload column is scene-equal; multiplying it against a row-averaged action share mixes two weightings and does not reconcile. Under one consistent weighting the F share implied by the scene-equal payload is the last field above, and the small residual against the scene-equal F share is the L payload, which is three orders of magnitude smaller than F and not zero. Row share of F times B_F is 0; scene-equal share of F times B_F is 0; the scene-equal payload actually reported is 1,241, which implies a scene-equal F share of 0.0 %.
+
+**A-1 When L is optimal, which kind of optimal.**
+
+| case | rows | scene-equal share | gain sum | share of all gain |
+|---|---:|---:|---:|---:|
+| `L_strictly_above_F` | 15,826 | 71.3 % | +0.000 | 0.0 % |
+| `L_tied_with_F_taken_on_payload` | 0 | 0.0 % | +0.000 | 0.0 % |
+
+"L is optimal" is two different situations: one where the object-level message is genuinely worth more than the complete feature message, and one where the two are within TOL and L is taken only because it is cheaper. They are separated here because only the first is a statement about perception.
+
+Gain accrues only on rows where the channel-only rule disagrees with the optimum, so the gain column above is carried by a subset of the rows listed beside it: the tied rows contribute **+0.000** by construction, because taking L rather than F there changes the payload and not the perception.
 
 **B-3 Where the potential comes from.**
 
@@ -147,6 +190,8 @@ Scene-equal F1: optimum 0.84372, rule 0.84264, Fixed L 0.84264, Fixed F 0.82567,
 | `agreement` | 15,826 | 72.7 % | +0.000 | 0.0 % | +0.00000 |
 
 the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction. Unclassified rows: 0.
+
+**Structurally excluded here:** the rule requests L on every row of this subset, so "rule took F where L was right" cannot occur here. Its zero is a property of the rule, not evidence that F is never over-requested.
 
 **B-4 How it is distributed.**
 
@@ -166,9 +211,9 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | 2021_09_09_19_27_35 | 5,049 | 0 | -0.00000 | -0.0 % |
 | 2021_09_11_00_33_16 | 8,206 | 491 | +0.00020 | 19.0 % |
 
-### B-5 clean cells (q_F >= 0.99)
+### B-5 high-reliability cells by point estimate (q_F point estimate >= 0.99)
 
-11,880 rows over 6 cell(s). Optimal action shares: E 5.6 %, L 47.7 %, F 46.7 %. The rule requests F on 100.0 % of rows.
+11,880 rows over 6 cell(s). **Scene-equal** optimal action shares: E 11.8 %, L 50.4 %, F 37.8 %; the rule requests F on 100.0 %. Row-averaged, for comparison only: E 5.6 %, L 47.7 %, F 46.7 %, rule 100.0 %.
 
 | comparison | scene-equal mean | bootstrap 95 % |
 |---|---:|---|
@@ -176,7 +221,20 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | Q(a\*) − Q(Fixed L) | +0.02051 | [+0.01183, +0.03057] |
 | Q(a\*) − Q(Fixed F) | +0.00607 | [+0.00426, +0.00780] |
 
-Scene-equal F1: optimum 0.92283, rule 0.91675, Fixed L 0.90231, Fixed F 0.91675, Fixed E 0.82567. Payload, reported and not used as a criterion: optimum 1,189,158 QAM symbols per frame against the rule's 3,141,750.
+Scene-equal F1: optimum 0.92283, rule 0.91675, Fixed L 0.90231, Fixed F 0.91675, Fixed E 0.82567. Payload, reported and not used as a criterion, **scene-equal**: optimum 1,189,158 QAM symbols per frame against the rule's 3,141,750. Row-averaged: 1,468,835 against 3,141,750.
+
+*Weighting check (A-2).* The payload column is scene-equal; multiplying it against a row-averaged action share mixes two weightings and does not reconcile. Under one consistent weighting the F share implied by the scene-equal payload is the last field above, and the small residual against the scene-equal F share is the L payload, which is three orders of magnitude smaller than F and not zero. Row share of F times B_F is 1,467,737; scene-equal share of F times B_F is 1,188,313; the scene-equal payload actually reported is 1,189,158, which implies a scene-equal F share of 37.9 %.
+
+**A-1 When L is optimal, which kind of optimal.**
+
+| case | rows | scene-equal share | gain sum | share of all gain |
+|---|---:|---:|---:|---:|
+| `L_strictly_above_F` | 3,066 | 19.5 % | +64.018 | 91.1 % |
+| `L_tied_with_F_taken_on_payload` | 2,598 | 31.0 % | +0.000 | 0.0 % |
+
+"L is optimal" is two different situations: one where the object-level message is genuinely worth more than the complete feature message, and one where the two are within TOL and L is taken only because it is cheaper. They are separated here because only the first is a statement about perception.
+
+Gain accrues only on rows where the channel-only rule disagrees with the optimum, so the gain column above is carried by a subset of the rows listed beside it: the tied rows contribute **+0.000** by construction, because taking L rather than F there changes the payload and not the perception.
 
 **B-3 Where the potential comes from.**
 
@@ -188,6 +246,8 @@ Scene-equal F1: optimum 0.92283, rule 0.91675, Fixed L 0.90231, Fixed F 0.91675,
 | `agreement` | 5,550 | 46.7 % | +0.000 | 0.0 % | +0.00000 |
 
 the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction. Unclassified rows: 0.
+
+**Structurally excluded here:** the rule requests F on every row of this subset, so "rule took L where F was right" cannot occur here. Its zero is a property of the rule, not evidence that F is never missed.
 
 **B-4 How it is distributed.**
 
@@ -207,9 +267,9 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | 2021_09_09_19_27_35 | 2,754 | 804 | +0.00811 | 31.8 % |
 | 2021_09_11_00_33_16 | 4,476 | 1,566 | +0.00481 | 30.6 % |
 
-### B-5 clean cells with a sample of their own
+### B-5 high-reliability cells that have a sample of their own
 
-7,920 rows over 4 cell(s). Optimal action shares: E 5.6 %, L 47.7 %, F 46.7 %. The rule requests F on 100.0 % of rows.
+7,920 rows over 4 cell(s). **Scene-equal** optimal action shares: E 11.8 %, L 50.4 %, F 37.8 %; the rule requests F on 100.0 %. Row-averaged, for comparison only: E 5.6 %, L 47.7 %, F 46.7 %, rule 100.0 %.
 
 | comparison | scene-equal mean | bootstrap 95 % |
 |---|---:|---|
@@ -217,7 +277,20 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | Q(a\*) − Q(Fixed L) | +0.02051 | [+0.01183, +0.03057] |
 | Q(a\*) − Q(Fixed F) | +0.00607 | [+0.00426, +0.00780] |
 
-Scene-equal F1: optimum 0.92283, rule 0.91675, Fixed L 0.90231, Fixed F 0.91675, Fixed E 0.82567. Payload, reported and not used as a criterion: optimum 1,189,158 QAM symbols per frame against the rule's 3,141,750.
+Scene-equal F1: optimum 0.92283, rule 0.91675, Fixed L 0.90231, Fixed F 0.91675, Fixed E 0.82567. Payload, reported and not used as a criterion, **scene-equal**: optimum 1,189,158 QAM symbols per frame against the rule's 3,141,750. Row-averaged: 1,468,835 against 3,141,750.
+
+*Weighting check (A-2).* The payload column is scene-equal; multiplying it against a row-averaged action share mixes two weightings and does not reconcile. Under one consistent weighting the F share implied by the scene-equal payload is the last field above, and the small residual against the scene-equal F share is the L payload, which is three orders of magnitude smaller than F and not zero. Row share of F times B_F is 1,467,737; scene-equal share of F times B_F is 1,188,313; the scene-equal payload actually reported is 1,189,158, which implies a scene-equal F share of 37.9 %.
+
+**A-1 When L is optimal, which kind of optimal.**
+
+| case | rows | scene-equal share | gain sum | share of all gain |
+|---|---:|---:|---:|---:|
+| `L_strictly_above_F` | 2,044 | 19.5 % | +42.679 | 91.1 % |
+| `L_tied_with_F_taken_on_payload` | 1,732 | 31.0 % | +0.000 | 0.0 % |
+
+"L is optimal" is two different situations: one where the object-level message is genuinely worth more than the complete feature message, and one where the two are within TOL and L is taken only because it is cheaper. They are separated here because only the first is a statement about perception.
+
+Gain accrues only on rows where the channel-only rule disagrees with the optimum, so the gain column above is carried by a subset of the rows listed beside it: the tied rows contribute **+0.000** by construction, because taking L rather than F there changes the payload and not the perception.
 
 **B-3 Where the potential comes from.**
 
@@ -229,6 +302,8 @@ Scene-equal F1: optimum 0.92283, rule 0.91675, Fixed L 0.90231, Fixed F 0.91675,
 | `agreement` | 3,700 | 46.7 % | +0.000 | 0.0 % | +0.00000 |
 
 the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction. Unclassified rows: 0.
+
+**Structurally excluded here:** the rule requests F on every row of this subset, so "rule took L where F was right" cannot occur here. Its zero is a property of the rule, not evidence that F is never missed.
 
 **B-4 How it is distributed.**
 
@@ -248,9 +323,22 @@ the buckets are mutually exclusive: a frame where E is right is counted only the
 | 2021_09_09_19_27_35 | 1,836 | 536 | +0.00811 | 31.8 % |
 | 2021_09_11_00_33_16 | 2,984 | 1,044 | +0.00481 | 30.6 % |
 
-## B-5 The cells where the channel is not the variable
+## B-5 High-reliability cells, by point estimate
 
-`q_F >= 0.99` holds in 6 cells, all of them AWGN: 10 dB, 12 dB, 14 dB, 16 dB, 18 dB, 20 dB. There is **no Rayleigh cell** in this set — the best Rayleigh cell in the grid reaches q_F ≈ 1.6e-223.
+The subset is defined by the **q_F point estimate** reaching 0.99. That holds in 6 cells, all of them AWGN. There is **no Rayleigh cell** in this set — the best Rayleigh cell in the grid reaches q_F ≈ 1.6e-223.
+
+The set is defined by the q_F POINT ESTIMATE. The last two columns say what the same cells look like under the one-sided 95 % upper limit on p_cw: the reliability that survives the sampling uncertainty is far lower, and two cells have no sample of their own so no bound exists for them at all.
+
+| cell | q_F (point estimate) | p_cw_upper95 | q_F lower bound |
+|---|---:|---:|---:|
+| AWGN 10 dB | 1.0000 | 3e-05 | 0.686 |
+| AWGN 12 dB | 1.0000 | 3e-05 | 0.686 |
+| AWGN 14 dB | 1.0000 | **no sample** | **none exists** |
+| AWGN 16 dB | 1.0000 | 3e-05 | 0.686 |
+| AWGN 18 dB | 1.0000 | **no sample** | **none exists** |
+| AWGN 20 dB | 1.0000 | 3e-05 | 0.686 |
+
+The right-hand column is the point of A-3: a cell selected for q_F = 1 on the point estimate can only be shown to reach about 0.69 once the sampling uncertainty is carried, which is below the 0.8415 that F needs to beat L. The subset is a useful place to read the task cues with the channel held still; it is **not** a demonstration that the channel is reliable there.
 
 **Two of those cells were never measured.** AWGN 14 dB, AWGN 18 dB carry a p_cw the channel table never sampled: it comes from P1's §9.3 interpolation between neighbouring zero-error points. Their q_F = 1 is therefore inherited, not measured, which is why the same analysis is repeated above over only the cells that have counts of their own.
 

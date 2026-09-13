@@ -111,10 +111,17 @@ def markdown(m):
           f"above q_F = {ma['q_F_needed_to_beat_L']:.4f}, so the bound "
           + ('**does not settle** which of F and L is better in that range.'
              if ma['undetermined'] else 'still settles the comparison.'),
-          f"* **Partial recovery.** The same bound costs at most "
-          f"{pr['expected_lost_codewords_upper_bound']:.2f} codewords of the {m['n_cw_F']:,} in a "
-          f"message — {pr['as_fraction_of_message'] * 100:.4f} % of the payload — so under that "
+          f"* **Partial recovery.** At that error-rate bound the expected number of errored codewords "
+          f"in one complete F is about **{pr['expected_lost_codewords_upper_bound']:.2f}** of "
+          f"{m['n_cw_F']:,} — {pr['as_fraction_of_message'] * 100:.4f} % of the payload — so under that "
           'accounting the difference between the empirical zero and its upper bound is immaterial.',
+          '',
+          '**A bound is not a non-inferiority claim.** None of the above establishes that one action is '
+          'no worse than another. An error-rate bound constrains the channel; deciding between actions '
+          'requires the difference in expected effect between two policies computed at the same channel '
+          'parameters, with the variation between scenes carried through. That is what '
+          '`awgn_fill_eval.md` and `offline_potential.md` do, and it is why the sentence below says the '
+          'ordering is "not determined" rather than asserting either direction.',
           '', '## Draft sentence', '',
           'Ready to paste into the Limitations subsection. It has **not** been inserted.', '',
           '```latex',
@@ -125,9 +132,9 @@ def markdown(m):
           f"confidence rather than establishing it as zero, and the {inh} cells are interpolated between",
           'neighbouring points and carry no sample of their own. The channel grid consumes all of these',
           'as exact zeros. Under the fragment-aware partial-recovery accounting used here the',
-          f"consequence is immaterial, since the bound permits at most "
-          f"{pr['expected_lost_codewords_upper_bound']:.2f} lost codewords",
-          f"of {m['n_cw_F']:,}. Under an all-or-nothing message accounting it is not immaterial: the same",
+          f"consequence is immaterial, since at that bound the expected number of errored codewords",
+          f"in one complete feature message is about {pr['expected_lost_codewords_upper_bound']:.2f} of "
+          f"{m['n_cw_F']:,}. Under an all-or-nothing message accounting it is not: the same",
           f"bound admits a whole-message success probability as low as {ma['q_F_lower_bound']:.2f}, so the",
           'ordering of the feature-level and object-level actions in that SNR range is not determined',
           'by this measurement.',

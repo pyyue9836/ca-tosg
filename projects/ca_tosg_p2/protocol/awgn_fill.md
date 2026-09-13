@@ -22,13 +22,22 @@ Total wall time 66.5 min.
 
 **A-1 — the two p_cw columns mean different things and a consumer must choose deliberately.**
 
-* `p_cw_point` is the **empirical** rate k/N. Where no error was observed it is exactly `0.0`,
-  and that zero means "none seen in N draws", never "the rate is zero". It is the right column
-  for an unbiased estimate and the wrong column for any claim of reliability.
+* `p_cw_point` is the **empirical point estimate** of the codeword error rate, k/N. It is the
+  column the main analysis uses to construct the message success probability and the expected
+  perception outcome. Where no error was observed it is exactly `0.0`, and that zero means
+  "none seen in N draws", never "the rate is zero". **k/N is unbiased for p itself, but
+  `q = (1 - p)^12567` is a non-linear function of it, so `(1 - k/N)^12567` is not an unbiased
+  estimate of q** — with a convex transform of this steepness the plug-in value sits above the
+  mean of the sampling distribution. It is a point estimate and is reported as one.
 * `p_cw_upper95` is the one-sided 95 % Clopper-Pearson upper limit, finite on every row. At
   k = 0 it is exactly `1 - 0.05^(1/N)`, whose first-order approximation is the familiar `3/N`.
   It is the right column for "the loss is no worse than", which is what a delivery argument needs.
 * `zero_error` flags the rows where the two diverge most sharply.
+
+**An error-rate bound is not a non-inferiority result.** Knowing that p_cw lies below some value
+says nothing on its own about whether one action beats another: that requires the difference in
+expected effect between two policies, computed at the same channel parameters, with the
+between-scene variation carried through. That comparison is in `awgn_fill_eval.md`, not here.
 
 The two-sided Wilson column is a third quantity again: an interval for the observed proportion.
 It is what the D-1 verdicts use for k > 0, exactly as pre-registered; A-1 changes the field

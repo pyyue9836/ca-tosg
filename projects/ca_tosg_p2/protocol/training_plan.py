@@ -54,7 +54,9 @@ def build():
 
     by_label = {a['label']: a for a in pot['analyses']}
     headline = by_label['all 22 cells']
-    clean_lbl = f'B-5 clean cells (q_F >= {Q_F_CLEAN})'
+    sys.path.insert(0, HERE)
+    from offline_potential import CLEAN_LABEL                           # noqa: E402
+    clean_lbl = CLEAN_LABEL
     clean = by_label.get(clean_lbl)
     ref_shares = {lab: {'optimal_share': a['optimal_share'], 'rows': a['rows'],
                         'rule_share_F': a['rule_share_F']} for lab, a in by_label.items()}

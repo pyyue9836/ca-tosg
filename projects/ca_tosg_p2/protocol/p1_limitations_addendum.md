@@ -20,7 +20,9 @@ the brief described AWGN 10-20 dB as empirical zeros of 0/100,000. That holds fo
 
 * The measured zero-error cells each drew **100,000 codewords** and saw none in error. The one-sided 95 % upper limit is **3e-05** (`1 - 0.05^(1/N)`, whose first-order approximation is 3/N).
 * **Message accounting.** With 12,567 codewords per F message, a per-codeword loss at that upper limit gives q_F as low as **0.686**. F overtakes L only above q_F = 0.8414, so the bound **does not settle** which of F and L is better in that range.
-* **Partial recovery.** The same bound costs at most 0.38 codewords of the 12,567 in a message — 0.0030 % of the payload — so under that accounting the difference between the empirical zero and its upper bound is immaterial.
+* **Partial recovery.** At that error-rate bound the expected number of errored codewords in one complete F is about **0.38** of 12,567 — 0.0030 % of the payload — so under that accounting the difference between the empirical zero and its upper bound is immaterial.
+
+**A bound is not a non-inferiority claim.** None of the above establishes that one action is no worse than another. An error-rate bound constrains the channel; deciding between actions requires the difference in expected effect between two policies computed at the same channel parameters, with the variation between scenes carried through. That is what `awgn_fill_eval.md` and `offline_potential.md` do, and it is why the sentence below says the ordering is "not determined" rather than asserting either direction.
 
 ## Draft sentence
 
@@ -33,8 +35,8 @@ The AWGN codeword error rates at 10 dB, 12 dB, 16 dB, 20 dB are empirical zeros:
 confidence rather than establishing it as zero, and the 14 dB, 18 dB cells are interpolated between
 neighbouring points and carry no sample of their own. The channel grid consumes all of these
 as exact zeros. Under the fragment-aware partial-recovery accounting used here the
-consequence is immaterial, since the bound permits at most 0.38 lost codewords
-of 12,567. Under an all-or-nothing message accounting it is not immaterial: the same
+consequence is immaterial, since at that bound the expected number of errored codewords
+in one complete feature message is about 0.38 of 12,567. Under an all-or-nothing message accounting it is not: the same
 bound admits a whole-message success probability as low as 0.69, so the
 ordering of the feature-level and object-level actions in that SNR range is not determined
 by this measurement.
