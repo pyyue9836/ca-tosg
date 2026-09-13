@@ -1,6 +1,10 @@
 # Filling AWGN 8.5 / 9.0 / 9.5 dB — pre-registered plan (P2-R12 B)
 
-**Status: plan only. Nothing has been run.** The stopping rule below is fixed *before* the measurement,
+**Status: superseded in part and now RUNNING under Amendment 3 (P2-R13).** The stopping rule below
+is the *first* registration; `p2_protocol.md` Amendment 3 withdraws the early stop, fixes the sample
+sizes and replaces the reproduction criterion. Both texts are kept so the change is visible.
+
+**Original status line:** The stopping rule below is fixed *before* the measurement,
 which is the whole point of writing it down first. It runs on approval.
 
 ## Why these three points

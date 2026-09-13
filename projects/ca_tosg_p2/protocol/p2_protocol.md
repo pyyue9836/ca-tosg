@@ -349,6 +349,11 @@ channel model, and may not exist at all within the range examined.*
 
 ## P2-R12 B — pre-registered stopping rule for the AWGN fill
 
+> **Superseded in part by Amendment 3 (P2-R13) at the end of this file.** B-2b (early stop)
+> is withdrawn, B-2a's sample sizes are fixed rather than capped, and the reproduction criterion is
+> replaced. B-3 and B-5 stand unchanged. The original text is kept below as the record of what was
+> registered first.
+
 **Registered before the measurement is run; nothing has been run under it.** The full plan, its
 derivation and its cost are in `awgn_fill_plan.md`. The binding clauses are repeated here so the
 protocol itself carries them:
@@ -377,3 +382,43 @@ If either fails, the run stops and is reported.
 
 **Permitted outcome.** If the crossing cannot be bracketed under this rule, that is reported as an
 undetermined interval. N_min is not lowered and no tolerance is relaxed to obtain a crossing.
+
+## Amendment 3 (P2-R13, 2026-09-13) — the fill runs under these rules
+
+Supervisor-directed amendment to the P2-R12 B pre-registration, **made before any measurement was
+run**. The superseded text is retained above. Reason recorded: an early stop at a fixed error count
+makes the sample size a function of the observed data, and the reproduction criterion of P2-R12 tested
+agreement of intervals rather than agreement of implementations.
+
+**A-1 Fixed sample sizes; no early stop.** 8.5, 9.0 and 9.5 dB run **exactly 1,000,000 codewords
+each**; 8.0 and 10.0 dB run **exactly 100,000 each** as reproduction checks. The "stop at 30 errors"
+clause is **withdrawn**: every point runs to its full N whatever it observes.
+
+**A-2 Two interval kinds, kept apart.** Each point records errors `k`, sample size `N`, the empirical
+estimate `k/N`, and a **two-sided Wilson 95 % interval**. A point with `k = 0` additionally records a
+**one-sided 95 % upper limit** `p_upper = 1 − 0.05^(1/N) ≈ 3/N`. The two are labelled distinctly and
+are never presented as the same quantity.
+
+**B-1 The check is an implementation check.** Coding parameters, modulation, the SNR definition, the
+noise normalisation and the decoder iteration count are verified item by item against
+`projects/ca_tosg/communication/ldpc_qam.py` inside `--check`.
+
+**B-2 Randomness.** The seed and the software versions are fixed and recorded. **No claim of
+bit-identical reproduction across environments is made.**
+
+**B-3 Statistical re-check, reported not gated.** 8.0 and 10.0 dB are re-measured at 100,000 codewords
+and the difference from the committed values is reported in full. **A small number of errors at 10 dB
+is ordinary sampling variation, is not treated as an anomaly, and does not stop the run.**
+
+**C-1 Both sides are recomputed.** `Q_F = q_F·F1_clean + (1−q_F)·F1_ego` and
+`Q_L = q_L·L1_clean + (1−q_L)·F1_ego` are recomputed from the same new `p_cw` and compared as
+`Q_F − Q_L`. L is **not** held at its old value while only F is updated.
+
+**C-2 What 0.8415 is.** It is an **average-performance crossing estimate under the current data, scene
+weights and message model** — not a per-frame reliability rule and not a link-layer requirement.
+
+**D-1 Per-point verdict.** Each point is reported as supporting **L**, supporting **complete F**, or
+**not distinguishable** given the uncertainty carried through from the measurement.
+
+**D-2 No forced threshold.** If the crossing cannot be bracketed, the interval is reported as
+undetermined. N is not changed after seeing the data.
