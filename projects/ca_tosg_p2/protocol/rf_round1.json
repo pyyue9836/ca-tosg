@@ -54,6 +54,31 @@
   "verified": "TP lands on an integer for every frame and action; if it had not, no recall would be reported"
  },
  "reproducibility": "the forests are seeded (random_state 0) and the record re-derives exactly, apart from the per-fold wall-clock in folds[].seconds, which --check --full excludes and names",
+ "oof_product": {
+  "path": "projects/ca_tosg_p2/results/rf/rf_round1_oof.csv",
+  "sha256": "6cb0386402699a65f1abccbcafab72e7abae22672dd2d55323b3fd5b8560dee1",
+  "rows": 43560,
+  "columns": [
+   "sample_id",
+   "scene",
+   "snr_db",
+   "channel",
+   "a_star",
+   "pred_joint",
+   "pred_task_only",
+   "pred_channel_rule",
+   "p_E",
+   "p_L",
+   "p_F",
+   "q_F",
+   "q_L",
+   "Q_E",
+   "Q_L",
+   "Q_F",
+   "B_L_sym"
+  ],
+  "what": "the per-row out-of-fold record: the label, every arm's action, the joint forest's three class probabilities, and the channel and effect columns needed to reconstruct any of the above"
+ },
  "folds": [
   {
    "held_out_scene": "2021_08_20_21_48_35",
@@ -64,7 +89,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 4.061845064163208
+   "F_share_in_training_scenes": 0.10753446798331338,
+   "F_share_held_out": 0.0016233766233766235,
+   "reference_F_share_in_training_scenes": 0.10689244791507847,
+   "reference_F_share_held_out": 0.10917207792207792,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.3794684410095215
   },
   {
    "held_out_scene": "2021_08_21_17_30_41",
@@ -75,7 +109,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 3.9543087482452393
+   "F_share_in_training_scenes": 0.11425009656451353,
+   "F_share_held_out": 0.0,
+   "reference_F_share_in_training_scenes": 0.11395239135539612,
+   "reference_F_share_held_out": 0.052692530399536766,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.3038530349731445
   },
   {
    "held_out_scene": "2021_08_22_13_37_16",
@@ -86,7 +129,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 3.995060443878174
+   "F_share_in_training_scenes": 0.11358670301375565,
+   "F_share_held_out": 0.017508417508417508,
+   "reference_F_share_in_training_scenes": 0.11334198795836853,
+   "reference_F_share_held_out": 0.05757575757575758,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.2998881340026855
   },
   {
    "held_out_scene": "2021_08_22_22_01_17",
@@ -97,7 +149,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 3.9049179553985596
+   "F_share_in_training_scenes": 0.11809183794336703,
+   "F_share_held_out": 0.0,
+   "reference_F_share_in_training_scenes": 0.11809183794336703,
+   "reference_F_share_held_out": 0.019576957695769576,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.1540632247924805
   },
   {
    "held_out_scene": "2021_08_23_10_51_24",
@@ -108,7 +169,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 4.089951515197754
+   "F_share_in_training_scenes": 0.1075587468738434,
+   "F_share_held_out": 0.05823863636363636,
+   "reference_F_share_in_training_scenes": 0.10748853151897458,
+   "reference_F_share_held_out": 0.10440340909090909,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.404703140258789
   },
   {
    "held_out_scene": "2021_08_23_13_17_21",
@@ -119,7 +189,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 4.112440586090088
+   "F_share_in_training_scenes": 0.10280060487269153,
+   "F_share_held_out": 0.12878787878787878,
+   "reference_F_share_in_training_scenes": 0.10254653341291398,
+   "reference_F_share_held_out": 0.14393939393939395,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.4054436683654785
   },
   {
    "held_out_scene": "2021_08_23_19_42_07",
@@ -130,7 +209,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 4.156060457229614
+   "F_share_in_training_scenes": 0.10411971704706688,
+   "F_share_held_out": 0.037480063795853266,
+   "reference_F_share_in_training_scenes": 0.1040915892342856,
+   "reference_F_share_held_out": 0.13157894736842105,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 4.407437324523926
   },
   {
    "held_out_scene": "2021_09_09_19_27_35",
@@ -141,7 +229,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 3.4240810871124268
+   "F_share_in_training_scenes": 0.0982854708781582,
+   "F_share_held_out": 0.0,
+   "reference_F_share_in_training_scenes": 0.09758886852877852,
+   "reference_F_share_held_out": 0.1836007130124777,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 3.685788631439209
   },
   {
    "held_out_scene": "2021_09_11_00_33_16",
@@ -152,7 +249,16 @@
     "awgn": 8.5,
     "rayleigh": 20.5
    },
-   "seconds": 2.950162649154663
+   "F_share_in_training_scenes": 0.10089820449871673,
+   "F_share_held_out": 0.0,
+   "reference_F_share_in_training_scenes": 0.10031747337554295,
+   "reference_F_share_held_out": 0.16177187423836217,
+   "classes_fitted": [
+    "E",
+    "F",
+    "L"
+   ],
+   "seconds": 3.207956552505493
   }
  ],
  "results": [
@@ -1656,160 +1762,342 @@
    "L -> E": 164,
    "F -> L": 2250
   },
-  "arms_under_upper_bound": {
-   "label": "sampled cells, labels from p_cw_upper95",
-   "rows": 39600,
-   "arms": {
-    "joint": {
-     "f1": 0.851710261355967,
-     "recall": 0.8315215422167685,
-     "misses_per_frame": 3.795182261114187,
-     "qam_symbols": 6798.3513826426315,
-     "request_share": {
-      "E": 0.3491331597797435,
-      "L": 0.6490149883684047,
-      "F": 0.001851851851851852
+  "B2_channel_and_model": {
+   "what_moved": "the error rate AND the labels AND the fitted forest. This is the round-1 sensitivity check, kept but relabelled: it does not isolate the channel",
+   "arms_under_upper_bound": {
+    "label": "sampled cells, relabelled and refitted",
+    "rows": 39600,
+    "arms": {
+     "joint": {
+      "f1": 0.851710261355967,
+      "recall": 0.8315215422167685,
+      "misses_per_frame": 3.795182261114187,
+      "qam_symbols": 6798.3513826426315,
+      "request_share": {
+       "E": 0.3491331597797435,
+       "L": 0.6490149883684047,
+       "F": 0.001851851851851852
+      }
+     },
+     "task_only": {
+      "f1": 0.8449296562759115,
+      "recall": 0.8173970788698894,
+      "misses_per_frame": 3.9700872466820476,
+      "qam_symbols": 3143.16769171319,
+      "request_share": {
+       "E": 0.4636782277421806,
+       "L": 0.5355955558453285,
+       "F": 0.0007262164124909223
+      }
+     },
+     "channel_rule": {
+      "f1": 0.8506649384762212,
+      "recall": 0.8243250906673966,
+      "misses_per_frame": 3.870128110153141,
+      "qam_symbols": 629769.5976430963,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.8,
+       "F": 0.2
+      }
+     },
+     "fixed_L": {
+      "f1": 0.8534883218885009,
+      "recall": 0.8351538842638377,
+      "misses_per_frame": 3.635875067313436,
+      "qam_symbols": 1774.497053870335,
+      "request_share": {
+       "E": 0.0,
+       "L": 1.0,
+       "F": 0.0
+      }
+     },
+     "fixed_F": {
+      "f1": 0.8385084241044543,
+      "recall": 0.8006402042380144,
+      "misses_per_frame": 4.316039718864505,
+      "qam_symbols": 3141750.0,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.0,
+       "F": 1.0
+      }
+     },
+     "offline_optimum": {
+      "f1": 0.8562084379078078,
+      "recall": 0.8340446012188715,
+      "misses_per_frame": 3.656583254206938,
+      "qam_symbols": 136765.64964252795,
+      "request_share": {
+       "E": 0.3548594710191611,
+       "L": 0.6019451935749889,
+       "F": 0.043195335405849994
+      }
      }
-    },
-    "task_only": {
-     "f1": 0.8449296562759115,
-     "recall": 0.8173970788698894,
-     "misses_per_frame": 3.9700872466820476,
-     "qam_symbols": 3143.16769171319,
-     "request_share": {
-      "E": 0.4636782277421806,
-      "L": 0.5355955558453285,
-      "F": 0.0007262164124909223
-     }
-    },
-    "channel_rule": {
-     "f1": 0.8506649384762212,
-     "recall": 0.8243250906673966,
-     "misses_per_frame": 3.870128110153141,
-     "qam_symbols": 629769.5976430963,
-     "request_share": {
-      "E": 0.0,
-      "L": 0.8,
-      "F": 0.2
-     }
-    },
-    "fixed_L": {
-     "f1": 0.8534883218885009,
-     "recall": 0.8351538842638377,
-     "misses_per_frame": 3.635875067313436,
-     "qam_symbols": 1774.497053870335,
-     "request_share": {
-      "E": 0.0,
-      "L": 1.0,
-      "F": 0.0
-     }
-    },
-    "fixed_F": {
-     "f1": 0.8385084241044543,
-     "recall": 0.8006402042380144,
-     "misses_per_frame": 4.316039718864505,
-     "qam_symbols": 3141750.0,
-     "request_share": {
-      "E": 0.0,
-      "L": 0.0,
-      "F": 1.0
-     }
-    },
-    "offline_optimum": {
-     "f1": 0.8562084379078078,
-     "recall": 0.8340446012188715,
-     "misses_per_frame": 3.656583254206938,
-     "qam_symbols": 136765.64964252795,
-     "request_share": {
-      "E": 0.3548594710191611,
-      "L": 0.6019451935749889,
-      "F": 0.043195335405849994
+    }
+   },
+   "arms_under_point_estimate_same_rows": {
+    "label": "sampled cells, round-1 labels and forest",
+    "rows": 39600,
+    "arms": {
+     "joint": {
+      "f1": 0.8531997302107813,
+      "recall": 0.8331005818203538,
+      "misses_per_frame": 3.7521351294081544,
+      "qam_symbols": 61580.87821372748,
+      "request_share": {
+       "E": 0.310485218539202,
+       "L": 0.6702654911826333,
+       "F": 0.019249290278164546
+      }
+     },
+     "task_only": {
+      "f1": 0.8448607383324698,
+      "recall": 0.8167480491612119,
+      "misses_per_frame": 3.96973900787488,
+      "qam_symbols": 14780.993016159548,
+      "request_share": {
+       "E": 0.487564224780874,
+       "L": 0.5079952644469158,
+       "F": 0.004440510772210119
+      }
+     },
+     "channel_rule": {
+      "f1": 0.8570544622894505,
+      "recall": 0.8341745064462982,
+      "misses_per_frame": 3.6719929836934053,
+      "qam_symbols": 629769.5976430963,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.8,
+       "F": 0.2
+      }
+     },
+     "fixed_E": {
+      "f1": 0.8256674842513136,
+      "recall": 0.7814308231022299,
+      "misses_per_frame": 4.701935436209087,
+      "qam_symbols": 0.0,
+      "request_share": {
+       "E": 1.0,
+       "L": 0.0,
+       "F": 0.0
+      }
+     },
+     "fixed_L": {
+      "f1": 0.8541662127976745,
+      "recall": 0.8364604205436881,
+      "misses_per_frame": 3.6093254505021073,
+      "qam_symbols": 1774.497053870335,
+      "request_share": {
+       "E": 0.0,
+       "L": 1.0,
+       "F": 0.0
+      }
+     },
+     "fixed_F": {
+      "f1": 0.8447733249398988,
+      "recall": 0.8100121715007153,
+      "misses_per_frame": 4.127767020009431,
+      "qam_symbols": 3141750.0,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.0,
+       "F": 1.0
+      }
+     },
+     "offline_optimum": {
+      "f1": 0.859119548267461,
+      "recall": 0.8362196618208678,
+      "misses_per_frame": 3.6184927762731416,
+      "qam_symbols": 252436.95532161384,
+      "request_share": {
+       "E": 0.35077650100539626,
+       "L": 0.569186469131058,
+       "F": 0.08003702986354584
+      }
      }
     }
    }
   },
-  "arms_under_point_estimate_same_rows": {
-   "label": "sampled cells, labels from the point estimate",
-   "rows": 39600,
-   "arms": {
-    "joint": {
-     "f1": 0.8531997302107813,
-     "recall": 0.8331005818203538,
-     "misses_per_frame": 3.7521351294081544,
-     "qam_symbols": 61580.87821372748,
-     "request_share": {
-      "E": 0.310485218539202,
-      "L": 0.6702654911826333,
-      "F": 0.019249290278164546
-     }
-    },
-    "task_only": {
-     "f1": 0.8448607383324698,
-     "recall": 0.8167480491612119,
-     "misses_per_frame": 3.96973900787488,
-     "qam_symbols": 14780.993016159548,
-     "request_share": {
-      "E": 0.487564224780874,
-      "L": 0.5079952644469158,
-      "F": 0.004440510772210119
-     }
-    },
-    "channel_rule": {
-     "f1": 0.8570544622894505,
-     "recall": 0.8341745064462982,
-     "misses_per_frame": 3.6719929836934053,
-     "qam_symbols": 629769.5976430963,
-     "request_share": {
-      "E": 0.0,
-      "L": 0.8,
-      "F": 0.2
-     }
-    },
-    "fixed_E": {
-     "f1": 0.8256674842513136,
-     "recall": 0.7814308231022299,
-     "misses_per_frame": 4.701935436209087,
-     "qam_symbols": 0.0,
-     "request_share": {
-      "E": 1.0,
-      "L": 0.0,
-      "F": 0.0
-     }
-    },
-    "fixed_L": {
-     "f1": 0.8541662127976745,
-     "recall": 0.8364604205436881,
-     "misses_per_frame": 3.6093254505021073,
-     "qam_symbols": 1774.497053870335,
-     "request_share": {
-      "E": 0.0,
-      "L": 1.0,
-      "F": 0.0
-     }
-    },
-    "fixed_F": {
-     "f1": 0.8447733249398988,
-     "recall": 0.8100121715007153,
-     "misses_per_frame": 4.127767020009431,
-     "qam_symbols": 3141750.0,
-     "request_share": {
-      "E": 0.0,
-      "L": 0.0,
-      "F": 1.0
-     }
-    },
-    "offline_optimum": {
-     "f1": 0.859119548267461,
-     "recall": 0.8362196618208678,
-     "misses_per_frame": 3.6184927762731416,
-     "qam_symbols": 252436.95532161384,
-     "request_share": {
-      "E": 0.35077650100539626,
-      "L": 0.569186469131058,
-      "F": 0.08003702986354584
+  "B1_channel_only": {
+   "what_moved": "only the per-codeword error rate. Actions, labels and forest are those of round 1, so every difference below is channel uncertainty alone",
+   "point_estimate": {
+    "label": "same actions, p_cw_point",
+    "rows": 39600,
+    "arms": {
+     "joint": {
+      "f1": 0.8531997302107813,
+      "recall": 0.8331005818203538,
+      "misses_per_frame": 3.7521351294081544,
+      "qam_symbols": 61580.87821372748,
+      "request_share": {
+       "E": 0.310485218539202,
+       "L": 0.6702654911826333,
+       "F": 0.019249290278164546
+      }
+     },
+     "task_only": {
+      "f1": 0.8448607383324698,
+      "recall": 0.8167480491612119,
+      "misses_per_frame": 3.96973900787488,
+      "qam_symbols": 14780.993016159548,
+      "request_share": {
+       "E": 0.487564224780874,
+       "L": 0.5079952644469158,
+       "F": 0.004440510772210119
+      }
+     },
+     "channel_rule": {
+      "f1": 0.8570544622894505,
+      "recall": 0.8341745064462982,
+      "misses_per_frame": 3.6719929836934053,
+      "qam_symbols": 629769.5976430963,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.8,
+       "F": 0.2
+      }
+     },
+     "fixed_E": {
+      "f1": 0.8256674842513136,
+      "recall": 0.7814308231022299,
+      "misses_per_frame": 4.701935436209087,
+      "qam_symbols": 0.0,
+      "request_share": {
+       "E": 1.0,
+       "L": 0.0,
+       "F": 0.0
+      }
+     },
+     "fixed_L": {
+      "f1": 0.8541662127976745,
+      "recall": 0.8364604205436881,
+      "misses_per_frame": 3.6093254505021073,
+      "qam_symbols": 1774.497053870335,
+      "request_share": {
+       "E": 0.0,
+       "L": 1.0,
+       "F": 0.0
+      }
+     },
+     "fixed_F": {
+      "f1": 0.8447733249398988,
+      "recall": 0.8100121715007153,
+      "misses_per_frame": 4.127767020009431,
+      "qam_symbols": 3141750.0,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.0,
+       "F": 1.0
+      }
+     },
+     "offline_optimum": {
+      "f1": 0.859119548267461,
+      "recall": 0.8362196618208678,
+      "misses_per_frame": 3.6184927762731416,
+      "qam_symbols": 252436.95532161384,
+      "request_share": {
+       "E": 0.35077650100539626,
+       "L": 0.569186469131058,
+       "F": 0.08003702986354584
+      }
      }
     }
-   }
+   },
+   "upper_bound": {
+    "label": "same actions, p_cw_upper95",
+    "rows": 39600,
+    "arms": {
+     "joint": {
+      "f1": 0.8518170897244779,
+      "recall": 0.8307679956497477,
+      "misses_per_frame": 3.7956680009298336,
+      "qam_symbols": 61580.87821372748,
+      "request_share": {
+       "E": 0.310485218539202,
+       "L": 0.6702654911826333,
+       "F": 0.019249290278164546
+      }
+     },
+     "task_only": {
+      "f1": 0.8443386039155976,
+      "recall": 0.8158035667622207,
+      "misses_per_frame": 3.9894526389787313,
+      "qam_symbols": 14780.993016159548,
+      "request_share": {
+       "E": 0.487564224780874,
+       "L": 0.5079952644469158,
+       "F": 0.004440510772210119
+      }
+     },
+     "channel_rule": {
+      "f1": 0.8506649384762212,
+      "recall": 0.8243250906673966,
+      "misses_per_frame": 3.870128110153141,
+      "qam_symbols": 629769.5976430963,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.8,
+       "F": 0.2
+      }
+     },
+     "fixed_E": {
+      "f1": 0.8256674842513136,
+      "recall": 0.7814308231022299,
+      "misses_per_frame": 4.701935436209087,
+      "qam_symbols": 0.0,
+      "request_share": {
+       "E": 1.0,
+       "L": 0.0,
+       "F": 0.0
+      }
+     },
+     "fixed_L": {
+      "f1": 0.8534883218885009,
+      "recall": 0.8351538842638377,
+      "misses_per_frame": 3.635875067313436,
+      "qam_symbols": 1774.497053870335,
+      "request_share": {
+       "E": 0.0,
+       "L": 1.0,
+       "F": 0.0
+      }
+     },
+     "fixed_F": {
+      "f1": 0.8385084241044543,
+      "recall": 0.8006402042380144,
+      "misses_per_frame": 4.316039718864505,
+      "qam_symbols": 3141750.0,
+      "request_share": {
+       "E": 0.0,
+       "L": 0.0,
+       "F": 1.0
+      }
+     },
+     "offline_optimum": {
+      "f1": 0.8552374025370039,
+      "recall": 0.8306759547934296,
+      "misses_per_frame": 3.7367800288815456,
+      "qam_symbols": 252436.95532161384,
+      "request_share": {
+       "E": 0.35077650100539626,
+       "L": 0.569186469131058,
+       "F": 0.08003702986354584
+      }
+     }
+    }
+   },
+   "delta": {
+    "joint": -0.0013826404863034325,
+    "task_only": -0.0005221344168722108,
+    "channel_rule": -0.006389523813229325,
+    "fixed_E": 0.0,
+    "fixed_L": -0.0006778909091735841,
+    "fixed_F": -0.006264900835444509,
+    "offline_optimum": -0.0038821457304570872
+   },
+   "tau_caveat": "the channel-rule arm keeps the tau fitted in round 1, which was fitted on the point-estimate effect columns. Its action set is therefore not re-optimised for the upper bound, and the upper-bound column for that arm should be read as \"the round-1 rule evaluated under a worse channel\", not as the best rule under that channel"
   }
  },
  "offline_reference_shares": {

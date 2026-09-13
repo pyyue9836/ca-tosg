@@ -13,19 +13,21 @@
 
 **Recall.** TP = F1 (P + G) / 2, valid for a one-to-one matching. TP lands on an integer for every frame and action; if it had not, no recall would be reported (largest deviation from an integer: 1.4e-14).
 
-## C-4 The folds
+## C-4 The folds, and C-1 fit versus generalise
 
-| held-out scene | train rows | test rows | channel versions per frame | τ from training scenes |
-|---|---:|---:|---:|---|
-| 2021_08_20_21_48_35 | 41,096 | 2,464 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_08_21_17_30_41 | 40,106 | 3,454 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_08_22_13_37_16 | 40,590 | 2,970 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_08_22_22_01_17 | 39,116 | 4,444 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_08_23_10_51_24 | 42,152 | 1,408 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_08_23_13_17_21 | 42,504 | 1,056 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_08_23_19_42_07 | 42,306 | 1,254 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_09_09_19_27_35 | 33,462 | 10,098 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
-| 2021_09_11_00_33_16 | 27,148 | 16,412 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} |
+The two F-share columns answer a question that the held-out numbers alone cannot: a forest that already declines F on the scenes it was fitted on is underfitting the action, whereas one that requests F in training and not out of fold is failing to generalise.
+
+| held-out scene | train rows | test rows | versions/frame | τ from training | RF F share, training scenes | reference F share, training | RF F share, held out | reference F share, held out |
+|---|---:|---:|---:|---|---:|---:|---:|---:|
+| 2021_08_20_21_48_35 | 41,096 | 2,464 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 10.8 % | 10.7 % | 0.2 % | 10.9 % |
+| 2021_08_21_17_30_41 | 40,106 | 3,454 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 11.4 % | 11.4 % | 0.0 % | 5.3 % |
+| 2021_08_22_13_37_16 | 40,590 | 2,970 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 11.4 % | 11.3 % | 1.8 % | 5.8 % |
+| 2021_08_22_22_01_17 | 39,116 | 4,444 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 11.8 % | 11.8 % | 0.0 % | 2.0 % |
+| 2021_08_23_10_51_24 | 42,152 | 1,408 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 10.8 % | 10.7 % | 5.8 % | 10.4 % |
+| 2021_08_23_13_17_21 | 42,504 | 1,056 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 10.3 % | 10.3 % | 12.9 % | 14.4 % |
+| 2021_08_23_19_42_07 | 42,306 | 1,254 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 10.4 % | 10.4 % | 3.7 % | 13.2 % |
+| 2021_09_09_19_27_35 | 33,462 | 10,098 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 9.8 % | 9.8 % | 0.0 % | 18.4 % |
+| 2021_09_11_00_33_16 | 27,148 | 16,412 | 22 | {'awgn': 8.5, 'rayleigh': 20.5} | 10.1 % | 10.0 % | 0.0 % | 16.2 % |
 
 The gate asserts that no frame appears on both sides and that every frame carries the
 same number of channel versions, so all 22 versions of a frame move together.
@@ -146,22 +148,48 @@ Registered in `training_plan.md` before this was run.
 | L | 83.3 % | 78.3 % | 24,372 | 25,920 |
 | F | 3.5 % | 61.4 % | 5,682 | 321 |
 
-## C-7 Stability under the upper bound on p_cw
+## B Stability under the upper bound on p_cw, split into two questions
 
-The main analysis uses the p_cw point estimate. This section relabels with `p_cw_upper95`
-and reports what moves. It is a sensitivity check, **not** a demonstration that the
-reliability is assured.
+The main analysis uses the p_cw point estimate. Neither table below shows that the
+reliability is assured; they show how much of the movement is the channel and how much is
+the model responding to a changed channel.
 
 Cells with a sample of their own: 20 of 22 (39,600 rows). Excluded for having no sample and therefore no bound: awgn 14 dB, awgn 18 dB.
 
+### B-1 Channel only — the actions of round 1 held fixed
+
+Only the per-codeword error rate. Actions, labels and forest are those of round 1, so every difference below is channel uncertainty alone.
+
+| arm | F1, p_cw_point | F1, p_cw_upper95 | change |
+|---|---:|---:|---:|
+| `offline_optimum` | 0.85912 | 0.85524 | -0.00388 |
+| `joint` | 0.85320 | 0.85182 | -0.00138 |
+| `task_only` | 0.84486 | 0.84434 | -0.00052 |
+| `channel_rule` | 0.85705 | 0.85066 | -0.00639 |
+| `fixed_L` | 0.85417 | 0.85349 | -0.00068 |
+| `fixed_F` | 0.84477 | 0.83851 | -0.00626 |
+| `fixed_E` | 0.82567 | 0.82567 | +0.00000 |
+
+**B-3.** the channel-rule arm keeps the tau fitted in round 1, which was fitted on the point-estimate effect columns. Its action set is therefore not re-optimised for the upper bound, and the upper-bound column for that arm should be read as "the round-1 rule evaluated under a worse channel", not as the best rule under that channel.
+
+### B-2 Channel and model together — relabelled and refitted
+
+The error rate AND the labels AND the fitted forest. This is the round-1 sensitivity check, kept but relabelled: it does not isolate the channel.
+
 **Labels flip on 2,414 of 39,600 rows (6.1 %)**, by direction: L -> E 164, F -> L 2,250.
 
-| arm | F1 under point estimate | F1 under upper bound | change |
+| arm | F1, round-1 labels and forest | F1, relabelled and refitted | change |
 |---|---:|---:|---:|
 | `offline_optimum` | 0.85912 | 0.85621 | -0.00291 |
 | `joint` | 0.85320 | 0.85171 | -0.00149 |
+| `task_only` | 0.84486 | 0.84493 | +0.00007 |
 | `fixed_L` | 0.85417 | 0.85349 | -0.00068 |
 | `fixed_F` | 0.84477 | 0.83851 | -0.00626 |
+
+## D-1 The per-row product
+
+`projects/ca_tosg_p2/results/rf/rf_round1_oof.csv` — 43,560 rows. The per-row out-of-fold record: the label, every arm's action, the joint forest's three class probabilities, and the channel and effect columns needed to reconstruct any of the above. Its sha256 is recorded here and `--check` verifies it.
+
 
 ## Per cell
 

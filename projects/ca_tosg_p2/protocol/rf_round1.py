@@ -41,6 +41,7 @@ WP34 = os.path.join(V2, 'wp34_e_l_validate.csv')
 BLER = os.path.join(ROOT, 'results', 'channel', 'bler_sionna.csv')
 FREEZE = os.path.join(ROOT, 'results', 'manifests', 'V2_PRIMARY_FREEZE.json')
 POTENTIAL = os.path.join(HERE, 'offline_potential.json')
+OOF_CSV = os.path.join(P2, 'results', 'rf', 'rf_round1_oof.csv')
 OUT_JSON = os.path.join(HERE, 'rf_round1.json')
 OUT_MD = os.path.join(HERE, 'rf_round1.md')
 
@@ -200,6 +201,7 @@ def run_round(g, cues, cue_fields, labels, jobs, tag):
 
     oof = {'joint': np.empty(len(g), object), 'task_only': np.empty(len(g), object),
            'channel_rule': np.empty(len(g), object)}
+    proba = np.full((len(g), len(ACTIONS)), np.nan)
     folds = []
     for s in uniq:
         te = scenes == s
@@ -214,15 +216,33 @@ def run_round(g, cues, cue_fields, labels, jobs, tag):
         t0 = time.time()
         rf = RandomForestClassifier(n_jobs=jobs, **hp).fit(X[tr], labels[tr])
         oof['joint'][te] = rf.predict(X[te])
+        # C-3: keep the class probabilities, so "the forest ranked F second" can be separated from
+        # "the forest saw no value in F at all"
+        cls = list(rf.classes_)
+        pr = rf.predict_proba(X[te])
+        for j, act in enumerate(ACTIONS):
+            proba[te, j] = pr[:, cls.index(act)] if act in cls else 0.0
+        # C-1: the same forest's F share on the scenes it was fitted on, for fit-versus-generalise
+        tr_pred = rf.predict(X[tr])
         rf_t = RandomForestClassifier(n_jobs=jobs, **hp).fit(Xt[tr], labels[tr])
         oof['task_only'][te] = rf_t.predict(Xt[te])
         tau = fit_tau(g, tr)
         oof['channel_rule'][te] = apply_tau(g[te], tau)
         folds.append({'held_out_scene': str(s), 'train_rows': int(tr.sum()),
                       'test_rows': int(te.sum()), 'channel_versions_per_frame': int(n_cells_te[0]),
-                      'tau_from_training_scenes': tau, 'seconds': time.time() - t0})
+                      'tau_from_training_scenes': tau,
+                      'F_share_in_training_scenes': scene_equal((tr_pred == 'F').astype(float),
+                                                                scenes[tr]),
+                      'F_share_held_out': scene_equal((oof['joint'][te] == 'F').astype(float),
+                                                      scenes[te]),
+                      'reference_F_share_in_training_scenes': scene_equal(
+                          (labels[tr] == 'F').astype(float), scenes[tr]),
+                      'reference_F_share_held_out': scene_equal((labels[te] == 'F').astype(float),
+                                                                scenes[te]),
+                      'classes_fitted': sorted(cls),
+                      'seconds': time.time() - t0})
         print(f'  [{tag}] fold {s}: tau={tau} ({time.time() - t0:.1f}s)', flush=True)
-    return oof, folds, names, hp
+    return oof, folds, names, hp, proba
 
 
 def evaluate(g, fo, chosen_by_arm, mask, label):
@@ -290,7 +310,7 @@ def build(jobs=-1):
 
     labels = g.a_star.to_numpy().astype(object)
     print('main round (labels from the p_cw point estimate)', flush=True)
-    oof, folds, names, hp = run_round(g, cues, cue_fields, labels, jobs, 'main')
+    oof, folds, names, hp, proba = run_round(g, cues, cue_fields, labels, jobs, 'main')
 
     chosen = dict(oof)
     chosen['fixed_E'] = np.full(len(g), 'E', object)
@@ -344,8 +364,8 @@ def build(jobs=-1):
     stability['flips_by_direction'] = {k: v for k, v in stability['flips_by_direction'].items() if v}
 
     print('stability round (labels from p_cw_upper95)', flush=True)
-    oof_up, folds_up, _, _ = run_round(g[has].reset_index(drop=True), cues, cue_fields,
-                                       lab_up[has], jobs, 'upper95')
+    oof_up, folds_up, _, _, _ = run_round(g[has].reset_index(drop=True), cues, cue_fields,
+                                          lab_up[has], jobs, 'upper95')
     gh = g[has].reset_index(drop=True)
     fo_h = FO()
     for a in ACTIONS:
@@ -356,12 +376,54 @@ def build(jobs=-1):
     ch_up['fixed_L'] = np.full(len(gh), 'L', object)
     ch_up['fixed_F'] = np.full(len(gh), 'F', object)
     ch_up['offline_optimum'] = lab_up[has]
-    stability['arms_under_upper_bound'] = evaluate(gh, fo_h, ch_up, np.ones(len(gh), bool),
-                                                   'sampled cells, labels from p_cw_upper95')
-    stability['arms_under_point_estimate_same_rows'] = evaluate(
-        g[has].reset_index(drop=True), fo_h,
-        {k: v[has] if len(v) == len(g) else v for k, v in chosen.items()},
-        np.ones(int(has.sum()), bool), 'sampled cells, labels from the point estimate')
+    stability['B2_channel_and_model'] = {
+        'what_moved': 'the error rate AND the labels AND the fitted forest. This is the round-1 '
+                      'sensitivity check, kept but relabelled: it does not isolate the channel',
+        'arms_under_upper_bound': evaluate(gh, fo_h, ch_up, np.ones(len(gh), bool),
+                                           'sampled cells, relabelled and refitted'),
+        'arms_under_point_estimate_same_rows': evaluate(
+            g[has].reset_index(drop=True), fo_h,
+            {k: v[has] if len(v) == len(g) else v for k, v in chosen.items()},
+            np.ones(int(has.sum()), bool), 'sampled cells, round-1 labels and forest')}
+
+    # B-1: hold round 1's actions fixed and change only the channel assumption, so the difference is
+    # the channel uncertainty and nothing else. Every arm keeps the action it chose in round 1,
+    # including the offline optimum, whose label is NOT recomputed here.
+    fixed_actions = {k: v[has] for k, v in chosen.items()}
+    g_pt = g[has].reset_index(drop=True)
+    g_up = g_pt.assign(q_F=qF_up[has], q_L=qL_up[has], Q_F=QF_up[has], Q_L=QL_up[has])
+    ev_pt = evaluate(g_pt, fo_h, fixed_actions, np.ones(len(g_pt), bool),
+                     'same actions, p_cw_point')
+    ev_up = evaluate(g_up, fo_h, fixed_actions, np.ones(len(g_up), bool),
+                     'same actions, p_cw_upper95')
+    stability['B1_channel_only'] = {
+        'what_moved': 'only the per-codeword error rate. Actions, labels and forest are those of '
+                      'round 1, so every difference below is channel uncertainty alone',
+        'point_estimate': ev_pt, 'upper_bound': ev_up,
+        'delta': {arm: ev_up['arms'][arm]['f1'] - ev_pt['arms'][arm]['f1'] for arm in ev_pt['arms']},
+        'tau_caveat': 'the channel-rule arm keeps the tau fitted in round 1, which was fitted on the '
+                      'point-estimate effect columns. Its action set is therefore not re-optimised '
+                      'for the upper bound, and the upper-bound column for that arm should be read '
+                      'as "the round-1 rule evaluated under a worse channel", not as the best rule '
+                      'under that channel'}
+
+    # D-1: the per-row out-of-fold record, saved as a product and hashed into the manifest
+    oof_df = pd.DataFrame({
+        'sample_id': g.sample_id.to_numpy(), 'scene': g.scene.to_numpy(),
+        'snr_db': g.snr_db.to_numpy(), 'channel': g.channel.to_numpy(),
+        'a_star': labels, 'pred_joint': oof['joint'], 'pred_task_only': oof['task_only'],
+        'pred_channel_rule': oof['channel_rule'],
+        'p_E': proba[:, 0], 'p_L': proba[:, 1], 'p_F': proba[:, 2],
+        'q_F': g.q_F.to_numpy(), 'q_L': g.q_L.to_numpy(),
+        'Q_E': g.Q_E.to_numpy(), 'Q_L': g.Q_L.to_numpy(), 'Q_F': g.Q_F.to_numpy(),
+        'B_L_sym': g.B_L_sym.to_numpy()})
+    if oof_df[['p_E', 'p_L', 'p_F']].isna().any().any():
+        raise SystemExit('a row has no out-of-fold probability -- some row was never held out')
+    ps = oof_df[['p_E', 'p_L', 'p_F']].to_numpy().sum(axis=1)
+    if float(np.abs(ps - 1.0).max()) > 1e-9:
+        raise SystemExit('class probabilities do not sum to 1 -- the class mapping is wrong')
+    os.makedirs(os.path.dirname(OOF_CSV), exist_ok=True)
+    oof_df.to_csv(OOF_CSV, index=False)
 
     pot = json.load(open(POTENTIAL))
     ref = {a['label']: a['optimal_share'] for a in pot['analyses']}
@@ -391,6 +453,11 @@ def build(jobs=-1):
             'reproducibility': 'the forests are seeded (random_state 0) and the record re-derives '
                                'exactly, apart from the per-fold wall-clock in folds[].seconds, '
                                'which --check --full excludes and names',
+            'oof_product': {'path': os.path.relpath(OOF_CSV, ROOT), 'sha256': sha(OOF_CSV),
+                            'rows': int(len(oof_df)), 'columns': list(oof_df.columns),
+                            'what': 'the per-row out-of-fold record: the label, every arm\'s action, '
+                                    'the joint forest\'s three class probabilities, and the channel '
+                                    'and effect columns needed to reconstruct any of the above'},
             'folds': folds, 'results': results, 'differences': diffs, 'per_cell': per_cell,
             'confusion': confusion(labels, oof['joint'], ch, np.ones(len(g), bool)),
             'stability_C7': stability,
@@ -414,12 +481,21 @@ def markdown(m):
          f"**Recall.** {m['recall_derivation']['method']}. "
          f"{cap1(m['recall_derivation']['verified'])} "
          f"(largest deviation from an integer: {m['recall_derivation']['integrality_max_deviation']:.1e}).",
-         '', '## C-4 The folds', '',
-         '| held-out scene | train rows | test rows | channel versions per frame | τ from training scenes |',
-         '|---|---:|---:|---:|---|']
+         '', '## C-4 The folds, and C-1 fit versus generalise', '',
+         'The two F-share columns answer a question that the held-out numbers alone cannot: a forest '
+         'that already declines F on the scenes it was fitted on is underfitting the action, whereas '
+         'one that requests F in training and not out of fold is failing to generalise.', '',
+         '| held-out scene | train rows | test rows | versions/frame | τ from training | RF F share, '
+         'training scenes | reference F share, training | RF F share, held out | reference F share, '
+         'held out |',
+         '|---|---:|---:|---:|---|---:|---:|---:|---:|']
     for f in m['folds']:
         L.append(f"| {f['held_out_scene']} | {f['train_rows']:,} | {f['test_rows']:,} | "
-                 f"{f['channel_versions_per_frame']} | {f['tau_from_training_scenes']} |")
+                 f"{f['channel_versions_per_frame']} | {f['tau_from_training_scenes']} | "
+                 f"{f['F_share_in_training_scenes'] * 100:.1f} % | "
+                 f"{f['reference_F_share_in_training_scenes'] * 100:.1f} % | "
+                 f"{f['F_share_held_out'] * 100:.1f} % | "
+                 f"{f['reference_F_share_held_out'] * 100:.1f} % |")
     L += ['', 'The gate asserts that no frame appears on both sides and that every frame carries the',
           'same number of channel versions, so all 22 versions of a frame move together.', '',
           '## C-6 Arms', '']
@@ -464,23 +540,40 @@ def markdown(m):
                      + f" | {p['actual']:,} | {p['predicted']:,} |")
         L.append('')
     st = m['stability_C7']
-    L += ['## C-7 Stability under the upper bound on p_cw', '',
-          'The main analysis uses the p_cw point estimate. This section relabels with `p_cw_upper95`',
-          'and reports what moves. It is a sensitivity check, **not** a demonstration that the',
-          'reliability is assured.', '',
+    b1, b2 = st['B1_channel_only'], st['B2_channel_and_model']
+    L += ['## B Stability under the upper bound on p_cw, split into two questions', '',
+          'The main analysis uses the p_cw point estimate. Neither table below shows that the',
+          'reliability is assured; they show how much of the movement is the channel and how much is',
+          'the model responding to a changed channel.', '',
           f"Cells with a sample of their own: {st['cells_with_a_sample']} of 22 "
           f"({st['rows_considered']:,} rows). Excluded for having no sample and therefore no bound: "
           + ', '.join(st['cells_without']) + '.', '',
+          '### B-1 Channel only — the actions of round 1 held fixed', '',
+          f"{cap1(b1['what_moved'])}.", '',
+          '| arm | F1, p_cw_point | F1, p_cw_upper95 | change |', '|---|---:|---:|---:|']
+    for arm in ('offline_optimum', 'joint', 'task_only', 'channel_rule', 'fixed_L', 'fixed_F',
+                'fixed_E'):
+        a1 = b1['point_estimate']['arms'].get(arm)
+        a2 = b1['upper_bound']['arms'].get(arm)
+        if a1 and a2:
+            L.append(f"| `{arm}` | {a1['f1']:.5f} | {a2['f1']:.5f} | {a2['f1'] - a1['f1']:+.5f} |")
+    L += ['', f"**B-3.** {b1['tau_caveat']}.", '',
+          '### B-2 Channel and model together — relabelled and refitted', '',
+          f"{cap1(b2['what_moved'])}.", '',
           f"**Labels flip on {st['label_flip_rows']:,} of {st['rows_considered']:,} rows "
           f"({st['label_flip_share'] * 100:.1f} %)**, by direction: "
           + ', '.join(f'{k} {v:,}' for k, v in st['flips_by_direction'].items()) + '.', '',
-          '| arm | F1 under point estimate | F1 under upper bound | change |',
+          '| arm | F1, round-1 labels and forest | F1, relabelled and refitted | change |',
           '|---|---:|---:|---:|']
-    for arm in ('offline_optimum', 'joint', 'fixed_L', 'fixed_F'):
-        a1 = st['arms_under_point_estimate_same_rows']['arms'].get(arm)
-        a2 = st['arms_under_upper_bound']['arms'].get(arm)
+    for arm in ('offline_optimum', 'joint', 'task_only', 'fixed_L', 'fixed_F'):
+        a1 = b2['arms_under_point_estimate_same_rows']['arms'].get(arm)
+        a2 = b2['arms_under_upper_bound']['arms'].get(arm)
         if a1 and a2:
             L.append(f"| `{arm}` | {a1['f1']:.5f} | {a2['f1']:.5f} | {a2['f1'] - a1['f1']:+.5f} |")
+    pr = m['oof_product']
+    L += ['', '## D-1 The per-row product', '',
+          f"`{pr['path']}` — {pr['rows']:,} rows. {cap1(pr['what'])}. Its sha256 is recorded here and "
+          '`--check` verifies it.', '']
     L += ['', '## Per cell', '',
           '| channel | SNR | optimum F1 | joint F1 | rule F1 | optimum F share | joint F share | rule F share |',
           '|---|---:|---:|---:|---:|---:|---:|---:|']
@@ -519,10 +612,15 @@ def main():
             print('rf round1: FAIL -- no stored record to check against'); return 1
         m = json.load(open(OUT_JSON))
         ok = os.path.exists(OUT_MD) and open(OUT_MD).read() == markdown(m)
+        prod = m.get('oof_product', {})
+        have = os.path.exists(OOF_CSV)
+        prod_ok = have and sha(OOF_CSV) == prod.get('sha256')
         print('rf round1:', 'document matches the record' if ok else 'FAIL -- document is not what '
-              'the generator writes from the record', '(record itself not re-derived; use --check '
-              '--full for that)')
-        return 0 if ok else 1
+              'the generator writes from the record')
+        print('  per-row product:', 'hash matches the record' if prod_ok
+              else ('FAIL -- missing' if not have else 'FAIL -- hash differs from the record'))
+        print('  (the record itself is not re-derived at this level; use --check --full)')
+        return 0 if (ok and prod_ok) else 1
 
     m = build(a.jobs)
     js, md = json.dumps(m, indent=1) + '\n', markdown(m)

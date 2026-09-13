@@ -457,3 +457,23 @@ the next table.
 | packet-level utility grid | `results/v2/v2_grid_validate_packet.csv`, `results/v2/v2_grid_validate_packet.json` | P2-R11 A-4 removed packet and partial-recovery accounting from the candidate set. These files stay in P1's record and are read only by `projects/ca_tosg_p2/protocol/message_regime.py`, the pre-lock comparison whose result produced the lock. They enter no P2 table |
 | the sparse-F line, in full | `archive/p2-sparse-exploratory/` | closed in P2-R9 |
 | the 100 ms reachability gate | measured by `projects/ca_tosg_p2/protocol/full_f_feasibility.py` | the finding is kept — 0 of 27 link configurations deliver a complete F inside 100 ms — but it is **not applied as a gate** in the training or evaluation line, per C-4. Deleting the finding and dropping the gate are different acts and only the second is intended |
+
+## P2-R15 result, registered (P2-R16 A)
+
+**A-1 The negative result, as it came out.** The first joint forest **does not beat the channel-only
+rule**: scene-equal F1 0.85740 against 0.86248, a difference of **−0.00508 [−0.00949, −0.00166]**,
+negative in **8 of 9 scenes**; on AWGN alone −0.01009 [−0.01881, −0.00330]. The pre-registered C-5
+criterion 1 asked for an interval entirely above zero; it is entirely below. The forest is also
+indistinguishable from always sending L (−0.00114 [−0.00566, +0.00184]). The channel inputs do carry
+information — joint beats the task-only forest by +0.00952 [+0.00357, +0.01664] — but the forest turns
+that into a policy no better than Fixed L.
+
+**Grid caveat.** This round uses the **original 22-cell grid**. The measured 8.5, 9.0 and 9.5 dB points
+are not in it, so nothing in this result depends on them and nothing in it speaks to that SNR range.
+
+**A-2 The C-8 reading, by the rule registered before training.** The offline reference requests F on
+**10.7 %** of rows over all cells and **37.8 %** on every one of the high-reliability AWGN cells; the
+forest requests it on **2.7 %** overall and **7.7 % to 10.9 %** across those same cells. That is
+**reading 2: the inputs or the fitting are insufficient, and the selector is what to examine.** It is
+not written as "F is useless", and it is not grounds for reverting to an E/L-only design. The
+diagnosis is in `rf_diagnostics.md`.

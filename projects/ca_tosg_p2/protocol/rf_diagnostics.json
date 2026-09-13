@@ -1,0 +1,1873 @@
+{
+ "schema": "catosg-p2-rf-diagnostics/1",
+ "status": "DIAGNOSIS ONLY. No model is fitted, no hyperparameter is changed, no label rule is altered. It reads the out-of-fold record of the round that produced the negative result",
+ "inputs": {
+  "oof": "6cb0386402699a65f1abccbcafab72e7abae22672dd2d55323b3fd5b8560dee1",
+  "round1": "994bbe914e21fbbe12f1e8d004d0b83a5045736088e578b1f7dce84b33fb451b"
+ },
+ "tie_slack": {
+  "min_loss": -9.929377320361255e-10,
+  "rows_below_zero": 639,
+  "explanation": "any negative loss is at most TOL and comes from the cheaper-payload tie rule: the forest took the dearer of two actions that score within TOL of each other. It is reported rather than clipped"
+ },
+ "grid_caveat": "this round uses the original 22-cell grid. The measured 8.5, 9.0 and 9.5 dB points are not in it, so nothing here is affected by them and nothing here should be read as covering that SNR range",
+ "C1_fit_vs_generalise": {
+  "per_fold": [
+   {
+    "held_out_scene": "2021_08_20_21_48_35",
+    "rf_F_share_training_scenes": 0.10753446798331338,
+    "reference_F_share_training_scenes": 0.10689244791507847,
+    "rf_F_share_held_out": 0.0016233766233766235,
+    "reference_F_share_held_out": 0.10917207792207792
+   },
+   {
+    "held_out_scene": "2021_08_21_17_30_41",
+    "rf_F_share_training_scenes": 0.11425009656451353,
+    "reference_F_share_training_scenes": 0.11395239135539612,
+    "rf_F_share_held_out": 0.0,
+    "reference_F_share_held_out": 0.052692530399536766
+   },
+   {
+    "held_out_scene": "2021_08_22_13_37_16",
+    "rf_F_share_training_scenes": 0.11358670301375565,
+    "reference_F_share_training_scenes": 0.11334198795836853,
+    "rf_F_share_held_out": 0.017508417508417508,
+    "reference_F_share_held_out": 0.05757575757575758
+   },
+   {
+    "held_out_scene": "2021_08_22_22_01_17",
+    "rf_F_share_training_scenes": 0.11809183794336703,
+    "reference_F_share_training_scenes": 0.11809183794336703,
+    "rf_F_share_held_out": 0.0,
+    "reference_F_share_held_out": 0.019576957695769576
+   },
+   {
+    "held_out_scene": "2021_08_23_10_51_24",
+    "rf_F_share_training_scenes": 0.1075587468738434,
+    "reference_F_share_training_scenes": 0.10748853151897458,
+    "rf_F_share_held_out": 0.05823863636363636,
+    "reference_F_share_held_out": 0.10440340909090909
+   },
+   {
+    "held_out_scene": "2021_08_23_13_17_21",
+    "rf_F_share_training_scenes": 0.10280060487269153,
+    "reference_F_share_training_scenes": 0.10254653341291398,
+    "rf_F_share_held_out": 0.12878787878787878,
+    "reference_F_share_held_out": 0.14393939393939395
+   },
+   {
+    "held_out_scene": "2021_08_23_19_42_07",
+    "rf_F_share_training_scenes": 0.10411971704706688,
+    "reference_F_share_training_scenes": 0.1040915892342856,
+    "rf_F_share_held_out": 0.037480063795853266,
+    "reference_F_share_held_out": 0.13157894736842105
+   },
+   {
+    "held_out_scene": "2021_09_09_19_27_35",
+    "rf_F_share_training_scenes": 0.0982854708781582,
+    "reference_F_share_training_scenes": 0.09758886852877852,
+    "rf_F_share_held_out": 0.0,
+    "reference_F_share_held_out": 0.1836007130124777
+   },
+   {
+    "held_out_scene": "2021_09_11_00_33_16",
+    "rf_F_share_training_scenes": 0.10089820449871673,
+    "reference_F_share_training_scenes": 0.10031747337554295,
+    "rf_F_share_held_out": 0.0,
+    "reference_F_share_held_out": 0.16177187423836217
+   }
+  ],
+  "mean_rf_F_share_training": 0.10745842774171403,
+  "mean_rf_F_share_held_out": 0.027070930342129172,
+  "reference_F_share": 0.10714574013807841,
+  "reading": "a generalisation gap: the forest requests F in training and not out of fold",
+  "note": "the training-scene share is an in-sample number and is reported only to separate fitting from generalisation. It is never a result"
+ },
+ "C2_loss_sources": {
+  "all cells": {
+   "scene_equal_total_loss": 0.007506737856679084,
+   "rows": 43560,
+   "agreement_rows": 31173,
+   "agreement_row_share": 0.715633608815427,
+   "categories": {
+    "should F, chose L": {
+     "rows": 2826,
+     "row_share": 0.06487603305785124,
+     "scene_equal_loss": 0.0033583852258697536,
+     "share_of_total_loss": 0.4473827766453369,
+     "mean_loss_per_row": 0.046212130096180304
+    },
+    "should E, chose L": {
+     "rows": 2798,
+     "row_share": 0.06423324150596878,
+     "scene_equal_loss": 0.0015925850197854438,
+     "share_of_total_loss": 0.2121540741386685,
+     "mean_loss_per_row": 0.007802142204607777
+    },
+    "should L, chose E": {
+     "rows": 3980,
+     "row_share": 0.0913682277318641,
+     "scene_equal_loss": 0.0012701223373868906,
+     "share_of_total_loss": 0.1691976410574675,
+     "mean_loss_per_row": 0.04482928977334561
+    },
+    "should F, chose E": {
+     "rows": 2659,
+     "row_share": 0.06104224058769513,
+     "scene_equal_loss": 0.0012324337221818493,
+     "share_of_total_loss": 0.16417700280892283,
+     "mean_loss_per_row": 0.06733742811805855
+    },
+    "should L, chose F": {
+     "rows": 96,
+     "row_share": 0.0022038567493112946,
+     "scene_equal_loss": 3.455779318919907e-05,
+     "share_of_total_loss": 0.004603569999244271,
+     "mean_loss_per_row": 0.00416260059387184
+    },
+    "should E, chose F": {
+     "rows": 28,
+     "row_share": 0.0006427915518824609,
+     "scene_equal_loss": 1.865375826594659e-05,
+     "share_of_total_loss": 0.0024849353503598767,
+     "mean_loss_per_row": 0.007518796992481187
+    }
+   },
+   "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+  },
+  "AWGN only": {
+   "scene_equal_total_loss": 0.013864740964701939,
+   "rows": 21780,
+   "agreement_rows": 12917,
+   "agreement_row_share": 0.5930670339761249,
+   "categories": {
+    "should F, chose L": {
+     "rows": 2826,
+     "row_share": 0.12975206611570247,
+     "scene_equal_loss": 0.006716770451739507,
+     "share_of_total_loss": 0.48444976136515244,
+     "mean_loss_per_row": 0.046212130096180304
+    },
+    "should L, chose E": {
+     "rows": 2586,
+     "row_share": 0.118732782369146,
+     "scene_equal_loss": 0.0024739503179011762,
+     "share_of_total_loss": 0.1784346584043347,
+     "mean_loss_per_row": 0.06731331572514213
+    },
+    "should F, chose E": {
+     "rows": 2659,
+     "row_share": 0.12208448117539027,
+     "scene_equal_loss": 0.0024648674443636985,
+     "share_of_total_loss": 0.17777955250941738,
+     "mean_loss_per_row": 0.06733742811805855
+    },
+    "should E, chose L": {
+     "rows": 668,
+     "row_share": 0.030670339761248853,
+     "scene_equal_loss": 0.002102729647787266,
+     "share_of_total_loss": 0.15166021876215197,
+     "mean_loss_per_row": 0.019892958943169593
+    },
+    "should L, chose F": {
+     "rows": 96,
+     "row_share": 0.004407713498622589,
+     "scene_equal_loss": 6.911558637839814e-05,
+     "share_of_total_loss": 0.004984989373718456,
+     "mean_loss_per_row": 0.00416260059387184
+    },
+    "should E, chose F": {
+     "rows": 28,
+     "row_share": 0.0012855831037649219,
+     "scene_equal_loss": 3.730751653189318e-05,
+     "share_of_total_loss": 0.002690819585225133,
+     "mean_loss_per_row": 0.007518796992481187
+    }
+   },
+   "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+  },
+  "Rayleigh only": {
+   "scene_equal_total_loss": 0.0011487347486562266,
+   "rows": 21780,
+   "agreement_rows": 18256,
+   "agreement_row_share": 0.8382001836547291,
+   "categories": {
+    "should E, chose L": {
+     "rows": 2130,
+     "row_share": 0.09779614325068871,
+     "scene_equal_loss": 0.0010824403917836214,
+     "share_of_total_loss": 0.9422892387035777,
+     "mean_loss_per_row": 0.004010280429321722
+    },
+    "should L, chose E": {
+     "rows": 1394,
+     "row_share": 0.06400367309458219,
+     "scene_equal_loss": 6.629435687260509e-05,
+     "share_of_total_loss": 0.05771076129642223,
+     "mean_loss_per_row": 0.0031193248441161985
+    }
+   },
+   "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+  },
+  "high-reliability AWGN cells": {
+   "scene_equal_total_loss": 0.023572353848651917,
+   "rows": 11880,
+   "agreement_rows": 4115,
+   "agreement_row_share": 0.3463804713804714,
+   "categories": {
+    "should F, chose L": {
+     "rows": 2764,
+     "row_share": 0.23265993265993265,
+     "scene_equal_loss": 0.012096050230203374,
+     "share_of_total_loss": 0.5131456242285765,
+     "mean_loss_per_row": 0.04692240004487805
+    },
+    "should F, chose E": {
+     "rows": 2589,
+     "row_share": 0.21792929292929292,
+     "scene_equal_loss": 0.0045087770504256665,
+     "share_of_total_loss": 0.19127394232135708,
+     "mean_loss_per_row": 0.06901501887913926
+    },
+    "should L, chose E": {
+     "rows": 1788,
+     "row_share": 0.1505050505050505,
+     "scene_equal_loss": 0.003510251473065426,
+     "share_of_total_loss": 0.148913913969019,
+     "mean_loss_per_row": 0.07429705333980056
+    },
+    "should E, chose L": {
+     "rows": 500,
+     "row_share": 0.04208754208754209,
+     "scene_equal_loss": 0.003262166072955248,
+     "share_of_total_loss": 0.13838949194044142,
+     "mean_loss_per_row": 0.022513702655488223
+    },
+    "should L, chose F": {
+     "rows": 96,
+     "row_share": 0.00808080808080808,
+     "scene_equal_loss": 0.00012671190836039659,
+     "share_of_total_loss": 0.005375445709578262,
+     "mean_loss_per_row": 0.00416260059387184
+    },
+    "should E, chose F": {
+     "rows": 28,
+     "row_share": 0.0023569023569023568,
+     "scene_equal_loss": 6.839711364180417e-05,
+     "share_of_total_loss": 0.0029015818310276953,
+     "mean_loss_per_row": 0.007518796992481187
+    }
+   },
+   "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+  }
+ },
+ "C3_beliefs": {
+  "all cells": {
+   "F": {
+    "rows": 5682,
+    "p_F_quantiles": {
+     "p05": 0.17136060163420017,
+     "p25": 0.2214756517860133,
+     "p50": 0.2477697718117251,
+     "p75": 0.29906031619415285,
+     "p95": 0.39393729742071426
+    },
+    "p_F_mean": 0.26359961751015515,
+    "share_F_ranked_first": 0.03467089053150299,
+    "share_F_ranked_second": 0.508799718409011,
+    "share_F_ranked_third": 0.4565293910594861,
+    "share_p_F_below_0.05": 0.0,
+    "share_p_F_above_0.25": 0.47571277719112987
+   },
+   "L": {
+    "rows": 24372,
+    "p_F_quantiles": {
+     "p05": 0.0,
+     "p25": 0.0052002564220203,
+     "p50": 0.0098575538158078,
+     "p75": 0.17036309147737233,
+     "p95": 0.3227232202248085
+    },
+    "p_F_mean": 0.08166364711445151,
+    "share_F_ranked_first": 0.003938946331856229,
+    "share_F_ranked_second": 0.17770392253405548,
+    "share_F_ranked_third": 0.8183571311340883,
+    "share_p_F_below_0.05": 0.6774167076973576,
+    "share_p_F_above_0.25": 0.1457820449696373
+   },
+   "E": {
+    "rows": 13506,
+    "p_F_quantiles": {
+     "p05": 0.0,
+     "p25": 0.0,
+     "p50": 0.0025,
+     "p75": 0.0059254247482841,
+     "p95": 0.20979059353440993
+    },
+    "p_F_mean": 0.02341234559871495,
+    "share_F_ranked_first": 0.002073152672886125,
+    "share_F_ranked_second": 0.03479934843773138,
+    "share_F_ranked_third": 0.9631274988893825,
+    "share_p_F_below_0.05": 0.8884199614985933,
+    "share_p_F_above_0.25": 0.03753887161261661
+   },
+   "p_F_discrimination": {
+    "mean_p_F_where_F_optimal": 0.26359961751015515,
+    "mean_p_F_where_L_optimal": 0.08166364711445151,
+    "difference": 0.18193597039570364,
+    "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+   },
+   "reading": "P(F) is 0.1819 higher where F is optimal (0.2636 against 0.0817), so the ordering does carry signal and the argmax is what discards it"
+  },
+  "AWGN only": {
+   "F": {
+    "rows": 5682,
+    "p_F_quantiles": {
+     "p05": 0.17136060163420017,
+     "p25": 0.2214756517860133,
+     "p50": 0.2477697718117251,
+     "p75": 0.29906031619415285,
+     "p95": 0.39393729742071426
+    },
+    "p_F_mean": 0.26359961751015515,
+    "share_F_ranked_first": 0.03467089053150299,
+    "share_F_ranked_second": 0.508799718409011,
+    "share_F_ranked_third": 0.4565293910594861,
+    "share_p_F_below_0.05": 0.0,
+    "share_p_F_above_0.25": 0.47571277719112987
+   },
+   "L": {
+    "rows": 8546,
+    "p_F_quantiles": {
+     "p05": 0.037115794318709976,
+     "p25": 0.16155179734372366,
+     "p50": 0.23538041557944978,
+     "p75": 0.2914273766007723,
+     "p95": 0.3594492500353029
+    },
+    "p_F_mean": 0.2201175245060755,
+    "share_F_ranked_first": 0.011233325532412824,
+    "share_F_ranked_second": 0.5031593728059911,
+    "share_F_ranked_third": 0.48560730166159605,
+    "share_p_F_below_0.05": 0.08003744441844138,
+    "share_p_F_above_0.25": 0.41575005850690383
+   },
+   "E": {
+    "rows": 7552,
+    "p_F_quantiles": {
+     "p05": 0.0,
+     "p25": 0.002136287625418,
+     "p50": 0.00352700729927,
+     "p75": 0.0080753522519425,
+     "p95": 0.29244143340286277
+    },
+    "p_F_mean": 0.03993794228991125,
+    "share_F_ranked_first": 0.003707627118644068,
+    "share_F_ranked_second": 0.062235169491525424,
+    "share_F_ranked_third": 0.9340572033898306,
+    "share_p_F_below_0.05": 0.8004502118644068,
+    "share_p_F_above_0.25": 0.06713453389830508
+   },
+   "p_F_discrimination": {
+    "mean_p_F_where_F_optimal": 0.26359961751015515,
+    "mean_p_F_where_L_optimal": 0.2201175245060755,
+    "difference": 0.04348209300407965,
+    "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+   },
+   "reading": "P(F) is only 0.0435 higher where F is optimal (0.2636 against 0.2201), which is barely any separation. Moving a decision threshold would trade F recall against F precision almost one for one"
+  },
+  "high-reliability AWGN cells": {
+   "F": {
+    "rows": 5550,
+    "p_F_quantiles": {
+     "p05": 0.17742404365883213,
+     "p25": 0.2233209059183818,
+     "p50": 0.2484180597417351,
+     "p75": 0.3012484340702463,
+     "p95": 0.39493150022118095
+    },
+    "p_F_mean": 0.2656065263829584,
+    "share_F_ranked_first": 0.035495495495495494,
+    "share_F_ranked_second": 0.5162162162162162,
+    "share_F_ranked_third": 0.44828828828828826,
+    "share_p_F_below_0.05": 0.0,
+    "share_p_F_above_0.25": 0.48504504504504503
+   },
+   "L": {
+    "rows": 5664,
+    "p_F_quantiles": {
+     "p05": 0.1874439725610196,
+     "p25": 0.2343993232017149,
+     "p50": 0.2648216835629607,
+     "p75": 0.3157039561482954,
+     "p95": 0.3746876839429788
+    },
+    "p_F_mean": 0.2754529717485443,
+    "share_F_ranked_first": 0.01694915254237288,
+    "share_F_ranked_second": 0.637888418079096,
+    "share_F_ranked_third": 0.3451624293785311,
+    "share_p_F_below_0.05": 0.0,
+    "share_p_F_above_0.25": 0.6223516949152542
+   },
+   "E": {
+    "rows": 666,
+    "p_F_quantiles": {
+     "p05": 0.21692139917640746,
+     "p25": 0.25093067784212186,
+     "p50": 0.30309832787466384,
+     "p75": 0.37471766996488537,
+     "p95": 0.4409813979387278
+    },
+    "p_F_mean": 0.31474426058976085,
+    "share_F_ranked_first": 0.042042042042042045,
+    "share_F_ranked_second": 0.6231231231231231,
+    "share_F_ranked_third": 0.33483483483483484,
+    "share_p_F_below_0.05": 0.0,
+    "share_p_F_above_0.25": 0.7537537537537538
+   },
+   "p_F_discrimination": {
+    "mean_p_F_where_F_optimal": 0.2656065263829584,
+    "mean_p_F_where_L_optimal": 0.2754529717485443,
+    "difference": -0.009846445365585876,
+    "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+   },
+   "reading": "P(F) does not separate the two cases at all: it averages 0.2656 where F is optimal and 0.2755 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+  }
+ },
+ "C4_margin": {
+  "all cells": {
+   "bins": [
+    {
+     "bin": "tie (<= TOL)",
+     "rows": 14761,
+     "reference_F_share": 0.0,
+     "rf_F_share": 0.003997019172142809,
+     "rf_F_share_where_F_is_optimal": null,
+     "mean_p_F_where_F_is_optimal": null,
+     "mean_margin": 1.6901956958430507e-11
+    },
+    {
+     "bin": "(TOL, 0.005]",
+     "rows": 10362,
+     "reference_F_share": 0.017757189731712024,
+     "rf_F_share": 0.0017371163867979154,
+     "rf_F_share_where_F_is_optimal": 0.0,
+     "mean_p_F_where_F_is_optimal": 0.2340422104796297,
+     "mean_margin": 0.0009303612323083506
+    },
+    {
+     "bin": "(0.005, 0.02]",
+     "rows": 5986,
+     "reference_F_share": 0.30187103240895424,
+     "rf_F_share": 0.006515202138322753,
+     "rf_F_share_where_F_is_optimal": 0.008854454897620365,
+     "mean_p_F_where_F_is_optimal": 0.24762923123157193,
+     "mean_margin": 0.012191915383966863
+    },
+    {
+     "bin": "(0.02, 0.05]",
+     "rows": 6807,
+     "reference_F_share": 0.3481710004407228,
+     "rf_F_share": 0.016747465843984136,
+     "rf_F_share_where_F_is_optimal": 0.038818565400843885,
+     "mean_p_F_where_F_is_optimal": 0.2633999073993989,
+     "mean_margin": 0.03268577825703011
+    },
+    {
+     "bin": "(0.05, 0.10]",
+     "rows": 3788,
+     "reference_F_share": 0.3075501583949314,
+     "rf_F_share": 0.02006335797254488,
+     "rf_F_share_where_F_is_optimal": 0.06351931330472103,
+     "mean_p_F_where_F_is_optimal": 0.2865428905977806,
+     "mean_margin": 0.06983150377114931
+    },
+    {
+     "bin": "> 0.10",
+     "rows": 1856,
+     "reference_F_share": 0.08405172413793104,
+     "rf_F_share": 0.008081896551724138,
+     "rf_F_share_where_F_is_optimal": 0.09615384615384616,
+     "mean_p_F_where_F_is_optimal": 0.3151473785000591,
+     "mean_margin": 0.1626444385276603
+    }
+   ],
+   "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 9.6 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 9.6 % leaves 90.4 % of them taking a lesser action. Unconditionally the forest requests F on 0.8 % of that bin's rows against a reference 8.4 %",
+   "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+   "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+  },
+  "AWGN only": {
+   "bins": [
+    {
+     "bin": "tie (<= TOL)",
+     "rows": 9759,
+     "reference_F_share": 0.0,
+     "rf_F_share": 0.00604570140383236,
+     "rf_F_share_where_F_is_optimal": null,
+     "mean_p_F_where_F_is_optimal": null,
+     "mean_margin": 6.6088586710087306e-12
+    },
+    {
+     "bin": "(TOL, 0.005]",
+     "rows": 2125,
+     "reference_F_share": 0.08658823529411765,
+     "rf_F_share": 0.008470588235294117,
+     "rf_F_share_where_F_is_optimal": 0.0,
+     "mean_p_F_where_F_is_optimal": 0.2340422104796297,
+     "mean_margin": 0.0012954344045605884
+    },
+    {
+     "bin": "(0.005, 0.02]",
+     "rows": 3100,
+     "reference_F_share": 0.5829032258064516,
+     "rf_F_share": 0.012580645161290323,
+     "rf_F_share_where_F_is_optimal": 0.008854454897620365,
+     "mean_p_F_where_F_is_optimal": 0.24762923123157193,
+     "mean_margin": 0.012856207074342369
+    },
+    {
+     "bin": "(0.02, 0.05]",
+     "rows": 4000,
+     "reference_F_share": 0.5925,
+     "rf_F_share": 0.0285,
+     "rf_F_share_where_F_is_optimal": 0.038818565400843885,
+     "mean_p_F_where_F_is_optimal": 0.2633999073993989,
+     "mean_margin": 0.032607947251576064
+    },
+    {
+     "bin": "(0.05, 0.10]",
+     "rows": 2070,
+     "reference_F_share": 0.5628019323671497,
+     "rf_F_share": 0.03671497584541063,
+     "rf_F_share_where_F_is_optimal": 0.06351931330472103,
+     "mean_p_F_where_F_is_optimal": 0.2865428905977806,
+     "mean_margin": 0.06996028155625401
+    },
+    {
+     "bin": "> 0.10",
+     "rows": 726,
+     "reference_F_share": 0.21487603305785125,
+     "rf_F_share": 0.02066115702479339,
+     "rf_F_share_where_F_is_optimal": 0.09615384615384616,
+     "mean_p_F_where_F_is_optimal": 0.3151473785000591,
+     "mean_margin": 0.1657015179016619
+    }
+   ],
+   "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 9.6 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 9.6 % leaves 90.4 % of them taking a lesser action. Unconditionally the forest requests F on 2.1 % of that bin's rows against a reference 21.5 %",
+   "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+   "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+  },
+  "high-reliability AWGN cells": {
+   "bins": [
+    {
+     "bin": "tie (<= TOL)",
+     "rows": 2976,
+     "reference_F_share": 0.0,
+     "rf_F_share": 0.0198252688172043,
+     "rf_F_share_where_F_is_optimal": null,
+     "mean_p_F_where_F_is_optimal": null,
+     "mean_margin": 0.0
+    },
+    {
+     "bin": "(TOL, 0.005]",
+     "rows": 858,
+     "reference_F_share": 0.16083916083916083,
+     "rf_F_share": 0.02097902097902098,
+     "rf_F_share_where_F_is_optimal": 0.0,
+     "mean_p_F_where_F_is_optimal": 0.25470473044453446,
+     "mean_margin": 0.0027263296405200784
+    },
+    {
+     "bin": "(0.005, 0.02]",
+     "rows": 2892,
+     "reference_F_share": 0.6058091286307054,
+     "rf_F_share": 0.013485477178423237,
+     "rf_F_share_where_F_is_optimal": 0.0091324200913242,
+     "mean_p_F_where_F_is_optimal": 0.24953216760380756,
+     "mean_margin": 0.012869245957592696
+    },
+    {
+     "bin": "(0.02, 0.05]",
+     "rows": 3534,
+     "reference_F_share": 0.6621392190152802,
+     "rf_F_share": 0.03225806451612903,
+     "rf_F_share_where_F_is_optimal": 0.039316239316239315,
+     "mean_p_F_where_F_is_optimal": 0.26451818511670544,
+     "mean_margin": 0.03224639659314862
+    },
+    {
+     "bin": "(0.05, 0.10]",
+     "rows": 1446,
+     "reference_F_share": 0.8049792531120332,
+     "rf_F_share": 0.05255878284923928,
+     "rf_F_share_where_F_is_optimal": 0.06357388316151202,
+     "mean_p_F_where_F_is_optimal": 0.28664180993393695,
+     "mean_margin": 0.06947037584912137
+    },
+    {
+     "bin": "> 0.10",
+     "rows": 174,
+     "reference_F_share": 0.896551724137931,
+     "rf_F_share": 0.08620689655172414,
+     "rf_F_share_where_F_is_optimal": 0.09615384615384616,
+     "mean_p_F_where_F_is_optimal": 0.3151473785000591,
+     "mean_margin": 0.12224606098966484
+    }
+   ],
+   "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 9.6 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 9.6 % leaves 90.4 % of them taking a lesser action. Unconditionally the forest requests F on 8.6 % of that bin's rows against a reference 89.7 %",
+   "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+   "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+  }
+ },
+ "C5_per_cell": [
+  {
+   "channel": "awgn",
+   "snr_db": 0,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0032651626900418026,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.0
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 2,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0032678054155025654,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.0
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 4,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.003899125261225421,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.0
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 6,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0545416238406526,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 1.7743386835106373e-05
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 8,
+   "rows": 1980,
+   "reference_F_share": 0.08780922573729964,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.15553496982948553,
+   "mean_p_F_where_F_is_optimal": 0.17921822172183557,
+   "scene_equal_loss": 0.011060284132974711
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 10,
+   "rows": 1980,
+   "reference_F_share": 0.3782328428834043,
+   "rf_F_share": 0.07693848819579813,
+   "mean_p_F": 0.2584028029683362,
+   "mean_p_F_where_F_is_optimal": 0.2508653579598116,
+   "scene_equal_loss": 0.024286664453089097
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 12,
+   "rows": 1980,
+   "reference_F_share": 0.3782328428834043,
+   "rf_F_share": 0.09515784058912713,
+   "mean_p_F": 0.2715982308428071,
+   "mean_p_F_where_F_is_optimal": 0.26395861259940046,
+   "scene_equal_loss": 0.023942400994686832
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 14,
+   "rows": 1980,
+   "reference_F_share": 0.3782328428834043,
+   "rf_F_share": 0.10199785729756489,
+   "mean_p_F": 0.2759287345511499,
+   "mean_p_F_where_F_is_optimal": 0.26829868841656573,
+   "scene_equal_loss": 0.023619907783177605
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 16,
+   "rows": 1980,
+   "reference_F_share": 0.3782328428834043,
+   "rf_F_share": 0.10431267211237973,
+   "mean_p_F": 0.2771427307874102,
+   "mean_p_F_where_F_is_optimal": 0.26971201389016725,
+   "scene_equal_loss": 0.023321222000620853
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 18,
+   "rows": 1980,
+   "reference_F_share": 0.3782328428834043,
+   "rf_F_share": 0.10857680466598595,
+   "mean_p_F": 0.2777110408227215,
+   "mean_p_F_where_F_is_optimal": 0.27052662385008247,
+   "scene_equal_loss": 0.02313196393016857
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 20,
+   "rows": 1980,
+   "reference_F_share": 0.3782328428834043,
+   "rf_F_share": 0.10857680466598595,
+   "mean_p_F": 0.27755056657401694,
+   "mean_p_F_where_F_is_optimal": 0.2702778615817229,
+   "scene_equal_loss": 0.02313196393016857
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 0,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 4.629843757117453e-08
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 2,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 1.2554154564543674e-06
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 4,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 4.042082736658124e-06
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 6,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.00331561224113874,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 2.3194068373770213e-05
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 8,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.010685561228139682,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.00016311717008977956
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 10,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.007688003948570834,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.0004085051617385646
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 12,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.007236321495024223,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.0009676573050129227
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 14,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.0075394186561561554,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.0015647351672085997
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 16,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.008302032997826208,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.002404747090922801
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 18,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.008498881420583226,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.003300787017392895
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 20,
+   "rows": 1980,
+   "reference_F_share": 0.0,
+   "rf_F_share": 0.0,
+   "mean_p_F": 0.009248229895048588,
+   "mean_p_F_where_F_is_optimal": null,
+   "scene_equal_loss": 0.003797995457848475
+  }
+ ],
+ "C5_per_high_reliability_cell": {
+  "awgn 10 dB": {
+   "C2": {
+    "scene_equal_total_loss": 0.024286664453089097,
+    "rows": 1980,
+    "agreement_rows": 686,
+    "agreement_row_share": 0.3464646464646465,
+    "categories": {
+     "should F, chose L": {
+      "rows": 466,
+      "row_share": 0.23535353535353534,
+      "scene_equal_loss": 0.012653599169518658,
+      "share_of_total_loss": 0.5210101697563169,
+      "mean_loss_per_row": 0.047063843315908564
+     },
+     "should F, chose E": {
+      "rows": 432,
+      "row_share": 0.21818181818181817,
+      "scene_equal_loss": 0.0045624539156967365,
+      "share_of_total_loss": 0.18785839959659112,
+      "mean_loss_per_row": 0.06908610656864107
+     },
+     "should L, chose E": {
+      "rows": 299,
+      "row_share": 0.151010101010101,
+      "scene_equal_loss": 0.0035698924344777228,
+      "share_of_total_loss": 0.14698981992249896,
+      "mean_loss_per_row": 0.074290921951092
+     },
+     "should E, chose L": {
+      "rows": 86,
+      "row_share": 0.043434343434343436,
+      "scene_equal_loss": 0.0034164296929006166,
+      "share_of_total_loss": 0.14067101307796387,
+      "mean_loss_per_row": 0.022735803778945646
+     },
+     "should L, chose F": {
+      "rows": 9,
+      "row_share": 0.004545454545454545,
+      "scene_equal_loss": 8.428924049536263e-05,
+      "share_of_total_loss": 0.003470597646629141,
+      "mean_loss_per_row": 0.004685128090187766
+     },
+     "should E, chose F": {
+      "rows": 2,
+      "row_share": 0.00101010101010101,
+      "scene_equal_loss": 0.0,
+      "share_of_total_loss": 0.0,
+      "mean_loss_per_row": 0.0
+     }
+    },
+    "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+   },
+   "C3": {
+    "F": {
+     "rows": 925,
+     "p_F_quantiles": {
+      "p05": 0.1635361145773281,
+      "p25": 0.2114603380832311,
+      "p50": 0.2356328239069445,
+      "p75": 0.2810686832163349,
+      "p95": 0.37745831921981493
+     },
+     "p_F_mean": 0.2508653579598116,
+     "share_F_ranked_first": 0.02918918918918919,
+     "share_F_ranked_second": 0.5102702702702703,
+     "share_F_ranked_third": 0.46054054054054056,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.3481081081081081
+    },
+    "L": {
+     "rows": 944,
+     "p_F_quantiles": {
+      "p05": 0.1719226331420572,
+      "p25": 0.22283627541320977,
+      "p50": 0.25164725509006136,
+      "p75": 0.29920513301375506,
+      "p95": 0.3585158100746522
+     },
+     "p_F_mean": 0.26103247788113665,
+     "share_F_ranked_first": 0.009533898305084746,
+     "share_F_ranked_second": 0.625,
+     "share_F_ranked_third": 0.3654661016949153,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.510593220338983
+    },
+    "E": {
+     "rows": 111,
+     "p_F_quantiles": {
+      "p05": 0.20396082485100087,
+      "p25": 0.2392190607176911,
+      "p50": 0.2863491192413853,
+      "p75": 0.35159421052936846,
+      "p95": 0.42775195204303496
+     },
+     "p_F_mean": 0.2988507625647473,
+     "share_F_ranked_first": 0.018018018018018018,
+     "share_F_ranked_second": 0.6396396396396397,
+     "share_F_ranked_third": 0.34234234234234234,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.6216216216216216
+    },
+    "p_F_discrimination": {
+     "mean_p_F_where_F_optimal": 0.2508653579598116,
+     "mean_p_F_where_L_optimal": 0.26103247788113665,
+     "difference": -0.010167119921325074,
+     "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+    },
+    "reading": "P(F) does not separate the two cases at all: it averages 0.2509 where F is optimal and 0.2610 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+   },
+   "C4": {
+    "bins": [
+     {
+      "bin": "tie (<= TOL)",
+      "rows": 496,
+      "reference_F_share": 0.0,
+      "rf_F_share": 0.006048387096774193,
+      "rf_F_share_where_F_is_optimal": null,
+      "mean_p_F_where_F_is_optimal": null,
+      "mean_margin": 0.0
+     },
+     {
+      "bin": "(TOL, 0.005]",
+      "rows": 143,
+      "reference_F_share": 0.16083916083916083,
+      "rf_F_share": 0.02097902097902098,
+      "rf_F_share_where_F_is_optimal": 0.0,
+      "mean_p_F_where_F_is_optimal": 0.2375404295784151,
+      "mean_margin": 0.0027263296405200784
+     },
+     {
+      "bin": "(0.005, 0.02]",
+      "rows": 482,
+      "reference_F_share": 0.6058091286307054,
+      "rf_F_share": 0.01037344398340249,
+      "rf_F_share_where_F_is_optimal": 0.00684931506849315,
+      "mean_p_F_where_F_is_optimal": 0.2354317228033882,
+      "mean_margin": 0.012869245957592696
+     },
+     {
+      "bin": "(0.02, 0.05]",
+      "rows": 589,
+      "reference_F_share": 0.6621392190152802,
+      "rf_F_share": 0.025466893039049237,
+      "rf_F_share_where_F_is_optimal": 0.03333333333333333,
+      "mean_p_F_where_F_is_optimal": 0.2500270954777521,
+      "mean_margin": 0.03224639659314862
+     },
+     {
+      "bin": "(0.05, 0.10]",
+      "rows": 241,
+      "reference_F_share": 0.8049792531120332,
+      "rf_F_share": 0.04149377593360996,
+      "rf_F_share_where_F_is_optimal": 0.05154639175257732,
+      "mean_p_F_where_F_is_optimal": 0.27112205149224666,
+      "mean_margin": 0.06947037584912139
+     },
+     {
+      "bin": "> 0.10",
+      "rows": 29,
+      "reference_F_share": 0.896551724137931,
+      "rf_F_share": 0.06896551724137931,
+      "rf_F_share_where_F_is_optimal": 0.07692307692307693,
+      "mean_p_F_where_F_is_optimal": 0.29741222877360046,
+      "mean_margin": 0.12224606098966485
+     }
+    ],
+    "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 7.7 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 7.7 % leaves 92.3 % of them taking a lesser action. Unconditionally the forest requests F on 6.9 % of that bin's rows against a reference 89.7 %",
+    "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+    "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+   }
+  },
+  "awgn 12 dB": {
+   "C2": {
+    "scene_equal_total_loss": 0.023942400994686832,
+    "rows": 1980,
+    "agreement_rows": 682,
+    "agreement_row_share": 0.34444444444444444,
+    "categories": {
+     "should F, chose L": {
+      "rows": 463,
+      "row_share": 0.23383838383838385,
+      "scene_equal_loss": 0.012406287543883685,
+      "share_of_total_loss": 0.5181722395609706,
+      "mean_loss_per_row": 0.047021833874604325
+     },
+     "should F, chose E": {
+      "rows": 431,
+      "row_share": 0.21767676767676766,
+      "scene_equal_loss": 0.0044551001851546,
+      "share_of_total_loss": 0.18607574846579722,
+      "mean_loss_per_row": 0.06894376625300289
+     },
+     "should L, chose E": {
+      "rows": 299,
+      "row_share": 0.151010101010101,
+      "scene_equal_loss": 0.0035698924344777228,
+      "share_of_total_loss": 0.14910335998757743,
+      "mean_loss_per_row": 0.074290921951092
+     },
+     "should E, chose L": {
+      "rows": 84,
+      "row_share": 0.04242424242424243,
+      "scene_equal_loss": 0.0032938478528672533,
+      "share_of_total_loss": 0.13757383203122386,
+      "mean_loss_per_row": 0.022528507631573932
+     },
+     "should L, chose F": {
+      "rows": 17,
+      "row_share": 0.008585858585858586,
+      "scene_equal_loss": 0.00013519644193340336,
+      "share_of_total_loss": 0.005646737015364726,
+      "mean_loss_per_row": 0.004205217696470668
+     },
+     "should E, chose F": {
+      "rows": 4,
+      "row_share": 0.00202020202020202,
+      "scene_equal_loss": 8.2076536370165e-05,
+      "share_of_total_loss": 0.003428082939066094,
+      "mean_loss_per_row": 0.010526315789473661
+     }
+    },
+    "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+   },
+   "C3": {
+    "F": {
+     "rows": 925,
+     "p_F_quantiles": {
+      "p05": 0.17643147607457535,
+      "p25": 0.2214348255235679,
+      "p50": 0.2475247572862404,
+      "p75": 0.2990663041161625,
+      "p95": 0.39150040646387335
+     },
+     "p_F_mean": 0.26395861259940046,
+     "share_F_ranked_first": 0.03351351351351351,
+     "share_F_ranked_second": 0.518918918918919,
+     "share_F_ranked_third": 0.44756756756756755,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.4627027027027027
+    },
+    "L": {
+     "rows": 944,
+     "p_F_quantiles": {
+      "p05": 0.18486838903799677,
+      "p25": 0.23475724186412097,
+      "p50": 0.2631954063251909,
+      "p75": 0.31419102230541207,
+      "p95": 0.3742160205208506
+     },
+     "p_F_mean": 0.27415478078850686,
+     "share_F_ranked_first": 0.018008474576271187,
+     "share_F_ranked_second": 0.6377118644067796,
+     "share_F_ranked_third": 0.3442796610169492,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.6101694915254238
+    },
+    "E": {
+     "rows": 111,
+     "p_F_quantiles": {
+      "p05": 0.21840376148136537,
+      "p25": 0.25124002781230936,
+      "p50": 0.3024900118627698,
+      "p75": 0.3730444907940491,
+      "p95": 0.436188587927678
+     },
+     "p_F_mean": 0.3135195256753349,
+     "share_F_ranked_first": 0.036036036036036036,
+     "share_F_ranked_second": 0.6306306306306306,
+     "share_F_ranked_third": 0.3333333333333333,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.7657657657657657
+    },
+    "p_F_discrimination": {
+     "mean_p_F_where_F_optimal": 0.26395861259940046,
+     "mean_p_F_where_L_optimal": 0.27415478078850686,
+     "difference": -0.010196168189106403,
+     "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+    },
+    "reading": "P(F) does not separate the two cases at all: it averages 0.2640 where F is optimal and 0.2742 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+   },
+   "C4": {
+    "bins": [
+     {
+      "bin": "tie (<= TOL)",
+      "rows": 496,
+      "reference_F_share": 0.0,
+      "rf_F_share": 0.020161290322580645,
+      "rf_F_share_where_F_is_optimal": null,
+      "mean_p_F_where_F_is_optimal": null,
+      "mean_margin": 0.0
+     },
+     {
+      "bin": "(TOL, 0.005]",
+      "rows": 143,
+      "reference_F_share": 0.16083916083916083,
+      "rf_F_share": 0.02097902097902098,
+      "rf_F_share_where_F_is_optimal": 0.0,
+      "mean_p_F_where_F_is_optimal": 0.252972137598546,
+      "mean_margin": 0.0027263296405200784
+     },
+     {
+      "bin": "(0.005, 0.02]",
+      "rows": 482,
+      "reference_F_share": 0.6058091286307054,
+      "rf_F_share": 0.012448132780082987,
+      "rf_F_share_where_F_is_optimal": 0.00684931506849315,
+      "mean_p_F_where_F_is_optimal": 0.2480376957800704,
+      "mean_margin": 0.012869245957592696
+     },
+     {
+      "bin": "(0.02, 0.05]",
+      "rows": 589,
+      "reference_F_share": 0.6621392190152802,
+      "rf_F_share": 0.03225806451612903,
+      "rf_F_share_where_F_is_optimal": 0.038461538461538464,
+      "mean_p_F_where_F_is_optimal": 0.2630741432915112,
+      "mean_margin": 0.03224639659314862
+     },
+     {
+      "bin": "(0.05, 0.10]",
+      "rows": 241,
+      "reference_F_share": 0.8049792531120332,
+      "rf_F_share": 0.04979253112033195,
+      "rf_F_share_where_F_is_optimal": 0.061855670103092786,
+      "mean_p_F_where_F_is_optimal": 0.284456402261021,
+      "mean_margin": 0.06947037584912139
+     },
+     {
+      "bin": "> 0.10",
+      "rows": 29,
+      "reference_F_share": 0.896551724137931,
+      "rf_F_share": 0.06896551724137931,
+      "rf_F_share_where_F_is_optimal": 0.07692307692307693,
+      "mean_p_F_where_F_is_optimal": 0.31280355382964775,
+      "mean_margin": 0.12224606098966485
+     }
+    ],
+    "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 7.7 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 7.7 % leaves 92.3 % of them taking a lesser action. Unconditionally the forest requests F on 6.9 % of that bin's rows against a reference 89.7 %",
+    "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+    "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+   }
+  },
+  "awgn 14 dB": {
+   "C2": {
+    "scene_equal_total_loss": 0.023619907783177605,
+    "rows": 1980,
+    "agreement_rows": 686,
+    "agreement_row_share": 0.3464646464646465,
+    "categories": {
+     "should F, chose L": {
+      "rows": 460,
+      "row_share": 0.23232323232323232,
+      "scene_equal_loss": 0.012119578909221836,
+      "share_of_total_loss": 0.5131086463366107,
+      "mean_loss_per_row": 0.04698790784189201
+     },
+     "should F, chose E": {
+      "rows": 431,
+      "row_share": 0.21767676767676766,
+      "scene_equal_loss": 0.0044551001851546,
+      "share_of_total_loss": 0.18861632424863142,
+      "mean_loss_per_row": 0.06894376625300289
+     },
+     "should L, chose E": {
+      "rows": 298,
+      "row_share": 0.1505050505050505,
+      "scene_equal_loss": 0.0035341078576303442,
+      "share_of_total_loss": 0.14962411750597013,
+      "mean_loss_per_row": 0.07439432014264076
+     },
+     "should E, chose L": {
+      "rows": 83,
+      "row_share": 0.04191919191919192,
+      "scene_equal_loss": 0.0032938478528672533,
+      "share_of_total_loss": 0.13945218936092432,
+      "mean_loss_per_row": 0.02279993543436398
+     },
+     "should L, chose F": {
+      "rows": 17,
+      "row_share": 0.008585858585858586,
+      "scene_equal_loss": 0.00013519644193340336,
+      "share_of_total_loss": 0.0057238344524652195,
+      "mean_loss_per_row": 0.004205217696470668
+     },
+     "should E, chose F": {
+      "rows": 5,
+      "row_share": 0.0025252525252525255,
+      "scene_equal_loss": 8.2076536370165e-05,
+      "share_of_total_loss": 0.0034748880953981093,
+      "mean_loss_per_row": 0.00842105263157893
+     }
+    },
+    "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+   },
+   "C3": {
+    "F": {
+     "rows": 925,
+     "p_F_quantiles": {
+      "p05": 0.18205644888276712,
+      "p25": 0.2258497964726092,
+      "p50": 0.2511056408879136,
+      "p75": 0.3042614907062679,
+      "p95": 0.3972308923772695
+     },
+     "p_F_mean": 0.26829868841656573,
+     "share_F_ranked_first": 0.036756756756756756,
+     "share_F_ranked_second": 0.5178378378378379,
+     "share_F_ranked_third": 0.4454054054054054,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.5102702702702703
+    },
+    "L": {
+     "rows": 944,
+     "p_F_quantiles": {
+      "p05": 0.19051523118123806,
+      "p25": 0.23775452041400283,
+      "p50": 0.26704791879291356,
+      "p75": 0.32019747714720864,
+      "p95": 0.3777788110943525
+     },
+     "p_F_mean": 0.2783890609104868,
+     "share_F_ranked_first": 0.018008474576271187,
+     "share_F_ranked_second": 0.6408898305084746,
+     "share_F_ranked_third": 0.3411016949152542,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.6451271186440678
+    },
+    "E": {
+     "rows": 111,
+     "p_F_quantiles": {
+      "p05": 0.22132079765334,
+      "p25": 0.2549261727076205,
+      "p50": 0.306648510174874,
+      "p75": 0.37872586044466716,
+      "p95": 0.441417653023634
+     },
+     "p_F_mean": 0.3185885957338195,
+     "share_F_ranked_first": 0.04504504504504504,
+     "share_F_ranked_second": 0.6216216216216216,
+     "share_F_ranked_third": 0.3333333333333333,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.7837837837837838
+    },
+    "p_F_discrimination": {
+     "mean_p_F_where_F_optimal": 0.26829868841656573,
+     "mean_p_F_where_L_optimal": 0.2783890609104868,
+     "difference": -0.010090372493921085,
+     "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+    },
+    "reading": "P(F) does not separate the two cases at all: it averages 0.2683 where F is optimal and 0.2784 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+   },
+   "C4": {
+    "bins": [
+     {
+      "bin": "tie (<= TOL)",
+      "rows": 496,
+      "reference_F_share": 0.0,
+      "rf_F_share": 0.02217741935483871,
+      "rf_F_share_where_F_is_optimal": null,
+      "mean_p_F_where_F_is_optimal": null,
+      "mean_margin": 0.0
+     },
+     {
+      "bin": "(TOL, 0.005]",
+      "rows": 143,
+      "reference_F_share": 0.16083916083916083,
+      "rf_F_share": 0.02097902097902098,
+      "rf_F_share_where_F_is_optimal": 0.0,
+      "mean_p_F_where_F_is_optimal": 0.256731638493783,
+      "mean_margin": 0.0027263296405200784
+     },
+     {
+      "bin": "(0.005, 0.02]",
+      "rows": 482,
+      "reference_F_share": 0.6058091286307054,
+      "rf_F_share": 0.014522821576763486,
+      "rf_F_share_where_F_is_optimal": 0.010273972602739725,
+      "mean_p_F_where_F_is_optimal": 0.25265096205896165,
+      "mean_margin": 0.012869245957592696
+     },
+     {
+      "bin": "(0.02, 0.05]",
+      "rows": 589,
+      "reference_F_share": 0.6621392190152802,
+      "rf_F_share": 0.03395585738539898,
+      "rf_F_share_where_F_is_optimal": 0.041025641025641026,
+      "mean_p_F_where_F_is_optimal": 0.26721317815572576,
+      "mean_margin": 0.03224639659314862
+     },
+     {
+      "bin": "(0.05, 0.10]",
+      "rows": 241,
+      "reference_F_share": 0.8049792531120332,
+      "rf_F_share": 0.05394190871369295,
+      "rf_F_share_where_F_is_optimal": 0.06701030927835051,
+      "mean_p_F_where_F_is_optimal": 0.2888066857239246,
+      "mean_margin": 0.06947037584912139
+     },
+     {
+      "bin": "> 0.10",
+      "rows": 29,
+      "reference_F_share": 0.896551724137931,
+      "rf_F_share": 0.06896551724137931,
+      "rf_F_share_where_F_is_optimal": 0.07692307692307693,
+      "mean_p_F_where_F_is_optimal": 0.31752852567596623,
+      "mean_margin": 0.12224606098966485
+     }
+    ],
+    "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 7.7 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 7.7 % leaves 92.3 % of them taking a lesser action. Unconditionally the forest requests F on 6.9 % of that bin's rows against a reference 89.7 %",
+    "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+    "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+   }
+  },
+  "awgn 16 dB": {
+   "C2": {
+    "scene_equal_total_loss": 0.023321222000620853,
+    "rows": 1980,
+    "agreement_rows": 687,
+    "agreement_row_share": 0.346969696969697,
+    "categories": {
+     "should F, chose L": {
+      "rows": 459,
+      "row_share": 0.2318181818181818,
+      "scene_equal_loss": 0.011820893126665085,
+      "share_of_total_loss": 0.5068728013630843,
+      "mean_loss_per_row": 0.04680916198084055
+     },
+     "should F, chose E": {
+      "rows": 431,
+      "row_share": 0.21767676767676766,
+      "scene_equal_loss": 0.0044551001851546,
+      "share_of_total_loss": 0.19103202160830154,
+      "mean_loss_per_row": 0.06894376625300289
+     },
+     "should L, chose E": {
+      "rows": 298,
+      "row_share": 0.1505050505050505,
+      "scene_equal_loss": 0.0035341078576303442,
+      "share_of_total_loss": 0.15154042346221222,
+      "mean_loss_per_row": 0.07439432014264076
+     },
+     "should E, chose L": {
+      "rows": 83,
+      "row_share": 0.04191919191919192,
+      "scene_equal_loss": 0.0032938478528672533,
+      "share_of_total_loss": 0.14123821868251865,
+      "mean_loss_per_row": 0.02279993543436398
+     },
+     "should L, chose F": {
+      "rows": 17,
+      "row_share": 0.008585858585858586,
+      "scene_equal_loss": 0.00013519644193340336,
+      "share_of_total_loss": 0.005797142273668343,
+      "mean_loss_per_row": 0.004205217696470668
+     },
+     "should E, chose F": {
+      "rows": 5,
+      "row_share": 0.0025252525252525255,
+      "scene_equal_loss": 8.2076536370165e-05,
+      "share_of_total_loss": 0.0035193926102148497,
+      "mean_loss_per_row": 0.00842105263157893
+     }
+    },
+    "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+   },
+   "C3": {
+    "F": {
+     "rows": 925,
+     "p_F_quantiles": {
+      "p05": 0.18292003067342907,
+      "p25": 0.2256409573556007,
+      "p50": 0.2512221639697255,
+      "p75": 0.3068312326916644,
+      "p95": 0.3987856312380436
+     },
+     "p_F_mean": 0.26971201389016725,
+     "share_F_ranked_first": 0.03783783783783784,
+     "share_F_ranked_second": 0.5167567567567568,
+     "share_F_ranked_third": 0.4454054054054054,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.5275675675675676
+    },
+    "L": {
+     "rows": 944,
+     "p_F_quantiles": {
+      "p05": 0.19241628650315595,
+      "p25": 0.23858628930149256,
+      "p50": 0.2685936254684544,
+      "p75": 0.32113823254484025,
+      "p95": 0.3766078054791075
+     },
+     "p_F_mean": 0.27944705824891597,
+     "share_F_ranked_first": 0.018008474576271187,
+     "share_F_ranked_second": 0.6430084745762712,
+     "share_F_ranked_third": 0.3389830508474576,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.6536016949152542
+    },
+    "E": {
+     "rows": 111,
+     "p_F_quantiles": {
+      "p05": 0.22511478255545125,
+      "p25": 0.25421164495220594,
+      "p50": 0.3057672357859054,
+      "p75": 0.3815689628109048,
+      "p95": 0.44305619634210947
+     },
+     "p_F_mean": 0.3194682083215387,
+     "share_F_ranked_first": 0.04504504504504504,
+     "share_F_ranked_second": 0.6216216216216216,
+     "share_F_ranked_third": 0.3333333333333333,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.7837837837837838
+    },
+    "p_F_discrimination": {
+     "mean_p_F_where_F_optimal": 0.26971201389016725,
+     "mean_p_F_where_L_optimal": 0.27944705824891597,
+     "difference": -0.009735044358748723,
+     "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+    },
+    "reading": "P(F) does not separate the two cases at all: it averages 0.2697 where F is optimal and 0.2794 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+   },
+   "C4": {
+    "bins": [
+     {
+      "bin": "tie (<= TOL)",
+      "rows": 496,
+      "reference_F_share": 0.0,
+      "rf_F_share": 0.02217741935483871,
+      "rf_F_share_where_F_is_optimal": null,
+      "mean_p_F_where_F_is_optimal": null,
+      "mean_margin": 0.0
+     },
+     {
+      "bin": "(TOL, 0.005]",
+      "rows": 143,
+      "reference_F_share": 0.16083916083916083,
+      "rf_F_share": 0.02097902097902098,
+      "rf_F_share_where_F_is_optimal": 0.0,
+      "mean_p_F_where_F_is_optimal": 0.2595740087595907,
+      "mean_margin": 0.0027263296405200784
+     },
+     {
+      "bin": "(0.005, 0.02]",
+      "rows": 482,
+      "reference_F_share": 0.6058091286307054,
+      "rf_F_share": 0.014522821576763486,
+      "rf_F_share_where_F_is_optimal": 0.010273972602739725,
+      "mean_p_F_where_F_is_optimal": 0.2533203270028339,
+      "mean_margin": 0.012869245957592696
+     },
+     {
+      "bin": "(0.02, 0.05]",
+      "rows": 589,
+      "reference_F_share": 0.6621392190152802,
+      "rf_F_share": 0.03395585738539898,
+      "rf_F_share_where_F_is_optimal": 0.041025641025641026,
+      "mean_p_F_where_F_is_optimal": 0.2684022498232459,
+      "mean_margin": 0.03224639659314862
+     },
+     {
+      "bin": "(0.05, 0.10]",
+      "rows": 241,
+      "reference_F_share": 0.8049792531120332,
+      "rf_F_share": 0.05394190871369295,
+      "rf_F_share_where_F_is_optimal": 0.06701030927835051,
+      "mean_p_F_where_F_is_optimal": 0.29141164062408526,
+      "mean_margin": 0.06947037584912139
+     },
+     {
+      "bin": "> 0.10",
+      "rows": 29,
+      "reference_F_share": 0.896551724137931,
+      "rf_F_share": 0.10344827586206896,
+      "rf_F_share_where_F_is_optimal": 0.11538461538461539,
+      "mean_p_F_where_F_is_optimal": 0.3205053634603152,
+      "mean_margin": 0.12224606098966485
+     }
+    ],
+    "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 11.5 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 11.5 % leaves 88.5 % of them taking a lesser action. Unconditionally the forest requests F on 10.3 % of that bin's rows against a reference 89.7 %",
+    "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+    "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+   }
+  },
+  "awgn 18 dB": {
+   "C2": {
+    "scene_equal_total_loss": 0.02313196393016857,
+    "rows": 1980,
+    "agreement_rows": 687,
+    "agreement_row_share": 0.346969696969697,
+    "categories": {
+     "should F, chose L": {
+      "rows": 458,
+      "row_share": 0.2313131313131313,
+      "scene_equal_loss": 0.011787971315965496,
+      "share_of_total_loss": 0.5095966495344433,
+      "mean_loss_per_row": 0.046824029146737584
+     },
+     "should F, chose E": {
+      "rows": 432,
+      "row_share": 0.21818181818181817,
+      "scene_equal_loss": 0.0045624539156967365,
+      "share_of_total_loss": 0.1972359082639936,
+      "mean_loss_per_row": 0.06908610656864107
+     },
+     "should L, chose E": {
+      "rows": 297,
+      "row_share": 0.15,
+      "scene_equal_loss": 0.0034267541270882078,
+      "share_of_total_loss": 0.1481393511347757,
+      "mean_loss_per_row": 0.07420563171682912
+     },
+     "should E, chose L": {
+      "rows": 82,
+      "row_share": 0.04141414141414142,
+      "scene_equal_loss": 0.003137511593114558,
+      "share_of_total_loss": 0.13563533137895975,
+      "mean_loss_per_row": 0.02209992853413509
+     },
+     "should L, chose F": {
+      "rows": 18,
+      "row_share": 0.00909090909090909,
+      "scene_equal_loss": 0.00013519644193340336,
+      "share_of_total_loss": 0.005844572572460264,
+      "mean_loss_per_row": 0.003971594491111187
+     },
+     "should E, chose F": {
+      "rows": 6,
+      "row_share": 0.0030303030303030303,
+      "scene_equal_loss": 8.2076536370165e-05,
+      "share_of_total_loss": 0.0035481871153672895,
+      "mean_loss_per_row": 0.007017543859649107
+     }
+    },
+    "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+   },
+   "C3": {
+    "F": {
+     "rows": 925,
+     "p_F_quantiles": {
+      "p05": 0.18356269812418302,
+      "p25": 0.2272289062345786,
+      "p50": 0.2523319102417485,
+      "p75": 0.3092365975815119,
+      "p95": 0.3988093992044832
+     },
+     "p_F_mean": 0.27052662385008247,
+     "share_F_ranked_first": 0.03783783783783784,
+     "share_F_ranked_second": 0.5167567567567568,
+     "share_F_ranked_third": 0.4454054054054054,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.532972972972973
+    },
+    "L": {
+     "rows": 944,
+     "p_F_quantiles": {
+      "p05": 0.1927597880224513,
+      "p25": 0.24040058539807932,
+      "p50": 0.2688312894681109,
+      "p75": 0.32090392363555714,
+      "p95": 0.3768950433535357
+     },
+     "p_F_mean": 0.2798992550322061,
+     "share_F_ranked_first": 0.019067796610169493,
+     "share_F_ranked_second": 0.6398305084745762,
+     "share_F_ranked_third": 0.3411016949152542,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.6557203389830508
+    },
+    "E": {
+     "rows": 111,
+     "p_F_quantiles": {
+      "p05": 0.2238086134412618,
+      "p25": 0.254451967796954,
+      "p50": 0.3060006979631705,
+      "p75": 0.38036046063489665,
+      "p95": 0.44439579161533915
+     },
+     "p_F_mean": 0.3189715046599965,
+     "share_F_ranked_first": 0.05405405405405406,
+     "share_F_ranked_second": 0.6126126126126126,
+     "share_F_ranked_third": 0.3333333333333333,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.7837837837837838
+    },
+    "p_F_discrimination": {
+     "mean_p_F_where_F_optimal": 0.27052662385008247,
+     "mean_p_F_where_L_optimal": 0.2798992550322061,
+     "difference": -0.009372631182123614,
+     "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+    },
+    "reading": "P(F) does not separate the two cases at all: it averages 0.2705 where F is optimal and 0.2799 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+   },
+   "C4": {
+    "bins": [
+     {
+      "bin": "tie (<= TOL)",
+      "rows": 496,
+      "reference_F_share": 0.0,
+      "rf_F_share": 0.024193548387096774,
+      "rf_F_share_where_F_is_optimal": null,
+      "mean_p_F_where_F_is_optimal": null,
+      "mean_margin": 0.0
+     },
+     {
+      "bin": "(TOL, 0.005]",
+      "rows": 143,
+      "reference_F_share": 0.16083916083916083,
+      "rf_F_share": 0.02097902097902098,
+      "rf_F_share_where_F_is_optimal": 0.0,
+      "mean_p_F_where_F_is_optimal": 0.2608429717120733,
+      "mean_margin": 0.0027263296405200784
+     },
+     {
+      "bin": "(0.005, 0.02]",
+      "rows": 482,
+      "reference_F_share": 0.6058091286307054,
+      "rf_F_share": 0.014522821576763486,
+      "rf_F_share_where_F_is_optimal": 0.010273972602739725,
+      "mean_p_F_where_F_is_optimal": 0.2540174116393302,
+      "mean_margin": 0.012869245957592696
+     },
+     {
+      "bin": "(0.02, 0.05]",
+      "rows": 589,
+      "reference_F_share": 0.6621392190152802,
+      "rf_F_share": 0.03395585738539898,
+      "rf_F_share_where_F_is_optimal": 0.041025641025641026,
+      "mean_p_F_where_F_is_optimal": 0.26933318939403117,
+      "mean_margin": 0.03224639659314862
+     },
+     {
+      "bin": "(0.05, 0.10]",
+      "rows": 241,
+      "reference_F_share": 0.8049792531120332,
+      "rf_F_share": 0.058091286307053944,
+      "rf_F_share_where_F_is_optimal": 0.06701030927835051,
+      "mean_p_F_where_F_is_optimal": 0.292123239656083,
+      "mean_margin": 0.06947037584912139
+     },
+     {
+      "bin": "> 0.10",
+      "rows": 29,
+      "reference_F_share": 0.896551724137931,
+      "rf_F_share": 0.10344827586206896,
+      "rf_F_share_where_F_is_optimal": 0.11538461538461539,
+      "mean_p_F_where_F_is_optimal": 0.3212616213966124,
+      "mean_margin": 0.12224606098966485
+     }
+    ],
+    "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 11.5 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 11.5 % leaves 88.5 % of them taking a lesser action. Unconditionally the forest requests F on 10.3 % of that bin's rows against a reference 89.7 %",
+    "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+    "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+   }
+  },
+  "awgn 20 dB": {
+   "C2": {
+    "scene_equal_total_loss": 0.02313196393016857,
+    "rows": 1980,
+    "agreement_rows": 687,
+    "agreement_row_share": 0.346969696969697,
+    "categories": {
+     "should F, chose L": {
+      "rows": 458,
+      "row_share": 0.2313131313131313,
+      "scene_equal_loss": 0.011787971315965496,
+      "share_of_total_loss": 0.5095966495344433,
+      "mean_loss_per_row": 0.046824029146737584
+     },
+     "should F, chose E": {
+      "rows": 432,
+      "row_share": 0.21818181818181817,
+      "scene_equal_loss": 0.0045624539156967365,
+      "share_of_total_loss": 0.1972359082639936,
+      "mean_loss_per_row": 0.06908610656864107
+     },
+     "should L, chose E": {
+      "rows": 297,
+      "row_share": 0.15,
+      "scene_equal_loss": 0.0034267541270882078,
+      "share_of_total_loss": 0.1481393511347757,
+      "mean_loss_per_row": 0.07420563171682912
+     },
+     "should E, chose L": {
+      "rows": 82,
+      "row_share": 0.04141414141414142,
+      "scene_equal_loss": 0.003137511593114558,
+      "share_of_total_loss": 0.13563533137895975,
+      "mean_loss_per_row": 0.02209992853413509
+     },
+     "should L, chose F": {
+      "rows": 18,
+      "row_share": 0.00909090909090909,
+      "scene_equal_loss": 0.00013519644193340336,
+      "share_of_total_loss": 0.005844572572460264,
+      "mean_loss_per_row": 0.003971594491111187
+     },
+     "should E, chose F": {
+      "rows": 6,
+      "row_share": 0.0030303030303030303,
+      "scene_equal_loss": 8.2076536370165e-05,
+      "share_of_total_loss": 0.0035481871153672895,
+      "mean_loss_per_row": 0.007017543859649107
+     }
+    },
+    "identity_note": "the category losses sum to the total by construction, so the ranking is a decomposition and not a set of separate estimates"
+   },
+   "C3": {
+    "F": {
+     "rows": 925,
+     "p_F_quantiles": {
+      "p05": 0.18356269812418302,
+      "p25": 0.2270006285161923,
+      "p50": 0.2522439251603932,
+      "p75": 0.3091404667237851,
+      "p95": 0.39858702243466326
+     },
+     "p_F_mean": 0.2702778615817229,
+     "share_F_ranked_first": 0.03783783783783784,
+     "share_F_ranked_second": 0.5167567567567568,
+     "share_F_ranked_third": 0.4454054054054054,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.5286486486486487
+    },
+    "L": {
+     "rows": 944,
+     "p_F_quantiles": {
+      "p05": 0.191522968390043,
+      "p25": 0.24040058539807932,
+      "p50": 0.26963137897918255,
+      "p75": 0.32094477272463434,
+      "p95": 0.37736602101374456
+     },
+     "p_F_mean": 0.2797951976300134,
+     "share_F_ranked_first": 0.019067796610169493,
+     "share_F_ranked_second": 0.6408898305084746,
+     "share_F_ranked_third": 0.3400423728813559,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.6588983050847458
+    },
+    "E": {
+     "rows": 111,
+     "p_F_quantiles": {
+      "p05": 0.2238086134412618,
+      "p25": 0.2543709873480007,
+      "p50": 0.3061312314258355,
+      "p75": 0.38072433421855234,
+      "p95": 0.444508673615871
+     },
+     "p_F_mean": 0.3190669665831279,
+     "share_F_ranked_first": 0.05405405405405406,
+     "share_F_ranked_second": 0.6126126126126126,
+     "share_F_ranked_third": 0.3333333333333333,
+     "share_p_F_below_0.05": 0.0,
+     "share_p_F_above_0.25": 0.7837837837837838
+    },
+    "p_F_discrimination": {
+     "mean_p_F_where_F_optimal": 0.2702778615817229,
+     "mean_p_F_where_L_optimal": 0.2797951976300134,
+     "difference": -0.009517336048290526,
+     "definition": "mean P(F) on rows where F is optimal minus mean P(F) on rows where L is. Positive means the probability carries signal about F; zero or negative means it does not, whatever the rank histogram looks like"
+    },
+    "reading": "P(F) does not separate the two cases at all: it averages 0.2703 where F is optimal and 0.2798 where L is, so it is flat or slightly inverted. The shortfall is not a threshold that could be moved -- the probability carries no usable signal about F on these rows"
+   },
+   "C4": {
+    "bins": [
+     {
+      "bin": "tie (<= TOL)",
+      "rows": 496,
+      "reference_F_share": 0.0,
+      "rf_F_share": 0.024193548387096774,
+      "rf_F_share_where_F_is_optimal": null,
+      "mean_p_F_where_F_is_optimal": null,
+      "mean_margin": 0.0
+     },
+     {
+      "bin": "(TOL, 0.005]",
+      "rows": 143,
+      "reference_F_share": 0.16083916083916083,
+      "rf_F_share": 0.02097902097902098,
+      "rf_F_share_where_F_is_optimal": 0.0,
+      "mean_p_F_where_F_is_optimal": 0.26056719652479865,
+      "mean_margin": 0.0027263296405200784
+     },
+     {
+      "bin": "(0.005, 0.02]",
+      "rows": 482,
+      "reference_F_share": 0.6058091286307054,
+      "rf_F_share": 0.014522821576763486,
+      "rf_F_share_where_F_is_optimal": 0.010273972602739725,
+      "mean_p_F_where_F_is_optimal": 0.2537348863382608,
+      "mean_margin": 0.012869245957592696
+     },
+     {
+      "bin": "(0.02, 0.05]",
+      "rows": 589,
+      "reference_F_share": 0.6621392190152802,
+      "rf_F_share": 0.03395585738539898,
+      "rf_F_share_where_F_is_optimal": 0.041025641025641026,
+      "mean_p_F_where_F_is_optimal": 0.2690592545579666,
+      "mean_margin": 0.03224639659314862
+     },
+     {
+      "bin": "(0.05, 0.10]",
+      "rows": 241,
+      "reference_F_share": 0.8049792531120332,
+      "rf_F_share": 0.058091286307053944,
+      "rf_F_share_where_F_is_optimal": 0.06701030927835051,
+      "mean_p_F_where_F_is_optimal": 0.29193083984626134,
+      "mean_margin": 0.06947037584912139
+     },
+     {
+      "bin": "> 0.10",
+      "rows": 29,
+      "reference_F_share": 0.896551724137931,
+      "rf_F_share": 0.10344827586206896,
+      "rf_F_share_where_F_is_optimal": 0.11538461538461539,
+      "mean_p_F_where_F_is_optimal": 0.3213729778642121,
+      "mean_margin": 0.12224606098966485
+     }
+    ],
+    "reading": "the F-selection rate does rise with the margin, from 0.0 % in the (TOL, 0.005] bin to 11.5 % in the > 0.10 bin, so the forest is not wholly blind to how much the choice is worth -- but that is a recall on the rows where F is optimal, where an oracle reaches 100 %, so 11.5 % leaves 88.5 % of them taking a lesser action. Unconditionally the forest requests F on 10.3 % of that bin's rows against a reference 89.7 %",
+    "note": "the margin is |Q_F - Q_L| on the same row, so it measures how much the F-versus-L choice is worth under the locked accounting",
+    "conditioning_note": "the two RF columns are not comparable to each other: \"RF F share\" is unconditional within the bin and belongs beside the reference share, while \"RF F share where F is optimal\" is a recall whose ideal value is 100 %"
+   }
+  }
+ },
+ "command": "python projects/ca_tosg_p2/protocol/rf_diagnostics.py"
+}
