@@ -345,3 +345,35 @@ work**.
 
 *The range of channel conditions in which the complete F is useful may differ under a different
 channel model, and may not exist at all within the range examined.*
+
+
+## P2-R12 B — pre-registered stopping rule for the AWGN fill
+
+**Registered before the measurement is run; nothing has been run under it.** The full plan, its
+derivation and its cost are in `awgn_fill_plan.md`. The binding clauses are repeated here so the
+protocol itself carries them:
+
+**B-2a Minimum sample.** Each new SNR point runs **N_min = 1,000,000 codewords**. This follows from
+the A-5 threshold: F overtakes L only at `p_cw < 1.37e-05`, and with zero errors the rule of three
+resolves a rate only down to 3/N, so N ≥ 3 / 1.37e-05 = 218,978, rounded up to the next power of ten.
+
+**B-2b Early stop.** A point that reaches **30 block errors** stops there.
+
+**B-2c Reporting.** Every point reports codewords, errors, the `p_cw` point estimate and its **Wilson
+95 % interval**.
+
+**B-3 Zero errors is an upper bound.** A point with no errors at N_min is reported as `p_cw < 3/N at
+95 %` with its codeword count. **It is never written as `p_cw = 0`**, and no sentence may state that
+the message always arrives.
+
+**B-5 New files only.** New points go to a new versioned grid file under
+`projects/ca_tosg_p2/results/`. `results/channel/bler_sionna.csv` and `results/v2/v2_grid_validate_ideal.csv`
+are not modified.
+
+**The reproduction check is statistical, not bit-exact.** `ldpc_qam.py` sets no random seed, so a re-run
+of 8.0 dB cannot return the recorded count. The criterion, fixed here in advance: the new and recorded
+Wilson intervals must each contain the other's point estimate, and 10.0 dB must again give zero errors.
+If either fails, the run stops and is reported.
+
+**Permitted outcome.** If the crossing cannot be bracketed under this rule, that is reported as an
+undetermined interval. N_min is not lowered and no tolerance is relaxed to obtain a crossing.
