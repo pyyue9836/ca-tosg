@@ -1,0 +1,1175 @@
+{
+ "schema": "catosg-p2-offline-potential/1",
+ "B6_status": "OFFLINE POTENTIAL, NOT A DEPLOYMENT RESULT. Every action here is chosen with per-frame outcomes that no selector can observe before it transmits. The number is an upper bound on what any predictor of these quantities could recover, and it exists to decide whether training a joint selector is worth starting -- not to claim a gain",
+ "accounting": "LOCKED all-or-nothing (p2_protocol.md P2-R11 A): a message is usable only if the whole message decodes, a failure falls back to E, and the channel is charged for the attempt",
+ "tie_rule": "argmax with TOL = 1e-09; ties go to the cheaper payload, and the payload order E < L < F holds on every row (asserted, not assumed)",
+ "n_cw_F": 12567,
+ "B_F_sym": 3141750.0,
+ "rule_tau": {
+  "awgn": {
+   "tau_db": 8.5,
+   "equivalent_set": [
+    8.5,
+    9.0,
+    9.5,
+    10.0
+   ],
+   "consistent_with_measured_bracket": [
+    8.0,
+    8.5
+   ]
+  },
+  "rayleigh": {
+   "tau_db": 20.5,
+   "equivalent_set": [
+    20.5
+   ],
+   "consistent_with_measured_bracket": [
+    8.0,
+    8.5
+   ]
+  }
+ },
+ "grid": {
+  "frames": 1980,
+  "cells": 22,
+  "scenes": 9,
+  "rows": 43560
+ },
+ "clean_cells": [
+  {
+   "channel": "awgn",
+   "snr_db": 10,
+   "sampled": true
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 12,
+   "sampled": true
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 14,
+   "sampled": false
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 16,
+   "sampled": true
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 18,
+   "sampled": false
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 20,
+   "sampled": true
+  }
+ ],
+ "clean_cells_without_a_sample": [
+  {
+   "channel": "awgn",
+   "snr_db": 14
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 18
+  }
+ ],
+ "per_cell": [
+  {
+   "channel": "awgn",
+   "snr_db": 0,
+   "q_F": 0.0,
+   "p_cw": 1.0,
+   "optimal_share": {
+    "E": 1.0,
+    "L": 0.0,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 2,
+   "q_F": 0.0,
+   "p_cw": 1.0,
+   "optimal_share": {
+    "E": 1.0,
+    "L": 0.0,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 4,
+   "q_F": 0.0,
+   "p_cw": 1.0,
+   "optimal_share": {
+    "E": 1.0,
+    "L": 0.0,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 6,
+   "q_F": 0.0,
+   "p_cw": 0.7465,
+   "optimal_share": {
+    "E": 0.4217171717171717,
+    "L": 0.5782828282828283,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 6.286633976759048e-06
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 8,
+   "q_F": 0.19518329250262947,
+   "p_cw": 0.00013,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.8772727272727273,
+    "F": 0.06666666666666667
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0050825676015680155
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 10,
+   "q_F": 1.0,
+   "p_cw": 0.0,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_action": "F",
+   "G_task_scene_equal": 0.006073225821359781
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 12,
+   "q_F": 1.0,
+   "p_cw": 0.0,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_action": "F",
+   "G_task_scene_equal": 0.006073225821359781
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 14,
+   "q_F": 1.0,
+   "p_cw": 0.0,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_action": "F",
+   "G_task_scene_equal": 0.006073225821359781
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 16,
+   "q_F": 1.0,
+   "p_cw": 0.0,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_action": "F",
+   "G_task_scene_equal": 0.006073225821359781
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 18,
+   "q_F": 1.0,
+   "p_cw": 0.0,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_action": "F",
+   "G_task_scene_equal": 0.006073225821359781
+  },
+  {
+   "channel": "awgn",
+   "snr_db": 20,
+   "q_F": 1.0,
+   "p_cw": 0.0,
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_action": "F",
+   "G_task_scene_equal": 0.006073225821359781
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 0,
+   "q_F": 0.0,
+   "p_cw": 0.9835,
+   "optimal_share": {
+    "E": 0.8803030303030303,
+    "L": 0.11969696969696969,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 9.09454719331401e-10
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 2,
+   "q_F": 0.0,
+   "p_cw": 0.9385,
+   "optimal_share": {
+    "E": 0.747979797979798,
+    "L": 0.25202020202020203,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 5.214610266266013e-08
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 4,
+   "q_F": 0.0,
+   "p_cw": 0.8145,
+   "optimal_share": {
+    "E": 0.43737373737373736,
+    "L": 0.5626262626262626,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 1.990432591610308e-06
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 6,
+   "q_F": 0.0,
+   "p_cw": 0.6605,
+   "optimal_share": {
+    "E": 0.2767676767676768,
+    "L": 0.7232323232323232,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 2.0095729909330995e-05
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 8,
+   "q_F": 0.0,
+   "p_cw": 0.4645,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0001538364374857588
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 10,
+   "q_F": 0.0,
+   "p_cw": 0.3505,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0004015668546350381
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 12,
+   "q_F": 0.0,
+   "p_cw": 0.236,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0009469317680353816
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 14,
+   "q_F": 0.0,
+   "p_cw": 0.168,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0015170349238933787
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 16,
+   "q_F": 0.0,
+   "p_cw": 0.1045,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.002309437040293282
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 18,
+   "q_F": 0.0,
+   "p_cw": 0.0595,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.003082363469800892
+  },
+  {
+   "channel": "rayleigh",
+   "snr_db": 20,
+   "q_F": 1.5943571298852821e-223,
+   "p_cw": 0.04,
+   "optimal_share": {
+    "E": 0.09494949494949495,
+    "L": 0.9050505050505051,
+    "F": 0.0
+   },
+   "rule_action": "L",
+   "G_task_scene_equal": 0.0034866523270264188
+  }
+ ],
+ "analyses": [
+  {
+   "label": "all 22 cells",
+   "rows": 43560,
+   "frames": 1980,
+   "cells": 22,
+   "tie_slack": {
+    "min_gain": -9.986833582331656e-10,
+    "rows_below_zero": 3074,
+    "explanation": "any negative entry is at most TOL and comes from the cheaper-payload tie rule, never from the rule outperforming the per-frame optimum"
+   },
+   "optimal_share": {
+    "E": 0.3100550964187328,
+    "L": 0.5595041322314049,
+    "F": 0.13044077134986226
+   },
+   "rule_share_F": 0.2727272727272727,
+   "G_task": {
+    "mean": 0.002429462327405997,
+    "lcb95": 0.0015797735055204899,
+    "ucb95": 0.0034272256502400848
+   },
+   "vs_Fixed_L": {
+    "mean": 0.006367984361645924,
+    "lcb95": 0.0033996085096549278,
+    "ucb95": 0.009945417282133592
+   },
+   "vs_Fixed_F": {
+    "mean": 0.013594132645180211,
+    "lcb95": 0.009089999771884419,
+    "ucb95": 0.019515183249183148
+   },
+   "scene_equal": {
+    "Q_star": 0.8649109859619156,
+    "Q_rule": 0.8624815236345095,
+    "Q_Fixed_L": 0.8585430016002696,
+    "Q_Fixed_F": 0.8513168533167353,
+    "Q_Fixed_E": 0.8256674842513136
+   },
+   "payload_sym_scene_equal": {
+    "optimal": 337593.4071021387,
+    "rule": 858131.4524028148
+   },
+   "B3_sources": {
+    "rule_F_but_L_is_right": {
+     "rows": 5664,
+     "row_share": 0.13002754820936638,
+     "gain_sum": 64.01780917180605,
+     "gain_share": 0.7683380550674289,
+     "mean_gain_when_it_happens": 0.011302579302931859
+    },
+    "rule_L_but_F_is_right": {
+     "rows": 132,
+     "row_share": 0.0030303030303030303,
+     "gain_sum": 1.8611233879722298,
+     "gain_share": 0.022337095609089634,
+     "mean_gain_when_it_happens": 0.014099419605850226
+    },
+    "E_is_right": {
+     "rows": 13506,
+     "row_share": 0.3100550964187328,
+     "gain_sum": 17.440914413293825,
+     "gain_share": 0.20932484932348108,
+     "mean_gain_when_it_happens": 0.001291345654767794
+    },
+    "agreement": {
+     "rows": 24258,
+     "row_share": 0.5568870523415977,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    }
+   },
+   "B3_unclassified_rows": 0,
+   "B3_note": "the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction",
+   "B4_distribution": {
+    "per_scene": [
+     {
+      "scene": "2021_08_20_21_48_35",
+      "rows": 2464,
+      "mean_gain": 0.0025666072475083596,
+      "gain_sum": 6.324120257860598,
+      "gain_share": 0.07590172675070407,
+      "rows_with_gain": 255
+     },
+     {
+      "scene": "2021_08_21_17_30_41",
+      "rows": 3454,
+      "mean_gain": 0.0028568455683635643,
+      "gain_sum": 9.867544593127752,
+      "gain_share": 0.1184297013449486,
+      "rows_with_gain": 356
+     },
+     {
+      "scene": "2021_08_22_13_37_16",
+      "rows": 2970,
+      "mean_gain": 0.0005039077922916459,
+      "gain_sum": 1.4966061431061881,
+      "gain_share": 0.01796218065054622,
+      "rows_with_gain": 65
+     },
+     {
+      "scene": "2021_08_22_22_01_17",
+      "rows": 4444,
+      "mean_gain": 0.0011926434174298578,
+      "gain_sum": 5.300107347058288,
+      "gain_share": 0.06361158282937332,
+      "rows_with_gain": 109
+     },
+     {
+      "scene": "2021_08_23_10_51_24",
+      "rows": 1408,
+      "mean_gain": 0.001632310385463278,
+      "gain_sum": 2.2982930227322953,
+      "gain_share": 0.02758398036274686,
+      "rows_with_gain": 143
+     },
+     {
+      "scene": "2021_08_23_13_17_21",
+      "rows": 1056,
+      "mean_gain": 0.004087897425869299,
+      "gain_sum": 4.31681968171798,
+      "gain_share": 0.051810220956276104,
+      "rows_with_gain": 239
+     },
+     {
+      "scene": "2021_08_23_19_42_07",
+      "rows": 1254,
+      "mean_gain": 0.00530699176633103,
+      "gain_sum": 6.654967674979112,
+      "gain_share": 0.0798725383776798,
+      "rows_with_gain": 306
+     },
+     {
+      "scene": "2021_09_09_19_27_35",
+      "rows": 10098,
+      "mean_gain": 0.002210599883962726,
+      "gain_sum": 22.32263762825561,
+      "gain_share": 0.26791500991918515,
+      "rows_with_gain": 804
+     },
+     {
+      "scene": "2021_09_11_00_33_16",
+      "rows": 16412,
+      "mean_gain": 0.0015073574594342122,
+      "gain_sum": 24.738750624234292,
+      "gain_share": 0.2969130588085397,
+      "rows_with_gain": 2152
+     }
+    ],
+    "scenes_with_positive_gain": 9,
+    "rows_with_any_gain": 4429,
+    "row_share_with_any_gain": 0.10167584940312213,
+    "top10pct_rows_gain_share": 0.9999999945153031,
+    "top1pct_rows_gain_share": 0.33157066833504845,
+    "concentration_caveat": "the top-10 % figure is close to tautological whenever fewer than 10 % of rows carry any gain at all: the informative quantities are the share of rows with a gain and the spread across scenes",
+    "max_scene_gain_share": 0.2969130588085397,
+    "total_gain_sum": 83.31984697307213
+   }
+  },
+  {
+   "label": "AWGN only",
+   "rows": 21780,
+   "frames": 1980,
+   "cells": 11,
+   "tie_slack": {
+    "min_gain": -9.751690566162097e-10,
+    "rows_below_zero": 650,
+    "explanation": "any negative entry is at most TOL and comes from the cheaper-payload tie rule, never from the rule outperforming the per-frame optimum"
+   },
+   "optimal_share": {
+    "E": 0.3467401285583104,
+    "L": 0.3923783287419651,
+    "F": 0.2608815426997245
+   },
+   "rule_share_F": 0.5454545454545454,
+   "G_task": {
+    "mean": 0.00377529174215486,
+    "lcb95": 0.0026879228528629774,
+    "ucb95": 0.004773875928448723
+   },
+   "vs_Fixed_L": {
+    "mean": 0.011652335810634715,
+    "lcb95": 0.006569640269335405,
+    "ucb95": 0.01758012113349568
+   },
+   "vs_Fixed_F": {
+    "mean": 0.009131397147550277,
+    "lcb95": 0.006390323872410187,
+    "ucb95": 0.012756421741938669
+   },
+   "scene_equal": {
+    "Q_star": 0.8860976195297074,
+    "Q_rule": 0.8823223277875526,
+    "Q_Fixed_L": 0.8744452837190726,
+    "Q_Fixed_F": 0.876966222382157,
+    "Q_Fixed_E": 0.8256674842513136
+   },
+   "payload_sym_scene_equal": {
+    "optimal": 673945.8535146303,
+    "rule": 1714488.4077517593
+   },
+   "B3_sources": {
+    "rule_F_but_L_is_right": {
+     "rows": 5664,
+     "row_share": 0.26005509641873276,
+     "gain_sum": 64.01780917180605,
+     "gain_share": 0.8570133336808271,
+     "mean_gain_when_it_happens": 0.011302579302931859
+    },
+    "rule_L_but_F_is_right": {
+     "rows": 132,
+     "row_share": 0.006060606060606061,
+     "gain_sum": 1.8611233879722298,
+     "gain_share": 0.024915060039572393,
+     "mean_gain_when_it_happens": 0.014099419605850226
+    },
+    "E_is_right": {
+     "rows": 7552,
+     "row_share": 0.3467401285583104,
+     "gain_sum": 8.819799252074542,
+     "gain_share": 0.1180716062796003,
+     "mean_gain_when_it_happens": 0.0011678759602852943
+    },
+    "agreement": {
+     "rows": 8432,
+     "row_share": 0.38714416896235077,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    }
+   },
+   "B3_unclassified_rows": 0,
+   "B3_note": "the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction",
+   "B4_distribution": {
+    "per_scene": [
+     {
+      "scene": "2021_08_20_21_48_35",
+      "rows": 1232,
+      "mean_gain": 0.004981267058256681,
+      "gain_sum": 6.136921015772231,
+      "gain_share": 0.08215562522841188,
+      "rows_with_gain": 235
+     },
+     {
+      "scene": "2021_08_21_17_30_41",
+      "rows": 1727,
+      "mean_gain": 0.005713691143299393,
+      "gain_sum": 9.867544604478052,
+      "gain_share": 0.13209788660578461,
+      "rows_with_gain": 356
+     },
+     {
+      "scene": "2021_08_22_13_37_16",
+      "rows": 1485,
+      "mean_gain": 0.0008105161223755925,
+      "gain_sum": 1.2036164417277548,
+      "gain_share": 0.016112943453435856,
+      "rows_with_gain": 43
+     },
+     {
+      "scene": "2021_08_22_22_01_17",
+      "rows": 2222,
+      "mean_gain": 0.0017439078706169226,
+      "gain_sum": 3.874963288510802,
+      "gain_share": 0.051874552546231335,
+      "rows_with_gain": 65
+     },
+     {
+      "scene": "2021_08_23_10_51_24",
+      "rows": 704,
+      "mean_gain": 0.0030886337476578925,
+      "gain_sum": 2.1743981583511562,
+      "gain_share": 0.02910890326529122,
+      "rows_with_gain": 116
+     },
+     {
+      "scene": "2021_08_23_13_17_21",
+      "rows": 528,
+      "mean_gain": 0.005092399739331528,
+      "gain_sum": 2.688787062367047,
+      "gain_share": 0.035995083144643204,
+      "rows_with_gain": 104
+     },
+     {
+      "scene": "2021_08_23_19_42_07",
+      "rows": 627,
+      "mean_gain": 0.005311014156891273,
+      "gain_sum": 3.3300058763708282,
+      "gain_share": 0.044579148743224564,
+      "rows_with_gain": 93
+     },
+     {
+      "scene": "2021_09_09_19_27_35",
+      "rows": 5049,
+      "mean_gain": 0.004421199780386243,
+      "gain_sum": 22.32263769117014,
+      "gain_share": 0.2988355645366939,
+      "rows_with_gain": 804
+     },
+     {
+      "scene": "2021_09_11_00_33_16",
+      "rows": 8206,
+      "mean_gain": 0.0028149960605782136,
+      "gain_sum": 23.09985767310482,
+      "gain_share": 0.3092402924762833,
+      "rows_with_gain": 1661
+     }
+    ],
+    "scenes_with_positive_gain": 9,
+    "rows_with_any_gain": 3477,
+    "row_share_with_any_gain": 0.15964187327823692,
+    "top10pct_rows_gain_share": 0.9150297392357517,
+    "top1pct_rows_gain_share": 0.21922675426089963,
+    "concentration_caveat": "the top-10 % figure is close to tautological whenever fewer than 10 % of rows carry any gain at all: the informative quantities are the share of rows with a gain and the spread across scenes",
+    "max_scene_gain_share": 0.3092402924762833,
+    "total_gain_sum": 74.69873181185284
+   }
+  },
+  {
+   "label": "Rayleigh only",
+   "rows": 21780,
+   "frames": 1980,
+   "cells": 11,
+   "tie_slack": {
+    "min_gain": -9.986833582331656e-10,
+    "rows_below_zero": 2424,
+    "explanation": "any negative entry is at most TOL and comes from the cheaper-payload tie rule, never from the rule outperforming the per-frame optimum"
+   },
+   "optimal_share": {
+    "E": 0.27337006427915517,
+    "L": 0.7266299357208448,
+    "F": 0.0
+   },
+   "rule_share_F": 0.0,
+   "G_task": {
+    "mean": 0.001083632912657134,
+    "lcb95": 0.00014448638965963782,
+    "ucb95": 0.002401532952527728
+   },
+   "vs_Fixed_L": {
+    "mean": 0.001083632912657134,
+    "lcb95": 0.00014448638965963782,
+    "ucb95": 0.002401532952527728
+   },
+   "vs_Fixed_F": {
+    "mean": 0.01805686814281015,
+    "lcb95": 0.011376349108383622,
+    "ucb95": 0.026498829911082565
+   },
+   "scene_equal": {
+    "Q_star": 0.8437243523941237,
+    "Q_rule": 0.8426407194814666,
+    "Q_Fixed_L": 0.8426407194814666,
+    "Q_Fixed_F": 0.8256674842513136,
+    "Q_Fixed_E": 0.8256674842513136
+   },
+   "payload_sym_scene_equal": {
+    "optimal": 1240.9606896470652,
+    "rule": 1774.497053870335
+   },
+   "B3_sources": {
+    "rule_F_but_L_is_right": {
+     "rows": 0,
+     "row_share": 0.0,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    },
+    "rule_L_but_F_is_right": {
+     "rows": 0,
+     "row_share": 0.0,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    },
+    "E_is_right": {
+     "rows": 5954,
+     "row_share": 0.27337006427915517,
+     "gain_sum": 8.621115161219283,
+     "gain_share": 1.0,
+     "mean_gain_when_it_happens": 0.0014479535037318246
+    },
+    "agreement": {
+     "rows": 15826,
+     "row_share": 0.7266299357208448,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    }
+   },
+   "B3_unclassified_rows": 0,
+   "B3_note": "the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction",
+   "B4_distribution": {
+    "per_scene": [
+     {
+      "scene": "2021_08_20_21_48_35",
+      "rows": 1232,
+      "mean_gain": 0.00015194743676003844,
+      "gain_sum": 0.18719924208836736,
+      "gain_share": 0.02171404030541819,
+      "rows_with_gain": 20
+     },
+     {
+      "scene": "2021_08_21_17_30_41",
+      "rows": 1727,
+      "mean_gain": -6.572265218058766e-12,
+      "gain_sum": -1.135030203158749e-08,
+      "gain_share": -1.3165700514760572e-09,
+      "rows_with_gain": 0
+     },
+     {
+      "scene": "2021_08_22_13_37_16",
+      "rows": 1485,
+      "mean_gain": 0.00019729946220769918,
+      "gain_sum": 0.2929897013784333,
+      "gain_share": 0.03398512789811704,
+      "rows_with_gain": 22
+     },
+     {
+      "scene": "2021_08_22_22_01_17",
+      "rows": 2222,
+      "mean_gain": 0.0006413789642427928,
+      "gain_sum": 1.4251440585474855,
+      "gain_share": 0.165308551376076,
+      "rows_with_gain": 44
+     },
+     {
+      "scene": "2021_08_23_10_51_24",
+      "rows": 704,
+      "mean_gain": 0.0001759870232686633,
+      "gain_sum": 0.12389486438113895,
+      "gain_share": 0.014371094929628167,
+      "rows_with_gain": 27
+     },
+     {
+      "scene": "2021_08_23_13_17_21",
+      "rows": 528,
+      "mean_gain": 0.003083395112407069,
+      "gain_sum": 1.6280326193509325,
+      "gain_share": 0.18884246282596695,
+      "rows_with_gain": 135
+     },
+     {
+      "scene": "2021_08_23_19_42_07",
+      "rows": 627,
+      "mean_gain": 0.005302969375770787,
+      "gain_sum": 3.3249617986082836,
+      "gain_share": 0.38567653214575953,
+      "rows_with_gain": 213
+     },
+     {
+      "scene": "2021_09_09_19_27_35",
+      "rows": 5049,
+      "mean_gain": -1.246078996461771e-11,
+      "gain_sum": -6.291452853135482e-08,
+      "gain_share": -7.297725103402612e-09,
+      "rows_with_gain": 0
+     },
+     {
+      "scene": "2021_09_11_00_33_16",
+      "rows": 8206,
+      "mean_gain": 0.00019971885829021105,
+      "gain_sum": 1.6388929511294719,
+      "gain_share": 0.19010219913332924,
+      "rows_with_gain": 491
+     }
+    ],
+    "scenes_with_positive_gain": 7,
+    "rows_with_any_gain": 952,
+    "row_share_with_any_gain": 0.04370982552800735,
+    "top10pct_rows_gain_share": 1.000000019850565,
+    "top1pct_rows_gain_share": 0.8101391060393301,
+    "concentration_caveat": "the top-10 % figure is close to tautological whenever fewer than 10 % of rows carry any gain at all: the informative quantities are the share of rows with a gain and the spread across scenes",
+    "max_scene_gain_share": 0.38567653214575953,
+    "total_gain_sum": 8.621115161219283
+   }
+  },
+  {
+   "label": "B-5 clean cells (q_F >= 0.99)",
+   "rows": 11880,
+   "frames": 1980,
+   "cells": 6,
+   "tie_slack": {
+    "min_gain": 0.0,
+    "rows_below_zero": 0,
+    "explanation": "any negative entry is at most TOL and comes from the cheaper-payload tie rule, never from the rule outperforming the per-frame optimum"
+   },
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_share_F": 1.0,
+   "G_task": {
+    "mean": 0.006073225821359781,
+    "lcb95": 0.004264350441998127,
+    "ucb95": 0.007803605326831043
+   },
+   "vs_Fixed_L": {
+    "mean": 0.02051447328023951,
+    "lcb95": 0.011834418452679461,
+    "ucb95": 0.030568243223714636
+   },
+   "vs_Fixed_F": {
+    "mean": 0.006073225821359781,
+    "lcb95": 0.004264350441998127,
+    "ucb95": 0.007803605326831043
+   },
+   "scene_equal": {
+    "Q_star": 0.9228253629064602,
+    "Q_rule": 0.9167521370851005,
+    "Q_Fixed_L": 0.9023108896262207,
+    "Q_Fixed_F": 0.9167521370851005,
+    "Q_Fixed_E": 0.8256674842513136
+   },
+   "payload_sym_scene_equal": {
+    "optimal": 1189157.924907387,
+    "rule": 3141750.0
+   },
+   "B3_sources": {
+    "rule_F_but_L_is_right": {
+     "rows": 5664,
+     "row_share": 0.4767676767676768,
+     "gain_sum": 64.01780917180605,
+     "gain_share": 0.9106844120825001,
+     "mean_gain_when_it_happens": 0.011302579302931859
+    },
+    "rule_L_but_F_is_right": {
+     "rows": 0,
+     "row_share": 0.0,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    },
+    "E_is_right": {
+     "rows": 666,
+     "row_share": 0.05606060606060606,
+     "gain_sum": 6.278561692183866,
+     "gain_share": 0.08931558791749984,
+     "mean_gain_when_it_happens": 0.009427269808083883
+    },
+    "agreement": {
+     "rows": 5550,
+     "row_share": 0.4671717171717172,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    }
+   },
+   "B3_unclassified_rows": 0,
+   "B3_note": "the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction",
+   "B4_distribution": {
+    "per_scene": [
+     {
+      "scene": "2021_08_20_21_48_35",
+      "rows": 672,
+      "mean_gain": 0.008986574489289429,
+      "gain_sum": 6.038978056802496,
+      "gain_share": 0.08590739440143742,
+      "rows_with_gain": 228
+     },
+     {
+      "scene": "2021_08_21_17_30_41",
+      "rows": 942,
+      "mean_gain": 0.010473105699777217,
+      "gain_sum": 9.865665569190138,
+      "gain_share": 0.14034388188087718,
+      "rows_with_gain": 354
+     },
+     {
+      "scene": "2021_08_22_13_37_16",
+      "rows": 810,
+      "mean_gain": 0.0012768959435626112,
+      "gain_sum": 1.0342857142857151,
+      "gain_share": 0.014713216366273884,
+      "rows_with_gain": 24
+     },
+     {
+      "scene": "2021_08_22_22_01_17",
+      "rows": 1212,
+      "mean_gain": 0.0028324810503028344,
+      "gain_sum": 3.432967032967035,
+      "gain_share": 0.04883562253319125,
+      "rows_with_gain": 48
+     },
+     {
+      "scene": "2021_08_23_10_51_24",
+      "rows": 384,
+      "mean_gain": 0.005497613861736919,
+      "gain_sum": 2.1110837229069768,
+      "gain_share": 0.030031190756511762,
+      "rows_with_gain": 108
+     },
+     {
+      "scene": "2021_08_23_13_17_21",
+      "rows": 288,
+      "mean_gain": 0.006720743853096805,
+      "gain_sum": 1.9355742296918799,
+      "gain_share": 0.02753448301672425,
+      "rows_with_gain": 72
+     },
+     {
+      "scene": "2021_08_23_19_42_07",
+      "rows": 342,
+      "mean_gain": 0.005958833009296704,
+      "gain_sum": 2.037920889179473,
+      "gain_share": 0.028990413930791128,
+      "rows_with_gain": 42
+     },
+     {
+      "scene": "2021_09_09_19_27_35",
+      "rows": 2754,
+      "mean_gain": 0.008105532930708112,
+      "gain_sum": 22.32263769117014,
+      "gain_share": 0.3175503573912825,
+      "rows_with_gain": 804
+     },
+     {
+      "scene": "2021_09_11_00_33_16",
+      "rows": 4476,
+      "mean_gain": 0.004807251554467398,
+      "gain_sum": 21.517257957796073,
+      "gain_share": 0.30609343972291064,
+      "rows_with_gain": 1566
+     }
+    ],
+    "scenes_with_positive_gain": 9,
+    "rows_with_any_gain": 3246,
+    "row_share_with_any_gain": 0.2732323232323232,
+    "top10pct_rows_gain_share": 0.6943383171898284,
+    "top1pct_rows_gain_share": 0.13937296635115715,
+    "concentration_caveat": "the top-10 % figure is close to tautological whenever fewer than 10 % of rows carry any gain at all: the informative quantities are the share of rows with a gain and the spread across scenes",
+    "max_scene_gain_share": 0.3175503573912825,
+    "total_gain_sum": 70.29637086398992
+   }
+  },
+  {
+   "label": "B-5 clean cells with a sample of their own",
+   "rows": 7920,
+   "frames": 1980,
+   "cells": 4,
+   "tie_slack": {
+    "min_gain": 0.0,
+    "rows_below_zero": 0,
+    "explanation": "any negative entry is at most TOL and comes from the cheaper-payload tie rule, never from the rule outperforming the per-frame optimum"
+   },
+   "optimal_share": {
+    "E": 0.05606060606060606,
+    "L": 0.4767676767676768,
+    "F": 0.4671717171717172
+   },
+   "rule_share_F": 1.0,
+   "G_task": {
+    "mean": 0.006073225821359781,
+    "lcb95": 0.004264350441998127,
+    "ucb95": 0.007803605326831045
+   },
+   "vs_Fixed_L": {
+    "mean": 0.020514473280239517,
+    "lcb95": 0.011834418452679461,
+    "ucb95": 0.030568243223714636
+   },
+   "vs_Fixed_F": {
+    "mean": 0.006073225821359781,
+    "lcb95": 0.004264350441998127,
+    "ucb95": 0.007803605326831045
+   },
+   "scene_equal": {
+    "Q_star": 0.9228253629064602,
+    "Q_rule": 0.9167521370851005,
+    "Q_Fixed_L": 0.9023108896262207,
+    "Q_Fixed_F": 0.9167521370851005,
+    "Q_Fixed_E": 0.8256674842513136
+   },
+   "payload_sym_scene_equal": {
+    "optimal": 1189157.924907387,
+    "rule": 3141750.0
+   },
+   "B3_sources": {
+    "rule_F_but_L_is_right": {
+     "rows": 3776,
+     "row_share": 0.4767676767676768,
+     "gain_sum": 42.678539447870705,
+     "gain_share": 0.9106844120825003,
+     "mean_gain_when_it_happens": 0.01130257930293186
+    },
+    "rule_L_but_F_is_right": {
+     "rows": 0,
+     "row_share": 0.0,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    },
+    "E_is_right": {
+     "rows": 444,
+     "row_share": 0.05606060606060606,
+     "gain_sum": 4.185707794789244,
+     "gain_share": 0.08931558791749986,
+     "mean_gain_when_it_happens": 0.009427269808083883
+    },
+    "agreement": {
+     "rows": 3700,
+     "row_share": 0.4671717171717172,
+     "gain_sum": 0.0,
+     "gain_share": 0.0,
+     "mean_gain_when_it_happens": 0.0
+    }
+   },
+   "B3_unclassified_rows": 0,
+   "B3_note": "the buckets are mutually exclusive: a frame where E is right is counted only there, so the two F/L buckets are genuine F-versus-L disagreements. Rows where the rule already agrees with the optimum contribute no gain by construction",
+   "B4_distribution": {
+    "per_scene": [
+     {
+      "scene": "2021_08_20_21_48_35",
+      "rows": 448,
+      "mean_gain": 0.008986574489289427,
+      "gain_sum": 4.0259853712016636,
+      "gain_share": 0.08590739440143741,
+      "rows_with_gain": 152
+     },
+     {
+      "scene": "2021_08_21_17_30_41",
+      "rows": 628,
+      "mean_gain": 0.010473105699777219,
+      "gain_sum": 6.577110379460093,
+      "gain_share": 0.1403438818808772,
+      "rows_with_gain": 236
+     },
+     {
+      "scene": "2021_08_22_13_37_16",
+      "rows": 540,
+      "mean_gain": 0.0012768959435626112,
+      "gain_sum": 0.6895238095238101,
+      "gain_share": 0.014713216366273886,
+      "rows_with_gain": 16
+     },
+     {
+      "scene": "2021_08_22_22_01_17",
+      "rows": 808,
+      "mean_gain": 0.002832481050302834,
+      "gain_sum": 2.28864468864469,
+      "gain_share": 0.04883562253319125,
+      "rows_with_gain": 32
+     },
+     {
+      "scene": "2021_08_23_10_51_24",
+      "rows": 256,
+      "mean_gain": 0.005497613861736918,
+      "gain_sum": 1.407389148604651,
+      "gain_share": 0.030031190756511762,
+      "rows_with_gain": 72
+     },
+     {
+      "scene": "2021_08_23_13_17_21",
+      "rows": 192,
+      "mean_gain": 0.006720743853096805,
+      "gain_sum": 1.2903828197945866,
+      "gain_share": 0.027534483016724252,
+      "rows_with_gain": 48
+     },
+     {
+      "scene": "2021_08_23_19_42_07",
+      "rows": 228,
+      "mean_gain": 0.005958833009296704,
+      "gain_sum": 1.3586139261196486,
+      "gain_share": 0.02899041393079113,
+      "rows_with_gain": 28
+     },
+     {
+      "scene": "2021_09_09_19_27_35",
+      "rows": 1836,
+      "mean_gain": 0.008105532930708112,
+      "gain_sum": 14.881758460780093,
+      "gain_share": 0.31755035739128257,
+      "rows_with_gain": 536
+     },
+     {
+      "scene": "2021_09_11_00_33_16",
+      "rows": 2984,
+      "mean_gain": 0.004807251554467398,
+      "gain_sum": 14.344838638530714,
+      "gain_share": 0.3060934397229107,
+      "rows_with_gain": 1044
+     }
+    ],
+    "scenes_with_positive_gain": 9,
+    "rows_with_any_gain": 2164,
+    "row_share_with_any_gain": 0.2732323232323232,
+    "top10pct_rows_gain_share": 0.6943383171898284,
+    "top1pct_rows_gain_share": 0.13889878350325696,
+    "concentration_caveat": "the top-10 % figure is close to tautological whenever fewer than 10 % of rows carry any gain at all: the informative quantities are the share of rows with a gain and the spread across scenes",
+    "max_scene_gain_share": 0.31755035739128257,
+    "total_gain_sum": 46.86424724265994
+   }
+  }
+ ],
+ "inputs": {
+  "grid": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+  "wp5": "9dbcffd78829d762b03191016c73e7d6b89bddf9a6782dbb8cbc0bd06bb48f31",
+  "wp34": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02",
+  "bler": "631db285595af1a77766f101c69725815a252f48577674922fc1b18551315102",
+  "four_arm": "82e843fbd4c0f18287f74ea6c485e4151963fafb4360c8f845fc46306d5aa75d",
+  "fill_eval": "167d6c33789d8dac75233bfc6b28ae410381cc735b1e1a304feaa95efed71e19"
+ },
+ "command": "python projects/ca_tosg_p2/protocol/offline_potential.py"
+}

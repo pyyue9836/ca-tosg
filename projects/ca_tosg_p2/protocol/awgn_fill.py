@@ -32,6 +32,8 @@ TARGET_ERR beyond reach turns the adaptive loop into a fixed-N loop, which is ex
 from __future__ import annotations
 import argparse, inspect, json, math, os, platform, sys, time
 
+from scipy.stats import beta as _beta
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 LDPC_PY = os.path.join(ROOT, 'projects', 'ca_tosg', 'communication', 'ldpc_qam.py')
@@ -66,6 +68,21 @@ def one_sided_upper(n, alpha=0.05):
 
     This is the exact Clopper-Pearson form; 3/n is its first-order approximation."""
     return 1.0 - alpha ** (1.0 / n)
+
+
+def cp_upper(k, n, alpha=0.05):
+    """A-1: the one-sided 95 % Clopper-Pearson upper limit for ANY k, not only k = 0.
+
+    At k = 0 the closed form 1 - alpha^(1/n) IS the Clopper-Pearson limit, so it is used directly:
+    beta.ppf is a numerical quantile routine and agrees with it only to about 1e-9 relative, which is
+    fine as a sanity check on the library but is no reason to store a slightly wrong number where an
+    exact one is available. check_implementation records the measured agreement.
+
+    Having the limit defined for every k is what lets `p_cw_upper95` be a real column rather than a
+    footnote that exists only on the zero-error rows."""
+    if k <= 0:
+        return one_sided_upper(n, alpha)
+    return 1.0 if k >= n else float(_beta.ppf(1.0 - alpha, k + 1, n - k))
 
 
 # ------------------------------------------------------------- implementation
@@ -106,6 +123,15 @@ def check_implementation(ldpc):
     chk('decoder iterations', ldpc.NUM_ITER, 20, 'ldpc_qam.NUM_ITER')
     chk('batch size', ldpc.BATCH, 2000, 'ldpc_qam.BATCH')
     chk('bits per symbol', BPS, int(round(math.log2(QAM))), 'log2 of the constellation order')
+    # A-1: at k = 0 the stored value comes from the closed form, so it is exact by construction. What
+    # is checked here is that scipy's quantile routine agrees with that closed form -- a sanity check
+    # on the library, at a tolerance set by what a numerical quantile can deliver, not by the data.
+    rel = max(abs(float(_beta.ppf(0.95, 1, n)) / one_sided_upper(n) - 1.0) for n in (100_000, 1_000_000))
+    if rel > 1e-6:
+        raise SystemExit(f'A-1: beta.ppf disagrees with 1 - 0.05^(1/N) at k = 0 by {rel:.3g} relative')
+    items.append({'item': 'p_cw_upper95 at k = 0 uses the exact closed form 1 - 0.05^(1/N)',
+                  'value': f'exact by construction; scipy agrees to {rel:.2g} relative',
+                  'expected': 'exact', 'ok': True, 'source': 'cp_upper vs one_sided_upper at 1e5, 1e6'})
 
     # SNR definition and noise normalisation, verified against the physics rather than a literal:
     # the x-axis is Es/N0 with unit symbol energy, so N0 must equal 10^(-EsN0/10) exactly, and the
@@ -185,14 +211,17 @@ def measure(ldpc, esno, n_target, log):
     dt = time.time() - t0
     lo, hi = wilson(n_err, n_cw)
     row = {'qam': QAM, 'channel': CHANNEL, 'esno_db': esno, 'ebno_db': round(ebno, 4),
-           'n_cw': n_cw, 'n_err': n_err, 'p_hat': n_err / n_cw,
+           'n_cw': n_cw, 'n_err': n_err,
+           # A-1: two explicit fields. p_cw_point is the empirical k/N and is 0.0 when no error was
+           # observed; p_cw_upper95 is the one-sided 95 % upper limit and is always finite. A consumer
+           # picks the column its purpose needs and can never mistake one for the other.
+           'p_cw_point': n_err / n_cw, 'p_cw_point_kind': 'empirical k/N',
+           'p_cw_upper95': cp_upper(n_err, n_cw),
            'wilson95_lo': lo, 'wilson95_hi': hi,
            'zero_error': n_err == 0,
-           'one_sided_upper95': one_sided_upper(n_cw) if n_err == 0 else None,
            'seed': seed, 'seconds': dt}
-    msg = (f'  Es/N0={esno:5.2f} dB  k={n_err:6d}  N={n_cw:9d}  p_hat={row["p_hat"]:.3e}  '
-           f'Wilson95=[{lo:.3e}, {hi:.3e}]'
-           + (f'  one-sided upper={row["one_sided_upper95"]:.3e}' if n_err == 0 else '')
+    msg = (f'  Es/N0={esno:5.2f} dB  k={n_err:6d}  N={n_cw:9d}  p_point={row["p_cw_point"]:.3e}  '
+           f'p_upper95={row["p_cw_upper95"]:.3e}  Wilson95=[{lo:.3e}, {hi:.3e}]'
            + f'  [{dt/60:.1f} min]')
     print(msg, flush=True)
     log.append(msg)
@@ -238,7 +267,7 @@ def run():
 def fmt_p(r):
     if r['n_err'] == 0:
         return 'no error observed'
-    return f'{r["p_hat"]:.3e}'
+    return f'{r["p_cw_point"]:.3e}'
 
 
 def verdict(r, thr=P_THRESHOLD):
@@ -248,7 +277,7 @@ def verdict(r, thr=P_THRESHOLD):
     not the point estimate, because the point estimate carries no uncertainty. A zero-error point is
     judged by its one-sided upper limit."""
     if r['n_err'] == 0:
-        u = r['one_sided_upper95']
+        u = r['p_cw_upper95']
         return ('supports complete F' if u < thr else 'not distinguishable',
                 f'zero errors; one-sided 95 % upper limit {u:.3e} '
                 f'{"<" if u < thr else ">="} threshold {thr:.3e}')
@@ -280,17 +309,25 @@ def render(d):
     w('')
     w('## Measured points')
     w('')
-    w('| Es/N0 (dB) | errors k | codewords N | k/N | two-sided Wilson 95 % | one-sided 95 % upper (k = 0 only) |')
-    w('|---:|---:|---:|---:|---|---|')
+    w('| Es/N0 (dB) | errors k | codewords N | `p_cw_point` (empirical k/N) | `p_cw_upper95` (one-sided 95 %) | two-sided Wilson 95 % |')
+    w('|---:|---:|---:|---:|---:|---|')
     for r in d['rows']:
-        up = f'{r["one_sided_upper95"]:.3e}' if r['n_err'] == 0 else '—'
-        w(f'| {r["esno_db"]:.1f} | {r["n_err"]:,} | {r["n_cw"]:,} | {fmt_p(r)} | '
-          f'[{r["wilson95_lo"]:.3e}, {r["wilson95_hi"]:.3e}] | {up} |')
+        w(f'| {r["esno_db"]:.1f} | {r["n_err"]:,} | {r["n_cw"]:,} | {r["p_cw_point"]:.3e} | '
+          f'{r["p_cw_upper95"]:.3e} | [{r["wilson95_lo"]:.3e}, {r["wilson95_hi"]:.3e}] |')
     w('')
-    w('The two interval kinds are different quantities and are kept in different columns: the Wilson')
-    w('column is a two-sided interval for the observed proportion; the last column is a one-sided 95 %')
-    w('upper limit `1 - 0.05^(1/N)`, quoted only where no error was observed. **No point is reported as')
-    w('`p_cw = 0`.**')
+    w('**A-1 — the two p_cw columns mean different things and a consumer must choose deliberately.**')
+    w('')
+    w('* `p_cw_point` is the **empirical** rate k/N. Where no error was observed it is exactly `0.0`,')
+    w('  and that zero means "none seen in N draws", never "the rate is zero". It is the right column')
+    w('  for an unbiased estimate and the wrong column for any claim of reliability.')
+    w('* `p_cw_upper95` is the one-sided 95 % Clopper-Pearson upper limit, finite on every row. At')
+    w('  k = 0 it is exactly `1 - 0.05^(1/N)`, whose first-order approximation is the familiar `3/N`.')
+    w('  It is the right column for "the loss is no worse than", which is what a delivery argument needs.')
+    w('* `zero_error` flags the rows where the two diverge most sharply.')
+    w('')
+    w('The two-sided Wilson column is a third quantity again: an interval for the observed proportion.')
+    w('It is what the D-1 verdicts use for k > 0, exactly as pre-registered; A-1 changes the field')
+    w('semantics, not the decision rule.')
     w('')
     w('## Reproduction check at 8 and 10 dB (B-3)')
     w('')

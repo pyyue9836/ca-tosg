@@ -11,7 +11,7 @@
   "grid": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
   "wp5": "9dbcffd78829d762b03191016c73e7d6b89bddf9a6782dbb8cbc0bd06bb48f31",
   "wp34": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02",
-  "fill": "00722c16b913a5f02e02ddeb200d180a482921e88d9722f0e7ead3a8d53764b6"
+  "fill": "24940ebbb05eba0922cd8b7278d6d2cecabb791e1d6fdbcebf2d31fb3f219b24"
  },
  "reconstruction_guard": [
   {
@@ -345,7 +345,9 @@
    9.5
   ],
   "p1_grid_untouched_sha256": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
-  "note": "the added rows carry p_cw from the P2-R13 measurement; where no error was observed the stored p_cw is 0 and p_cw_is_upper_bound is True, so no consumer can read it as a measured zero without seeing the flag"
+  "A1_columns": "every row carries p_cw_point (empirical k/N) and p_cw_upper95 (one-sided 95 % Clopper-Pearson upper limit) as separate fields, plus p_cw_sampled and p_cw_is_upper_bound. p_cw is kept unchanged so existing consumers still read what they always read",
+  "interpolated_cells_without_counts": 3960,
+  "note": "where no error was observed p_cw_point is 0.0 and p_cw_is_upper_bound is True, so no consumer can read it as a measured zero without seeing the flag. Rows whose cell P1 obtained by interpolation carry p_cw_sampled = False and an empty p_cw_upper95: they have no counts of their own and none is invented for them"
  },
  "C2_status_of_the_threshold": "an average-performance crossing estimate under the current data, scene weights and message model -- not a per-frame reliability rule and not a link-layer requirement",
  "command": "python projects/ca_tosg_p2/protocol/awgn_fill_eval.py"

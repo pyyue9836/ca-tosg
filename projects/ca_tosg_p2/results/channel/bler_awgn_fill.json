@@ -104,11 +104,12 @@
    "ebno_db": 4.9897,
    "n_cw": 100000,
    "n_err": 12,
-   "p_hat": 0.00012,
+   "p_cw_point": 0.00012,
+   "p_cw_point_kind": "empirical k/N",
+   "p_cw_upper95": 0.0001944184581475167,
    "wilson95_lo": 6.864888073994729e-05,
    "wilson95_hi": 0.0002097550126960724,
    "zero_error": false,
-   "one_sided_upper95": null,
    "seed": 20260993,
    "seconds": 128.4251880645752
   },
@@ -119,11 +120,12 @@
    "ebno_db": 5.4897,
    "n_cw": 1000000,
    "n_err": 4,
-   "p_hat": 4e-06,
+   "p_cw_point": 4e-06,
+   "p_cw_point_kind": "empirical k/N",
+   "p_cw_upper95": 9.153495440240322e-06,
    "wilson95_lo": 1.5555229483848642e-06,
    "wilson95_hi": 1.0285890384007566e-05,
    "zero_error": false,
-   "one_sided_upper95": null,
    "seed": 20260998,
    "seconds": 1248.6310017108917
   },
@@ -134,11 +136,12 @@
    "ebno_db": 5.9897,
    "n_cw": 1000000,
    "n_err": 1,
-   "p_hat": 1e-06,
+   "p_cw_point": 1e-06,
+   "p_cw_point_kind": "empirical k/N",
+   "p_cw_upper95": 4.743855638214234e-06,
    "wilson95_lo": 1.765245767453709e-07,
    "wilson95_hi": 5.664911804311442e-06,
    "zero_error": false,
-   "one_sided_upper95": null,
    "seed": 20261003,
    "seconds": 1241.4477632045746
   },
@@ -149,11 +152,12 @@
    "ebno_db": 6.4897,
    "n_cw": 1000000,
    "n_err": 0,
-   "p_hat": 0.0,
+   "p_cw_point": 0.0,
+   "p_cw_point_kind": "empirical k/N",
+   "p_cw_upper95": 2.9957277863923437e-06,
    "wilson95_lo": 0.0,
    "wilson95_hi": 3.841444063944942e-06,
    "zero_error": true,
-   "one_sided_upper95": 2.9957277863923437e-06,
    "seed": 20261008,
    "seconds": 1241.2725129127502
   },
@@ -164,11 +168,12 @@
    "ebno_db": 6.9897,
    "n_cw": 100000,
    "n_err": 0,
-   "p_hat": 0.0,
+   "p_cw_point": 0.0,
+   "p_cw_point_kind": "empirical k/N",
+   "p_cw_upper95": 2.995687401941005e-05,
    "wilson95_lo": 0.0,
    "wilson95_hi": 3.841311258303963e-05,
    "zero_error": true,
-   "one_sided_upper95": 2.995687401941005e-05,
    "seed": 20261013,
    "seconds": 128.20892119407654
   }
@@ -186,5 +191,6 @@
   }
  },
  "p_threshold": 1.37e-05,
- "wall_minutes": 66.46941150029501
+ "wall_minutes": 66.46941150029501,
+ "A1_field_note": "p_cw is reported as two explicit fields: p_cw_point (empirical k/N, 0.0 where no error was observed) and p_cw_upper95 (one-sided 95 % Clopper-Pearson upper limit, finite everywhere). The counts n_cw and n_err are kept so either can be re-derived."
 }

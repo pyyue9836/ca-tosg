@@ -12,18 +12,27 @@ Total wall time 66.5 min.
 
 ## Measured points
 
-| Es/N0 (dB) | errors k | codewords N | k/N | two-sided Wilson 95 % | one-sided 95 % upper (k = 0 only) |
-|---:|---:|---:|---:|---|---|
-| 8.0 | 12 | 100,000 | 1.200e-04 | [6.865e-05, 2.098e-04] | — |
-| 8.5 | 4 | 1,000,000 | 4.000e-06 | [1.556e-06, 1.029e-05] | — |
-| 9.0 | 1 | 1,000,000 | 1.000e-06 | [1.765e-07, 5.665e-06] | — |
-| 9.5 | 0 | 1,000,000 | no error observed | [0.000e+00, 3.841e-06] | 2.996e-06 |
-| 10.0 | 0 | 100,000 | no error observed | [0.000e+00, 3.841e-05] | 2.996e-05 |
+| Es/N0 (dB) | errors k | codewords N | `p_cw_point` (empirical k/N) | `p_cw_upper95` (one-sided 95 %) | two-sided Wilson 95 % |
+|---:|---:|---:|---:|---:|---|
+| 8.0 | 12 | 100,000 | 1.200e-04 | 1.944e-04 | [6.865e-05, 2.098e-04] |
+| 8.5 | 4 | 1,000,000 | 4.000e-06 | 9.153e-06 | [1.556e-06, 1.029e-05] |
+| 9.0 | 1 | 1,000,000 | 1.000e-06 | 4.744e-06 | [1.765e-07, 5.665e-06] |
+| 9.5 | 0 | 1,000,000 | 0.000e+00 | 2.996e-06 | [0.000e+00, 3.841e-06] |
+| 10.0 | 0 | 100,000 | 0.000e+00 | 2.996e-05 | [0.000e+00, 3.841e-05] |
 
-The two interval kinds are different quantities and are kept in different columns: the Wilson
-column is a two-sided interval for the observed proportion; the last column is a one-sided 95 %
-upper limit `1 - 0.05^(1/N)`, quoted only where no error was observed. **No point is reported as
-`p_cw = 0`.**
+**A-1 — the two p_cw columns mean different things and a consumer must choose deliberately.**
+
+* `p_cw_point` is the **empirical** rate k/N. Where no error was observed it is exactly `0.0`,
+  and that zero means "none seen in N draws", never "the rate is zero". It is the right column
+  for an unbiased estimate and the wrong column for any claim of reliability.
+* `p_cw_upper95` is the one-sided 95 % Clopper-Pearson upper limit, finite on every row. At
+  k = 0 it is exactly `1 - 0.05^(1/N)`, whose first-order approximation is the familiar `3/N`.
+  It is the right column for "the loss is no worse than", which is what a delivery argument needs.
+* `zero_error` flags the rows where the two diverge most sharply.
+
+The two-sided Wilson column is a third quantity again: an interval for the observed proportion.
+It is what the D-1 verdicts use for k > 0, exactly as pre-registered; A-1 changes the field
+semantics, not the decision rule.
 
 ## Reproduction check at 8 and 10 dB (B-3)
 

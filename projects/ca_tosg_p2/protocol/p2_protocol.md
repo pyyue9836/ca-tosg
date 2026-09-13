@@ -422,3 +422,38 @@ weights and message model** — not a per-frame reliability rule and not a link-
 
 **D-2 No forced threshold.** If the crossing cannot be bracketed, the interval is reported as
 undetermined. N is not changed after seeing the data.
+
+## C-6 Migration list (P2-R14) — what comes over from P1, and what does not
+
+Every path below is registered with its sha256 in `protocol/p2_reuse_manifest.json`, and
+`build_reuse_manifest.py --check` fails if any path here is missing from that manifest or any manifest
+path is missing from this section. The two cannot drift apart.
+
+### Migrated
+
+| what | path |
+|---|---|
+| cue extractor (`v2_ego_local_23d`, 21 ego-local fields) | `projects/ca_tosg/evaluation/v2_wp6_generate_cues.py` |
+| cue schema | `results/manifests/V2_CUE_SCHEMA.json` |
+| frozen cue set for validate | `results/v2/wp6_cues_validate.json` |
+| random-forest structure and training scaffolding | `projects/ca_tosg/models/v2_selector.py` |
+| training entry point | `tools/train_selector.py` |
+| evaluation harness | `tools/evaluate_selector.py` |
+| scene identity, shared by folds and leakage gate | `projects/ca_tosg/datasets/scene_split.py` |
+| scene-level LOSO folds | `results/manifests/v2_validate_loso_folds.csv` |
+| freeze mechanism | `results/manifests/FROZEN_MANIFEST.json` |
+| primary freeze record and its hash discipline | `results/manifests/V2_PRIMARY_FREEZE.json` |
+| normative candidate block the entry point parses | `docs/experiment_protocol.md` |
+
+The scaffolding is migrated; the objective inside it is not. That distinction is the whole point of
+the next table.
+
+### Not migrated
+
+| what | where it lives | why not |
+|---|---|---|
+| the λ payload-penalty objective `U = eff − λ·B` | `projects/ca_tosg/models/v2_selector.py` (the utility function it defines) | P2-R14 C-1 keeps payload out of the objective. Payload is measured and reported beside F1, never optimised against it |
+| candidate 67's weights and the labels it was fitted to | `data/p2/v2_selector_cand67.pkl` | fitted under the λ objective on the old label definition. P2 labels are C-7's argmax, so the weights answer a different question |
+| packet-level utility grid | `results/v2/v2_grid_validate_packet.csv`, `results/v2/v2_grid_validate_packet.json` | P2-R11 A-4 removed packet and partial-recovery accounting from the candidate set. These files stay in P1's record and are read only by `projects/ca_tosg_p2/protocol/message_regime.py`, the pre-lock comparison whose result produced the lock. They enter no P2 table |
+| the sparse-F line, in full | `archive/p2-sparse-exploratory/` | closed in P2-R9 |
+| the 100 ms reachability gate | measured by `projects/ca_tosg_p2/protocol/full_f_feasibility.py` | the finding is kept — 0 of 27 link configurations deliver a complete F inside 100 ms — but it is **not applied as a gate** in the training or evaluation line, per C-4. Deleting the finding and dropping the gate are different acts and only the second is intended |

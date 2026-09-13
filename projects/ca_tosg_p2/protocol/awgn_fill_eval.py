@@ -28,6 +28,9 @@ import argparse, hashlib, json, os, sys
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from awgn_fill import cp_upper                                          # noqa: E402
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 P2 = os.path.dirname(HERE)
 ROOT = os.path.dirname(os.path.dirname(P2))
@@ -38,6 +41,7 @@ WP34 = os.path.join(V2, 'wp34_e_l_validate.csv')
 CHAIN = os.path.join(V2, 'payload_chain.json')
 A5_JSON = os.path.join(HERE, 'four_arm_eval.json')
 FILL_JSON = os.path.join(P2, 'results', 'channel', 'bler_awgn_fill.json')
+P1_BLER = os.path.join(ROOT, 'results', 'channel', 'bler_sionna.csv')
 NEW_GRID = os.path.join(P2, 'results', 'grid', 'v2_grid_validate_ideal_p2r13fill.csv')
 OUT_JSON = os.path.join(HERE, 'awgn_fill_eval.json')
 OUT_MD = os.path.join(HERE, 'awgn_fill_eval.md')
@@ -179,12 +183,12 @@ def evaluate_point(t, n_cw_F, r):
     sc = t.scene.to_numpy()
     p_lo, p_hi = r['wilson95_lo'], r['wilson95_hi']
     if r['n_err'] == 0:                       # A-2: zero errors is an upper bound, never a zero
-        p_lo, p_hi = 0.0, r['one_sided_upper95']
+        p_lo, p_hi = 0.0, r['p_cw_upper95']
         interval_kind = 'one-sided 95 % upper limit (no error observed)'
-        p_point = None
+        p_point = None                        # p_cw_point is 0.0 here and must not be used as a rate
     else:
         interval_kind = 'two-sided Wilson 95 %'
-        p_point = r['p_hat']
+        p_point = r['p_cw_point']
 
     def at(p):
         Q_F, Q_L, q_F, q_L = arms_at(t, n_cw_F, p)
@@ -233,6 +237,18 @@ def write_new_grid(g, t, n_cw_F, rows, srcs):
     keep = list(g.columns)
     base = g.copy()
     base['source'] = 'P1 v2_grid_validate_ideal.csv'
+    # A-1 across the whole grid: give every row both columns. The upper limit is derived from the
+    # channel table's own counts; cells P1 obtained by interpolation have no counts of their own and
+    # are left blank rather than given a bound that was never measured.
+    bl = pd.read_csv(P1_BLER); bl = bl[bl.qam == 16]
+    key = {(r.channel, float(r.esno_db)): (int(r.n_err), int(r.n_cw)) for r in bl.itertuples()}
+    ne = [key.get((c, float(s))) for c, s in zip(base.channel, base.snr_db)]
+    base['p_cw_point'] = base.p_cw
+    base['p_cw_upper95'] = [cp_upper(*x) if x else '' for x in ne]
+    base['p_cw_sampled'] = [x is not None for x in ne]
+    base['p_cw_is_upper_bound'] = [bool(x is not None and x[0] == 0) for x in ne]
+    base['n_cw_measured'] = [x[1] if x else '' for x in ne]
+    base['n_err_measured'] = [x[0] if x else '' for x in ne]
     add = []
     # columns that belong to P1's partial-recovery construction are left empty rather than invented
     p1_only = [c for c in ('p_cw_F', 'q_msg_F_descriptive') if c in keep]
@@ -245,7 +261,7 @@ def write_new_grid(g, t, n_cw_F, rows, srcs):
     for r in rows:
         if r['esno_db'] in (8.0, 10.0):       # reproduction points: reported, not added to the grid
             continue
-        p = r['p_hat'] if r['n_err'] else 0.0
+        p = r['p_cw_point']
         Q_F, Q_L, q_F, q_L = arms_at(t, n_cw_F, p)
         d = pd.DataFrame({'sample_id': t.sample_id, 'scene': t.scene,
                           'snr_db': r['esno_db'], 'channel': 'awgn',
@@ -255,6 +271,9 @@ def write_new_grid(g, t, n_cw_F, rows, srcs):
         for c in p1_only:
             d[c] = ''
         d['source'] = 'P2-R13 measured fill'
+        d['p_cw_point'] = r['p_cw_point']
+        d['p_cw_upper95'] = r['p_cw_upper95']
+        d['p_cw_sampled'] = True
         d['p_cw_is_upper_bound'] = bool(r['n_err'] == 0)
         d['n_cw_measured'] = r['n_cw']
         d['n_err_measured'] = r['n_err']
@@ -266,9 +285,15 @@ def write_new_grid(g, t, n_cw_F, rows, srcs):
             'rows_added': int(sum(len(d) for d in add)),
             'added_snr_points': sorted({float(d.snr_db.iloc[0]) for d in add}),
             'p1_grid_untouched_sha256': srcs['grid'],
-            'note': 'the added rows carry p_cw from the P2-R13 measurement; where no error was '
-                    'observed the stored p_cw is 0 and p_cw_is_upper_bound is True, so no consumer '
-                    'can read it as a measured zero without seeing the flag'}
+            'A1_columns': 'every row carries p_cw_point (empirical k/N) and p_cw_upper95 (one-sided '
+                          '95 % Clopper-Pearson upper limit) as separate fields, plus p_cw_sampled and '
+                          'p_cw_is_upper_bound. p_cw is kept unchanged so existing consumers still '
+                          'read what they always read',
+            'interpolated_cells_without_counts': int(sum(1 for x in base.p_cw_sampled if not x)),
+            'note': 'where no error was observed p_cw_point is 0.0 and p_cw_is_upper_bound is True, so '
+                    'no consumer can read it as a measured zero without seeing the flag. Rows whose '
+                    'cell P1 obtained by interpolation carry p_cw_sampled = False and an empty '
+                    'p_cw_upper95: they have no counts of their own and none is invented for them'}
 
 
 def build():
@@ -397,7 +422,10 @@ def markdown(m):
           '## C-3 The new grid file', '']
     ng = m['new_grid']
     L += [f"`{ng['path']}` — {ng['rows']:,} rows, of which {ng['rows_added']:,} are new "
-          f"({', '.join(f'{x:.1f} dB' for x in ng['added_snr_points'])} on AWGN). {ng['note']}.", '',
+          f"({', '.join(f'{x:.1f} dB' for x in ng['added_snr_points'])} on AWGN).", '',
+          f"**A-1.** {ng['A1_columns']}. {ng['note']}. "
+          f"{ng['interpolated_cells_without_counts']:,} rows are in that last category — the AWGN 14 dB "
+          'and 18 dB cells, which the channel table never sampled.', '',
           f"P1's `results/v2/v2_grid_validate_ideal.csv` is unchanged (sha256 "
           f"`{ng['p1_grid_untouched_sha256'][:16]}…`), and `results/channel/bler_sionna.csv` is not "
           'written by this line of work at all.', '',

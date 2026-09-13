@@ -6,7 +6,12 @@
 | `protocol/full_f_feasibility.md` | complete-F transmission audit (P2-R9) |
 | `protocol/link_scenarios.md` | resource table, sources quoted |
 | `protocol/four_arm_eval.md` | four arms under the **locked** accounting (P2-R11 C) |
-| `protocol/awgn_fill_plan.md` | pre-registered plan to measure AWGN 8.5/9.0/9.5 dB (P2-R12 B) — **not run, awaiting approval** |
+| `protocol/awgn_fill_plan.md` | the first pre-registration of the AWGN fill (P2-R12 B); superseded in part by Amendment 3 |
+| `protocol/awgn_fill.md` | the measurement: 3.2M codewords at 8.0/8.5/9.0/9.5/10.0 dB (P2-R13) |
+| `protocol/awgn_fill_eval.md` | both arms recomputed from it; the F-vs-L crossing bracketed at 8.0–8.5 dB |
+| `protocol/offline_potential.md` | offline potential of a per-frame choice over the channel-only rule (P2-R14 B) — **not a deployment result** |
+| `protocol/training_plan.md` | draft training plan for a joint selector (P2-R14 C) — **written, not run** |
+| `protocol/p1_limitations_addendum.md` | sentence drafted for P1's Limitations about its empirical zeros (P2-R14 A-2) — **not inserted** |
 | `protocol/message_regime.md` | the costing that informed the ruling (P2-R10 B); the accounting is now locked in `p2_protocol.md` |
 | `protocol/e_criterion.md` | candidates for a "no cooperation needed → E" rule (P2-R10 C) |
 | `protocol/rule_prototype_plan.md` | rule-based prototype evaluation (P2-R10 D) — **plan only, not run** |

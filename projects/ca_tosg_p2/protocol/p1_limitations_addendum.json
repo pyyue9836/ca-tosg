@@ -1,0 +1,77 @@
+{
+ "schema": "catosg-p2-p1-limitations-addendum/1",
+ "status": "DRAFT SENTENCE. Not inserted into paper/main.tex. P1 is on another branch and no P1 experiment is touched",
+ "inputs": {
+  "bler": "631db285595af1a77766f101c69725815a252f48577674922fc1b18551315102",
+  "grid": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+  "fill_eval": "167d6c33789d8dac75233bfc6b28ae410381cc735b1e1a304feaa95efed71e19"
+ },
+ "zero_cells": [
+  {
+   "snr_db": 10,
+   "sampled": true,
+   "n_err": 0,
+   "n_cw": 100000,
+   "upper95": 2.995687401941005e-05
+  },
+  {
+   "snr_db": 12,
+   "sampled": true,
+   "n_err": 0,
+   "n_cw": 100000,
+   "upper95": 2.995687401941005e-05
+  },
+  {
+   "snr_db": 14,
+   "sampled": false,
+   "n_err": null,
+   "n_cw": null,
+   "upper95": null
+  },
+  {
+   "snr_db": 16,
+   "sampled": true,
+   "n_err": 0,
+   "n_cw": 100000,
+   "upper95": 2.995687401941005e-05
+  },
+  {
+   "snr_db": 18,
+   "sampled": false,
+   "n_err": null,
+   "n_cw": null,
+   "upper95": null
+  },
+  {
+   "snr_db": 20,
+   "sampled": true,
+   "n_err": 0,
+   "n_cw": 100000,
+   "upper95": 2.995687401941005e-05
+  }
+ ],
+ "measured_zero_cells_db": [
+  10,
+  12,
+  16,
+  20
+ ],
+ "inherited_zero_cells_db": [
+  14,
+  18
+ ],
+ "sample_size": 100000,
+ "upper95": 2.995687401941005e-05,
+ "n_cw_F": 12567,
+ "message_accounting": {
+  "q_F_lower_bound": 0.6862771838212144,
+  "q_F_needed_to_beat_L": 0.8413659714493195,
+  "undetermined": true
+ },
+ "partial_recovery": {
+  "expected_lost_codewords_upper_bound": 0.3764680358019261,
+  "as_fraction_of_message": 2.995687401941005e-05
+ },
+ "brief_correction": "the brief described AWGN 10-20 dB as empirical zeros of 0/100,000. That holds for 10, 12, 16, 20 dB; 14, 18 dB were never sampled by the channel table and carry zero by P1 \u00a79.3 interpolation between neighbours. The two are different kinds of claim and the sentence separates them",
+ "command": "python projects/ca_tosg_p2/protocol/p1_limitations_addendum.py"
+}

@@ -75,7 +75,9 @@ No threshold is forced and no value is interpolated across the gap.
 
 ## C-3 The new grid file
 
-`projects/ca_tosg_p2/results/grid/v2_grid_validate_ideal_p2r13fill.csv` — 49,500 rows, of which 5,940 are new (8.5 dB, 9.0 dB, 9.5 dB on AWGN). the added rows carry p_cw from the P2-R13 measurement; where no error was observed the stored p_cw is 0 and p_cw_is_upper_bound is True, so no consumer can read it as a measured zero without seeing the flag.
+`projects/ca_tosg_p2/results/grid/v2_grid_validate_ideal_p2r13fill.csv` — 49,500 rows, of which 5,940 are new (8.5 dB, 9.0 dB, 9.5 dB on AWGN).
+
+**A-1.** every row carries p_cw_point (empirical k/N) and p_cw_upper95 (one-sided 95 % Clopper-Pearson upper limit) as separate fields, plus p_cw_sampled and p_cw_is_upper_bound. p_cw is kept unchanged so existing consumers still read what they always read. where no error was observed p_cw_point is 0.0 and p_cw_is_upper_bound is True, so no consumer can read it as a measured zero without seeing the flag. Rows whose cell P1 obtained by interpolation carry p_cw_sampled = False and an empty p_cw_upper95: they have no counts of their own and none is invented for them. 3,960 rows are in that last category — the AWGN 14 dB and 18 dB cells, which the channel table never sampled.
 
 P1's `results/v2/v2_grid_validate_ideal.csv` is unchanged (sha256 `4e83047ab8c81cf4…`), and `results/channel/bler_sionna.csv` is not written by this line of work at all.
 
@@ -86,4 +88,4 @@ P1's `results/v2/v2_grid_validate_ideal.csv` is unchanged (sha256 `4e83047ab8c81
 | grid | `4e83047ab8c81cf4…` |
 | wp5 | `9dbcffd78829d762…` |
 | wp34 | `3bc30400a3c3acab…` |
-| fill | `00722c16b913a5f0…` |
+| fill | `24940ebbb05eba09…` |

@@ -17,20 +17,6 @@
    "p2_takes": "the definitions of eff_L and eff_F and the payload contract the grid was built under"
   },
   {
-   "role": "utility_grid_packet_sensitivity",
-   "path": "results/v2/v2_grid_validate_packet.csv",
-   "sha256": "ac74902e18d6f0b618d78fa5a88c41d5951bed4230dd6ab8c353b6b71543618a",
-   "bytes": 6187986,
-   "p2_takes": "the same columns under packet-level recovery; sensitivity only, as in P1"
-  },
-  {
-   "role": "utility_grid_packet_sensitivity_meta",
-   "path": "results/v2/v2_grid_validate_packet.json",
-   "sha256": "4cdee44a495e2da1381ed565784b1a5da04823d68d70e3c2ab7151e5234d8a70",
-   "bytes": 1525,
-   "p2_takes": "definitions for the packet grid"
-  },
-  {
    "role": "grid_builder",
    "path": "projects/ca_tosg/evaluation/v2_build_grid.py",
    "sha256": "fa327111251f8916fae3e4caabe7d638563a3fc787eefb041f3e71e0016b490f",
@@ -73,6 +59,129 @@
    "p2_takes": "provenance of the above"
   }
  ],
+ "C6_migrate": [
+  {
+   "role": "cue_extractor",
+   "path": "projects/ca_tosg/evaluation/v2_wp6_generate_cues.py",
+   "sha256": "8791e3d50b7f9674415ec6a6406ddd6b563d83c7e3c4f5ef72a117ae633b033c",
+   "bytes": 11217,
+   "why": "the v2_ego_local_23d extractor: 21 ego-local perception fields, no ground truth and no post-decision information"
+  },
+  {
+   "role": "cue_schema",
+   "path": "results/manifests/V2_CUE_SCHEMA.json",
+   "sha256": "0d70b8794402065a5276fa1045964c38e3cca74ee6a85be05b0461a45edd29dd",
+   "bytes": 5990,
+   "why": "the field list and order the extractor is held to"
+  },
+  {
+   "role": "cue_product_meta",
+   "path": "results/v2/wp6_cues_validate.json",
+   "sha256": "e91a8620725caaf3c9c4ba68189a1f7acdb74d6c394a81fd3753e375a683157b",
+   "bytes": 1436,
+   "why": "the frozen validate cue set: field names, point source, the fields declared forbidden"
+  },
+  {
+   "role": "rf_structure_and_training_scaffold",
+   "path": "projects/ca_tosg/models/v2_selector.py",
+   "sha256": "abf139f473c5275dc701b0772f0f4fa658eb47e90d44affe5ac0a8054bba71a9",
+   "bytes": 8970,
+   "why": "the random-forest fitting structure, the candidate walk and the freeze step. The SCAFFOLDING is taken; the lambda objective it contains is not (see NOT_MIGRATED)"
+  },
+  {
+   "role": "training_entry_point",
+   "path": "tools/train_selector.py",
+   "sha256": "3d7e7ec1a5880c467ec4dcd68604a42bae972b57193e08ff2d9af9529bb8591f",
+   "bytes": 603,
+   "why": "parses the candidate block, runs the scene-level 9-fold LOSO, writes the freeze manifest"
+  },
+  {
+   "role": "evaluation_harness",
+   "path": "tools/evaluate_selector.py",
+   "sha256": "b557d21a34f097d82ca94f4902166290158fce66e70362dcfc1843b1ab62d57b",
+   "bytes": 417,
+   "why": "how a frozen model is scored"
+  },
+  {
+   "role": "scene_identity_for_loso",
+   "path": "projects/ca_tosg/datasets/scene_split.py",
+   "sha256": "fa94ebeb1a41235b55cd4a5a973804c2e8146708ad17105dcaafaa3cd1b2ec64",
+   "bytes": 5434,
+   "why": "the single source of scene identity, shared by the LOSO folds and the leakage gate"
+  },
+  {
+   "role": "loso_folds",
+   "path": "results/manifests/v2_validate_loso_folds.csv",
+   "sha256": "bb98b4af1f4375ac7fce9a51e396d7d4e8384441692cfbcc930c3a106e9c5145",
+   "bytes": 91969,
+   "why": "the 9 scene-level folds, each scene held out exactly once"
+  },
+  {
+   "role": "freeze_mechanism",
+   "path": "results/manifests/FROZEN_MANIFEST.json",
+   "sha256": "742f5313e1c8286048da35dcae279d2424ea56d7366892b59ed0488467ef9a57",
+   "bytes": 7649,
+   "why": "one model per budget, hashed"
+  },
+  {
+   "role": "primary_freeze_record",
+   "path": "results/manifests/V2_PRIMARY_FREEZE.json",
+   "sha256": "2df5de94b4f4488f652beee4d340fba08a51b169339658fc02f1f3b7d5cf6ad0",
+   "bytes": 1996,
+   "why": "the freeze record and its hash discipline. The MECHANISM is migrated, the frozen candidate is not"
+  },
+  {
+   "role": "candidate_block_source",
+   "path": "docs/experiment_protocol.md",
+   "sha256": "66ff3438973bc284c001ad108567982f625bdff49667cdf77f78eee7b332e413",
+   "bytes": 215097,
+   "why": "the single normative source the training entry point reads its candidate order from"
+  }
+ ],
+ "C6_not_migrated": [
+  {
+   "role": "lambda_payload_penalty_objective",
+   "path": "projects/ca_tosg/models/v2_selector.py",
+   "exists": true,
+   "why": "the utility U = eff - lambda*B defined in this file. C-1 keeps payload out of the objective; the file is migrated for its scaffolding and this objective is not used",
+   "sha256": "abf139f473c5275dc701b0772f0f4fa658eb47e90d44affe5ac0a8054bba71a9"
+  },
+  {
+   "role": "candidate_67_weights_and_labels",
+   "path": "data/p2/v2_selector_cand67.pkl",
+   "exists": true,
+   "why": "fitted under the lambda objective on the old label definition; P2 labels are C-7 argmax",
+   "sha256": "87d990f68698732edb747d3ef06fdd3f89e905f2548d7fc691cb03fd5107ff7d"
+  },
+  {
+   "role": "packet_level_grid",
+   "path": "results/v2/v2_grid_validate_packet.csv",
+   "exists": true,
+   "why": "P2-R11 A-4 removed packet and partial-recovery accounting. Read only by message_regime.py, the pre-lock comparison that produced the lock; it enters no P2 table",
+   "sha256": "ac74902e18d6f0b618d78fa5a88c41d5951bed4230dd6ab8c353b6b71543618a"
+  },
+  {
+   "role": "packet_level_grid_meta",
+   "path": "results/v2/v2_grid_validate_packet.json",
+   "exists": true,
+   "why": "as above",
+   "sha256": "4cdee44a495e2da1381ed565784b1a5da04823d68d70e3c2ab7151e5234d8a70"
+  },
+  {
+   "role": "sparse_F_line",
+   "path": "archive/p2-sparse-exploratory",
+   "exists": true,
+   "why": "closed in P2-R9"
+  },
+  {
+   "role": "reachability_gate_100ms",
+   "path": "projects/ca_tosg_p2/protocol/full_f_feasibility.py",
+   "exists": true,
+   "why": "the FINDING is kept -- 0 of 27 link configurations deliver a complete F inside 100 ms -- but the gate is not applied in the training or evaluation line, per C-4. Dropping the gate and deleting the finding are different acts and only the first is intended",
+   "sha256": "b6b8dd07d4b46ea2e7c211e02c5148b15c56bf6dd2c5ad8046961bd1a9c4ff03"
+  }
+ ],
+ "C6_note": "the migration list is stated in p2_protocol.md C-6 and hashed here; generation fails if either side names a path the other does not",
  "verification": {
   "payload_chain_F": {
    "B_F_msym_recomputed": 3.14175,

@@ -1,0 +1,150 @@
+{
+ "schema": "catosg-p2-training-plan/1",
+ "status": "DRAFT, written for review. No model is trained, no GPU is used, and nothing in this file has been executed as an experiment",
+ "inputs": {
+  "cue_meta": "e91a8620725caaf3c9c4ba68189a1f7acdb74d6c394a81fd3753e375a683157b",
+  "grid": "4e83047ab8c81cf4de242de053816f7904e72c4ee09ae31c0eeb379a54ef1064",
+  "potential": "c748f8d59d2970015882902e8e0fb8ea7d294b1ceba369be81c81f11aed8cd11"
+ },
+ "feature_space": {
+  "perception_fields": 21,
+  "channel_fields": [
+   "est_snr_db",
+   "channel_is_rayleigh"
+  ],
+  "total_dimensions": 23,
+  "field_names": [
+   "ego_detected_box_count",
+   "has_collaborator",
+   "ego_origin_lidar_shape_0",
+   "ego_origin_lidar_shape_1",
+   "ego_pcd_num_points",
+   "ego_pcd_mean_range",
+   "ego_pcd_max_range",
+   "ego_pcd_std_range",
+   "ego_pcd_near_20m",
+   "ego_pcd_mid_20_50m",
+   "ego_pcd_far_50_80m",
+   "ego_pcd_very_far_80m",
+   "ego_pcd_front_points",
+   "ego_pcd_back_points",
+   "ego_pcd_left_points",
+   "ego_pcd_right_points",
+   "ego_pcd_front_far_30m",
+   "ego_pcd_front_far_50m",
+   "ego_pcd_density_0_20",
+   "ego_pcd_density_20_50",
+   "ego_pcd_density_50_80"
+  ],
+  "correction": "the brief asked for \"the 23-dimensional cue plus estimated SNR plus channel type\". That double-counts: the 23 dimensions are already 21 perception fields plus the 2 channel fields ['est_snr_db', 'channel_is_rayleigh']. The input is 21 + 2 = 23, not 25",
+  "point_source": "get_item_single_car()['projected_lidar'] for the EGO CAV ONLY -- the same array pre_processor.preprocess() receives, so the cue describes exactly the scene action E sees. projected_lidar_stack is never built."
+ },
+ "data": {
+  "frames": 1980,
+  "scenes": 9,
+  "cells": 22,
+  "rows": 43560,
+  "split_rule": "validate only. test and Culver are not touched at any point in this plan, including for model selection"
+ },
+ "payload": {
+  "F_qam_symbols": 3141750.0,
+  "F_codewords": 12567,
+  "L_qam_symbols_min": 500.0,
+  "L_qam_symbols_max": 5250.0
+ },
+ "headline_potential": {
+  "all_cells_G_task": {
+   "mean": 0.002429462327405997,
+   "lcb95": 0.0015797735055204899,
+   "ucb95": 0.0034272256502400848
+  },
+  "all_cells_optimal_share": {
+   "E": 0.3100550964187328,
+   "L": 0.5595041322314049,
+   "F": 0.13044077134986226
+  },
+  "clean_cells_G_task": {
+   "mean": 0.006073225821359781,
+   "lcb95": 0.004264350441998127,
+   "ucb95": 0.007803605326831043
+  },
+  "clean_cells_optimal_share": {
+   "E": 0.05606060606060606,
+   "L": 0.4767676767676768,
+   "F": 0.4671717171717172
+  },
+  "reading": "these are the offline potentials from offline_potential.md. They bound what any predictor could recover and are the reason this plan is worth reviewing at all"
+ },
+ "C7_label_rule": {
+  "rule": "a*_t = argmax_a Q_t(a) under the locked all-or-nothing message accounting, ties to the cheaper payload, TOL = 1e-09",
+  "fixed": "this is the label definition and it does not change during the study",
+  "prefer_F_is_not_a_label": "the idea that F should be preferred where the channel permits it is recorded as a research hypothesis to be tested, not as a labelling rule. It does not enter the targets",
+  "forcing_F_is_an_objective_change": "any scheme that forces F on good-channel frames is a change of objective, not a tuning choice. It requires a separate discussion and a separate pre-registration before it may be tried"
+ },
+ "C8_interpretation_rule": {
+  "registered_before_training": true,
+  "what_is_reported": "the trained selector's realised E/L/F request shares, printed beside the offline reference shares from offline_potential B-1, for the same subsets",
+  "reading_1": "F has limited opportunity under the current data and transmission model",
+  "reading_2": "the inputs or the fitting are insufficient, and the selector is what to examine",
+  "forbidden": "neither reading may be written as \"F is useless\", and neither is grounds for reverting to an E/L-only design. Both are statements about this data and this model, not about the action",
+  "reference_shares": {
+   "all 22 cells": {
+    "optimal_share": {
+     "E": 0.3100550964187328,
+     "L": 0.5595041322314049,
+     "F": 0.13044077134986226
+    },
+    "rows": 43560,
+    "rule_share_F": 0.2727272727272727
+   },
+   "AWGN only": {
+    "optimal_share": {
+     "E": 0.3467401285583104,
+     "L": 0.3923783287419651,
+     "F": 0.2608815426997245
+    },
+    "rows": 21780,
+    "rule_share_F": 0.5454545454545454
+   },
+   "Rayleigh only": {
+    "optimal_share": {
+     "E": 0.27337006427915517,
+     "L": 0.7266299357208448,
+     "F": 0.0
+    },
+    "rows": 21780,
+    "rule_share_F": 0.0
+   },
+   "B-5 clean cells (q_F >= 0.99)": {
+    "optimal_share": {
+     "E": 0.05606060606060606,
+     "L": 0.4767676767676768,
+     "F": 0.4671717171717172
+    },
+    "rows": 11880,
+    "rule_share_F": 1.0
+   },
+   "B-5 clean cells with a sample of their own": {
+    "optimal_share": {
+     "E": 0.05606060606060606,
+     "L": 0.4767676767676768,
+     "F": 0.4671717171717172
+    },
+    "rows": 7920,
+    "rule_share_F": 1.0
+   }
+  }
+ },
+ "C9_role_of_the_threshold_rule": {
+  "status": "the fixed channel-threshold rule is a COMPARISON ARM only",
+  "core_question": "whether adding task information selects among E, L and F more accurately than the channel alone, and what that does to perception quality and to the QAM-symbol cost",
+  "not_the_question": "whether a better threshold exists. A threshold sweep tunes the comparison arm; it does not test the hypothesis"
+ },
+ "C3_active_E": {
+  "definition": "on cells with q_F >= 0.99 only, a frame is \"cooperation is not needed for the task\" when Q_E >= max(Q_L, Q_F) - 1e-09",
+  "excluded": "frames where E is chosen because the channel destroyed both messages. Those are a fallback, not a statement about the task, and the q_F restriction is what removes them",
+  "status": "CONSTRUCTIVE AND PENDING REVIEW. It is a definition being proposed, not a measured property, and no claim rests on it until it is accepted",
+  "caveat": "two of the clean cells (AWGN 14 dB and 18 dB) have no channel sample of their own; the definition should be evaluated on the four cells that do"
+ },
+ "command": "python projects/ca_tosg_p2/protocol/training_plan.py"
+}
