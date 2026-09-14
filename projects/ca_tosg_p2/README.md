@@ -18,6 +18,7 @@
 | `protocol/rf_round3.md` | round 3, 23 inputs against 28 (P2-R18) — **the five cues make it worse, not better** |
 | `protocol/rf_round4.md` | round 4, regress the gain instead of classifying the label (P2-R19) |
 | `protocol/r24_two_questions.md` | can the F-vs-L advantage be predicted, and what do the Rayleigh F requests cost (P2-R24) — analysis only |
+| `protocol/r25_clip.md` | hold the predicted F gain inside what the estimated channel allows (P2-R25) — post-hoc method change, no training |
 | `results/rf/rf_round4_rows.csv.gz` | per-row predicted and true gains beside the action taken |
 | `results/cues/ego_conf_cues_validate.csv` | the five confidence cues per validate frame |
 | `results/rf/rf_round3_rows.csv.gz` | both input arms, training and held-out rows, actions and class probabilities |
