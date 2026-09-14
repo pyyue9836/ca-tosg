@@ -1,0 +1,103 @@
+{
+ "schema": "catosg-p2-ego-conf-cues/1 (v2_ego_local_28d)",
+ "status": "derived from an existing product. No detection head was re-run, no GPU was used, and no new inference of any kind took place",
+ "cue_schema_name": "v2_ego_local_28d",
+ "dimensions": {
+  "existing_ego_local": 21,
+  "new_confidence": 5,
+  "channel": 2,
+  "total": 28
+ },
+ "fields": [
+  "ego_conf_mean",
+  "ego_conf_std",
+  "ego_conf_p10",
+  "ego_conf_p50",
+  "ego_conf_p90"
+ ],
+ "definitions": {
+  "ego_conf_mean": "mean of the ego post-processed box scores on the frame",
+  "ego_conf_std": "population standard deviation (ddof 0); a frame with one box gives 0.0, which is a real zero spread and not a missing value",
+  "ego_conf_p10": "10th percentile, numpy linear interpolation",
+  "ego_conf_p50": "50th percentile",
+  "ego_conf_p90": "90th percentile"
+ },
+ "provenance": [
+  {
+   "item": "source file",
+   "where": "results/v2/wp2_per_agent_validate.npz, key `ego_scores`",
+   "why": "written at projects/ca_tosg/evaluation/v2_wp2_per_agent.py:165-166 by the same run that wrote the box counts P1 registered"
+  },
+  {
+   "item": "how the scores are produced",
+   "where": "projects/ca_tosg/evaluation/v2_wp2_per_agent.py:132-134",
+   "why": "`solo = one_cav(cav, 0)` takes row 0 of the stacked batch, which is the ego vehicle; `inference_intermediate_fusion({'ego': solo}, model, ds)` runs the single-vehicle forward (record_len = [1], so AttFusion self-attends over one element and is the identity); its second return value is the post-processed box score vector, kept as `E_s`"
+  },
+  {
+   "item": "why it is available before a request",
+   "where": "the same forward pass the ego already runs for its own detection",
+   "why": "no collaborator tensor enters it, no ground truth enters it, and nothing transmitted enters it. The ego has these scores at the moment it must decide what to request"
+  },
+  {
+   "item": "what is NOT read",
+   "where": "collab_boxes, collab_scores, gts in the same file",
+   "why": "only `ego_scores` and `frames` are loaded; the loader asserts that no other key is touched"
+  }
+ ],
+ "gates": {
+  "keys_read": [
+   "frames",
+   "ego_scores"
+  ],
+  "keys_present_but_not_read": [
+   "ego_boxes",
+   "collab_boxes",
+   "collab_scores",
+   "gts"
+  ],
+  "count_matches_registered_n_box_ego": true,
+  "agreement_with_wp5_tpfp_ego_05_score": 0.0,
+  "frames": 1980
+ },
+ "zero_box_frames": 0,
+ "zero_box_note": "A-1 asks for the five fields to be zero on frames with no boxes, with `ego_detected_box_count` distinguishing them. On validate there are 0 such frames, so that branch is implemented but never taken here and the distinguishing field distinguishes nothing on this split. Said plainly because a rule that never fires can look like a rule that works",
+ "score_distribution": {
+  "boxes": 44665,
+  "min": 0.20000843703746796,
+  "max": 0.9350835084915161,
+  "mean": 0.5832704720919628,
+  "truncation_note": "the minimum is 0.2 to six decimals because the frozen post-processor already discards boxes below a 0.2 score. These five cues therefore describe a TRUNCATED distribution. The threshold belongs to the frozen detector and is not swept here (D-1)"
+ },
+ "per_frame": {
+  "path": "projects/ca_tosg_p2/results/cues/ego_conf_cues_validate.csv",
+  "sha256": "57a7c363674488849bf56ecf6e8dae17e5ae3984174a2956e4d443e411521dea",
+  "rows": 1980,
+  "columns": [
+   "frame",
+   "ego_conf_mean",
+   "ego_conf_std",
+   "ego_conf_p10",
+   "ego_conf_p50",
+   "ego_conf_p90"
+  ]
+ },
+ "upstream_inputs": {
+  "wp2_npz": {
+   "path": "results/v2/wp2_per_agent_validate.npz",
+   "sha256": "26d503df52fc8fc9a42ae567ba564b05fe4d96322601f3ce18d07ed010f4073a",
+   "tracked_by_git": false,
+   "note": "excluded by the `*.npz` rule in .gitignore. Its hash is recorded here so the derived product can be traced, and the derived CSV is committed because it is small; a fresh clone must regenerate the npz with v2_wp2_per_agent.py"
+  },
+  "wp5_tpfp_npz": {
+   "path": "results/v2/wp5_tpfp_validate.npz",
+   "sha256": "e0b8e6d3969c0bed7cad2cc06278a287e844e31805e7cf5a4f3367e392d212d4",
+   "tracked_by_git": false,
+   "note": "read only to cross-check the scores"
+  },
+  "wp34": {
+   "path": "results/v2/wp34_e_l_validate.csv",
+   "sha256": "3bc30400a3c3acab55c6c777a02679aa62da495f63df0c79c62016bd0c14ea02"
+  }
+ },
+ "command": "python projects/ca_tosg_p2/protocol/ego_conf_cues.py"
+}

@@ -51,6 +51,26 @@ PAYLOAD_ONLY = ['sample_id', 'snr_db', 'channel', 'B_E', 'B_L', 'B_F']
 
 PROTOCOL_MD = 'projects/ca_tosg_p2/protocol/p2_protocol.md'
 
+# P2-R18 A-2. Tracked products of this line of work: a missing one is a hard failure.
+DERIVED = [
+    ('ego_confidence_cues', 'projects/ca_tosg_p2/results/cues/ego_conf_cues_validate.csv',
+     'the five ego detection-confidence cues of the v2_ego_local_28d schema, derived from the '
+     'per-box scores; audited in protocol/ego_conf_cues.md'),
+]
+
+# Upstream files git deliberately excludes. Hashed when present, recorded as absent with the command
+# that regenerates them when not -- a deliberate change of gate semantics, stated in p2_protocol.md
+# under "P2-R18 A-2", not an accidental loosening. The hard failure is kept for everything tracked.
+UPSTREAM_UNTRACKED = [
+    ('ego_per_box_scores', 'results/v2/wp2_per_agent_validate.npz',
+     'key ego_scores: the ego vehicle\'s own post-processed box scores, written by '
+     'projects/ca_tosg/evaluation/v2_wp2_per_agent.py',
+     'python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --split validate'),
+    ('ego_score_cross_check', 'results/v2/wp5_tpfp_validate.npz',
+     'key ego_05_score: an independent copy of the same scores, read only to confirm they agree',
+     'python projects/ca_tosg/evaluation/v2_wp5_final.py --split validate'),
+]
+
 # P2-R14 C-6. What is carried over from P1 into the selector line, by path and content hash.
 MIGRATE = [
     ('cue_extractor', 'projects/ca_tosg/evaluation/v2_wp6_generate_cues.py',
@@ -130,8 +150,27 @@ def build():
         if os.path.isfile(pa):
             e['sha256'] = sha(pa)
         not_migrated.append(e)
+    derived = []
+    for role, rel, why in DERIVED:
+        pa = os.path.join(ROOT, rel)
+        if not os.path.exists(pa):
+            raise SystemExit(f'DERIVED: {rel} is missing -- a tracked product of this work is gone')
+        derived.append({'role': role, 'path': rel, 'sha256': sha(pa),
+                        'bytes': os.path.getsize(pa), 'why': why})
+    upstream = []
+    for role, rel, why, regen in UPSTREAM_UNTRACKED:
+        pa = os.path.join(ROOT, rel)
+        e = {'role': role, 'path': rel, 'why': why, 'tracked_by_git': False,
+             'present': os.path.exists(pa), 'regenerate_with': regen}
+        if e['present']:
+            e['sha256'] = sha(pa)
+            e['bytes'] = os.path.getsize(pa)
+        upstream.append(e)
+
     prot = open(os.path.join(ROOT, PROTOCOL_MD)).read()
     absent = [r for _, r, _ in MIGRATE + NOT_MIGRATED if r not in prot]
+    absent += [r for _, r, _ in DERIVED if r not in prot]
+    absent += [r for _, r, _, _ in UPSTREAM_UNTRACKED if r not in prot]
     if absent:
         raise SystemExit(f'C-6: these paths are in the manifest but not in {PROTOCOL_MD}: {absent}')
 
@@ -175,6 +214,11 @@ def build():
             'split': 'validate (development) only; no sealed or held-out product is listed or read',
             'files': files,
             'C6_migrate': migrate, 'C6_not_migrated': not_migrated,
+            'R18_derived_products': derived, 'R18_upstream_untracked': upstream,
+            'R18_gate_note': 'tracked entries fail generation when missing; untracked upstream entries '
+                             'are hashed when present and recorded as absent with a regeneration '
+                             'command when not. The change of semantics is stated in p2_protocol.md '
+                             'under "P2-R18 A-2"',
             'C6_note': 'the migration list is stated in p2_protocol.md C-6 and hashed here; generation '
                        'fails if either side names a path the other does not',
             'verification': {'payload_chain_F': chain_F, 'payload_chain_L': chain_L,

@@ -477,3 +477,26 @@ forest requests it on **2.7 %** overall and **7.7 % to 10.9 %** across those sam
 **reading 2: the inputs or the fitting are insufficient, and the selector is what to examine.** It is
 not written as "F is useless", and it is not grounds for reverting to an E/L-only design. The
 diagnosis is in `rf_diagnostics.md`.
+
+## P2-R18 A-2 — the five ego confidence cues, registered
+
+The `v2_ego_local_28d` schema adds five statistics of the ego vehicle's own post-processed box scores
+(mean, population standard deviation, 10th/50th/90th percentiles) to the 21 existing ego-local cues
+and the two channel fields. The source audit, with the code location of every field and the argument
+for its availability before a request, is `protocol/ego_conf_cues.md`.
+
+| role | path | note |
+|---|---|---|
+| derived cue product, tracked | `projects/ca_tosg_p2/results/cues/ego_conf_cues_validate.csv` | 1,980 rows; the five fields. Its absence is a hard failure |
+| upstream per-box scores | `results/v2/wp2_per_agent_validate.npz` | key `ego_scores`, written by `projects/ca_tosg/evaluation/v2_wp2_per_agent.py`. **Excluded from git by the `*.npz` rule**, so a fresh clone must regenerate it with `python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --split validate` |
+| upstream cross-check | `results/v2/wp5_tpfp_validate.npz` | key `ego_05_score`, read only to confirm the scores agree exactly |
+
+**A deliberate change to the manifest gate, recorded as such.** Until now a registered path that was
+missing stopped generation. That is right for a tracked artefact and wrong for an upstream file git
+deliberately excludes: on a fresh clone the npz is legitimately absent. Untracked upstream entries are
+therefore hashed when present and recorded as absent with their regeneration command when not, while
+every tracked entry keeps the hard failure. The distinction is in the manifest, not implicit.
+
+**Forbidden sources stay forbidden.** Only `frames` and `ego_scores` are read out of that file. The
+collaborator boxes and scores and the ground truth sit in the same file and are not opened, which the
+generator asserts and records.

@@ -181,6 +181,38 @@
    "sha256": "b6b8dd07d4b46ea2e7c211e02c5148b15c56bf6dd2c5ad8046961bd1a9c4ff03"
   }
  ],
+ "R18_derived_products": [
+  {
+   "role": "ego_confidence_cues",
+   "path": "projects/ca_tosg_p2/results/cues/ego_conf_cues_validate.csv",
+   "sha256": "57a7c363674488849bf56ecf6e8dae17e5ae3984174a2956e4d443e411521dea",
+   "bytes": 198719,
+   "why": "the five ego detection-confidence cues of the v2_ego_local_28d schema, derived from the per-box scores; audited in protocol/ego_conf_cues.md"
+  }
+ ],
+ "R18_upstream_untracked": [
+  {
+   "role": "ego_per_box_scores",
+   "path": "results/v2/wp2_per_agent_validate.npz",
+   "why": "key ego_scores: the ego vehicle's own post-processed box scores, written by projects/ca_tosg/evaluation/v2_wp2_per_agent.py",
+   "tracked_by_git": false,
+   "present": true,
+   "regenerate_with": "python projects/ca_tosg/evaluation/v2_wp2_per_agent.py --split validate",
+   "sha256": "26d503df52fc8fc9a42ae567ba564b05fe4d96322601f3ce18d07ed010f4073a",
+   "bytes": 14923080
+  },
+  {
+   "role": "ego_score_cross_check",
+   "path": "results/v2/wp5_tpfp_validate.npz",
+   "why": "key ego_05_score: an independent copy of the same scores, read only to confirm they agree",
+   "tracked_by_git": false,
+   "present": true,
+   "regenerate_with": "python projects/ca_tosg/evaluation/v2_wp5_final.py --split validate",
+   "sha256": "e0b8e6d3969c0bed7cad2cc06278a287e844e31805e7cf5a4f3367e392d212d4",
+   "bytes": 9056992
+  }
+ ],
+ "R18_gate_note": "tracked entries fail generation when missing; untracked upstream entries are hashed when present and recorded as absent with a regeneration command when not. The change of semantics is stated in p2_protocol.md under \"P2-R18 A-2\"",
  "C6_note": "the migration list is stated in p2_protocol.md C-6 and hashed here; generation fails if either side names a path the other does not",
  "verification": {
   "payload_chain_F": {

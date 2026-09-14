@@ -14,6 +14,10 @@
 | `protocol/rf_round1.md` | first RF round, 9-fold LOSO on validate (P2-R15 C) — **the joint forest does not beat the channel-only rule**; development validation only |
 | `protocol/rf_diagnostics.md` | why that forest declines F (P2-R16 C) — diagnosis only, nothing refitted |
 | `protocol/rf_round2.md` | round 2, the same forest at max_depth 8 (P2-R17) — **still below the channel rule; no pre-registered rule fires** |
+| `protocol/ego_conf_cues.md` | the five ego confidence cues and their source audit (P2-R18 A) — derived from existing products, zero GPU |
+| `protocol/rf_round3.md` | round 3, 23 inputs against 28 (P2-R18) — **the five cues make it worse, not better** |
+| `results/cues/ego_conf_cues_validate.csv` | the five confidence cues per validate frame |
+| `results/rf/rf_round3_rows.csv.gz` | both input arms, training and held-out rows, actions and class probabilities |
 | `results/rf/rf_round2_rows.csv.gz` | both rounds, training and held-out rows, per-row actions and class probabilities (20.8 MB) |
 | `results/rf/rf_round1_oof.csv` | the per-row out-of-fold record: labels, every arm's action, and the forest's class probabilities |
 | `protocol/p1_limitations_addendum.md` | sentence drafted for P1's Limitations about its empirical zeros (P2-R14 A-2) — **not inserted** |
