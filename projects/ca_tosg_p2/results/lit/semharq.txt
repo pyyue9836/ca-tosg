@@ -1,0 +1,2013 @@
+1
+SemHARQ: Semantic-Aware Hybrid Automatic
+Repeat Request for Multi-Task Semantic
+Communications
+Jiangjing Hu, Fengyu Wang ∗, Member, IEEE, Wenjun Xu, Senior Member, IEEE, Hui Gao, Senior
+Member, IEEE, and Ping Zhang, Fellow, IEEE
+Abstract—Intelligent task-oriented semantic communica-
+tions (SemComs) have witnessed great progress with the devel-
+opment of deep learning (DL), where multi-task SemComs that
+perform multiple tasks simultaneously attach great importance
+due to its high efficiency. However, the study of robust multi-task-
+oriented semantics transmission is still in early stages. In this
+paper, we propose a semantic-aware hybrid automatic repeat
+request (SemHARQ) framework for the robust and efficient
+transmissions of multi-task semantic features. First, to improve
+the robustness and effectiveness of semantic coding, a multi-task
+semantic encoder is proposed. Meanwhile, a feature importance
+ranking (FIR) method is investigated to ensure the important
+features delivery under limited channel resources. Then, to
+accurately detect the possible transmission errors, a novel feature
+distortion evaluation (FDE) network is designed to identify the
+distortion level of each feature, based on which an efficient
+HARQ method is proposed. Specifically, the corrupted features
+are retransmitted, where the remaining channel resources are
+used for incremental transmissions. The system performance
+is evaluated under different channel conditions in multi-task
+scenarios in the Internet of Vehicles. Extensive experiments show
+that the proposed framework outperforms state-of-the-art works
+by more than 20% in rank-1 accuracy for vehicle re-identification,
+and 10% in vehicle color classification accuracy in the low signal-
+to-noise ratio regime.
+Index Terms —Semantic communications, semantic-aware
+HARQ, feature distortion evaluation, feature importance rank-
+ing.
+I. I NTRODUCTION
+I
+N the era of the sixth-generation (6G) wireless com-
+munications, communications among humans, machines,
+objects, and intelligent agents enable intelligent services to
+individuals and industries [1–3]. As a result, the requirements
+for communication systems to effectively convey the intended
+meaning have increased. Conventional communication systems
+focus on the successful transmissions of bits but ignore the
+This work was supported in part by the National Natural Science Foundation
+of China under Grant 62301069 and 62293485, and in part by the Fundamental
+Research Funds for the Central Universities under Grant 2025TSQY11 (Cor-
+responding author: Fengyu Wang).
+Jiangjing Hu, Wenjun Xu and Ping Zhang are with the State Key
+Laboratory of Network and Switching Technology, Beijing University
+of Posts and Telecommunications, Beijing 100876, China (e-mail: hu-
+jiangjing@bupt.edu.cn, wjxu@bupt.edu.cn, pzhang@bupt.edu.cn).
+Fengyu Wang is with the School of Artificial Intelligence, Beijing Uni-
+versity of Posts and Telecommunications, Beijing 100876, China (e-mail:
+fengyu.wang@bupt.edu.cn).
+Hui Gao is with the Key Laboratory of Trustworthy Distributed Computing
+and Service, Ministry of Education, Beijing University of Posts and Telecom-
+munications, Beijing 100876, China (e-mail: huigao@bupt.edu.cn).
+meanings of messages, facing critical challenges to support
+the aforementioned applications over limited communication
+resources [4, 5]. To solve this issue, semantic communica-
+tions (SemComs), which transmit the intention-related seman-
+tics, can significantly reduce the amount of transmission data
+while ensuring the system performance. Consequently, the
+efficiency of communication is improved effectively. Mean-
+while, with the development of artificial intelligence (AI),
+deep learning (DL) has shown its superiority in semantic
+representation [6], compression [7] and recovery [8], which
+has been widely used in task-oriented SemComs to enable
+the extraction, compression, and reconstruction of semantic
+features [9, 10].
+To guarantee the reliability of semantic transmissions, most
+of the current DL-based SemCom systems transmit task-
+related semantics and identify semantic errors by joint source-
+channel coding (JSCC) [11, 12]. Particularly, Bourtsoulatze et
+al. propose a JSCC technique for image transmission, which
+directly maps the image pixel values to the complex-valued
+channel input symbols [11]. Furthermore, besides transmit-
+ting semantics in an end-to-end (E2E) manner, a multi-user
+cooperative semantic framework based on JSCC is proposed
+to exploit the correlations among users in [12]. However, the
+above SemCom systems are designed with a fixed coding rate,
+incapable of transmitting semantics adaptively according to
+the dynamic channel conditions. To overcome this problem, a
+variable length coding method is proposed based on dynamic
+neural networks in [13]. Meanwhile, a policy network is
+trained additionally in [14] to select a part of the encoded
+feature vector based on the signal-to-noise ratio (SNR). Nev-
+ertheless, the robustness of semantic recovery is limited in the
+mentioned systems due to the lack of an accurate processing
+on semantic errors.
+To improve the robustness of communication systems, hy-
+brid automatic repeat request (HARQ) is commonly used
+in conventional communications [15]. Specifically, the re-
+ceived information packet is detected by a cyclic redundancy
+check (CRC) detector at the receiver. Then, a NACK signal
+is sent back to the transmitter to trigger a retransmission if
+the detection fails. The process will repeat until the packet is
+received correctly, or the maximum number of transmissions
+is reached. Particularly, based on the type of retransmitted
+data, the conventional HARQ can be classified into three
+main types. In type-I HARQ (HARQ-I), the same data packet
+is retransmitted, and the erroneous packet is replaced with
+arXiv:2404.08490v2  [eess.SP]  29 Aug 2025
+2
+the new one [16]. Since the erroneous packets are simply
+discarded in HARQ-I, the useful information is not fully
+utilized, reducing the efficiency of retransmissions. To over-
+come this problem, in type-II HARQ (HARQ-II), the orig-
+inal bit vector is punctured into different lengths, and the
+incremental redundancy is transmitted when retransmission is
+needed. Then, at the receiver, the received packet is combined
+with the previously transmitted information for the forward
+error correction (FEC) decoding [17]. However, due to the
+lack of information bits, the received incremental redundancy
+cannot be decoded independently, degrading the efficiency of
+decoding. Therefore, type-III HARQ (HARQ-III) is proposed
+to include the information bits and parity bits simultaneously
+at every retransmission [18]. Nevertheless, the meanings of
+transmitted information are ignored in the above methods,
+making it incapable of handling semantic errors. Moreover,
+since the CRC detector can only detect whether the entire
+received packet is erroneous, the fine-grained error detection
+is not considered, degrading the efficiency of error detection.
+Therefore, to further enhance the robustness and efficiency
+of SemComs, semantic retransmission schemes have been
+studied [19–24]. In [19], the data sample is thoroughly re-
+transmitted in a DL-based communication network when the
+received semantic information is not sufficient to complete the
+task. A channel output feedback is further incorporated into
+the retransmission mechanism in [20] to improve the recon-
+struction quality. Although constantly retransmitting messages
+can improve the performance of specific intelligent task, the
+efficiency in resource utilization is too low for practical us-
+age. Therefore, incremental transmission methods are further
+incorporated to improve the transmission efficiency. Specif-
+ically, multiple incremental transmissions are supported by
+different autoencoders in [25] to reduce semantic transmission
+error. To further simplify the network architecture, a unified
+single decoder is proposed in [14] to exploit the incremen-
+tal knowledge (IK) obtained from retransmission. Besides
+the text and image transmission, an incremental redundancy
+HARQ framework is investigated for video conferencing with
+a semantic error detector [26]. However, the above works
+retransmit the same messages simply or directly transmit
+incremental redundancy triggered by task performance, having
+no insight into the specific distortion from the channel fading
+and noise. Consequently, the error detection on the seman-
+tic feature dimension is always ignored, where the features
+that are successfully received and decoded are probable to
+be transmitted again, decreasing the efficiency of resource
+utilization. At the same time, the receiver may fail to recover
+critical semantics that are previously transmitted when only
+incremental transmissions are involved without considering
+retransmissions, degrading the system performance.
+Moreover, to ensure the transmission of critical semantics
+with a higher priority, the impact of different importance levels
+of semantic features has been investigated [27–30]. Wang
+et al . evaluate the importance of each semantic triple using
+an attention network [28, 29]. Meanwhile, the importance
+diversity among semantic features is estimated in [30] from
+an information theory perspective, where an entropy model is
+set on the latent space. Nevertheless, the above measurements
+cannot be associated with the semantic task performance
+directly, degrading the task efficiency.
+Overall, to realize robust and scalable semantic trans-
+missions, in this paper, we propose a semantic-aware
+HARQ (SemHARQ) framework for multi-task semantic com-
+munications. The major contributions of this work are sum-
+marized as follows:
+• First, to avoid unnecessary retransmissions, a feature
+distortion evaluation (FDE) network is proposed to differ-
+entiate the distortion extents of the received features. The
+corrupted features are then identified and retransmitted,
+and meanwhile, the remaining resources are utilized to
+transmit the incremental semantics for better perfor-
+mance.
+• Then, to further improve the transmission efficiency, a
+feature importance ranking (FIR) method is designed for
+multi-task SemComs. Specifically, a multi-task semantic
+encoder is proposed [31–33], where the correlated seman-
+tics among different tasks are extracted jointly, making
+the semantic coding more robust and efficient than exist-
+ing single-task coding [34, 35]. Moreover, the semantic
+importance levels are further evaluated by measuring
+the sensitivity of task performance to different features,
+where the gradients of the task performance with respect
+to the features are considered [36].
+• Finally, to enhance the scalability of the proposed
+SemHARQ, the amount of semantics at each transmission
+is adaptively adjusted. Specifically, the length of the
+semantic feature vector to be transmitted is determined
+by the channel conditions. During retransmission, besides
+the features that failed to be reconstructed in previous
+transmissions, the incremental features are also transmit-
+ted in descending order of importance to fully utilize
+channel resources.
+• Extensive simulations are conducted to validate the effec-
+tiveness of the proposed SemHARQ. Numerical results
+demonstrate that SemHARQ outperforms the traditional
+HARQ and state-of-the-art semantic-aware HARQ meth-
+ods, especially at the low SNR regime. To the best
+of our knowledge, this is the first HARQ method that
+realizes semantic feature-level retransmission considering
+semantic importance evaluation.
+The remainder of this paper is organized as follows. Section
+II introduces the system model of the proposed SemHARQ.
+The architecture and principle of the FDE network and FIR
+method are illustrated in Section III. In Section IV , the
+process and training strategy of the SemHARQ are presented.
+Numerical results of the proposed system are demonstrated in
+Section V . Finally, Section VI concludes this paper.
+Notation: Cn and Rn represent the set of n-dimensional
+complex and real vectors, respectively. Bold-font variables
+denote vectors, where xi represents the i-th value of vector x.
+Additionally, note that in this paper, the superscript of a vector
+indicates the number of retransmissions. For example, xj
+indicates the vector corresponding to the jth retransmission.
+Finally, x ∼ CN(µ, σ2) means variable x follows a circularly-
+symmetric complex Gaussian distribution with mean µ and
+3
+…
+V ehicle 
+Re-identification
+‘Blue’
+Color
+Classification
+Base Station Edge Server Communication 
+Link
+Fig. 1: The scenario of the multi-task intelligent transportation
+systems.
+covariance σ2.
+II. S YSTEM MODEL
+In this section, the system model of SemHARQ is intro-
+duced. Specifically, K intelligent tasks are executed simulta-
+neously in intelligent transportation scenarios, and the inputs
+of the system are assumed to be vehicle images, as shown
+in Fig. 1. Note that the system can be readily extended to
+other scenarios and modalities. First, the semantic features are
+extracted and encoded as symbols, then directly transmitted
+to the receiver after mapping into complex symbols and
+scalably selected according to the importance levels. Then, the
+SemHARQ is triggered after receiving the semantic features
+from the channel. After all the transmissions, the concate-
+nated feature vector is decoded by a joint source-channel de-
+coder (JSC-Decoder) and multiple semantic decoders. Finally,
+the multiple tasks are performed by different task performers.
+As shown in Fig. 2, the input images denoted as x ∈
+R eB×W ×H are encoded by a multi-task semantic encoder,
+where eB is the batch size, and W , H are the width and height
+of an image, respectively. The semantic features are extracted
+as s ∈ RN , where N is the number of features in s. Then,
+a JSC-Encoder encodes s as f ∈ CL, where L is the length
+of the feature vector. Afterwards, the feature vector selected
+by a scalable feature selector for HARQ is represented as
+ezj ∈ CB, where B is the number of features to be transmitted
+according to channel state information (CSI), j is the number
+of retransmissions. The value of B is determined by the
+transmission bandwidth in a single time slot so that the length
+of the transmitted feature vector can be scalably adjusted
+according to the channel conditions. Finally, the average power
+control is utilized to normalize the input signals of the channel
+at each transmission, which is shown as
+zj =
+√
+P B ezj
+||ezj||2
+, (1)
+where P is the average power.
+Furthermore, zj is sent and passes through the stochastic
+physical channel. The channel output can be represented as
+ˆzj = hzj + n, (2)
+where n ∈ CB denotes the white Gaussian noise, the value of
+which follows ni ∼ CN(0, σ2). h ∈ CB represents the fading
+coefficient of the channel. In this paper, the performance is
+evaluated in the intelligent transportation scenario as shown
+in Fig. 1, where both the line-of-sight (LOS) and the non-
+line-of-sight (NLOS) paths should be considered [37, 38]. As a
+result, the Rician channel is considered. The fading coefficient
+follows CN
+p
+r/(r + 1), 1/(r + 1)
+
+, where r is set to 2.
+At the receiver, ˆzj is measured by a retransmission identi-
+fication module to detect if the retransmission is required. If
+ˆzj passes the detection, it will be directly concatenated with
+the previously received features and the concatenated vector
+is denoted as zj = [ ˆz1, ...,ˆzj]. Otherwise, the received ˆzj
+will be evaluated by the feature distortion evaluation (FDE)
+network to generate a binary feedback vector p(j+1), indicat-
+ing which features in ˆzj are needed to be retransmitted. Such
+retransmissions will be repeated until the success of multi-
+task or the maximum times of retransmission is reached. After
+all the transmissions, the concatenated vector is decoded as
+ˆs ∈ RN by the JSC-Decoder. ˆs is then semantically decoded
+to [ˆy1, ˆy2, ...,ˆyK] by multiple semantic decoders, where K
+represents the number of tasks. Finally, the task prediction
+vectors [c1, c2, ...,cK] are generated from the task performers.
+III. F EATURE DISTORTION EVALUATION AND
+IMPORTANCE RANKING
+In this section, the FDE network and feature importance
+ranking (FIR) method are introduced. Firstly, the FDE network
+is investigated to locate the corrupted features that need to
+be retransmitted in the received feature vector. Then, the
+FIR method is designed to identify important features in the
+scalable feature selector for HARQ.
+A. FDE network
+As shown in Fig. 3, to obtain the distortion extents of the
+received features, a distortion measure module F is proposed.
+Specifically, a neural network (NN) consisting of four dense
+layers is utilized to evaluate the distortion distribution of
+the received vector ˆzj after jth retransmission. Since ˆzj
+corresponds to a subset of the original features after scalable
+feature selection, to align the features in ˆzj with the original
+feature vector s, a vector ˆzj
+p of the same dimension as the
+original vector is generated from ˆzj by padding the other
+positions with zeros. Then, a distortion measure vector can be
+generated by feeding ˆzj
+p into F, which has the same dimension
+as ˆzj
+p, inferring the distortion levels of all the features in ˆzj.
+To enable F to learn the discrepancy of the distributions
+between the received features corrupted by the channel im-
+pairments and the original undistorted feature vector s, F
+is trained independently before the entire system training.
+Since mutual information can be used to measure the semantic
+similarity between the transmitted and received features, the
+mutual information of the original feature vector s and the
+JSC-decoded feature vector ˆs is estimated and serves as the
+training objective of F.
+Specifically, the optimization problem of FDE network
+training is defined as
+max
+F
+I(s; ˆs). (3)
+4
+1
+Multi-task 
+Semantic 
+Encoder 
+𝒙 ∈ ℝ෩𝑩×𝑾×𝑯
+JSC-
+Encoder
+JSC-
+Decoder
+Semantic 
+Decoder 1
+ො𝒔
+…
+…
+ෝ𝒚𝟏
+ෝ𝒚𝑲
+𝒄𝟏
+𝒄𝑲
+Scalable 
+Feature 
+Selector for 
+HARQ
+Semantic 
+Decoder K
+Task 
+Performer 1
+Task 
+Performer K
+Normali-
+zation 
+Layer
+Retransmission 
+Identification 
+Module
+NAK?
+Semantic-aware HARQ
+1 0 1 …
+Channel
+Transmitter Receiver
+𝒔 𝒇 ത𝒛𝒋෤𝒛𝒋 𝒛𝒋 ො𝒛𝒋
+𝒑(𝒋+𝟏)
+Identifi-
+cation
+‘Blue’
+Color
+Classi.
+…
+Fig. 2: The framework of the proposed SemHARQ.
+The mutual information of s and ˆs can be calculated as [39],
+I(s; ˆs) = Ep(s,ˆs)
+
+log p(s, ˆs)
+p(s)p(ˆs)
+
+= DKL
+
+p(s, ˆs)||p(s)p(ˆs)
+
+,
+(4)
+where p(s) and p(ˆs) are the marginal probability of s and
+ˆs, respectively, and p(s, ˆs) is the joint probability of s and
+ˆs. Note that the mutual information can be represented by
+the Kullback-Leibler (KL) divergence between the product of
+the marginal probabilities and the joint probability. Inspired
+by the general-purpose parametric mutual information neural
+estimation (MINE) method of [40], the KL-divergence in
+Eq. (4) obeys the following dual representation [40, Eq. (5)],
+DKL
+
+p(s, ˆs)||p(s)p(ˆs)
+
+=
+sup
+T :Ω→R
+Ep(s,ˆs)[T ] − log
+ 
+Ep(s)p(ˆs)
+
+eT 
+, (5)
+where the supremum is taken over all functions T . Con-
+sequently, the lower bound of I(s; ˆs) can be derived [40,
+Eq. (6)],
+I(s; ˆs) = DKL
+
+p(s, ˆs)||p(s)p(ˆs)
+
+⩾ Ep(s,ˆs) [T ] − log
+ 
+Ep(s)p(ˆs)[eT ]
+
+.
+(6)
+Note that T can be any class of functions satisfying integra-
+bility, as a result, the NN in F is employed as T to obtain
+a precise bound according to Eq. (6). Finally, the estimated
+mutual information can be denoted as
+I(s; ˆs|F ) = Ep(s,ˆs) [F ] − log
+ 
+Ep(s)p(ˆs)
+
+eF 
+, (7)
+where F is trained in an unsupervised manner and the
+optimization goal is updated to maximize I(s; ˆs|F ) (i.e.,
+−I(s; ˆs|F ) serves as a part of LFDE, which is the loss of FDE
+network training). As indicated by Eq. (7), during the training
+phase of F, the network should be optimized using both joint
+and marginal distributions of s and ˆs. Thus, as shown in
+Fig. 3, the inputs are defined as J(s, ˆs) and M (s, ˆs), which
+are sampled from the joint feature space and the marginal
+feature space of s and ˆs, respectively. Particularly, J(s, ˆs) are
+sampled from the combination of s and ˆs corresponding to the
+same images, and M (s, ˆs) are sampled from the combination
+of s and ˆs corresponding to different images within a batch.
+As a result, F can learn the distributions of s and ˆs.
+By optimizing the parameters through maximizing the mu-
+tual information, the first three dense layers in F learn to
+make the received feature vector approach the distributions of
+1
+Multidimensional
+Gumbel softmax
+𝒑(𝒋+𝟏)
+For training 
+
+Dense 
+Layer1
+Dense 
+Layer2
+෩𝑩 × 𝑵 ෩𝑩 × 𝑵/𝟒
+Dense 
+Layer3
+෩𝑩 × 𝟏
+෩𝑩 × 𝑵
+Dense 
+Layer4
+For  testing
+𝑱(𝒔, ො𝒔)
+ො𝒛𝒑
+𝒋
+ഥ𝒅𝒋
+…
+𝒘𝒋
+10 1…Forward 
+Backward 
+…
+Calculation of the mutual information
+Back-propagation of the gradients
+𝑴(𝒔, ො𝒔)
+Fig. 3: The structure of the FDE network.
+the original undistorted vectors across all the categories in the
+dataset. On this basis, the output vector ¯dj as shown in Fig. 3
+can serve as a weight vector that prominently quantifies the
+contributions of different received features to the information
+recovery, further reflecting the distortion levels of the input
+features after transmission [41, 42]. Specifically, as illustrated
+in [40], based on the chain rule and the smoothness of the
+estimated mutual information function, the correlation between
+the i-th output feature ¯dj
+i of neural network F and the loss
+LFDE can be derived as follows,
+∆LFDE( ¯dj
+i ) ≈ ∇¯dj
+i
+LFDE · ∆ ¯dj
+i , (8)
+where ∇ ¯dj
+i
+LFDE represents the gradient of the loss function
+with respect to the output feature, ∆LFDE( ¯dj
+i ) and ∆ ¯dj
+i are
+the variation of the loss function and the output feature
+after iterations, respectively. Additionally, the output feature
+variation ∆ ¯dj
+i is linearly related to its corresponding gradient,
+which can be represented as
+∆ ¯dj
+i = −η∇ ¯dj
+i
+LFDE, (9)
+where η is the learning rate. Therefore, the variation of LFDE
+can be also represented as follows,
+∆LFDE( ¯dj
+i ) ≈ −η
+∇ ¯dj
+i
+LFDE
+2
+. (10)
+This suggests that if
+∇ ¯dj
+i
+LFDE
+ is larger, the loss decreases
+more rapidly, indicating that this feature contributes more to
+5
+the reduction of the loss. As illustrated in Eq. (9), in the
+gradient descent process, the optimizer is more inclined to
+adjust these features, causing their variations to be more rapid
+to accelerate the reduction of the loss [43]. Finally, the output
+feature vector of F can display a more pronounced distribution
+corresponding to the decrease in loss (i.e., the increase in
+mutual information), which can be used to guide the feature
+distortion evaluation.
+During testing, since the contributions of different received
+features to the information recovery are well-learned on all
+the categories, for an received feature vector ˆzj
+p to feed into
+FDE, the output ¯dj can represent the semantic similarity of
+ˆzj
+p relative to the undistorted vectors that the model have
+learned corresponding to the specific category. Consequently,
+the distortion levels of features in received feature vector
+ˆzj
+p can be inferred from output vector ¯dj of FDE directly.
+Particularly, after applying the activation function to ¯dj, larger
+values indicate greater similarities, implying less distortion of
+the corresponding features in ˆzj
+p. Finally, these values form the
+vector ed
+j
+by selecting the corresponding positions according
+to ˆzj, and the distortion measure vector dj can be given by
+dj = 1 − ed
+j
+.
+Furthermore, to instruct the transmitter to retransmit the
+corrupted features, dj is quantized into a binary feedback
+vector p(j+1) to trigger the (j + 1)-th retransmission. Note
+that the process is not trivial because the quantization is
+discrete, which makes the network non-differentiable and hard
+to optimize with back-propagation. Thus, a straight-through
+Gumbel-softmax estimator is investigated [44], where dj is
+discretized in the forward pass but a gradient estimator based
+on Gumbel-softmax distributions is employed to resolve the
+non-differentiability in the backward pass. Specifically, for
+the forward propagation, p(j+1) is drawn from dj using a
+distortion threshold t, which can be represented as
+p(j+1)
+i =
+
+1 if dj
+i ≥ t,
+0 otherwise, (11)
+where p(j+1)
+i and dj
+i denote the i-th value of p(j+1) and dj,
+respectively. On this basis, p(j+1) can serve as a feedback
+vector to guide the next retransmission. Particularly, the num-
+ber of features requested to be retransmitted is equal to the
+number of 1 values in p(j+1), which is given by
+R =
+BX
+i=1
+p(j+1)
+i , (12)
+where B is the size of p(j+1).
+For the backward propagation, simply back-propagating
+through the binarization function as if it had been an identity
+function may cause discrepancies between the forward and
+backward pass, leading to high variance. Therefore, to improve
+the efficiency and stability of gradient estimation, Gumbel-
+softmax distributions are used, where each sample is a differ-
+entiable proxy of the corresponding discrete sample. Further-
+more, note that straightforwardly applying single-dimension
+Gumbel-softmax is probable to sample repeatedly since the
+R selections act independently and are not aware of each
+25106 86
+2
+SNR= -6
+SNR= -2
+SNR= 2
+Original 
+image
+Fig. 4: The gradient-weighted class activation mapping visualiza-
+tion results w.r.t. different channel conditions, where warmer colors
+indicate contributing semantic features while red circles indicate
+distracting backgrounds.
+other. To solve this issue, a multi-dimension Gumbel-softmax
+scheme is proposed, where R Gumbel-softmax distributions
+are designed simultaneously from R categorical distributions
+generating from dj. The R Gumbel-softmax distributions are
+used to estimate the gradients of R samplings in the forward
+propagation.
+Specifically, a categorical vector vjr ∈ RB is designed for
+the r-th sampling, where r = 1 , ..., R. It is obtained from
+djr ∈ RB after a softmax function and can be denoted as
+vjr = softmax(djr ), (13)
+where djr is obtained after replacing the largest r − 1 values
+with 0 in dj. On this basis, vjr serves as a probability
+vector involving the variables in djr, and can be utilized to
+form the r-th Gumbel-softmax distribution. Since the samples
+from Gumbel-softmax distributions will become identical to
+the samples from the corresponding categorical distributions
+along with training, the maximum value in each categorical
+vector will most likely be sampled, matching the forward
+propagation. Therefore, vjr is used to select the r-th largest
+value in dj, mitigating repetitive samplings. Consequently, the
+sample vector wjr in r-th sampling is represented as
+wjr = softmax
+
+log(vjr ) + gr
+
+/τ
+
+, (14)
+where gr is a sampling vector drawn from Gumbel(0,1)
+distribution. The softmax function in Eq. (14) is used as
+a continuous, differentiable approximation to arg max, and
+τ serves as the softmax temperature. As τ approaches 0,
+the distribution will become more discrete and the sample
+vectors will converge to one-hot vectors. During training,
+the temperature parameter is decreased by an exponentially
+decreasing curve as in [45, 46]. Finally, all the R sample
+vectors are summed up to be a continuous relaxation of the
+quantized p(j+1) for backward propagation, which is denoted
+as
+wj =
+RX
+r=1
+wjr . (15)
+B. Feature importance ranking (FIR)
+To identify the importance levels of different features in
+f w.r.t. specific tasks, we refer to gradient-weighted class
+6
+activation mapping (Grad-CAM) [47], where visual explana-
+tions of the decision-making process of a CNN are proposed.
+In Grad-CAM, the important regions within an input image
+are identified by leveraging the gradients flowing into the last
+convolutional layer of the CNN. The gradients represent the
+sensitivity of each feature map w.r.t. the target class. The
+higher the gradient value, the more influential the correspond-
+ing feature map is for the prediction.
+In this paper, the important features are identified by calcu-
+lating the gradient of the task predictions relative to the feature
+vector f. Intuitively, Fig. 4 demonstrates the visualization
+results with the proposed SemHARQ architecture of three
+multi-task, i.e., vehicle re-identification (ReID), vehicle color
+classification and vehicle type classification, where warmer
+colors indicate regions with more significance. Apparently, as
+SNR gets better, SemHARQ focuses more on the vehicles
+than the backgrounds, leading to better task performance. The
+specific methodology for calculating the importance levels of
+semantic features is shown as follows.
+Firstly, as shown in Fig. 5, the input images are fed into
+the proposed SemHARQ to obtain the output logits w.r.t.
+different tasks, where the entire f is encoded and transmitted
+without feature selection. Retransmissions are triggered and
+guided by the FDE network if the received features fail to
+pass the detection of the retransmission identification module.
+Then, the gradients of the target classes w.r.t. the features
+of f are calculated by back-propagating the final predictions
+through the system. Specifically, the probability vector output
+by the k-th task performer is denoted as ck ∈ RM , where
+M indicates the total number of categories of the k-th task.
+The importance level corresponding to each feature in f is
+obtained by calculating the partial derivative of ckm relative to
+f, where ckm is the probability corresponding to the predicted
+category. The importance measure vector w.r.tk-th task is then
+represented as
+efk = ∂ckm
+∂f , (16)
+which represents the significance of each feature of f to the
+k-th task. Finally, the importance measure vectors of all the K
+tasks are summed up, and then an integral importance measure
+vector is obtained,
+Ind =
+KX
+k=1
+λk efk, (17)
+where λk denotes the weight of the k-th task, efk is the
+importance measure vector corresponding to the k-th task. In
+the end, the features in f are selected based on the importance
+measure vector Ind under various channel conditions. The
+features corresponding to the positions with larger values in
+Ind are with higher priority at the first transmission and all
+the incremental transmissions.
+IV. S EMANTIC -AWARE HARQ
+In this section, the process of SemHARQ is further an-
+alyzed. Note that to transmit the meanings of the source
+efficiently, all the functions of SemHARQ are performed at
+the level of semantic features. The JSCC is utilized in our
+…
+𝒇
+Semantic-
+aware 
+HARQ
+…𝒄𝟏
+𝒄𝑲
+Task 
+Performers
+Decoders
+𝐈nd
+…
+…
+…
+Partial 
+Derivative 
+Calculator
+Importance ranking based on 𝐈nd
+cBack-propagation
+of the predictions
+Fig. 5: The framework of FIR, where features with deeper colors in
+f attach higher importance.
+1
+NAK?FDE
+Network
+Scalable Feature 
+Selector for
+HARQ
+Normalization 
+Layer
+Channel
+1 0 1 …
+Normalization 
+Layer
+Retransmission Identification
+Module
+FDE
+Network
+10 1 …
+Normalization 
+Layer
+…
+…
+NAK
+?
+ACK
+Retransmission Identification
+Module
+Retransmission Identification
+Module
+෤𝒛𝟎
+෤𝒛𝟏
+෤𝒛𝒋
+𝒛𝟎
+𝒛𝟏
+𝒛𝒋
+ො𝒛𝟎
+ො𝒛𝟏
+ො𝒛𝒋
+ത𝒛𝒋
+𝒑𝟏
+𝒑𝟐
+ො𝒛𝟎
+ො𝒛𝟏
+Fig. 6: The working flow of SemHARQ.
+framework to encode semantic features directly into channel
+transmission symbols. Furthermore, the training strategy of
+SemHARQ is proposed to optimize the training process.
+A. SemHARQ
+The structure of SemHARQ of j retransmissions is shown
+in Fig. 6. Firstly, the feature vector to be transmitted at the
+first transmission is obtained by encoding and scalable feature
+selection, which is represented by
+ez0 = fsfs
+
+Cα
+
+Sβ(x)
+
+, (18)
+where Sβ(·) and Cα(·) denote the multi-task semantic encoder
+with the parameter set β and the JSC-Encoder with the param-
+eter set α, respectively, and fsfs(·) indicates the scalable feature
+selector, whose structure is shown in Fig. 7. Consequently, ez0
+consists of B features chosen from the encoded feature vector
+according to the importance measure vector Ind and the given
+channel condition. After normalizing and passing through the
+channel, the received feature vector is represented as ˆz0 at the
+receiver.
+Then, ˆz0 is detected by the retransmission identification
+module to determine the need for retransmission. Specifi-
+cally, a retransmission criterion based on the received data
+uncertainty is applied [19]. Consider the acquisition of a
+7
+concatenated feature vector zj after j retransmissions, the
+receiver repeatedly requests the transmitter to retransmit until
+SNR > min
+
+θ0L
+
+U (zj)
+
+, θSNR
+
+, (19)
+where SNR stands for the receive-SNR after the previous
+transmissions, U (·) denotes the received information uncer-
+tainty, L(·) represents a monotonically increasing reshaping
+function which is set to L(x) = 1 + x, θ0 indicates a given
+conversion ratio between the uncertainty and SNR of the
+combined information, and θSNR is a given maximum receive-
+SNR. Particularly, the receive-SNR is obtained by integrating
+the information after multiple retransmissions, which is given
+by
+SNR = 2P
+σ2
+JX
+j=0
+hj2
+, (20)
+where P is the average power of the semantics, hj represents
+the channel coefficient vector at the jth retransmission, σ2
+2
+indicates the noise variance, J denotes the total number of
+retransmissions. As for the uncertainty, U (zj) is measured by
+the average entropy of the posterior probability distribution
+corresponding to different tasks. In terms of the k-th task, the
+uncertainty is given by
+Uk(zj) = −
+X
+yk
+pγ(yk | zj) logpγ(yk | zj), (21)
+where yk denotes a class label and γ is the set of parameters of
+the decoders and the task performer to be learned. The uncer-
+tainty measures the contribution of the received semantics to
+the task performance from the perspective of information en-
+tropy, and thus serves as a criterion for measuring the adequacy
+of the amount of received information. Furthermore, since
+the uncertainty will be constantly bridged by increasing the
+receive-SNR or equivalently the number of retransmissions,
+the inequality in Eq. (19) is intuitively used to evaluate the
+adequacy of the number of retransmissions.
+After passing through the retransmission identification mod-
+ule, if ˆz0 passes the detection successfully, it is fed into the
+decoders and the multiple task performers to generate the
+multi-task predictions. The received feature vector is decoded
+as
+ck = Tϕk
+
+S−1
+β−1
+k
+
+C−1
+α−1 ( ˆz0)
+
+, (22)
+where ck denotes the predicted probability vector of the k-th
+task, C−1
+α−1 (·), S−1
+β−1
+k
+(·) and Tϕk (·) represent the JSC-Decoder
+with parameter set α−1 , the semantic decoder of the k-th
+task with parameter set β−1
+k and the task performer of the
+k-th task with parameter set ϕk, respectively. Additionally, if
+ˆz0 fails to pass the detection, the FDE network is utilized to
+generate the feedback vector p1 to trigger the first distortion-
+aware retransmission. The distorted features in ˆz0 are required
+to be retransmitted according to the distortion evaluation. Note
+that the number of transmitted features at every transmission
+is adaptive to the channel conditions. Therefore, the incre-
+mental transmission of new features in descending order of
+importance levels is combined with the retransmission if there
+SNR
+…
+Incremental 
+transmission
+Retransmission
+෩𝑩 × 𝑳
+෩𝑩 × 𝑩 ෩𝑩 × 𝑩
+Scalable Feature Selection
+…
+෩𝑩 × 𝑳
+Feature  Importance Ranking
+Distortion-aware transmission
+𝒇
+𝒑𝒋
+෤𝒛𝒋
+Fig. 7: The structure of the scalable feature selector for SemHARQ.
+Algorithm 1 Training process of SemHARQ.
+Stage 1: Training of the FDE network.
+Input: The semantic encoded s and JSC-decoded ˆs, initial-
+ized parameters ξF of the distortion measure module F
+in the FDE network.
+Output: ξF.
+1: Sample from J(s, ˆs) and M (s, ˆs), and feed the samples
+into F.
+2: Estimate the mutual information of s and ˆs by Eq. (7).
+3: Train ξF by loss function −I(s; ˆs|F ).
+Stage 2: Training of the whole HARQ system without scalable
+feature selection.
+Input: Images x from training dataset, initialized parameters
+α, β, α−1, β−1
+k , ϕk with f fully transmitted; k = 1, ..., K.
+Output: Sβ(·), Cα(·), C−1
+α−1 (·), S−1
+β−1
+k
+(·), Tϕk (·).
+1: Transmitter: f = Cα
+
+Sβ(x)
+
+.
+2: while the retransmission criterion and the maximum num-
+ber of retransmissions are not met do
+3: Obtain pj from the FDE network and
+4: Send pj back to the transmitter.
+5: Trigger distortion-aware retransmission according to
+pj.
+6: end while
+7: Receiver: zj = [ˆz1, ...,ˆzj], ck = Tϕk
+
+S−1
+β−1
+k
+(C−1
+α−1 (zj))
+
+.
+8: Train α, β, α−1, β−1
+k , ϕk by loss function LE2E ; k =
+1, ..., K.
+9: Calculate the importance measure vector Ind.
+Stage 3: Retraining of the SemHARQ with scalable feature
+selection according to Ind.
+are remaining channel resources. On this basis, the transmis-
+sion robustness and efficiency are enhanced simultaneously.
+Furthermore, after the first retransmission, ˆz1 is obtained
+at the receiver and concatenated with the cached semantics
+from the previous transmission. The retransmission process
+will continue until either the receive-SNR is sufficiently large
+or the predetermined maximum number of retransmissions is
+reached.
+8
+B. Training strategy
+To improve the efficiency of SemHARQ training, a three-
+stage training strategy is proposed. We focus on three repre-
+sentative tasks in intelligent traffic scenarios for experiments,
+namely vehicle ReID, vehicle color classification, and vehicle
+type classification. DenseNet-121 pre-trained on ImageNet
+is used as the initial model [48]. In the first stage, to improve
+the performance of feature distortion evaluation, the FDE
+network is trained with other trainable modules frozen. The
+training loss can be expressed as,
+LFDE = LCH + LMI, (23)
+where LCH, LMI denote the channel transmission loss and the
+loss of mutual information, respectively. Specifically, LCH can
+be measured by the mean square error (MSE),
+LCH = 1
+N
+NX
+n=1
+||sn − ˆsn||2
+2, (24)
+where s denotes the feature vector extracted by the semantic
+encoder, and ˆs is the feature vector decoded by the JSC-
+Decoder. The mutual information loss is denoted as
+LMI = −I(s; ˆs|F ), (25)
+where I(s; ˆs|F ) is calculated in Eq. (7).
+Then, in the second stage, to calculate the feature impor-
+tance levels, the whole system is trained with the entire f
+transmitted without considering the constraint of communica-
+tion capacity. The overall E2E loss is represented by
+LE2E = LFDE + LT, (26)
+where LT is the multi-task loss. Specifically, the losses of the
+three tasks are weighted, which can be given by
+LT = λrLr + λcLc + λtLt, (27)
+where Lr, Lc, and Lt correspond to the ReID, color classifi-
+cation, and type classification losses, respectively, λr, λc, and
+λt denote the respective task weights. Specifically, Lr consists
+of the hard-mining triplet loss [49] and the cross-entropy loss,
+defined as Lr = Lht(a, p, n) + Lce(y, ˆy), where a, pand n
+represent anchor, positive and negative elements, respectively.
+The hard-mining triplet loss Lht(a, p, n) is defined as
+Lht(a, p, n) = max
+n
+max(dap) − min(dan) + α
+
+, 0
+o
+,
+(28)
+where dap and dan denote the distances between the extracted
+features of the anchor and positive/negative images. Lce(y, ˆy)
+indicates the cross-entropy loss, which is defined as
+Lce(y, ˆy) =
+KX
+k=1
+yk log(ˆyk) + (1 − yk) log(1 − ˆyk), (29)
+where y denotes the label of the task and ˆy is the predicted
+one. For the other two classification tasks, the cross-entropy
+loss is also employed.
+Finally, the SemHARQ considering scalable feature selec-
+tion is trained based on the importance measure vector Ind
+with limited bandwidth and time slot, where all the trainable
+parameters are optimized. The most important B features are
+transmitted, where B is determined by channel conditions.
+The pseudocode of the whole training process is shown in
+Algorithm 1.
+V. N UMERICAL RESULTS
+In this section, simulations are performed to evaluate the
+proposed system. The details of the simulation settings and
+the structure of the network are introduced. Then, the proposed
+SemHARQ is compared with other baselines, and the results
+are analyzed.
+A. Dataset and performance metrics
+The adopted dataset is VeRi- 776 [50], which contains over
+50, 000 images of 776 vehicles captured by 20 cameras
+covering an area of 1.0 square kilometers, making the dataset
+flexible to be used for vehicle ReID and other related tasks.
+The images are captured in unconstrained surveillance scenar-
+ios and are labeled with different attributes such as vehicle
+type, color, and brand. Thus, the evaluation results are all
+presented based on the VeRi- 776 dataset.
+Two of the most popular metrics, rank-1 accuracy and mean
+average precision (mAP), are used to evaluate the performance
+of vehicle ReID. Specifically, rank-1 accuracy measures the
+percentage of query images that are correctly matched at
+the top-ranked position based on the similarity or distance
+metrics. The mAP represents the mean of the AP, indicating
+the proportion of the correctly retrieved gallery images in the
+gallery image set. It evaluates the identification performance in
+a more global view. Additionally, the other two classification
+tasks are evaluated by the average accuracy.
+B. Simulation settings and numerical analysis
+The detailed network settings of the proposed SemHARQ
+are shown in Table I. The system is evaluated under several
+SNR levels and the average power budget P is set to 1.
+DenseNet-121 is utilized as our backbone deep neural net-
+work (DNN), which is optimized by Adam [43]. λr, λc, λt
+are set to 1, 0.125, 0.125, respectively. For a given SNR, the
+entire training process consists of 135 epochs, including 30
+epochs for pre-training the FDE network to estimate feature
+distortion, followed by 40 epochs for training the whole
+SemHARQ system without scalable feature selection to obtain
+feature importance scores, and another 65 epochs for retraining
+the SemHARQ model with scalable feature selection based
+on the learned importance scores. The training batch and
+testing batch are set to 32 and 100, respectively. Both training
+and testing are conducted on a single NVIDIA V100 GPU.
+The entire model is trained using a dataset of approximately
+40,000 RGB images with a resolution of 3 × 256 × 256.
+To further illustrate the convergence behavior of our model,
+a training loss curve of SemHARQ training with SNR =
+0 dB is shown in Fig. 8. It can be observed that the training
+loss decreases smoothly and steadily during the three training
+phases as discussed in Algorithm 1, eventually converging
+around epoch 25, epoch 60 and epoch 130, respectively.
+9
+TABLE I: The network settings of SemHARQ.
+Transmission System Modules Layer Output
+dimensions
+Activation
+function
+Transmitter
+Input x 256 × 256 /
+Multi-task semantic encoder DenseNet-121 1024 ReLu
+JSC-Encoder FC with BN
+FC
+1024
+1024
+Leaky ReLu
+Linear
+Scalable feature selector for HARQ / B /
+Output ( jth retransmission) ezj B /
+Channel Rician fading / / /
+Receiver
+Input ˆzj B /
+Retransmission identification NACK or concatenation / or B × (j + 1) /
+JSC-Decoder FC with BN
+FC
+1024
+1024
+Leaky ReLu
+ReLu
+Semantic decoder 1 for vehicle ReID FC 1024 Leaky ReLu
+Semantic decoder 2 for vehicle color classi. FC 512 Leaky ReLu
+Semantic decoder 3 for vehicle type classi. FC 512 Leaky ReLu
+Task performer 1 for vehicle ReID FC 575 /
+Task performer 2 for vehicle color classi. FC 10 /
+Task performer 3 for vehicle type classi. FC 9 /
+Output c1, c2, c3 575, 10, 9 /
+FDE network
+(jth retransmission)
+F
+Dense Layer 1
+Dense Layer 2
+Dense Layer 3
+Dense Layer 4
+1024
+256
+1024
+1
+ReLu
+ReLu
+Sigmoid
+/
+Mutual information estimation / 1 /
+Multi-dimension Gumbel-softmax pj B /
+1 FC: fully connected layer; BN: batch normalization; ReLu: rectified linear unit.
+2 The retransmission identification module sends NACK to the FDE network if the detection is not successful, otherwise, concatenates the received vector
+with the buffered feature vectors.
+Meanwhile, around 3.6 GB of memory is consumed during
+testing on images with a resolution of 3 × 256 × 256. Note
+that techniques such as model pruning [51] and knowledge
+distillation [52] can be adopted to further reduce memory
+consumption in practical applications. Besides, the learning
+rate is initialized as 1e −4, and learning rate decay is applied.
+In addition, the conversion ratio between the uncertainty and
+the receive-SNR of the combined information θ0 in Eq. (19)
+is set to 1 dB, and the maximum receive-SNR θSNR can
+be determined by θSNR = θ0 [1 + logM ], where log M is
+the maximum entropy, with M denoting the total number
+of categories. Moreover, to trade off the robustness and the
+diversity of the received semantics, the number of features
+to be retransmitted is approximately the same as those for
+incremental transmission on average by adjusting the distortion
+threshold t in Eq. (11). Note that the value of t can also be
+readily changed. Particularly, to explore the impact of t, the
+multi-task performance of different retransmission ratios after
+adjusting t is shown in Table II, where the retransmission ratio
+represents the average ratio of the retransmitted features to all
+the received features. It is obvious that better performance is
+achieved when the ratio is set to 0.5. The reason is that the
+semantic error correction and new information transmission
+are better traded off, enhancing the communication efficiency.
+The proposed E2E system is compared with the state-of-
+the-art HARQ benchmarks. The details are as follows:
+• Traditional II-HARQ method: JPEG, LDPC with 3
+4 rate
+and 16 QAM are used for source coding, channel coding
+and modulation, respectively. Then, the CRC is employed
+0 20 40 60 80 100 120 140
+Epoch
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0Average loss
+Fig. 8: The loss curve of SemHARQ training with SNR = 0 dB.
+at the receiver and the incremental redundancy infor-
+mation is requested to transmit when CRC fails until
+the success or the maximum number of transmissions
+is reached. After the image reconstruction, the three
+intelligent tasks are performed using DenseNet121.
+• Semantic-aware HARQ baselines: 1) IK-S-HARQ [14]:
+An incremental knowledge-based semantic-aware HARQ
+method is compared. Specifically, the B features to be
+transmitted are incrementally selected from f at each
+transmission in order of the importance level. 2) RT-
+S-HARQ [19]: A retransmission-only semantic-aware
+HARQ method is compared, where the most important
+B features are selected and retransmitted at each trans-
+mission.
+Note that the comparison only focuses on the HARQ method at
+the semantic feature level, which is independent of the source
+10
+TABLE II: Multi-task accuracy of different retransmission ratios.
+Retransmission ratio
+SNR [dB] 0.25 0.5 0.75
+Rank-1 Color Type Rank-1 Color Type Rank-1 Color Type
+−6 17.61 88.09 76.48 20.97 88.95 80.68 18.85 88.10 78.86
+−4 19.45 89.69 84.30 23.65 90.81 85.15 20.89 89.75 85.26
+−2 60.98 90.49 88.47 68.22 91.30 88.81 63.35 90.75 88.55
+0 72.94 91.17 90.07 76.94 92.17 91.07 73.69 92.02 90.84
+2 85.11 93.19 91.79 85.74 93.75 91.64 85.00 92.25 91.53
+4 89.78 93.51 91.92 89.94 93.78 91.75 89.90 93.06 91.80
+6 90.40 93.61 92.36 90.58 94.21 91.85 90.41 93.40 92.32
+8 90.41 93.72 92.23 91.54 94.15 92.52 91.03 93.80 92.55
+modality. The proposed SemHARQ and the semantic-aware
+HARQ baselines are all DL-based with the same backbone
+DNN, i.e., DenseNet-121. Meanwhile, the JSCC and scalable
+feature selector with the same structures are applied to achieve
+the best results.
+Fig. 9 presents the vehicle ReID performance w.r.t. different
+methods. It is obvious that the semantic-aware HARQ methods
+outperform the traditional method in both rank-1 accuracy and
+mAP, which verifies the superiority of SemCom in transmit-
+ting the meaning of information efficiently. Furthermore, the
+proposed SemHARQ achieves the best performance among
+the three semantic-aware HARQ methods, followed by IK-S-
+HARQ and RT-S-HARQ. The rank-1 accuracy gaps between
+SemHARQ and IK-S-HARQ and RT-S-HARQ at −6 dB are
+49.79% and 77.71%, respectively, while in terms of the mAP,
+the gaps are 67.93% and 139.17%, respectively. The gain is
+attributed to the precise evaluation of the feature distortion
+in SemHARQ, where only distorted features are allowed to
+be retransmitted, improving the efficiency of channel resource
+utilization significantly, especially for the low SNR regimes.
+To further demonstrate the performance of SemHARQ at
+any given SNR regime, the task performance of the perfect
+transmission is shown in Fig. 9 and Fig. 10, which are obtained
+by performing the tasks directly using the extracted semantic
+feature vector without feature selection and transmission (i.e.,
+transmission conditions are good enough to ensure perfect
+reconstruction of transmitted symbols at the receiver, as shown
+in the highest line in Fig. 9 and Fig. 10). Note that to ensure
+a fair comparison, the same backbone DNN as SemHARQ
+is utilized. At low SNR regime, the transmission capacity is
+severely constrained and the transmitted features are heavily
+corrupted by the channel fading and noises. Therefore, under
+the constraint of the maximum number of retransmissions, the
+performance of SemHARQ is relatively poor. For example, at
+-6 dB, the SemHARQ exhibits a 70.97% absolute reduction
+in rank-1 accuracy compared to the perfect transmission
+method in Fig. 9. However, this limitation is inherent to
+all HARQ methods operating under such transmission con-
+ditions. Particularly, the superiority of our SemHARQ lies
+in combining the retransmissions of distorted features with
+the incremental transmissions, which significantly improves
+the task performance compared to other HARQ methods,
+despite the capacity constraint. It is obvious that at high
+TABLE III: Performance comparison of the proposed FIR method
+and the SST method.
+SNR [dB] Proposed FIR ( %) SST ( %)
+Rank-1 acc. Color acc. Type acc. Rank-1 acc. Color acc. Type acc.
+−6 20.97 88.95 80.68 1.61 42.54 47.51
+−4 23.65 90.81 85.15 5.96 70.76 70.54
+−2 68.22 91.30 88.81 27.83 82.24 82.15
+0 76.94 92.17 91.07 68.00 90.72 87.67
+2 85.74 93.75 91.64 83.91 92.67 90.97
+4 89.94 93.78 91.75 88.97 92.80 91.45
+6 90.58 94.21 91.85 89.52 93.47 91.29
+8 91.54 94.15 92.52 90.01 93.54 91.54
+SNR regime, the performance of SemHARQ is very close
+to the perfect transmission, which results from the correct
+reception of most of the information under good channel
+conditions and high transmission capacity. For example, as
+presented in Fig. 9, the rank-1 accuracy of the SemHARQ only
+reduces 0.44% compared to the perfect transmission when
+SNR is 8 dB. Furthermore, note that the performance gains
+of SemHARQ over IK-S-HARQ and RT-S-HARQ are also
+marginal when SNR is high. The reason is that the decoding
+is mostly successful after the first transmission, and thus,
+retransmission seldomly triggers under this condition. As a
+result, the superiority of SemHARQ over other semantic-aware
+HARQ methods degrades.
+At the same time, the accuracy of the other two classification
+tasks is illustrated in Fig. 10. The performance of SemHARQ
+is superior to other methods, especially for the low SNR
+regimes. Specifically, at −6 dB, in terms of color classification,
+SemHARQ improves the performance by 10.28%, 40.88%,
+and 166.48%, compared with the IK-S-HARQ, the RT-S-
+HARQ and the traditional HARQ, respectively. For type clas-
+sification, the performance is improved by 14.50%, 33.55%,
+and 82.04%, respectively. Note that since the classification
+task is less difficult than the ReID task, the accuracy is not
+affected by a certain amount of semantic errors. Therefore, the
+semantic baselines perform well even without feature distor-
+tion evaluation, leading to less performance gain. Additionally,
+the performance gain progressively reduces as SNR increases
+due to the correct decoding of the received semantics under
+good channel conditions. On this basis, the retransmissions
+become less meaningful.
+To further verify the effectiveness of the FDE network in
+SemHARQ, we conduct an ablation study for comparison.
+The distorted features are directly identified from the received
+feature vector ˆzj using multi-dimension Gumbel-softmax in
+the comparison method. Accordingly, F and mutual infor-
+mation estimation discussed in III-A are not involved, and
+FDE network training is not taken into account. As shown in
+Fig. 11, the multi-task accuracy w.r.t. different channel condi-
+tions is demonstrated. It shows that our proposed SemHARQ
+achieves better task performance, especially with poor SNRs.
+Specifically, at −6 dB, the multi-task performance has been
+improved by 107.00%, 2.69%, and 18.91% by using the FDE
+network, respectively. The reason is that the FDE network
+enhances the distortion evaluation ability of the system by
+11
+/uni00000019
+/uni00000017
+/uni00000015
+/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000013
+/uni00000015/uni00000013
+/uni00000017/uni00000013
+/uni00000019/uni00000013
+/uni0000001b/uni00000013
+/uni00000014/uni00000013/uni00000013/uni00000035/uni00000044/uni00000051/uni0000004e/uni00000010/uni00000014/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000033/uni00000048/uni00000055/uni00000049/uni00000048/uni00000046/uni00000057/uni00000003/uni00000057/uni00000055/uni00000044/uni00000051/uni00000056/uni00000050/uni0000004c/uni00000056/uni00000056/uni0000004c/uni00000052/uni00000051
+/uni00000033/uni00000055/uni00000052/uni00000053/uni00000052/uni00000056/uni00000048/uni00000047/uni00000003/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni0000002c/uni0000002e/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000035/uni00000037/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000037/uni00000055/uni00000044/uni00000047/uni0000004c/uni00000057/uni0000004c/uni00000052/uni00000051/uni00000044/uni0000004f/uni00000003/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+(a) Rank-1 accuracy of different methods
+/uni00000019
+/uni00000017
+/uni00000015
+/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000013
+/uni00000014/uni00000013
+/uni00000015/uni00000013
+/uni00000016/uni00000013
+/uni00000017/uni00000013
+/uni00000018/uni00000013
+/uni00000019/uni00000013
+/uni0000001a/uni00000013/uni00000050/uni00000024/uni00000033/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000033/uni00000048/uni00000055/uni00000049/uni00000048/uni00000046/uni00000057/uni00000003/uni00000057/uni00000055/uni00000044/uni00000051/uni00000056/uni00000050/uni0000004c/uni00000056/uni00000056/uni0000004c/uni00000052/uni00000051
+/uni00000033/uni00000055/uni00000052/uni00000053/uni00000052/uni00000056/uni00000048/uni00000047/uni00000003/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni0000002c/uni0000002e/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000035/uni00000037/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000037/uni00000055/uni00000044/uni00000047/uni0000004c/uni00000057/uni0000004c/uni00000052/uni00000051/uni00000044/uni0000004f/uni00000003/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000033/uni00000048/uni00000055/uni00000049/uni00000048/uni00000046/uni00000057/uni00000003/uni00000057/uni00000055/uni00000044/uni00000051/uni00000056/uni00000050/uni0000004c/uni00000056/uni00000056/uni0000004c/uni00000052/uni00000051
+/uni00000033/uni00000055/uni00000052/uni00000053/uni00000052/uni00000056/uni00000048/uni00000047/uni00000003/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni0000002c/uni0000002e/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000035/uni00000037/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000037/uni00000055/uni00000044/uni00000047/uni0000004c/uni00000057/uni0000004c/uni00000052/uni00000051/uni00000044/uni0000004f/uni00000003/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+ (b) mAP of different methods
+Fig. 9: Rank-1 accuracy and mAP of vehicle ReID w.r.t. different methods.
+/uni00000019
+/uni00000017
+/uni00000015
+/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000013
+/uni00000015/uni00000013
+/uni00000017/uni00000013
+/uni00000019/uni00000013
+/uni0000001b/uni00000013
+/uni00000014/uni00000013/uni00000013/uni00000026/uni00000052/uni0000004f/uni00000052/uni00000055/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000033/uni00000048/uni00000055/uni00000049/uni00000048/uni00000046/uni00000057/uni00000003/uni00000057/uni00000055/uni00000044/uni00000051/uni00000056/uni00000050/uni0000004c/uni00000056/uni00000056/uni0000004c/uni00000052/uni00000051
+/uni00000033/uni00000055/uni00000052/uni00000053/uni00000052/uni00000056/uni00000048/uni00000047/uni00000003/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni0000002c/uni0000002e/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000035/uni00000037/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000037/uni00000055/uni00000044/uni00000047/uni0000004c/uni00000057/uni0000004c/uni00000052/uni00000051/uni00000044/uni0000004f/uni00000003/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+(a) Color accuracy of different methods
+/uni00000019
+/uni00000017
+/uni00000015
+/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000013
+/uni00000015/uni00000013
+/uni00000017/uni00000013
+/uni00000019/uni00000013
+/uni0000001b/uni00000013
+/uni00000014/uni00000013/uni00000013/uni00000037/uni0000005c/uni00000053/uni00000048/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000033/uni00000048/uni00000055/uni00000049/uni00000048/uni00000046/uni00000057/uni00000003/uni00000057/uni00000055/uni00000044/uni00000051/uni00000056/uni00000050/uni0000004c/uni00000056/uni00000056/uni0000004c/uni00000052/uni00000051
+/uni00000033/uni00000055/uni00000052/uni00000053/uni00000052/uni00000056/uni00000048/uni00000047/uni00000003/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni0000002c/uni0000002e/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000035/uni00000037/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+/uni00000037/uni00000055/uni00000044/uni00000047/uni0000004c/uni00000057/uni0000004c/uni00000052/uni00000051/uni00000044/uni0000004f/uni00000003/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034
+ (b) Type accuracy of different methods
+Fig. 10: Accuracy of vehicle color classification and type classification w.r.t. different methods.
+measuring the contribution of the received semantics to the
+mutual information at each transmission. The obtained distor-
+tion levels quantify the degree of feature distortion, providing
+precise guidance on retransmission. Therefore, the efficiency
+of retransmission is improved dramatically.
+The impact of FIR is also presented in Table III. The
+task performance is compared with the sequentially selected
+transmission (SST) method which transmits the first B features
+without considering the importance levels at each transmis-
+sion. Both FIR and SST perform scalable transmission w.r.t.
+various SNR levels. It is obvious that the FIR method surpasses
+the SST method significantly for all three tasks. Particularly,
+at −2 dB, the recognition accuracy increases by 145.13%,
+11.02%, and 8.11% in the three tasks, respectively. Note that
+vehicle ReID is more challenging due to the high intra-class
+variability coupled with small inter-class variability. However,
+greater advancements are made on the vehicle ReID than
+the remaining two tasks, demonstrating the superiority of the
+proposed system. One of the reasons is that the proposed FIR
+can build the relationship between the importance distribution
+of the semantic information and the multi-task predictions,
+thus effectively finding the optimal feature selection policy
+for partial semantics transmissions.
+Besides, to validate the effectiveness of the proposed
+SemHARQ more comprehensively, the gain of the system
+is investigated by increasing the number of retransmissions
+progressively. Fig. 12 presents the impact of retransmissions
+on the task performance in the case of SNR = −6 dB. Note
+that as the number of retransmissions increases, the system
+performance improves obviously. Particularly, the performance
+of vehicle ReID after three retransmissions is almost four times
+that of the no-retransmission method, which further proves the
+validity of SemHARQ.
+Moreover, to confirm the effectiveness of the retransmission
+identification module, the average numbers of retransmissions
+are summarized in Fig. 13 w.r.t. multiple SNR levels, where
+the maximum number is set large enough. As shown in
+Fig. 13, the retransmissions are more frequent under harsh
+channel conditions to meet the criteria in Eq. (19). The
+average number of retransmissions at −6 dB is almost 18
+times higher than at 8 dB in SemHARQ when θ0, the given
+conversion ratio between the uncertainty and SNR, is set
+to 1 dB. Meanwhile, the need for retransmissions reduces
+when θ0 becomes lower accordingly, which represents that
+the receiver’s demand for necessary information reception has
+been decreased. Furthermore, note that the RT-S-HARQ and
+IK-S-HARQ methods require more frequent retransmissions
+than SemHARQ. Particularly, compared to SemHARQ, the
+12
+/uni00000010/uni00000019/uni00000010/uni00000017/uni00000010/uni00000015/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000014/uni00000013
+/uni00000015/uni00000013
+/uni00000016/uni00000013
+/uni00000017/uni00000013
+/uni00000018/uni00000013
+/uni00000019/uni00000013
+/uni0000001a/uni00000013
+/uni0000001b/uni00000013
+/uni0000001c/uni00000013/uni00000035/uni00000044/uni00000051/uni0000004e/uni00000010/uni00000014/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000044/uni00000055/uni00000054
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000044/uni00000055/uni00000054/uni00000003/uni0000005a/uni00000012/uni00000052/uni00000003/uni00000029/uni00000027/uni00000028
+(a) Rank-1 accuracy
+/uni00000010/uni00000019/uni00000010/uni00000017/uni00000010/uni00000015/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni0000001a/uni00000018
+/uni0000001b/uni00000013
+/uni0000001b/uni00000018
+/uni0000001c/uni00000013
+/uni0000001c/uni00000018
+/uni00000014/uni00000013/uni00000013/uni00000026/uni00000052/uni0000004f/uni00000052/uni00000055/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000044/uni00000055/uni00000054
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000044/uni00000055/uni00000054/uni00000003/uni0000005a/uni00000012/uni00000052/uni00000003/uni00000029/uni00000027/uni00000028 (b) Color accuracy
+/uni00000010/uni00000019/uni00000010/uni00000017/uni00000010/uni00000015/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000019/uni00000013
+/uni00000019/uni00000018
+/uni0000001a/uni00000013
+/uni0000001a/uni00000018
+/uni0000001b/uni00000013
+/uni0000001b/uni00000018
+/uni0000001c/uni00000013
+/uni0000001c/uni00000018
+/uni00000014/uni00000013/uni00000013/uni00000037/uni0000005c/uni00000053/uni00000048/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000044/uni00000055/uni00000054
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000044/uni00000055/uni00000054/uni00000003/uni0000005a/uni00000012/uni00000052/uni00000003/uni00000029/uni00000027/uni00000028 (c) Type accuracy
+Fig. 11: Multi-task accuracy comparison between SemHARQ and SemHARQ without FDE, w.r.t. SNR.
+/uni00000035/uni00000048/uni00000010/uni0000004c/uni00000047/uni00000026/uni00000052/uni0000004f/uni00000052/uni00000055/uni00000003/uni00000046/uni0000004f/uni00000044/uni00000056/uni00000056/uni00000011/uni00000037/uni0000005c/uni00000053/uni00000048/uni00000003/uni00000046/uni0000004f/uni00000044/uni00000056/uni00000056/uni00000011
+/uni00000030/uni00000058/uni0000004f/uni00000057/uni0000004c/uni00000010/uni00000057/uni00000044/uni00000056/uni0000004e
+/uni00000013
+/uni00000014/uni00000013
+/uni00000015/uni00000013
+/uni00000016/uni00000013
+/uni00000017/uni00000013
+/uni00000018/uni00000013
+/uni00000019/uni00000013
+/uni0000001a/uni00000013
+/uni0000001b/uni00000013
+/uni0000001c/uni00000013/uni00000030/uni00000058/uni0000004f/uni00000057/uni0000004c/uni00000010/uni00000057/uni00000044/uni00000056/uni0000004e/uni00000003/uni00000044/uni00000046/uni00000046/uni00000058/uni00000055/uni00000044/uni00000046/uni0000005c/uni00000003/uni0000000b/uni00000008/uni0000000c
+/uni00000035/uni00000048/uni00000042/uni00000051/uni00000058/uni00000050/uni00000020/uni00000016
+/uni00000035/uni00000048/uni00000042/uni00000051/uni00000058/uni00000050/uni00000020/uni00000014
+/uni00000035/uni00000048/uni00000042/uni00000051/uni00000058/uni00000050/uni00000020/uni00000013
+Fig. 12: The impact of retransmissions on the accuracy of multi-task.
+/uni00000019
+/uni00000017
+/uni00000015
+/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000013/uni00000011/uni00000013
+/uni00000015/uni00000011/uni00000018
+/uni00000018/uni00000011/uni00000013
+/uni0000001a/uni00000011/uni00000018
+/uni00000014/uni00000013/uni00000011/uni00000013
+/uni00000014/uni00000015/uni00000011/uni00000018
+/uni00000014/uni00000018/uni00000011/uni00000013
+/uni00000014/uni0000001a/uni00000011/uni00000018
+/uni00000015/uni00000013/uni00000011/uni00000013
+/uni00000015/uni00000015/uni00000011/uni00000018/uni00000031/uni00000058/uni00000050/uni00000045/uni00000048/uni00000055/uni00000003/uni00000052/uni00000049/uni00000003/uni00000055/uni00000048/uni00000057/uni00000055/uni00000044/uni00000051/uni00000056/uni00000050/uni0000004c/uni00000056/uni00000056/uni0000004c/uni00000052/uni00000051/uni00000056
+/uni00000035/uni00000037/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034/uni00000003/uni0000005a/uni0000004c/uni00000057/uni0000004b/uni000000030/uni00000020/uni00000014/uni00000047/uni00000025
+/uni0000002c/uni0000002e/uni00000010/uni00000036/uni00000010/uni0000002b/uni00000024/uni00000035/uni00000034/uni00000003/uni0000005a/uni0000004c/uni00000057/uni0000004b/uni000000030/uni00000020/uni00000014/uni00000047/uni00000025
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034/uni00000003/uni0000005a/uni0000004c/uni00000057/uni0000004b/uni000000030/uni00000020/uni00000014/uni00000047/uni00000025
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034/uni00000003/uni0000005a/uni0000004c/uni00000057/uni0000004b/uni000000030/uni00000020/uni00000013/uni00000011/uni00000018/uni00000047/uni00000025
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034/uni00000003/uni0000005a/uni0000004c/uni00000057/uni0000004b/uni000000030/uni00000020/uni00000013/uni00000011/uni00000016/uni00000047/uni00000025
+Fig. 13: Average number of retransmissions after using the retrans-
+mission identification module.
+numbers of retransmissions for RT-S-HARQ and IK-S-HARQ
+increase by 19.82% and 12.95% when SNR is set to −6 dB,
+respectively. The reason is that SemHARQ has higher resource
+utilization when combining the retransmission of distorted
+features and the incremental transmission of new features,
+reducing the need for retransmission.
+C. Discussions
+1) Computational and implementation complexity: The
+computational complexity and number of parameters of differ-
+ent modules of SemHARQ are shown in Table IV. Specifically,
+TABLE IV: Computational complexity and number of parameters of
+each module in SemHARQ.
+Transmission
+system Complexity Parameters
+Multi-task semantic
+encoder O(W · H · N ) 6.95 M
+JSC-Encoder O(N 2) 2.10 M
+JSC-Decoder O(J · B · N ) 17.83 M
+Semantic decoders
+and task performers
+O
+ 
+N · (M1 +
+M2 + M3)
+ 3.68 M
+FDE network O(N 2) 1.49 M
+TABLE V: Execution delay of each module in SemHARQ with batch
+size 100.
+Transmission system Execution delay
+Multi-task semantic encoder 55.27 ms
+JSC-Encoder 0.13 ms
+Retransmissions 2.2 ms
+JSC-Decoder 0.14 ms
+Semantic decoders and task performers 0.27 ms
+FDE network 0.16 ms
+Overall inference latency 58.17 ms
+the complexity of the multi-task semantic encoder is mainly
+impacted by the input and output dimensions of the DNN,
+where W , H are the width and height of the input images,
+respectively, and N denotes the size of the encoded semantic
+feature vector [14]. Compared with the JSC-Encoder, whose
+complexity is only dependent on the length of the semantic
+vector, the JSC-Decoder becomes more complicated as the
+total number of retransmissions J increases. The reason is
+that the received feature vectors after all the transmissions are
+concatenated and decoded to the original length N by the
+JSC-Decoder. Note that B represents the dimension of the
+transmitted vector after scalable feature selection. Moreover,
+the complexity of semantic decoders and task performers is
+given by O
+ 
+N · (M1 + M2 + M3)
+
+[32], where M1, M2,
+and M3 indicate the number of categories of the considered
+three tasks, respectively. It is obvious that more complex
+tasks require more complicated semantic decoders and task
+performers. Finally, the FDE network consists of multiple FC
+layers, whose complexity is determined by the input dimension
+N.
+13
+TABLE VI: Classification accuracy of different semantic-aware
+HARQ methods on ImageNet.
+SNR [dB] SemHARQ (Ours) IK-S-HARQ RT-S-HARQ
+−6 21.36 15.85 12.16
+−2 69.22 58.32 54.68
+2 84.53 83.11 78.54
+6 91.56 90.98 90.36
+/uni00000019
+/uni00000017
+/uni00000015
+/uni00000013/uni00000015/uni00000017/uni00000019/uni0000001b
+/uni00000036/uni00000031/uni00000035/uni00000003/uni0000003e/uni00000047/uni00000025/uni00000040
+/uni00000013/uni00000011/uni00000018
+/uni00000014/uni00000011/uni00000013
+/uni00000014/uni00000011/uni00000018
+/uni00000015/uni00000011/uni00000013
+/uni00000015/uni00000011/uni00000018
+/uni00000016/uni00000011/uni00000013
+/uni00000016/uni00000011/uni00000018
+/uni00000017/uni00000011/uni00000013/uni00000030/uni00000058/uni00000057/uni00000058/uni00000044/uni0000004f/uni00000003/uni0000004c/uni00000051/uni00000049/uni00000052/uni00000055/uni00000050/uni00000044/uni00000057/uni0000004c/uni00000052/uni00000051/uni00000003/uni0000000b/uni00000045/uni0000004c/uni00000057/uni0000000c
+/uni0000002cU
+/uni00000036/uni00000048/uni00000050/uni0000002b/uni00000024/uni00000035/uni00000034
+Fig. 14: The mutual information of the upper bound and the proposed
+SemHARQ w.r.t. different SNRs.
+Furthermore, as shown in Table IV, the JSC-Decoder has
+the largest number of parameters due to the multiple transmis-
+sions. Meanwhile, since the DNN is used to extract semantic
+features, the parameter count of the multi-task semantic en-
+coder is 6.95 M, approximately one-third of that of the JSC-
+Decoder. Other modules have fewer parameters because they
+only consist of FC layers with low input dimensions. Note
+that compared with the semantic-aware HARQ baselines, the
+only complexity increase of our proposed SemHARQ lies in
+the FDE network, which is negligible and acceptable.
+Finally, an evaluation of the execution delay is conducted
+for different modules in the proposed SemHARQ system in
+Table V. The delay is measured in terms of average time taken
+for each module to process a batch of data at an NVIDIA
+V100 GPU, where the batch size is set to 100. As shown
+in Table V, the execution delay of the multi-task semantic
+encoder is the highest, approximately 300 times that of the
+other modules. The reason is that the multi-task semantic
+encoder is composed of DenseNet-121, which has 121 layers
+of convolutional neural network, resulting in relatively large
+computational cost. However, the other modules like JSC-
+Encoder/Decoder, semantic decoders, task performers, each
+consists of two fully connected layers, respectively, while the
+FDE network comprises three, which is very lightweight with
+low execution delay. Additionally, the average retransmission
+delay under different SNRs is 2.2 ms with batch size 100,
+which is acceptable in practical systems.
+2) FDE module: Note that the FDE network - based on
+MINE - is the key module in the proposed SemHARQ. As
+analyzed in [40, 53, 54], when dealing with noisy variables
+with low relevance, MINE may suffer from high variance,
+particularly when handling high-dimensional inputs with in-
+sufficient batch size of training samples. For example, for
+noisy vectors manifesting Gaussian distributions, variance in
+the estimation tends to increase as the true mutual information
+grows when the dimension of the data is about 100 with batch
+size less than 64 [53, 54]. However, the task-related semantic
+features in SemCom frameworks exhibit higher semantic rel-
+evance and less randomness compared to randomly generated
+variables. Therefore, the uncertainty in the mutual information
+estimation is significantly reduced, leading to a stable MINE
+module, as in [55]. Note that the major variance introduced in
+SemHARQ lies in the channel fading and additive noise. To
+mitigate the impact, the transmission loss over the channel
+is combined with the mutual information loss during the
+training of the MINE module, which improves the scalability
+of different channel states. Additionally, the proposed FDE
+network is task-specific in our framework, which is consis-
+tent with the existing task-oriented semantic communication
+methods [9, 12]. However, the FDE methodology is general
+and can be applied to new semantic tasks by retraining or
+transfer learning techniques [56]. For example, the pretrained
+FDE network can be efficiently adapted to new tasks via fine-
+tuning or domain adaptation using a few new labels [56].
+To further verify the scalability of the proposed SemHARQ
+on more complicated scenarios, the classification accuracy of
+different semantic-aware HARQ methods on the ImageNet
+dataset with rician fading channel is shown in Table VI. Note
+that ImageNet is one of the most comprehensive image
+datasets, encompassing a larger number of categories than
+our IoV scenario, with 1,000 diverse categories and varying
+data distributions [57]. As presented in Table VI, our pro-
+posed SemHARQ achieves the best performance among three
+semantic-aware HARQ methods, followed by IK-S-HARQ and
+RT-S-HARQ, especially for the low SNR regimes. Specifically,
+the classification accuracy gaps between SemHARQ and IK-S-
+HARQ and RT-S-HARQ at−6 dB are 34.76% and 75.66%, re-
+spectively. The performance gain is attributed to SemHARQ’s
+design in accurately evaluating the incurring feature distortion
+because of an accurate estimation by MINE, demonstrating the
+practicality of MINE for semantic features on diverse datasets.
+3) Bounds of SemHARQ: To bound the performance margin
+between the optimal scheme and the proposed SemHARQ,
+we first depict the performance upper bound of the optimal
+scheme using mutual information. Given the optimal method
+that noisy transmission is not considered, the maximum mutual
+information between the semantic encoded feature vector and
+the multi-task prediction vectors is defined as follows:
+IDL =
+KX
+k=1
+max
+α,β,α−1,β−1
+k ,ϕk
+I (s′; c′
+k) , (30)
+where K represents the number of tasks, α, β, α−1, β−1
+k , ϕk
+are the parameter sets of the semantic encoder, JSC-Encoder,
+JSC-Decoder, and the semantic decoder and task performer
+for the k-th task, respectively. Particularly, I (s′; c′
+k) denotes
+the mutual information between the semantic encoded feature
+vector s′ and the k-th task prediction vector c′
+k. IDL indicates
+the optimal performance of the adopted deep learning model
+from the perspective of information theory. On this basis, we
+can obtain the ideal mutual information achievable at any given
+SNR, where Rician channel model is considered. Note that
+to ensure a fair comparison with our proposed SemHARQ,
+retransmission scheme is also utilized when calculating the
+14
+theoretical limit of the mutual information under different
+SNRs. Specifically, the upper bound of the mutual information
+between the transmitter and the receiver is the total channel
+capacity with multiple transmissions, which can be represented
+as follows,
+IU = min( IDL
+C , Gmax) × C = min(IDL, Gmax × C), (31)
+where C = log 2
+
+1 + SNR · ∥h∥2
+
+is the channel capacity
+with the fading coefficient vector h, Gmax is the considered
+maximum number of transmissions, and min( IDL
+C , Gmax) de-
+notes the actual number of transmissions. This indicates that
+IDL is the maximum mutual information achievable in Sem-
+Com systems at any SNRs. Finally, the mutual information
+margin between the upper bound and the proposed SemHARQ
+can be formulated as
+Γ = IU −
+KX
+k=1
+max
+α,β,α−1,β−1
+k ,ϕk
+I (s; ck) , (32)
+where I (s; ck) denotes the mutual information between the
+semantic feature vector s at the transmitter and the k-th
+task prediction vector in SemHARQ, Γ represents the dis-
+crepancy between the proposed SemHARQ and the opti-
+mal performance the system can achieve with certain deep
+learning encoding/decoding functions. To further illustrate the
+performance margin, Fig. 14 presents IU and the estimated
+mutual information in SemHARQ. It shows that at high SNR
+regime, e.g., at 8 dB, the mutual information of SemHARQ
+is only 1.7% lower than IU, indicating the effectiveness of
+the designed system. While at −6 dB, the mutual informa-
+tion of SemHARQ is nearly 50% of the upper bound. The
+poor performance may be due to the constant-coding rate
+commonly considered for SemCom systems, although the
+designed HARQ mechanism can fix the constant-coding rate
+problem for a certain extent. The performance could be further
+improved with an SNR-adaptive coding system, which can be
+an interesting topic for further research and design.
+VI. C ONCLUSIONS
+In this paper, a novel semantic-aware HARQ framework
+SemHARQ is proposed for multi-task semantic communi-
+cations. Specifically, the task-related semantics are extracted
+by a multi-task semantic encoder and scalably transmitted in
+descending order of importance levels. On this basis, to enable
+the SemHARQ and improve the semantic error correction of
+the system, the distortion level of each received feature is
+evaluated by a feature distortion evaluation (FDE) network.
+The corrupted features are identified by the distortion mea-
+sure vector and retransmitted by the transmitter. Meanwhile,
+the incremental transmission is triggered to fully utilize the
+channel resources. Compared with the existing semantic-aware
+and traditional HARQ methods, the proposed SemHARQ has
+improved the multi-task performance by 16.27%-166.48% at
+low SNR regime.
+REFERENCES
+[1] W. Yang, H. Du, Z. Q. Liew, W. Y . B. Lim, Z. Xiong, D. Niyato,
+X. Chi, X. Shen, and C. Miao, “Semantic Communications for
+Future Internet: Fundamentals, Applications, and Challenges,”
+IEEE Communications Surveys & Tutorials , vol. 25, no. 1, pp.
+213–250, 2023.
+[2] D. G ¨und¨uz, Z. Qin, I. E. Aguerri, H. S. Dhillon, Z. Yang,
+A. Yener, K. K. Wong, and C.-B. Chae, “Beyond Transmitting
+Bits: Context, Semantics, and Task-Oriented Communications,”
+IEEE J. Sel. Areas Commun. , vol. 41, no. 1, pp. 5–41, 2023.
+[3] T. M. Getu, G. Kaddoum, and M. Bennis, “Tutorial-Cum-
+Survey on Semantic and Goal-Oriented Communication: Re-
+search Landscape, Challenges, and Future Directions,” 2023,
+arXiv:2308.01913.
+[4] C. E. Shannon, “A Mathematical Theory of Communication,”
+The Bell system technical journal , vol. 27, no. 3, pp. 379–423,
+1948.
+[5] W. Weaver, “Recent Contributions to The Mathematical Theory
+of Communication,” ETC: a review of general semantics , pp.
+261–281, 1953.
+[6] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N.
+Gomez, Ł. Kaiser, and I. Polosukhin, “Attention is all you need,”
+Advances in neural information processing systems , vol. 30,
+2017.
+[7] N. Patwa, N. Ahuja, S. Somayazulu, O. Tickoo, S. Varadarajan,
+and S. Koolagudi, “Semantic-Preserving Image Compression,”
+in 2020 IEEE International Conference on Image Processing
+(ICIP), 2020, pp. 1281–1285.
+[8] Y . Wang, J. Yu, and J. Zhang, “Zero-Shot Image Restoration
+Using Denoising Diffusion Null-Space Model,” in The Eleventh
+International Conference on Learning Representations .
+[9] H. Xie, Z. Qin, X. Tao, and K. B. Letaief, “Task-Oriented Multi-
+User Semantic Communications,” IEEE J. Sel. Areas Commun.,
+vol. 40, no. 9, pp. 2584–2597, 2022.
+[10] M. Jankowski, D. G ¨und¨uz, and K. Mikolajczyk, “Deep joint
+source-channel coding for wireless image retrieval,” in ICASSP
+2020-2020 IEEE International Conference on Acoustics, Speech
+and Signal Processing (ICASSP). IEEE, 2020, pp. 5070–5074.
+[11] E. Bourtsoulatze, D. B. Kurka, and D. G ¨und¨uz, “Deep Joint
+Source-channel Coding for Wireless Image Transmission,” in
+Proc. of ICASSP , 2019, pp. 4774–4778.
+[12] W. Xu, Y . Zhang, F. Wang, Z. Qin, C. Liu, and P. Zhang,
+“Semantic Communication for the Internet of Vehicles: A
+Multiuser Cooperative Approach,” IEEE Vehicular Technology
+Magazine, vol. 18, no. 1, pp. 100–109, 2023.
+[13] J. Shao, Y . Mao, and J. Zhang, “Learning Task-Oriented Com-
+munication for Edge Inference: An Information Bottleneck
+Approach,” IEEE J. Sel. Areas Commun. , vol. 40, no. 1, pp.
+197–211, 2021.
+[14] Q. Zhou, R. Li, Z. Zhao, Y . Xiao, and H. Zhang, “Adaptive
+Bit Rate Control in Semantic Communication with Incremental
+Knowledge-Based HARQ,” IEEE open j. Commun. Soc. , vol. 3,
+pp. 1076–1089, 2022.
+[15] A. Ahmed, A. Al-Dweik, Y . Iraqi, H. Mukhtar, M. Naeem,
+and E. Hossain, “Hybrid Automatic Repeat Request (HARQ)
+in Wireless Communications Systems and Standards: A Con-
+temporary Survey,” IEEE Communications Surveys & Tutorials,
+vol. 23, no. 4, pp. 2711–2752, 2021.
+[16] S. Ahmadi, LTE-Advanced: A Practical Systems Approach to
+Understanding 3GPP LTE Releases 10 and 11 Radio Access
+Technologies. Academic Press, 2013.
+[17] H. A. Ngo and L. Hanzo, “Hybrid Automatic-Repeat-Request
+Systems for Cooperative Wireless Communications,” IEEE
+Communications Surveys & Tutorials, vol. 16, no. 1, pp. 25–45,
+2014.
+[18] S. Kallel and D. Haccoun, “Generalized Type II Hybrid ARQ
+Scheme Using Punctured Convolutional Coding,” IEEE Trans.
+Commun., vol. 38, no. 11, pp. 1938–1946, 1990.
+[19] D. Liu, G. Zhu, Q. Zeng, J. Zhang, and K. Huang, “Wireless
+15
+data acquisition for edge learning: Data-importance aware re-
+transmission,” IEEE Trans. Wirel. Commun., vol. 20, no. 1, pp.
+406–420, 2021.
+[20] D. B. Kurka and D. G ¨und¨uz, “DeepJSCC-f: Deep Joint Source-
+Channel Coding of Images With Feedback,” IEEE J. Sel. Areas
+Inf. Theory, vol. 1, no. 1, pp. 178–193, 2020.
+[21] M. Nakahara, M. Nishimura, Y . Ushiku, T. Nishio, K. Maruta,
+Y . Nakayama, and D. Hisano, “Edge Computing-Assisted DNN
+Image Recognition System With Progressive Image Retransmis-
+sion,” IEEE Access, vol. 10, pp. 91 253–91 262, 2022.
+[22] X. Bao, M. Jiang, and H. Zhang, “ADJSCC-l: SNR-Adaptive
+JSCC Networks for Multi-Layer Wireless Image Transmission,”
+in 2021 7th International Conference on Computer and Com-
+munications (ICCC), 2021, pp. 1812–1816.
+[23] D. B. Kurka and D. G ¨und¨uz, “Successive refinement of im-
+ages with deep joint source-channel coding,” in 2019 IEEE
+20th International Workshop on Signal Processing Advances
+in Wireless Communications (SPAWC), 2019, pp. 1–5.
+[24] Y . Zheng, F. Wang, W. Xu, and P. Zhang, “Semantic Base
+Enabled Image Transmission With Fine-Grained HARQ,” IEEE
+Trans. Wirel. Commun., vol. 24, no. 4, pp. 3606–3622, 2025.
+[25] P. Jiang, C.-K. Wen, S. Jin, and G. Y . Li, “Deep source-channel
+coding for sentence semantic transmission with harq,” IEEE
+Trans. Commun., vol. 70, no. 8, pp. 5225–5240, 2022.
+[26] P. Jiang et al. , “Wireless semantic communications for video
+conferencing,” IEEE J. Sel. Areas Commun. , vol. 41, no. 1, pp.
+230–244, 2022.
+[27] J. Hu, F. Wang, W. Xu, H. Gao, and P. Zhang, “Scalable multi-
+task semantic communication system with feature importance
+ranking,” in Proc. of ICASSP , 2023, pp. 1–5.
+[28] Y . Wanget al., “Performance optimization for semantic commu-
+nications: An attention-based reinforcement learning approach,”
+IEEE J. Sel. Areas Commun. , vol. 40, no. 9, pp. 2598–2613,
+2022.
+[29] Y . Wang, M. Chen, W. Saad, T. Luo, S. Cui, and H. V .
+Poor, “Performance optimization for semantic communications:
+An attention-based learning approach,” in 2021 IEEE Global
+Commun. Conf. (GLOBECOM) , 2021, pp. 1–6.
+[30] Z. Xiao, S. Yao, J. Dai, S. Wang, K. Niu, and P. Zhang,
+“Wireless deep speech semantic transmission,” in Proc. of
+ICASSP, 2023, pp. 1–5.
+[31] J. Sun et al., “Vehicle attribute recognition algorithm based on
+multi-task learning,” in 2019 IEEE International Conference on
+Smart Internet of Things (SmartIoT) , 2019, pp. 135–141.
+[32] Z. Tang, M. Naphade, S. Birchfield, J. Tremblay, W. Hodge,
+R. Kumar, S. Wang, and X. Yang, “PAMTRI: pose-aware
+multi-task learning for vehicle re-identification using highly
+randomized synthetic data,” in Proc. of ICCV , 2019, pp. 211–
+220.
+[33] Y . Zhang and Q. Yang, “A survey on multi-task learning,” IEEE
+Trans. Knowl. Data Eng., vol. 34, no. 12, pp. 5586–5609, 2022.
+[34] H. Wei, W. Xu, F. Wang, X. Du, T. Zhang, and P. Zhang, “Se-
+maudio: Semantic-aware streaming communications for real-
+time audio transmission,” in GLOBECOM 2022-2022 IEEE
+Global Commun. Conf. , 2022, pp. 3965–3970.
+[35] Y . Zhang, W. Xu, H. Gao, and F. Wang, “Multi-User Semantic
+Communications for Cooperative Object Identification,” in 2022
+IEEE Int. Conf. Commun. Workshops (ICC Workshops) , 2022,
+pp. 157–162.
+[36] Q. Sun, C. Guo, Y . Yang, J. Chen, R. Tang, and C. Liu, “Deep
+Joint Source-Channel Coding for Wireless Image Transmis-
+sion with Semantic Importance,” in 2022 Veh. Technol. Conf.e
+(VTC2022-Fall), 2022, pp. 1–7.
+[37] C. Li, J. Yao, H. Wang, U. Ahmed, and S. Du, “Effect of Mobile
+Wireless on Outage and BER Performances Over Rician Fading
+Channel,” IEEE Access, vol. 8, pp. 91 799–91 806, 2020.
+[38] F. Jameel, Faisal, M. A. A. Haider, and A. A. Butt, “Perfor-
+mance Analysis of V ANETs under Rayleigh, Rician, Nakagami-
+m and Weibull Fading,” in 2017 International Conference on
+Communication, Computing and Digital Systems (C-CODE) ,
+2017, pp. 127–132.
+[39] T. M. Cover, Elements of Information Theory . John Wiley &
+Sons, 1999.
+[40] M. I. Belghazi, A. Baratin, S. Rajeswar, S. Ozair, Y . Bengio,
+R. D. Hjelm, and A. C. Courville, “Mutual information neural
+estimation,” in Proc. of ICML , 2018, pp. 531–540.
+[41] X. Cheng, B. Cao, Q. Ye, Z. Zhu, H. Li, and Y . Zou, “ML-
+LMCL: Mutual Learning and Large-Margin Contrastive Learn-
+ing for Improving ASR Robustness in Spoken Language Un-
+derstanding,” in Findings of the Association for Computational
+Linguistics: ACL 2023 , 2023, pp. 6492–6505.
+[42] X. Cheng, Z. Yao, Z. Zhu, Y . Li, H. Li, and Y . Zou, “C²A-SLU:
+Cross and Contrastive Attention for Improving ASR Robustness
+in Spoken Language Understanding,” in Proc. INTERSPEECH
+2023, 2023, pp. 695–699.
+[43] D. P. Kingma and J. Ba, “Adam: A method for stochastic
+optimization,” in Proc. of ICLR , 2015.
+[44] E. Jang, S. Gu, and B. Poole, “Categorical reparameterization
+with gumbel-softmax,” in Proc. of ICLR , 2017.
+[45] T. Strypsteen and A. Bertrand, “End-to-end Learnable EEG
+Channel Selection for Deep Neural Networks With Gumbel-
+Softmax,” J. Neural Eng. , vol. 18, no. 4, p. 0460a9, 2021.
+[46] A. Abid, M. F. Balin, and J. Zou, “Concrete autoencoders
+for differentiable feature selection and reconstruction,” 2019,
+arXiv:1901.09346.
+[47] R. R. Selvaraju, M. Cogswell, A. Das, R. Vedantam, D. Parikh,
+and D. Batra, “Grad-cam: Visual explanations from deep net-
+works via gradient-based localization,” in Proc. of ICCV, 2017,
+pp. 618–626.
+[48] G. Huang, Z. Liu, L. van der Maaten, and K. Q. Weinberger,
+“Densely connected convolutional networks,” in Proc. of CVPR,
+2017, pp. 4700–4708.
+[49] A. Hermans, L. Beyer, and B. Leibe, “In defense of the triplet
+loss for person re-identification,” 2017, arXiv:1703.07737.
+[50] X. Liu, W. Liu, T. Mei, and H. Ma, “A deep learning-
+based approach to progressive vehicle re-identification for urban
+surveillance,” in Proc. of ECCV , 2016, pp. 869–884.
+[51] G. Fang, X. Ma, M. Song, M. B. Mi, and X. Wang, “Dep-
+graph: Towards any structural pruning,” in Proceedings of the
+IEEE/CVF conference on computer vision and pattern recogni-
+tion, 2023, pp. 16 091–16 101.
+[52] S. Wei, C. Luo, and Y . Luo, “Scaled decoupled distillation,” in
+Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition, 2024, pp. 15 975–15 983.
+[53] S. Kleinegesse and M. U. Gutmann, “Bayesian experimental
+design for implicit models by mutual information neural estima-
+tion,” in International conference on machine learning. PMLR,
+2020, pp. 5316–5326.
+[54] J. Song and S. Ermon, “Understanding the limitations of varia-
+tional mutual information estimators,” in International Confer-
+ence on Learning Representations .
+[55] Y . Mroueh, I. Melnyk, P. Dognin, J. Ross, and T. Sercu,
+“Improved mutual information estimation,” in Proceedings of
+the AAAI Conference on Artificial Intelligence , vol. 35, no. 10,
+2021, pp. 9009–9017.
+[56] H. Zhang et al., “Deep Learning-Enabled Semantic Communi-
+cation Systems With Task-Unaware Transmitter and Dynamic
+Data,” IEEE J. Sel. Areas Comm. , vol. 41, no. 1, pp. 170–185,
+2023.
+[57] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei,
+“Imagenet: A large-scale hierarchical image database,” in 2009
+IEEE conference on computer vision and pattern recognition ,
+2009, pp. 248–255.
+16
+Jiangjing Hu is currently pursuing the Ph.D. degree
+with the School of Information and Communica-
+tion Engineering, Beijing University of Posts and
+Telecommunications (BUPT), Beijing, China. Her
+research interests include semantic communications
+and image coding.
+Fengyu Wang (Member, IEEE) received the B.S.
+and M.S. degrees from the School of Information
+and Communication Engineering, BUPT, Beijing,
+China, in 2014 and 2017, respectively, and the Ph.D.
+degree in electrical engineering from the University
+of Maryland at College Park (UMCP), College Park,
+MD, USA, in 2021. She is currently a lecturer with
+the School of Artificial Intelligence, BUPT, Beijing,
+China. Her research interests include semantic com-
+munications, wireless sensing, and statistical signal
+processing. She was the recipient of the Best Paper
+Award from IEEE GLOBECOM in 2022.
+Wenjun Xu (Senior Member, IEEE) received the
+B.S. and Ph.D. degrees from BUPT, Beijing, China,
+in 2003 and 2008, respectively. He is currently a
+Professor and a Ph.D. Supervisor with the School
+of Artificial Intelligence, State Key Laboratory of
+Network and Switching Technology, BUPT, Bei-
+jing, China. He is currently an Editor of China
+Communications. His research interests include AI-
+driven networks, semantic communications, UA V
+communications and networks, and green commu-
+nications/networking.
+Hui Gao (Senior Member, IEEE) received the
+Ph.D. degree from the Beijing University of Posts
+and Telecommunications (BUPT), Beijing, China,
+in 2012. He is currently an Associate Professor
+with the School of Information and Communication
+Engineering, BUPT. His research interests include
+massive and mmWave MIMO systems, SAGINs,
+semantic communications, and intelligent wireless
+networks.
+Ping Zhang (Fellow, IEEE) received the Ph.D.
+degree from BUPT, Beijing, China, in 1990, where
+he is currently a Professor. He is the director of
+State Key Laboratory of Networking and Switching
+Technology, a member of IMT-2020 (5G) Experts
+Panel, a member of Experts Panel for China’s 6G de-
+velopment. He served as Chief Scientist of National
+Basic Research Program (973 Program), an expert in
+Information Technology Division of National High-
+tech R&D program (863 Program), and a member of
+Consultant Committee on International Cooperation
+of National Natural Science Foundation of China. His research interests
+mainly focus on wireless communication. He is an Academician of the
+Chinese Academy of Engineering (CAE).

@@ -1,0 +1,220 @@
+{
+ "schema": "catosg-p2-prerequest-review/1",
+ "status": "LITERATURE ONLY. No experiment, no model, no code change. Every quote is verified verbatim against a text extracted from the paper's own PDF and archived under results/lit/",
+ "max_quote_words": 15,
+ "web_summary_corrections": [
+  "the figures \"22 MBpf\" and \"0.98 MBpf\" attributed to When2com by a web summariser occur 0 times in its text and were dropped",
+  "\"quarter\" occurs 0 times in When2com; \"a quarter of the bandwidth\" is Who2com's abstract and is cited there only"
+ ],
+ "section_label_note": "section labels are hand-chosen and machine-verified: each must occur verbatim, before its quote, with no other declared label between. Automatic heading detection was tried first and rejected -- on these PDFs it returned \"4 Mar\" and \"3 Abstract\" as headings",
+ "papers": [
+  {
+   "key": "where2comm",
+   "name": "Where2comm",
+   "venue": "NeurIPS 2022",
+   "url": "https://arxiv.org/abs/2209.12836",
+   "b1_quote": "The spatial conﬁdence generator generates a spatial conﬁdence map from the feature map",
+   "b1_label": "4.2 Spatial con",
+   "b1": "A confidence map produced by a detection decoder run on the agent's OWN feature map, before anything is received.",
+   "b2_quote": "The request map of theith agent is R(k) i = 1− C(k) i",
+   "b2_label": "4.3 Spatial con",
+   "b2": "Ego-side. The ego derives its own request map and sends it; the collaborator then selects what to return. Round 0 uses the sender's confidence alone, so the request only steers rounds after the first.",
+   "b3_quote": "the communication volume is log2 ( |M(k) i→j|× D× 32/8 )",
+   "b3_label": "7.5 Detailed information about experimental settings",
+   "b3": "Defined, not a fixed figure: log2 of selected cells x channels x 4 bytes. The request map itself is H x W and its cost is not separately accounted in that formula.",
+   "b3_kind": "quoted",
+   "implication": "The only decision input is the ego's own detection confidence, which is exactly the quantity our forest already receives as cues; the request map adds a collaborator-side selector that our single-collaborator setting does not have."
+  },
+  {
+   "key": "when2com",
+   "name": "When2com",
+   "venue": "CVPR 2020",
+   "url": "https://arxiv.org/abs/2006.00176",
+   "b1_quote": "compresses its local observationsxi into a com- pact query vectorµi and a key vectorκi",
+   "b1_label": "3.2. Communication Groups Construction",
+   "b1": "A learned low-dimensional query from the agent's own raw observation; no ground truth and nothing received.",
+   "b2_quote": "We further broad- cast the query to all of other agents",
+   "b2_label": "3.2. Communication Groups Construction",
+   "b2": "Both: ego broadcasts a query, every other agent holds a key, and the match decides who transmits.",
+   "b3_quote": "Ours 0.385 / 0.77",
+   "b3_label": "Bandwidth (Mbpf / # of links)",
+   "b3_label_note": "a table header, not a section heading: this paper's experiment-section headings did not survive PDF extraction, so no section number is claimed",
+   "b3": "MBytes per frame and links per agent, against 2.5 / 5 for the fully connected baselines. The text also states a one-fourth bandwidth ratio, but that sentence is interrupted by a figure's axis labels in the extraction and so is not quoted here. The query's own size is never costed.",
+   "b3_kind": "quoted",
+   "implication": "The handshake needs a reply from every candidate before the ego can choose, so its decision information is not available to a vehicle that must decide alone."
+  },
+  {
+   "key": "who2com",
+   "name": "Who2com",
+   "venue": "ICRA 2020",
+   "url": "https://arxiv.org/abs/2003.09575",
+   "b1_quote": "compute a matching score, s ji, between their keys, κi∈ Rk, and the request message",
+   "b1_label": "B. Communication via Three-Stage Handshake",
+   "b1": "A learned key from each candidate's own observation, scored against the requester's compressed request.",
+   "b2_quote": "the de- graded agent ﬁrst broadcasts its request message",
+   "b2_label": "B. Communication via Three-Stage Handshake",
+   "b2": "Both, in three stages: request from ego, scores back from candidates, then ego connects.",
+   "b3_quote": "comparable to centralized ones using a quarter of the bandwidth",
+   "b3_label": "Abstract",
+   "b3": "A ratio in the abstract. The paper states its selection sends one feature map where centralized baselines send all; the request and score messages are not costed in bits.",
+   "b3_kind": "quoted",
+   "implication": "The score that decides comes from the collaborator, not the ego, so the information we are looking for does not exist before the exchange."
+  },
+  {
+   "key": "select2col",
+   "name": "Select2Col",
+   "venue": "IEEE TVT 2024",
+   "url": "https://arxiv.org/abs/2307.16517",
+   "b1_quote": "each node corresponds to an agent and comprises its sparse map along with the semantic",
+   "b1_label": "A. Enhanced Weight Estimation",
+   "b1": "A GNN over per-agent nodes, each holding that agent's sparse feature map and its information latency.",
+   "b2_quote": "receives semantic information transmitted by its neighboring agents",
+   "b2_label": "A. System Model",
+   "b2": "Collaborator-side, and only after arrival: the sparse maps that form the GNN nodes are the received semantic information.",
+   "b3": "Not given as bits or a ratio for the decision itself. No estimate is offered either, because the selection happens after reception and therefore has no pre-request signalling cost to estimate; the paper models transmission latency instead.",
+   "b3_kind": "not_given_no_estimate",
+   "implication": "This is a post-reception filter, not a pre-request decision, so it is a counter-example to the question rather than an answer to it."
+  },
+  {
+   "key": "smartcooper",
+   "name": "SmartCooper",
+   "venue": "ICRA 2024",
+   "url": "https://arxiv.org/abs/2402.00321",
+   "b1_quote": "dynamically adjust the compression ratio based on the channel state information",
+   "b1_label": "Abstract",
+   "b1": "Channel state information for the compression ratio; sensing-coverage overlap for the judger.",
+   "b2_quote": "our judger scores reconstructed image sequences based on the union of sensing coverage",
+   "b2_label": "I. I NTRODUCTION",
+   "b2": "Split: CSI is available before transmission, but the judger scores data that has already been transmitted and reconstructed at the ego.",
+   "b3_quote": "a substantial reduction in communication costs by 23.10%",
+   "b3_label": "Abstract",
+   "b3": "A ratio against a no-judger scheme. Since the judger runs after reconstruction, the saving is on subsequent rounds, not on the transmission it judges.",
+   "b3_kind": "quoted",
+   "implication": "Its channel half matches what our arm already has; its task half needs the data first, which is the same wall our rounds 1 to 4 ran into."
+  },
+  {
+   "key": "cods",
+   "name": "CoDS",
+   "venue": "arXiv 2512.22513",
+   "url": "https://arxiv.org/abs/2512.22513",
+   "b1_quote": "the spatial compression ratio as the fraction of featu res selected for transmission",
+   "b1_label": "II. S YSTEM MODEL",
+   "b1": "A selection mask over the sender's own BEV feature map, plus SNR for modulation and code rate.",
+   "b2_quote": "the CA V ﬁrst employs a feature extraction network",
+   "b2_label": "II. S YSTEM MODEL",
+   "b2": "Collaborator-side, before transmission: the CAV decides what of its own features to send. The ego does not request.",
+   "b3_quote": "Channel Uses = Qd × q C × γs × Rc × log2 Or",
+   "b3_label": "IV. S IMULATION RESULTS",
+   "b3": "A formula in channel uses, with quantisation bits q, spatial ratio, LDPC rate and modulation order -- the same accounting our payload chain uses.",
+   "b3_kind": "quoted",
+   "implication": "Closest to our transmission model, but the decision sits at the sender about its own data; it does not tell an ego vehicle what to ask for."
+  },
+  {
+   "key": "semharq",
+   "name": "SemHARQ",
+   "venue": "arXiv 2404.08490",
+   "url": "https://arxiv.org/abs/2404.08490",
+   "b1_quote": "the gradients of the task performance with respect to the features are considered",
+   "b1_label": "I. I NTRODUCTION",
+   "b1": "Feature importance from task-performance gradients at the transmitter; distortion of received features at the receiver.",
+   "b2_quote": "generate a binary feedback vector p(j+1)",
+   "b2_label": "II. S YSTEM MODEL",
+   "b2": "Both, but after a first transmission: the receiver evaluates what arrived and feeds back which features to resend.",
+   "b3": "No figure for the feedback overhead is given. Estimated: the feedback is one bit per feature in the transmitted block, so B bits per retransmission round.",
+   "b3_kind": "estimate",
+   "b3_assumption": "Assumes the binary vector p is uncoded, one bit per feature of the block just received, and sent once per round; the paper states the vector exists and its indexing but gives neither its length in bits nor a channel for it.",
+   "implication": "Its decision information is retrospective -- it needs a first transmission before it can rank anything, so it cannot inform a first request."
+  },
+  {
+   "key": null,
+   "name": "ML-Cooper",
+   "venue": "IEEE IoT-J 9(21):21370-21381, 2022",
+   "url": "https://ieeexplore.ieee.org/document/9786737/",
+   "b1": "UNVERIFIED",
+   "b2": "UNVERIFIED",
+   "b3": "UNVERIFIED",
+   "b3_kind": "unverified",
+   "implication": "UNVERIFIED: not entered into the comparison. The full text is behind IEEE Xplore, the abstract page returned empty on fetch and no preprint was found, so no quote could be located. Only the bibliographic record above is confirmed."
+  }
+ ],
+ "verification": [
+  {
+   "paper": "Where2comm",
+   "status": "verified",
+   "quotes_checked": 3,
+   "labels_checked": 7
+  },
+  {
+   "paper": "When2com",
+   "status": "verified",
+   "quotes_checked": 3,
+   "labels_checked": 2
+  },
+  {
+   "paper": "Who2com",
+   "status": "verified",
+   "quotes_checked": 3,
+   "labels_checked": 4
+  },
+  {
+   "paper": "Select2Col",
+   "status": "verified",
+   "quotes_checked": 2,
+   "labels_checked": 4
+  },
+  {
+   "paper": "SmartCooper",
+   "status": "verified",
+   "quotes_checked": 3,
+   "labels_checked": 4
+  },
+  {
+   "paper": "CoDS",
+   "status": "verified",
+   "quotes_checked": 3,
+   "labels_checked": 3
+  },
+  {
+   "paper": "SemHARQ",
+   "status": "verified",
+   "quotes_checked": 2,
+   "labels_checked": 3
+  },
+  {
+   "paper": "ML-Cooper",
+   "status": "unverified",
+   "quotes_checked": 0
+  }
+ ],
+ "sources": {
+  "cods": {
+   "path": "projects/ca_tosg_p2/results/lit/cods.txt",
+   "sha256": "d59371d3350f7e5b16a60d052218b172d80a2abd360f64b19023a8ad3c0a4d95"
+  },
+  "select2col": {
+   "path": "projects/ca_tosg_p2/results/lit/select2col.txt",
+   "sha256": "d27c6e3e46f4311d9e853a0c36b5896c5b412f956fa24b3aacf5710cbf5be97f"
+  },
+  "semharq": {
+   "path": "projects/ca_tosg_p2/results/lit/semharq.txt",
+   "sha256": "defe42a2c26de0dac133eec4abf81cc1750359655ba0c993b7b33dda437d9754"
+  },
+  "smartcooper": {
+   "path": "projects/ca_tosg_p2/results/lit/smartcooper.txt",
+   "sha256": "6becc5ce1595cf6e583a09ed6c6b5a35447abfd66a17578959c7575ea799bc74"
+  },
+  "when2com": {
+   "path": "projects/ca_tosg_p2/results/lit/when2com.txt",
+   "sha256": "0b793c1a08d4d12a6f7b80b449010e08136c6af78eaa69edeb4dc71b4255e5e4"
+  },
+  "where2comm": {
+   "path": "projects/ca_tosg_p2/results/lit/where2comm.txt",
+   "sha256": "045f1ba5bd4a90b542e3ced14fd33f6b656fc273976be1becf7a4db895a9db3c"
+  },
+  "who2com": {
+   "path": "projects/ca_tosg_p2/results/lit/who2com.txt",
+   "sha256": "69b85077c7e3e99abb276ec05e02829455aa9fd3e51683973ec0b79aa824da40"
+  }
+ },
+ "command": "python projects/ca_tosg_p2/protocol/prerequest_info_review.py"
+}

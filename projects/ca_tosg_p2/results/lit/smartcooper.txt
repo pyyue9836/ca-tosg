@@ -1,0 +1,737 @@
+SmartCooper: Vehicular Collaborative Perception
+with Adaptive Fusion and Judger Mechanism
+Yuang Zhang1, Haonan An 2, Zhengru Fang 3, Guowen Xu 3, Yuan Zhou 2, Xianhao Chen 4, Yuguang Fang 3
+Abstract—In recent years, autonomous driving has garnered
+significant attention due to its potential for improving road
+safety through collaborative perception among connected and
+autonomous vehicles (CA Vs). However, time-varying channel
+variations in vehicular transmission environments demand dy-
+namic allocation of communication resources. Moreover, in the
+context of collaborative perception, it is important to recognize
+that not all CA Vs contribute valuable data, and some CA V
+data even have detrimental effects on collaborative perception.
+In this paper, we introduce SmartCooper, an adaptive collabo-
+rative perception framework that incorporates communication
+optimization and a judger mechanism to facilitate CA V data
+fusion. Our approach begins with optimizing the connectivity of
+vehicles while considering communication constraints. We then
+train a learnable encoder to dynamically adjust the compression
+ratio based on the channel state information (CSI). Subse-
+quently, we devise a judger mechanism to filter the detrimental
+image data reconstructed by adaptive decoders. We evaluate
+the effectiveness of our proposed algorithm on the OpenCOOD
+platform. Our results demonstrate a substantial reduction in
+communication costs by 23.10% compared to the non-judger
+scheme. Additionally, we achieve a significant improvement on
+the average precision of Intersection over Union (AP@IoU) by
+7.15% compared with state-of-the-art schemes.
+I. I NTRODUCTION
+Over the past few decades, autonomous driving perception
+technology has witnessed remarkable progress, thanks to
+the rapid advances of computer vision and deep learning
+techniques [4] [12]. This technology relies predominantly
+on two types of data sources: image data and point cloud
+data, both acquired from on-board sensors in real-world
+scenarios or generated through simulation platforms [16]. In
+terms of real-world data, researchers have proposed extensive
+public datasets like KITTI [8] and nuScenes [2]. By using
+simulation platforms like CARLA [6], simulation datasets
+like OPV2V [27] and SHIFT [22], usually include a wider
+range of scenarios and weather conditions, along with com-
+prehensive annotation information, thereby facilitating the
+studies of autonomous driving perception. Numerous single-
+vehicle perception methods have been rigorously tested and
+validated on both real-world and simulation datasets [4],
+[15], [26]. However, recent developments in communication
+1Department of Automation, Tsinghua University. zya21@mails.tsi
+nghua.edu.cn
+2School of Electrical and Electronic Engineering, Nanyang Technological
+University. {an0029an, yzhou027}@e.ntu.edu.sg
+3Department of Computer Science, City University of Hong Kong. zhef
+ang4-c@my.cityu.edu.hk, {guowenxu, my.Fang}@cityu.e
+du.hk
+4Department of Electrical and Electronic Engineering, The University of
+Hong Kong. xchen@eee.hku.hk
+technology and the advent of CA Vs have thrusted collabo-
+rative perception into the forefront of autonomous driving
+research [23] [11]. In contrast to single-vehicle perception,
+collaborative perception extends the scope of perception
+and effectively mitigates blind spots [25]. This allows au-
+tonomous vehicles to comprehensively perceive their sur-
+roundings, leading to more effective decision-making [5].
+Specifically, collaborative perception systems facilitate the
+sharing of perception data among CA Vs [18]. Each CA V
+benefits from a broader sensing range than single-vehicle
+perception, thus aggregating global and local information
+to optimize perception results [14] [10]. Existing studies
+have introduced various collaborative perception methods,
+including a perception framework based on point cloud
+features [3] and a collaborative perception framework based
+on Bird’s-Eye View (BEV), which refers to the top view of
+a scene, and vision [28].
+Nonetheless, several challenges persist in current collabo-
+rative perception research, particularly when applied to real-
+world scenarios. Firstly, the data collected by vehicular sen-
+sors, comprising image sequences and point cloud data, often
+pose a significant volume challenge. Regarding image data,
+contemporary cameras, exemplified by Google’s autonomous
+vehicles (A Vs), are capable of capturing a staggering 750
+megabytes of data per second [9]. As for point cloud data,
+using KITTI [8] as an illustration, even the smallest sequence
+contains upwards of 10 million data points [17]. The sheer
+volume of data can easily congest communication channels
+and potentially result in significant delays or packet loss,
+thereby restricting effective data sharing among CA Vs. More-
+over, the real-world communication landscape is far from
+ideal, and with constrained spectrum resources is difficult
+to enable real-time data transmissions in Vehicle-to-Vehicle
+(V2V) networks [4]. Specifically, channel quality fluctuates
+over time, and the limited bandwidth cannot guarantee con-
+sistent real-time and complete data transmission from all
+vehicles. Some prior studies have already recognized these
+challenges and initiated efforts to address them. For instance,
+Hu et al. proposed an efficient communication framework,
+Where2comm, incorporating an attention-based mechanism
+to enhance perception performance and mitigate bandwidth
+pressures [13]. Similarly, Wang et al. introduced a viable
+approach wherein each agent transmits compressed feature
+maps, successfully alleviating communication burdens [24].
+However, these approaches often assume that channel con-
+dition remains time-invariant and fail to account for dy-
+namic channel variations. In contrast, channel-aware methods
+prioritize the real-time fluctuations in channel conditions
+arXiv:2402.00321v3  [cs.CV]  4 Mar 2024
+among CA Vs, adjusting data transmissions accordingly. This
+dynamic adaptation optimizes communication, ensuring the
+efficacy of collaborative perception.
+Secondly, data compression for CA Vs also affects the per-
+formance of collaborative perception significantly. However,
+existing data compression schemes exhibit notable deficien-
+cies. Previous compression methods have typically employed
+a uniform “fairness scheme” [21], which uniformly applies
+the same compression ratio to all CA V data. Unfortunately,
+this fairness scheme overlooks the fact that CA Vs in a V2V
+network contribute perception data differently in data fusion.
+Some CA Vs, situated at some locations, can significantly
+extend sensing coverage and enhance collaborative percep-
+tion, while others, with obscured views, provide minimal
+assistance to data fusion. Moreover, it is crucial to recognize
+that not all data from CA Vs is beneficial. Certain CA Vs may
+be situated at the edge of perception or suffer from severe
+communication delays, potentially having a detrimental im-
+pact on data fusion and consequently reducing the accuracy
+of collaborative perception. Thus, a judger mechanism is
+needed to assess and prioritize CA Vs based on their spatial
+location and sensing coverage. This mechanism can then
+eliminate low-quality data, enabling efficient CA V data fusion
+and perception.
+Finally, most existing collaborative perception schemes
+assume that the wireless channel is ideal, ignoring the dy-
+namic characteristics of the channel and the mechanism of
+filtering the perception data. If the dynamic nature of the
+channel is taken into account, the compression ratio can be
+flexibly adjusted and the communication can be optimized.
+Moreover, the priority can be set adaptively according to the
+sensing coverage and data quality of CA Vs. In contrast to
+the previous studies, in this paper, we propose SmartCooper,
+an adaptive collaborative perception framework with channel-
+aware communication optimization and judger mechanism to
+enable efficient CA Vs’ data fusion. Our main contributions
+are summarized as follows.
+• To the best of our knowledge, SmartCooper is the first
+that comprehensively considers CA V data judger mech-
+anism. We design a novel judger to filter reconstructed
+image data according to the sensing coverage. Specifi-
+cally, our judger scores reconstructed image sequences
+based on the union of sensing coverage, then removes
+data with negative gains to improve the accuracy of col-
+laborative perception and reduce communication cost.
+• We propose a channel-aware communication optimizing
+scheme to adapt to the channel state. Specifically, we
+leverage an adaptive encoder to adjust the compression
+ratio of data delivered by CA Vs according to the real-
+time channel state, ensuring real-time and high-quality
+data transmission for CA V data fusion.
+• With the OpenCOOD platform [27], we conduct ex-
+tensive experiments to validate the effectiveness of our
+proposed scheme by comparing it with the state-of-the-
+art methods. Under the same channel condition, the
+communication cost shows a significant reduction by
+at least 23.10%, and AP@IoU (the average precision of
+Intersection over Union), which evaluates the accuracy
+of perception, is significantly improved by 7.15%.
+II. R ELATED WORK
+A. Collaborative Perception
+Due to the limited sensing range of a vehicle’s sensors,
+CA Vs are unable to sense the imminent dangers behind
+certain hard-to-observe corners. However, collaboration with
+other CA Vs can expand its sensing coverage, thus reducing
+safety risks. Numerous works on collaborative perception
+have already been carried out lately. Wang et al. [24] pro-
+posed V2V collaboration based on point cloud data, while
+Xu et al. [28] introduced V2V collaboration using 2D image
+data. Although these studies have demonstrated promising
+results on test datasets, they often assume an ideal channel
+environment for V2V collaboration. When these methods are
+applied in real-world scenarios, the presence of non-ideal
+communication channels will cause serious problems such
+as long latency and high packet loss because of the resulting
+reduced transmission rate. Thus, while these approaches have
+shown potential, their effectiveness under realistic channel
+conditions needs further consideration.
+B. Which V ehicle to Communicate
+The choice of vehicles to participate in collaboration not
+only significantly impacts spectrum consumption but also
+the quality of fused sensing results, thereby affecting the
+overall performance of cooperation. Therefore, the selection
+of which vehicles to participate is of great importance. Liu
+et al. [19] proposed a three-stage handshake mechanism for
+communication selection. Specifically, participating vehicles
+are chosen based on matching scores computed between
+the data from the degraded agent and data from all other
+normal agents. Hu et al. [13] suggested establishing a spatial
+confidence map for participating vehicle selection. However,
+most of these methods heavily rely on attention mechanisms
+to build an evaluation system. Assuming a data volume
+with N participating vehicles, attention mechanisms implies
+a time complexity of O(N 2) for communications, a non-
+negligible cost that could result in additional latency.
+III. O UR PROPOSED SCHEME
+In this section, we introduce our proposed adaptive col-
+laborative scheme for CA Vs. Firstly, in Sec. III-A, we
+mathematically model the channel conditions in practical
+communication scenarios, thus defining the adaptive factors
+required for CA Vs in practical settings. Next, in Sec. III-B1,
+we conduct a concise experiment to illustrate the drawbacks
+of solely optimizing communication parameters for enhanc-
+ing collaborative quality. Then, in Sec. III-B2, we introduce
+a scoring mechanism based on the perceptual gains of the
+Ego CA V to address the shortcomings mentioned in Sec.
+III-B1, that is, some CA Vs may have detrimental effects on
+sensing data fusion. Finally, in Sec. III-C we combine the
+two adaptive strategies and show our comprehensive network
+architecture.
+TABLE I: The collaborative results for different numbers of
+CA Vs under both ideal and non-ideal conditions.
+AP@IoU
+Parameters #CA Vs
+1 2 3 4
+Ideal 0.252 0.582 0.668 0.673
+Non-ideal 0.252 0.579 0.656 0.642
+A. Channel-aware Optimization
+1) CA V Communication Scheme: In view of the fact
+that the actual communication situation is not ideal, we
+propose a channel-aware communication optimizing scheme.
+We formulate the channel capacity optimization under CA Vs’
+actual communication conditions, and propose our adaptive
+communication scheme. In accordance with the 5G standards
+by 3GPP [1], [7], CA Vs primarily rely on Cellular Vehicle-
+to-Everything (C-V2X) employing Orthogonal Frequency
+Division Multiplexing (OFDM). The capacity of each sub-
+channel SC ij is given by:
+SC ij = W
+N log2
+"
+1 + Hij ∗ PT
+ρn ∗
+  W
+N
+
+#
+, (1)
+where W denotes the total bandwidth, N the number of
+sub-channels, SC ij the sub-channel capacity from the ith
+transmitter to the jth receiver, Hij the channel gain from the
+ith transmitter to the jth receiver, PT the transmit power, and
+ρn the noise power spectral density.
+2) Channel-aware Adjuster: Based on the above model-
+ing, we get the sub-channel capacity SCij. Moreover, we
+propose a channel-aware adjuster to adaptively adjust the
+compression ratio of each agent’s data according to the com-
+munication capacity of the sub-channel. The compression
+ratio α∗
+ij of each sub-channel is given by:
+α∗
+ij = SC ij
+Vij
+, (2)
+where α∗ij is the compression ratio of the data transmitted
+from the ith transmitter to the jth receiver, and Vij is
+the volume of data transmitted from the ith transmitter to
+the jth receiver. Since the volume of data transmitted is
+often greater than the capacity of a single sub-channel, the
+compression ratio satisfies: 0 ≤ α∗ij ≤ 1, α∗ij ∈ R+. Based
+on this, the adaptive reconstruction structure is designed
+as follows: we utilize channel-aware adjuster to modulate
+the compression ratio of the transmitted data for each CA V
+according to the capacity of the sub-channel, then the encoder
+transmits the compressed data, and the decoder receives the
+information transmitted over the sub-channel and enables the
+reconstruction.
+B. Adaptive Judger Mechanism
+1) Disadvantage Analysis: The proposed method in Sec.
+III-A can adaptively allocate communication resources to
+different CA Vs based on the channel conditions, thereby
+enhancing the performance of V2V collaborative perception.
+However, we have observed that the optimized collaborative
+(a) Score Increasing
+s1 s2 (b) Maximum Score
+(c) Score Decreasing
+ (d) Score equal to zero
+Fig. 1: Four possible scoring scenarios where the orange
+represents the Ego CA V , and the green represents CA V1.
+data may not always lead to positive gains (i.e., it might
+potentially degrade the perception performance of the Ego
+CA V). To illustrate this issue, we conducted a straightforward
+yet convincing experiment. The results are summarized in
+Table I.
+In our experiment, we employ a test dataset from OPV2V
+[27] involving a collaborative network of four CA Vs. To
+systematically analyze the impact of participating CA Vs on
+collaborative perception, we increase the number of col-
+laborating CA Vs incrementally based on their distance to
+the Ego CA V . Notably, when the number of CA Vs equals
+1, it signifies the presence of only the Ego CA V , with no
+collaborative perception taking place. We conducted tests to
+measure AP@IoU for the collaborative network under two
+distinct scenarios: ideal condition and non-ideal condition
+(Transmissions under non-ideal condition are achieved by
+adaptively allocating channel resources using the approach
+outlined in Sec. III-A). Under ideal channel conditions,
+data transmission does not require any compression. When
+increasing the number of CA Vs, AP@IoU also increases
+simultaneously. This occurs because different CA Vs expand
+the Ego CA V’s sensing coverage, enhancing its understand-
+ing of the surrounding environment. However, under non-
+ideal channel conditions, an interesting phenomenon emerges
+when increasing the number of CA Vs. Initially, AP@IoU
+increases, but then it starts to decrease. It indicates that not
+all CA Vs contribute positively under non-ideal conditions.
+Therefore, we conclude that optimizing the channel under
+non-ideal conditions alone is insufficient to achieve optimal
+collaborative performance.
+2) Scoring & Threshold Scheme: In this subsection, we in-
+troduce our judger mechanism based on scoring and threshold
+to mitigate the detrimental impact of the data with negative
+gain on collaborative quality. Specifically, as for the Ego
+CA V , we define a predetermined maximum collaborative
+sensing coverage (MCSC) as dmax. Additionally, for each
+CA V , we define the individual sensing coverage denoted as
+dsingle for each CA V , including the ego CA V , as follows:
+dsingle < dmax. (3)
+Hence, the sensing coverage of each individual CA V can be
+obtained as follows:
+s = π × d2
+single − sotr, (4)
+CAV 1
+CAV 2
+CAV 3
+Channel-Aware Adjuster
+ Judger
+BitStream
+BitStream
+BitStream
+BitStream
+BitStream
+BitStream
+Fusion
+Net
+Ego CAV 
+Adaptive Decoder
+Compression ratio α*
+Multi-view images BEV PredictionAdaptive Encoder
+Compression ratio α*
+Channel State Infomation
+Fig. 2: Overall architecture of SmartCooper consists of three stages. (1) Network optimization: determining the parameters
+of CSI to output the optimized compression ratio α∗. (2) Transmission & Judgement: Each CA V transmits its compressed
+image data to the Ego CA V and receives a judgment. (3) Fusion: the qualified reconstructed images are combined with the
+Ego CA V’s image to generate a BEV through the fusion net.
+where sotr represents the area out of MCSC. Meanwhile, we
+define the score of each CA V , or rather, the collaborative gain
+of the Ego CA V , in the following equation:
+score = scav
+[
+sego − sego. (5)
+where scav denotes the sensing coverage of each CA V , and
+sego denotes the sensing coverage of ego CA V . Intuitively,
+the score captures the sensing area of a collaborative CA V
+that the ego CA V cannot sense. The different situations in
+which the collaborative gain varies with sensing coverage
+among CA Vs are shown in Fig. 1. For the sake of analysis,
+we assume that the Ego CA V remains stationary. As CA V
+moves, the variations in the collaborative gain of the Ego
+CA V exhibit four scenarios: (a) When the distance between
+the CA V and the Ego CA V is short, the collaborative gain of
+the Ego CA V increases as the CA V approaches. This trend
+continues until (b) The intersection of the CA V’s sensing
+coverage with the Ego CA V’s sensing coverage equals the
+intersection of the CA V’s sensing coverage with MCSC. In
+other words, s1 = s2. (c) As the CA V continues to move, the
+collaborative gain of the Ego CA V gradually decreases due
+to most of perception part exceeding MCSC until (d) The
+CA V moves entirely out of MCSC.
+According to Eq. (1) and Eq. (2), the farther a CA V is from
+the Ego CA V within the MCSC, the fewer channel resources
+it will be allocated. Additionally, CA Vs located far from the
+Ego CA V obtain low scores based on Eq. (5). These two
+factors are combined to find CA Vs near the vicinity of the
+MCSC contributing poorer quality and less impactful data to
+the collaboration with the Ego CA V . Consequently, lack of
+the consideration of the impact of the detrimental data can
+lead to interference or even errors. This phenomenon explains
+the situation observed in cases when an increased number
+of participating CA Vs results in a reduction in collaborative
+performance in Table I. Hence, guided by experimental data,
+we have established a threshold based on the experience.
+This threshold serves to mitigate the adverse impact of
+detrimental data on collaborative quality. Data falling below
+the established threshold is discarded outright, while data
+surpassing the threshold is retained for further processing.
+It is worth noting that, compared to the previous selection
+strategies based on attention mechanisms, SmartCooper has
+a lower computational complexity. Assuming there are N
+CA Vs participating in collaboration, the time complexity of
+the attention mechanism is O(N 2), whereas SmartCooper
+has a time complexity of O(N ).
+C. Overall Architecture
+To combine our proposed methods, we show the overall
+architecture in Fig. 2 and the overall algorithm in Algorithm
+1. Our proposed SmartCooper is divided into three stages.
+(1) The first stage is network optimization: The network
+optimization process involves collecting parameters from the
+actual communication environment to compute the optimized
+compression ratio α∗ for both the Adaptive Encoder and
+Adaptive Decoder. In the case of the Adaptive Encoder
+and Adaptive Decoder, we have directly implemented the
+Modulated Autoencoder [29]. This framework allows for a
+trade-off between bitrate and distortion by utilizing trade-
+off parameters. These trade-off parameters correspond one-
+to-one to compression ratios. Therefore, by adjusting the
+compression ratio, we can adapt the trade-off parameters.
+(2) The second stage is transmission & judgement:
+Each CA V compresses its own camera’s image data and
+transforms it into a bitstream using the Adaptive Encoder.
+These bitstreams are then transmitted to the Ego CA V . Upon
+receiving the bitstreams, the Ego CA V reconstructs them
+into image data using the Adaptive Decoder. Subsequently,
+a scoring and decision-making process is carried out by the
+Judger. Images that surpass a specified threshold, along with
+the Ego CA V’s own camera data, are jointly used as inputs
+and passed to the Fusion Net.
+(3) The last stage is fusion: We adapt the Fusion Net, i.e.,
+CoBEVT [28], which is designed for the fusion of vehicular
+camera data. It conducts merging data from various vehicles
+and produces a BEV output.
+Algorithm 1 SmartCooper: Vehicle Collaborative Perception
+under Adaptive Fusion
+Require: Input ego CA V’s image sequence: Ie. CA Vs’ image
+sequence set: {Ii}. Adaptive encoders: EA. Adaptive decoders:
+DA. The channel parameters: N, W , PT , H, ρn. The volume of
+data transmitted: V . The vehicle coordinates: {C0, ..., CN −1}.
+Ensure: Output BEV prediction results and AP@IoU scores.
+1: for i from 0 to N − 1 do
+2: Calculate the adaptive compression ratio α∗
+i by Eq. (2);
+3: The encoder EA learns to compress raw image consequence
+Ii, then converts them into bistreams;
+4: Current vehicle CAV i transmits bistreams to ego A V;
+5: The decoder DA reconstructs the image sequence and obtain
+new image consequence ˙Ii;
+6: end for
+7: for i from 0 to N − 1 do
+8: Calculate the perception union of the current vehicle CAV i
+and ego CA V using coordinates {C0, ..., CN −1};
+9: Judger scores new image sequence ˙Ii based on the union of
+sensing coverage.
+10: end for
+11: Judger removes the image sequences whose scores are lower
+than the threshold, then obtain the qualified image sequence set
+{ ¨Ij}.
+12: Use fusion net to combine the qualified image sequences ¨Ij
+with ego CA V’s image sequence Ie to conduct BEV prediction
+results and AP@IoU scores.
+IV. E XPERIMENTS
+In this section, we conduct our experiments to evaluate
+our proposed scheme. We first set up the experiments un-
+der different transmission powers and bandwidths. We then
+compare the performance of our SmartCooper and several
+non-adaptive methods, respectively. Finally, we show the
+IoU results and visualize the performance of collaborative
+perception with the predicted BEV .
+A. Dataset
+We conduct experiments using the CA V simulation plat-
+form OpenCOOD and validate our method on OPV2V
+dataset [27], which is collected from the CARLA simulator
+[6]. The dataset contains 6 road types, 73 different scenes,
+232,913 marked 3D detection bounding boxes. The total
+point cloud and RGB image data volume exceeds 240 GB.
+B. Baselines
+C-AOL (Channel-aware only): This scheme denotes that
+we only use our communication optimizing scheme and
+adaptive encoder without the adaptive scoring scheme.
+TWD (Transmission with distribution): This scheme is
+based on the work of X. Lyu [20], which uses distributed
+methods for optimization in communication.
+TWF (Transmission with fairness): This scheme is
+based on study [21], which mainly distributes communication
+resources to each sub-channel fairly based on Jain’s Network
+Starvation Fairness Index.
+No Fusion: This scheme does not use any collaborative
+perception, in which ego CA V only uses the information it
+perceives and does not receive data from other CA Vs.
+Fig. 3: Comparison between SmartCooper and C-AOL for
+the Minimum Required Bandwidth under different power
+conditions.
+C. Settings
+Our experimental setup complies with 3GPP standards
+[1]. The basic settings are shown as follows. A vehicle has
+sensing coverage of up to 70 meters and speeds within the
+range of 0-50 km/h. The default value of the number of
+cooperative vehicles is 3, and the upper bound of the number
+of sub-channels N is 3. Most scenarios in the OPV2V
+dataset [27] involve collaboration among three or four CA Vs.
+Therefore, the filtering threshold for the judger mechanism is
+set as follows: In a scenario with three CA Vs, the threshold
+will eliminate data from CA Vs whose normalized score is
+below 0.4 and whose distance from the Ego CA V exceeds
+0.5dmax. In a scenario with four CA Vs, the threshold will
+remove data from CA Vs whose normalizedscore falls below
+0.3 and whose distance from the Ego CA V is greater than
+0.5dmax. Other parameters are set as follows. The default
+value of the total bandwidth W is set to 200 MHz, and the
+default value of the transmission power PT of each vehicle
+is set to 8 mW. In addition, the road is a bilateral highway
+with three lanes for vehicles in each direction and with all
+vehicles uniformly distributed on the road.
+D. Experimental Results
+We compare the proposed SmartCooper with four base-
+lines (C-AOL, TWD, TWF and No Fusion). Table II shows
+the performance results under different transmission power
+and bandwidth. The experimental results clearly show that
+our SmartCooper performs better than all baseline schemes.
+Specifically, SmartCooper achieves superior AP@IoU scores:
+in collaborative perception scenes, the AP@IoU scores of
+SmartCooper outperform TWD by an average of 7.15 % and
+TWF by 5.65 % under the same power level. Compared with
+No Fusion scheme, SmartCooper’s AP@IoU scores are at
+least 25.8 % better. When focusing solely on communica-
+tion optimization, that is, using the C-AOL scheme, the
+AP@IoU scores outperform TWD by an average of 6.72 %,
+TWF by 5.24 %, and No Fusion scheme by 65.3 % under
+the same power level. Compared with the C-AOL scheme,
+SmartCooper adds an adaptive judger to filter vehicles at
+the boundary of the sensing coverage, thereby eliminating
+the impact of the data with negative gain on data fusion,
+TABLE II: Comparing SmartCooper with four baseline meth-
+ods across various parameter settings in relation to perception
+accuracy.
+AP@IoU
+Parameters Power (mW) Bandwidth (MHz)
+4 8 12 100 150 200
+No Fusion 0.409 0.409 0.409 0.409 0.409 0.409
+TWD 0.600 0.633 0.669 0.669 0.669 0.669
+TWF 0.641 0.642 0.643 0.668 0.672 0.669
+C-AOL 0.663 0.680 0.684 0.673 0.672 0.675
+SmartCooper 0.667 0.682 0.686 0.686 0.686 0.686
+so the perception performance is better. SmartCooper and
+C-AOL allocate channel capacity adaptively according to
+the importance of CA V perception data, while the TWF
+scheme allocates channel resources fairly, which, in real-
+world communication environment, is likely to cause some
+important CA Vs to request more communication resources,
+resulting in poor transmission quality and a deterioration in
+the collaborative perception. Notice that the data delivered
+by the TWD scheme is not compressed, which will generate
+transmission delay under the limited channel capacity. When
+data of different time scales are fused, the perception results
+may deteriorate. For No Fusion, SmartCooper and C-AOL
+integrate information from multiple vehicles, leading to a
+wider sensing coverage, more comprehensive information,
+and better perception results than No Fusion.
+Under practical communication conditions, channel-aware
+optimization that we propose can significantly improve col-
+laborative perception performance. Furthermore, our pro-
+posed SmartCooper not only further enhances collaborative
+perception quality compared to channel-aware-only optimiza-
+tion but also reduces the minimum required bandwidth for
+collaboration. In Fig. 3, SmartCooper reduces the minimum
+required bandwidth by at least 23.10% compared to channel-
+aware optimization. SmartCooper achieves this by intercept-
+ing detrimental data to reduce communication overhead while
+simultaneously improving collaborative perception quality.
+Fig. 4 presents the BEV prediction results of (a)
+Groundtruth, (b) SmartCooper, (c) C-AOL, (d) TWF, (e)
+TWD and (f) No Fusion at the same time scale and with the
+same scenario. Groundtruth is the standard result under abso-
+lutely ideal condition. For perception schemes, we especially
+use MD and FD to intuitively denote the errors in prediction
+results where MD denotes the missed detection, and FD
+the false detection. Both errors are labeled in each figure.
+From the visual comparison, our scheme SmartCooper does
+not have any MD and FD problems and performs the best
+compared with the baselines. The C-AOL method without
+Adaptive Scoring mechanism only has one MD problem
+according to Fig. 4(c). As shown in Figs. 4(d) and 4(e),
+both TWF and TWD have more MD errors. In Fig. 4(f), the
+No Fusion scheme of single-vehicle detection has not only
+many MD errors, but also obvious FD errors, which means
+that it incorrectly predicts roads that do not actually exist.
+The comparisons of the above results verify the superior
+performance of our SmartCooper scheme.
+(a) Groundtruth
+ (b) SmartCooper
+MD x 1
+(c) C-AOL
+MD x 3 (d) TWF
+MD x 7
+(e) TWD
+MD x 10FD FD (f) No Fusion
+Fig. 4: The comparison of SmartCooper with four baseline
+methods in terms of BEV prediction.
+V. C ONCLUSIONS
+In this paper, we have developed SmartCooper, a scheme
+aimed at enhancing V2V collaborative perception perfor-
+mance under practical dynamic channel conditions. We first
+propose C-AOL to ensure collaborative perception quality in
+actual communication environments by dynamically adjust-
+ing compression ratios. However, continuing to increase the
+number of participating CA Vs does not necessarily lead to
+improved collaborative perception performance under practi-
+cal channel conditions. Solely relying on channel-aware opti-
+mization is insufficient. To solve this problem, SmartCooper
+employs a distinctive judger mechanism to score and make
+judgments for each CA V , effectively mitigating the adverse
+impact of low-quality data on collaborative perception. Ex-
+perimental results demonstrate that SmartCooper can reduce
+the communication cost by at least 23.10%. In terms of CA V
+perception accuracy, SmartCooper outperforms the state-of-
+the-art schemes by 7.15% under the same transmission power
+level.
+ACKNOWLEDGMENT
+This work was supported in part by the Hong Kong
+SAR Government under the Global STEM Professorship and
+Research Talent Hub and the Hong Kong Jockey Club under
+JC STEM Lab of Smart City. The work of X. Chen was
+supported in part by HKU IDS Research Seed Fund under
+Grant IDS-RSF2023-0012 and HKU-SCF FinTech Academy
+R&D Funding.
+REFERENCES
+[1] W Anwar, N Franchi, and G Fettweis. Physical layer evaluation of
+V2X communications technologies: 5G NR-V2X, LTE-V2X, IEEE
+802.11bd, and IEEE 802.11p. In IEEE 90th V ehicular Technology
+Conference (VTC2019-Fall) , pages 1–7, Honolulu, HI, USA, Sep.
+2019.
+[2] H Caesar, V Bankiti, A. H Lang, S V ora, V . E Liong, Q Xu, A Krish-
+nan, Y Pan, G Baldan, and O Beijbom. nuScenes: A multimodal dataset
+for autonomous driving. In Proceedings of the IEEE/CVF conference
+on computer vision and pattern recognition (CVPR) , pages 11621–
+11631, Seattle, USA, Jun. 2020.
+[3] Q Chen, X Ma, S Tang, J Guo, Q Yang, and S Fu. F-cooper: Feature
+based cooperative perception for autonomous vehicle edge computing
+system using 3D point clouds. In Proceedings of the F ourth ACM/IEEE
+Symposium on Edge Computing (SEC) , pages 88–100, Washington DC,
+USA, Nov. 2019.
+[4] X Chen, Y Deng, H Ding, G Qu, H Zhang, P Li, and Y Fang. Vehicle
+as a service (VaaS): Leverage vehicles to build service networks
+and capabilities for smart cities. IEEE Communications Surveys and
+Tutorials, 2023 (doi: 10.1109/COMST.2024.3370169).
+[5] G Cui, W Zhang, Y Xiao, L Yao, and Z Fang. Cooperative perception
+technology of autonomous driving in the internet of vehicles environ-
+ment: A review. Sensors, 22(15):5535, Jul. 2022.
+[6] A Dosovitskiy, G Ros, F Codevilla, A Lopez, and V Koltun. CARLA:
+An open urban driving simulator. In Conference on Robot Learning
+(CoRL), pages 1–16, Mountain View, CA, USA, Oct. 2017.
+[7] Z Fang, J Wang, Y Ren, Z Han, H. V Poor, and L Hanzo. Age
+of information in energy harvesting aided massive multiple access
+networks. IEEE Journal on Selected Areas in Communications ,
+40(5):1441–1456, May 2022.
+[8] A Geiger, P Lenz, C Stiller, and R Urtasun. Vision meets robotics:
+The KITTI dataset. The International Journal of Robotics Research ,
+32(11):1231–1237, 2013.
+[9] C Hu, W Bao, D Wang, and F Liu. Dynamic adaptive DNN surgery for
+inference acceleration on the edge. In IEEE Conference on Computer
+Communications (INFOCOM) , pages 1423–1431, Paris, France, Apr.
+2019.
+[10] Senkang Hu, Zhengru Fang, Haonan An, Guowen Xu, Yuan Zhou,
+Xianhao Chen, and Yuguang Fang. Adaptive communications in col-
+laborative perception with domain alignment for autonomous driving.
+arXiv preprint arXiv:2310.00013 , 2023.
+[11] Senkang Hu, Zhengru Fang, Xianhao Chen, Yuguang Fang, and
+Sam Kwong. Towards full-scene domain generalization in multi-
+agent collaborative bird’s eye view segmentation for connected and
+autonomous driving. arXiv preprint arXiv:2311.16754 , 2023.
+[12] Senkang Hu, Zhengru Fang, Yiqin Deng, Xianhao Chen, and Yuguang
+Fang. Collaborative perception for connected and autonomous driving:
+Challenges, possible solutions and opportunities. arXiv preprint
+arXiv:2401.01544, 2024.
+[13] Yue Hu, Shaoheng Fang, Zixing Lei, Yiqi Zhong, and Siheng Chen.
+Where2comm: Communication-efficient collaborative perception via
+spatial confidence maps. Advances in neural information processing
+systems (NeurlPS) , 35:4874–4886, 2022.
+[14] S. W. Kim, B Qin, Z. J. Chong, Shen X, W Liu, M. H. Ang, E Fraz-
+zoli, and D Rus. Multivehicle cooperative driving using cooperative
+perception: Design and experimental validation. IEEE Transactions on
+Intelligent Transportation Systems (TITS) , 16(2):663–680, Aug. 2014.
+[15] A. H Lang, S V ora, H Caesar, L Zhou, J Yang, and O Beijbom.
+Pointpillars: Fast encoders for object detection from point clouds. In
+Proceedings of the IEEE/CVF conference on computer vision and
+pattern recognition (CVPR) , pages 12697–12705, Long Beach, CA,
+USA, Jun. 2019.
+[16] Xingyu Li, Yuang Zhang, Yunda Shi, He Zhu, Jianming Hu, and
+Lihui Peng. Quality assessment of image dataset for autonomous
+driving. In 2023 IEEE International Conference on Imaging Systems
+and Techniques (IST) , pages 1–6, Copenhagen, Denmark, Oct. 2023.
+[17] Y Li, L Ma, Z Zhong, F Liu, M. A. Chapman, D Cao, and J Li. Deep
+learning for lidar point clouds in autonomous driving: A review. IEEE
+Transactions on Neural Networks and Learning Systems , 32(8):3412–
+3432, Aug. 2020.
+[18] Z Lin, L Wang, J Ding, Y Xu, and B Tan. Tracking and transmission
+design in terahertz V2I networks. IEEE Transactions on Wireless
+Communications, 22(6):3586–3598, Jun. 2022.
+[19] Yen-Cheng Liu, Junjiao Tian, Chih-Yao Ma, Nathan Glaser, Chia-Wen
+Kuo, and Zsolt Kira. Who2com: Collaborative perception via learnable
+handshake communication. In IEEE International Conference on
+Robotics and Automation (ICRA) , pages 6876–6883, Paris, France,
+May 2020.
+[20] X Lyu, C Zhang, C Ren, and Y Hou. Distributed graph-based
+optimization of multicast data dissemination for internet of vehi-
+cles. IEEE Transactions on Intelligent Transportation Systems (TITS) ,
+24(3):3117–3128, Dec. 2022.
+[21] E. R Magsino and I. W.-H Ho. An enhanced information sharing
+roadside unit allocation scheme for vehicular networks. IEEE Trans-
+actions on Intelligent Transportation Systems (TITS) , 23(9):15462–
+–15475, Jan. 2022.
+[22] T Sun, M Segu, J Postels, Y Wang, L Van Gool, B Schiele, F Tombari,
+and F Yu. SHIFT: A synthetic driving dataset for continuous multi-task
+domain adaptation. In Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition (CVPR) , pages 21371–21382,
+New Orleans, LA, USA, Jun. 2022.
+[23] A Talebpour and H. S Mahmassani. Influence of connected and
+autonomous vehicles on traffic flow stability and throughput. Trans-
+portation research part C: emerging technologies , 71:143–163, 2016.
+[24] Tsun-Hsuan Wang, Sivabalan Manivasagam, Ming Liang, Bin Yang,
+Wenyuan Zeng, and Raquel Urtasun. V2VNet: Vehicle-to-vehicle
+communication for joint perception and prediction. In European
+Conference on Computer Vision , pages 605–621, Glasgow, UK, Aug.
+2020.
+[25] W Wei, J Wang, Z Fang, J Chen, Y Ren, and Y Dong. 3U: Joint
+design of UA V-USV-UUV networks for cooperative target hunting.
+IEEE Transactions on V ehicular Technology , 72(3):4085–4090, Mar.
+2022.
+[26] D Xu, D Anguelov, and A Jain. PointFusion: Deep sensor fusion for
+3D bounding box estimation. In Proceedings of the IEEE conference
+on computer vision and pattern recognition (CVPR) , pages 244–253,
+Salt Lake City, UT, USA, Jun. 2018.
+[27] R Xu, H Xiang, X Xia, X Han, J Li, and J Ma. OPV2V: An open
+benchmark dataset and fusion pipeline for perception with vehicle-to-
+vehicle communication. In 2022 International Conference on Robotics
+and Automation (ICRA) , pages 2583–2589, Philadelphia, PA, USA,
+May 2022.
+[28] Runsheng Xu, Zhengzhong Tu, Hao Xiang, Wei Shao, Bolei Zhou,
+and Jiaqi Ma. CoBEVT: Cooperative bird’s eye view semantic
+segmentation with sparse transformers. In Conference on Robot
+Learning (CoRL) , pages 989–1000, Atlanta, GA, USA, Mar. 2023.
+[29] Fei Yang, Luis Herranz, Joost Van De Weijer, José A Iglesias Guitián,
+Antonio M López, and Mikhail G Mozerov. Variable rate deep image
+compression with modulated autoencoder. IEEE Signal Processing
+Letters, 27:331–335, Jul. 2020.

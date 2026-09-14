@@ -1,0 +1,1523 @@
+1
+CoDS: Collaborative Perception via Digital
+Semantic Communication
+Jipeng Gan, Student Member , IEEE, Le Liang, Member , IEEE, Hua Zhang, Member , IEEE,
+Chongtao Guo, Member , IEEE, and Shi Jin, Fellow, IEEE
+Abstract—Semantic communication has been introduced into
+collaborative perception systems for autonomous driving, offering
+a promising approach to enhancing data transmission efﬁcie ncy
+and robustness. Despite its potential, existing semantic c ommu-
+nication approaches predominantly rely on analog transmis sion
+models, rendering these systems fundamentally incompatib le
+with the digital architecture of modern vehicle-to-everyt hing
+(V2X) networks and posing a signiﬁcant barrier to real-worl d
+deployment. To bridge this critical gap, we propose CoDS, a n ovel
+collaborative perception framework based on digital seman tic
+communication, designed to realize semantic-level transm ission
+efﬁciency within practical digital communication systems . Specif-
+ically, we develop a semantic compression codec that extrac ts
+and compresses task-oriented semantic features while pres erving
+downstream perception accuracy. Building on this, we propo se
+a novel semantic analog-to-digital converter that convert s these
+continuous semantic features into a discrete bitstream, en suring
+integration with existing digital communication pipeline s. Fur-
+thermore, we develop an uncertainty-aware network (UAN) th at
+assesses the reliability of each received feature and disca rds those
+corrupted by decoding failures, thereby mitigating the cli ff effect
+of conventional channel coding schemes under low signal-to -noise
+ratio (SNR) conditions. Extensive experiments demonstrate that
+CoDS signiﬁcantly outperforms existing semantic communic ation
+and traditional digital communication schemes, achieving state-
+of-the-art perception performance while ensuring compati bility
+with practical digital V2X systems.
+Index Terms—Semantic communication, autonomous driving,
+collaborative perception, vehicle-to-vehicle communica tion, 3D
+object detection.
+I. I NTRODUCTION
+Autonomous driving is a foundational component of modern
+intelligent transportation systems, and its success criti cally
+relies on accurate and robust environmental perception [ 1]–
+[3]. This perception capability enables essential downstrea m
+tasks such as object detection [ 4], tracking [ 5], and motion
+prediction [6], which serve as the foundation for safe and efﬁ-
+cient vehicle planning and control [ 7]. Conventionally, vehicles
+achieve environmental awareness through a stand-alone per -
+ception approach, relying exclusively on their own on-boar d
+sensors like cameras, millimeter-wave radar, and particul arly
+light detection and ranging (LiDAR) devices, which provide
+precise 3D spatial information [
+8], [9]. However, these systems
+Jipeng Gan, Le Liang, Hua Zhang and Shi Jin are with the Nation al Mobile
+Communications Research Laboratory, Southeast Universit y, Nanjing 210096,
+China (e-mail: {jpgan, lliang, huazhang, jinshi }@seu.edu.cn). Le Liang is also
+with the Purple Mountain Laboratories, Nanjing 211111, Chi na.
+Chongtao Guo is with the College of Electronics and Informat ion
+Engineering, Shenzhen University, Shenzhen 518060, China (e-mail: ct-
+guo@szu.edu.cn).
+!"##$%$"&' 
+()"*+,-$.#, 
+!"##/0"1/2$&) 
+!3 + 
+4,1.,52$"& 
+6..#7%$"& 6..#78,8* 
++,-$.#, 
+4,1.,52$"& 
+9&:"1;/2$"& 
+Fig. 1. An illustrative example of collaborative perceptio n scenario.
+are constrained by inherent limitations, including a restr icted
+ﬁeld of view and critical blind spots caused by occlusions fr om
+buildings or other vehicles, which may compromise safety.
+To overcome these challenges, collaborative perception ha s
+emerged as a promising paradigm. By leveraging vehicle-to-
+everything (V2X) communication, connected automated vehi -
+cles (CA Vs) can share and fuse sensory data from multiple
+viewpoints to generate comprehensive scene representatio ns
+[
+10]–[12]. As shown in Fig. 1, sharing perception data from a
+collaborating CA V allows the ego vehicle to overcome line-o f-
+sight occlusions. This enables the detection of hidden obje cts
+and planning of safe trajectories, directly enhancing its s afety
+and robustness.
+Currently, three primary strategies have been developed
+to implement collaborative perception: early, intermedia te,
+and late collaboration, each with distinct communication a nd
+computational resource requirements [ 13]. Speciﬁcally, early
+collaboration involves sharing raw sensor data, such as LiD AR
+point clouds, which preserves complete scene information
+and thus offers the highest potential perception ﬁdelity [
+14].
+However, its prohibitively high bandwidth consumption may
+render it impractical for real-time applications. Convers ely,
+late collaboration minimizes communication overhead by
+transmitting only ﬁnal object-level detections [
+15]. However,
+such efﬁciency comes at the cost of discarding rich contextu al
+information, which limits perception performance in compl ex
+arXiv:2512.22513v1  [eess.SP]  27 Dec 2025
+2
+scenarios. As a balanced solution, intermediate collabora tion
+compresses raw sensor data into compact feature representa -
+tions for transmission [ 16]. This approach signiﬁcantly reduces
+transmission overhead compared to early collaboration whi le
+maintaining comparable perception performance, thus achi ev-
+ing an effective balance between accuracy and communica-
+tion efﬁciency. Consequently, intermediate collaboratio n has
+become a dominant paradigm for communication in resource-
+constrained collaborative perception systems.
+Within the intermediate collaboration paradigm, signiﬁca nt
+research has focused on optimizing the balance between
+perception performance and communication overhead [
+17].
+For instance, several studies have concentrated on intelli gent
+information selection schemes to determine what, when, and
+to whom to communicate [
+18]–[21], as well as MAC-layer
+optimization for efﬁcient resource allocation to ensure re liable
+V2X communication [ 22]–[24]. Despite these advances, a
+critical limitation of most existing collaborative percep tion
+frameworks is the implicit assumption of an ideal, error-
+free communication channel. This critical oversight divor ces
+the perception schemes from the physical reality of wireles s
+transmission, where inevitable data corruption can render a
+CA V’s perception dangerously incomplete or incorrect, di-
+rectly compromising safety.
+To address this limitation, recent research has begun to
+integrate semantic communication into collaborative perc ep-
+tion frameworks [
+25]–[29]. The dominant approach in these
+pioneering works is analog semantic communication (ASC),
+which is based on an end-to-end joint source-channel coding
+methodology. By directly mapping perception features to ch an-
+nel symbols, these methods demonstrated a profound potenti al
+for optimizing the communication system directly towards t he
+ﬁnal perception performance (e.g., object detection preci sion),
+rather than for traditional metrics like bit-level ﬁdelity . For
+instance, the seminal work in [
+25] introduced a task-oriented
+semantic codec, demonstrating transmission efﬁciency and
+resilience to noise under low signal-to-noise ratio (SNR)
+conditions. Building on this, subsequent efforts have enha nced
+efﬁciency and robustness through more advanced techniques ,
+such as Transformer-based semantic codecs [
+26], masked
+autoencoder pre-training [ 27], and semantic-aware hybrid au-
+tomatic repeat request (HARQ) protocols [ 28]. Collectively,
+these advances have established semantic communication as a
+new paradigm capable of achieving high bandwidth efﬁciency
+and perception performance.
+While ASC has demonstrated signiﬁcant potential, its un-
+derlying design philosophy creates a critical implementat ion
+gap with the standardized, modular architecture of real-wo rld
+vehicular networks. Modern systems like cellular-V2X (C-
+V2X) are built on a robust digital pipeline comprising discr ete
+processes for channel coding (e.g., low-density parity-ch eck
+(LDPC) codes), modulation, etc.
+By circumventing this infras-
+tructure, the end-to-end analog design of the ASC can achiev e
+optimal theoretical performance. However, this departure from
+the digital pipeline presents signiﬁcant deployment chall enges
+and results in the forfeiture of mature, robust error correc tion
+capabilities inherent in standardized channel coding sche mes.
+To bridge the gap between theoretical potential and practic al
+deployment, digital semantic communication has emerged as
+a compelling solution [
+30], [ 31]. Unlike its analog coun-
+terpart, digital semantic communication discretizes sema ntic
+information into compact bitstreams. This approach retain s the
+core beneﬁt of semantic-level transmission efﬁciency whil e
+ensuring full compatibility with existing digital communi -
+cation pipelines. Consequently, digital semantic communi ca-
+tion can leverage the powerful error-correction capabilit ies
+of established channel codes and integrate with MAC-layer
+strategies for scalable multi-agent resource management. Thus,
+digital semantic communication provides a practical and ro bust
+pathway toward deploying intelligent, efﬁcient, and scala ble
+V2X collaborative perception systems.
+In response, this paper proposes a novel intermediate col-
+laborative perception framework based on digital semantic
+communication (CoDS). To the best of our knowledge, this
+work represents the ﬁrst semantic communication system
+speciﬁcally designed for compatibility with digital commu -
+nication networks for collaborative perception. Particul arly,
+we ﬁrst develop a semantic compression codec that extracts
+key semantic features to reduce the bandwidth requirements .
+Building on this, we propose a semantic analog-to-digital
+converter that maps continuous-valued semantic features i nto
+discrete bitstreams, thereby enabling integration with ex isting
+digital communication systems. Furthermore, we develop an
+uncertainty-aware network (UAN) to mitigate the performan ce
+degradation of conventional channel coding schemes under
+low SNR conditions. The main contributions of this work are
+summarized as follows:
+• We propose a digital semantic communication framework
+for collaborative perception. This framework is designed
+to be fully compatible with modern digital communi-
+cation architectures and enables efﬁcient semantic-level
+information sharing between collaborative CA Vs.
+• We develop a semantic compression codec, constructed
+from cascaded down/up-sampling blocks, that is end-to-
+end optimized for the perception task. The codec learns to
+extract and compress only the most task-oriented seman-
+tic features, achieving signiﬁcant bandwidth reduction
+while preserving downstream perception accuracy.
+• We design a semantic analog-to-digital converter for
+bidirectional conversion between continuous semantic
+features and discrete bitstreams. This converter utilizes
+a decoupling layer to project features into independent
+subspaces, which are then quantized by mapping to
+the nearest entry in corresponding semantic embedding
+spaces and encoded as discrete bitstreams.
+• We develop a UAN that leverages soft information from
+the channel decoder and semantic similarity between se-
+mantic features to assess the post-transmission reliabili ty
+of received semantic features. This allows the system to
+selectively retain or discard received semantic features,
+mitigating the impact of performance collapse in low
+SNR environments.
+The remainder of this paper is organized as follows. Section
+II presents the system model of the proposed CoDS frame-
+work. Section III details the proposed semantic compressio n
+3
+!"#$%$&&'()*++$% 
+!"#$%&'()* 
+!!
++,&$# *-./)*$%&'()* 
+!!
+!"#$%&"' 
+()$&#*$+,- 
+!"#$%&"' 
+()$&#*$+,- 
+!"#$%&" 
+!%.+,- 
+/01"*$' 
+2"$"*$+,- 
+2+.*&"$"34-#5,6' 
+7,-8"&.+,- 
+9":#-$+*' 
+(-*,;"& 
+!"#$%&"' 
+9"5"*$+,- 
+"! #!
+9":#-$+*' 
+2"*,;"& 
+0*1*/1.&2 
+3*4()14 
+0.,.15)$!&66(2./51.&2$%&'()* 
+<-*"&$#+-$=' 
+4>#&" 
+7**8$&9$0.4/59': 
+$"#$ 
+%!
+!"#" !!!"!$%&'( 
+,"-".*%'/+012$# 
+)*+,,-.$ 
+/,012-3 
+4125.+'&1, 
+9?#&";'9":#-$+*' 
+4-#5,63$,32+.*&"$"'7,-8"&$"& 
+"& %
+'(
+"% #(! %(!
+&
+)!
+)& !
+%(!
+*'
+,"-".*%',$012$# 
+!"#" !!!"!$%&'( 
+)*+,,-.$ 
+6-012-3 
++
+,
+4-#5,632+.*&"$"' 
+7,-8"&.+,- 
+6-7125.+'&1, 
+Fig. 2. An illustration of the proposed CoDS framework.
+codec, semantic analog-to-digital converter, and UAN, alo ng
+with the corresponding loss function design and training st rate-
+gies. Section IV provides simulation results to demonstrat e
+the advantages of the proposed framework. Finally, Section V
+concludes the paper.
+II. S YSTEM MODEL
+This section details the proposed collaborative perceptio n
+framework based on digital semantic communication. As illu s-
+trated in Fig.
+2, we consider a representative vehicle-to-vehicle
+(V2V) scenario in which a single collaborating CA V transmit s
+its LiDAR-based perception information to an ego vehicle
+to enable intermediate collaboration. The overall archite cture
+comprises three primary components: the CA V module, the
+ego vehicle module, and the digital communication module.
+Speciﬁcally, the CA V module processes its raw LiDAR point
+cloud and encodes it into a compact semantic feature represe n-
+tation for transmission. Subsequently, the ego vehicle mod ule
+fuses the received semantic features with its own local sens or
+data to perform a 3D object detection task. Meanwhile, the
+digital communication module is responsible for transmitt ing
+semantic features from the CA V to the ego vehicle over a
+wireless channel. This process involves quantization, cha nnel
+coding, and modulation at the transmitter, followed by demo d-
+ulation, decoding, and reliability assessment at the recei ver.
+A. CA V Module
+Raw LiDAR point clouds are usually unstructured and
+sparse, making them unsuitable for direct processing by dow n-
+stream perception tasks. To address this, the CA V ﬁrst employs
+a feature extraction network to transform its raw LiDAR
+point cloud, Xc, into a bird’s-eye view (BEV) feature map,
+expressed as
+Mc = Fα(Xc), (1)
+where Mc ∈ RH×W ×C denotes the BEV feature map, with
+spatial dimensions H × W and C feature channels. Fα(·)
+represents the feature extraction network, parameterized by
+α, which is adapted from the backbone module of PointPil-
+lars [
+32].
+Given that the CA V’s feature map, Mc, is typically sparse
+in the spatial dimension, transmitting the full feature map is
+inefﬁcient. Therefore, we employ a feature selection netwo rk
+Fβ(·), parameterized by β, to identify important perception
+features for transmission, thereby reducing communicatio n
+overhead [ 20]. Speciﬁcally, the network Fβ(·) processes the
+CA V’s feature map Mc to generate a binary selection mask
+Csel ∈ { 0, 1}H×W , where a value of 1 indicates a spatial
+location selected for transmission and 0 indicates that the
+location is discarded. This operation is formulated as
+Csel = Fβ(Mc). (2)
+The mask, Csel, is then broadcast along the channel dimen-
+sion and applied to the feature map via element-wise multi-
+plication. The remaining feature vectors are gathered into a
+feature matrix, Fc ∈ RK×C, which contains only the selected
+features. Here, K denotes the number of selected features,
+equal to the ℓ1 norm, || · ||1, of the mask, i.e., K = ||Csel||1.
+This selection and collection process is abstractly repres ented
+as
+Fc = Gather(Mc, Csel), (3)
+where Gather (·, ·) represents the operation of masking the
+feature map and collecting the selected features. Moreover , we
+deﬁne the spatial compression ratio as the fraction of featu res
+selected for transmission, given by γs = (H × W )/K.
+To further mitigate communication overhead along the
+channel dimension, the CA V employs a semantic compression
+encoder Fθ(·), parameterized by θ, to extract key semantic
+information from the selected feature matrix Fc, thereby
+compressing it into a compact semantic feature representat ion,
+given by
+Zc = Fθ(Fc), (4)
+where Zc ∈ RK×C ′
+represents the semantic features, and C′
+denotes the number of channels after compression, with C′ <
+4
+C. The channel compression ratio is deﬁned as the ratio of
+the number of input to output channels, i.e., γc = C/C ′.
+B. Ego V ehicle Module
+At the ego vehicle side, the received semantic features,
+denoted as ˆZ′
+c, are decompressed back to the original chan-
+nel dimension using a semantic compression decoder Fφ(·),
+parameterized by φ. This decompression process is expressed
+as
+ˆFc = Fφ(ˆZ′
+c), (5)
+where ˆFc represents the decompressed CA V feature matrix.
+Then, the ego vehicle fuses its local feature map Me with
+the reconstructed features ˆFc using an attention-based fusion
+function fµ(·) [
+33]. This fusion process aggregates information
+from both the ego and CA V to yield a more comprehensive
+scene representation, written as
+ˆMe = fµ(Me, ˆFc), (6)
+where ˆMe represents the fused feature map. Finally, the fused
+feature map ˆMe is processed by a detection network, Fκ(·),
+to yield the ﬁnal perception result, ˆY. The detection process
+is given by
+ˆY = Fκ( ˆMe). (7)
+The network Fκ(·), parameterized by κ, is composed of two
+parallel heads: a regression head and a classiﬁcation head.
+The regression head estimates the seven parameters of each
+3D bounding box, including its center (x, y, z), dimensions
+(w, l, h), and yaw angle θ. Simultaneously, the classiﬁcation
+head determines a conﬁdence score for each predicted bound-
+ing box, representing its object category likelihood.
+C. Digital Communication Module
+To facilitate the transmission of semantic features from th e
+CA V to the ego vehicle, a digital communication module is
+designed, consisting of a transmitter, a receiver, and a wir eless
+channel.
+At the transmitter, for compatibility with the digital comm u-
+nication framework, the continuous-valued semantic featu res
+Zc need to be converted into discrete bitstreams. This is
+accomplished using a semantic analog-to-digital converte r
+Fω(·), parameterized by ω, expressed as
+Oc = Fω(Zc), (8)
+where Oc ∈ {0, 1}K×q is the discrete bitstream and q denotes
+the number of quantization bits for each semantic feature. T he
+bitstream is then processed by a digital encoder that applie s
+channel coding and quadrature amplitude modulation (QAM)
+to produce a sequence of complex-valued channel symbols,
+Sc ∈ CD, where D denotes the number of channel symbols.
+After encoding, the symbols Sc are transmitted to the ego
+vehicle via a noisy physical channel. The channel model is
+formulated as
+ˆSc = h ⊙ Sc + n, (9)
+where ⊙ denotes element-wise multiplication, ˆSc ∈ CD
+denotes the received symbols, h ∈ CD represents the channel
+gain coefﬁcients, and n ∈ CD is the additive white Gaussian
+noise (AWGN). The noise n is assumed to consist of inde-
+pendent and identically distributed (i.i.d.) samples foll owing
+a circularly symmetric complex Gaussian distribution, i.e .,
+n ∼ CN (0, σ2I), where σ2 is the noise variance and I is
+the identity matrix.
+At the receiver, the received symbols ˆSc are processed by a
+digital decoder to reconstruct the original bitstream. The digital
+decoder performs both demodulation and channel decoding,
+producing a hard-decision bitstream ˆOc ∈ {0, 1}K×q and the
+corresponding soft-decision information Lr ∈ RK×q, which
+represents the log-likelihood ratio (LLR) matrix. Subsequ ently,
+the received bitstream ˆOc is reconstructed into semantic
+features, ˆZc ∈ RK×C ′
+, through the inverse semantic analog-
+to-digital converter operation, described as
+ˆZc = F −1
+ω ( ˆOc), (10)
+where F −1
+ω (·) denotes the inverse function corresponding to
+the semantic analog-to-digital converter, Fω(·).
+However, the reconstructed semantic features, ˆZc, may
+contain errors due to channel noise, resulting in a degraded
+perception quality. To mitigate this, the ego vehicle emplo ys
+a UAN, Fϕ(·) parameterized by ϕ, to assess the reliability
+of the received semantic features. Speciﬁcally, the networ k
+processes the LLR matrix, Lr, and outputs conﬁdence scores,
+p ∈ [0, 1]K, for each semantic feature, as follows
+p = Fϕ(Lr), (11)
+where each element in p represents the conﬁdence that the
+corresponding semantic feature has been decoded correctly .
+Subsequently, the ego vehicle employs a gating mechanism to
+selectively ﬁlter the received semantic features based on t heir
+conﬁdence scores, generating a binary gating mask, Cunc ∈
+{0, 1}K. Each semantic feature is retained if its conﬁdence
+score exceeds a predeﬁned threshold, τthe, indicating higher
+reliability in the decoded information. The gating operati on is
+formulated as
+Cunc = I(p > τthe), (12)
+where I(·) denotes the element-wise indicator function that
+outputs 1 for the entries with the corresponding condition s at-
+isﬁed, and 0 otherwise. The binary gating mask, Cunc, is then
+applied to ﬁlter unreliable components out of the reconstru cted
+semantic features, ˆZc. This is achieved by broadcasting the
+mask along the channel dimension and applying element-
+wise multiplication, which yields the ﬁltered semantic fea ture
+representation as follows
+ˆZ′
+c = Gather(ˆZc, Cunc), (13)
+where ˆZ′
+c ∈ RK ′×C ′
+contains only high-conﬁdence semantic
+features, with K ′ denoting the number of retained semantic
+features.
+III. P ROPOSED CODS F RAMEWORK
+In this section, we ﬁrst introduce the semantic compression
+codec and the semantic analog-to-digital converter, follo wed
+by their loss functions and the corresponding training stra tegy.
+The UAN and its associated training algorithm are then
+described in detail.
+5
+!"#$%&'"()" 
+*'+,-) 
+./ 
+*'+,-) 
+0(1)++2$3 
+4#5)" 
+42$)#"6 
+4#5)" 
+.'$7 
+4#5)" 
+!!"# 8'9$%#(:-2$3 ;-'<= $"%&'
+.'$7 
+4#5)" 
+>:%#(:-2$3 ;-'<= 
+!"#$%&'"()" 
+*'+,-) 
+./ 
+*'+,-) 
+.'$7 
+4#5)" 
+!!#
+42$)#"6 
+4#5)" 
+$#%&'
+!!
+!"!
+#!
+()$%
+Fig. 3. Network structure of our proposed semantic compress ion codec.
+A. Semantic Compression Codec
+This subsection introduces the proposed semantic com-
+pression codec, denoted as Fθ(·) in (4) and Fφ(·) in (5),
+with its architecture illustrated in Fig. 3. The feature matrix,
+Fc, contains signiﬁcant redundancy along the channel dimen-
+sion, leading to excessive communication overhead. To this
+end, we propose a semantic compression codec that extracts
+perception-relevant information into compact semantic fe ature
+representations, thereby reducing transmission overhead while
+preserving perception performance. The codec comprises a
+semantic compression encoder at the CA V and a corresponding
+semantic compression decoder at the ego vehicle, which work
+in tandem to compress and reconstruct the features.
+At the CA V , the semantic compression encoder is pri-
+marily composed of a stack of Nb downsampling blocks,
+where each block achieves a two-fold channel compression
+ratio. Consequently, the number of blocks is determined by
+Nb = log 2(γc). Each block consists of three key components:
+a Transformer module, a channel attention (CA) module, and
+a linear layer [
+26]. This hierarchical architecture enables the
+encoder to progressively extract and compress the most sali ent
+features through multiple stages of reﬁnement. Speciﬁcall y,
+within each block, the Transformer module captures global
+contextual information by modeling long-range dependenci es
+within the features. The CA module then processes the Trans-
+former output, dynamically computing channel-wise scalin g
+and offset parameters to selectively enhance the most infor -
+mative channels. Finally, the linear layer performs dimens ion-
+ality reduction by compressing the channel dimension of the
+attention-reﬁned features, thereby achieving the desired level
+of compression.
+Among these components, the CA module ﬁrst aggregates
+spatial information through parallel average-pooling and max-
+pooling operations applied to the input features, f . The re-
+sulting pooled features are processed by linear layers and
+concatenated to form an aggregated spatial context vector, w.
+This context vector is then fed into two independent linear
+layers to generate a channel-wise scaling vector, Scale (w), and
+an offset vector, Offset (w). The module applies these vectors
+in a feature-speciﬁc afﬁne transformation, formulated as
+f ′ = Scale(w) ⊙ f + Offset(w), (14)
+where f ′ represents the attention-reﬁned features. At the
+ego vehicle, the semantic compression decoder mirrors the
+encoder’s architecture, employing the same number of upsam -
+pling blocks for symmetric reconstruction. This design all ows
+the decoder to progressively restore the features from thei r
+compressed representation to their original dimensionali ty,
+ensuring compatibility with downstream fusion and percept ion
+tasks.
+B. Semantic Analog-to-Digital Converter
+In this subsection, we present the semantic analog-to-digi tal
+converter, denoted as Fω(·) in (8), which enables bidirec-
+tional transformation between continuous semantic featur es
+and discrete bitstreams compatible with digital communica tion
+systems.
+The architecture of the semantic analog-to-digital conver ter
+is illustrated in Fig.
+4. The converter contains two primary
+trainable components: a feature decoupling layer, denoted as
+W, and a set of M distinct semantic embedding spaces, collec-
+tively denoted as E = {E1, . . . ,EM }. Each embedding space
+Em = {em,1, . . . ,em,N } contains N semantic embedding
+vectors, with em,n ∈ RL. To ensure coherent semantic repre-
+sentation, these embedding spaces are maintained consiste ntly
+between the CA V and the ego vehicle.
+At the transmitter, we partition the k-th input semantic fea-
+ture vector, denoted as zk ∈ RC ′
+, into multiple sub-vectors to
+achieve a ﬁner-grained representation of the semantic feat ures.
+However, directly partitioning this vector is not feasible , as its
+components are inherently correlated. To address this, we ﬁ rst
+pass the vector through a feature decoupling layer to mitiga te
+these correlations. The resulting decorrelated semantic f eature
+vector is then partitioned into M sub-vectors, forming the
+set {z(1)
+k , . . . ,z(M)
+k }, where the length of each sub-vector,
+L = C′/M, matches that of the embedding vectors. Each
+sub-vector z(m)
+k is subsequently quantized by mapping it to
+the nearest embedding vector in its corresponding embeddin g
+space Em. This process yields a set of M integer indices,
+which are concatenated and encoded into a binary bitstream
+for transmission.
+At the receiver, the inverse operation is performed. The
+received bitstream is ﬁrst decoded to recover the M integer
+indices. Each recovered index serves as a pointer to retriev e
+the corresponding embedding vector from the locally synchr o-
+nized semantic embedding space. Finally, these M retrieved
+vectors are concatenated in their original order to reconst ruct
+the complete semantic feature vector.
+Speciﬁcally, to achieve a ﬁner-grained representation, a
+strategy is to partition a feature vector into multiple sub-
+vectors. This approach can exponentially expand the model’ s
+expressive capacity; by selecting one of N embedding vec-
+tors for each of the M sub-vectors, a total of N M unique
+composite representations can be formed. As a result, more
+expressive and detailed semantic representations can be co n-
+structed by partitioning the feature vector. A straightfor ward
+implementation of this strategy is to directly partition th e input
+semantic feature vector, zk. However, the effectiveness of this
+direct partitioning scheme relies on the crucial assumptio n
+6
+!"#$%&" '"($)&* 
++ "($)& 
+,%#-$./#$.)- 
+0#&$.$.)- 
+!"#$%&" 
+1"()%02" 
+!!!
+!"#$%&"34%56+ "($)&* 
+78 
+9: 
+;< 
+=-$">"&3=-?.("* 
+9@@93 !!!"99@9 
+A.$*$&"#B*3 #!
+!"#$%&'(()" 
+$!
++ "($)& 
+1"C%#-$./#$.)- 
+!"#$%&"34%56+ "($)&* =-$">"&3=-?.("* 
+9@@93 !!!"99@9 
+A.$*$&"#B*3 #% !*)+)',)" 
+$&!
+()-(#$"-#$.)- 
+D"B#.-.->31.>.$#23 
+E)BB%-.(#$.)-3F)?%2" 
+!!!
+-)&#$('+./&0)11'$2.-3#+)% 
+!! !" !#!!!
+!!!
+78 
+9: 
+;< !!!
+Fig. 4. Network structure of our proposed semantic analog-t o-digital converter.
+that feature dimensions can be organized into semantically
+independent sub-vectors. This assumption is fundamentall y
+inconsistent with the nature of features learned by the sema ntic
+compression encoder, which are highly entangled, meaning
+that semantic concepts are coupled and distributed across t he
+entire feature vector. Consequently, naive partitioning o f such
+features creates sub-vectors that lack complete or meaning ful
+semantic content, leading to unstable training and signiﬁc antly
+degraded model performance.
+To resolve this issue, we introduce a feature decoupling
+layer that operates prior to the partitioning step. This lay er is
+designed to transform the entangled features into a represe nta-
+tion in which semantic concepts are disentangled, making th em
+suitable for partitioning. Speciﬁcally, the layer learns a linear
+transformation matrix W ∈ RC ′×C ′
+to map the input semantic
+feature zk to a decoupled representation z′
+k, expressed as
+z′
+k = Wzk. (15)
+To ensure the stability and effectiveness of this transform a-
+tion, the matrix W is implemented without a bias term and is
+initialized as an identity matrix, i.e., Winit = I. This initializa-
+tion allows the layer to begin as an identity mapping and lear ns
+a pure basis transformation, which gradually disentangles the
+feature space during training.
+Following the feature decoupling, the vector z′
+k is parti-
+tioned into M sub-vectors. Each sub-vector, z(m)
+k , is then in-
+dependently quantized by its corresponding embedding spac e,
+Em.
+Speciﬁcally, for each sub-vector, we identify the index
+Ik,m of the most semantically similar embedding vector from
+the corresponding embedding space. This is achieved by
+maximizing their cosine similarity, as expressed by
+Ik,m = arg max
+n∈{1,...,N }
+cosine(z(m)
+k , em,n), (16)
+where the cosine similarity function, cosine (·, ·), is deﬁned as
+the normalized inner product, formulated as
+cosine(a, b) = a⊤b
+∥a∥2∥b∥2
+, (17)
+where ∥ · ∥ 2 denotes the Euclidean norm. The resulting set
+of integer indices {Ik,1, Ik,2, . . . , Ik,M } for the k-th input
+semantic feature vector zk is subsequently encoded into a
+binary bitstream Oc, and fed into the digital encoder.
+The semantic embedding space is dynamically optimized
+throughout the training process. As part of the network’s en d-
+to-end training, the active embedding vectors—those selec ted
+during the quantization step—are updated via gradient de-
+scent [
+34]. This optimization adjusts each selected embedding
+vector to move closer to the feature sub-vector it represent s,
+thereby minimizing the distance between them. Consequentl y,
+the embedding vectors are reﬁned in the feature space, enhan c-
+ing their ability to capture the underlying semantic struct ure
+of the data. However, a notable limitation of this gradient-
+based approach is the potential for low embedding vector
+utilization. In practice, only a small subset of vectors may be
+consistently selected and updated, leaving a signiﬁcant po rtion
+of the embedding space dormant. This phenomenon severely
+constrains the model’s expressive capacity, limiting its a bility
+to represent diverse and complex semantic structures prese nt
+in the input data. To overcome this limitation, we adopt a
+clustering-based vector quantization method. In addition to up-
+dating the embedding vectors via gradient descent, this met hod
+continuously monitors embedding vector utilization durin g
+training and strategically optimizes underutilized vecto rs to
+enhance overall efﬁciency [
+35]. The detailed reinitialization
+process is described as follows.
+First, the utilization rate of each semantic embedding vect or
+is tracked across batches using an exponential moving avera ge.
+To simplify the presentation, we denote the n-th vector in any
+semantic embedding space as en. The utilization rate of the
+n-th embedding vector, en, at batch t is updated as
+R(t)
+n = ρR(t−1)
+n + (1 − ρ) r(t)
+n
+B × K , (18)
+where R(t)
+n and R(t−1)
+n are the utilization rates at the current
+batch t and the previous batch t − 1, respectively. The term
+r(t)
+n denotes the number of times en is selected in the current
+7
+batch. This count is normalized by the product of the batch
+size, B, and the number of semantic features per sample, K.
+The hyperparameter ρ ∈ [0, 1) controls the decay rate of the
+moving average.
+Next, an anchor-based update mechanism optimizes the
+embedding vectors. At each update step, a set of V anchor
+vectors, ˜Z(t) = {˜z(t)
+1 , ˜z(t)
+2 , . . . ,˜z(t)
+V }, is randomly sampled
+from semantic features Zc. For each embedding vector en
+that requires reinitialization, a corresponding anchor ve ctor,
+˜z(t)
+v , is probabilistically selected from ˜Z(t). The probability of
+selecting anchor ˜z(t)
+v to update en is computed using a softmax
+function over the cosine similarity, D(t)
+n,v = cosine(˜z(t)
+v , en),
+as follows
+p(t)
+n,v =
+exp
+(
+−D(t)
+n,v
+)
+∑ V
+v=1 exp
+(
+−D(t)
+n,v
+) . (19)
+Finally, the embedding vector en is updated by optimizing
+it as a weighted average of its previous state and the selecte d
+anchor vector, as follows
+e(t)
+n = (1 − w(t)
+n )e(t−1)
+n + w(t)
+n ˜z(t)
+v . (20)
+where w(t)
+n is the update weight, determined by the vector’s
+utilization rate, expressed as
+w(t)
+n = exp
+(
+− R(t)
+n × N × 10
+1 − ρ − ǫ
+)
+, (21)
+where ǫ is a small constant for numerical stability. This formu-
+lation ensures that embedding vectors with low utilization rates
+receive update weights approaching 1, enabling signiﬁcant
+updates, while frequently used vectors receive weights clo se
+to 0, thereby preserving their learned positions.
+C. Training Strategy
+We train the proposed model using a four-stage strategy for
+stable convergence and desirable performance. The process be-
+gins with the independent training of the semantic compress ion
+codec on the perception task. This is followed by the separat e
+training of the analog-to-digital converter, which learns to
+process the features generated by the frozen, pre-trained c odec.
+With these modules pre-trained, the entire network undergo es
+joint end-to-end training. The ﬁnal stage is the task-orien ted
+ﬁne-tuning to optimize performance on the downstream task.
+The ﬁrst stage is dedicated to optimizing the semantic
+compression codec, Fθ(·) and Fφ(·), while all other network
+components are frozen, with their weights initialized from
+a publicly available pre-trained implementation. During t his
+stage, the model is trained in an end-to-end manner, with
+the digital communication module bypassed. The input point
+cloud data is processed through the entire perception pipel ine:
+from feature extraction and selection, through the semanti c
+compression encoder and decoder, and ﬁnally to the fusion an d
+detection network. The loss function at this stage is design ed
+for the 3D object detection task, aiming to enhance detectio n
+accuracy. Following the PointPillars [
+32], the loss function
+combines classiﬁcation and regression terms, and is formul ated
+as
+Lstage1 = Lcls( ˆY, Y) + η · Lreg( ˆY, Y), (22)
+where Lcls denotes focal loss [ 36] for classiﬁcation, Lreg
+represents smooth ℓ1 loss for regression, η is a weighting
+factor, and Y denotes the ground-truth detection results.
+The second stage focuses exclusively on optimizing the
+semantic analog-to-digital converter, Fω(·). In this stage, the
+converter is inserted between the pre-trained semantic com -
+pression encoder and decoder derived in the ﬁrst stage, whil e
+all other network components remain frozen. The objective
+of this stage is to train the converter to perform high-ﬁdeli ty
+quantization and reconstruction of the semantic features, Zc.
+To this end, the optimization is guided by a reconstruction
+loss, deﬁned as the mean squared error (MSE) between the
+original semantic features, Zc, and the reconstructed features,
+ˆZc, expressed as
+Lstage2 = Lmse(ˆZc, Zc), (23)
+where Lmse(·) denotes the MSE loss. To enable gradient
+ﬂow through the non-differentiable quantization operatio ns in
+the semantic analog-to-digital converter, the straight-t hrough
+estimator (STE) is employed to approximate gradients durin g
+backpropagation [
+37].
+In the third stage, the entire network is jointly trained in
+an end-to-end manner, including Fα(·), Fβ(·), Fθ(·), Fφ(·),
+Fκ(·), and Fω(·). The training loss combines the task-oriented
+detection loss from the ﬁrst stage and the reconstruction lo ss
+from the second stage, deﬁned as
+Lstage3 = Lcls( ˆY, Y)+ η ·L reg( ˆY, Y)+ λ·L mse(ˆZc, Zc), (24)
+where λ is a hyperparameter that balances the detection and
+reconstruction losses.
+The ﬁnal stage consists of end-to-end ﬁne-tuning to align
+the decoding and perception pipeline with the object detect ion
+task. In this stage, the semantic compression decoder Fφ(·),
+the semantic analog-to-digital converter Fω(·) (excluding its
+feature decoupling layer W), and the detection network Fκ(·)
+are jointly optimized, while other network components rema in
+frozen. The optimization is driven exclusively by the task-
+oriented detection loss. This process reﬁnes the represent ations
+learned by the converter and decoder, ensuring they are max-
+imally informative for the ﬁnal perception task. The object ive
+function is therefore identical to that used in the ﬁrst stag e,
+and is deﬁned as
+Lstage4 = Lcls( ˆY, Y) + η · Lreg( ˆY, Y). (25)
+D. UAN Design and Loss Function
+This subsection presents the design of the UAN and its cor-
+responding loss function, developed to mitigate performan ce
+collapse in digital communication systems operating at low
+SNR.
+In digital communication systems, standard hard-decision
+channel decoding is inherently fragile for semantic repres enta-
+tion. A single bit error in the transmitted binary represent ation
+of an embedding vector can cause the system to select another
+semantically distant vector from the embedding space, seve rely
+distorting the reconstructed meaning. This leads to the cli ff
+effect, a catastrophic collapse in performance once channe l
+noise exceeds a critical threshold.
+8
+!!!
+!"#$%&'()*+ 
+,--*&-,'.)%/%&'()*+ 
+!!
+"!
+!"#$%$%&' 
+Fig. 5. Network structure of our proposed UAN.
+To address this challenge, we introduce two key strategies.
+First, to mitigate the impact of bit errors, we employ a Gray
+code design for the semantic embedding space. This involves
+projecting high-dimensional embedding vectors onto a 2D
+plane using an averaging operation and applying a Gray code
+to their spatial arrangement. This structure ensures that a
+single-bit error in a transmitted index yields a spatially p roxi-
+mate and thus semantically similar embedding vector, there by
+minimizing distortion. Second, to address the unreliabili ty of
+features decoded under low SNR conditions, we leverage the
+principle that erroneous features degrade overall percept ion
+performance more severely than missing ones. Speciﬁcally, we
+propose the UAN to assess the reliability of each reconstruc ted
+semantic feature ˆ zk and output a corresponding conﬁdence
+score pk. Using these conﬁdence scores, the system can
+selectively discard features deemed unreliable, thereby p re-
+venting error propagation and ensuring graceful performan ce
+degradation under low-SNR conditions.
+As illustrated in Fig.
+5, the UAN architecture is organized
+hierarchically to align with the structure of the multi-sem antic
+embedding space. The network input is the LLR vector, de-
+noted as lk, corresponding to the k-th reconstructed semantic
+feature, denoted as ˆ zk. The LLR vector is ﬁrst partitioned
+into M groups and independently processed by an identical
+sub-network, composed of several linear layers, to produce
+an intermediate reliability score. These M intermediate scores
+are then fed into a ﬁnal aggregation network, which generate s
+the conﬁdence score pk for the k-th reconstructed semantic
+feature.
+A straightforward approach to training the UAN is to frame
+the task as a binary classiﬁcation problem, predicting the
+correctness of a decoded feature using the binary cross-ent ropy
+(BCE) loss [
+38]. However, BCE assigns equal penalties to
+all decoding errors, which reduces efﬁciency in our setting
+since different errors have markedly different semantic im pacts
+under the adopted Gray coding scheme. For example, a single-
+bit error causing a shift to an adjacent index results in far
+less semantic damage than a multi-bit error. To this end, we
+propose a semantic-weighted binary cross-entropy (SW-BCE )
+loss. This loss function modulates the standard BCE penalty
+for each incorrectly decoded feature based on its associate d
+semantic error. This trains the UAN to be more sensitive to
+the most semantically destructive errors, rather than trea ting
+all failures equally.
+Algorithm 1 Training the UAN with the SW-BCE Loss
+1: Input: Training dataset D; hyperparameter α.
+2: Initialize: Load and freeze the pre-trained network pa-
+rameters ω; initialize UAN parameters ϕ randomly.
+3: while not converged do
+4: Sample a mini-batch of {zk}K
+k=1 from D.
+5: for k = 1, . . . , K do
+6: Compute LLR vector lk using (8)-(11).
+7: Predict conﬁdence score pk using (13).
+8: Determine the ground-truth label yk using (
+26).
+9: Compute the semantic damage dk using ( 27).
+10: Calculate the sample-wise loss LSW-BCE via ( 28).
+11: end for
+12: Compute the total mini-batch loss LSW-BCE using ( 29).
+13: Update UAN parameters ϕ to minimize LSW-BCE via
+gradient descent.
+14: end while
+15: Return: Trained UAN parameters ϕ.
+Speciﬁcally, a binary ground-truth label, yk ∈ { 0, 1}, is
+used to indicate whether the embedding vector of the k-th
+reconstructed feature, ˆ zk, has been correctly decoded after
+transmission. This label is deﬁned as
+yk =
+{
+1, if ˆ zk = ck,
+0, otherwise, (26)
+where ck is the concatenated representation of the M em-
+bedding vectors corresponding to the k-th semantic feature
+on the CA V side. Furthermore, to quantify the magnitude of
+the semantic error, we introduce a semantic damage metric,
+denoted as dk. This metric is deﬁned as
+dk = 1 − cosine(ck, ˆ zk). (27)
+For correctly decoded features with yk = 1 , the semantic
+damage is zero, i.e., dk = 0 . Leveraging these components,
+the SW-BCE loss for the k-th feature, denoted as LSW-BCE,k,
+is formulated as
+LSW-BCE,k = −[yk log(pk) + (1 − yk)(1 + αdk) log(1 − pk)],
+(28)
+where α ≥ 0 is a hyperparameter that controls the scaling
+of the penalty based on semantic damage. In the case of a
+correctly decoded feature, the loss reduces to the standard BCE
+loss. Conversely, when a decoding error occurs, the loss is
+ampliﬁed by a factor of 1 + αdk. This mechanism compels
+the network to develop a heightened sensitivity to the most
+semantically signiﬁcant errors, thereby enhancing its abi lity
+to identify and suppress the most harmful decoding artifact s.
+Finally, the total loss for training the UAN is the average
+of the SW-BCE loss across all K semantic features, given by
+LSW-BCE = 1
+K
+K∑
+k=1
+LSW-BCE,k. (29)
+The training of the UAN is solely implemented after training
+the semantic compression codec and the semantic analog-to-
+digital converter. The detailed training process is outlin ed in
+Algorithm
+1.
+9
+IV. S IMULATION RESULTS
+This section provides a comprehensive performance evalu-
+ation of our proposed CoDS framework.
+A. Experimental Setup
+Dataset. To evaluate the performance of the proposed
+collaborative perception framework, we employed OPV2V , a
+publicly available large-scale dataset speciﬁcally desig ned for
+V2V collaborative perception tasks [
+33]. Generated through
+the OpenCDA platform that integrates CARLA and SUMO
+simulators [
+39], the OPV2V dataset comprises 12,000 syn-
+chronized frames containing both LiDAR point clouds and
+RGB images, encompassing 230,000 meticulously annotated
+3D bounding boxes. Following the standard experimental pro -
+tocol, we adopted the ofﬁcial data partition: 6,764 frames f or
+training, 1,981 frames for validation, and 2,170 frames for test-
+ing. For 3D object detection evaluation, the perception reg ion
+is deﬁned as x ∈ [−140, 140] meters and y ∈ [−40, 40] meters,
+centered on the ego vehicle. To simulate realistic communic a-
+tion constraints, the maximum communication range is set to
+70 meters between the ego vehicle and collaborating agents.
+Implementation Details. The proposed model is imple-
+mented in PyTorch and utilizes the Adam optimizer with an
+initial learning rate of 1 × 10−4 and an exponential weight
+decay factor of 0.8, training the network until convergence .
+The architecture of our digital semantic communication sys -
+tem is conﬁgured as follows. The semantic compression codec
+achieves a γc = 16 using Nb = 4 stacked down/up-sampling
+blocks. The semantic analog-to-digital converter compone nt
+utilizes M = 4 semantic embedding spaces, each containing
+N = 64 embedding vectors of length L = 16 . Besides, the
+system employs an adaptive modulation and coding (AMC)
+scheme to dynamically select the optimal modulation and
+coding scheme (MCS) according to the channel conditions.
+The set of available MCSs is designed with reference to
+the IEEE 802.11bd standard [
+40], implementing LDPC codes
+with a block length of 1, 296. Finally, the UAN is trained
+exclusively over a Rayleigh fading channel.
+Benchmarks. We evaluate the proposed CoDS scheme
+against three benchmarks, all of which adopt PointPillars a s
+the underlying backbone. The baselines are as follows
+• CNN-based ASC: This baseline is adapted from the ASC
+for collaborative perception scheme in [ 25]. It utilizes
+a convolutional neural network (CNN)-based analog se-
+mantic codec network to transmit features over noisy
+channels.
+• Transformer-based ASC: This baseline is adapted from
+the approach in [
+26] and utilizes a Transformer-based
+analog semantic codec network to perform the same task.
+• Traditional Digital Communication: The non-semantic
+baseline is implemented using a standard digital pipeline
+that supports multiple MCSs. The channel coding compo-
+nent utilizes LDPC codes with a block length of 1, 296.
+B. Evaluation Metrics
+The performance is evaluated using average precision (AP),
+a standard metric for 3D object detection [
+41]. This metric
+quantiﬁes detection accuracy by calculating the area under
+the precision-recall curve, with higher values indicating better
+performance. We report AP at intersection-over-union (IoU )
+thresholds of 0.5 and 0.7, denoted as AP@ 0.5 and AP@ 0.7,
+respectively. Since higher IoU thresholds impose stricter detec-
+tion criteria by requiring more precise object localizatio n, per-
+formance at AP@ 0.7 is typically lower than that at AP@ 0.5.
+The perception performance is highly dependent on the SNR
+of the physical noisy channel, which determines the recon-
+structed quality of the transmitted features. The SNR is deﬁ ned
+as the ratio of the average power of the transmitted symbols,
+denoted as Ps, to the average power of the channel noise. Since
+the average power of each complex symbol is normalized to
+unity, we have Ps = E[|Sc|2] = D. Accordingly, the SNR in
+decibels (dB) is expressed as
+SNR (dB) = 10 log10
+(Ps
+σ2
+)
+, (30)
+Different transmission approaches operating at a speciﬁc
+γs may incur varying communication overhead when trans-
+mitting identical feature maps. To establish a fair evalua-
+tion framework, we normalize the communication cost by
+constraining all competing methods to utilize an identical
+number of channel uses, which represents the total number
+of complex symbols transmitted over the wireless channel.
+For the proposed digital semantic communication system, th e
+number of channel uses is given by
+Channel Uses = Qd × q
+C × γs × Rc × log2 Or
+, (31)
+where Qd = H × W × C denotes the data size of the
+feature map Mc, Rc is the LDPC code rate, and Or is the
+modulation order (e.g., Or = 16 for 16-QAM). Similarly, for
+the traditional digital communication approach, the numbe r of
+channel uses is given by
+Channel Uses = Qd × 8
+γs × Rc × log2 Or
+. (32)
+For the ASC scheme, the number of channel uses is calcu-
+lated as
+Channel Uses = Qd
+γs
+. (33)
+To ensure a fair comparison, the parameter γs is adjusted
+until the calculated number of channel uses is identical acr oss
+all methods.
+C. Performance Analysis
+We ﬁrst present experimental results comparing our pro-
+posed CoDS framework with leading ASC methods and con-
+ventional digital communication baselines. Fig.
+6 illustrates
+the perception performance comparison between CoDS and
+other methods at different SNRs over an AWGN channel. A
+reference baseline are included: the performance of a stand -
+alone perception system without collaboration, shown as a r ed
+dotted line. Compared to ASC schemes, at SNR = −10 dB,
+CoDS achieves a modest 0.28% performance gain over the
+10
+-10 -5 0 5 10 15 20
+0.79
+0.81
+0.83
+0.85
+0.87
+0.89
+Stand-Alone Perception
+Proposed CoDS
+Trans.-based ASC
+CNN-based ASC
+LDPC 1/2 16-QAM
+LDPC 2/3 64-QAM
+(a) Perception performance in terms of AP@ 0.5.
+-10 -5 0 5 10 15 20
+0.62
+0.64
+0.66
+0.68
+0.7
+0.72
+0.74
+Stand-Alone Perception
+Proposed CoDS
+Trans.-based ASC
+CNN-based ASC
+LDPC 1/2 16-QAM
+LDPC 2/3 64-QAM
+(b) Perception performance in terms of AP@ 0.7.
+Fig. 6. Performance of the proposed method compared with oth er schemes at different SNRs over an AWGN channel, where “Tra ns.” denotes Transformer.
+-10 -5 0 5 10 15 20
+0.77
+0.79
+0.81
+0.83
+0.85
+0.87
+0.89
+Stand-Alone Perception
+Proposed CoDS
+Trans.-based ASC
+CNN-based ASC
+LDPC 1/2 16-QAM
+LDPC 2/3 64-QAM
+(a) Perception performance in terms of AP@ 0.5.
+-10 -5 0 5 10 15 20
+0.62
+0.64
+0.66
+0.68
+0.7
+0.72
+0.74
+Stand-Alone Perception
+Proposed CoDS
+Trans.-based ASC
+CNN-based ASC
+LDPC 1/2 16-QAM
+LDPC 2/3 64-QAM
+(b) Perception performance in terms of AP@ 0.7.
+Fig. 7. Performance of our proposed method compared with oth er schemes at different SNRs over a Rayleigh fading channel, where “Trans.” denotes
+Transformer.
+CNN-based ASC but is outperformed by the Transformer-
+based ASC. This behavior stems from the inherent susceptibi l-
+ity of digital communication to the cliff effect, where perf or-
+mance degrades precipitously under severe channel conditi ons.
+The effect is evident when comparing modulation orders.
+Although higher-order constellations (e.g., 64-QAM) are s pec-
+trally efﬁcient at high SNRs, their smaller minimum distanc e
+between constellation points makes them more noise-sensit ive,
+leading to elevated bit error rates and frequent decoding
+failures. In collaborative perception, these failures pro pagate
+corrupted features to downstream tasks and can precipitate
+sudden accuracy collapse. Accordingly, at low SNRs, the
+dense 64-QAM constellation is prone to reconstruction fail ure,
+whereas a simpler scheme such as 16-QAM is more robust.
+Moreover, attempting to transmit more bits under such poor
+channel conditions is counterproductive: it increases the vol-
+ume of corrupted features and further degrades perception p er-
+formance. Although the proposed UAN mitigates these effect s
+by ﬁltering unreliable semantic features, some performanc e
+degradation at extremely low SNRs is unavoidable, causing
+CoDS to approach the stand-alone baseline. In contrast, the
+ASC baselines, including both CNN-based and Transformer-
+based approaches, exhibit graceful performance degradati on.
+Their performance declines smoothly as channel conditions
+worsen, demonstrating greater robustness to channel impai r-
+ments compared with the brittle behavior of conventional
+digital systems. However, while they effectively mitigate the
+cliff effect, they still fall short of our proposed method at high
+SNRs. At SNR = 20 dB, CoDS surpasses the CNN-based
+and Transformer-based ASC schemes by notable margins
+of 4.25% and 3.78%, respectively. This result underscores
+the strength of our digital semantic architecture in reliab ly
+11
+-10 -5 0 5 10 15 20
+0.65
+0.7
+0.75
+0.8
+0.85
+0.9
+AWGN w/ UAN
+AWGN w/o UAN
+Rayleigh w/ UAN
+Rayleigh w/o UAN
+(a) Perception performance in terms of AP@ 0.5.
+-10 -5 0 5 10 15 20
+0.4
+0.45
+0.5
+0.55
+0.6
+0.65
+0.7
+0.75
+AWGN w/ UAN
+AWGN w/o UAN
+Rayleigh w/ UAN
+Rayleigh w/o UAN
+(b) Perception performance in terms of AP@ 0.7.
+Fig. 8. Performance of our proposed UAN at different SNRs ove r both AWGN and Rayleigh fading channels.
+transmitting rich and essential perceptual information un der
+favorable channel conditions. The superiority of CoDS aris es
+from two complementary design principles. First, it adopts
+a robust digital semantic architecture. Semantic features are
+quantized into a bitstream and protected via channel coding ,
+enabling ﬁne-grained, bit-level protection of critical se mantics
+and more reliable conveyance of rich, essential informatio n
+within comparable or lower bandwidth. Second, CoDS em-
+ploys dual adaptation to handle channel variation and resid ual
+errors. At the transmitter, AMC selects modulation and code
+rate matched to instantaneous SNR—using lower-order mod-
+ulation at low SNR for reliability, and higher-order settin gs
+at high SNR for throughput. At the receiver, the proposed
+UAN evaluates the reliability of decoded semantic features and
+discards those deemed corrupted, limiting error propagati on
+and mitigating the cliff effect. Ultimately, this holistic design
+achieves a superior trade-off between perception accuracy and
+communication cost, establishing CoDS as a more effective
+and robust solution for reliable collaborative perception in
+noisy wireless environments. As shown in Fig.
+6(b), we
+compare the performance of the proposed method with other
+schemes in terms of AP@ 0.7. Consistent with the ﬁndings at
+AP@0.5, our method signiﬁcantly outperforms other schemes
+under high SNR conditions, while its performance in the
+low SNR regime converges toward that of the stand-alone
+bound. As expected, all schemes exhibit a marked perfor-
+mance drop when evaluated at this higher IoU threshold. The
+stricter criterion for AP@ 0.7 demands greater precision in
+object localization, making the perception performance mo re
+susceptible to information errors induced by channel noise .
+Fig.
+7 illustrates a comparison of perception performance
+between our proposed method and other schemes in terms
+of AP@ 0.5 and AP@ 0.7 at different SNRs over a Rayleigh
+fading channel. The multipath fading induces general perfo r-
+mance degradation for all schemes compared to the AWGN
+case, and the relative performance trends across different SNRs
+remain consistent with those observed in Fig.
+6. Crucially,
+TABLE I
+PERFORMANCE OF PROPOSED SEMANTIC COMPRESSION
+CODEC AT DIFFERENT γc VALUES .
+No Compress γc = 4 γc = 8 γc = 16
+AP@0.5 0.8697 0 .8700 0 .8715 0 .8702
+AP@0.7 0.7606 0 .7598 0 .7533 0 .7534
+although our model is trained solely over a Rayleigh fading
+channel, CoDS maintains competitive accuracy when eval-
+uated on both Rayleigh and AWGN test scenarios without
+model retraining. This resilience to distinct channel cond itions
+underscores the practical viability of our approach for dep loy-
+ment in dynamic real-world vehicular environments.
+Table
+I presents the perception performance of the proposed
+semantic compression codec under different γc values, with
+γs = 3 .3 × 102. The evaluation is performed under lossless
+transmission, excluding the digital communication module . As
+shown in Table I, the proposed semantic compression codec
+achieves strong performance in terms of AP@ 0.5. Remarkably,
+at γc values of 4, 8, and 16, its performance is comparable
+to—or even exceeds—that of the uncompressed baseline. This
+improvement arises from the autoencoder-based architectu re,
+which effectively reﬁnes and distills more informative se-
+mantic representations from the input features. Under the
+stricter AP@ 0.7 metric, the network exhibits only marginal
+degradation. Therefore, we set γc to 16 in the experiment.
+Fig.
+8 presents an ablation study to evaluate the proposed
+UAN at different SNRs over both AWGN and Rayleigh
+fading channels. In this experiment, for the digital codec,
+we employ a 1/2-rate LDPC code, and the resulting bits
+are modulated using 16-QAM. The results demonstrate that
+the UAN effectively mitigates the characteristic cliff eff ect
+at low SNRs and provides performance improvements even
+at high SNRs. Speciﬁcally, as illustrated in Fig.
+8(a), the
+UAN demonstrates a substantial capacity to prevent abrupt
+performance degradation under challenging channel condit ions
+12
+in terms of AP@ 0.5. For instance, at an SNR = −10 dB,
+the UAN achieves a performance gain of 17.1% compared
+to the baseline without this module over the Rayleigh fading
+channel. This improvement stems from the UAN’s adaptive
+ability to identify and discard unreliable semantic featur es,
+ensuring graceful performance degradation rather than cat as-
+trophic failure. Even under favorable high SNR conditions,
+the UAN continues to provide performance improvements. For
+example, in the Rayleigh fading channel at SNR = 20 dB,
+it improves performance by 0.92%. The advantage is more
+pronounced under the stricter AP@ 0.7 metric. As shown in
+Fig.
+8(b), the performance disparity between the UAN and
+the baseline without the UAN is particularly signiﬁcant ove r
+the Rayleigh fading channel, where the UAN outperforms
+the baseline by 24.56% at SNR = −10 dB and by 1.34%
+at SNR = 20 dB in terms of AP@ 0.7. Collectively, these
+ﬁndings validate the role of the UAN as a critical component
+for building robust digital semantic communication system s.
+By preventing catastrophic performance collapse in low SNR
+regimes, the UAN ensures a high level of perceptual reliabil ity,
+a crucial requirement for safety-critical applications su ch as
+autonomous driving.
+Fig.
+9 compares the perception performance of the pro-
+posed CoDS framework and the Transformer-based ASC
+scheme under varying channel uses at SNR = 5 dB over
+an AWGN channel. As shown, the perception performance
+of both methods generally improves with increasing channel
+use. In resource-constrained conditions (i.e., with few ch annel
+uses), CoDS outperforms the ASC baseline, demonstrating
+that the proposed digital semantic framework is more effect ive
+at transmitting essential information when communication re-
+sources are limited. However, as channel uses increase beyo nd
+a logarithmic value of approximately 3.5, the performance
+of CoDS begins to saturate, while the ASC method contin-
+ues to improve and eventually surpasses CoDS in terms of
+AP@0.7. This performance ceiling arises from the intrinsic
+representational limitations of the semantic embedding sp ace
+in CoDS. In contrast, the analog nature of ASC enables it
+to exploit the additional bandwidth to convey progressivel y
+more perceptual details, resulting in higher performance w hen
+resources are abundant. A similar trend is observed for the
+AP@0.5 metric, although the crossover occurs later—around
+a log value of 4.5. This delay occurs because the core semantic
+information captured within the embedding space remains
+sufﬁcient for the more lenient AP@ 0.5 detection threshold.
+The ﬁner-grained details omitted by the embedding space
+have less impact on this metric, allowing CoDS to sustain
+its advantage longer. Overall, these ﬁndings demonstrate t hat
+CoDS excels in practical, bandwidth-limited communicatio n
+environments, where efﬁciently transmitting the most sali ent
+semantic information is of paramount importance.
+V. C ONCLUSION
+In this paper, we have proposed CoDS, a novel collaborative
+perception framework based on digital semantic communica-
+tion. The framework enables efﬁcient and robust semantic-
+level information sharing among CA Vs while remaining com-
+patible with existing digital communication infrastructu res.
+1.5 2 2.5 3 3.5 4 4.5 5
+0.66
+0.7
+0.74
+0.78
+0.82
+0.86
+0.9
+AP@0.5 Proposed CoDS
+AP@0.5 Trans.-based ASC
+AP@0.7 Proposed CoDS
+AP@0.7 Trans.-based ASC
+Fig. 9. Performance of proposed CoDS compared with ASC schem e at
+different channel uses at SNR = 5 dB over an AWGN channel in terms
+of AP@ 0.7 and AP@ 0.5, where “Trans.” denotes Transformer.
+Speciﬁcally, we ﬁrst design a semantic compression codec
+to extract task-oriented features, effectively reducing c ommu-
+nication overhead while preserving perception performanc e.
+Next, we introduce a semantic analog-to-digital converter to
+transform continuous semantic features into discrete bits treams
+compatible with standard transmission pipelines. To furth er en-
+hance reliability under adverse wireless conditions, we de velop
+the UAN, which evaluates the reliability of received featur es
+and selectively ﬁlters them to mitigate the cliff effect at l ow
+SNRs. Experimental results show that CoDS outperforms both
+traditional digital communication and existing ASC scheme s.
+REFERENCES
+[1] L. Chen, P . Wu, K. Chitta, B. Jaeger, A. Geiger, and H. Li, “ End-to-
+end autonomous driving: Challenges and frontiers,” IEEE Trans. Pattern
+Anal. Mach. Intell. , vol. 46, no. 12, pp. 10 164–10 183, Dec. 2024.
+[2] J. Zhao, Y . Wu, R. Deng, S. Xu, J. Gao, and A. Burke, “A surve y of
+autonomous driving from a deep learning perspective,” ACM Computing
+Surveys, vol. 57, no. 10, pp. 1–60, May 2025.
+[3] M. Noor-A-Rahim, Z. Liu, H. Lee, M. O. Khyam, J. He, D. Pesc h,
+K. Moessner, W. Saad, and H. V . Poor, “6G for vehicle-to-ever ything
+(V2X) communications: Enabling technologies, challenges , and oppor-
+tunities,” Proc. IEEE , vol. 110, no. 6, pp. 712–734, May 2022.
+[4] D. Feng, A. Harakeh, S. L. Waslander, and K. Dietmayer, “A review
+and comparative study on probabilistic object detection in autonomous
+driving,” IEEE Trans. Intell. Transp. Syst., vol. 23, no. 8, pp. 9961–9980,
+Aug. 2021.
+[5] C. Luo, X. Y ang, and A. Y uille, “Exploring simple 3D multi -object
+tracking for autonomous driving,” in Proc. IEEE Int. Conf. Comput.
+Vision (ICCV), Oct. 2021, pp. 10 488–10 497.
+[6] P . Ghorai, A. Eskandarian, Y .-K. Kim, and G. Mehr, “State estimation
+and motion prediction of vehicles and vulnerable road users for cooper-
+ative autonomous driving: A survey,” IEEE Trans. Intell. Transp. Syst. ,
+vol. 23, no. 10, pp. 16 983–17 002, Oct. 2022.
+[7] Z. Huang, H. Liu, J. Wu, and C. Lv, “Differentiable integr ated motion
+prediction and planning with learnable cost function for au tonomous
+driving,” IEEE Trans. Neural Netw. Learn. Syst. , vol. 35, no. 11, pp.
+15 222–15 236, Nov. 2023.
+[8] L. Wang, X. Zhang, Z. Song, J. Bi, G. Zhang, H. Wei, L. Tang,
+L. Y ang, J. Li, C. Jia, and L. Zhao, “Multi-modal 3D object det ection in
+autonomous driving: A survey and taxonomy,” IEEE Trans. Intell. V eh.,
+vol. 8, no. 7, pp. 3781–3798, Nov. 2023.
+13
+[9] Z. Song, L. Liu, F. Jia, Y . Luo, C. Jia, G. Zhang, L. Y ang, an d L. Wang,
+“Robustness-aware 3D object detection in autonomous drivi ng: A review
+and outlook,” IEEE Trans. Intell. Transp. Syst. , 2024.
+[10] Y . Han, H. Zhang, H. Li, Y . Jin, C. Lang, and Y . Li, “Collab orative
+perception in autonomous driving: Methods, datasets, and c hallenges,”
+IEEE Intell. Transp. Syst. Mag. , vol. 15, no. 6, pp. 131–151, Nov. 2023.
+[11] S. Hu, Z. Fang, Y . Deng, X. Chen, and Y . Fang, “Collaborat ive
+perception for connected and autonomous driving: Challeng es, possible
+solutions and opportunities,” IEEE Wirel. Commun. , 2025.
+[12] G. Liu, L. Liang, C. Guo, H. Y e, and S. Jin, “RSU-assisted resource al-
+location for collaborative perception,” arXiv preprint arXiv:2509.17691 ,
+2025.
+[13] Z. Bai, G. Wu, M. J. Barth, Y . Liu, E. A. Sisbot, K. Oguchi, and
+Z. Huang, “A survey and framework of cooperative perception : From
+heterogeneous singleton to hierarchical cooperation,” IEEE Trans. Intell.
+Transp. Syst., Nov. 2024.
+[14] S. Dhakal, D. Carrillo, D. Qu, M. Nutt, Q. Y ang, and S. Fu, “Virtual-
+painting: Addressing sparsity with virtual points and dist ance-aware data
+augmentation for 3D object detection,” arXiv preprint arXiv:2312.16141,
+2023.
+[15] S. Pang, D. Morris, and H. Radha, “CLOCs: Camera-lidar o bject
+candidates fusion for 3D object detection,” in Proc. IEEE/RSJ Int. Conf.
+Intell. Robots Syst. (IROS) , Oct. 2020, pp. 10 386–10 393.
+[16] R. Xu, C.-J. Chen, Z. Tu, and M.-H. Y ang, “V2X-ViTv2: Imp roved
+vision transformers for vehicle-to-everything cooperati ve perception,”
+IEEE Trans. Pattern Anal. Mach. Intell. , vol. 47, no. 1, pp. 650–662,
+Oct. 2025.
+[17] M. Y azgan, T. Graf, M. Liu, T. Fleck, and J. M. Z ¨ ollner, “ A survey on
+intermediate fusion methods for collaborative perception categorized by
+real world challenges,” in Proc. IEEE Intell. V eh. Symp. (IV) , Jun. 2024,
+pp. 2226–2233.
+[18] Y .-C. Liu, J. Tian, N. Glaser, and Z. Kira, “When2com: Mu lti-agent
+perception via communication graph grouping,” in Proc. IEEE/CVF
+Conf. Comput. Vis. Pattern Recognit. (CVPR) , Jun. 2020, pp. 4106–
+4115.
+[19] D. Y ang, K. Y ang, Y . Wang, J. Liu, Z. Xu, R. Yin, P . Zhai, an d
+L. Zhang, “How2comm: Communication-efﬁcient and collabor ation-
+pragmatic multi-agent perception,” in Proc. Adv. Neural Inf. Process.
+Syst. (NeurIPS) , vol. 36, 2023, pp. 25 151–25 164.
+[20] Y . Hu, S. Fang, Z. Lei, Y . Zhong, and S. Chen, “Where2comm :
+Communication-efﬁcient collaborative perception via spa tial conﬁdence
+maps,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 35, 2022,
+pp. 4874–4886.
+[21] T.-H. Wang, S. Manivasagam, M. Liang, B. Y ang, W. Zeng, a nd R. Ur-
+tasun, “V2VNet: V ehicle-to-vehicle communication for joi nt perception
+and prediction,” in Proc. Eur . Conf. Comput. Vis. (ECCV) , Nov. 2020,
+pp. 605–621.
+[22] K. Qu, W. Zhuang, Q. Y e, W. Wu, and X. Shen, “Model-assist ed learning
+for adaptive cooperative perception of connected autonomo us vehicles,”
+IEEE Trans. Wirel. Commun., vol. 23, no. 8, pp. 8820–8835, Aug. 2024.
+[23] G. Liu, H. Y e, L. Liang, and S. Jin, “V2I interference man agement for
+collaborative perception based on hierarchical reinforce ment learning,”
+in Proc. IEEE 34th Int. Conf. Mach. Learn. Signal Process. (MLS P),
+Sept. 2024, pp. 1–6.
+[24] Y . Liu, G. Liu, L. Liang, H. Y e, C. Guo, and S. Jin, “Deep re inforce-
+ment learning-based user scheduling for collaborative per ception,” IEEE
+Trans. Mobile Comput. , 2025 (Early Access).
+[25] Y . Sheng, H. Y e, L. Liang, S. Jin, and G. Y . Li, “Semantic c ommunica-
+tion for cooperative perception based on importance map,” J. Franklin
+Inst., vol. 361, no. 6, p. 106739, Mar. 2024.
+[26] J. Gan, Y . Sheng, H. Zhang, L. Liang, H. Y e, C. Guo, and S. J in,
+“SComCP: Task-oriented semantic communication for collab orative
+perception,” arXiv preprint arXiv:2507.00895 , 2025.
+[27] Y . Liu, Q. Huang, R. Li, Z. Zhao, S. Zhao, Y . Liu, Y . Zhu, an d H. Zhang,
+“Semantic communication empowered collaborative percept ion in con-
+strained networks,” IEEE Wirel. Commun. Letters , vol. 14, no. 3, pp.
+701–705, Mar. 2025.
+[28] Y . Sheng, L. Liang, H. Y e, S. Jin, and G. Y . Li, “Semantic c ommunica-
+tion for cooperative perception using harq,” IEEE Trans. Cogn. Commun.
+Netw., 2025.
+[29] Z. Qin, L. Liang, Z. Wang, S. Jin, X. Tao, W. Tong, and G. Y . Li, “AI
+empowered wireless communications: From bits to semantics ,” Proc.
+IEEE, vol. 112, no. 7, pp. 621–652, Jul. 2024.
+[30] Y . Huh, H. Seo, and W. Choi, “Universal joint source-cha nnel coding
+for modulation-agnostic semantic communication,” IEEE J. Sel. Areas
+Commun., Jul. 2025.
+[31] Y . Bo, Y . Duan, S. Shao, and M. Tao, “Joint coding-modula tion for
+digital semantic communications via variational autoenco der,” IEEE
+Trans. Commun., vol. 72, no. 9, pp. 5626–5640, Sept. 2024.
+[32] A. H. Lang, S. V ora, H. Caesar, L. Zhou, J. Y ang, and O. Bei jbom,
+“Pointpillars: Fast encoders for object detection from poi nt clouds,” in
+Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , Jun.
+2019, pp. 12 697–12 705.
+[33] R. Xu, H. Xiang, X. Xia, X. Han, J. Li, and J. Ma, “OPV2V: An open
+benchmark dataset and fusion pipeline for perception with v ehicle-to-
+vehicle communication,” in Proc. Int. Conf. Robotics Autom. (ICRA) ,
+2022, pp. 2583–2589.
+[34] A. V an Den Oord, O. Vinyals et al. , “Neural discrete representation
+learning,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 30,
+2017.
+[35] C. Zheng and A. V edaldi, “Online clustered codebook,” i n Proc. IEEE
+Int. Conf. Comput. Vision (ICCV) , Oct. 2023, pp. 22 798–22 807.
+[36] T.-Y . Lin, P . Goyal, R. Girshick, K. He, and P . Doll´ ar, “ Focal loss for
+dense object detection,” in Proc. IEEE Int. Conf. Comput. Vision (ICCV) ,
+Oct. 2017, pp. 2980–2988.
+[37] P . Yin, J. Lyu, S. Zhang, S. Osher, Y . Qi, and J. Xin, “Unde rstanding
+straight-through estimator in training activation quanti zed neural nets,”
+arXiv preprint arXiv:1903.05662 , 2019.
+[38] Z. Zhang and M. Sabuncu, “Generalized cross entropy los s for training
+deep neural networks with noisy labels,” in Proc. Adv. Neural Inf.
+Process. Syst. (NeurIPS) , vol. 31, 2018.
+[39] A. Dosovitskiy, G. Ros, F. Codevilla, A. Lopez, and V . Ko ltun,
+“CARLA: An open urban driving simulator,” in Proc. Annu. Conf. Robot
+Learn. (CoRL) , 2017, pp. 1–16.
+[40] C. Iliopoulos, A. Iossiﬁdes, C. H. Foh, and P . Chatzimis ios, “IEEE
+802.11bd for next-generation V2X communications: From pro tocol to
+services,” IEEE Commun. Mag. , vol. 9, no. 2, pp. 88–98, Jun. 2025.
+[41] G. Zamanakos, L. Tsochatzidis, A. Amanatiadis, and I. P ratikakis, “A
+comprehensive survey of lidar-based 3D object detection me thods with
+deep learning for autonomous driving,” Comput. Graph. , vol. 99, pp.
+153–181, Oct. 2021.

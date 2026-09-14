@@ -1,0 +1,877 @@
+When2com: Multi-Agent Perception via Communication Graph Grouping
+Yen-Cheng Liu, Junjiao Tian∗, Nathaniel Glaser∗, Zsolt Kira
+Georgia Institute of Technology
+{ycliu, jtian73, nglaser3, zkira }@gatech.edu
+Abstract
+While signiﬁcant advances have been made for single-
+agent perception, many applications require multiple sens-
+ing agents and cross-agent communication due to beneﬁts
+such as coverage and robustness. It is therefore critical
+to develop frameworks which support multi-agent collab-
+orative perception in a distributed and bandwidth-efﬁcient
+manner. In this paper, we address the collaborative percep-
+tion problem, where one agent is required to perform a per-
+ception task and can communicate and share information
+with other agents on the same task. Speciﬁcally, we propose
+a communication framework by learning both to construct
+communication groups and decide when to communicate.
+We demonstrate the generalizability of our framework on
+two different perception tasks and show that it signiﬁcantly
+reduces communication bandwidth while maintaining supe-
+rior performance.
+1. Introduction
+Remarkable progress has been achieved for single-agent
+perception and recognition, where one or more sensor
+modalities are used to perform object detection [30, 31, 22]
+and segmentation [3, 12, 19], depth estimation [10, 38, 11],
+and various other scene understanding tasks. However, in
+many applications, such as robotics, there may be multiple
+agents distributed in the environment, each of which has lo-
+cal sensors. Such multi-agent systems are advantageous in
+many cases, for example, to increase coverage across the
+environment or to improve robustness to failures.
+Thus, we tackle the problem ofmulti-agent collaborative
+perception, an under-studied topic in the literature, where
+multiple agents are able to exchange information to improve
+overall accuracy towards perception tasks ( e.g., semantic
+segmentation or object recognition). One major challenge
+for multi-agent collaborative perception is the transmission
+bandwidth, as high bandwidth results in network conges-
+tion and latency in the agent network. We therefore inves-
+∗equal contribution
+Figure 1: Illustration of multi-agent collaborative per-
+ception. We construct a multi-agent perception system to
+improve the agent-wise perception accuracy and reduce the
+transmission bandwidth. Each agent learns to construct
+communication groups and decide when to communication.
+tigate the scenario where information across all agents (and
+hence sensors) is not available in a centralized manner, and
+agents can only communicate through bandwidth-limited
+channels. We also consider several challenging scenarios
+where some sensor data may be uninformative or degraded.
+Prior works on learning to communicate [34, 8] mainly
+address decision-making tasks (rather than for improving
+perception) under simple perceptual environments. In addi-
+tion, these methods also do not consider bandwidth limita-
+tions: They learn to communicate across a fully-connected
+graph (i.e. all agents communicate with each other through
+broadcasts). Such methods cannot scale as the number of
+agents increases. Similarly, since all information is broad-
+cast there is no decision of when to communicate condi-
+tioned on the need. An agent does not need to consume
+bandwidth when the local observation is sufﬁcient for the
+prediction. When messages sent by other agents are de-
+graded or irrelevant, communication thus could be detri-
+mental to the perception task.
+In this paper, we propose a learning-based communi-
+1
+arXiv:2006.00176v2  [cs.CV]  2 Jun 2020
+cation model for collaborative perception. We speciﬁcally
+view the problem as learning to construct the communica-
+tion group (i.e. each agent decides what to transmit and
+which agent(s) to communicate with) and to decide when
+to communicate without explicit supervision for such deci-
+sions during training. In contrast to broadcast-based meth-
+ods (e.g. TarMac [6]) and inspired by the general attention
+mechanisms, our method decouples the stages of commu-
+nication and this allows for asymmetric message and key
+sizes, reducing the amount of transmitted data.
+Our method can be generalized to several downstream
+vision tasks, including multi-agent collaborative semantic
+segmentation (dense prediction) and multi-agent 3D shape
+recognition (global prediction). Our model is able to be
+trained in an end-to-end manner with only supervision from
+downstream tasks (e.g. ground-truth masks for segmenta-
+tion and class labels for image recognition) and without the
+need for explicit ground-truth communication labels.
+We demonstrate across different tasks that our method
+can perform favorably against previous works on learning to
+communicate while using less bandwidth. We provide ex-
+tensive analyses, including trade-offs between message and
+query sizes, the correlation between ground-truth key and
+predicted message, and visualization of the learned com-
+munication groups.
+Our contributions are listed as follows:
+• We address the under-explored area of collaborative per-
+ception, which is at the intersection of perception, multi-
+agent systems, and communication.
+• We propose a uniﬁed framework that learns both how to
+construct communication groups and when to communi-
+cate. It does not require ground truth communication la-
+bels during training, and it can dynamically reduce band-
+width during inference.
+• Our model can be generalized to several down-stream
+tasks, and we show through rigorous experimentation
+that it can perform better when compared with previous
+works investigating learned communication.
+• We provide a collaborative multi-agent semantic seg-
+mentation dataset, AirSim-MAP, where each agent has
+its own depth, pose, RBG images, and semantic segmen-
+tation masks. This dataset allows researchers to further
+investigate solutions to multi-agent perception.
+2. Related works
+Learning to communicate. Communication is an es-
+sential component for effective collaboration, especially for
+multi-agent decision-making and perception tasks. Early
+works [35, 27] facilitated information ﬂow and collabora-
+tion through pre-deﬁned communication protocols. Simi-
+larly, auction-based methods [21, 29] for camera grouping
+use several assumptions (e.g., static cameras) and heuristic
+rules to decide the agents communication. However, such
+Group 
+Communication
+Fullyconnected
+Communication
+agent Supporter
+Requester
+Figure 2: Fully connected versus group communication.
+Fully connected communication results in a large amount of
+bandwidth usage, growing on the order of O(N2), where N
+represents the number of agents in a network. Group com-
+munication is able to prune irrelevant connections and can
+substantially reduce the overall network complexity.
+rigid protocols do not evolve with dynamic environments
+and do not easily generalize to complex environments.
+Thus, in recent years, several multi-agent reinforcement
+learning (MARL) works have explored learn-able interac-
+tions between agents. For example, assuming full coopera-
+tion across agents, each agent in CommNet [34] broadcasts
+its hidden state to a shared communication channel so that
+other agents can decide their actions based on this integrated
+information. A similar scheme was proposed by Foerster et
+al. [8], where agents instead communicate via learned, dis-
+crete signals. To further leverage the interactions between
+agents, Battaglia et al. [2] and Hoshen [15] integrate ker-
+nel functions into CommNet. Additionally, several works
+have addressed communication through recurrent neural
+networks (RNN). For example, DIAL [7] uses an RNN to
+derive the individual Q-value of each agent based on its ob-
+servation and the messages from other agents. BiCNet [28]
+connects all agents with a Bi-directional LSTM to inte-
+grate agent-speciﬁc information, and ATOC [18] addition-
+ally applies an attention unit to determine what to broad-
+cast to the shared channel. Although substantial progress
+has been made by several MARL works, most experimen-
+tal tasks are built on simplistic 2D-grid environments where
+each agent observes low-dimensional 2D images. As men-
+tioned in Jain et al. [16], studying agents’ interactions in
+simplistic environments does not permit study of the inter-
+play between perception and communication.
+Recent works have proposed to construct communi-
+cation groups based on pre-deﬁned rules [18, 17] or a
+uniﬁed communication network [33, 34, 15, 28, 33, 6].
+With these techniques, bandwidth usage during communi-
+cation increases as the number of agents scales up. While
+Who2com [23] uses a handshake communication to reduce
+the bandwidth usage, this model assumes all agents always
+(a) (b)
+Figure 3: Our (a) Multiple-Request Multiple-Support Model and its (b) Handshake-Communication (H-Com) Module.
+need to communicate with one of the other agents. This
+results in the waste of bandwidth consumption and cannot
+prevent the issue of detrimental messages. In contrast, our
+proposed framework alleviates these problems by learning
+to decide when to communicate and to create communica-
+tion groups.
+Attention mechanisms. Attention mechanisms have
+been widely used in recent learning-based models. In a
+nutshell, the attention mechanism can be viewed as a soft
+fusion scheme to weight different values based on a sim-
+ilarity between query and keys. A few noticeable and
+widely used attention mechanisms are additive [1], scale
+dot-product [36], and general [25]. One key ﬁnding of our
+work is that the general mechanism allows for asymmet-
+ric queries and keys, which makes it especially suitable for
+tasks with bandwidth considerations: An agent’s transmit-
+ted query message can be smaller than its retained key, and
+hence its overall bandwidth consumption can be reduced.
+3. Method
+The goal of our proposed model is to address the multi-
+agent collaborative perception problem, where an agent is
+able to improve its perception by receiving information
+from other agents. In this paper, we are speciﬁcally inter-
+ested in learning to construct communication groups and
+learning when to communicate in a bandwidth-limited way.
+3.1. Problem Deﬁnition and Notation
+We assume an environment consisting N agents with
+their own observations X ={xn}n=1,...,N . Among those
+agents, some of them are degraded ˜X ={ ˜xl}l=1,..,L, and
+the set of degraded agents is a subset of all agents ˜X⊂
+X. Each agent outputs the prediction of perception task
+˜Y ={˜yn}n=1,...,N with the proposed communication mech-
+anism. Note that each agent is a requester and supporter
+simultaneously. However, which agents are degraded isun-
+known in our problem setting.
+3.2. Communication Groups Construction
+As demonstrated in Figure 2, previous works on learn-
+ing to communicate applied fully-connected communica-
+tion for information exchange across agents. This frame-
+work results in a large amount of bandwidth usage and is
+difﬁcult to scale up when the number of agents increases.
+To reduce the network complexity and bandwidth us-
+age, inspired by communication network protocol [20], we
+propose a two-step group construction procedure: we ﬁrst
+apply the handshake communication [23] to determine the
+weights of connections, and we further prune the less im-
+portant connections with an activation function.
+To start constructing a communication group, we apply
+a three-stage handshake communication mechanism [23],
+which consists of three stages: request, match, and select.
+Agent i ﬁrst compresses its local observationsxi into a com-
+pact query vectorµi and a key vectorκi:
+µi = Gq(xi; θq)∈ RQ, κi = Gk(xi; θk)∈ RK, (1)
+where Gq is a query generator parameterized by θq and Gk
+is a key generator parameterized by θk. We further broad-
+cast the query to all of other agents, and note that this
+only causes limited amount of bandwidth transmission as
+all queries are compact compared to the high-resolution im-
+ages. To decide who to communicate with, we compute a
+matching scoremi, j between an agent i (as a requester) and
+an agent j (as a supporter),
+mi, j = Φ(µi,κ j), ∀i̸= j, (2)
+where Φ(·,·) is a learned similarity function which mea-
+sures the correlation between two vectors. The matching
+scoremi, j implies correlation between agent i and j, and
+intuitively this value also represents the amount of informa-
+tion the supporting agent j can provide for the requesting
+agent i.
+However, the above method does not learn “when” to
+communicate, and it results in wasted bandwidth when an
+agent has sufﬁcient information and the communication is
+not necessary. An ideal communication mechanism is to
+switch on transmission when the agent requires information
+from other agents to improve its perception ability, while it
+should also switch off the transmission when it has sufﬁ-
+cient information for its own perception task. Toward this
+end, inspired by self-attention mechanism [4], we use the
+correlation between the key and query from the same agent
+to determine if the agent potentially requires more informa-
+tion and thus learn when to communicate,
+mi,i = Φ(µi,κi). (3)
+Note that ˆmi,i≈ 1 represents that the agent has sufﬁcient in-
+formation and does not need communication for perception
+tasks.
+In order to minimize bandwidth usage during transmis-
+sion, we further propose an asymmetric message method,
+which compresses the query into an extremely low-
+dimensional vector (which is transmitted) while keeping
+a larger size for the key vector (which is not transmit-
+ted). Once extremely compact queries are passed to receiver
+agents, we use a scaled general attention [25, 36] to com-
+pute the correlation between agent i and agent j:
+Φ(µi,κ j) =µT
+iWgκ j√
+K , (4)
+where Wg∈ RQ×K is a learnable parameter to match the size
+of query and key, and Q and K are dimension of query and
+key respectively.
+Based on the above self-attention and cross-attention
+mechanism across all queries and keys, we thus derive the
+matching matrixM:
+M =σ(
+
+
+m1,1 m1,2 ··· m1,N
+m2,1 m2,2 ··· m2,N
+... ... ... ...
+mN,1 mN,2 ··· mN,N
+
+)∈ RN×N , (5)
+whereσ(·) is a row-wise softmax function.
+To construct the communication groups, we prune the
+less connections with an activation function:
+¯M = Γ(M; δ ), (6)
+where Γ(·; δ ) is an element-wise function, which zeros out
+the elements smaller than δ. (We set δ = 1
+N in our experi-
+Figure 4: An example of our constructed communication
+groups and the corresponding adjacency matrix. Blue
+arrow indicates the intra-agent transmission without band-
+width consumption, and red arrow represents the inter-agent
+transmission with bandwidth consumption.
+ment.)
+The derived matrix ¯M can be regarded as the adjacency
+matrix of a directed graph, where the entries of the ma-
+trix indicate when to communicate and non-entries repre-
+sent who to communicate with as demonstrated in Figure 4.
+Each row of the matrix represents how a receiver agent col-
+lects information from different supporting agents, and each
+column of the matrix is how one supporter sends its own in-
+formation to different requesting agents.
+As shown in Figure 3, once a requesting agent collects
+the information from its linked supporting agents, the re-
+questing agent i integrates its local observation and the com-
+pressed visual feature maps from supporters based on the
+matching scores:
+ˆyi = D([fi;f in f
+i ]; θd), f int
+i =
+N
+∑
+j=1
+¯mi, j̸=0
+¯mi, jf j, (7)
+whereD is an perception task decoder parameterized byθd,
+¯mi, j is the element located ini-th row and j-th of the matrix
+¯M,fi =E(xi; θe) is an feature map of agent i encoded by
+an image encoderE, [·;·] is concatenation operation along
+channel dimension. It is worth noting that our perception
+task decoder is not limited for speciﬁc vision tasks, and we
+demonstrate our communication framework can be general-
+ized to different visual tasks in our experiments.
+3.3. Learning of Communication
+Our learning strategy follows the centralized training and
+decentralized inference procedure [24]. Precisely, all agents
+are able to access all local observations of agents in the
+training stage, while each agent can only observe its own
+local observation in the inference stage. Our goal is to learn
+a bandwidth-efﬁcient communication mechanism, so that
+in the inference stage, our proposed model is able to per-
+form multi-agent collaborative perceptions in a bandwidth-
+limited and distributed manner.
+We follow the aforementioned handshake communica-
+tion to compute the matching matrix M, and we weight the
+agents’ feature maps based on the matching matrix M and
+further integrate them as:
+f all
+i =
+N
+∑
+j=1
+˜mi, jf j, (8)
+where ˜m the element located in i-th row and j-th of the
+matrixM. Note that in the above equation mi, jf j repre-
+sents who to communicate with, andmi,ifi indicates when
+to communicate. Then, a client agent i combines its own
+feature map fi and the integrated feature f all
+i to compute
+the prediction for downstream visual tasks,
+˜yi = D([fi;f all
+i ]; θd), (9)
+In order to train our model, we use the label for down-
+stream tasks (e.g., segmentation masks) as supervision, we
+compute the loss as:
+L = H(y j, ˜y j), (10)
+where H(·,·) can be the objective function for any down-
+stream visual tasks ( e.g. pixel-wise cross-entropy for seg-
+mentation tasks or cross-entropy for recognition tasks). We
+later update the weights of our model Θ = (θk, θq, θe, θd)
+using the above loss in an end-to-end manner.
+4. Experiment
+We evaluate the performance of our proposed frame-
+work on two distinct perception tasks: collaborative seman-
+tic segmentation and multi-view 3D shape recognition.
+4.1. Experimental Cases and Datasets
+4.1.1 Collaborative Semantic Segmentation
+Our ﬁrst task is collaborative 2D semantic segmentation of
+a 3D scene. Given observations (an RGB image, aligned
+dense depth map, and pose) from several mobile agents, the
+objective of this task is to produce an accurate 2D semantic
+segmentation mask for each agent.
+Since current semantic segmentation datasets [9, 5, 26,
+14] only provide RGB images and labels captured from
+the perspective of single agent, we thus use AirSim sim-
+ulator [32] to collect our AirSim-MAP (Multi-Agent Per-
+ception) dataset. For this dataset, we ﬂy a swarm of ﬁve
+to six drones with different yaw rates through a series of
+waypoints in the AirSim “CityEnviron” environment. We
+record pose, depth maps, and RGB images for each agent.
+Note that we also provide semantic segmentation masks for
+all drones.
+We consider three experimental cases within this task.
+We refer to the agent attempting segmentation as the re-
+questing agent, and all other agents as the supporting
+agents. Details for each case are listed as follows:
+Single-Request Multiple-Support (SRMS) This ﬁrst case
+examines the effectiveness of communication for a single
+requesting agent under the assumption that if an agent is
+degraded, then its original, non-degraded information will
+be present in one of the supporting agents. We include a to-
+tal of ﬁve agents, of which only one is selected for possible
+degradation. We add noise to a random selection of 50% of
+this agent’s frames, and we randomly replace one of the re-
+maining agents with the non-degraded frame of the original
+agent. Note that only the segmentation mask of the original
+agent is used as supervision.
+Multiple-Request Multiple-Support (MRMS) The sec-
+ond case considers a more challenging problem, where mul-
+tiple agents can suffer degradation. Instead of requiring a
+single segmentation output, this case requires segmentation
+outputs for all agents, degraded and non-degraded. We fol-
+low the setup of the previous case, and we ensure that each
+of the several degraded requesting agents has a correspond-
+ing non-degraded image among its supporting agents.
+Multiple-Request Multiple-Partial-Support (MRMPS)
+The third case removes the assumption that there exists a
+clean version of the degraded view among the supporting
+agents. Instead, the degraded agent must select the most
+informative view(s) from the other agents, and these views
+might have a variable degree of relevance. Speciﬁcally, as
+the drone group moves through the environment, the im-
+ages from each drone periodically and partially overlap with
+those of other drones. Intuitively, the segmentation output
+of the requesting drone is only aided from the supporting
+drones that have overlapping views.
+4.1.2 Multi-Agent 3D Shape Classiﬁcation
+In addition to the semantic segmentation task, we also con-
+sider a multi-agent 3D shape classiﬁcation task. For this
+experimental case, we construct a multi-agent variant of the
+ModelNet 40 dataset [37]. The original dataset contains 40
+common object categories from ModelNet with 100 unique
+CAD models per category and 12 different views of each
+model. However, our variant adds a communication group
+structure to the original dataset. Speciﬁcally, we sample
+three sets of class-based image triplets. Each triplet corre-
+sponds to a randomly selected 3D object model and each
+triplet contains three randomly selected 2D views of its cor-
+responding object model. To make this problem setting
+more challenging, we further degrade one image from each
+triplet. The objective of this task is to predict the corre-
+sponding object class for each agent by leveraging the in-
+formation from all agents. Figure 6 shows an example of
+the dataset in one trial with 9 agents. This modiﬁed task is
+essentially a distributed version of the multi-view classiﬁ-
+Table 1: Experimental results on Multiple-Request Multiple-Support and Multiple-Request Multiple-Partial-Support.
+Note that we evaluate these models with the metric of mean intersection of union (mIoU) and use MBytes per frame (Mbpf)
+and the averaged number of links per agent for measuring bandwidth.
+Multiple-Request Multiple-Support Multiple-Request Multiple-Partial-Support
+Models Bandwidth (Mbpf / # of links) Noisy Normal Avg. Bandwidth (Mbpf / # of links) Noisy Normal Avg.
+AllNorm - 57.85 57.74 57.80 - 47.9 48.37 48.14
+Fully-Connect.
+CatAll 2.5 / 5 29.07 51.83 40.45 2.0 / 4 26.86 45.27 36.07
+AuxAttend 2.5 / 5 33.69 56.27 44.98 2.0 / 4 26.97 51.03 39.00
+CommNet [34] 2.5 / 5 23.68 52.67 38.18 2.0 / 4 26.56 49.07 37.82
+TarMac [6] 2.5 / 5 51.09 56.74 53.92 2.0 / 4 29.78 51.39 40.59
+Distri.
+RandCom 0.5 / 1 21.22 52.74 36.98 0.5 / 1 24.13 45.19 34.66
+Who2com [23] 0.5 / 1 31.96 56.11 44.04 0.5 / 1 26.97 50.71 38.84
+Ours 0.385 / 0.77 56.52 58.04 57.28 0.55 / 1.08 30.38 51.26 40.82
+OccDeg - 30.06 56.31 43.19 - 25.2 46.74 35.97
+30.86
+38.08
+25.12
+37.67
+52.1
+44.1
+46.09 45.06
+42.68
+54.24
+53.08
+25.94
+CatAll
+(FC)
+AuxAttend
+(FC)
+RandCom
+(Distr.)
+Who2com
+(Distri.)
+Ours
+(Distr.)
+mIoU 
+Noisy samples Normal samples AllNorm OccDeg
+Figure 5: Experimental results of Single-Request
+Multiple-Support.
+cation task [37].
+4.2. Baselines and Evaluation Metrics
+Here we consider several fully-connected (FC) and dis-
+tributed communication (DistCom) models as our base-
+lines. FC models fuse all of the agents’ observations (either
+weighted or unweighted) whereas DistCom models only
+fuse a subset of those observations.
+• CatAll (FC) is a naive FC model baseline which con-
+catenates the encoded image features of all agents prior
+to subsequent network stages.
+• Auxiliary-View Attention (AuxAttend;FC) uses an atten-
+tion mechanism to weight auxiliary views from the sup-
+porting agents.
+• RandCom (DistCom) is a naive distributed baseline
+which randomly selects one of other agents as a support-
+ing agent.
+• Who2com [23] (DistCom) excludes self-attention mech-
+anism such that it always communicates with one of the
+supporting agents.
+• OccDeg and AllNorm are baselines that employ no com-
+munication, i.e. each agent (view) independently com-
+putes the output for itself. For OccDeg the data is de-
+graded similarly as before, while in AllNorm we use
+clean images for all views. These two serve as an up-
+per and lower reference for comparison.
+We also consider communication modules of Comm-
+Net [34], VAIN [15], and TarMac [6] as our baseline meth-
+ods for all multiple-outputs tasks. For a fair comparison,
+we use ResNet18 [13] as the feature backbone for our and
+all mentioned baseline models. For the 3D recognition task,
+we also add MVCNN [37] as a baseline.
+We evaluate the performance of all the models with mean
+IoU on the segmentation task and prediction accuracy on
+the 3D shape recognition task. In addition, we report Band-
+width of all FC and DistCom models in Megabyte per frame
+(MBpf). To obtain MBpf, We add the size of the feature
+vectors which need to be transmitted to the requesters and
+size of keys broadcast to all supporters and multiply by the
+number of bytes required for storage.
+4.3. Quantitative results
+Single-Request Multiple-Support (SRMS) The goal of
+this case is to examine if our model is able to learn when
+to communicate and learn who to communicate with for a
+single requesting agent. Figure 5 shows the performance of
+our proposed model and several baseline models. Although
+most fully-connected methods can improve the prediction
+mIoU compared with NoCom, they need to propagate all
+information in a fully-connected manner and thus require
+high bandwidth consumption. In contrast, our model re-
+ports higher prediction accuracy yet smaller bandwidth us-
+age (Who2com [23]: 2 MBpf; ours: 0 .98 MBpf). Another
+observation is that our model is able to further improve
+compared with Who2com [23]. This demonstrates the ben-
+eﬁt of learning when to communicate, which reduces the
+waste of bandwidth and prevent detrimental message when
+the requesting agent has sufﬁcient information and commu-
+nication is not required.
+Table 2: Experimental results on Multi-agent 3D Shape recognition. We report the accuracy of the degraded split, and all
+methods perform similar results for the normal split (≈ 83%).
+OccDeg AllNorm RandCom CatAll MVCNN [37] CommNet [34] V AIN [15] TarMac [6] Ours
+Degraded Split Accuracy (%) 55.02 83.66 54.28 73.82 31.80 71.52 75.09 78.73 80.72
+Bandwidth (links/MBpf) - - 0.11 / 0.89 1 / 8 1 / 8 1 / 8 1 / 8 1 / 8 0.176/ 1.32
+Supporting
+Requesting
+Dresser Bo x Bo x Person Person Person Wardro be Wardro beNoCom Bookshelf
+Bo x Bo x Bo x Person Person Person Wardro be Wardro be Wardro beGT
+Dresser Bo x Bo x Person Person Person Wardro be Wardro beRandCo m Bo wl
+Bo x Bo x Bo x Person Person Person Wardro be Wardro beOurs Wardro be
+0.999 0.998
+0.998
+0.6840.2260.207
+0.695
+0.689 0.308
+0.549
+0.620 0.672
+0.445
+0.2750.281
+Figure 6: Bipartite communication graph between supporting and requesting agents. During the query phase, each
+requesting agent sends a low-dimensional query vector to all other agents (including itself) to establish communication.
+Then during the transmission phase, supporting agents transmit their high-dimensional feature representations. We visualize
+the ﬂow of data during the transmission phase, where blue and red arrows refer to internal and external communication,
+respectively. More prominent colors and larger numerical values indicate stronger feature weightings, whereas missing
+arrows represent the pruned links in the communication graph. Note that these images are ordered for visualization purposes;
+the actual dataset is unordered, and each agent observes a random class with a random chance of degradation.
+Multiple-Request Multiple-Support (MRMS) In this
+case, we further address a more challenging problem, where
+multiple agents suffer degradation. Each agent should (1)
+identify when it needs to communicate, (2) decide who to
+communicate with when it needs to, and (3) avoid the selec-
+tion of noisy views from the supporting agents. We list the
+experiment results in the Table 1. It can be seen that, when
+the requesting agents cannot prevent the selection of noisy
+supporting agents, both CatAll and RandCom perform even
+worse than NoCom. This veriﬁes our intuition that the infor-
+mation from the supporting agents is not always beneﬁcial
+for the requesting agents, and selection of incorrect infor-
+mation may even hinder the prediction of the requesters.
+With the use of attention mechanisms for weighting the
+feature maps from the supporting agents, both AuxAttend
+and Who2com [23] are able to prevent incorrect views from
+deteriorating performance and thus improve with respect to
+NoCom, CatAll, and RandCom. However, without learning
+when to communicate, those models are forced to always
+request information from at least one supporting agent re-
+sulting in both poorer performance and unnecessary band-
+width usage.
+In addition to the above baseline methods, we also con-
+sider CommNet [34] and TarMac [6]. Even though Comm-
+Net integrates the information from other agents by using an
+average pooling mechanism, it does not improve the predic-
+tion of either degraded or non-degraded requesting agents
+because it indiscriminately incorporates all views.
+On the other hand, TarMac [6] is able to provide bet-
+ter results compared with the baseline models. However,
+TarMac uses one-way communication and results in large
+bandwidth usage which presents difﬁculty in the real sce-
+nario. On the contrary, our model is not only able to out-
+perform it on both degraded and non-degraded samples,
+but also consumes less bandwidth by using our asymmet-
+ric query mechanism and pruning redundant connections
+within the network with the activation function.
+Multiple-Request Multiple-Partial-Support (MRMPS)
+In this case, there is less chance to have completely over-
+lapped observations between any two agents. This presents
+an inherent difﬁculty in the perception task because only
+incomplete information is available for the prediction. As
+shown in the right part of Table 1, the performance improve-
+ment margin of all FC and DistCom models is smaller with
+respect to NoCom, in comparison to more signiﬁcant im-
+provement observed in the previous scenario.
+Nonetheless, we observe that all methods exhibit a sim-
+ilar trend as the previous scenario. Our model is still able
+to maintain a similar prediction accuracy as fully-connected
+models, while we only use one-fourth bandwidth for com-
+60
+70
+80
+90
+80
+90
+100
+1 4 16 64
+Recognition Acc.(%)
+GroupingAcc.(%)
+Query Size
+Grouping Acc.
+Recongition Acc.
+Figure 7: Ablation study on varying query size.
+munication across agents. This demonstrates the superior
+bandwidth-efﬁciency of our model.
+Multi-agent 3D shape Recognition In order to demon-
+strate the generalization of our model, here we apply our
+model to the task of multi-agent 3D shape classiﬁcation.
+Table 2 provides the quantitative evaluation on this task
+using our proposed model and other baselines, including
+VAIN [15], CommNet [34], and TarMac [6]. Our model
+is able to perform competitively compared with TarMac [6]
+with only approximately one-eighth bandwidth usage. We
+also provide qualitative results in Figure 6 to demonstrate
+the effectiveness of our model, which allows agents to com-
+municate with the correct and informative agents.
+4.4. Analyses
+To investigate the source of our model’s improvement
+over the baselines, we computed two selection accuracy
+metrics on the SRMS dataset, WhenToCom and Grouping.
+WhenToCom accuracy measures how often communication
+between a requester and a supporter(s) is established and
+when it is needed; and Grouping measures how often the
+correct group is created when there is indeed communica-
+tion. We also comment on the trade-off between bandwidth
+and performance of communication by conducting a con-
+trolled experiment on the size of query and key on the 3D
+recognition dataset.
+Effect of handshake communication As demonstrated
+in Figure 8, we conduct an ablation study on the pro-
+posed handshake communication. In the Ours (w/o H-Com)
+model, we remove the handshake communication module,
+so that each agent only uses its local observations to com-
+pute both (1) the communication score and (2) its commu-
+nication group.
+We additionally provide the result of RandCom. We ob-
+served that our model with the proposed handshake commu-
+nication offers a signiﬁcant improvement over both Rand-
+Com and our model without handshake communication.
+This ﬁnding demonstrates the necessity of communication
+for deciding when to communicate and who to communi-
+cate with. That is, an agent without communication cannot
+decide what information it needs and which supporter has
+the relevant information to help better perform on percep-
+tion tasks.
+Figure 6 visualizes three examples from the 3D shape
+48.46%
+19.32%
+46.73%
+33.84%
+99.80% 98.27%
+10%
+40%
+70%
+100%
+WhenToCom Grouping
+Accuracy
+Effect of Handshake Communication
+RandComOurs (w/o H-Com)Ours (w/ H-Com)
+Figure 8: Effect of our proposed H-Com. Handshake
+communication signiﬁcantly improves the communication
+accuracy.
+recognition task. Each agent clearly knows when communi-
+cation is needed based on information provided by the sup-
+porters and its own observation. For example, in the ﬁrst
+three box examples, the degraded agent on the left knows
+to select an informative view from the other agents; the
+non-degraded agent in the middle decides to select a more
+informative view even though it possesses sufﬁcient infor-
+mation; and the third agent decides that communication is
+not needed because it has the most informative view among
+all. It is worth mentioning that all 9 views are provided
+to every agent and the agent needs to identify informative
+views and detrimental views based on the matching scores.
+Query and key size We further analyze the effect of query
+and key size on Grouping accuracy and classiﬁcation accu-
+racy on the 3D shape classiﬁcation task. We vary the query
+size from 1 to 128 with a ﬁxed key size of 16 as shown in
+Figure 7. We observe that both selection and classiﬁcation
+accuracy improve as the message size increases. Our model
+can perform favorably with a message size of 4. The same
+trend is also observed for key sizes. Most noticeably, we
+ﬁnd that there exists asymmetry in query-key size. While
+the selection accuracy saturates at 16-dimensional query,
+selection accuracy consistently improves with increasing
+key size until 1024-dimensional key. Our model exploits
+this asymmetry to save bandwidth in communication while
+maintaining high performance.
+5. Conclusion
+In this paper, we proposed a general bandwidth-efﬁcient
+communication framework for collaborative perception.
+Our framework learns both how to construct communica-
+tion groups and when to communicate. This framework
+can be generalized to several down-stream tasks including
+(but not limited to) multi-agent semantic segmentation and
+multi-agent 3D shape recognition. We demonstrated supe-
+rior performance with lower bandwidth requirements across
+all compared methods.
+6. Acknowledgement
+This work was supported by ONR grant N00014-18-1-
+2829.
+References
+[1] Dzmitry Bahdanau, KyungHyun Cho, and Yoshua Bengio.
+Neural machine translation by jointly learning to align and
+translation. In Proceedings of the International Conference
+on Learning Representations (ICLR), 2015. 3
+[2] Peter Battaglia, Razvan Pascanu, Matthew Lai,
+Danilo Jimenez Rezende, et al. Interaction networks
+for learning about objects, relations and physics. In Ad-
+vances in Neural Information Processing Systems (NIPS) ,
+2016. 2
+[3] Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian
+Schroff, and Hartwig Adam. Encoder-decoder with atrous
+separable convolution for semantic image segmentation. In
+Proceedings of the European Conference on Computer Vi-
+sion (ECCV), pages 801–818, 2018. 1
+[4] Jianpeng Cheng, Li Dong, and Mirella Lapata. Long short-
+term memory-networks for machine reading. In Confer-
+ence on Empirical Methods in Natural Language Processing
+(EMNLP), 2016. 4
+[5] Marius Cordts, Mohamed Omran, Sebastian Ramos, Timo
+Rehfeld, Markus Enzweiler, Rodrigo Benenson, Uwe
+Franke, Stefan Roth, and Bernt Schiele. The cityscapes
+dataset for semantic urban scene understanding. In Proceed-
+ings of the IEEE Conference on Computer Vision and Pattern
+Recognition (CVPR), pages 3213–3223, 2016. 5
+[6] Abhishek Das, Th ´eophile Gervet, Joshua Romoff, Dhruv Ba-
+tra, Devi Parikh, Michael Rabbat, and Joelle Pineau. Tar-
+mac: Targeted multi-agent communication. In Proceed-
+ings of the International Conference on Machine Learning
+(ICML), 2019. 2, 6, 7, 8
+[7] Jakob Foerster, Ioannis Alexandros Assael, Nando de Fre-
+itas, and Shimon Whiteson. Learning to communicate with
+deep multi-agent reinforcement learning. In Advances in
+Neural Information Processing Systems (NIPS), 2016. 2
+[8] Jakob Foerster, Yannis M Assael, Nando de Freitas, and Shi-
+mon Whiteson. Learning to communicate with deep multi-
+agent reinforcement learning. In Advances in Neural Infor-
+mation Processing Systems (NIPS), 2016. 1, 2
+[9] Andreas Geiger, Philip Lenz, Christoph Stiller, and Raquel
+Urtasun. Vision meets robotics: The kitti dataset. The Inter-
+national Journal of Robotics Research , 32(11):1231–1237,
+2013. 5
+[10] Cl ´ement Godard, Oisin Mac Aodha, and Gabriel J Bros-
+tow. Unsupervised monocular depth estimation with left-
+right consistency. In Proceedings of the IEEE Conference on
+Computer Vision and Pattern Recognition , pages 270–279,
+2017. 1
+[11] Cl ´ement Godard, Oisin Mac Aodha, Michael Firman, and
+Gabriel J Brostow. Digging into self-supervised monocular
+depth estimation. In Proceedings of the IEEE International
+Conference on Computer Vision, pages 3828–3838, 2019. 1
+[12] Kaiming He, Georgia Gkioxari, Piotr Dollar, and Ross Gir-
+shick. Mask r-cnn. In Proceedings of the IEEE International
+Conference on Computer Vision (ICCV), Oct 2017. 1
+[13] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+Deep residual learning for image recognition. In Proceed-
+ings of the IEEE Conference on Computer Vision and Pattern
+Recognition (CVPR), 2016. 6
+[14] Simon Hecker, Dengxin Dai, and Luc Van Gool. End-to-end
+learning of driving models with surround-view cameras and
+route planners. In Proceedings of the European Conference
+on Computer Vision (ECCV), pages 435–453, 2018. 5
+[15] Yedid Hoshen. Vain: Attentional multi-agent predictive
+modeling. In Advances in Neural Information Processing
+Systems (NIPS), 2017. 2, 6, 7, 8
+[16] Unnat Jain, Luca Weihs, Eric Kolve, Mohammad Rastegari,
+Svetlana Lazebnik, Ali Farhadi, Alexander G Schwing, and
+Aniruddha Kembhavi. Two body problem: Collaborative vi-
+sual task completion. InProceedings of the IEEE Conference
+on Computer Vision and Pattern Recognition (CVPR), 2019.
+2
+[17] Jiechuan Jiang, Chen Dun, and Zongqing Lu. Graph convo-
+lutional reinforcement learning for multi-agent cooperation.
+arXiv preprint arXiv:1810.09202, 2018. 2
+[18] Jiechuan Jiang and Zongqing Lu. Learning attentional com-
+munication for multi-agent cooperation. InAdvances in Neu-
+ral Information Processing Systems (NIPS), 2018. 2
+[19] Alexander Kirillov, Kaiming He, Ross Girshick, Carsten
+Rother, and Piotr Doll ´ar. Panoptic segmentation. In Pro-
+ceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR), pages 9404–9413, 2019. 1
+[20] James F Kurose. Computer networking: A top-down ap-
+proach featuring the internet, 3/E. Pearson Education India,
+2005. 3
+[21] Yiming Li, Bir Bhanu, and Wei Lin. Auction protocol for
+camera active control. In Proceedings of the IEEE Interna-
+tional Conference on Image Processing (ICIP), pages 4325–
+4328. IEEE, 2010. 2
+[22] Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and
+Piotr Dollar. Focal loss for dense object detection. In Pro-
+ceedings of the IEEE International Conference on Computer
+Vision (ICCV), Oct 2017. 1
+[23] Yen-Cheng Liu, Junjiao Tian, Chih-Yao Ma, Nathaniel
+Glaser, Chia-Wen Kuo, and Zsolt Kira. Who2com: Col-
+laborative perception via learnable handshake communica-
+tion. In Proceedings of the IEEE International Conference
+on Robotics and Automation (ICRA), 2020. 2, 3, 6, 7
+[24] Ryan Lowe, Yi Wu, Aviv Tamar, Jean Harb, OpenAI Pieter
+Abbeel, and Igor Mordatch. Multi-agent actor-critic for
+mixed cooperative-competitive environments. In Advances
+in Neural Information Processing Systems (NIPS), 2017. 4
+[25] Minh-Thang Luong, Hieu Pham, and Christopher D Man-
+ning. Effective approaches to attention-based neural machine
+translation. In Conference on Empirical Methods in Natural
+Language Processing (EMNLP), 2015. 3, 4
+[26] Will Maddern, Geoff Pascoe, Chris Linegar, and Paul New-
+man. 1 Year, 1000km: The Oxford RobotCar Dataset. The
+International Journal of Robotics Research (IJRR), 36(1):3–
+15, 2017. 5
+[27] Francisco S Melo, Matthijs TJ Spaan, and Stefan J Witwicki.
+Querypomdp: Pomdp-based communication in multiagent
+systems. In Proceedings of the 9th European conference on
+Multi-Agent Systems, 2011. 2
+[28] Peng Peng, Ying Wen, Yaodong Yang, Quan Yuan,
+Zhenkun Tang, Haitao Long, and Jun Wang. Multiagent
+bidirectionally-coordinated nets: Emergence of human-level
+coordination in learning to play starcraft combat games.
+arXiv preprint arXiv:1703.10069, 2017. 2
+[29] Faisal Qureshi and Demetri Terzopoulos. Smart cam-
+era networks in virtual reality. Proceedings of the IEEE ,
+96(10):1640–1656, 2008. 2
+[30] Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali
+Farhadi. You only look once: Uniﬁed, real-time object de-
+tection. In Proceedings of the IEEE Conference on Com-
+puter Vision and Pattern Recognition (CVPR) , pages 779–
+788, 2016. 1
+[31] Joseph Redmon and Ali Farhadi. Yolo9000: Better, faster,
+stronger. In Proceedings of the IEEE Conference on Com-
+puter Vision and Pattern Recognition (CVPR), July 2017. 1
+[32] Shital Shah, Debadeepta Dey, Chris Lovett, and Ashish
+Kapoor. Airsim: High-ﬁdelity visual and physical simula-
+tion for autonomous vehicles. In Field and Service Robotics,
+2017. 5
+[33] Amanpreet Singh, Tushar Jain, and Sainbayar Sukhbaatar.
+Learning when to communicate at scale in multia-
+gent cooperative and competitive tasks. arXiv preprint
+arXiv:1812.09755, 2018. 2
+[34] Sainbayar Sukhbaatar, Rob Fergus, et al. Learning multia-
+gent communication with backpropagation. In Advances in
+Neural Information Processing Systems (NIPS), 2016. 1, 2,
+6, 7, 8
+[35] Ming Tan. Multi-agent reinforcement learning: Independent
+vs. cooperative agents. In Proceedings of the International
+Conference on Machine Learning (ICML), 1993. 2
+[36] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+Polosukhin. Attention is all you need. In Advances in Neural
+Information Processing Systems (NIPS), 2017. 3, 4
+[37] Zhirong Wu, Shuran Song, Aditya Khosla, Fisher Yu, Lin-
+guang Zhang, Xiaoou Tang, and Jianxiong Xiao. 3d
+shapenets: A deep representation for volumetric shapes. In
+Proceedings of the IEEE Conference on Computer Vision
+and Pattern Recognition (CVPR) , pages 1912–1920, 2015.
+5, 6, 7
+[38] Tinghui Zhou, Matthew Brown, Noah Snavely, and David G.
+Lowe. Unsupervised learning of depth and ego-motion from
+video. In Proceedings of the IEEE Conference on Computer
+Vision and Pattern Recognition (CVPR), July 2017. 1

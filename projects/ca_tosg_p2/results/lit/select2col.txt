@@ -1,0 +1,1587 @@
+1
+Select2Col: Leveraging Spatial-Temporal
+Importance of Semantic Information for Efficient
+Collaborative Perception
+Yuntao Liu, Qian Huang, Rongpeng Li, Xianfu Chen, Zhifeng Zhao, Shuyuan Zhao, Yongdong Zhu and
+Honggang Zhang
+Abstract—Collaborative perception by leveraging the shared
+semantic information plays a crucial role in overcoming the
+individual limitations of isolated agents. However, existing col-
+laborative perception methods tend to focus solely on the spatial
+features of semantic information, while neglecting the impor-
+tance of the temporal dimension. Consequently, the potential
+benefits of collaboration remain underutilized. In this article,
+we propose Select2Col, a novel collaborative perception frame-
+work that takes into account the s patial-temporal importance
+of semantic information. Within the Select2Col, we develop a
+collaborator selection method that utilizes a lightweight graph
+neural network (GNN) to estimate the importance of semantic
+information (IoSI) of each collaborator in enhancing percep-
+tion performance, thereby identifying contributive collaborators
+while excluding those that potentially bring negative impact.
+Moreover, we present a semantic information fusion algorithm
+called HPHA (historical prior hybrid attention), which inte-
+grates multi-scale attention and short-term attention modules
+to capture the IoSI in feature representation from the spatial
+and temporal dimensions respectively, and assigns IoSI-consistent
+weights for efficient fusion of information from selected collab-
+orators. Extensive experiments on three open datasets demon-
+strate that our proposed Select2Col significantly improves the
+perception performance compared to state-of-the-art approaches.
+The code associated with this research is publicly available at
+https://github.com/huangqzj/Select2Col/.
+Index Terms—Collaborative Perception, Importance of Seman-
+tic Information, Spatial-Temporal Dimensions, Semantic Infor-
+mation Fusion, Hybrid Attention.
+I. I NTRODUCTION
+P
+ERCEPTION is an essential capability for agents, espe-
+cially for autonomous vehicles (A Vs). However, in real-
+world scenarios involving occluded or distant objects, relying
+solely on single-agent individual perception capabilities often
+encounters significant challenges [1], and possibly leads to
+catastrophic outcomes, as depicted in Fig. 1. Fortunately,
+Y . Liu is with the College of Information Science and Electronic Engineer-
+ing, Zhejiang University, Hangzhou 310027, China as well as with Zhejiang
+Lab, Hangzhou 311121, China (e-mail: liuyuntao@zju.edu.cn).
+Q. Huang, S. Zhao and Y . Zhu are with Zhejiang Lab, Hangzhou 311121,
+China (e-mail: {huangq, zhaosy, zhuyd }@zhejianglab.com).
+R. Li is with the College of Information Science and Electronic En-
+gineering, Zhejiang University, Hangzhou 310027, China (e-mail: lirong-
+peng@zju.edu.cn).
+X. Chen is with the VTT Technical Research Centre of Finland, Oulu,
+90570, Finland (e-mail: xianfu.chen@vtt.fi).
+Z. Zhao and H. Zhang are with Zhejiang Lab, Hangzhou 311121, China (e-
+mail: {zhaozf, honggangzhang}@zhejianglab.com) as well as with the College
+of Information Science and Electronic Engineering, Zhejiang University,
+Hangzhou 310027, China.
+VehicleA
+VehicleA
+Agent 
+(Road infra)
+Agent 
+(Road infra)
+Potential collision
+Agent 
+Agent 
+Agent i (ego)
+Semantic 
+Information
+Semantic 
+Information
+Semantic 
+Information
+Semantic 
+Information
+A
+A
+Collaborator 
+(Road infra)
+Collaborator 
+(Road infra)
+Potential collision
+Ego
+Semantic 
+information
+Semantic 
+information
+Semantic 
+information
+Semantic 
+information
+Collaborator
+Collaborator
+B
+B
+Fig. 1. The limitation of single-agent perception. From the perspective of the
+ego vehicle, Vehicle A is occluded, causing a dangerous collision risk when
+both vehicles accelerate. Such collisions occur frequently.
+the emergence of the Internet of Vehicles (IoV) allows A Vs
+to communicate with other agents, thereby acquiring addi-
+tional perception information [2]. Consequently, collaborative
+perception, wherein participating agents (e.g., vehicles and
+road infrastructures) exchange their perception information
+to obtain an enhanced understanding of surroundings beyond
+their individual capabilities, has become a promising solution
+to avoid perception difficulties encountered by isolated agents
+[3]. In an illustrative scenario in Fig. 1, the ego vehicle
+becomes capable of detecting the occluded Vehicle A by lever-
+aging perception information provided by other agents (i.e.,
+its collaborators). Hence, it not only enhances the perception
+performance of the ego vehicle but also improves its ability to
+respond to abnormal situations, thus mitigating potential traffic
+conflicts.
+In terms of the embedded characteristics of shared infor-
+mation, collaborative perception can be classified as early
+fusion [4], late fusion [5], [6], and intermediate fusion [7]–
+[18]. Specifically, the former two categories, which share the
+raw data directly or perception results (e.g., object classifi-
+cation and regression results), could either inflict significant
+communication cost or yield limited performance due to
+the inadequately shared scene context. Instead, intermediate
+fusion, which involves to share extracted feature information
+(i.e., semantic information) from raw perception data, has
+arXiv:2307.16517v3  [cs.CV]  7 Feb 2024
+2
+been consistently demonstrated as a promising strategy to ef-
+fectively balance perception performance and communication
+overhead [9]–[11].
+However, as semantic information suffers from multi-level
+heterogeneity (e.g., diverse transmission latency, different sen-
+sor configurations, and distinct views of agents), the shared
+semantic information could be rather asynchronous and mis-
+aligned in both temporal and spatial dimensions. For instance,
+the semantic information of different agents may offer in-
+consistent sizes and locations for the same object. Therefore,
+the direct fusion of semantic information could be trouble-
+some. Moreover, the selection of appropriate collaborators
+becomes crucial, as unsuitable candidates have the potential
+to introduce disruptive noise interference, which ultimately
+results in a deterioration of the overall perception performance
+[12]. Nonetheless, identifying beneficial collaborators that can
+enhance perception performance is not straightforward, due to
+their diverse spatial-temporal perspectives.
+In order to realize efficient collaborative perception, sev-
+eral recent studies have been proposed [8]–[18], and promi-
+nent works include CoFF [8], V2VNet [9], V2X-Vit [10],
+Where2comm [11], Who2com [12] and When2com [13].
+However, these studies solely focus on the spatial aspect
+of semantic information, disregarding the importance of the
+temporal dimension. Given the heterogeneous nature of inter-
+agent sensors and the time required for information trans-
+mission, shared semantic information inherently encounters
+latency in real-world scenarios [10]. Disregarding the temporal
+dimension of semantic information in collaborative perception
+results in limited or even degraded performance enhancement.
+For instance, relying on outdated shared semantic information,
+such as depicting objects that are no longer present in the
+focus region, has the potential to confuse the ego and lead
+to misleading perception outcomes. Therefore, comprehensive
+consideration of both the spatial and temporal dimensions of
+semantic information becomes indispensable for successful
+collaborative perception. Furthermore, considering the diverse
+temporal and spatial characteristics of semantic information
+from various collaborators, the importance of semantic in-
+formation in enhancing perception performance also varies.
+Therefore, integrating the importance of semantic informa-
+tion (IoSI) into collaborative perception is highly attractive.
+This can be achieved by assigning distinctive spatial-temporal
+importance weights to different semantic information and
+utilizing these weights to guide both collaborator selection and
+semantic information fusion.
+In this article, motivated by the aforementioned discussions
+and the significant contributions of artificial intelligence stud-
+ies [19]–[21], we propose an IoSI-based collaborative percep-
+tion framework called Select2Col to more comprehensively
+take account of the s patial-temporal importance of semantic
+information. Within the Select2Col framework, we develop
+an IoSI-based method for collaborator selection, which en-
+ables efficient selection of contributive collaborators from
+both temporal and spatial dimensions. Moreover, we design
+a historical prior hybrid attention (HPHA) fusion algorithm
+to achieve more effective information fusion by assigning
+IoSI-consistent weights. Compared to existing works [8]–[17],
+the main contributions of this article can be summarized as
+follows.
+1) We propose the Select2Col 1 framework for collaborative
+perception, which allows to capture the IoSI from spatial
+and temporal dimensions for both effective collaborator
+selection and meaningful information fusion.
+2) We design a semantic information fusion algorithm
+HPHA, which employs a multi-scale attention module
+and a short-term attention module to efficiently aggre-
+gate semantic information from the spatial and temporal
+dimensions of IoSI. Moreover, we present a collabora-
+tor selection method based on IoSI, ensuring that only
+semantic information from contributive collaborators is
+leveraged.
+3) We carry out a comprehensive evaluation of our proposed
+Select2Col on three open datasets OPV2V [14], V2XSet
+[10], and V2V4Real [22]. The experimental results show
+that Select2Col is more effective in improving perception
+performance than state-of-the-art (SOTA) works, such as
+V2VNet [9], V2X-Vit [10], and Where2comm [11].
+The remainder of this article is organized as follows. Section
+II reviews the related works on collaborative perception. Sec-
+tion III presents the system model and formulates the problem.
+Section IV elaborates on our proposed Select2Col framework.
+Sections V and VI introduce our innovative collaborator
+selection method and semantic information fusion algorithm
+HPHA, respectively. We conduct experiments to verify our
+proposed Select2Col in Section VII. Finally, we conclude this
+article with a summary in Section VIII.
+II. R ELATED WORKS
+A. Perception Means in IoV
+Perception plays a crucial role in various tasks of IoV
+(especially A Vs), such as 3D object detection [23], multiple
+object tracking [24], semantic segmentation [25], and depth
+estimation [26]. In particular, 3D object detection, which aims
+to accurately identify predefined object categories by providing
+classification and regression information [27], is considered as
+one of the fundamental perception tasks within the field of
+computer vision.
+Given commonly utilized perception sensors in autonomous
+vehicles, methods for 3D target detection can be categorized
+into camera-based and LiDAR-based methods [28]. Mean-
+while, LiDAR-based detection methods are particularly fa-
+vored due to the inherent 3D information of LiDAR point
+clouds, which maintain excellent performance even under chal-
+lenging weather and lighting conditions [27]. However, LiDAR
+point clouds often suffer from sparsity and disorderliness,
+which pose challenges for the direct processing of individual
+points [29]. To address this limitation, it commonly turns
+point clouds into alternative structures, such as voxel [30]
+or pillar [31], to improve the processing efficiency. Notably,
+compared to voxels, pillar structures offer advantages in terms
+of reduced computational and memory resources [32]. For
+1The codes for our proposed Select2Col are available at
+https://github.com/huangqzj/Select2Col/.
+3
+TABLE I
+A COMPARISON BETWEEN SELECT 2COL AND HIGHLY RELATED WORKS .
+Works Collaborator
+selection strategy
+Information
+fusion strategy
+[8]–[10] All agents Spatial fusion
+[15]–[18] All agents Spatial fusion
+[11]–[13] Spatial selection Spatial fusion
+Select2Col (Ours) Spatial-temporal
+selection
+Spatial-temporal
+fusion
+example, PointPillars [33], a widely adopted technique for
+object detection in point clouds, organizes point clouds into
+vertical columns and operates on pillars instead of voxels.
+Consequently, all critical operations can be performed ef-
+ficiently using 2D convolutions, thus eliminating the need
+for manual tuning of vertical direction binning. Given the
+requirement for real-time inference in detection models for
+autonomous vehicles, many state-of-the-art collaborative per-
+ception methods, such as V2VNet [9], V2X-Vit [10], and
+Where2comm [11], integrate the backbone of PointPillars in
+their respective models.
+Consistent with these works, we primarily consider LiDAR-
+based 3D object detection as our perception task and focus on
+how to enhance the performance of collaborative perception,
+given the inherent limitations of single-agent perception [32].
+B. Related Studies in Collaborative Perception
+Collaborative perception allows agents to share the percep-
+tion information through the IoV , overcoming the inherent
+limitations of single-agent perception. Early research primarily
+focuses on effectively fusing feature information from col-
+laborators, with the pioneering V2VNet [9] being one such
+example. Specifically, V2VNet employs a space-aware graph
+neural network (GNN) to aggregate information from neigh-
+boring agents. Similarly, in [15], a collaborative perception
+solution is proposed by using a graph attention network-based
+aggregation strategy to fuse intermediate representations. In
+addition, V2X-ViT [10] introduces a unified vision transformer
+architecture with heterogeneous multi-agent self-attention to
+effectively capture the spatial relationship between agents,
+leading to efficient feature fusion. Another related work [16]
+designs adaptive feature fusion models using trainable neural
+networks in the spatial dimension. Meanwhile, the CoFF
+approach [8] fuses feature information by enhancing the spatial
+feature information of the original perception data. In another
+related study [17], a feature fusion method that leverages a
+repair network module and a specially designed V2V attention
+module is proposed to mitigate the influence of shared feature
+loss during transmission. Furthermore, CoAlign [18] intro-
+duces a collaborative perception framework that effectively
+handles unknown pose errors by utilizing a novel agent-object
+pose graph model.
+Although the incorporation of multiple agents in collabo-
+rative perception yields performance improvement, studies of
+Who2com [12] and literature [34] demonstrate that bluntly
+adding more collaborators does not always guarantee perfor-
+mance benefits and can even result in counter-intuition nega-
+tive effects. Therefore, the selection of effective collaborators
+and the fusion of meaningful information becomes crucial
+for collaborative perception. For example, When2com [13]
+proposes to forge several communication groups from neigh-
+boring agents in terms of the spatial feature similarity of the
+shared information and determines when to collaborate within
+these groups. On the other hand, Where2comm [11] employs
+a spatial confidence map to select collaborators and utilizes
+multi-head attention to fuse the shared semantic information.
+Despite the remarkable progress, the lack of exploring
+the temporal dimension of semantic information makes these
+works far from optimality. To address this performance gap,
+our proposed Select2Col highlights the importance of both
+spatial and temporal dimensions of IoSI for collaborator
+selection and semantic information fusion, thereby achieving
+further improvements in perception performance. As outlined
+in TABLE I, Select2Col exhibits notable distinctions from
+existing works.
+III. S YSTEM MODEL AND PROBLEM FORMULATION
+A. System Model
+Beforehand, Table II presents a list of notations used in this
+manuscript.
+Consistent with SOTA methods, such as [9]–[11], we adopt
+a collaborative perception scenario wherein at a given time-
+slot t, there exists an ego agent i performing collaborative
+perception with a set of neighboring agents N t
+i (e.g., vehicles
+and/or road infrastructures with perception and communication
+functionalities), as depicted in Fig. 1. From the ego’s perspec-
+tive, the objective of collaborative perception is to effectively
+leverage the received semantic information to maximize its
+perception performance.
+Mathematically, we denote that at the very beginning of t,
+agent i obtains its raw perception data Xi from its sensors and
+receives semantic information transmitted by its neighboring
+agents. From that time, the collaborative perception undergoes
+the following procedures.
+1) Semantic information extraction: We adopt the interme-
+diate feature fusion strategy [9]. In other words, et each time-
+slot t, agent i employs an encoder fenc to extract semantic
+information from its raw perception data Xi, such as LiDAR
+point cloud data [11]. For any agent i, the corresponding
+semantic information F t
+i is extracted at time-slot t as follows
+F t
+i = fenc (Xi) . (1)
+In addition, for a simpler and more consistent representation
+of semantic information, we employ the notation F t−τji
+j to
+denote the semantic information of agent j ∈ Nt
+i ∪ {i}, where
+τji represents the information latency between the source agent
+j and the target agent i. Specifically, when j equals i, τji is
+set to 0 as there is no latency between agent i and itself.
+Otherwise, τji can be defined as the sum of inter-agent asyn-
+chronous overhead tasyn
+ji , the semantic information extraction
+latency text
+ji , the semantic information transmission latency ttx
+ji ,
+and the idle time tidle
+ji caused by the lack of synchronization
+4
+TABLE II
+NOTATIONS AND EXPLANATION
+Notation Explanation
+Xi Raw perception data of agent i
+N t
+i Set of neighbor agents for agent i at time-slot t
+Ct
+i Set of selected collaborators for agent i at time-slot t
+S Set of scales for mult-scale attention operation
+F t
+i Semantic information of agent i at time-slot t
+F
+t−τji
+j
+Semantic information of agent j shared to agent i
+at time-slot t
+Hs
+Aggregated feature semantic information after
+spatial attention operation at a specific scale s
+Hms
+Aggregated feature semantic information after
+multi-scale attention operation
+Hi Fused semantic information of agent i
+Mj Sparse map of agent j
+W sa
+s,ji
+Spatial-attention weight of agent j to agent i at
+scale s
+W ta Temporal-attention weight
+wen
+ji Enhanced weight of agent j to agent i
+bYi Perception results of agent i
+Yi Ground truth of the perception results of agent i
+fenc
+Encoder that extracts semantic information from raw
+perception data
+fselect Selector that outputs the selected collaborators
+ffuse Fuser that outputs the fused semantic information
+fdec Decoder that outputs perception results
+feva Standard perception performance evaluation function
+conv (·) Convolution block operation
+deconv (·) Deconvolution block operation
+sa (·) Spatial attention operation
+ta (·) Temporal attention operation
+τji Information availability latency of agent j to agent i
+tasyn
+ji
+Asynchronous overhead between the sensors of
+agent j and agent i
+text
+ji Semantic information extraction latency of agent j
+ttx
+ji
+Transmission latency of shared semantic information
+from agent j to agent i
+tidle
+ji
+Idle time between the perception system and
+communication system
+bji Bandwidth of agent j to agent i
+ptx
+ji Transmission power of agent j to agent i
+ploss
+ji Path loss between agent j and agent i
+pnoise
+ji Noise power between agent j and agent i
+dji Distance between agent j and i
+fc Center frequency in GHz
+sms Multi-scale attention output scale
+T Sensor sampling interval
+K Number of historical prior frames
+between the perception system and communication system
+[10]. In other words,
+τji = tasyn
+ji + text
+ji + ttx
+ji + tidle
+ji . (2)
+According to the specification 3GPP TR 38.901 [35], network
+transmission latency ttx
+ji can be approximately derived from a
+path-loss driven channel as
+ttx
+ji =
+size
+
+F t−τji
+j
+
+bji log2 (1 + 100.1(ptx
+ji −ploss
+ji −pnoise
+ji ) )
+, (3)
+where size (·) denotes a function that calculates the size of the
+transmitted semantic information. Besides, bji, ptx
+ji , pnoise
+ji and
+ploss
+ji = 28.0 + 22 log10 (dji) + 20 log10 (fc) represent agent
+j’s transmission bandwidth, transmission power, transmission
+noise power, and transmission path loss to agenti, respectively.
+Furthermore, dji denotes the distance between agent j and i
+in meters, and fc represents the center frequency in GHz.
+2) Contributive collaborator selection: The semantic infor-
+mation of neighboring agents is derived from a variety of raw
+perception data with various spatial and temporal dimensions.
+It is important to note that not all semantic information is
+beneficial. In certain cases, the semantic information provided
+by specific agents may degrade perception performance due
+to excessive delay or unreasonable spatial viewpoint [12].
+Therefore, agent i employs a selector fselect to determine a
+contributive collaborator set Ct
+i from N t
+i , namely,
+Ct
+i = fselect
+
+F t−τji
+j
+	
+j∈N t
+i ∪{i}
+
+. (4)
+3) Semantic information fusion: After selecting contribu-
+tive collaborators, agent i utilizes a fuser ffuse to aggregate its
+semantic information F t
+i with selected collaborators’ semantic
+information {F t−τji
+j }j∈Ct
+i
+and correspondingly obtain the
+fused semantic information Hi with a more comprehensive
+representation of features. The semantic information fusion
+expression can be written as
+Hi = ffuse
+
+F t−τji
+j
+	
+j∈Ct
+i ∪{i}
+
+. (5)
+4) Semantic information decoding: Finally, for each agent
+i, the fused semantic information Hi needs to be converted
+into appropriate perception results bYi by a decoder fdec.
+Mathematically, the expression for this process is as
+bYi = fdec(Hi). (6)
+B. Problem Formulation
+Consistent with all collaborative perception works, we use
+the average precision (AP) metric to evaluate the perception
+performance, that is
+AP = feva( bYi, Yi), (7)
+where Yi represents the ground truth of agent i’s perception
+results, and feva (·) is a standard perception performance
+evaluation function [36] that measures the accuracy of the
+perception results relative to the ground truth.
+Thus, in order to maximize the perception performance (i.e.,
+maximize the AP), together with (4) to (7), the collaborative
+perception problem can be formulated as
+max AP =feva
+ 
+fdec
+
+ffuse
+ 
+F t−τji
+j
+	
+j∈Ct
+i ∪{i}
+
+, Yi
+!
+s.t. Ct
+i = fselect
+
+F t−τji
+j
+	
+j∈N t
+i ∪{i}
+
+.
+(8)
+As implied in (8), it turns to optimize the design of the selec-
+tor fselect (·) and fuser ffuse (·), since the fenc (·), fdec (·), and
+feva (·) are typically common and well-established elements
+5
+Ego
+Encoder
+Fuser
+HPHA
+Decoder
+Classif
+y
+ 
+ 
+Regress
+ 
+ 
+Selector
+ 
+ 
+ 
+ 
+...
+Agent 1
+Inputs
+Outputs
+Agent j
+Historical
+Feature
+Spatial aggregate
+Temporal refine
+...
+...
+ 
+ 
+...
+...
+Pointpillars
+backbone
+Raw point 
+clouds
+j
+j
+GNN 
+layers
+GNN 
+layers
+j
+GNN 
+layers
+Selected 
+collaborators
+Fused 
+information
+ 
+Aggregated 
+information
+ 
+ 
+ 
+ 
+ 
+Fig. 2. The overview of our proposed Select2Col framework.
+[9]–[11]. Furthermore, the former fselect (·) involves iden-
+tifying effective collaborators that can provide high-quality
+perception semantic information, while the latter considers
+the correlation of semantic information to improve the feature
+representations. Nevertheless, it is non-trivial to describe these
+two functions in compact, mathematical formulations. Hence,
+vanilla approaches [9]–[14] approximate these functions with
+the guidance of intuitive observations. For example, collab-
+orators with larger ego interest regions promise to be more
+contributive in improving the perception performance of ego.
+Furthermore, assigning higher weights to more important
+semantic information for fusion can contribute to yielding an
+enhanced feature representation. However, these approaches
+ignore the importance of semantic information from the tem-
+poral dimension, resulting in limitations in accurately fitting
+these functions.
+Therefore, to address these challenges, we leverage
+lightweight GNN and hybrid attention modules to calibrate
+the selector fselect (·) and fuser ffuse (·) based on the IoSI
+from spatial-temporal dimensions. The details shall be given
+in Section V and Section VI.
+IV. S ELECT 2C OL: AN IOSI- BASED COLLABORATIVE
+PERCEPTION FRAMEWORK
+Based on the previous analysis, we propose Select2Col, an
+IoSI-based collaborative perception framework. As depicted
+in Fig. 2, Select2Col comprises four components (i.e., en-
+coder fenc, selector fselect, fuser ffuse, and decoder fdec)
+to implement the entire process of collaborative perception.
+We briefly introduce these components of Select2Col in this
+section, while leaving the innovative design of collaborator
+selection and information fusion in Section V and Section VI,
+respectively.
+A. Overview of Select2Col
+Typically, the Select2Col framework encompasses the fol-
+lowing components.
+1) Encoder: The encoder extracts semantic information
+from raw perception data. In this article, we focus on LiDAR-
+based 3D object detection as the perception task. Correspond-
+ingly, we adopt the backbone of Pointpillars [33] as our
+encoder because of its low inference latency and optimized
+memory usage, consistent with the literature [9]–[11].
+2) Selector: This selector is invoked to determine con-
+tributive collaborators Ct
+i using the semantic information
+{F t−τji
+j }j∈N t
+i ∪{i} obtained from the outputs of the encoder.
+As mentioned earlier, we design an IoSI-based collaborator
+selection method, the details of which are given in Section V .
+3) Fuser: This fuser is responsible for obtaining the fused
+semantic information Hi using {F t−τji
+j }j∈Ct
+i ∪{i}. In par-
+ticular, we propose a semantic information fusion algorithm
+named HPHA to enhance the fusion feature representation as
+further discussed in Section VI.
+4) Decoder: This decoder outputs the perception results
+bYi based on the fused semantic information Hi. Consistent
+with [11], we utilize a two-layer convolution block to down-
+sample the fused semantic information and then employ a
+single-layer convolutional classification head and a single-
+layer convolutional regression head to obtain the classification
+and regression information of objects, respectively.
+B. End-to-End Network Model
+We employ an end-to-end neural network model to effec-
+tively integrate the components above, given that the output
+of each component serves as the input for the next one.
+This network model takes the raw perception data of the
+ego agent and its neighboring agents as input. It produces
+collaborative perception results (i.e., the results of 3D object
+detection, including the classification and regression informa-
+tion) for the ego agent. Therefore, the loss function of the
+model consists of a classification loss and a regression loss.
+In line with PointPillars [33], we utilize focal loss [37] for the
+classification loss and smooth L1 loss [38] for the regression
+loss.
+6
+Conv map
+Conv map
+...
+...
+Collaborator Selection
+...
+...
+sparse map
+，
+GNN layers
+Fig. 3. Diagram of our collaborator selection method.
+Furthermore, the network model is trained in an end-to-
+end manner under the supervision LiDAR-based 3D object
+detection task. During training, a random agent is selected as
+the ego from the training subset of the open datasets, such as
+OPV2V [14], V2XSet [10], and V2V4Real [22]. The training
+method and parameters are consistent with the SOTA works
+[9]–[11], and more details can be found in our open-source
+code.
+V. C OLLABORATOR SELECTION BASED ON IOSI
+Given the spatial-temporal variability of agents, this sec-
+tion introduces our proposed IoSI-based collaborator selection
+method, that is the fuser ffuse (·), to address the challenges of
+identifying contributive collaborators.
+Specifically, the collaborator selection method, as illustrated
+in Fig. 3, consists of two steps. In the first step, we employ
+a lightweight GNN module to estimate the enhanced weight
+of each agent from spatial-temporal dimensions. These en-
+hanced weights indicate the individual IoSI in enhancing the
+perception performance of the ego. In the subsequent step,
+contributive collaborators are selected based on the acquired
+enhanced weights, and the feature information of the chosen
+collaborators is enhanced accordingly. Different from solely
+relying on spatial relationships to determine contributive col-
+laborators, our method takes into account both spatial and
+temporal dimensions, resulting in a more precise selection
+of contributors and more effective utilization of their feature
+information.
+A. Enhanced Weight Estimation
+For each agent j in N t
+i ∪ {i}, we first utilize a convolution
+module convmap [11] to extract its sparse map Mj from its
+semantic information F t−τji
+j . Mathematically, the expression
+for this process is as
+Mj = convmap
+ 
+F t−τji
+j
+
+. (9)
+In addition, given that the sparse map contains the spatial
+location information of potential objects, the element in the
+sparse map takes either 0 or 1 depending on the existence of
+Algorithm 1 Collaborator Selection Method
+1: Input: semantic information of ego and its neighboring
+agents {F t−τji
+j }j∈N t
+i ∪{i}.
+2: Output: selected collaborator set Ct
+i , and corresponding
+enhanced semantic information {F t−τji
+j }j∈Ct
+i ∪{i}.
+3: initialize Ct
+i as neighboring agent set N t
+i .
+4: for each agent j ∈ Nt
+i ∪ {i} do
+5: get the corresponding sparse map Mj using (9);
+6: if (j = i) then
+7: the latency between ego and itself is 0, i.e., τji = 0;
+8: endif
+9: using (Mj, τji) as agent’s spatial-temporal informa-
+tion;
+10: endfor
+11: agents in N t
+i ∪ {i} as nodes to build the GNN network;
+12: GNN outputs each agent’s enhanced weight
+
+wen
+ji
+	
+j∈N t
+i
+;
+13: for each agent j ∈ Nt
+i do
+14: if
+ 
+wen
+ji ⩽ wthreshold
+
+then
+15: delete invalid agent j from Ct
+i ;
+16: else then
+17: enhanced semantic information of selected collab-
+orator using (10);
+18: endif
+19: endfor
+20: Return Ct
+i , {F t−τji
+j }j∈Ct
+i ∪{i}.
+potential objects (i.e., 1 indicates the existence, while 0 implies
+only the existence of the background).
+Subsequently, we employ a lightweight GNN [19] as the
+backbone to estimate the importance of each agent in en-
+hancing ego i’s perception performance from spatial-temporal
+dimensions. Within this GNN module, each node corresponds
+to an agent and comprises its sparse map along with the
+semantic information latency, which respectively indicates
+the spatial and temporal characteristics of this agent. For
+each agent j in N t
+i , the trained GNN generates its enhanced
+weight wen
+ji , reflecting the importance of this agent’s semantic
+information to the ego.
+B. Collaborator Selection and Enhancement
+We utilize the acquired enhanced weights to determine the
+contributive agents. For any agent j in N t
+i , if its enhanced
+weight wen
+ji exceeds a pre-defined threshold, we consider it as
+a contributive agent; otherwise, we classify it as an ineffective
+collaborator. After eliminating all ineffective collaborators in
+N t
+i , we then obtain a selected collaborator set Ct
+i .
+It is important to note that not all selected individuals con-
+tribute equally to the improvement of perception performance.
+Inspired by the idea in [8], we employ the acquired enhanced
+weights to appropriately enhance the features of the selected
+collaborators. Specifically, for each selected collaborator, such
+as agent j, we perform multiplication between its original fea-
+ture information F t−τji
+j and the respective enhanced weights
+wen
+ji . Then, we proceed to conduct elementwise multiplication
+of the enhanced feature information with its sparse graph Mj.
+7
+maxpool
+maxpool
+avgpool
+avgpool
+Historical 
+Feature
+concat
+(a) Aggregated from spatial 
+utilizing multi
+-
+scale attention
+spatial
+-
+attention 
+weight
+...
+sa
+sa
+conv
+conv
+ta
+temporal
+-
+attention 
+weight
+Fused 
+information
+Input
+Output
+deconv
+deconv
+deconv
+spatial
+-
+attention 
+weight
+spatial
+-
+attention 
+weight
+conv
+concat
+sa
+(b) Refined from temporal 
+utilizing short
+-
+term attention
+Fig. 4. Diagram of our HPHA fusion algorithm.
+The enhanced semantic information F t−τji
+j for agent j in Ct
+i
+is obtained as
+F t−τji
+j = F t−τji
+j × wen
+ji ⊗ Mj, (10)
+where ⊗ represents the elementwise multiplication. Recalling
+the definition of sparse map Mj in (9), (10) implies the
+enhanced weight wen
+ji is only applied to regions with potential
+objects, which can effectively improve the object features
+while suppressing background noise.
+In conclusion, by identifying contributive collaborators and
+enhancing their semantic information based on IoSI, the
+collaborator selection method provides high-quality percep-
+tion information for subsequent semantic information fusion,
+thereby further ensuring the effectiveness of the fused semantic
+information. We summarize the details of the collaborator
+selection method in Algorithm 1.
+VI. HPHA: A H ISTORICAL PRIOR HYBRID ATTENTION
+INFORMATION FUSION ALGORITHM
+In this section, we introduce our proposed semantic infor-
+mation fusion algorithm HPHA to develop the fuser ffuse (·).
+As illustrated in Fig. 4, to enhance the feature presentation
+of the aggregated semantic information, HPHA leverages a
+multi-scale attention module and a short-term attention module
+to learn the IoSI in feature presentation from spatial and
+temporal dimensions respectively, and assigns IoSI-consistent
+weights to different semantic information for optimal feature
+fusion. Specifically, the multi-scale attention module captures
+the correlation between the ego and its collaborators under var-
+ious spatial resolutions, while the short-term attention module
+effectively measures the temporal importance in terms of the
+correlation between past and present features. Furthermore,
+our proposed HPHA algorithm is outlined in Algorithm 2.
+A. Semantic Information Aggregated from Spatial Dimension
+To enhance the object feature representation from the spatial
+dimension, we first introduce a multi-scale attention module
+Algorithm 2 HPHA: Information Fusion Algorithm
+1: Input: semantic information of ego and its selected col-
+laborators {F t−kT
+i
+	
+k={0,1···K }, {F t−τji
+j }j∈Ct
+i
+.
+2: Output: fused semantic information Hi.
+3: for each scale s in S do
+4: for each agent j ∈ C t
+i ∪ {i} do
+5: calculate the corresponding spatial-attention
+weight W sa
+s,ji using (11);
+6: endfor
+7: obtain aggregated information Hs with spatial-
+attention weight at specific s using (12);
+8: convert Hs into unified scale sms using (13);
+9: endfor
+10: combine all information {Hs}s∈S to produce the ultimate
+aggregated semantic information Hms using (14);
+11: create a temporary semantic information Hh with histor-
+ical prior information {F t−kT
+i
+	
+k={1,2···K } using (15);
+12: get temporal-attention weight W ta using (16);
+13: refine the final fused semantic information Hi with
+temporal-attention weight W ta using (17);
+14: Return Hi.
+[20] to extract spatial attention weights at various spatial
+resolutions and utilize the spatial-attention weight to indi-
+cate the importance of a collaborator’s semantic information.
+Specifically, the spatial-attention weight of agent j to agent i
+at a specific spatial scale s (s ∈ S) is represented as W sa
+s,ji
+and can be defined as
+W sa
+s,ji = sa
+ 
+conv (F t
+i , s), conv (F t−τji
+j , s)
+
+, (11)
+where S is the set of spatial scales, conv (F, s) denotes a
+convolution block [39] that reshapes the scale of semantic
+information F to s, and sa (·) represents the spatial attention
+operation, referring to the dot-product attention [40]. More-
+over, when j equals i, the spatial-attention weight in Eq. (11)
+is reduced to the self-attention weight, resulting in a simpler
+and more consistent equation.
+Next, we aggregate the semantic information of selected
+collaborators by assigning spatial-attention weights obtained
+in Eq. (11) to generate the aggregated semantic information
+Hs with a specific scale s as
+Hs =
+X
+j∈Ct
+i ∪{i}
+W sa
+s,ji ⊗ conv (F t−τji
+j , s). (12)
+Subsequently, in order to ensure the scale consistency of the
+aggregated semantic information after spatial attention opera-
+tion, we reshape it to a unified scale sms by a deconvolution
+block [41] as
+Hs = deconv (Hs, sms ), (13)
+where deconv (H, s) denotes the deconvolution block that
+reshapes the scale of semantic information H to s.
+Finally, we combine all the information {Hs}s∈S acquired
+at various attention scales to produce the ultimate aggregated
+semantic information Hms, that is,
+Hms = concat
+ 
+{Hs}s∈S
+
+. (14)
+8
+The multi-scale attention module effectively learns the spa-
+tial correlation between the ego and its collaborators at differ-
+ent spatial resolutions, which enhances the aggregated features
+and presents a comprehensive representation of features.
+B. Semantic Information Refined from Temporal Dimension
+Furthermore, considering that the historical semantic infor-
+mation of the ego contains rich object information, we design
+a historical prior short-term attention module to refine the
+aggregated semantic information from the temporal dimension.
+First, the ego’s historical semantic information
+{F t−kT
+i
+	
+k= {1,2···K } and the last-step aggregated semantic
+information Hms are concatenated to produce a new semantic
+information Hh, such as
+Hh = concat
+ 
+Hms, {F t−kT
+i
+	
+k={1,2···K }
+
+, (15)
+where T represents the sensor sampling interval, and K
+represents the number of historical frames.
+Next, the semantic information Hh is processed using av-
+erage pooling and max pooling operations to generate average
+pooling features and max pooling features, respectively. Subse-
+quently, we devise a short-term attention operation to process
+the two features to obtain the temporal-attention weight W ta,
+that is,
+W ta = ta
+ 
+avgpool (Hh ), maxpool (Hh )
+
+, (16)
+where avgpool (·) and maxpool (·) represent the operations
+of average pooling and max pooling respectively, and ta (·)
+denotes a temporal attention operation, and refers to the
+channel attention in [18].
+Finally, the temporal-attention weight W ta is multiplied
+by the semantic information Hh to produce the final fused
+semantic information Hi as
+Hi = W ta ⊗ Hh. (17)
+By incorporating historical prior semantic information, the
+short-term attention module effectively captures the temporal
+correlation between past and present features. This enables it
+to identify discriminating object features, thereby enhancing
+the quality of object representation.
+Overall, the proposed HPHA provides an enhanced and
+comprehensive feature representation for the fused semantic
+information Hi, derived from both spatial and temporal di-
+mensions. Consequently, the decoder fdec (·) can more effi-
+ciently decode the fused semantic information Hi to generate
+perception results bYi, as depicted in (6).
+VII. E XPERIMENTAL EVALUATION
+This section provides a comprehensive performance com-
+parison of the proposed Select2Col with the existing
+SOTA methods, such as V2VNet [9], V2X-Vit [10], and
+Where2comm [11]. Furthermore, in order to demonstrate the
+superiority of Select2Col, we conduct various ablation studies
+to showcase the performance improvements.
+TABLE III
+EXPERIMENTAL PARAMETERS
+Parameter Value
+Carrier frequency fc 5.9 Ghz
+Total bandwidth 20 M
+Transmit power ptx
+ji 23 dbm
+Power of noise pnoise
+ji -95 dbm ∼ -110 dbm
+Sensor asynchronous overhead tasyn
+ji -100 ms ∼ 100 ms
+Semantic extraction time text
+ji 20 ms ∼ 40 ms
+Multi-scale attention scale set S
+[64, 96, 352]
+[128, 48, 176]
+[256, 24, 88]
+Multi-scale attention output scale sms [128, 96, 352]
+Sensor sampling interval T 100 ms
+Number of historical prior frames K 2
+A. Experimental Settings
+Rather than evaluating on popular datasets such as KITTI
+[42] and Nuscenes [43], which mainly provide single-agent
+samples, all experiments in this article are conducted on open
+collaborative perception datasets OPV2V [14], V2XSet [10]
+and V2V4Real [22]. Specifically, OPV2V is the first large-
+scale open dataset targeted at vehicle-to-vehicle collaborative
+perception, generated using CARLA [44] and SUMO [45].
+On the other hand, V2XSet is an open dataset that focuses
+on vehicle-to-vehicle and vehicle-to-infrastructure collabora-
+tive perception, generated employing CARLA and OpenCDA
+[46]. Consequently, these two popular datasets are inherently
+distinct. In addition, the V2V4Real dataset which comprises
+collaborative perception data extracted from real-world road
+scenarios spans a three-day period of driving in Columbus,
+Ohio, covering a total driving area of 410 kilometers, incor-
+porating 347 kilometers of highway roads and 63 kilometers
+of city roads.
+To comprehensively evaluate the performance of our pro-
+posed Select2Col, we utilize the average accuracy (AP) at IoU
+(Intersection over Union) thresholds of 0.3, 0.5, and 0.7. All
+experiments are conducted on an X86 station equipped with
+an Intel TM i7-11700 @2.50 GHz, 128-core CPU, 256 GB
+RAM, and NVIDIA RTX3090 GPU.
+As presented in TABLE III, the key parameters employed
+in our study are in line with V2VNet [9], V2X-Vit [10], and
+Where2comm [11]. In addition, Eq. (3) is further adopted
+for a more realistic calculation of the transmission time,
+where the related parameters are consistent with the literature
+[47]. Notably, we allocate equal bandwidth to each individual
+agent. Consequently, our setting is more precise compared to
+V2X-Vit [10] and Where2comm [11], which employ a fixed
+transmission rate of 27 Mbps for all agents. Furthermore, the
+semantic information extraction latency text
+ji is obtained based
+on our computing device. More experimental parameters can
+be found in our open-source code.
+B. Perception Performance Comparison
+In this experiment, we evaluate the overall perception per-
+formance of our proposed Select2Col on a total of 664 test
+data from the OPV2V dataset, 1, 466 test samples from the
+9
+TABLE IV
+OVERALL PERCEPTION PERFORMANCE
+Dataset Methods AP (%)
+IoU 0.3 IoU 0.5 IoU 0.7
+OPV2V
+No fusion 79.81 77.70 62.12
+V2X-Vit 87.09 85.89 75.56
+V2VNet 82.71 80.38 52.96
+Where2comm 86.71 85.20 71.35
+Select2Col 89.80 88.51 77.65
+V2XSet
+No fusion 75.55 71.17 47.12
+V2X-Vit 81.54 78.76 62.36
+V2VNet 77.85 72.27 46.99
+Where2comm 82.70 79.05 57.16
+Select2Col 87.18 84.25 64.92
+V2V4Real
+No fusion 46.77 37.23 15.55
+V2X-Vit 55.08 47.78 23.74
+Where2comm 60.28 48.32 20.55
+Select2Col 62.20 50.19 24.89
+V2XSet dataset, and 1, 993 test samples from the V2V4Real
+dataset. To reduce randomness, we use their average inference
+results as our experimental outcomes.
+As presented in TABLE IV , our proposed Select2Col out-
+performs V2VNet [9], V2X-Vit [10], and Where2comm [11]
+in terms of AP. For example, at an IoU threshold of 0.7,
+Select2Col achieves gains of 24.69%, 2.09%, and 6.30%
+in AP performance compared to V2VNet, V2X-Vit, and
+Where2comm, respectively, on the OPV2V dataset. Further-
+more, Select2Col proves to be highly effective and robust, even
+in real-world situations obtained from V2V4Real. Notably, at
+an IoU threshold of 0.3, Select2Col demonstrates a remarkable
+improvement of 15.43% in AP performance compared to
+single-agent perception (i.e., no fusion).
+Discussions: The remarkable results achieved by Select2Col
+are attributed to its introduction of innovative features. First,
+selecting contributive collaborators while pruning less effective
+ones can reduce noise and interference, thereby improving the
+perception performance. Second, by enhancing the effective
+features while suppressing noise, the effectiveness of semantic
+information is boosted. Third, a multi-scale attention module
+aggregates semantic information from different collaborators
+with IoSI-consistent weights from the spatial dimension, which
+provides a comprehensive representation of features. Finally,
+a short-term attention module is applied with historical prior
+semantic information, which refines the final fused semantic
+information from the temporal dimension and further improves
+the perception performance. Overall, unlike other works that
+only focus on the spatial dimension, Select2Col comprehen-
+sively considers collaborative perception from both spatial and
+temporal dimensions and yields unparalleled performance.
+C. Computational Efficiency Comparison
+Table V and Fig. 5 present the computing efficiency of
+Select2Col. Specifically, as demonstrated in TABLE V , our
+Select2Col has fewer network model parameters than V2X-
+Vit and V2VNet and a similar number of parameters to
+Where2comm. In other words, compared to other spatial
+dimension-only solutions, the incorporation of both spatial and
+temporal dimensions of IoSI in selecting collaborators and
+Fig. 5. The comparison of computing efficiency.
+TABLE V
+NUMBER OF NETWORK MODEL PARAMETERS
+Works Number of
+paramters (M)
+V2VNet 14.6122
+V2X-Vit 12.4554
+Where2comm 8.0574
+Select2Col 8.2875
+fusing semantic information does not add any computational
+complexity. Furthermore, as depicted in Fig. 5, the inference
+time of our proposed Select2Col is significantly lower than
+that of V2VNet and V2X-Vit, and slightly higher than that of
+Where2comm due to the introduction of the lightweight GNN
+and the short-term attention module; however, Select2Col out-
+performs Where2comm in terms of perception performance.
+The inference time of Select2Col is much less than 100 ms,
+which is acceptable given the perception cycle (i.e., 10 Hz) of
+the LiDAR sensor device.
+Discussions: Compared to Where2comm, the newly added
+lightweight GNN and short-term attention modules can en-
+hance perception performance and are easily handled by main-
+stream computing devices without an excessive computational
+burden. Overall, Select2Col generates superior perception per-
+formance with a high computational efficiency.
+D. Perception Performance under Localization Noise
+Notably, localization noise can be widely observed due to
+the impact of spatial and temporal misalignment. To evaluate
+the robustness of our proposed Select2Col, we add localization
+noise to the test data, which follows a Gaussian distribution
+with a standard deviation of 0.2 for both position and heading.
+As presented in TABLE VI, localization noise impairs the
+perception performance of all approaches, and the reduction
+is more noticeable when the IoU threshold is larger (i.e.,
+the detection difficulty is increased). This indicates that high-
+precision detection is more vulnerable to noise. However,
+compared to other methods, our proposed Select2Col shows
+superior noise suppression ability. For instance, on the V2XSet
+dataset, Select2Col maintains an AP of 78.74% and 58.41% at
+IoU thresholds of 0.5 and 0.7, presenting an improvement of
+10.20%/22.18%, 1.72%/1.51% and 3.85%/7.26% compared to
+10
+TABLE VI
+PERCEPTION PERFORMANCE UNDER NOISE
+Dataset Methods AP (%)
+IoU 0.3 IoU 0.5 IoU 0.7
+OPV2V
+No fusion 79.81 77.70 62.12
+V2X-Vit 86.76 85.41 74.51
+V2VNet 82.24 78.33 44.72
+Where2comm 86.47 84.30 66.52
+Select2Col 89.73 88.20 74.54
+V2XSet
+No fusion 75.55 71.17 47.12
+V2X-Vit 80.77 77.02 56.90
+V2VNet 76.12 68.54 36.23
+Where2comm 80.74 74.89 51.15
+Select2Col 84.90 78.74 58.41
+V2VNet, V2X-Vit, and Where2comm, respectively. The same
+conclusion can be observed in the OPV2V dataset.
+Discussions: Select2Col introduces historical prior semantic
+information and utilizes a short-term attention module to learn
+the correlation of semantic information from the temporal
+dimension. This enables the suppression of spatial localization
+noise for the current semantic information by using historical
+information. As a result, the localization noise has less impact
+on Select2Col.
+E. Perception Performance under Distance
+Collaborative perception improves the agent’s ability to
+perceive objects that are located far away. Given the scarcity
+of object samples beyond 120 meters in test datasets, we
+solely evaluate the perception performance of objects within
+120 meters to avoid the inherent randomness arising from an
+inadequate number of samples. Fig. 6 to Fig. 8 illustrate the
+perception performance of our proposed Select2Col and other
+SOTA methods at different object distances on the OPV2V
+and V2XSet datasets.
+Intuitively, as the distance between the agent and the
+object increases, the probability of accurately detecting the
+object decreases. Consequently, the perception performance
+tends to decline as the distance increases. Nonetheless, our
+proposed Select2Col is still able to achieve the highest per-
+ception accuracy in long-distance perception scenarios. For
+instance, at an IoU threshold of 0.5 and object distance
+of 60 meters, Select2Col improves the AP performance by
+16.97%/9.18%/10.07% in comparison to V2VNet, V2X-Vit
+and Where2comm, respectively, on the V2XSet dataset.
+Discussions: The efficacy of Select2Col in perceiving dis-
+tant objects lies in its ability to enhance the fused semantic
+information of collaborators in both spatial and temporal
+dimensions with multi-scale attention and short-term attention,
+thus enhancing the capability to perceive distant objects.
+F . Perception Performance under Latency
+This experiment aims to evaluate the influence of informa-
+tion latency on perception performance. To achieve this, we
+randomly add a collaborator with a specific latency in test
+samples.
+Fig. 9 to Fig. 11 demonstrate the corresponding results
+under different IoU thresholds. As depicted in these figures,
+Fig. 6. Perception performance under distance at IoU 0.3.
+Fig. 7. Perception performance under distance at IoU 0.5.
+Fig. 8. Perception performance under distance at IoU 0.7.
+the collaborator with a small latency has the potential to
+enhance perception performance, whereas a large latency has
+a negative impact. Furthermore, our proposed Select2Col ex-
+hibits the best performance among all approaches and remains
+performance-stable even under large latency. For instance, at
+an IoU threshold of 0.3, when the latency of the collaborator
+is 400 ms, Select2Col enhances the AP performance by
+11.19%/7.75%/5.23% on the V2XSet dataset compared to
+V2VNet, V2X-Vit, and Where2comm, respectively.
+Discussions: As anticipated, the results of the experiment
+support our hypothesis that the collaborator with notable
+latency has a minimal or even negative impact on enhancing
+11
+Fig. 9. Perception performance under latency at IoU 0.3.
+Fig. 10. Perception performance under latency at IoU 0.5.
+Fig. 11. Perception performance under latency at IoU 0.7.
+the ego’s perception performance. Furthermore, it validates the
+significance of collaborator selection and strongly supports the
+effectiveness of selecting collaborators from both temporal
+and spatial dimensions to eliminate the negative impact. In
+Select2col, we utilize a collaborator selection method that con-
+siders both temporal and spatial dimensions, thus effectively
+eliminating collaborators with significant latency. In contrast,
+other methods either neglect collaborator selection entirely
+or solely rely on spatial criteria, resulting in a decline in
+perception performance as latency increases. Consequently,
+Select2Col ensures stable perception performance even in
+situations with notable latency and is more robust than other
+TABLE VII
+INNOVATIVE COMPONENT ABLATION STUDY RESULTS
+Open
+dataset HPHA Collaborator
+selection
+AP at
+IoU0.3
+AP at
+IoU0.5
+AP at
+IoU0.7
+OPV2V
+✘ ✘ 79.81 77.70 62.12
+✔ ✘ 88.11 86.13 73.91
+✔ ✔ 89.80 88.51 77.65
+V2XSet
+✘ ✘ 75.55 71.17 47.12
+✔ ✘ 85.47 81.85 61.52
+✔ ✔ 87.18 84.25 64.92
+methods.
+G. Ablation Studies
+In this subsection, we evaluate the effectiveness of the
+innovations incorporated in our proposed Select2Col. As previ-
+ously mentioned, Select2Col includes two novel innovations: i)
+the collaborator selection method; ii) the semantic information
+fusion algorithm HPHA.
+TABLE VII presents the results of our ablation studies. The
+outcome clearly illustrates that each innovative component
+significantly contributes to the advancement of perception
+performance. Specifically, the collaborator selection method
+enhances the perception performance of AP by 1.71%, 2.40%,
+and 3.40%, respectively, on the V2XSet dataset. Moreover,
+HPHA improves the perception performance of AP by 9.92%,
+10.68%, and 14.4% on the V2XSet dataset. In addition, we
+conclude that the gains from the collaborator selection method
+and HPHA are more pronounced when the value of the IoU
+threshold is larger (i.e., the detection difficulty is increased).
+This trend is in line with our previous experimental findings
+and is more apparent in HPHA.
+Discussions: The collaborator selection method benefits
+the removal of unsuitable collaborators that cause noise,
+resulting in improved perception performance. Likewise, the
+gain from HPHA is obtained due to the efficient utilization
+of the correlation between temporal and spatial dimensions
+embedded in the semantic information for information fusion.
+Thus, both techniques can effectively enhance the perception
+performance.
+VIII. CONCLUSION
+In this article, we have proposed Select2Col, a novel
+collaborative perception framework that improves perception
+performance based on IoSI from both spatial and temporal
+dimensions. Specifically, we have designed a collaborator
+selection method that capably selects contributive collabora-
+tors efficiently. To further boost the perception performance,
+we have presented a semantic information fusion algorithm
+named HPHA by integrating a multi-scale attention module
+and a short-term attention module to capture the IoSI from
+both spatial and temporal dimensions and aggregate semantic
+information by assigning IoSI-consistent weights. Extensive
+experimental results are conducted on three open datasets,
+OPV2V , V2XSet, and V2V4Real, and demonstrate that Se-
+lect2Col outperforms SOTA methods in terms of perception
+performance.
+12
+There still exist many promising means to improve the
+performance of our Select2Col framework. For instance, the
+current approach for calculating enhanced weights overlooks
+the IoU threshold, leading to situations where a collaborator
+may be deemed effective at a low IoU threshold but fails
+to enhance perception performance at higher IoU thresholds.
+Thus, a more accurate enhanced weight determination method
+is highly anticipated. Furthermore, the sharing of perception
+information inherently carries the risk of privacy leakage.
+Therefore, it is worthwhile to investigate collaborative privacy
+protection techniques with malicious behavior avoidance to
+enhance collaborators’ willingness to participate in sharing
+information.
+ACKNOWLEDGMENTS
+This work was supported in part by the National Key
+Research and Development Program of China under Grant
+2021YFB2900200, in part by the National Natural Science
+Foundation of China under Grant 62071425, in part by the
+Zhejiang Key Research and Development Plan under Grant
+2022C01129, and in part by the Zhejiang Provincial Natural
+Science Foundation of China under Grant LR23F010005.
+REFERENCES
+[1] L. Chen, Y . Li, C. Huang, B. Li, Y . Xing, D. Tian, L. Li, Z. Hu, X. Na,
+Z. Li, S. Teng, C. Lv, J. Wang, D. Cao, N. Zheng, and F.-Y . Wang,
+“Milestones in autonomous driving and intelligent vehicles: Survey of
+surveys,” IEEE Transactions on Intelligent Vehicles , vol. 8, no. 2, pp.
+1046–1056, 2023.
+[2] M. Gerla, E.-K. Lee, G. Pau, and U. Lee, “Internet of vehicles: From
+intelligent grid to autonomous cars and vehicular clouds,” inProceedings
+of the IEEE World Forum on Internet of Things , Seoul, Korea, March
+2014, pp. 241–246.
+[3] R. Miucic, A. Sheikh, Z. Medenica, and R. Kunde, “V2x applications
+using collaborative perception,” in Proceedings of the IEEE 88th Vehic-
+ular Technology Conference , Hilton, Chicago, USA, August 2018, pp.
+1–6.
+[4] Q. Chen, S. Tang, Q. Yang, and S. Fu, “Cooper: Cooperative perception
+for connected autonomous vehicles based on 3d point clouds,” in
+Proceedings of IEEE 39th International Conference on Distributed
+Computing Systems, Dallas, TX, USA, July 2019, pp. 514–524.
+[5] A. Rauch, F. Klanner, R. Rasshofer, and K. Dietmayer, “Car2x-based
+perception in a high-level fusion architecture for cooperative perception
+systems,” in Proceedings of IEEE Intelligent Vehicles Symposium, Alcala
+de Henares, Spain, June 2012, pp. 270–275.
+[6] Z. Y . Rawashdeh and Z. Wang, “Collaborative automated driving: A
+machine learning-based method to enhance the accuracy of shared
+information,” in Proceedings of IEEE 21st International Conference on
+Intelligent Transportation Systems, Maui, HI, USA, November 2018, pp.
+3961–3966.
+[7] J. Cui, H. Qiu, D. Chen, P. Stone, and Y . Zhu, “Coopernaut: End-to-
+end driving with cooperative perception for networked vehicles,” in
+Proceedings of the IEEE/CVF Conference on Computer Vision and
+Pattern Recognition, New Orleans, LA, USA, June 2022, pp. 17 252–
+17 262.
+[8] J. Guo, D. Carrillo, S. Tang, Q. Chen, Q. Yang, S. Fu, X. Wang,
+N. Wang, and P. Palacharla, “Coff: Cooperative spatial feature fusion for
+3-d object detection on autonomous vehicles,” IEEE Internet of Things
+Journal, vol. 8, no. 14, pp. 11 078–11 087, 2021.
+[9] T.-H. Wang, S. Manivasagam, M. Liang, B. Yang, W. Zeng, and R. Urta-
+sun, “V2vnet: Vehicle-to-vehicle communication for joint perception and
+prediction,” in Proceedings of the European Conference on Computer
+Vision, Glasgow, UK, August 2020, pp. 605–621.
+[10] R. Xu, H. Xiang, Z. Tu, X. Xia, M.-H. Yang, and J. Ma, “V2x-vit:
+Vehicle-to-everything cooperative perception with vision transformer,”
+in Proceedings of the European Conference on Computer Vision , Tel
+Aviv, Israel, October 2022, pp. 107–124.
+[11] Y . Hu, S. Fang, Z. Lei, Y . Zhong, and S. Chen, “Where2comm:
+Communication-efficient collaborative perception via spatial confidence
+maps,” arXiv preprint arXiv:2209.12836 , 2022.
+[12] Y .-C. Liu, J. Tian, C.-Y . Ma, N. Glaser, C.-W. Kuo, and Z. Kira,
+“Who2com: Collaborative perception via learnable handshake commu-
+nication,” in Proceedings of IEEE International Conference on Robotics
+and Automation (ICRA) , Paris, France, May 2020, pp. 6876–6883.
+[13] Y .-C. Liu, J. Tian, N. Glaser, and Z. Kira, “When2com: Multi-agent
+perception via communication graph grouping,” in Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition ,
+Seattle, W A, USA, June 2020, pp. 4106–4115.
+[14] R. Xu, H. Xiang, X. Xia, X. Han, J. Li, and J. Ma, “Opv2v: An
+open benchmark dataset and fusion pipeline for perception with vehicle-
+to-vehicle communication,” in Proceedings of the IEEE International
+Conference on Robotics and Automation (ICRA) , Paris, France, May
+2022, pp. 2583–2589.
+[15] A. N. Ahmed, S. Mercelis, and A. Anwar, “Attention based fea-
+ture fusion for multi-agent collaborative perception,” arXiv preprint
+arXiv:2305.02061, May 2023.
+[16] D. Qiao and F. Zulkernine, “Adaptive feature fusion for cooperative
+perception using lidar point clouds,” in Proceedings of the IEEE/CVF
+Winter Conference on Applications of Computer Vision , Waikoloa, HI,
+USA, Jan 2023, pp. 1186–1195.
+[17] J. Li, R. Xu, X. Liu, J. Ma, Z. Chi, J. Ma, and H. Yu, “Learning for
+vehicle-to-vehicle cooperative perception under lossy communication,”
+IEEE Transactions on Intelligent Vehicles, vol. 8, no. 4, pp. 2650–2660,
+2023.
+[18] Y . Lu, Q. Li, B. Liu, M. Dianati, C. Feng, S. Chen, and Y . Wang,
+“Robust collaborative 3d object detection in presence of pose errors,”
+in Proceedings of the IEEE International Conference on Robotics and
+Automation, ExCeL London, United Kingdom, May 2023, pp. 4812–
+4818.
+[19] M. Schlichtkrull, T. N. Kipf, P. Bloem, R. Van Den Berg, I. Titov,
+and M. Welling, “Modeling relational data with graph convolutional
+networks,” in Proceedings of the European Semantic Web Conference ,
+Heraklion, Crete, Greece, June 2018, pp. 593–607.
+[20] H. Fan, B. Xiong, K. Mangalam, Y . Li, Z. Yan, J. Malik, and C. Feichten-
+hofer, “Multiscale vision transformers,” in Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition, Nashville, TN,
+USA, June 2021, pp. 6824–6835.
+[21] S. Woo, J. Park, J.-Y . Lee, and I. S. Kweon, “Cbam: Convolutional
+block attention module,” in Proceedings of the European Conference on
+Computer Vision, Munich, Germany, September 2018, pp. 3–19.
+[22] R. Xu, X. Xia, J. Li, H. Li, S. Zhang, Z. Tu, Z. Meng, H. Xiang,
+X. Dong, R. Song et al. , “V2v4real: A real-world large-scale dataset
+for vehicle-to-vehicle cooperative perception,” in Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition ,
+Vancouver, Canada, June 2023, pp. 13 712–13 722.
+[23] X. Chen, H. Ma, J. Wan, B. Li, and T. Xia, “Multi-view 3d object
+detection network for autonomous driving,” in Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition ,
+Honolulu, HI, USA, July 2017, pp. 1907–1915.
+[24] W. Luo, J. Xing, A. Milan, X. Zhang, W. Liu, and T.-K. Kim, “Multiple
+object tracking: A literature review,” Artificial intelligence, vol. 293, pp.
+103 448–103 496, February 2021.
+[25] S. Minaee, Y . Boykov, F. Porikli, A. Plaza, N. Kehtarnavaz, and D. Ter-
+zopoulos, “Image segmentation using deep learning: A survey,” IEEE
+Transactions on Pattern Analysis and Machine Intelligence , vol. 44,
+no. 7, pp. 3523–3542, 2021.
+[26] C. Godard, O. Mac Aodha, and G. J. Brostow, “Unsupervised monocular
+depth estimation with left-right consistency,” in Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition ,
+Honolulu, HI, USA, July 2017, pp. 270–279.
+[27] E. Arnold, O. Y . Al-Jarrah, M. Dianati, S. Fallah, D. Oxtoby, and
+A. Mouzakitis, “A survey on 3d object detection methods for au-
+tonomous driving applications,” IEEE Transactions on Intelligent Trans-
+portation Systems, vol. 20, no. 10, pp. 3782–3795, 2019.
+[28] R. Qian, X. Lai, and X. Li, “3d object detection for autonomous driving:
+A survey,” Pattern Recognition, vol. 130, p. 108796, 2022.
+[29] Y . Li, L. Ma, Z. Zhong, F. Liu, M. A. Chapman, D. Cao, and J. Li,
+“Deep learning for lidar point clouds in autonomous driving: A review,”
+IEEE Transactions on Neural Networks and Learning Systems , vol. 32,
+no. 8, pp. 3412–3432, 2020.
+[30] Y . Zhou and O. Tuzel, “V oxelnet: End-to-end learning for point cloud
+based 3d object detection,” in Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition, Salt Lake City, UT, USA,
+June 2018, pp. 4490–4499.
+13
+[31] Y . Wang, A. Fathi, A. Kundu, D. A. Ross, C. Pantofaru, T. Funkhouser,
+and J. Solomon, “Pillar-based object detection for autonomous driving,”
+in Proceedings of the European Conference on Computer Vision , Glas-
+gow, UK, August 2020, pp. 18–34.
+[32] G. Cui, W. Zhang, Y . Xiao, L. Yao, and Z. Fang, “Cooperative per-
+ception technology of autonomous driving in the Internet of vehicles
+environment: A review,” Sensors, vol. 22, no. 15, pp. 5535–5565, 2022.
+[33] A. H. Lang, S. V ora, H. Caesar, L. Zhou, J. Yang, and O. Beijbom,
+“Pointpillars: Fast encoders for object detection from point clouds,”
+in Proceedings of the IEEE/CVF Conference on Computer Vision and
+Pattern Recognition, Long Beach, CA, USA, June 2019, pp. 12 697–
+12 705.
+[34] R. Dobbe, D. Fridovich-Keil, and C. Tomlin, “Fully decentralized
+policies for multi-agent systems: An information theoretic approach,”
+Advances in neural information processing systems , vol. 30, 2017.
+[35] 3GPP, “3gpp TR 38.901 v17.0.0: Study on channel model for
+frequencies from 0.5 to 100 ghz,” 2022. [Online]. Available:
+https://www.3gpp.org/ftp/Specs/archive/38 series/38.901/38901-h00.zip
+[36] J. Revaud, J. Almaz ´an, R. S. Rezende, and C. R. d. Souza, “Learning
+with average precision: Training image retrieval with a listwise loss,” in
+Proceedings of the IEEE International Conference on Computer Vision ,
+Seoul,Korea, October 2019, pp. 5107–5116.
+[37] T.-Y . Lin, P. Goyal, R. Girshick, K. He, and P. Doll ´ar, “Focal loss
+for dense object detection,” in Proceedings of the IEEE International
+Conference on Computer Vision, Venice, Italy, October 2017, pp. 2980–
+2988.
+[38] A. R. Sutanto and D.-K. Kang, “A novel diminish smooth l1 loss model
+with generative adversarial network,” in Proceedings of the Intelligent
+Human Computer Interaction: 12th International Conference , Daegu,
+South Korea, November 2021, pp. Part I 12, 361–368.
+[39] X. Ding, Y . Guo, G. Ding, and J. Han, “Acnet: Strengthening the
+kernel skeletons for powerful cnn via asymmetric convolution blocks,” in
+Proceedings of the IEEE International Conference on Computer Vision .
+Seoul, Korea: IEEE, October 2019, pp. 1911–1920.
+[40] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez,
+Ł. Kaiser, and I. Polosukhin, “Attention is all you need,” Advances in
+neural information processing systems , vol. 30, December 2017.
+[41] H. Noh, S. Hong, and B. Han, “Learning deconvolution network
+for semantic segmentation,” in Proceedings of the IEEE International
+Conference on Computer Vision , Santiago, Chile, December 2015, pp.
+1520–1528.
+[42] A. Geiger, P. Lenz, C. Stiller, and R. Urtasun, “Vision meets robotics:
+The kitti dataset,” The International Journal of Robotics Research ,
+vol. 32, no. 11, pp. 1231–1237, 2013.
+[43] H. Caesar, V . Bankiti, A. H. Lang, S. V ora, V . E. Liong, Q. Xu,
+A. Krishnan, Y . Pan, G. Baldan, and O. Beijbom, “nuscenes: A multi-
+modal dataset for autonomous driving,” in Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition , Seattle, W A,
+USA, June 2020, pp. 11 621–11 631.
+[44] A. Dosovitskiy, G. Ros, F. Codevilla, A. Lopez, and V . Koltun, “Carla:
+An open urban driving simulator,” inProceedings of the 1st Annual Con-
+ference on Robot Learning, Mountain View, California, USA, November
+2017, pp. 1–16.
+[45] P. A. Lopez, M. Behrisch, L. Bieker-Walz, J. Erdmann, Y .-P. Fl ¨otter¨od,
+R. Hilbrich, L. L ¨ucken, J. Rummel, P. Wagner, and E. Wießner, “Micro-
+scopic traffic simulation using sumo,” in Proceedings of the IEEE Inter-
+national Intelligent Transportation Systems Conference , Maui, Hawaii,
+United States, November 2018, pp. 2575–2582.
+[46] R. Xu, Y . Guo, X. Han, X. Xia, H. Xiang, and J. Ma, “Opencda:
+an open cooperative driving automation framework integrated with
+co-simulation,” in Proceedings of the IEEE International Intelligent
+Transportation Systems Conference , Indianapolis, IN, United States,
+September 2021, pp. 1155–1162.
+[47] A. Bazzi, B. M. Masini, A. Zanella, and I. Thibault, “On the performance
+of IEEE 802.11 p and LTE-V2V for the cooperative awareness of con-
+nected vehicles,” IEEE Transactions on Vehicular Technology , vol. 66,
+no. 11, pp. 10 419–10 432, 2017.
