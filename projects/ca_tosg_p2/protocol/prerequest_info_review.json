@@ -1,12 +1,24 @@
 {
- "schema": "catosg-p2-prerequest-review/1",
- "status": "LITERATURE ONLY. No experiment, no model, no code change. Every quote is verified verbatim against a text extracted from the paper's own PDF and archived under results/lit/",
+ "schema": "catosg-p2-prerequest-review/2",
+ "status": "LITERATURE ONLY. No experiment, no model, no code change beyond this generator. Every quote is verified verbatim against a text extracted from the paper's own PDF and archived under results/lit/",
  "max_quote_words": 15,
+ "cost_classes": {
+  "formula_excludes": "the paper gives a cost formula and that formula demonstrably excludes the decision signalling",
+  "not_itemised": "the paper reports a figure or ratio but does not itemise the decision signalling, so whether it is included cannot be confirmed",
+  "unverified": "no source text could be opened, so nothing is claimed"
+ },
+ "timing_values": {
+  "before_handshake": "握手前 (before the handshake itself)",
+  "before_message": "正式感知消息前 (before the perception message proper)",
+  "after_first_tx": "首次传输后 (after a first transmission)",
+  "after_reception": "接收后 (after reception)",
+  "unverified": "未核实"
+ },
  "web_summary_corrections": [
-  "the figures \"22 MBpf\" and \"0.98 MBpf\" attributed to When2com by a web summariser occur 0 times in its text and were dropped",
+  "the figures \"22 MBpf\" and \"0.98 MBpf\" attributed to When2com occur 0 times in its text and were dropped",
   "\"quarter\" occurs 0 times in When2com; \"a quarter of the bandwidth\" is Who2com's abstract and is cited there only"
  ],
- "section_label_note": "section labels are hand-chosen and machine-verified: each must occur verbatim, before its quote, with no other declared label between. Automatic heading detection was tried first and rejected -- on these PDFs it returned \"4 Mar\" and \"3 Abstract\" as headings",
+ "anchor_note": "anchors are hand-picked and machine-verified: each must equal the nearest declared label preceding its quote, or Abstract when none precedes. Automatic heading detection was rejected after it returned \"4 Mar\" and \"3 Abstract\" as headings on these PDFs",
  "papers": [
   {
    "key": "where2comm",
@@ -15,15 +27,20 @@
    "url": "https://arxiv.org/abs/2209.12836",
    "b1_quote": "The spatial conﬁdence generator generates a spatial conﬁdence map from the feature map",
    "b1_label": "4.2 Spatial con",
-   "b1": "A confidence map produced by a detection decoder run on the agent's OWN feature map, before anything is received.",
+   "b1": "A confidence map from a detection decoder over the agent's own feature map.",
    "b2_quote": "The request map of theith agent is R(k) i = 1− C(k) i",
    "b2_label": "4.3 Spatial con",
-   "b2": "Ego-side. The ego derives its own request map and sends it; the collaborator then selects what to return. Round 0 uses the sender's confidence alone, so the request only steers rounds after the first.",
+   "b2b_quote": "Φselect(C(k) i ⊙ R(k−1) j )",
+   "b2b_label": "4.3 Spatial con",
+   "b2": "Split by round. The initial round is decided by the sending agent's own local confidence map alone; later rounds combine it with the receiver's request map from the previous round, which is Eq. (2). The ego's request therefore steers rounds after the first, not the first.",
+   "sel": "Which spatial regions to send, and to whom: a per-location binary mask over the BEV feature map, one mask per receiver.",
+   "timing": "before_message",
+   "timing_note": "initial round before the perception message; later rounds use the previous round's exchange",
    "b3_quote": "the communication volume is log2 ( |M(k) i→j|× D× 32/8 )",
    "b3_label": "7.5 Detailed information about experimental settings",
-   "b3": "Defined, not a fixed figure: log2 of selected cells x channels x 4 bytes. The request map itself is H x W and its cost is not separately accounted in that formula.",
-   "b3_kind": "quoted",
-   "implication": "The only decision input is the ego's own detection confidence, which is exactly the quantity our forest already receives as cues; the request map adds a collaborator-side selector that our single-collaborator setting does not have."
+   "b3": "Eq. (5) counts the selected feature volume: log2 of selected cells x channels x 4 bytes. The request map is H x W and does not appear in that formula.",
+   "cost_class": "formula_excludes",
+   "implication": "Its decision input is the ego's own detection confidence, kept as a spatial map over locations."
   },
   {
    "key": "when2com",
@@ -32,16 +49,19 @@
    "url": "https://arxiv.org/abs/2006.00176",
    "b1_quote": "compresses its local observationsxi into a com- pact query vectorµi and a key vectorκi",
    "b1_label": "3.2. Communication Groups Construction",
-   "b1": "A learned low-dimensional query from the agent's own raw observation; no ground truth and nothing received.",
+   "b1": "A learned low-dimensional query from the agent's own raw observation.",
    "b2_quote": "We further broad- cast the query to all of other agents",
    "b2_label": "3.2. Communication Groups Construction",
-   "b2": "Both: ego broadcasts a query, every other agent holds a key, and the match decides who transmits.",
+   "b2": "Both sides: the ego broadcasts a query, every other agent holds a key, and the match sets the connection weights.",
+   "sel": "Whom to connect to and how strongly: the communication group and its connection weights, pruned by an activation.",
+   "timing": "before_handshake",
+   "timing_note": "the query and key are formed from local observations before the handshake runs",
    "b3_quote": "Ours 0.385 / 0.77",
    "b3_label": "Bandwidth (Mbpf / # of links)",
    "b3_label_note": "a table header, not a section heading: this paper's experiment-section headings did not survive PDF extraction, so no section number is claimed",
-   "b3": "MBytes per frame and links per agent, against 2.5 / 5 for the fully connected baselines. The text also states a one-fourth bandwidth ratio, but that sentence is interrupted by a figure's axis labels in the extraction and so is not quoted here. The query's own size is never costed.",
-   "b3_kind": "quoted",
-   "implication": "The handshake needs a reply from every candidate before the ego can choose, so its decision information is not available to a vehicle that must decide alone."
+   "b3": "MBytes per frame and links per agent, against 2.5 / 5 for the fully connected baselines. The text also states a one-fourth bandwidth ratio, but that sentence is interrupted by a figure's axis labels in the extraction and is therefore not quoted. The query's own size is not itemised.",
+   "cost_class": "not_itemised",
+   "implication": "The decision needs a key from every candidate, so it is not formed by the ego alone."
   },
   {
    "key": "who2com",
@@ -53,12 +73,15 @@
    "b1": "A learned key from each candidate's own observation, scored against the requester's compressed request.",
    "b2_quote": "the de- graded agent ﬁrst broadcasts its request message",
    "b2_label": "B. Communication via Three-Stage Handshake",
-   "b2": "Both, in three stages: request from ego, scores back from candidates, then ego connects.",
+   "b2": "Both sides, in three stages: request from the ego, scores back from candidates, then the ego connects.",
+   "sel": "Whom to receive from: the best n agents, each then sending one full feature map.",
+   "timing": "before_message",
+   "timing_note": "the three-stage handshake completes before the selected agent sends its feature map",
    "b3_quote": "comparable to centralized ones using a quarter of the bandwidth",
    "b3_label": "Abstract",
-   "b3": "A ratio in the abstract. The paper states its selection sends one feature map where centralized baselines send all; the request and score messages are not costed in bits.",
-   "b3_kind": "quoted",
-   "implication": "The score that decides comes from the collaborator, not the ego, so the information we are looking for does not exist before the exchange."
+   "b3": "A ratio in the abstract; the selection sends one feature map where centralized baselines send all. The request and the returned scores are not itemised.",
+   "cost_class": "not_itemised",
+   "implication": "The score that decides is computed by the candidates, not by the ego."
   },
   {
    "key": "select2col",
@@ -70,10 +93,12 @@
    "b1": "A GNN over per-agent nodes, each holding that agent's sparse feature map and its information latency.",
    "b2_quote": "receives semantic information transmitted by its neighboring agents",
    "b2_label": "A. System Model",
-   "b2": "Collaborator-side, and only after arrival: the sparse maps that form the GNN nodes are the received semantic information.",
-   "b3": "Not given as bits or a ratio for the decision itself. No estimate is offered either, because the selection happens after reception and therefore has no pre-request signalling cost to estimate; the paper models transmission latency instead.",
-   "b3_kind": "not_given_no_estimate",
-   "implication": "This is a post-reception filter, not a pre-request decision, so it is a counter-example to the question rather than an answer to it."
+   "b2": "Collaborator-side, and only after arrival: the sparse maps forming the GNN nodes are the received semantic information.",
+   "sel": "Which collaborators to keep and how to weight them for fusion; agents below a weight threshold are dropped.",
+   "timing": "after_reception",
+   "b3": "Not itemised for the decision itself; the paper models transmission latency instead. No estimate is offered, because the quantity would be the cost of something this process does not do.",
+   "cost_class": "not_itemised",
+   "implication": "A process of a different shape: it decides after receiving, so its decision information is not of a kind the ego holds beforehand."
   },
   {
    "key": "smartcooper",
@@ -82,32 +107,37 @@
    "url": "https://arxiv.org/abs/2402.00321",
    "b1_quote": "dynamically adjust the compression ratio based on the channel state information",
    "b1_label": "Abstract",
-   "b1": "Channel state information for the compression ratio; sensing-coverage overlap for the judger.",
+   "b1": "Channel state information sets the compression ratio; sensing-coverage overlap drives the judger.",
    "b2_quote": "our judger scores reconstructed image sequences based on the union of sensing coverage",
    "b2_label": "I. I NTRODUCTION",
-   "b2": "Split: CSI is available before transmission, but the judger scores data that has already been transmitted and reconstructed at the ego.",
+   "b2": "Split: CSI is available before transmission, but the judger scores data already transmitted and reconstructed at the ego.",
+   "sel": "The compression ratio per vehicle, and whether reconstructed data is admitted to fusion at all.",
+   "timing": "after_reception",
+   "timing_note": "the CSI half is before the message; the judger half is after reconstruction, and the row is classified by the judger",
    "b3_quote": "a substantial reduction in communication costs by 23.10%",
    "b3_label": "Abstract",
-   "b3": "A ratio against a no-judger scheme. Since the judger runs after reconstruction, the saving is on subsequent rounds, not on the transmission it judges.",
-   "b3_kind": "quoted",
-   "implication": "Its channel half matches what our arm already has; its task half needs the data first, which is the same wall our rounds 1 to 4 ran into."
+   "b3": "A ratio against a no-judger scheme. Since the judger runs after reconstruction, the saving falls on later rounds rather than on the transmission being judged. Not itemised for the decision.",
+   "cost_class": "not_itemised",
+   "implication": "A process of a different shape: its channel half is pre-transmission, its task half needs the data first."
   },
   {
    "key": "cods",
    "name": "CoDS",
-   "venue": "arXiv 2512.22513",
+   "venue": "“CoDS: Collaborative Perception via Digital Semantic Communication”, Jipeng Gan, Le Liang, Hua Zhang, Chongtao Guo, Shi Jin, arXiv 2512.22513",
    "url": "https://arxiv.org/abs/2512.22513",
    "b1_quote": "the spatial compression ratio as the fraction of featu res selected for transmission",
    "b1_label": "II. S YSTEM MODEL",
    "b1": "A selection mask over the sender's own BEV feature map, plus SNR for modulation and code rate.",
    "b2_quote": "the CA V ﬁrst employs a feature extraction network",
    "b2_label": "II. S YSTEM MODEL",
-   "b2": "Collaborator-side, before transmission: the CAV decides what of its own features to send. The ego does not request.",
+   "b2": "Sender-side, before transmission: the CAV decides what of its own features to send. The ego does not request.",
+   "sel": "Which of its own feature cells to send, the channel compression ratio, and the modulation order and code rate.",
+   "timing": "before_message",
    "b3_quote": "Channel Uses = Qd × q C × γs × Rc × log2 Or",
    "b3_label": "IV. S IMULATION RESULTS",
-   "b3": "A formula in channel uses, with quantisation bits q, spatial ratio, LDPC rate and modulation order -- the same accounting our payload chain uses.",
-   "b3_kind": "quoted",
-   "implication": "Closest to our transmission model, but the decision sits at the sender about its own data; it does not tell an ego vehicle what to ask for."
+   "b3": "Also expressed in Channel Uses. Whether it is the same accounting as ours is not settled here: code rate, modulation order, the mask or index overhead, packet headers, and whether a failed message is still charged all remain to be checked against our chain.",
+   "cost_class": "not_itemised",
+   "implication": "The nearest transmission accounting to ours, with the decision sitting at the sender about its own data."
   },
   {
    "key": "semharq",
@@ -119,11 +149,15 @@
    "b1": "Feature importance from task-performance gradients at the transmitter; distortion of received features at the receiver.",
    "b2_quote": "generate a binary feedback vector p(j+1)",
    "b2_label": "II. S YSTEM MODEL",
-   "b2": "Both, but after a first transmission: the receiver evaluates what arrived and feeds back which features to resend.",
-   "b3": "No figure for the feedback overhead is given. Estimated: the feedback is one bit per feature in the transmitted block, so B bits per retransmission round.",
+   "b2": "Both, but only after a first transmission: the receiver evaluates what arrived and feeds back which features to resend.",
+   "sel": "Which features to send first, how many per round, and which corrupted features to retransmit.",
+   "timing": "after_first_tx",
+   "timing_note": "the importance ranking is formed at the transmitter before sending, but the retransmission decision requires the first transmission to have happened",
+   "b3": "No figure for the feedback overhead is given. Estimated: one bit per feature of the block just received, so B bits per retransmission round.",
    "b3_kind": "estimate",
-   "b3_assumption": "Assumes the binary vector p is uncoded, one bit per feature of the block just received, and sent once per round; the paper states the vector exists and its indexing but gives neither its length in bits nor a channel for it.",
-   "implication": "Its decision information is retrospective -- it needs a first transmission before it can rank anything, so it cannot inform a first request."
+   "b3_assumption": "Assumes the binary vector p is uncoded, one bit per feature of the block just received, and sent once per round; the paper states the vector and its indexing but gives neither a length in bits nor a channel for it.",
+   "cost_class": "not_itemised",
+   "implication": "A process of a different shape: its ranking is retrospective, needing a transmission before it can rank."
   },
   {
    "key": null,
@@ -133,15 +167,36 @@
    "b1": "UNVERIFIED",
    "b2": "UNVERIFIED",
    "b3": "UNVERIFIED",
-   "b3_kind": "unverified",
-   "implication": "UNVERIFIED: not entered into the comparison. The full text is behind IEEE Xplore, the abstract page returned empty on fetch and no preprint was found, so no quote could be located. Only the bibliographic record above is confirmed."
+   "sel": "UNVERIFIED",
+   "timing": "unverified",
+   "cost_class": "unverified",
+   "implication": "UNVERIFIED: the full text is behind IEEE Xplore, the abstract page returned empty on fetch and no preprint was found, so no quote could be located. Only the bibliographic record is confirmed."
   }
  ],
+ "comparison": {
+  "w2_quote_a": "spatial conﬁdence map reﬂects the perceptually critical level of various spatial areas",
+  "w2_label_a": "4.2 Spatial con",
+  "w2_quote_b": "for the locations with low conﬁdence score, an agent is hard to tell",
+  "w2_label_b": "4.3 Spatial con"
+ },
+ "our_five_dimensions": {
+  "fields": [
+   "ego_conf_mean",
+   "ego_conf_std",
+   "ego_conf_p10",
+   "ego_conf_p50",
+   "ego_conf_p90"
+  ],
+  "score_min": 0.20000843703746796,
+  "boxes": 44665,
+  "zero_box_frames": 0,
+  "truncation": "the minimum is 0.2 to six decimals because the frozen post-processor already discards boxes below a 0.2 score. These five cues therefore describe a TRUNCATED distribution. The threshold belongs to the frozen detector and is not swept here (D-1)"
+ },
  "verification": [
   {
    "paper": "Where2comm",
    "status": "verified",
-   "quotes_checked": 3,
+   "quotes_checked": 4,
    "labels_checked": 7
   },
   {
